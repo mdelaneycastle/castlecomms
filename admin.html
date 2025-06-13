@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel - Castle Comms</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 3rem auto;
+      padding: 2rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+    h2 {
+      margin-bottom: 1rem;
+    }
+    input, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Create New User</h2>
+  <form id="admin-create-user">
+    <input type="email" id="new-user-email" placeholder="New user's email" required />
+    <input type="password" id="new-user-password" placeholder="New user's password" required />
+    <button type="submit">Create Account</button>
+  </form>
+
+  <p id="status" style="color: green;"></p>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <script>
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDJvHNZB_pzhytD7yLa69auStrZBk2SEHk",
+      authDomain: "castle-comms.firebaseapp.com",
+      databaseURL: "https://castle-comms-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "castle-comms",
+      storageBucket: "castle-comms.appspot.com",
+      messagingSenderId: "959264765744",
+      appId: "1:959264765744:web:7aee345a37673f720cfaf5",
+      measurementId: "G-NLS757VMJ8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const form = document.getElementById("admin-create-user");
+    const status = document.getElementById("status");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("new-user-email").value;
+      const password = document.getElementById("new-user-password").value;
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          status.textContent = `✅ User created: ${email}`;
+          form.reset();
+        })
+        .catch(error => {
+          status.textContent = `❌ ${error.message}`;
+          status.style.color = "red";
+        });
+    });
+  </script>
+</body>
+</html>
