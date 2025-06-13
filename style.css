@@ -183,3 +183,38 @@ form button {
   height: auto;
   margin-right: 10px;
 }
+
+.react-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.emoji-picker {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  padding: 0.5rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  position: absolute;
+  z-index: 10;
+}
+
+.emoji-picker span {
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+.post-footer {
+  position: relative;
+}
+
