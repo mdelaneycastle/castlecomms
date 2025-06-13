@@ -21,9 +21,30 @@ document.addEventListener("DOMContentLoaded", function () {
     const posts = JSON.parse(localStorage.getItem("posts") || "[]");
     feed.innerHTML = "";
     posts.reverse().forEach(post => {
+      const initials = post.name
+        .split(" ")
+        .map(word => word[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+
       const div = document.createElement("div");
       div.className = "post";
-      div.innerHTML = `<h3>${post.name}</h3><p>${post.message}</p>`;
+      div.innerHTML = `
+        <div class="post-header">
+          <div class="post-avatar">${initials}</div>
+          <div class="post-info">
+            <div class="post-name">${post.name}</div>
+            <div class="post-role">User</div>
+            <div class="post-time">Just now</div>
+          </div>
+        </div>
+        <div class="post-message">${post.message}</div>
+        <div class="post-footer">
+          <span>❤️ 0</span>
+          <span>💬 0 comments</span>
+        </div>
+      `;
       feed.appendChild(div);
     });
   }
