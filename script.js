@@ -17,53 +17,61 @@ document.addEventListener("DOMContentLoaded", function () {
   const postForm = document.getElementById("post-form");
   const feed = document.getElementById("feed");
 
-  function loadPosts() {
-    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-    feed.innerHTML = "";
-    posts.reverse().forEach(post => {
-      const initials = post.name
-        .split(" ")
-        .map(word => word[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
+ function loadPosts() {
+  const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+  feed.innerHTML = "";
+  posts.reverse().forEach((post, index) => {
+    const initials = post.name
+      .split(" ")
+      .map(word => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
 
-      const div = document.createElement("div");
-      div.className = "post";
-      div.innerHTML = `
-        <div class="post-header">
-          <div class="post-avatar">${initials}</div>
-          <div class="post-info">
-            <div class="post-name">${post.name}</div>
-            <div class="post-role">User</div>
-            <div class="post-time">Just now</div>
+    const div = document.createElement("div");
+    div.className = "post";
+
+    div.innerHTML = `
+      <div class="post-header">
+        <div class="post-avatar">${initials}</div>
+        <div class="post-info">
+          <div class="post-name">${post.name}</div>
+          <div class="post-role">User</div>
+          <div class="post-time">Just now</div>
+        </div>
+      </div>
+      <div class="post-message">${post.message}</div>
+      <div class="post-footer">
+        <div>
+          <button class="react-btn" data-index="${index}">${post.reaction || "➕ React"}</button>
+          <div class="emoji-picker hidden" data-index="${index}">
+            <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
           </div>
         </div>
-        <div class="post-message">${post.message}</div>
-        <div class="post-footer">
-          <span>❤️ 0</span>
-          <span>💬 0 comments</span>
-        </div>
-      `;
-      feed.appendChild(div);
+        <span>💬 0 comments</span>
+      </div>
+    `;
+
+    feed.appendChild(div);
+  });
+
+  // Add reaction picker behavior
+  document.querySelectorAll(".react-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const index = btn.dataset.index;
+      const picker = document.querySelector(`.emoji-picker[data-index="${index}"]`);
+      picker.classList.toggle("hidden");
     });
-  }
+  });
 
-  if (postForm) {
-    postForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const message = document.getElementById("message").value.trim();
-      if (!name || !message) return;
-
+  document.querySelectorAll(".emoji-picker span").forEach(span => {
+    span.addEventListener("click", (e) => {
+      const index = e.target.parentElement.dataset.index;
       const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-      posts.push({ name, message });
+      posts[posts.length - 1 - index].reaction = e.target.textContent;
       localStorage.setItem("posts", JSON.stringify(posts));
-
-      postForm.reset();
-      loadPosts();
+      loadPosts(); // re-render
     });
+  });
+}
 
-    loadPosts();
-  }
-});
