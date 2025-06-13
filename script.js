@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
         loadPosts(); // re-render
       });
     });
-  
+  }
 
   if (postForm) {
     postForm.addEventListener("submit", e => {
