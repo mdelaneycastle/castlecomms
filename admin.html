@@ -8,12 +8,16 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f9f9f9;
+    }
+    main {
       max-width: 500px;
       margin: 3rem auto;
       padding: 2rem;
       border: 1px solid #ddd;
       border-radius: 8px;
-      background: #f9f9f9;
+      background: white;
     }
     h2 {
       margin-bottom: 1rem;
@@ -35,18 +39,25 @@
     }
   </style>
 </head>
-  <nav id="sidebar" class="sidebar">
+<body>
+
+<header>
+  <button id="menu-toggle" class="hamburger">&#9776;</button>
+  <h1>Castle Comms</h1>
+</header>
+
+<nav id="sidebar" class="sidebar">
   <button id="close-btn" class="close-btn">&times;</button>
   <ul>
     <li><a href="main.html">🏠 Home</a></li>
     <li><a href="planner.html">🗓️ Planner</a></li>
     <li><a href="files.html">📁 Files</a></li>
     <li><a href="newsfeed.html">📰 Newsfeed</a></li>
-     <li id="admin-link" style="display:none;"><a href="admin.html">⚙️ Admin</a></li>
+    <li id="admin-link" style="display:none;"><a href="admin.html">⚙️ Admin</a></li>
   </ul>
 </nav>
-<body>
 
+<main>
   <h2>Create New User</h2>
   <form id="admin-create-user">
     <input type="email" id="new-user-email" placeholder="New user's email" required />
@@ -55,57 +66,52 @@
   </form>
 
   <p id="status" style="color: green;"></p>
+</main>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
-  <script>
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDJvHNZB_pzhytD7yLa69auStrZBk2SEHk",
-      authDomain: "castle-comms.firebaseapp.com",
-      databaseURL: "https://castle-comms-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "castle-comms",
-      storageBucket: "castle-comms.appspot.com",
-      messagingSenderId: "959264765744",
-      appId: "1:959264765744:web:7aee345a37673f720cfaf5",
-      measurementId: "G-NLS757VMJ8"
-    };
+<!-- Firebase init -->
+<script src="firebase-init.js"></script>
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    const form = document.getElementById("admin-create-user");
-    const status = document.getElementById("status");
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = document.getElementById("new-user-email").value;
-      const password = document.getElementById("new-user-password").value;
-
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(userCredential => {
-          status.textContent = `✅ User created: ${email}`;
-          form.reset();
-        })
-        .catch(error => {
-          status.textContent = `❌ ${error.message}`;
-          status.style.color = "red";
-        });
-    });
-
-    firebase.auth().onAuthStateChanged(function(user) {
-  if (!user) {
-    window.location.href = "index.html"; // redirect to login
-  } else {
-    // Show admin link only for your account
-    if (user.email === "mdelaney@castlefineart.com") {
-      document.getElementById("admin-link").style.display = "block";
+<!-- Auth protection and admin link display -->
+<script>
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) {
+      window.location.href = "index.html"; // redirect to login
+    } else {
+      if (user.email === "mdelaney@castlefineart.com") {
+        document.getElementById("admin-link").style.display = "block";
+      }
     }
-  }
-});
-  </script>
-  <script src="script.js"></script>
+  });
+</script>
+
+<!-- Sidebar toggle script -->
+<script src="script.js"></script>
+
+<!-- Account creation logic -->
+<script>
+  const auth = firebase.auth();
+  const form = document.getElementById("admin-create-user");
+  const status = document.getElementById("status");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("new-user-email").value;
+    const password = document.getElementById("new-user-password").value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        status.textContent = `✅ User created: ${email}`;
+        form.reset();
+      })
+      .catch(error => {
+        status.textContent = `❌ ${error.message}`;
+        status.style.color = "red";
+      });
+  });
+</script>
 </body>
 </html>
