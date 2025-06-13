@@ -1,3 +1,16 @@
+function setupSidebarEvents() {
+  const toggleBtn = document.getElementById("menu-toggle");
+  const closeBtn = document.getElementById("close-btn");
+  const sidebar = document.getElementById("sidebar");
+
+  if (toggleBtn && sidebar) {
+    toggleBtn.onclick = () => sidebar.classList.add("show");
+  }
+  if (closeBtn && sidebar) {
+    closeBtn.onclick = () => sidebar.classList.remove("show");
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const toggleButton = document.getElementById("menu-toggle");
   const sidebar = document.getElementById("sidebar");
@@ -63,18 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function setupSidebarEvents() {
-  const toggleBtn = document.getElementById("menu-toggle");
-  const closeBtn = document.getElementById("close-btn");
-  const sidebar = document.getElementById("sidebar");
-
-  if (toggleBtn && sidebar) {
-    toggleBtn.onclick = () => sidebar.style.display = "block";
-  }
-  if (closeBtn && sidebar) {
-    closeBtn.onclick = () => sidebar.style.display = "none";
-  }
-}
+ 
 
   // Reaction button logic
   function setupReactions(button, picker) {
