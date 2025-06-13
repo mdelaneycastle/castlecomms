@@ -309,34 +309,33 @@ form button {
 }
 
 .quick-links {
-  max-width: none; /* or use 1000px if you want a comfortable limit */
-  width: 100%;
-  padding: 1rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(4, 1fr); /* 4 buttons per row */
+  gap: 1.5rem;
   justify-items: center;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
 }
 
 .quick-links a {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* makes them square */
   background-color: #dcdcdc;
   color: #111;
   text-decoration: none;
-  padding: 1.5rem;
-  text-align: center;
-  border-radius: 0.5rem;
-  font-weight: bold;
-  font-size: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 80px;
+  border-radius: 0.5rem;
+  font-size: 2rem;
+  font-weight: bold;
   transition: all 0.2s ease-in-out;
 }
 
 .quick-links a:hover {
   background-color: #c0c0c0;
-  transform: scale(1.03);
+  transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
