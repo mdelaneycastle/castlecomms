@@ -62,11 +62,16 @@ header h1 {
 }
 main {
   padding: 2rem;
+  margin-left: 0;
 }
-section {
+.post {
   background: white;
-  margin-bottom: 2rem;
   padding: 1rem;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.images img {
+  max-width: 100%;
+  height: auto;
+  margin-right: 10px;
 }
