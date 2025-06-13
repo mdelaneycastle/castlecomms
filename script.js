@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Sidebar toggle
   const toggleButton = document.getElementById("menu-toggle");
   const sidebar = document.getElementById("sidebar");
   const closeButton = document.getElementById("close-btn");
@@ -13,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Newsfeed logic
   const postForm = document.getElementById("post-form");
   const feed = document.getElementById("feed");
 
@@ -57,7 +55,6 @@ document.addEventListener("DOMContentLoaded", function () {
       feed.appendChild(div);
     });
 
-    // Add reaction picker behavior
     document.querySelectorAll(".react-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         const index = btn.dataset.index;
@@ -72,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const posts = JSON.parse(localStorage.getItem("posts") || "[]");
         posts[posts.length - 1 - index].reaction = e.target.textContent;
         localStorage.setItem("posts", JSON.stringify(posts));
-        loadPosts(); // re-render
+        loadPosts();
       });
     });
   }
@@ -88,10 +85,10 @@ document.addEventListener("DOMContentLoaded", function () {
       posts.push({ name, message });
       localStorage.setItem("posts", JSON.stringify(posts));
 
-           postForm.reset();
+      postForm.reset();
       loadPosts();
     });
+
     loadPosts();
   }
 });
-
