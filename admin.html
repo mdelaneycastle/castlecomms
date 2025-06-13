@@ -46,16 +46,7 @@
   <h1>Castle Comms</h1>
 </header>
 
-<nav id="sidebar" class="sidebar">
-  <button id="close-btn" class="close-btn">&times;</button>
-  <ul>
-    <li><a href="main.html">🏠 Home</a></li>
-    <li><a href="planner.html">🗓️ Planner</a></li>
-    <li><a href="files.html">📁 Files</a></li>
-    <li><a href="newsfeed.html">📰 Newsfeed</a></li>
-    <li id="admin-link" style="display:none;"><a href="admin.html">⚙️ Admin</a></li>
-  </ul>
-</nav>
+<div id="sidebar-container"></div>
 
 <main>
   <h2>Create New User</h2>
@@ -112,6 +103,22 @@
         status.style.color = "red";
       });
   });
+</script>
+  <script>
+  fetch("sidebar.html")
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById("sidebar-container").innerHTML = html;
+
+      // After sidebar loads, you can initialize any JS that depends on it:
+      const user = firebase.auth().currentUser;
+      if (user && user.email === "mdelaney@castlefineart.com") {
+        document.getElementById("admin-link").style.display = "block";
+      }
+
+      // Ensure hamburger menu works after loading
+      if (typeof setupSidebarEvents === 'function') setupSidebarEvents();
+    });
 </script>
 </body>
 </html>
