@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <button class="comment-toggle" data-index="${index}">💬 Comment</button>
           <div class="comment-section hidden" data-index="${index}">
             <div class="comment-list"></div>
-            <form class="comment-form">
+            <form class="comment-form" data-index="${index}">
               <input type="text" placeholder="Your name" required />
               <textarea placeholder="Add a comment..." required></textarea>
               <button type="submit">Post Comment</button>
@@ -93,19 +93,20 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
 
-    document.querySelectorAll(".comment-form").forEach((form, idx) => {
+    document.querySelectorAll(".comment-form").forEach((form) => {
       form.addEventListener("submit", e => {
         e.preventDefault();
-        const nameInput = form.querySelector("input");
+        const index = form.dataset.index;
+        const nameInput = form.querySelector("input[type='text']");
         const textInput = form.querySelector("textarea");
         const name = nameInput.value.trim();
         const message = textInput.value.trim();
         if (!name || !message) return;
 
-        addComment(idx, name, message);
+        addComment(index, name, message);
         nameInput.value = "";
         textInput.value = "";
-        loadComments(idx);
+        loadComments(index);
       });
     });
   }
@@ -117,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     commentList.innerHTML = "";
 
-    const comments = (post.comments || []).slice().reverse(); // Newest first
+    const comments = (post.comments || []).slice().reverse();
     comments.forEach(comment => {
       const initials = comment.name
         .split(" ")
