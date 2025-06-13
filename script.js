@@ -48,7 +48,16 @@ document.addEventListener("DOMContentLoaded", function () {
               <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
             </div>
           </div>
-          <span>💬 0 comments</span>
+          <button class="comment-toggle" data-index="${index}">💬 Comment</button>
+<div class="comment-section hidden" data-index="${index}">
+  <div class="comment-list"></div>
+  <form class="comment-form">
+    <input type="text" placeholder="Your name" required />
+    <textarea placeholder="Add a comment..." required></textarea>
+    <button type="submit">Post Comment</button>
+  </form>
+</div>
+
         </div>
       `;
 
