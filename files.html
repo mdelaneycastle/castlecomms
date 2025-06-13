@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,9 +23,27 @@
   </ul>
 </nav>
 
-  <main id="main">
-    <h2>Files</h2><p>Upload and access shared documents.</p>
-  </main>
-  <script src="script.js"></script>
+<main id="main">
+  <h2>Files</h2>
+  <p>Upload and access shared documents.</p>
+</main>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<!-- Firebase init config -->
+<script src="firebase-init.js"></script>
+
+<!-- Protect the page -->
+<script>
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) {
+      window.location.href = "index.html"; // Redirect to login if not authenticated
+    }
+  });
+</script>
+
+<script src="script.js"></script>
 </body>
 </html>
