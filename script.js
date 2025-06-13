@@ -44,15 +44,14 @@ document.addEventListener("DOMContentLoaded", function () {
               <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
             </div>
           </div>
-          <button class="comment-toggle" data-index="${index}">💬 Comment</button>
-          <div class="comment-section hidden" data-index="${index}">
-            <div class="comment-list"></div>
-            <form class="comment-form" data-index="${index}">
-              <input type="text" placeholder="Your name" required />
-              <textarea placeholder="Add a comment..." required></textarea>
-              <button type="submit">Post Comment</button>
-            </form>
-          </div>
+        </div>
+        <div class="comment-section" data-index="${index}">
+          <form class="comment-form">
+            <input type="text" placeholder="Your name" required />
+            <textarea placeholder="Add a comment..." required></textarea>
+            <button type="submit">Post Comment</button>
+          </form>
+          <div class="comment-list"></div>
         </div>
       `;
 
@@ -61,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     setupReactions();
     setupCommentInteractions();
+    renderAllComments();
   }
 
   function setupReactions() {
@@ -84,30 +84,27 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function setupCommentInteractions() {
-    document.querySelectorAll(".comment-toggle").forEach(button => {
-      button.addEventListener("click", () => {
-        const index = button.dataset.index;
-        const section = document.querySelector(`.comment-section[data-index="${index}"]`);
-        section.classList.toggle("hidden");
-        loadComments(index);
-      });
-    });
-
-    document.querySelectorAll(".comment-form").forEach((form) => {
+    document.querySelectorAll(".comment-form").forEach((form, idx) => {
       form.addEventListener("submit", e => {
         e.preventDefault();
-        const index = form.dataset.index;
-        const nameInput = form.querySelector("input[type='text']");
+        const nameInput = form.querySelector("input");
         const textInput = form.querySelector("textarea");
         const name = nameInput.value.trim();
         const message = textInput.value.trim();
         if (!name || !message) return;
 
-        addComment(index, name, message);
+        addComment(idx, name, message);
         nameInput.value = "";
         textInput.value = "";
-        loadComments(index);
+        loadComments(idx);
       });
+    });
+  }
+
+  function renderAllComments() {
+    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+    posts.forEach((_, index) => {
+      loadComments(index);
     });
   }
 
@@ -118,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     commentList.innerHTML = "";
 
-    const comments = (post.comments || []).slice().reverse();
+    const comments = (post.comments || []).slice().reverse(); // Newest first
     comments.forEach(comment => {
       const initials = comment.name
         .split(" ")
@@ -128,13 +125,10 @@ document.addEventListener("DOMContentLoaded", function () {
         .slice(0, 2);
 
       const bubble = document.createElement("div");
-      bubble.className = "comment-bubble";
+      bubble.className = "comment";
       bubble.innerHTML = `
-        <div class="comment-avatar">${initials}</div>
-        <div class="comment-content">
-          <div class="comment-name">${comment.name}</div>
-          <div class="comment-text">${comment.message}</div>
-        </div>
+        <strong>${comment.name}</strong>
+        <p>${comment.message}</p>
       `;
       commentList.appendChild(bubble);
     });
