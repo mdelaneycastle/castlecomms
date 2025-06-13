@@ -19,6 +19,38 @@
       height: 600px;
       border: 0;
     }
+    .calendar-note {
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      padding: 1rem;
+      margin: 2rem auto;
+      max-width: 700px;
+      border-radius: 0.5rem;
+    }
+    .calendar-note code {
+      display: block;
+      background: #e5e7eb;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      margin: 0.5rem 0;
+      word-break: break-all;
+    }
+    .calendar-note img {
+      margin-top: 1rem;
+      width: 150px;
+      height: 150px;
+      border-radius: 0.25rem;
+      border: 1px solid #ccc;
+    }
+    .download-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 0.375rem;
+    }
   </style>
 </head>
 <body>
@@ -50,13 +82,21 @@
     </iframe>
   </div>
 
-  <p>
-  <a href="https://calendar.google.com/calendar/ical/7a2b68949fab28bdbe91979576d3bc792425a664a58b41d3c3953550a3f72e60%40group.calendar.google.com/public/basic.ics" 
-     class="download-btn" target="_blank">
-    📥 Subscribe to Calendar
-  </a>
-</p>
+  <div class="calendar-note">
+    <h3>📅 Keep this calendar synced</h3>
+    <p>If you'd like this calendar to stay updated automatically in your device's calendar app (like Apple Calendar or Outlook), use this link to <strong>subscribe</strong> instead of downloading it:</p>
+    <code>https://calendar.google.com/calendar/ical/7a2b68949fab28bdbe91979576d3bc792425a664a58b41d3c3953550a3f72e60%40group.calendar.google.com/public/basic.ics</code>
+    <p>On iPhone: <em>Settings → Calendar → Accounts → Add Subscribed Calendar</em></p>
+    <p>Scan this QR code to copy the link on your phone:</p>
+    <img src="https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=https%3A%2F%2Fcalendar.google.com%2Fcalendar%2Fical%2F7a2b68949fab28bdbe91979576d3bc792425a664a58b41d3c3953550a3f72e60%40group.calendar.google.com%2Fpublic%2Fbasic.ics" alt="QR Code to subscribe to calendar" />
+  </div>
 
+  <p>
+    <a href="https://calendar.google.com/calendar/ical/7a2b68949fab28bdbe91979576d3bc792425a664a58b41d3c3953550a3f72e60%40group.calendar.google.com/public/basic.ics" 
+       class="download-btn" target="_blank">
+      📥 Download One-Time Calendar Snapshot
+    </a>
+  </p>
 </main>
 
 <script src="script.js"></script>
