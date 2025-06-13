@@ -36,5 +36,24 @@
 </main>
 
 <script src="script.js"></script>
+
+  <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+
+<script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyDJvHNZB_pzhytD7yLa69auStrZBk2SEHk",
+  authDomain: "castle-comms.firebaseapp.com",
+  projectId: "castle-comms",
+  storageBucket: "castle-comms.firebasestorage.app",
+  messagingSenderId: "959264765744",
+  appId: "1:959264765744:web:7aee345a37673f720cfaf5",
+  measurementId: "G-NLS757VMJ8"
+};
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+</script>
 </body>
 </html>
