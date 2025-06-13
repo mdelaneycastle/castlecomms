@@ -88,10 +88,10 @@ document.addEventListener("DOMContentLoaded", function () {
       posts.push({ name, message });
       localStorage.setItem("posts", JSON.stringify(posts));
 
-      postForm.reset();
+           postForm.reset();
       loadPosts();
     });
-
     loadPosts();
   }
 });
+
