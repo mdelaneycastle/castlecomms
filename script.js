@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="post-message">${post.message}</div>
       <div class="post-footer">
         <div>
-          <button class="react-btn">➕ React</button>
+          <button class="react-btn">${post.reaction || "➕ React"}</button>
           <div class="emoji-picker hidden">
             <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
           </div>
@@ -70,11 +70,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     picker.querySelectorAll("span").forEach(span => {
-      span.addEventListener("click", () => {
-        button.textContent = span.textContent;
-        picker.classList.add("hidden");
+  span.addEventListener("click", () => {
+    const selectedReaction = span.textContent;
+    button.textContent = selectedReaction;
+    picker.classList.add("hidden");
+
+    // Find this post's timestamp to identify it in Firebase
+    const timestampEl = button.closest(".post").querySelector(".post-time");
+    const postTime = new Date(timestampEl.textContent).getTime();
+
+    // Find and update the post in Firebase by timestamp
+    db.ref("posts").once("value", snapshot => {
+      snapshot.forEach(child => {
+        const post = child.val();
+        if (post.timestamp === postTime) {
+          db.ref("posts/" + child.key).update({ reaction: selectedReaction });
+        }
       });
     });
+  });
+});
   }
 
   // Form submission
