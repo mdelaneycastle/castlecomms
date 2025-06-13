@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Castle Comms</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .calendar-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 0;
+    }
+  </style>
 </head>
 <body>
   
@@ -24,9 +38,19 @@
   </ul>
 </nav>
 
-  <main id="main">
-    <h2>Planner</h2><p>Upcoming events and scheduling go here.</p>
-  </main>
-  <script src="script.js"></script>
+<main id="main">
+  <h2>Planner</h2>
+  <p>Upcoming events and scheduling go here.</p>
+
+  <div class="calendar-container">
+    <iframe 
+      src="https://calendar.google.com/calendar/embed?src=7a2b68949fab28bdbe91979576d3bc792425a664a58b41d3c3953550a3f72e60%40group.calendar.google.com&ctz=Europe%2FLondon"
+      frameborder="0"
+      scrolling="no">
+    </iframe>
+  </div>
+</main>
+
+<script src="script.js"></script>
 </body>
 </html>
