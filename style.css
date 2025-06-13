@@ -309,13 +309,13 @@ form button {
 }
 
 .quick-links {
+  max-width: none; /* or use 1000px if you want a comfortable limit */
+  width: 100%;
+  padding: 1rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 1rem;
   justify-items: center;
-  margin: 2rem auto;
-  max-width: 800px;
-  padding: 0 1rem;
 }
 
 .quick-links a {
