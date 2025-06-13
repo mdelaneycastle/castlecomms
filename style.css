@@ -319,25 +319,23 @@ form button {
 }
 
 .quick-links a {
-  background-color: #2563eb;
-  color: white;
-  font-size: 1.75rem;
+  flex: 1 1 22%;
+  min-width: 100px;
+  background-color: #dcdcdc;
+  color: #111;
   text-decoration: none;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 1.2rem;
+  text-align: center;
   border-radius: 0.5rem;
   font-weight: bold;
-  position: relative;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  font-size: 1.4rem;
+  transition: all 0.2s ease-in-out;
 }
 
 .quick-links a:hover {
-  background-color: #1d4ed8;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  background-color: #c0c0c0;
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Tooltip-style title on hover (desktop) */
