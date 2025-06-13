@@ -60,5 +60,21 @@
 
 <!-- Newsfeed script -->
 <script src="script.js"></script>
+  <script>
+  fetch("sidebar.html")
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById("sidebar-container").innerHTML = html;
+
+      // After sidebar loads, you can initialize any JS that depends on it:
+      const user = firebase.auth().currentUser;
+      if (user && user.email === "mdelaney@castlefineart.com") {
+        document.getElementById("admin-link").style.display = "block";
+      }
+
+      // Ensure hamburger menu works after loading
+      if (typeof setupSidebarEvents === 'function') setupSidebarEvents();
+    });
+</script>
 </body>
 </html>
