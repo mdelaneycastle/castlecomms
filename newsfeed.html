@@ -35,26 +35,24 @@
   <div id="feed"></div>
 </main>
 
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDJvHNZB_pzhytD7yLa69auStrZBk2SEHk",
-    authDomain: "castle-comms.firebaseapp.com",
-    projectId: "castle-comms",
-    storageBucket: "castle-comms.firebasestorage.app",
-    messagingSenderId: "959264765744",
-    appId: "1:959264765744:web:7aee345a37673f720cfaf5",
-    measurementId: "G-NLS757VMJ8",
-    databaseURL: "https://castle-comms-default-rtdb.europe-west1.firebasedatabase.app"
-  };
+<!-- Firebase init -->
+<script src="firebase-init.js"></script>
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+<!-- Redirect to login if not logged in -->
+<script>
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (!user) {
+      window.location.href = "index.html";
+    }
+  });
 </script>
 
-<!-- Your custom script must come AFTER firebase init -->
+<!-- Newsfeed script -->
 <script src="script.js"></script>
 </body>
 </html>
