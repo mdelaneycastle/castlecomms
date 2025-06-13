@@ -319,10 +319,9 @@ form button {
 }
 
 .quick-links a {
-  flex: 1 1 22%;
   min-width: 100px;
   background-color: #dcdcdc;
-  color: #111;
+  color: #111 !important;
   text-decoration: none;
   padding: 1.2rem;
   text-align: center;
@@ -330,6 +329,7 @@ form button {
   font-weight: bold;
   font-size: 1.4rem;
   transition: all 0.2s ease-in-out;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .quick-links a:hover {
