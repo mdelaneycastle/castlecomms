@@ -360,3 +360,9 @@ form button {
 .quick-links a:hover::after {
   opacity: 1;
 }
+
+@media (max-width: 768px) {
+  .quick-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
