@@ -24,13 +24,19 @@ document.addEventListener("DOMContentLoaded", function () {
   const postForm = document.getElementById("post-form");
   const feed = document.getElementById("feed");
 
-  // Submit post to Firebase
   function submitPost(name, role, message) {
-    const post = { name, role, message, timestamp: Date.now() };
-    db.ref("posts").push(post);
+    const postRef = db.ref("posts").push();
+    const post = {
+      postId: postRef.key,
+      name,
+      role,
+      message,
+      timestamp: Date.now(),
+      reaction: null
+    };
+    postRef.set(post);
   }
 
-  // Display a single post on the page
   function displayPost(post) {
     const initials = post.name
       .split(" ")
@@ -41,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const div = document.createElement("div");
     div.className = "post";
+    div.dataset.id = post.postId;
 
     div.innerHTML = `
       <div class="post-header">
@@ -60,54 +67,70 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
       </div>
+      <div class="post-comments"></div>
+      <form class="comment-form">
+        <input type="text" placeholder="Write a comment..." required />
+        <button type="submit">Reply</button>
+      </form>
     `;
 
     feed.prepend(div);
-    setupReactions(div.querySelector(".react-btn"), div.querySelector(".emoji-picker"));
-  }
 
-  // Listen for new posts in Firebase
-  function listenForPosts() {
-    const postsRef = db.ref("posts");
+    const postId = post.postId;
+    const commentForm = div.querySelector(".comment-form");
+    const commentInput = commentForm.querySelector("input");
+    const commentsDiv = div.querySelector(".post-comments");
 
-    postsRef.on("child_added", (snapshot) => {
-      const post = snapshot.val();
-      displayPost(post);
+    // Listen for comments
+    const commentsRef = db.ref(`posts/${postId}/comments`);
+    commentsRef.on("child_added", snapshot => {
+      const data = snapshot.val();
+      const p = document.createElement("p");
+      p.textContent = `${new Date(data.timestamp).toLocaleTimeString()}: ${data.text}`;
+      commentsDiv.appendChild(p);
     });
+
+    // Add new comment
+    commentForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const comment = commentInput.value.trim();
+      if (!comment) return;
+
+      db.ref(`posts/${postId}/comments`).push({
+        text: comment,
+        timestamp: Date.now()
+      });
+
+      commentInput.value = "";
+    });
+
+    setupReactions(div.querySelector(".react-btn"), div.querySelector(".emoji-picker"), postId);
   }
 
- 
-
-  // Reaction button logic
-  function setupReactions(button, picker) {
+  function setupReactions(button, picker, postId) {
     button.addEventListener("click", () => {
       picker.classList.toggle("hidden");
     });
 
     picker.querySelectorAll("span").forEach(span => {
-  span.addEventListener("click", () => {
-    const selectedReaction = span.textContent;
-    button.textContent = selectedReaction;
-    picker.classList.add("hidden");
+      span.addEventListener("click", () => {
+        const selectedReaction = span.textContent;
+        button.textContent = selectedReaction;
+        picker.classList.add("hidden");
 
-    // Find this post's timestamp to identify it in Firebase
-    const timestampEl = button.closest(".post").querySelector(".post-time");
-    const postTime = new Date(timestampEl.textContent).getTime();
-
-    // Find and update the post in Firebase by timestamp
-    db.ref("posts").once("value", snapshot => {
-      snapshot.forEach(child => {
-        const post = child.val();
-        if (post.timestamp === postTime) {
-          db.ref("posts/" + child.key).update({ reaction: selectedReaction });
-        }
+        db.ref("posts/" + postId).update({ reaction: selectedReaction });
       });
     });
-  });
-});
   }
 
-  // Form submission
+  function listenForPosts() {
+    const postsRef = db.ref("posts");
+    postsRef.on("child_added", snapshot => {
+      const post = snapshot.val();
+      displayPost(post);
+    });
+  }
+
   if (postForm) {
     postForm.addEventListener("submit", e => {
       e.preventDefault();
