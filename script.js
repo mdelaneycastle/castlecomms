@@ -11,139 +11,73 @@ document.addEventListener("DOMContentLoaded", function () {
   const postForm = document.getElementById("post-form");
   const feed = document.getElementById("feed");
 
-  function loadPosts() {
-    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-    feed.innerHTML = "";
-    posts.reverse().forEach((post, index) => {
-      const initials = post.name
-        .split(" ")
-        .map(word => word[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
+  // Submit post to Firebase
+  function submitPost(name, role, message) {
+    const post = { name, role, message, timestamp: Date.now() };
+    db.ref("posts").push(post);
+  }
 
-      const div = document.createElement("div");
-      div.className = "post";
+  // Display a single post on the page
+  function displayPost(post) {
+    const initials = post.name
+      .split(" ")
+      .map(word => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
 
-      div.innerHTML = `
-        <div class="post-header">
-          <div class="post-avatar">${initials}</div>
-          <div class="post-info">
-            <div class="post-name">${post.name}</div>
-            <div class="post-role">User</div>
-            <div class="post-time">Just now</div>
+    const div = document.createElement("div");
+    div.className = "post";
+
+    div.innerHTML = `
+      <div class="post-header">
+        <div class="post-avatar">${initials}</div>
+        <div class="post-info">
+          <div class="post-name">${post.name}</div>
+          <div class="post-role">${post.role || "User"}</div>
+          <div class="post-time">${new Date(post.timestamp).toLocaleString()}</div>
+        </div>
+      </div>
+      <div class="post-message">${post.message}</div>
+      <div class="post-footer">
+        <div>
+          <button class="react-btn">➕ React</button>
+          <div class="emoji-picker hidden">
+            <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
           </div>
         </div>
-        <div class="post-message">${post.message}</div>
-        <div class="post-footer">
-          <div>
-            <button class="react-btn" data-index="${index}">
-              ${post.reaction ? post.reaction : "➕ React"}
-            </button>
-            <div class="emoji-picker hidden" data-index="${index}">
-              <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
-            </div>
-          </div>
-        </div>
-        <div class="comment-section" data-index="${index}">
-          <form class="comment-form">
-            <input type="text" placeholder="Your name" required />
-            <textarea placeholder="Add a comment..." required></textarea>
-            <button type="submit">Post Comment</button>
-          </form>
-          <div class="comment-list"></div>
-        </div>
-      `;
+      </div>
+    `;
 
-      feed.appendChild(div);
-    });
-
-    setupReactions();
-    setupCommentInteractions();
-    renderAllComments();
+    feed.prepend(div);
+    setupReactions(div.querySelector(".react-btn"), div.querySelector(".emoji-picker"));
   }
 
-  function setupReactions() {
-    document.querySelectorAll(".react-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const index = btn.dataset.index;
-        const picker = document.querySelector(`.emoji-picker[data-index="${index}"]`);
-        picker.classList.toggle("hidden");
-      });
+  // Listen for new posts in Firebase
+  function listenForPosts() {
+    const postsRef = db.ref("posts");
+
+    postsRef.on("child_added", (snapshot) => {
+      const post = snapshot.val();
+      displayPost(post);
+    });
+  }
+
+  // Reaction button logic
+  function setupReactions(button, picker) {
+    button.addEventListener("click", () => {
+      picker.classList.toggle("hidden");
     });
 
-    document.querySelectorAll(".emoji-picker span").forEach(span => {
-      span.addEventListener("click", (e) => {
-        const index = e.target.parentElement.dataset.index;
-        const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-        posts[posts.length - 1 - index].reaction = e.target.textContent;
-        localStorage.setItem("posts", JSON.stringify(posts));
-        loadPosts();
+    picker.querySelectorAll("span").forEach(span => {
+      span.addEventListener("click", () => {
+        button.textContent = span.textContent;
+        picker.classList.add("hidden");
       });
     });
   }
 
-  function setupCommentInteractions() {
-    document.querySelectorAll(".comment-form").forEach((form, idx) => {
-      form.addEventListener("submit", e => {
-        e.preventDefault();
-        const nameInput = form.querySelector("input");
-        const textInput = form.querySelector("textarea");
-        const name = nameInput.value.trim();
-        const message = textInput.value.trim();
-        if (!name || !message) return;
-
-        addComment(idx, name, message);
-        nameInput.value = "";
-        textInput.value = "";
-        loadComments(idx);
-      });
-    });
-  }
-
-  function renderAllComments() {
-    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-    posts.forEach((_, index) => {
-      loadComments(index);
-    });
-  }
-
-  function loadComments(index) {
-    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-    const post = posts[posts.length - 1 - index];
-    const commentList = document.querySelector(`.comment-section[data-index="${index}"] .comment-list`);
-
-    commentList.innerHTML = "";
-
-    const comments = (post.comments || []).slice().reverse(); // Newest first
-    comments.forEach(comment => {
-      const initials = comment.name
-        .split(" ")
-        .map(word => word[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
-
-      const bubble = document.createElement("div");
-      bubble.className = "comment";
-      bubble.innerHTML = `
-        <strong>${comment.name}</strong>
-        <p>${comment.message}</p>
-      `;
-      commentList.appendChild(bubble);
-    });
-  }
-
-  function addComment(index, name, message) {
-    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-    const post = posts[posts.length - 1 - index];
-
-    if (!post.comments) post.comments = [];
-    post.comments.push({ name, message });
-
-    localStorage.setItem("posts", JSON.stringify(posts));
-  }
-
+  // Form submission
   if (postForm) {
     postForm.addEventListener("submit", e => {
       e.preventDefault();
@@ -151,14 +85,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const message = document.getElementById("message").value.trim();
       if (!name || !message) return;
 
-      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-      posts.push({ name, message });
-      localStorage.setItem("posts", JSON.stringify(posts));
-
+      submitPost(name, "User", message);
       postForm.reset();
-      loadPosts();
     });
 
-    loadPosts();
+    listenForPosts();
   }
 });
