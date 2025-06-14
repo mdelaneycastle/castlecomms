@@ -138,14 +138,24 @@ document.addEventListener("DOMContentLoaded", function () {
     postForm.addEventListener("submit", e => {
       e.preventDefault();
       const user = firebase.auth().currentUser;
-const name = user.displayName || user.email || "Anonymous";
+const uid = user.uid;
+
+db.ref(`users/${uid}`).once("value").then(snapshot => {
+  const userData = snapshot.val();
+  const name = userData?.name || user.displayName || user.email || "Anonymous";
+  const role = userData?.role || "User";
+
+  
+
 
       const message = document.getElementById("message").value.trim();
       if (!name || !message) return;
 
-      submitPost(name, "User", message);
-      postForm.reset();
-    });
+      submitPost(name, role, message);
+  postForm.reset();
+}).catch(error => {
+  console.error("Failed to fetch user data:", error);
+});
 
     listenForPosts();
   }
