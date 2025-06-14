@@ -18,18 +18,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function submitPost(name, role, message) {
     const postRef = db.ref("posts").push();
+    const postId = postRef.key;
+
+    if (!postId) {
+      console.error("Failed to generate post ID");
+      return;
+    }
+
     const post = {
-      postId: postRef.key,
+      postId,
       name,
       role,
       message,
       timestamp: Date.now(),
       reaction: null
     };
-    postRef.set(post);
+
+    postRef.set(post).catch(error => console.error("Post save error:", error));
   }
 
   function displayPost(post) {
+    const postId = post.postId || "undefined";
+
     const initials = post.name
       .split(" ")
       .map(word => word[0])
@@ -39,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const div = document.createElement("div");
     div.className = "post";
-    div.dataset.id = post.postId;
+    div.dataset.id = postId;
 
     div.innerHTML = `
       <div class="post-header">
@@ -59,8 +69,8 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
       </div>
-      <div class="post-comments" id="comments-${post.postId}"></div>
-      <form class="comment-form" data-postid="${post.postId}">
+      <div class="post-comments"></div>
+      <form class="comment-form" data-postid="${postId}">
         <input type="text" placeholder="Write a comment..." required />
         <button type="submit">Reply</button>
       </form>
@@ -68,11 +78,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     feed.prepend(div);
 
-    const postId = post.postId;
     const commentForm = div.querySelector(".comment-form");
     const commentInput = commentForm.querySelector("input");
     const commentsDiv = div.querySelector(".post-comments");
-
 
     // Listen for comments on this post only
     const commentsRef = db.ref(`posts/${postId}/comments`);
@@ -89,12 +97,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const comment = commentInput.value.trim();
       if (!comment) return;
 
-      
-db.ref(`posts/${postId}/comments`).push({
-  text: comment,
-  timestamp: Date.now()
-}).catch(error => console.error("Comment error:", error));
-
+      db.ref(`posts/${postId}/comments`).push({
+        text: comment,
+        timestamp: Date.now()
+      }).catch(error => console.error("Comment error:", error));
 
       commentInput.value = "";
     });
@@ -113,10 +119,8 @@ db.ref(`posts/${postId}/comments`).push({
         button.textContent = selectedReaction;
         picker.classList.add("hidden");
 
-        
-db.ref(`posts/${postId}`).update({ reaction: selectedReaction })
-  .catch(error => console.error("Reaction error:", error));
-
+        db.ref(`posts/${postId}`).update({ reaction: selectedReaction })
+          .catch(error => console.error("Reaction error:", error));
       });
     });
   }
@@ -125,6 +129,7 @@ db.ref(`posts/${postId}`).update({ reaction: selectedReaction })
     const postsRef = db.ref("posts");
     postsRef.on("child_added", snapshot => {
       const post = snapshot.val();
+      post.postId = post.postId || snapshot.key; // fallback if missing
       displayPost(post);
     });
   }
