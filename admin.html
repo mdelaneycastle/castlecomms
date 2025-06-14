@@ -71,131 +71,59 @@
 <body>
 
 <main>
-  <h2>Create New User</h2>
-  <form id="create-user-form">
-    <input type="email" id="new-email" placeholder="Email" required />
-    <input type="password" id="new-password" placeholder="Password" required />
-    <input type="text" id="new-name" placeholder="Full Name" />
-    <input type="text" id="new-role" placeholder="Role" />
-    <button type="submit">Create User</button>
-  </form>
-
   <h2>User Management</h2>
   <table id="user-table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Role</th>
+        <th>UID</th>
         <th>Email</th>
-        <th>Edit</th>
+        <th>Display Name</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 </main>
 
-<div class="modal" id="edit-modal">
-  <div class="modal-content">
-    <h3>Edit User</h3>
-    <input type="text" id="edit-name" placeholder="Full name" />
-    <input type="text" id="edit-role" placeholder="Role" />
-    <input type="password" id="edit-password" placeholder="New password (optional)" />
-    <button id="save-btn">Save</button>
-    <button onclick="closeModal()">Cancel</button>
-  </div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="firebase-init.js"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js"></script>
+<script src="firebase-init.js"></script> <!-- Make sure this has correct config -->
 
 <script>
+  const app = firebase.app();
   const auth = firebase.auth();
+  const functions = firebase.app().functions("us-central1");
+  const listUsers = firebase.functions().httpsCallable("listUsers");
+
   const tableBody = document.querySelector("#user-table tbody");
-  const modal = document.getElementById("edit-modal");
-  const nameInput = document.getElementById("edit-name");
-  const roleInput = document.getElementById("edit-role");
-  const passwordInput = document.getElementById("edit-password");
-  const saveBtn = document.getElementById("save-btn");
-  const createForm = document.getElementById("create-user-form");
 
-  const userMap = {}; // temporary in-memory role store
-
-  let currentEditUid = null;
-  let currentEditEmail = null;
-
-  function openModal(uid, name, role, email) {
-    currentEditUid = uid;
-    currentEditEmail = email;
-    nameInput.value = name || "";
-    roleInput.value = role || "";
-    passwordInput.value = "";
-    modal.style.display = "flex";
-  }
-
-  function closeModal() {
-    modal.style.display = "none";
-  }
-
-  saveBtn.addEventListener("click", () => {
-    const newName = nameInput.value.trim();
-    const newRole = roleInput.value.trim();
-    const newPassword = passwordInput.value.trim();
-
-    if (!currentEditUid) return;
-
-    userMap[currentEditUid] = { name: newName, role: newRole };
-
-    if (newPassword) {
-      alert("Password updates must be handled securely via Firebase Admin SDK or user re-authentication.");
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      alert("Please log in to view this page.");
+      return;
     }
 
-    loadUsers();
-    closeModal();
-  });
+    try {
+      const result = await listUsers();
+      const users = result.data.users;
 
-  createForm.addEventListener("submit", e => {
-    e.preventDefault();
-    const email = document.getElementById("new-email").value;
-    const password = document.getElementById("new-password").value;
-    const name = document.getElementById("new-name").value;
-    const role = document.getElementById("new-role").value;
+      tableBody.innerHTML = "";
 
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        return userCredential.user.updateProfile({ displayName: name });
-      })
-      .then(() => {
-        const uid = auth.currentUser.uid;
-        userMap[uid] = { name, role };
-        createForm.reset();
-        loadUsers();
-      })
-      .catch(error => {
-        alert("Error creating user: " + error.message);
-      });
-  });
-
-  function loadUsers() {
-    tableBody.innerHTML = "";
-    auth.onAuthStateChanged(admin => {
-      if (!admin) return;
-
-      // This is a placeholder — real user listing requires Admin SDK
-      Object.entries(userMap).forEach(([uid, data]) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${data.name || ""}</td>
-          <td>${data.role || ""}</td>
-          <td>${uid}</td>
-          <td><button onclick="openModal('${uid}', '${data.name || ""}', '${data.role || ""}', '${uid}')">Edit</button></td>
+      users.forEach(u => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${u.uid}</td>
+          <td>${u.email || "-"}</td>
+          <td>${u.displayName || "-"}</td>
         `;
-        tableBody.appendChild(tr);
+        tableBody.appendChild(row);
       });
-    });
-  }
-
-  window.onload = loadUsers;
+    } catch (err) {
+      console.error("Error fetching users:", err.message);
+      alert("You do not have permission to view users.");
+    }
+  });
 </script>
 
 </body>
