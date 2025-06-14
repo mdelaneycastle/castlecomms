@@ -137,7 +137,9 @@ document.addEventListener("DOMContentLoaded", function () {
   if (postForm) {
     postForm.addEventListener("submit", e => {
       e.preventDefault();
-      const name = document.getElementById("name").value.trim();
+      const user = firebase.auth().currentUser;
+const name = user.displayName || user.email || "Anonymous";
+
       const message = document.getElementById("message").value.trim();
       if (!name || !message) return;
 
