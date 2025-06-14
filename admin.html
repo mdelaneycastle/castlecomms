@@ -43,7 +43,7 @@
 
 <header>
   <button id="menu-toggle" class="hamburger">&#9776;</button>
-  <h1>Castle Comms</h1>
+  <h1>Castle Comms.</h1>
 </header>
 
 <div id="sidebar-container"></div>
@@ -51,13 +51,12 @@
 <main>
   <h2>Create New User</h2>
   <form id="admin-create-user">
-  <input type="email" id="new-user-email" placeholder="New user's email" required />
-  <input type="password" id="new-user-password" placeholder="New user's password" required />
-  <input type="text" id="new-user-name" placeholder="Full name" required />
-  <input type="text" id="new-user-role" placeholder="Role (e.g. Admin, Staff)" required />
-  <button type="submit">Create Account</button>
-</form>
-
+    <input type="email" id="new-user-email" placeholder="New user's email" required />
+    <input type="password" id="new-user-password" placeholder="New user's password" required />
+    <input type="text" id="new-user-name" placeholder="Full name" required />
+    <input type="text" id="new-user-role" placeholder="Role (e.g. Admin, Staff)" required />
+    <button type="submit">Create Account</button>
+  </form>
 
   <p id="status" style="color: green;"></p>
 </main>
@@ -65,6 +64,7 @@
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <!-- Firebase init -->
 <script src="firebase-init.js"></script>
@@ -75,8 +75,9 @@
     if (!user) {
       window.location.href = "index.html"; // redirect to login
     } else {
-      if (user.email === "mdelaney@castlefineart.com") {
-        document.getElementById("admin-link").style.display = "block";
+      const adminLink = document.getElementById("admin-link");
+      if (user.email === "mdelaney@castlefineart.com" && adminLink) {
+        adminLink.style.display = "block";
       }
     }
   });
@@ -104,9 +105,7 @@
       .then(userCredential => {
         const user = userCredential.user;
 
-        // Set display name
         return user.updateProfile({ displayName: name }).then(() => {
-          // Save role in database
           return db.ref(`users/${user.uid}`).set({
             name,
             role,
@@ -123,6 +122,23 @@
         status.style.color = "red";
       });
   });
+</script>
+
+<!-- Load sidebar -->
+<script>
+  fetch("sidebar.html")
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById("sidebar-container").innerHTML = html;
+
+      const user = firebase.auth().currentUser;
+      const adminLink = document.getElementById("admin-link");
+      if (user && user.email === "mdelaney@castlefineart.com" && adminLink) {
+        adminLink.style.display = "block";
+      }
+
+      if (typeof setupSidebarEvents === 'function') setupSidebarEvents();
+    });
 </script>
 
 </body>
