@@ -165,26 +165,23 @@
 
   function loadUsers() {
     tableBody.innerHTML = "";
-    function loadUsers() {
-  tableBody.innerHTML = "";
-  db.ref("users").once("value").then(snapshot => {
-    snapshot.forEach(child => {
-      const uid = child.key;
-      const data = child.val() || {};
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${data.name || ""}</td>
-        <td>${data.role || ""}</td>
-        <td>${data.email || ""}</td>
-        <td><button onclick="openModal('${uid}', '${data.name || ""}', '${data.role || ""}', '${data.email || ""}')">Edit</button></td>
-      `;
-      tableBody.appendChild(tr);
+    db.ref("users").once("value").then(snapshot => {
+      snapshot.forEach(child => {
+        const uid = child.key;
+        const data = child.val() || {};
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${data.name || ""}</td>
+          <td>${data.role || ""}</td>
+          <td>${data.email || ""}</td>
+          <td><button onclick="openModal('${uid}', '${data.name || ""}', '${data.role || ""}', '${data.email || ""}')">Edit</button></td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }).catch(error => {
+      console.error("Error loading users:", error);
     });
-  }).catch(error => {
-    console.error("Error loading users:", error);
-  });
-}
-
+  }
 
   createForm.addEventListener("submit", e => {
     e.preventDefault();
