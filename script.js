@@ -12,17 +12,7 @@ function setupSidebarEvents() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const toggleButton = document.getElementById("menu-toggle");
-  const sidebar = document.getElementById("sidebar");
-  const closeButton = document.getElementById("close-btn");
-
-  if (toggleButton && sidebar && closeButton) {
-    toggleButton.addEventListener("click", () => sidebar.classList.add("show"));
-    closeButton.addEventListener("click", () => sidebar.classList.remove("show"));
-  }
-
-  const db = firebase.database(); // ✅ This line was missing
-
+  const db = firebase.database();
   const postForm = document.getElementById("post-form");
   const feed = document.getElementById("feed");
 
@@ -69,8 +59,8 @@ document.addEventListener("DOMContentLoaded", function () {
           </div>
         </div>
       </div>
-      <div class="post-comments"></div>
-      <form class="comment-form">
+      <div class="post-comments" id="comments-${post.postId}"></div>
+      <form class="comment-form" data-postid="${post.postId}">
         <input type="text" placeholder="Write a comment..." required />
         <button type="submit">Reply</button>
       </form>
@@ -81,9 +71,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const postId = post.postId;
     const commentForm = div.querySelector(".comment-form");
     const commentInput = commentForm.querySelector("input");
-    const commentsDiv = div.querySelector(".post-comments");
+    const commentsDiv = div.querySelector(`#comments-${postId}`);
 
-    // Listen for comments
+    // Listen for comments on this post only
     const commentsRef = db.ref(`posts/${postId}/comments`);
     commentsRef.on("child_added", snapshot => {
       const data = snapshot.val();
@@ -120,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
         button.textContent = selectedReaction;
         picker.classList.add("hidden");
 
-        db.ref("posts/" + postId).update({ reaction: selectedReaction });
+        db.ref(`posts/${postId}`).update({ reaction: selectedReaction });
       });
     });
   }
