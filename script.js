@@ -158,5 +158,5 @@ db.ref(`users/${uid}`).once("value").then(snapshot => {
 });
 
     listenForPosts();
-  }
+  })
 });
