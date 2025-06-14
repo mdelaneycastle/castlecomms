@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,12 +18,6 @@
       border: 1px solid #ddd;
       border-radius: 8px;
       background: white;
-    }
-    h2 {
-      margin-bottom: 1rem;
-    }
-    form {
-      margin-bottom: 2rem;
     }
     input, button {
       padding: 0.5rem;
@@ -114,11 +107,9 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-init.js"></script>
 
 <script>
-  const db = firebase.database();
   const auth = firebase.auth();
   const tableBody = document.querySelector("#user-table tbody");
   const modal = document.getElementById("edit-modal");
@@ -127,6 +118,8 @@
   const passwordInput = document.getElementById("edit-password");
   const saveBtn = document.getElementById("save-btn");
   const createForm = document.getElementById("create-user-form");
+
+  const userMap = {}; // temporary in-memory role store
 
   let currentEditUid = null;
   let currentEditEmail = null;
@@ -151,37 +144,15 @@
 
     if (!currentEditUid) return;
 
-    db.ref("users/" + currentEditUid).update({
-      name: newName,
-      role: newRole
-    });
+    userMap[currentEditUid] = { name: newName, role: newRole };
 
-    if (newPassword && currentEditEmail) {
+    if (newPassword) {
       alert("Password updates must be handled securely via Firebase Admin SDK or user re-authentication.");
     }
 
+    loadUsers();
     closeModal();
   });
-
-  function loadUsers() {
-    tableBody.innerHTML = "";
-    db.ref("users").once("value").then(snapshot => {
-      snapshot.forEach(child => {
-        const uid = child.key;
-        const data = child.val() || {};
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${data.name || ""}</td>
-          <td>${data.role || ""}</td>
-          <td>${data.email || ""}</td>
-          <td><button onclick="openModal('${uid}', '${data.name || ""}', '${data.role || ""}', '${data.email || ""}')">Edit</button></td>
-        `;
-        tableBody.appendChild(tr);
-      });
-    }).catch(error => {
-      console.error("Error loading users:", error);
-    });
-  }
 
   createForm.addEventListener("submit", e => {
     e.preventDefault();
@@ -192,10 +163,11 @@
 
     auth.createUserWithEmailAndPassword(email, password)
       .then(userCredential => {
-        const uid = userCredential.user.uid;
-        return db.ref("users/" + uid).set({ name, role, email });
+        return userCredential.user.updateProfile({ displayName: name });
       })
       .then(() => {
+        const uid = auth.currentUser.uid;
+        userMap[uid] = { name, role };
         createForm.reset();
         loadUsers();
       })
@@ -203,6 +175,25 @@
         alert("Error creating user: " + error.message);
       });
   });
+
+  function loadUsers() {
+    tableBody.innerHTML = "";
+    auth.onAuthStateChanged(admin => {
+      if (!admin) return;
+
+      // This is a placeholder — real user listing requires Admin SDK
+      Object.entries(userMap).forEach(([uid, data]) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${data.name || ""}</td>
+          <td>${data.role || ""}</td>
+          <td>${uid}</td>
+          <td><button onclick="openModal('${uid}', '${data.name || ""}', '${data.role || ""}', '${uid}')">Edit</button></td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    });
+  }
 
   window.onload = loadUsers;
 </script>
