@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel - Castle Comms</title>
+  <title>Admin - User Management</title>
   <link rel="stylesheet" href="style.css" />
   <style>
     body {
@@ -12,54 +13,86 @@
       background: #f9f9f9;
     }
     main {
-      max-width: 500px;
+      max-width: 800px;
       margin: 3rem auto;
       padding: 2rem;
       border: 1px solid #ddd;
       border-radius: 8px;
       background: white;
     }
-    h2 {
-      margin-bottom: 1rem;
-    }
-    input, button {
+    table {
       width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
       padding: 0.75rem;
-      margin: 0.5rem 0;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
     }
     button {
+      padding: 0.5rem 1rem;
       background-color: #333;
       color: white;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
     }
     button:hover {
       background-color: #555;
     }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      width: 400px;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <button id="menu-toggle" class="hamburger">&#9776;</button>
-  <h1>Castle Comms.</h1>
-</header>
-
-<div id="sidebar-container"></div>
-
 <main>
-  <h2>Create New User</h2>
-  <form id="admin-create-user">
-    <input type="email" id="new-user-email" placeholder="New user's email" required />
-    <input type="password" id="new-user-password" placeholder="New user's password" required />
-    <input type="text" id="new-user-name" placeholder="Full name" required />
-    <input type="text" id="new-user-role" placeholder="Role (e.g. Admin, Staff)" required />
-    <button type="submit">Create Account</button>
-  </form>
-
-  <p id="status" style="color: green;"></p>
+  <h2>User Management</h2>
+  <table id="user-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Email</th>
+        <th>Edit</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </main>
+
+<div class="modal" id="edit-modal">
+  <div class="modal-content">
+    <h3>Edit User</h3>
+    <input type="text" id="edit-name" placeholder="Full name" />
+    <input type="text" id="edit-role" placeholder="Role" />
+    <input type="password" id="edit-password" placeholder="New password (optional)" />
+    <button id="save-btn">Save</button>
+    <button onclick="closeModal()">Cancel</button>
+  </div>
+</div>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -69,76 +102,77 @@
 <!-- Firebase init -->
 <script src="firebase-init.js"></script>
 
-<!-- Auth protection and admin link display -->
 <script>
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (!user) {
-      window.location.href = "index.html"; // redirect to login
-    } else {
-      const adminLink = document.getElementById("admin-link");
-      if (user.email === "mdelaney@castlefineart.com" && adminLink) {
-        adminLink.style.display = "block";
-      }
-    }
-  });
-</script>
-
-<!-- Sidebar toggle script -->
-<script src="script.js"></script>
-
-<!-- Account creation logic -->
-<script>
-  const auth = firebase.auth();
   const db = firebase.database();
-  const form = document.getElementById("admin-create-user");
-  const status = document.getElementById("status");
+  const auth = firebase.auth();
+  const tableBody = document.querySelector("#user-table tbody");
+  const modal = document.getElementById("edit-modal");
+  const nameInput = document.getElementById("edit-name");
+  const roleInput = document.getElementById("edit-role");
+  const passwordInput = document.getElementById("edit-password");
+  const saveBtn = document.getElementById("save-btn");
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
+  let currentEditUid = null;
+  let currentEditEmail = null;
 
-    const email = document.getElementById("new-user-email").value;
-    const password = document.getElementById("new-user-password").value;
-    const name = document.getElementById("new-user-name").value;
-    const role = document.getElementById("new-user-role").value;
+  function openModal(uid, name, role, email) {
+    currentEditUid = uid;
+    currentEditEmail = email;
+    nameInput.value = name || "";
+    roleInput.value = role || "";
+    passwordInput.value = "";
+    modal.style.display = "flex";
+  }
 
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(userCredential => {
-        const user = userCredential.user;
+  function closeModal() {
+    modal.style.display = "none";
+  }
 
-        return user.updateProfile({ displayName: name }).then(() => {
-          return db.ref(`users/${user.uid}`).set({
-            name,
-            role,
-            email
-          });
-        }).then(() => {
-          status.textContent = `✅ User created: ${name} (${role})`;
-          status.style.color = "green";
-          form.reset();
-        });
-      })
-      .catch(error => {
-        status.textContent = `❌ ${error.message}`;
-        status.style.color = "red";
-      });
-  });
-</script>
+  saveBtn.addEventListener("click", () => {
+    const newName = nameInput.value.trim();
+    const newRole = roleInput.value.trim();
+    const newPassword = passwordInput.value.trim();
 
-<!-- Load sidebar -->
-<script>
-  fetch("sidebar.html")
-    .then(response => response.text())
-    .then(html => {
-      document.getElementById("sidebar-container").innerHTML = html;
+    if (!currentEditUid) return;
 
-      const user = firebase.auth().currentUser;
-      const adminLink = document.getElementById("admin-link");
-      if (user && user.email === "mdelaney@castlefineart.com" && adminLink) {
-        adminLink.style.display = "block";
-      }
-
-      if (typeof setupSidebarEvents === 'function') setupSidebarEvents();
+    db.ref("users/" + currentEditUid).update({
+      name: newName,
+      role: newRole
     });
+
+    if (newPassword && currentEditEmail) {
+      // Re-authenticate as admin to update password
+      auth.signInWithEmailAndPassword(firebase.auth().currentUser.email, prompt("Re-enter your password to update user password"))
+        .then(() => {
+          return firebase.auth().createUserWithEmailAndPassword(currentEditEmail, newPassword);
+        })
+        .catch(error => {
+          alert("Password update failed: " + error.message);
+        });
+    }
+
+    closeModal();
+  });
+
+  function loadUsers() {
+    db.ref("users").once("value").then(snapshot => {
+      tableBody.innerHTML = "";
+      snapshot.forEach(child => {
+        const uid = child.key;
+        const data = child.val();
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${data.name || ""}</td>
+          <td>${data.role || ""}</td>
+          <td>${data.email || ""}</td>
+          <td><button onclick="openModal('${uid}', '${data.name || ""}', '${data.role || ""}', '${data.email || ""}')">Edit</button></td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    });
+  }
+
+  window.onload = loadUsers;
 </script>
 
 </body>
