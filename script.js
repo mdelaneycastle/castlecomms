@@ -71,7 +71,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const postId = post.postId;
     const commentForm = div.querySelector(".comment-form");
     const commentInput = commentForm.querySelector("input");
-    const commentsDiv = div.querySelector(`#comments-${postId}`);
+    const commentsDiv = div.querySelector(".post-comments");
+
 
     // Listen for comments on this post only
     const commentsRef = db.ref(`posts/${postId}/comments`);
