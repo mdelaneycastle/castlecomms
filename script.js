@@ -12,7 +12,7 @@ function setupSidebarEvents() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const db = firebase.database();
+  const db = window.db;
   const postForm = document.getElementById("post-form");
   const feed = document.getElementById("feed");
 
@@ -88,10 +88,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const comment = commentInput.value.trim();
       if (!comment) return;
 
-      db.ref(`posts/${postId}/comments`).push({
-        text: comment,
-        timestamp: Date.now()
-      });
+      
+db.ref(`posts/${postId}/comments`).push({
+  text: comment,
+  timestamp: Date.now()
+}).catch(error => console.error("Comment error:", error));
+
 
       commentInput.value = "";
     });
@@ -110,7 +112,10 @@ document.addEventListener("DOMContentLoaded", function () {
         button.textContent = selectedReaction;
         picker.classList.add("hidden");
 
-        db.ref(`posts/${postId}`).update({ reaction: selectedReaction });
+        
+db.ref(`posts/${postId}`).update({ reaction: selectedReaction })
+  .catch(error => console.error("Reaction error:", error));
+
       });
     });
   }
