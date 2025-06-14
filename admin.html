@@ -13,12 +13,32 @@
       background: #f9f9f9;
     }
     main {
-      max-width: 800px;
+      max-width: 900px;
       margin: 3rem auto;
       padding: 2rem;
       border: 1px solid #ddd;
       border-radius: 8px;
       background: white;
+    }
+    h2 {
+      margin-bottom: 1rem;
+    }
+    form {
+      margin-bottom: 2rem;
+    }
+    input, button {
+      padding: 0.5rem;
+      margin: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #555;
     }
     table {
       width: 100%;
@@ -32,17 +52,6 @@
     }
     th {
       background-color: #f0f0f0;
-    }
-    button {
-      padding: 0.5rem 1rem;
-      background-color: #333;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #555;
     }
     .modal {
       display: none;
@@ -69,6 +78,15 @@
 <body>
 
 <main>
+  <h2>Create New User</h2>
+  <form id="create-user-form">
+    <input type="email" id="new-email" placeholder="Email" required />
+    <input type="password" id="new-password" placeholder="Password" required />
+    <input type="text" id="new-name" placeholder="Full Name" />
+    <input type="text" id="new-role" placeholder="Role" />
+    <button type="submit">Create User</button>
+  </form>
+
   <h2>User Management</h2>
   <table id="user-table">
     <thead>
@@ -94,12 +112,9 @@
   </div>
 </div>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-<!-- Firebase init -->
 <script src="firebase-init.js"></script>
 
 <script>
@@ -111,6 +126,7 @@
   const roleInput = document.getElementById("edit-role");
   const passwordInput = document.getElementById("edit-password");
   const saveBtn = document.getElementById("save-btn");
+  const createForm = document.getElementById("create-user-form");
 
   let currentEditUid = null;
   let currentEditEmail = null;
@@ -141,36 +157,55 @@
     });
 
     if (newPassword && currentEditEmail) {
-      // Re-authenticate as admin to update password
-      auth.signInWithEmailAndPassword(firebase.auth().currentUser.email, prompt("Re-enter your password to update user password"))
-        .then(() => {
-          return firebase.auth().createUserWithEmailAndPassword(currentEditEmail, newPassword);
-        })
-        .catch(error => {
-          alert("Password update failed: " + error.message);
-        });
+      alert("Password updates must be handled securely via Firebase Admin SDK or user re-authentication.");
     }
 
     closeModal();
   });
 
   function loadUsers() {
-    db.ref("users").once("value").then(snapshot => {
-      tableBody.innerHTML = "";
-      snapshot.forEach(child => {
-        const uid = child.key;
-        const data = child.val();
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${data.name || ""}</td>
-          <td>${data.role || ""}</td>
-          <td>${data.email || ""}</td>
-          <td><button onclick="openModal('${uid}', '${data.name || ""}', '${data.role || ""}', '${data.email || ""}')">Edit</button></td>
-        `;
-        tableBody.appendChild(tr);
+    tableBody.innerHTML = "";
+    auth.listUsers().then(result => {
+      result.users.forEach(userRecord => {
+        const uid = userRecord.uid;
+        const email = userRecord.email || "";
+        db.ref("users/" + uid).once("value").then(snapshot => {
+          const data = snapshot.val() || {};
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${data.name || ""}</td>
+            <td>${data.role || ""}</td>
+            <td>${email}</td>
+            <td><button onclick="openModal('${uid}', '${data.name || ""}', '${data.role || ""}', '${email}')">Edit</button></td>
+          `;
+          tableBody.appendChild(tr);
+        });
       });
+    }).catch(error => {
+      console.error("Error listing users:", error);
     });
   }
+
+  createForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const email = document.getElementById("new-email").value;
+    const password = document.getElementById("new-password").value;
+    const name = document.getElementById("new-name").value;
+    const role = document.getElementById("new-role").value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(userCredential => {
+        const uid = userCredential.user.uid;
+        return db.ref("users/" + uid).set({ name, role, email });
+      })
+      .then(() => {
+        createForm.reset();
+        loadUsers();
+      })
+      .catch(error => {
+        alert("Error creating user: " + error.message);
+      });
+  });
 
   window.onload = loadUsers;
 </script>
