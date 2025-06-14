@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", function () {
     closeButton.addEventListener("click", () => sidebar.classList.remove("show"));
   }
 
+  const db = firebase.database(); // ✅ This line was missing
+
   const postForm = document.getElementById("post-form");
   const feed = document.getElementById("feed");
 
