@@ -1,4 +1,4 @@
-export const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyDJvHNZB_pzhytD7yLa69auStrZBk2SEHk",
   authDomain: "castle-comms.firebaseapp.com",
   databaseURL: "https://castle-comms-default-rtdb.europe-west1.firebasedatabase.app",
@@ -8,3 +8,6 @@ export const firebaseConfig = {
   appId: "1:959264765744:web:7aee345a37673f720cfaf5",
   measurementId: "G-NLS757VMJ8"
 };
+
+firebase.initializeApp(firebaseConfig);
+window.db = firebase.database();
