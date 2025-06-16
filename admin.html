@@ -2,11 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
   <title>Admin – User Management</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; background: #f9f9f9; }
+    main { max-width: 900px; margin: 3rem auto; padding: 2rem; border: 1px solid #ddd; border-radius: 8px; background: white; }
+    input, button { padding: .5rem; margin: .25rem; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: #333; color: #fff; cursor: pointer; }
+    button:hover { background: #555; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: .75rem; border: 1px solid #ccc; text-align: left; }
+    th { background: #f0f0f0; }
+  </style>
 </head>
 <body>
+
 <main>
   <h2>User Management</h2>
   <table id="user-table">
@@ -17,15 +30,16 @@
   </table>
 </main>
 
-<!-- Firebase Compat SDKs -->
+<!-- 1) Compat SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+<!-- 2) Your existing init (make sure this runs firebase.initializeApp(...)) -->
 <script src="firebase-init.js"></script>
 
 <script>
+  // 3) Get auth + functions (pointing at europe-west1)
   const auth = firebase.auth();
-  // ← Explicitly target europe-west1 here
   const functions = firebase.app().functions("europe-west1");
   const listUsers = functions.httpsCallable("listUsers");
 
@@ -33,39 +47,40 @@
 
   auth.onAuthStateChanged(async (user) => {
     if (!user) {
-      alert("Please log in to view this page.");
-      return;
+      return alert("Please log in to view this page.");
     }
 
     try {
-      // 1) Force a token refresh so new custom claims take effect
+      // 4) Force-refresh token so custom claims (admin:true) appear:
       await user.getIdToken(true);
 
-      // 2) Inspect the claims you actually have
-      const tri = await user.getIdTokenResult();
-      console.log("Client token claims:", tri.claims);
-      // tri.claims should include { admin: true }
+      // Optional: see what claims you really have:
+      const { claims } = await user.getIdTokenResult();
+      console.log("Client claims:", claims);
+      // should log { admin: true, ... }
 
-      // 3) Call the function (always pass an object)
-      const result = await listUsers({});
-      const users = result.data.users;
+      // 5) Call your callable function (always pass an object)
+      const { data } = await listUsers({});
+      const users = data.users;
 
-      // 4) Render the table
+      // 6) Render the table
       tableBody.innerHTML = "";
       users.forEach(u => {
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${u.uid}</td>
-          <td>${u.email || "-"}</td>
-          <td>${u.displayName || "-"}</td>
+          <td>${u.email  || "-"}</td>
+          <td>${u.displayName  || "-"}</td>
         `;
         tableBody.appendChild(row);
       });
+
     } catch (err) {
       console.error("Error fetching users:", err.code, err.message);
-      alert("You do not have permission to view users.");
+      alert("❌ You do not have permission to view users.");
     }
   });
 </script>
+
 </body>
 </html>
