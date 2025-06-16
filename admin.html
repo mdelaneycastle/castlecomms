@@ -102,31 +102,35 @@
   const tableBody = document.querySelector("#user-table tbody");
 
   auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      alert("Please log in to view this page.");
-      return;
-    }
+  if (!user) {
+    alert("Please log in to view this page.");
+    return;
+  }
 
-    try {
-      const result = await listUsers();
-      const users = result.data.users;
+  try {
+    // 🔄 Force refresh token to get latest custom claims
+    await user.getIdToken(true);
 
-      tableBody.innerHTML = "";
+    const result = await listUsers();
+    const users = result.data.users;
 
-      users.forEach(u => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${u.uid}</td>
-          <td>${u.email || "-"}</td>
-          <td>${u.displayName || "-"}</td>
-        `;
-        tableBody.appendChild(row);
-      });
-    } catch (err) {
-      console.error("Error fetching users:", err.message);
-      alert("You do not have permission to view users.");
-    }
-  });
+    tableBody.innerHTML = "";
+
+    users.forEach(u => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${u.uid}</td>
+        <td>${u.email || "-"}</td>
+        <td>${u.displayName || "-"}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  } catch (err) {
+    console.error("Error fetching users:", err.message);
+    alert("You do not have permission to view users.");
+  }
+});
+
 </script>
 
 </body>
