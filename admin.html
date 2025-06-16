@@ -89,6 +89,8 @@ const listUsers = functions.httpsCallable("listUsers");
 
     try {
       await user.getIdToken(true); // force refresh to get updated claims
+      const tri = await user.getIdTokenResult();
+      console.log("After refresh, claims:", tri.claims);
       const result = await listUsers();
       const users = result.data.users;
 
