@@ -3,81 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin - User Management</title>
+  <title>Admin – User Management</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 2rem;
-      background: #f9f9f9;
-    }
-    main {
-      max-width: 900px;
-      margin: 3rem auto;
-      padding: 2rem;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      background: white;
-    }
-    input, button {
-      padding: 0.5rem;
-      margin: 0.25rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      background-color: #333;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #555;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-    th, td {
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      text-align: left;
-    }
-    th {
-      background-color: #f0f0f0;
-    }
-  </style>
 </head>
 <body>
-
 <main>
   <h2>User Management</h2>
   <table id="user-table">
     <thead>
-      <tr>
-        <th>UID</th>
-        <th>Email</th>
-        <th>Display Name</th>
-      </tr>
+      <tr><th>UID</th><th>Email</th><th>Display Name</th></tr>
     </thead>
     <tbody></tbody>
   </table>
 </main>
 
-<!-- Firebase Compat SDK -->
+<!-- Firebase Compat SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-init.js"></script>
 
 <script>
-  const app = firebase.app();
   const auth = firebase.auth();
+  // ← Explicitly target europe-west1 here
   const functions = firebase.app().functions("europe-west1");
-const listUsers = functions.httpsCallable("listUsers");
-
- 
+  const listUsers = functions.httpsCallable("listUsers");
 
   const tableBody = document.querySelector("#user-table tbody");
 
@@ -88,14 +38,20 @@ const listUsers = functions.httpsCallable("listUsers");
     }
 
     try {
-      await user.getIdToken(true); // force refresh to get updated claims
+      // 1) Force a token refresh so new custom claims take effect
+      await user.getIdToken(true);
+
+      // 2) Inspect the claims you actually have
       const tri = await user.getIdTokenResult();
-      console.log("After refresh, claims:", tri.claims);
-      const result = await listUsers();
+      console.log("Client token claims:", tri.claims);
+      // tri.claims should include { admin: true }
+
+      // 3) Call the function (always pass an object)
+      const result = await listUsers({});
       const users = result.data.users;
 
+      // 4) Render the table
       tableBody.innerHTML = "";
-
       users.forEach(u => {
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -106,11 +62,10 @@ const listUsers = functions.httpsCallable("listUsers");
         tableBody.appendChild(row);
       });
     } catch (err) {
-      console.error("Error fetching users:", err.message);
+      console.error("Error fetching users:", err.code, err.message);
       alert("You do not have permission to view users.");
     }
   });
 </script>
-
 </body>
 </html>
