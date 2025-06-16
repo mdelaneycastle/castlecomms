@@ -74,8 +74,9 @@
 <script>
   const app = firebase.app();
   const auth = firebase.auth();
-  const functions = firebase.app().functions("europe-west1");
+  const functions = firebase.functions();
   const listUsers = functions.httpsCallable("listUsers");
+ 
 
   const tableBody = document.querySelector("#user-table tbody");
 
