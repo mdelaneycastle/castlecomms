@@ -10,12 +10,9 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 2rem; background: #f9f9f9; }
     main { max-width: 900px; margin: 3rem auto; padding: 2rem; border: 1px solid #ddd; border-radius: 8px; background: white; }
-    input, button { padding: .5rem; margin: .25rem; border: 1px solid #ccc; border-radius: 4px; }
-    button { background: #333; color: #fff; cursor: pointer; }
-    button:hover { background: #555; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: .75rem; border: 1px solid #ccc; text-align: left; }
-    th { background: #f0f0f0; }
+    table { width: 100%; border-collapse: collapse; margin-top:1rem; }
+    th, td { padding:.75rem; border:1px solid #ccc; text-align:left; }
+    th { background:#f0f0f0; }
   </style>
 </head>
 <body>
@@ -34,12 +31,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
-<!-- 2) Your existing init (make sure this runs firebase.initializeApp(...)) -->
+<!-- 2) Your app init -->
 <script src="firebase-init.js"></script>
 
 <script>
-  // 3) Get auth + functions (pointing at europe-west1)
   const auth = firebase.auth();
+  // point the functions SDK at europe-west1
   const functions = firebase.app().functions("europe-west1");
   const listUsers = functions.httpsCallable("listUsers");
 
@@ -51,26 +48,26 @@
     }
 
     try {
-      // 4) Force-refresh token so custom claims (admin:true) appear:
+      // force a fresh token so custom claims (admin:true) appear
       await user.getIdToken(true);
 
-      // Optional: see what claims you really have:
+      // check your claims in the console
       const { claims } = await user.getIdTokenResult();
       console.log("Client claims:", claims);
-      // should log { admin: true, ... }
+      // should show { admin: true, ... }
 
-      // 5) Call your callable function (always pass an object)
+      // invoke the callable (always pass an object!)
       const { data } = await listUsers({});
       const users = data.users;
 
-      // 6) Render the table
+      // render the table
       tableBody.innerHTML = "";
       users.forEach(u => {
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${u.uid}</td>
-          <td>${u.email  || "-"}</td>
-          <td>${u.displayName  || "-"}</td>
+          <td>${u.email   || "-"}</td>
+          <td>${u.displayName   || "-"}</td>
         `;
         tableBody.appendChild(row);
       });
