@@ -95,9 +95,10 @@
 
 <script>
   const app = firebase.app();
-  const auth = firebase.auth();
-  const functions = firebase.app().functions("us-central1");
-  const listUsers = firebase.functions().httpsCallable("listUsers");
+const auth = firebase.auth();
+const functions = firebase.app().functions("us-central1");
+const listUsers = functions.httpsCallable("listUsers");
+
 
   const tableBody = document.querySelector("#user-table tbody");
 
