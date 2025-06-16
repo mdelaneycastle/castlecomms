@@ -1,4 +1,3 @@
-// firebase-init.js
 export const firebaseConfig = {
   apiKey: "AIzaSyDJvHNZB_pzhytD7yLa69auStrZBk2SEHk",
   authDomain: "castle-comms.firebaseapp.com",
@@ -9,7 +8,3 @@ export const firebaseConfig = {
   appId: "1:959264765744:web:7aee345a37673f720cfaf5",
   measurementId: "G-NLS757VMJ8"
 };
-
-
-
-window.db = firebase.database();  // <-- Make db globally accessible
