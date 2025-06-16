@@ -1,3 +1,18 @@
+async function listUsers() {
+  const auth = firebase.auth();
+
+  // 1) force-refresh so the admin:true claim is in the token
+  await auth.currentUser.getIdToken(true);
+
+  // 2) get the Functions instance in europe-west1
+  const functions = firebase.app().functions("europe-west1");
+  const fn = functions.httpsCallable("listUsers");
+
+  // 3) call it with an empty object (must POST)
+  const res = await fn({});
+  return res.data.users;    // array of { uid, email, displayName }
+}
+
 function setupSidebarEvents() {
   const toggleBtn = document.getElementById("menu-toggle");
   const closeBtn = document.getElementById("close-btn");
@@ -124,6 +139,18 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   }
+
+  firebase.auth().onAuthStateChanged(async user => {
+  if (!user) return window.location.href = "index.html";
+
+  try {
+    const users = await listUsers();
+    // render your table with `users`
+  } catch (e) {
+    console.error(e);
+    alert("❌ You do not have permission to view users.");
+  }
+});
 
   function listenForPosts() {
     const postsRef = db.ref("posts");
