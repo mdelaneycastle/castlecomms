@@ -64,30 +64,28 @@
   </table>
 </main>
 
-<!-- Modular Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
-  import { firebaseConfig } from "./firebase-init.js";
+<!-- Firebase Compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+<script src="firebase-init.js"></script>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const functions = getFunctions(app, "europe-west1");
-  const listUsers = httpsCallable(functions, "listUsers");
+<script>
+  const app = firebase.app();
+  const auth = firebase.auth();
+  const functions = firebase.functions("europe-west1");
+  const listUsers = functions.httpsCallable("listUsers");
 
   const tableBody = document.querySelector("#user-table tbody");
 
-  onAuthStateChanged(auth, async (user) => {
+  auth.onAuthStateChanged(async (user) => {
     if (!user) {
       alert("Please log in to view this page.");
       return;
     }
 
     try {
-      // 🔄 Refresh token to ensure custom claims are up-to-date
-      await user.getIdToken(true);
-
+      await user.getIdToken(true); // force refresh to get updated claims
       const result = await listUsers();
       const users = result.data.users;
 
