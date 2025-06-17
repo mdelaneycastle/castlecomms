@@ -1,16 +1,11 @@
 // ─── helper to call your Callable function ───
 async function listUsers() {
-  const auth = firebase.auth();
-  // force a refresh so your admin:true claim is in the token
-  await auth.currentUser.getIdToken(true);
-
-  // grab the Functions instance in europe-west1
-  const functions = firebase.app().functions("europe-west1");
-  const fn = functions.httpsCallable("listUsers");
-
-  // call it (empty object => POST)
-  const res = await fn({});
-  return res.data.users; // array of { uid, email, displayName }
+  await firebase.auth().currentUser.getIdToken(true);                // bake in admin:true
+  const fn = firebase.app()
+                    .functions("europe-west1")
+                    .httpsCallable("listUsers");                     // region-aware
+  const res = await fn({});                                          // empty object → POST
+  return res.data.users;                                             // your array
 }
 
 
