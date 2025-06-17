@@ -1,3 +1,4 @@
+console.log("🔌 script.js initialized");
 // ─── 1) HTTP helper for listUsersHttp ───
 async function listUsers() {
   const user = firebase.auth().currentUser;
