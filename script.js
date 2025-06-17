@@ -18,6 +18,28 @@ async function listUsers() {
     }
   );
 
+  // ─── helper for createUserHttp ───
+async function createUser({ email, password, displayName, admin: wantAdmin }) {
+  const user  = firebase.auth().currentUser;
+  if (!user) throw new Error("Not signed in");
+  const token = await user.getIdToken(true);
+
+  const res = await fetch(
+    "https://europe-west1-castle-comms.cloudfunctions.net/createUserHttp",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":  "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ email, password, displayName, admin: wantAdmin })
+    }
+  );
+  const payload = await res.json();
+  if (!res.ok) throw new Error(payload.error || res.statusText);
+  return payload;  // { uid, email, displayName, admin }
+}
+
   // 3) parse JSON
   const payload = await res.json();
 
@@ -173,5 +195,34 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("❌ You do not have permission to view users.");
       }
     });
+    const createForm = document.getElementById("create-user-form");
+if (createForm) {
+  createForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const email       = document.getElementById("new-email").value.trim();
+    const password    = document.getElementById("new-password").value;
+    const displayName = document.getElementById("new-displayName").value.trim();
+    const wantAdmin   = document.getElementById("new-admin").checked;
+
+    try {
+      const newUser = await createUser({ email, password, displayName, admin: wantAdmin });
+      alert(`✅ Created user ${newUser.uid}`);
+      createForm.reset();
+
+      // Refresh the table
+      const tbody = document.querySelector("#user-table tbody");
+      tbody.innerHTML = "";
+      const users = await listUsers();  // your existing helper
+      users.forEach(u => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${u.uid}</td><td>${u.email||'-'}</td><td>${u.displayName||'-'}</td>`;
+        tbody.appendChild(row);
+      });
+    } catch (err) {
+      console.error("Create user failed:", err);
+      alert("❌ " + err.message);
+    }
+  });
+}
   }
 });
