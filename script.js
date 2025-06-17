@@ -1,11 +1,11 @@
 console.log("🔌 script.js initialized");
 
+// ─── createUser helper ───
 async function createUser({ email, password, displayName, admin: wantAdmin }) {
   const user  = firebase.auth().currentUser;
   if (!user) throw new Error("Not signed in");
   const token = await user.getIdToken(true);
-
-  const res = await fetch(
+  const res   = await fetch(
     "https://europe-west1-castle-comms.cloudfunctions.net/createUserHttp",
     {
       method: "POST",
@@ -18,62 +18,30 @@ async function createUser({ email, password, displayName, admin: wantAdmin }) {
   );
   const payload = await res.json();
   if (!res.ok) throw new Error(payload.error || res.statusText);
-  return payload;  // { uid, email, displayName, admin }
+  return payload;
 }
 
-// ─── 1) HTTP helper for listUsersHttp ───
+// ─── listUsers helper ───
 async function listUsers() {
   const user = firebase.auth().currentUser;
   if (!user) throw new Error("Not signed in");
-
-  // 1) make sure admin:true is in the token
-  const idToken = await user.getIdToken(true);
-
-  // 2) POST to your new onRequest function
+  await user.getIdToken(true);
   const res = await fetch(
     "https://europe-west1-castle-comms.cloudfunctions.net/listUsersHttp",
     {
       method: "POST",
       headers: {
         "Content-Type":  "application/json",
-        "Authorization": `Bearer ${idToken}`,
+        "Authorization": `Bearer ${await user.getIdToken(true)}`
       }
-    }
-  );
-
-  // ─── helper for createUserHttp ───
-async function createUser({ email, password, displayName, admin: wantAdmin }) {
-  const user  = firebase.auth().currentUser;
-  if (!user) throw new Error("Not signed in");
-  const token = await user.getIdToken(true);
-
-  const res = await fetch(
-    "https://europe-west1-castle-comms.cloudfunctions.net/createUserHttp",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":  "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ email, password, displayName, admin: wantAdmin })
     }
   );
   const payload = await res.json();
   if (!res.ok) throw new Error(payload.error || res.statusText);
-  return payload;  // { uid, email, displayName, admin }
-}
-
-  // 3) parse JSON
-  const payload = await res.json();
-
-  // 4) error handling
-  if (!res.ok) {
-    throw new Error(payload.error || res.statusText);
-  }
-
-  // 5) return the users array
   return payload.users;
 }
+
+// ─── sidebar + DOMContentLoaded + form wiring … (rest unchanged) …
 
 
 // ─── 2) Sidebar toggle logic ───
