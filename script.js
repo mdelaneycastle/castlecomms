@@ -17,7 +17,6 @@ async function createUser({ email, password, displayName, admin: wantAdmin }) {
       body: JSON.stringify({ email, password, displayName, admin: wantAdmin })
     }
   );
-
   const payload = await res.json();
   if (!res.ok) throw new Error(payload.error || res.statusText);
   return payload;
@@ -39,7 +38,6 @@ async function listUsers() {
       },
     }
   );
-
   const payload = await res.json();
   if (!res.ok) throw new Error(payload.error || res.statusText);
   return payload.users;
@@ -58,16 +56,17 @@ function setupSidebarEvents() {
 document.addEventListener("DOMContentLoaded", () => {
   setupSidebarEvents();
 
-  document.addEventListener("DOMContentLoaded", () => {
-  setupSidebarEvents();
+  // ─── Auth‐redirect (common to all pages) ───
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) return window.location.href = "index.html";
+  });
 
-  // ——— A) Feed & posting logic ———
+  // ─── A) Newsfeed logic ───
   const db       = window.db;
   const postForm = document.getElementById("post-form");
   const feed     = document.getElementById("feed");
-
   if (db && postForm && feed) {
-    // 1) Post submission
+    // Submit new posts
     postForm.addEventListener("submit", e => {
       e.preventDefault();
       const user = firebase.auth().currentUser;
@@ -90,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // 2) Display one post
+    // Render a single post
     function displayPost(post) {
       const initials = post.name
         .split(" ").map(w => w[0]).join("")
@@ -112,7 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="post-footer">
           <button class="react-btn">${post.reaction||"➕ React"}</button>
           <div class="emoji-picker hidden">
-            <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
+            <span>👏</span><span>❤️</span><span>💡</span>
+            <span>👍</span><span>🤔</span>
           </div>
         </div>
         <div class="post-comments"></div>
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // 3) Listen for new posts
+    // Stream posts
     db.ref("posts").on("child_added", snap => {
       const post = snap.val();
       post.postId = post.postId || snap.key;
@@ -167,27 +167,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ——— B) Admin page logic ———
-  // … your existing admin code …
-});
-
-  // — Admin page logic —
+  // ─── B) Admin logic ───
   const tbody = document.querySelector("#user-table tbody");
   if (tbody) {
     firebase.auth().onAuthStateChanged(async user => {
       if (!user) return window.location.href = "index.html";
 
-      // Populate existing users
+      // List users
       try {
         const users = await listUsers();
         tbody.innerHTML = "";
         users.forEach(u => {
           const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${u.uid}</td>
-            <td>${u.email||"-"}</td>
-            <td>${u.displayName||"-"}</td>
-          `;
+          row.innerHTML = `<td>${u.uid}</td><td>${u.email||"-"}</td><td>${u.displayName||"-"}</td>`;
           tbody.appendChild(row);
         });
       } catch (e) {
@@ -195,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("❌ You do not have permission to view users.");
       }
 
-      // Wire up "Create User" form
+      // Create‐user form
       const form = document.getElementById("create-user-form");
       if (form) {
         form.addEventListener("submit", async e => {
@@ -204,16 +196,13 @@ document.addEventListener("DOMContentLoaded", () => {
           const password    = document.getElementById("new-password").value;
           const displayName = document.getElementById("new-displayName").value.trim();
           const wantAdmin   = document.getElementById("new-admin").checked;
-
           try {
             const newUser = await createUser({ email, password, displayName, admin: wantAdmin });
             alert(`✅ Created user ${newUser.uid}`);
             form.reset();
-
-            // Refresh the list
+            // Refresh list
             tbody.innerHTML = "";
-            const users = await listUsers();
-            users.forEach(u => {
+            (await listUsers()).forEach(u => {
               const row = document.createElement("tr");
               row.innerHTML = `<td>${u.uid}</td><td>${u.email||"-"}</td><td>${u.displayName||"-"}</td>`;
               tbody.appendChild(row);
