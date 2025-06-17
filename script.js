@@ -1,17 +1,33 @@
-// ─── 1) Callable‐SDK helper ───
+// ─── 1) HTTP helper for listUsersHttp ───
 async function listUsers() {
   const user = firebase.auth().currentUser;
   if (!user) throw new Error("Not signed in");
 
-  // force-refresh so admin:true is in the token
-  await user.getIdToken(true);
+  // 1) make sure admin:true is in the token
+  const idToken = await user.getIdToken(true);
 
-  // httpsCallable does the onCall handshake and sends your ID token
-  const fn  = firebase.app()
-                     .functions("europe-west1")
-                     .httpsCallable("listUsers");
-  const res = await fn({});       // empty object => POST
-  return res.data.users;          // array of { uid, email, displayName }
+  // 2) POST to your new onRequest function
+  const res = await fetch(
+    "https://europe-west1-castle-comms.cloudfunctions.net/listUsersHttp",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":  "application/json",
+        "Authorization": `Bearer ${idToken}`,
+      }
+    }
+  );
+
+  // 3) parse JSON
+  const payload = await res.json();
+
+  // 4) error handling
+  if (!res.ok) {
+    throw new Error(payload.error || res.statusText);
+  }
+
+  // 5) return the users array
+  return payload.users;
 }
 
 
@@ -30,11 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSidebarEvents();
 
   // ——— A) Feed & posting logic ———
-  const db       = window.db;                   
+  const db       = window.db;
   const postForm = document.getElementById("post-form");
   const feed     = document.getElementById("feed");
 
   if (db && postForm && feed) {
+    // Submit a new post
     postForm.addEventListener("submit", e => {
       e.preventDefault();
       const user = firebase.auth().currentUser;
@@ -45,18 +62,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const msg  = document.getElementById("message").value.trim();
         if (!msg) return;
         const ref = db.ref("posts").push();
-        ref.set({ 
-          postId: ref.key, name, role, message: msg, 
-          timestamp: Date.now(), reaction: null 
+        ref.set({
+          postId:      ref.key,
+          name,
+          role,
+          message:     msg,
+          timestamp:   Date.now(),
+          reaction:    null
         });
         postForm.reset();
       });
     });
 
+    // Render one post
     function displayPost(post) {
       const initials = post.name
-        .split(" ").map(w=>w[0]).join("")
+        .split(" ").map(w => w[0]).join("")
         .toUpperCase().slice(0,2);
+
       const div = document.createElement("div");
       div.className  = "post";
       div.dataset.id = post.postId;
@@ -71,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div class="post-message">${post.message}</div>
         <div class="post-footer">
-          <button class="react-btn">${post.reaction||"➕ React"}</button>
+          <button class="react-btn">${post.reaction || "➕ React"}</button>
           <div class="emoji-picker hidden">
             <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
           </div>
@@ -84,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       feed.prepend(div);
 
+      // Listen for comments
       const commentsDiv = div.querySelector(".post-comments");
       db.ref(`posts/${post.postId}/comments`)
         .on("child_added", snap => {
@@ -93,6 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
           commentsDiv.appendChild(p);
         });
 
+      // Comment form
       div.querySelector(".comment-form")
         .addEventListener("submit", e => {
           e.preventDefault();
@@ -103,6 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
           div.querySelector("input").value = "";
         });
 
+      // Reaction picker
       const btn    = div.querySelector(".react-btn");
       const picker = div.querySelector(".emoji-picker");
       btn.addEventListener("click", () => picker.classList.toggle("hidden"));
@@ -117,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    // Stream posts
     db.ref("posts").on("child_added", snap => {
       const post = snap.val();
       post.postId = post.postId || snap.key;
