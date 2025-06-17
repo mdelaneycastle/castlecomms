@@ -8,66 +8,42 @@
 </head>
 <body>
   
-<header>
-  <button id="menu-toggle" class="hamburger">&#9776;</button>
-  <h1>Castle Comms</h1>
-</header>
+  <header>
+    <button id="menu-toggle" class="hamburger">&#9776;</button>
+    <h1>Castle Comms</h1>
+  </header>
 
-<div id="sidebar-container"></div>
+  <div id="sidebar-container"></div>
 
-<main id="main">
-  <h2>Newsfeed.</h2>
+  <main id="main">
+    <h2>Newsfeed</h2>
+    <form id="post-form">
+      <textarea id="message" placeholder="Write a post..." required></textarea>
+      <button type="submit">Post</button>
+    </form>
+    <div id="feed"></div>
+  </main>
 
-  <form id="post-form">
-    
-    <textarea id="message" placeholder="Write a post..." required></textarea>
-    <button type="submit">Post</button>
-  </form>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-  <div id="feed"></div>
-</main>
+  <!-- Your init (sets window.db when DB SDK is loaded) -->
+  <script src="firebase-init.js"></script>
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="firebase-init.js"></script>
-<script src="script.js"></script>
+  <!-- Your entire unified logic: sidebar + auth-redirect + feed + admin if needed -->
+  <script src="script.js"></script>
 
-<!-- Firebase init -->
-
-
-<!-- Redirect to login if not logged in -->
-<script>
-  firebase.auth().onAuthStateChanged(function(user) {
-  if (!user) {
-    window.location.href = "index.html"; // redirect to login
-  } else {
-    // Show admin link only for your account
-    if (user.email === "mdelaney@castlefineart.com") {
-      document.getElementById("admin-link").style.display = "block";
-    }
-  }
-});
-</script>
-
-<!-- Newsfeed script -->
-<script src="script.js"></script>
+  <!-- Load the sidebar HTML and wire up the menu toggle -->
   <script>
-  fetch("sidebar.html")
-    .then(response => response.text())
-    .then(html => {
-      document.getElementById("sidebar-container").innerHTML = html;
-
-      // After sidebar loads, you can initialize any JS that depends on it:
-      const user = firebase.auth().currentUser;
-      if (user && user.email === "mdelaney@castlefineart.com") {
-        document.getElementById("admin-link").style.display = "block";
-      }
-
-      // Ensure hamburger menu works after loading
-      if (typeof setupSidebarEvents === 'function') setupSidebarEvents();
-    });
-</script>
+    fetch("sidebar.html")
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById("sidebar-container").innerHTML = html;
+        setupSidebarEvents();
+      })
+      .catch(console.error);
+  </script>
 </body>
 </html>
