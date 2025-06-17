@@ -242,10 +242,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const users = await listUsers();
         tbody.innerHTML = "";
         users.forEach(u => {
-          const row = document.createElement("tr");
-          row.innerHTML = `<td>${u.uid}</td><td>${u.email||"-"}</td><td>${u.displayName||"-"}</td>`;
-          tbody.appendChild(row);
-        });
+  const row = document.createElement("tr");
+  row.innerHTML = `<td>${u.uid}</td><td>${u.email || "-"}</td><td>${u.displayName || "-"}</td>`;
+  addEditButtonToRow(row, u);
+  tbody.appendChild(row);
+});
       } catch (e) {
         console.error(e);
         alert("❌ You do not have permission to view users.");
