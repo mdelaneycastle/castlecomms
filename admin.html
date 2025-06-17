@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin – User Management</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 2rem; background: #f9f9f9; }
-    main { max-width: 900px; margin: 3rem auto; padding: 2rem;
-           border: 1px solid #ddd; border-radius: 8px; background: white; }
+    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 2rem; }
+    main { background: #fff; border: 1px solid #ddd; border-radius: 8px;
+           margin: 3rem auto; max-width: 900px; padding: 2rem; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: .75rem; border: 1px solid #ccc; text-align: left; }
+    th, td { border: 1px solid #ccc; padding: .75rem; text-align: left; }
     th { background: #f0f0f0; }
   </style>
 </head>
@@ -25,13 +25,13 @@
   </table>
 </main>
 
-<!-- 1) Firebase compat SDKs -->
+<!-- 1) Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
-<!-- 2) Your existing init file -->
+<!-- 2) Your init -->
 <script src="firebase-init.js"></script>
-<!-- 3) Your unified logic, including the Callable helper -->
+<!-- 3) Single, unified logic -->
 <script src="script.js"></script>
 
 </body>
