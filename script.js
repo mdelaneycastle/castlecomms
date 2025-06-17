@@ -43,6 +43,48 @@ async function listUsers() {
   return payload.users;
 }
 
+// Extend your admin.html page to include an "Edit" button in the table
+// and a hidden form to update display name or password
+
+// Update script.js to include the following:
+
+function addEditButtonToRow(row, user) {
+  const btn = document.createElement("button");
+  btn.textContent = "Edit";
+  btn.onclick = () => {
+    const newDisplayName = prompt("Enter new display name:", user.displayName || "");
+    const newPassword = prompt("Enter new password (leave blank to skip):", "");
+    if (newDisplayName !== null || newPassword !== "") {
+      updateUser(user.uid, newDisplayName, newPassword);
+    }
+  };
+  const td = document.createElement("td");
+  td.appendChild(btn);
+  row.appendChild(td);
+}
+
+async function updateUser(uid, displayName, password) {
+  const currentUser = firebase.auth().currentUser;
+  const token = await currentUser.getIdToken(true);
+
+  const res = await fetch("https://europe-west1-castle-comms.cloudfunctions.net/updateUserHttp", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({ uid, displayName, password })
+  });
+
+  const payload = await res.json();
+  if (!res.ok) {
+    alert("❌ " + (payload.error || res.statusText));
+    return;
+  }
+  alert("✅ User updated");
+  location.reload();
+}
+
 // ─── Sidebar toggle logic ───
 function setupSidebarEvents() {
   const toggleBtn = document.getElementById("menu-toggle");
