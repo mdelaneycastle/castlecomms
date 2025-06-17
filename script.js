@@ -1,4 +1,26 @@
 console.log("🔌 script.js initialized");
+
+async function createUser({ email, password, displayName, admin: wantAdmin }) {
+  const user  = firebase.auth().currentUser;
+  if (!user) throw new Error("Not signed in");
+  const token = await user.getIdToken(true);
+
+  const res = await fetch(
+    "https://europe-west1-castle-comms.cloudfunctions.net/createUserHttp",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":  "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ email, password, displayName, admin: wantAdmin })
+    }
+  );
+  const payload = await res.json();
+  if (!res.ok) throw new Error(payload.error || res.statusText);
+  return payload;  // { uid, email, displayName, admin }
+}
+
 // ─── 1) HTTP helper for listUsersHttp ───
 async function listUsers() {
   const user = firebase.auth().currentUser;
