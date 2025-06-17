@@ -106,16 +106,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const isAdmin = !!token.claims.admin;
 
   if (isAdmin) {
-    const nav = document.querySelector("#sidebar ul");
+    const nav = document.querySelector("#sidebar nav");
     if (nav && !document.querySelector("#admin-link")) {
-  const li = document.createElement("li");
-  li.id = "admin-link";
-  const link = document.createElement("a");
-  link.href = "admin.html";
-  link.textContent = "⚙️ Admin";
-  li.appendChild(link);
-  nav.appendChild(li);
-}
+      const link = document.createElement("a");
+      link.href = "admin.html";
+      link.textContent = "Admin";
+      link.id = "admin-link";
+      nav.appendChild(link);
+    }
   }
 });
 
