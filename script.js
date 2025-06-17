@@ -99,9 +99,23 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSidebarEvents();
 
   // ─── Auth-redirect (common) ───
-  firebase.auth().onAuthStateChanged(user => {
-    if (!user) return window.location.href = "index.html";
-  });
+  firebase.auth().onAuthStateChanged(async user => {
+  if (!user) return window.location.href = "index.html";
+
+  const token = await user.getIdTokenResult();
+  const isAdmin = !!token.claims.admin;
+
+  if (isAdmin) {
+    const nav = document.querySelector("#sidebar nav");
+    if (nav && !document.querySelector("#admin-link")) {
+      const link = document.createElement("a");
+      link.href = "admin.html";
+      link.textContent = "Admin";
+      link.id = "admin-link";
+      nav.appendChild(link);
+    }
+  }
+});
 
   // ─── A) Newsfeed logic ───
   const db       = window.db;
