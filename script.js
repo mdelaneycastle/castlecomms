@@ -1,72 +1,62 @@
+// ─── helper to call your Callable function ───
 async function listUsers() {
   const auth = firebase.auth();
-
-  // 1) force-refresh so the admin:true claim is in the token
+  // force a refresh so your admin:true claim is in the token
   await auth.currentUser.getIdToken(true);
 
-  // 2) get the Functions instance in europe-west1
+  // grab the Functions instance in europe-west1
   const functions = firebase.app().functions("europe-west1");
   const fn = functions.httpsCallable("listUsers");
 
-  // 3) call it with an empty object (must POST)
+  // call it (empty object => POST)
   const res = await fn({});
-  return res.data.users;    // array of { uid, email, displayName }
+  return res.data.users; // array of { uid, email, displayName }
 }
 
+
+// ─── sidebar toggle logic ───
 function setupSidebarEvents() {
   const toggleBtn = document.getElementById("menu-toggle");
-  const closeBtn = document.getElementById("close-btn");
-  const sidebar = document.getElementById("sidebar");
+  const closeBtn  = document.getElementById("close-btn");
+  const sidebar   = document.getElementById("sidebar");
 
-  if (toggleBtn && sidebar) {
-    toggleBtn.onclick = () => sidebar.classList.add("show");
-  }
-  if (closeBtn && sidebar) {
-    closeBtn.onclick = () => sidebar.classList.remove("show");
-  }
+  if (toggleBtn && sidebar) toggleBtn.onclick = () => sidebar.classList.add("show");
+  if (closeBtn  && sidebar) closeBtn.onclick  = () => sidebar.classList.remove("show");
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  const db = window.db;
-  const postForm = document.getElementById("post-form");
-  const feed = document.getElementById("feed");
 
+// ─── when the DOM is ready ───
+document.addEventListener("DOMContentLoaded", () => {
+  setupSidebarEvents();
+
+  const db       = window.db;
+  const postForm = document.getElementById("post-form");
+  const feed     = document.getElementById("feed");
+
+  // ─── post submission ───
   function submitPost(name, role, message) {
     const postRef = db.ref("posts").push();
-    const postId = postRef.key;
+    const postId  = postRef.key;
+    if (!postId) return console.error("Failed to generate post ID");
 
-    if (!postId) {
-      console.error("Failed to generate post ID");
-      return;
-    }
-
-    const post = {
-      postId,
-      name,
-      role,
-      message,
+    postRef.set({
+      postId, name, role, message,
       timestamp: Date.now(),
       reaction: null
-    };
-
-    postRef.set(post).catch(error => console.error("Post save error:", error));
+    }).catch(err => console.error("Post save error:", err));
   }
 
+  // ─── render a single post ───
   function displayPost(post) {
-    const postId = post.postId || "undefined";
-
+    const postId   = post.postId || "undefined";
     const initials = post.name
-      .split(" ")
-      .map(word => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+      .split(" ").map(w => w[0]).join("")
+      .toUpperCase().slice(0,2);
 
     const div = document.createElement("div");
-    div.className = "post";
-    div.dataset.id = postId;
-
-    div.innerHTML = `
+    div.className   = "post";
+    div.dataset.id  = postId;
+    div.innerHTML   = `
       <div class="post-header">
         <div class="post-avatar">${initials}</div>
         <div class="post-info">
@@ -79,9 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="post-footer">
         <div>
           <button class="react-btn">${post.reaction || "➕ React"}</button>
-          <div class="emoji-picker hidden">
-            <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
-          </div>
+          <div class="emoji-picker hidden"><span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span></div>
         </div>
       </div>
       <div class="post-comments"></div>
@@ -90,98 +78,92 @@ document.addEventListener("DOMContentLoaded", function () {
         <button type="submit">Reply</button>
       </form>
     `;
-
     feed.prepend(div);
 
-    const commentForm = div.querySelector(".comment-form");
-    const commentInput = commentForm.querySelector("input");
+    // comments listener
     const commentsDiv = div.querySelector(".post-comments");
-
-    // Listen for comments on this post only
-    const commentsRef = db.ref(`posts/${postId}/comments`);
-    commentsRef.on("child_added", snapshot => {
-      const data = snapshot.val();
+    db.ref(`posts/${postId}/comments`).on("child_added", snap => {
+      const d = snap.val();
       const p = document.createElement("p");
-      p.textContent = `${new Date(data.timestamp).toLocaleTimeString()}: ${data.text}`;
+      p.textContent = `${new Date(d.timestamp).toLocaleTimeString()}: ${d.text}`;
       commentsDiv.appendChild(p);
     });
 
-    // Add new comment
-    commentForm.addEventListener("submit", e => {
+    // comment form handler
+    div.querySelector(".comment-form").addEventListener("submit", e => {
       e.preventDefault();
-      const comment = commentInput.value.trim();
-      if (!comment) return;
-
+      const text = div.querySelector(".comment-form input").value.trim();
+      if (!text) return;
       db.ref(`posts/${postId}/comments`).push({
-        text: comment,
+        text,
         timestamp: Date.now()
-      }).catch(error => console.error("Comment error:", error));
-
-      commentInput.value = "";
+      }).catch(err => console.error("Comment error:", err));
+      div.querySelector(".comment-form input").value = "";
     });
 
-    setupReactions(div.querySelector(".react-btn"), div.querySelector(".emoji-picker"), postId);
-  }
-
-  function setupReactions(button, picker, postId) {
-    button.addEventListener("click", () => {
-      picker.classList.toggle("hidden");
-    });
-
+    // reactions UI
+    const btn    = div.querySelector(".react-btn");
+    const picker = div.querySelector(".emoji-picker");
+    btn.addEventListener("click", () => picker.classList.toggle("hidden"));
     picker.querySelectorAll("span").forEach(span => {
       span.addEventListener("click", () => {
-        const selectedReaction = span.textContent;
-        button.textContent = selectedReaction;
+        const r = span.textContent;
+        btn.textContent = r;
         picker.classList.add("hidden");
-
-        db.ref(`posts/${postId}`).update({ reaction: selectedReaction })
-          .catch(error => console.error("Reaction error:", error));
+        db.ref(`posts/${postId}`).update({ reaction: r })
+          .catch(err => console.error("Reaction error:", err));
       });
     });
   }
 
-  firebase.auth().onAuthStateChanged(async user => {
-  if (!user) return window.location.href = "index.html";
-
-  try {
-    const users = await listUsers();
-    // render your table with `users`
-  } catch (e) {
-    console.error(e);
-    alert("❌ You do not have permission to view users.");
-  }
-});
-
+  // ─── listen for new posts ───
   function listenForPosts() {
-    const postsRef = db.ref("posts");
-    postsRef.on("child_added", snapshot => {
-      const post = snapshot.val();
-      post.postId = post.postId || snapshot.key; // fallback if missing
+    db.ref("posts").on("child_added", snap => {
+      const post = snap.val();
+      post.postId = post.postId || snap.key;
       displayPost(post);
     });
   }
 
+  // ─── wire up post form ───
   if (postForm) {
     postForm.addEventListener("submit", e => {
       e.preventDefault();
       const user = firebase.auth().currentUser;
-      const uid = user.uid;
-
-      db.ref(`users/${uid}`).once("value").then(snapshot => {
-        const userData = snapshot.val();
-        const name = userData?.name || user.displayName || user.email || "Anonymous";
-        const role = userData?.role || "User";
-
+      db.ref(`users/${user.uid}`).once("value").then(snap => {
+        const data = snap.val() || {};
+        const name = data.name || user.displayName || user.email || "Anonymous";
+        const role = data.role || "User";
         const message = document.getElementById("message").value.trim();
-        if (!name || !message) return;
-
-        submitPost(name, role, message);
+        if (message) submitPost(name, role, message);
         postForm.reset();
-      }).catch(error => {
-        console.error("Failed to fetch user data:", error);
-      });
+      }).catch(err => console.error("Failed to fetch user data:", err));
     });
-
     listenForPosts();
+  }
+
+  // ─── ADMIN‐PAGE LOGIC ───
+  const tbody = document.querySelector("#user-table tbody");
+  if (tbody) {
+    // only on admin.html
+    firebase.auth().onAuthStateChanged(async user => {
+      if (!user) return window.location.href = "index.html";
+      try {
+        const users = await listUsers();
+        tbody.innerHTML = "";
+        users.forEach(u => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${u.uid}</td>
+            <td>${u.email       || "-"}</td>
+            <td>${u.displayName || "-"}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (e) {
+        console.error(e);
+        alert("❌ You do not have permission to view users.");
+      }
+    });
   }
 });
