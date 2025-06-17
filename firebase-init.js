@@ -10,9 +10,16 @@ const firebaseConfig = {
   measurementId: "G-NLS757VMJ8"
 };
 
+// Initialize the core Firebase SDK
 firebase.initializeApp(firebaseConfig);
 
-// If you absolutely need Realtime Database elsewhere, 
-// you can load the compat SDK and call firebase.database(), 
-// but for this admin page it’s not needed.
-window.db = firebase.database();
+// Try to wire up Realtime Database, but don't blow up if it's not loaded
+try {
+  if (typeof firebase.database === "function") {
+    window.db = firebase.database();
+  } else {
+    console.log("⛔️ Skipping DB init: firebase.database() not available");
+  }
+} catch (e) {
+  console.warn("⛔️ Realtime DB SDK missing — skipping window.db:", e);
+}
