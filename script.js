@@ -105,16 +105,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const token = await user.getIdTokenResult();
   const isAdmin = !!token.claims.admin;
 
-  if (isAdmin) {
-    const nav = document.querySelector("#sidebar nav");
-    if (nav && !document.querySelector("#admin-link")) {
-      const link = document.createElement("a");
-      link.href = "admin.html";
-      link.textContent = "Admin";
-      link.id = "admin-link";
-      nav.appendChild(link);
+  const adminLink = document.getElementById("admin-link");
+
+    if (isAdmin) {
+      // If the user is an admin, show the link
+      if (adminLink) {
+        adminLink.style.display = "list-item"; // or 'block' depending on your desired layout
+      }
+    } else {
+      // If the user is not an admin, ensure the link is hidden
+      if (adminLink) {
+        adminLink.style.display = "none";
+      }
     }
-  }
 });
 
   // ─── A) Newsfeed logic ───
@@ -296,30 +299,4 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// ─── Inject Admin link if user is admin ───
-firebase.auth().onAuthStateChanged(async user => {
-  if (!user) return;
 
-  const token = await user.getIdTokenResult();
-  if (token.claims.admin) {
-    const tryInjectAdminLink = () => {
-      const nav = document.querySelector("#sidebar nav");
-      if (nav && !document.querySelector("#admin-link")) {
-        const link = document.createElement("a");
-        link.href = "admin.html";
-        link.id = "admin-link";
-        link.textContent = "Admin";
-        nav.appendChild(link);
-      }
-    };
-
-    // Sidebar may load slightly later — poll briefly until it's ready
-    let attempts = 0;
-    const interval = setInterval(() => {
-      tryInjectAdminLink();
-      if (document.querySelector("#admin-link") || ++attempts > 10) {
-        clearInterval(interval);
-      }
-    }, 300);
-  }
-});
