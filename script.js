@@ -1,24 +1,17 @@
 
+// ─── Callable‐SDK helper ───
 async function listUsers() {
-  // 1) Get the current user and force-refresh the token so it includes admin:true
-  const user = firebase.auth().currentUser;
-  if (!user) throw new Error("Not signed in");
+  // force-refresh so admin:true is in the token
+  await firebase.auth().currentUser.getIdToken(true);
 
-  const idToken = await user.getIdToken(true);
-
-  // 2) Call the raw HTTP endpoint, passing the token in Authorization
-  const res = await fetch(
-    "https://europe-west1-castle-comms.cloudfunctions.net/listUsers",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`,
-      },
-      // onCall endpoints expect {"data": <your args>}
-      body: JSON.stringify({ data: {} }),
-    }
-  );
+  // httpsCallable does the full onCall handshake for you
+  const fn  = firebase.app()
+                     .functions("europe-west1")
+                     .httpsCallable("listUsers");
+  // pass an empty object → POST
+  const res = await fn({});
+  return res.data.users;  // array of { uid, email, displayName }
+}
 
   // 3) Parse the JSON
   const payload = await res.json();
