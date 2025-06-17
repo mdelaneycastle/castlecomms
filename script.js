@@ -1,29 +1,17 @@
-
-// ─── Callable‐SDK helper ───
+// ─── 1) Callable‐SDK helper ───
 async function listUsers() {
-  // force-refresh so admin:true is in the token
-  await firebase.auth().currentUser.getIdToken(true);
+  const user = firebase.auth().currentUser;
+  if (!user) throw new Error("Not signed in");
 
-  // httpsCallable does the full onCall handshake for you
+  // force-refresh so admin:true is in the token
+  await user.getIdToken(true);
+
+  // httpsCallable does the onCall handshake and sends your ID token
   const fn  = firebase.app()
                      .functions("europe-west1")
                      .httpsCallable("listUsers");
-  // pass an empty object → POST
-  const res = await fn({});
-  return res.data.users;  // array of { uid, email, displayName }
-}
-
-  // 3) Parse the JSON
-  const payload = await res.json();
-
-  // 4) If not OK, bubble up the server‐side error message
-  if (!res.ok) {
-    const msg = payload.error?.message || res.statusText;
-    throw new Error(msg);
-  }
-
-  // 5) Success! The returned data is under payload.data
-  return payload.data.users;  // array of { uid, email, displayName }
+  const res = await fn({});       // empty object => POST
+  return res.data.users;          // array of { uid, email, displayName }
 }
 
 
@@ -42,11 +30,11 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSidebarEvents();
 
   // ——— A) Feed & posting logic ———
-  const db       = window.db;                     // from firebase-init.js
+  const db       = window.db;                   
   const postForm = document.getElementById("post-form");
   const feed     = document.getElementById("feed");
+
   if (db && postForm && feed) {
-    // submit a post
     postForm.addEventListener("submit", e => {
       e.preventDefault();
       const user = firebase.auth().currentUser;
@@ -65,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // display a post
     function displayPost(post) {
       const initials = post.name
         .split(" ").map(w=>w[0]).join("")
@@ -97,7 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       feed.prepend(div);
 
-      // comments
       const commentsDiv = div.querySelector(".post-comments");
       db.ref(`posts/${post.postId}/comments`)
         .on("child_added", snap => {
@@ -107,7 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
           commentsDiv.appendChild(p);
         });
 
-      // comment form
       div.querySelector(".comment-form")
         .addEventListener("submit", e => {
           e.preventDefault();
@@ -118,7 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
           div.querySelector("input").value = "";
         });
 
-      // reactions
       const btn    = div.querySelector(".react-btn");
       const picker = div.querySelector(".emoji-picker");
       btn.addEventListener("click", () => picker.classList.toggle("hidden"));
@@ -133,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // listen for posts
     db.ref("posts").on("child_added", snap => {
       const post = snap.val();
       post.postId = post.postId || snap.key;
