@@ -2,6 +2,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyDJvHNZB_pzhytD7yLa69auStrZBk2SEHk",
   authDomain: "castle-comms.firebaseapp.com",
+  databaseURL: "https://castle-comms-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "castle-comms",
   storageBucket: "castle-comms.appspot.com",
   messagingSenderId: "959264765744",
@@ -14,3 +15,4 @@ firebase.initializeApp(firebaseConfig);
 // If you absolutely need Realtime Database elsewhere, 
 // you can load the compat SDK and call firebase.database(), 
 // but for this admin page it’s not needed.
+window.db = firebase.database();
