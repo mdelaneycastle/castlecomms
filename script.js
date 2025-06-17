@@ -56,40 +56,54 @@ function setupSidebarEvents() {
 document.addEventListener("DOMContentLoaded", () => {
   setupSidebarEvents();
 
-  // ─── Auth‐redirect (common to all pages) ───
+  // ─── Auth-redirect (common) ───
   firebase.auth().onAuthStateChanged(user => {
     if (!user) return window.location.href = "index.html";
   });
 
   // ─── A) Newsfeed logic ───
   const db       = window.db;
+  const storage  = window.storage;
   const postForm = document.getElementById("post-form");
   const feed     = document.getElementById("feed");
-  if (db && postForm && feed) {
-    // Submit new posts
-    postForm.addEventListener("submit", e => {
+
+  if (db && storage && postForm && feed) {
+    // Submit new posts (with optional image)
+    postForm.addEventListener("submit", async e => {
       e.preventDefault();
-      const user = firebase.auth().currentUser;
-      db.ref(`users/${user.uid}`).once("value").then(snap => {
-        const data = snap.val() || {};
-        const name = data.name || user.displayName || user.email || "Anonymous";
-        const role = data.role || "User";
-        const msg  = document.getElementById("message").value.trim();
-        if (!msg) return;
-        const ref = db.ref("posts").push();
-        ref.set({
-          postId:    ref.key,
-          name,
-          role,
-          message:   msg,
-          timestamp: Date.now(),
-          reaction:  null
-        });
-        postForm.reset();
+      const user    = firebase.auth().currentUser;
+      const msg     = document.getElementById("message").value.trim();
+      const fileInp = document.getElementById("image-file");
+      const file    = fileInp.files[0]; // may be undefined
+      let imageURL  = null;
+
+      // 1) Upload image if present
+      if (file) {
+        const postId = db.ref("posts").push().key;
+        const path   = `posts/${postId}/${Date.now()}_${file.name}`;
+        const ref    = storage.ref(path);
+        await ref.put(file);
+        imageURL = await ref.getDownloadURL();
+      }
+
+      // 2) Push post data
+      const usersnap = await db.ref(`users/${user.uid}`).once("value");
+      const userdata = usersnap.val() || {};
+      const postRef  = db.ref("posts").push();
+      await postRef.set({
+        postId:      postRef.key,
+        name:        userdata.name       || user.displayName || user.email || "Anonymous",
+        role:        userdata.role       || "User",
+        message:     msg,
+        imageURL:    imageURL,          // null or URL
+        timestamp:   Date.now(),
+        reaction:    null
       });
+
+      postForm.reset();
     });
 
-    // Render a single post
+    // Display a single post
     function displayPost(post) {
       const initials = post.name
         .split(" ").map(w => w[0]).join("")
@@ -108,11 +122,20 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         </div>
         <div class="post-message">${post.message}</div>
+      `;
+      // image, if any
+      if (post.imageURL) {
+        const img = document.createElement("img");
+        img.src   = post.imageURL;
+        img.alt   = "attachment";
+        img.style = "max-width:100%; margin-top:0.5rem;";
+        div.appendChild(img);
+      }
+      div.innerHTML += `
         <div class="post-footer">
           <button class="react-btn">${post.reaction||"➕ React"}</button>
           <div class="emoji-picker hidden">
-            <span>👏</span><span>❤️</span><span>💡</span>
-            <span>👍</span><span>🤔</span>
+            <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
           </div>
         </div>
         <div class="post-comments"></div>
@@ -123,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       feed.prepend(div);
 
-      // Comments listener
+      // Comments
       const commentsDiv = div.querySelector(".post-comments");
       db.ref(`posts/${post.postId}/comments`)
         .on("child_added", snap => {
@@ -153,8 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const r = s.textContent;
           btn.textContent = r;
           picker.classList.add("hidden");
-          db.ref(`posts/${post.postId}`)
-            .update({ reaction: r });
+          db.ref(`posts/${post.postId}`).update({ reaction: r });
         });
       });
     }
@@ -203,9 +225,9 @@ document.addEventListener("DOMContentLoaded", () => {
             // Refresh list
             tbody.innerHTML = "";
             (await listUsers()).forEach(u => {
-              const row = document.createElement("tr");
-              row.innerHTML = `<td>${u.uid}</td><td>${u.email||"-"}</td><td>${u.displayName||"-"}</td>`;
-              tbody.appendChild(row);
+              const r = document.createElement("tr");
+              r.innerHTML = `<td>${u.uid}</td><td>${u.email||"-"}</td><td>${u.displayName||"-"}</td>`;
+              tbody.appendChild(r);
             });
           } catch (err) {
             console.error("Create user failed:", err);
