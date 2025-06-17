@@ -10,16 +10,31 @@ const firebaseConfig = {
   measurementId: "G-NLS757VMJ8"
 };
 
-// Initialize the core Firebase SDK
+// 1) Initialize the core Firebase SDK
 firebase.initializeApp(firebaseConfig);
 
-// Try to wire up Realtime Database, but don't blow up if it's not loaded
+// 2) Realtime Database (compat)
+//    Only set window.db if the compat SDK is loaded
 try {
   if (typeof firebase.database === "function") {
     window.db = firebase.database();
+    console.log("✅ Realtime Database initialized");
   } else {
     console.log("⛔️ Skipping DB init: firebase.database() not available");
   }
 } catch (e) {
-  console.warn("⛔️ Realtime DB SDK missing — skipping window.db:", e);
+  console.warn("⛔️ Realtime DB SDK missing—skipping window.db:", e);
+}
+
+// 3) Storage (compat)
+//    Only set window.storage if the compat SDK is loaded
+try {
+  if (typeof firebase.storage === "function") {
+    window.storage = firebase.storage();
+    console.log("✅ Storage initialized");
+  } else {
+    console.log("⛔️ Skipping Storage init: firebase.storage() not available");
+  }
+} catch (e) {
+  console.warn("⛔️ Storage SDK missing—skipping window.storage:", e);
 }
