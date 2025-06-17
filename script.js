@@ -295,3 +295,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+// ─── Inject Admin link if user is admin ───
+firebase.auth().onAuthStateChanged(async user => {
+  if (!user) return;
+
+  const token = await user.getIdTokenResult();
+  if (token.claims.admin) {
+    const tryInjectAdminLink = () => {
+      const nav = document.querySelector("#sidebar nav");
+      if (nav && !document.querySelector("#admin-link")) {
+        const link = document.createElement("a");
+        link.href = "admin.html";
+        link.id = "admin-link";
+        link.textContent = "Admin";
+        nav.appendChild(link);
+      }
+    };
+
+    // Sidebar may load slightly later — poll briefly until it's ready
+    let attempts = 0;
+    const interval = setInterval(() => {
+      tryInjectAdminLink();
+      if (document.querySelector("#admin-link") || ++attempts > 10) {
+        clearInterval(interval);
+      }
+    }, 300);
+  }
+});
