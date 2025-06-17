@@ -308,6 +308,10 @@ form button {
   background-color: #1e40af;
 }
 
+admin-link {
+  display: none;
+}
+
 .quick-links {
   display: grid;
   grid-template-columns: repeat(4, 1fr); /* 4 buttons per row */
