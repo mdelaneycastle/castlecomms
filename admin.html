@@ -80,7 +80,20 @@
 <!-- sidebar will be injected here -->
 <div id="sidebar-container"></div>
 
+  
+
 <main>
+<form id="create-user-form" style="margin-bottom:2rem;">
+  <input id="new-email"       type="email"    placeholder="Email"        required />
+  <input id="new-password"    type="password" placeholder="Password"     required />
+  <input id="new-displayName" type="text"     placeholder="Display Name" />
+  <label>
+    <input id="new-admin" type="checkbox" />
+    Admin
+  </label>
+  <button type="submit">Create User</button>
+</form>
+  
   <h2>User Management</h2>
   <table id="user-table">
     <thead>
