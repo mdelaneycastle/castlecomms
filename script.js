@@ -131,7 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
     postForm.addEventListener("submit", async e => {
       e.preventDefault();
       const user    = firebase.auth().currentUser;
-      const msg     = document.getElementById("message").value.trim();
+      const msg = document.getElementById("message").value.trim();
+      const taggedUsernames = Array.from(msg.matchAll(/@(\w+)/g)).map(m => m[1].toLowerCase());
       const fileInp = document.getElementById("image-file");
       const file    = fileInp.files[0]; // may be undefined
       let imageURL  = null;
@@ -145,6 +146,17 @@ document.addEventListener("DOMContentLoaded", () => {
         imageURL = await ref.getDownloadURL();
       }
 
+      // Fetch all users once (you could optimize with indexing later)
+const allUsersSnap = await db.ref("users").once("value");
+const allUsers = allUsersSnap.val() || {};
+const taggedUIDs = [];
+
+for (const [uid, userData] of Object.entries(allUsers)) {
+  if (userData.name && taggedUsernames.includes(userData.name.toLowerCase())) {
+    taggedUIDs.push(uid);
+  }
+}
+
       // 2) Push post data
       const usersnap = await db.ref(`users/${user.uid}`).once("value");
       const userdata = usersnap.val() || {};
@@ -157,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
         imageURL:    imageURL,          // null or URL
         timestamp:   Date.now(),
         reaction:    null
+        tagged:    taggedUIDs // this can be an empty array
       });
 
       postForm.reset();
@@ -180,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="post-time">${new Date(post.timestamp).toLocaleString()}</div>
           </div>
         </div>
-        <div class="post-message">${post.message}</div>
+       <div class="post-message">${highlightMentions(post.message)}</div>
       `;
       // image, if any
       if (post.imageURL) {
@@ -204,6 +217,10 @@ document.addEventListener("DOMContentLoaded", () => {
         </form>
       `;
       feed.prepend(div);
+
+      function highlightMentions(text) {
+  return text.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+}
 
       // Comments
       const commentsDiv = div.querySelector(".post-comments");
