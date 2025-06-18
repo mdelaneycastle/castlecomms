@@ -231,24 +231,25 @@ if (!window.userCache) {
         `;
 
         function formatMessageWithMentions(text, taggedUIDs) {
-  const uidToName = {};
-  // Assume we already cached or fetched user names (you can improve this later)
   const userCache = window.userCache || {};
-
+  const uidToName = {};
   taggedUIDs.forEach(uid => {
-    if (userCache[uid]) {
+    if (userCache[uid]?.name) {
       uidToName[uid] = userCache[uid].name;
     }
   });
 
-  // Replace only the valid @names
+  const validMentions = Object.values(uidToName).reduce((acc, name) => {
+    acc[name.toLowerCase()] = name;
+    return acc;
+  }, {});
+
   return text.replace(/@(\w+)/g, (match, handle) => {
-    const matchLower = handle.toLowerCase();
-    const found = Object.values(uidToName).find(name => name.toLowerCase() === matchLower);
-    if (found) {
-      return `<span class="mention">@${found}</span>`;
+    const lower = handle.toLowerCase();
+    if (validMentions[lower]) {
+      return `<span class="mention">@${validMentions[lower]}</span>`;
     }
-    return match; // not valid – leave as-is
+    return match;
   });
 }
 
