@@ -17,6 +17,12 @@ header h1 {
   font-size: 1.5rem;
 }
 
+.mention {
+  color: #007bff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 .hamburger {
   font-size: 1.5rem;
   margin-right: 1rem;
