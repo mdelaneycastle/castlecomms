@@ -23,6 +23,28 @@ header h1 {
   cursor: pointer;
 }
 
+.mention-list {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 120px;
+  overflow-y: auto;
+  width: 200px;
+}
+
+.mention-list li {
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.mention-list li:hover {
+  background-color: #f0f0f0;
+}
+
 .hamburger {
   font-size: 1.5rem;
   margin-right: 1rem;
