@@ -1,39 +1,8 @@
 console.log("🔌 script.js initialized");
 
-const bell        = document.getElementById("notification-bell");
-const countBadge  = document.getElementById("notification-count");
-
-let mentionCount = 0;
-
-function showBell(count) {
-  if (bell && countBadge) {
-    countBadge.textContent = count;
-    bell.classList.remove("hidden");
-  }
-}
-
-// Listen for new posts and check if the current user was mentioned
-if (db && firebase.auth().currentUser) {
-  const uid = firebase.auth().currentUser.uid;
-  db.ref("posts").on("child_added", snap => {
-    const post = snap.val();
-    if (post.tagged && post.tagged.includes(uid)) {
-      mentionCount++;
-      showBell(mentionCount);
-    }
-  });
-
-  bell?.addEventListener("click", () => {
-    mentionCount = 0;
-    bell.classList.add("hidden");
-    // Optional: open a "Mentions" page or scroll to newsfeed
-    window.location.href = "newsfeed.html"; // or scrollTo
-  });
-}
-
 // ─── Helper: Create a new user ───
 async function createUser({ email, password, displayName, admin: wantAdmin }) {
-  const user  = firebase.auth().currentUser;
+  const user = firebase.auth().currentUser;
   if (!user) throw new Error("Not signed in");
   const token = await user.getIdToken(true);
 
@@ -42,7 +11,7 @@ async function createUser({ email, password, displayName, admin: wantAdmin }) {
     {
       method: "POST",
       headers: {
-        "Content-Type":  "application/json",
+        "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({ email, password, displayName, admin: wantAdmin })
@@ -64,7 +33,7 @@ async function listUsers() {
     {
       method: "POST",
       headers: {
-        "Content-Type":  "application/json",
+        "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`,
       },
     }
@@ -117,21 +86,31 @@ function highlightMentions(text) {
 
 function setupSidebarEvents() {
   const toggleBtn = document.getElementById("menu-toggle");
-  const closeBtn  = document.getElementById("close-btn");
-  const sidebar   = document.getElementById("sidebar");
+  const closeBtn = document.getElementById("close-btn");
+  const sidebar = document.getElementById("sidebar");
   if (toggleBtn && sidebar) toggleBtn.onclick = () => sidebar.classList.add("show");
-  if (closeBtn  && sidebar) closeBtn.onclick  = () => sidebar.classList.remove("show");
+  if (closeBtn && sidebar) closeBtn.onclick = () => sidebar.classList.remove("show");
 }
 
+// ─── DOM Ready ───
 document.addEventListener("DOMContentLoaded", () => {
   setupSidebarEvents();
 
-  let allUsers = []; // populate on load
-firebase.auth().onAuthStateChanged(async user => {
-  if (user) {
-    allUsers = await listUsers(); // for mentions
+  const bell = document.getElementById("notification-bell");
+  const countBadge = document.getElementById("notification-count");
+  let mentionCount = 0;
+
+  function showBell(count) {
+    if (bell && countBadge) {
+      countBadge.textContent = count;
+      bell.classList.remove("hidden");
+    }
   }
-});
+
+  let allUsers = [];
+  firebase.auth().onAuthStateChanged(async user => {
+    if (user) allUsers = await listUsers();
+  });
 
   firebase.auth().onAuthStateChanged(async user => {
     if (!user) return window.location.href = "index.html";
@@ -139,59 +118,72 @@ firebase.auth().onAuthStateChanged(async user => {
     const token = await user.getIdTokenResult();
     const isAdmin = !!token.claims.admin;
     const adminLink = document.getElementById("admin-link");
+    if (adminLink) adminLink.style.display = isAdmin ? "list-item" : "none";
 
-    if (adminLink) {
-      adminLink.style.display = isAdmin ? "list-item" : "none";
-    }
-
-    const db       = window.db;
-    const storage  = window.storage;
+    const db = window.db;
+    const storage = window.storage;
     const postForm = document.getElementById("post-form");
-    const feed     = document.getElementById("feed");
-
+    const feed = document.getElementById("feed");
     const messageInput = document.getElementById("message");
-const mentionList = document.getElementById("mention-suggestions");
+    const mentionList = document.getElementById("mention-suggestions");
 
-if (messageInput && mentionList) {
-  let currentMention = "";
-
-  messageInput.addEventListener("input", () => {
-    const cursor = messageInput.selectionStart;
-    const text = messageInput.value.slice(0, cursor);
-    const match = text.match(/@(\w+)$/);
-    if (match) {
-      currentMention = match[1].toLowerCase();
-      const matches = allUsers.filter(u => {
-        const name = u.displayName?.toLowerCase() || "";
-        const handle = u.email?.split("@")[0].toLowerCase();
-        return name.includes(currentMention) || handle.includes(currentMention);
-      }).slice(0, 5); // max 5 suggestions
-
-      mentionList.innerHTML = "";
-      matches.forEach(u => {
-        const li = document.createElement("li");
-        li.textContent = u.displayName || u.email;
-        li.onclick = () => {
-          const before = messageInput.value.slice(0, cursor - currentMention.length - 1);
-          const after  = messageInput.value.slice(cursor);
-          const mentionTag = "@" + (u.displayName || u.email.split("@")[0]);
-          messageInput.value = before + mentionTag + " " + after;
-          mentionList.innerHTML = "";
-          messageInput.focus();
-        };
-        mentionList.appendChild(li);
+    if (bell && db && user) {
+      const uid = user.uid;
+      db.ref("posts").on("child_added", snap => {
+        const post = snap.val();
+        if (post.tagged && post.tagged.includes(uid)) {
+          mentionCount++;
+          showBell(mentionCount);
+        }
       });
-
-      const rect = messageInput.getBoundingClientRect();
-      mentionList.style.top = rect.bottom + "px";
-      mentionList.style.left = rect.left + "px";
-      mentionList.style.display = "block";
-    } else {
-      mentionList.innerHTML = "";
-      currentMention = "";
+      bell.addEventListener("click", () => {
+        mentionCount = 0;
+        bell.classList.add("hidden");
+        window.location.href = "newsfeed.html";
+      });
     }
-  });
-}
+
+    if (messageInput && mentionList) {
+      let currentMention = "";
+      messageInput.addEventListener("input", () => {
+        const cursor = messageInput.selectionStart;
+        const text = messageInput.value.slice(0, cursor);
+        const match = text.match(/@(\w+)$/);
+        if (match) {
+          currentMention = match[1].toLowerCase();
+          const matches = allUsers.filter(u => {
+            const name = u.displayName?.toLowerCase() || "";
+            const handle = u.email?.split("@")[0].toLowerCase();
+            return name.includes(currentMention) || handle.includes(currentMention);
+          }).slice(0, 5);
+
+          mentionList.innerHTML = "";
+          matches.forEach(u => {
+            const li = document.createElement("li");
+            li.textContent = u.displayName || u.email;
+            li.onclick = () => {
+              const before = messageInput.value.slice(0, cursor - currentMention.length - 1);
+              const after = messageInput.value.slice(cursor);
+              const mentionTag = "@" + (u.displayName || u.email.split("@")[0]);
+              messageInput.value = before + mentionTag + " " + after;
+              mentionList.innerHTML = "";
+              messageInput.focus();
+            };
+            mentionList.appendChild(li);
+          });
+
+          const rect = messageInput.getBoundingClientRect();
+          mentionList.style.top = rect.bottom + "px";
+          mentionList.style.left = rect.left + "px";
+          mentionList.style.display = "block";
+        } else {
+          mentionList.innerHTML = "";
+          currentMention = "";
+        }
+      });
+    }
+
+    
 
     if (db && storage && postForm && feed) {
       postForm.addEventListener("submit", async e => {
