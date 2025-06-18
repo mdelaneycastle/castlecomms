@@ -1,5 +1,36 @@
 console.log("🔌 script.js initialized");
 
+const bell        = document.getElementById("notification-bell");
+const countBadge  = document.getElementById("notification-count");
+
+let mentionCount = 0;
+
+function showBell(count) {
+  if (bell && countBadge) {
+    countBadge.textContent = count;
+    bell.classList.remove("hidden");
+  }
+}
+
+// Listen for new posts and check if the current user was mentioned
+if (db && firebase.auth().currentUser) {
+  const uid = firebase.auth().currentUser.uid;
+  db.ref("posts").on("child_added", snap => {
+    const post = snap.val();
+    if (post.tagged && post.tagged.includes(uid)) {
+      mentionCount++;
+      showBell(mentionCount);
+    }
+  });
+
+  bell?.addEventListener("click", () => {
+    mentionCount = 0;
+    bell.classList.add("hidden");
+    // Optional: open a "Mentions" page or scroll to newsfeed
+    window.location.href = "newsfeed.html"; // or scrollTo
+  });
+}
+
 // ─── Helper: Create a new user ───
 async function createUser({ email, password, displayName, admin: wantAdmin }) {
   const user  = firebase.auth().currentUser;
