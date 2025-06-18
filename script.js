@@ -206,6 +206,12 @@ messageInput.addEventListener("input", () => {
         postForm.reset();
       });
 
+      // Cache user data
+if (!window.userCache) {
+  const snap = await db.ref("users").once("value");
+  window.userCache = snap.val() || {};
+}
+
       function displayPost(post) {
         const initials = post.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
@@ -221,8 +227,30 @@ messageInput.addEventListener("input", () => {
               <div class="post-time">${new Date(post.timestamp).toLocaleString()}</div>
             </div>
           </div>
-          <div class="post-message">${highlightMentions(post.message)}</div>
+          <div class="post-message">${formatMessageWithMentions(post.message, post.tagged || [])}</div>
         `;
+
+        function formatMessageWithMentions(text, taggedUIDs) {
+  const uidToName = {};
+  // Assume we already cached or fetched user names (you can improve this later)
+  const userCache = window.userCache || {};
+
+  taggedUIDs.forEach(uid => {
+    if (userCache[uid]) {
+      uidToName[uid] = userCache[uid].name;
+    }
+  });
+
+  // Replace only the valid @names
+  return text.replace(/@(\w+)/g, (match, handle) => {
+    const matchLower = handle.toLowerCase();
+    const found = Object.values(uidToName).find(name => name.toLowerCase() === matchLower);
+    if (found) {
+      return `<span class="mention">@${found}</span>`;
+    }
+    return match; // not valid – leave as-is
+  });
+}
 
         if (post.imageURL) {
           const img = document.createElement("img");
