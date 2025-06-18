@@ -121,44 +121,46 @@ firebase.auth().onAuthStateChanged(async user => {
     const messageInput = document.getElementById("message");
 const mentionList = document.getElementById("mention-suggestions");
 
-let currentMention = "";
+if (messageInput && mentionList) {
+  let currentMention = "";
 
-messageInput.addEventListener("input", () => {
-  const cursor = messageInput.selectionStart;
-  const text = messageInput.value.slice(0, cursor);
-  const match = text.match(/@(\w+)$/);
-  if (match) {
-    currentMention = match[1].toLowerCase();
-    const matches = allUsers.filter(u => {
-      const name = u.displayName?.toLowerCase() || "";
-      const handle = u.email?.split("@")[0].toLowerCase();
-      return name.includes(currentMention) || handle.includes(currentMention);
-    }).slice(0, 5); // max 5 suggestions
+  messageInput.addEventListener("input", () => {
+    const cursor = messageInput.selectionStart;
+    const text = messageInput.value.slice(0, cursor);
+    const match = text.match(/@(\w+)$/);
+    if (match) {
+      currentMention = match[1].toLowerCase();
+      const matches = allUsers.filter(u => {
+        const name = u.displayName?.toLowerCase() || "";
+        const handle = u.email?.split("@")[0].toLowerCase();
+        return name.includes(currentMention) || handle.includes(currentMention);
+      }).slice(0, 5); // max 5 suggestions
 
-    mentionList.innerHTML = "";
-    matches.forEach(u => {
-      const li = document.createElement("li");
-      li.textContent = u.displayName || u.email;
-      li.onclick = () => {
-        const before = messageInput.value.slice(0, cursor - currentMention.length - 1);
-        const after  = messageInput.value.slice(cursor);
-        const mentionTag = "@" + (u.displayName || u.email.split("@")[0]);
-        messageInput.value = before + mentionTag + " " + after;
-        mentionList.innerHTML = "";
-        messageInput.focus();
-      };
-      mentionList.appendChild(li);
-    });
+      mentionList.innerHTML = "";
+      matches.forEach(u => {
+        const li = document.createElement("li");
+        li.textContent = u.displayName || u.email;
+        li.onclick = () => {
+          const before = messageInput.value.slice(0, cursor - currentMention.length - 1);
+          const after  = messageInput.value.slice(cursor);
+          const mentionTag = "@" + (u.displayName || u.email.split("@")[0]);
+          messageInput.value = before + mentionTag + " " + after;
+          mentionList.innerHTML = "";
+          messageInput.focus();
+        };
+        mentionList.appendChild(li);
+      });
 
-    const rect = messageInput.getBoundingClientRect();
-    mentionList.style.top = rect.bottom + "px";
-    mentionList.style.left = rect.left + "px";
-    mentionList.style.display = "block";
-  } else {
-    mentionList.innerHTML = "";
-    currentMention = "";
-  }
-});
+      const rect = messageInput.getBoundingClientRect();
+      mentionList.style.top = rect.bottom + "px";
+      mentionList.style.left = rect.left + "px";
+      mentionList.style.display = "block";
+    } else {
+      mentionList.innerHTML = "";
+      currentMention = "";
+    }
+  });
+}
 
     if (db && storage && postForm && feed) {
       postForm.addEventListener("submit", async e => {
