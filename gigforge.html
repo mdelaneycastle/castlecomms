@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GigForge - Promote Your Music</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #111827; /* Dark Gray */
+        }
+        .font-bebas {
+            font-family: 'Bebas Neue', cursive;
+        }
+        .hero-section {
+            background: linear-gradient(rgba(17, 24, 39, 0.8), rgba(17, 24, 39, 0.8)), url('https://placehold.co/1920x1080/000000/FFFFFF?text=Rock+Concert') no-repeat center center;
+            background-size: cover;
+        }
+        .form-container {
+            background-color: rgba(31, 41, 55, 0.8); /* Semi-transparent darker gray */
+            backdrop-filter: blur(10px);
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background-color: #F59E0B; /* Amber */
+            color: #111827;
+        }
+        .form-section {
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+        }
+        .form-input {
+            background-color: #374151; /* Gray */
+            border-color: #4B5563; /* Darker Gray */
+            color: #F9FAFB; /* Almost White */
+        }
+        .form-input::placeholder {
+            color: #9CA3AF; /* Lighter Gray */
+        }
+        .submit-btn {
+            background-color: #F59E0B; /* Amber */
+            transition: background-color 0.3s ease;
+        }
+        .submit-btn:hover {
+            background-color: #D97706; /* Darker Amber */
+        }
+        .switch-form-btn {
+            color: #F59E0B; /* Amber */
+        }
+        .switch-form-btn:hover {
+            text-decoration: underline;
+        }
+        .gig-card {
+            background-color: #1F2937; /* Darker Gray */
+            border: 1px solid #374151;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .gig-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.2);
+        }
+        .gig-card-date {
+            background-color: #374151;
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <!-- Header -->
+    <header class="bg-gray-900/80 backdrop-blur-sm fixed w-full z-10">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-4xl font-bebas text-white tracking-wider">Gig<span class="text-amber-500">Forge</span></h1>
+            <nav class="hidden md:flex space-x-8 items-center">
+                <a href="#home" class="text-gray-300 hover:text-amber-500 transition duration-300">Home</a>
+                <a href="#shows" class="text-gray-300 hover:text-amber-500 transition duration-300">Upcoming Shows</a>
+                <a href="#about" class="text-gray-300 hover:text-amber-500 transition duration-300">About</a>
+                <a href="#contact" class="text-gray-300 hover:text-amber-500 transition duration-300">Contact</a>
+                <a href="#login" class="bg-amber-500 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-amber-600 transition duration-300">Login / Register</a>
+            </nav>
+            <button id="mobile-menu-btn" class="md:hidden text-white">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-900">
+            <a href="#home" class="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-800">Home</a>
+            <a href="#shows" class="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-800">Upcoming Shows</a>
+            <a href="#about" class="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-800">About</a>
+            <a href="#contact" class="block py-2 px-4 text-sm text-gray-300 hover:bg-gray-800">Contact</a>
+            <a href="#login" class="block py-2 px-4 text-sm bg-amber-500 text-gray-900 font-bold hover:bg-amber-600">Login / Register</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section h-screen flex items-center justify-center text-center">
+        <div class="container mx-auto px-6">
+            <h2 class="text-6xl md:text-8xl font-bebas text-white uppercase tracking-widest">Ignite the Scene</h2>
+            <p class="text-xl md:text-2xl text-gray-300 mt-4 max-w-3xl mx-auto">The ultimate platform connecting bands, promoters, and venues. Find your next gig, promote your next show, and pack the house.</p>
+            <a href="#shows" class="mt-8 inline-block bg-amber-500 text-gray-900 font-bold py-4 px-8 rounded-lg text-lg uppercase hover:bg-amber-600 transition duration-300">Find Gigs</a>
+        </div>
+    </section>
+
+    <!-- Upcoming Shows Section -->
+    <section id="shows" class="py-20 bg-gray-800/50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-5xl font-bebas text-center text-white mb-12 tracking-wider">Upcoming Shows</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Gig Card 1 -->
+                <div class="gig-card rounded-lg overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <h3 class="text-2xl font-bold text-amber-500 mb-2">Alunah</h3>
+                        <p class="text-gray-400 mb-4 flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>The Flapper, Birmingham</p>
+                        <p class="text-gray-300 font-bold text-lg"><i class="fas fa-calendar-alt mr-2"></i>August 22, 2025</p>
+                    </div>
+                    <div class="gig-card-date p-4 text-center">
+                        <a href="#" class="font-bold text-white hover:text-amber-400 transition duration-300">Get Tickets</a>
+                    </div>
+                </div>
+                <!-- Gig Card 2 -->
+                <div class="gig-card rounded-lg overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <h3 class="text-2xl font-bold text-amber-500 mb-2">Redline</h3>
+                        <p class="text-gray-400 mb-4 flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>The Asylum, Birmingham</p>
+                        <p class="text-gray-300 font-bold text-lg"><i class="fas fa-calendar-alt mr-2"></i>September 5, 2025</p>
+                    </div>
+                    <div class="gig-card-date p-4 text-center">
+                       <a href="#" class="font-bold text-white hover:text-amber-400 transition duration-300">Find Out More</a>
+                    </div>
+                </div>
+                <!-- Gig Card 3 -->
+                <div class="gig-card rounded-lg overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <h3 class="text-2xl font-bold text-amber-500 mb-2">Margarita Witch Cult</h3>
+                        <p class="text-gray-400 mb-4 flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>The Sunflower Lounge, Birmingham</p>
+                        <p class="text-gray-300 font-bold text-lg"><i class="fas fa-calendar-alt mr-2"></i>September 12, 2025</p>
+                    </div>
+                    <div class="gig-card-date p-4 text-center">
+                        <a href="#" class="font-bold text-white hover:text-amber-400 transition duration-300">Get Tickets</a>
+                    </div>
+                </div>
+                 <!-- Gig Card 4 -->
+                <div class="gig-card rounded-lg overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <h3 class="text-2xl font-bold text-amber-500 mb-2">Oceans Ate Alaska</h3>
+                        <p class="text-gray-400 mb-4 flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>O2 Institute, Birmingham</p>
+                        <p class="text-gray-300 font-bold text-lg"><i class="fas fa-calendar-alt mr-2"></i>September 26, 2025</p>
+                    </div>
+                    <div class="gig-card-date p-4 text-center">
+                        <a href="#" class="font-bold text-white hover:text-amber-400 transition duration-300">Sold Out</a>
+                    </div>
+                </div>
+                 <!-- Gig Card 5 -->
+                <div class="gig-card rounded-lg overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <h3 class="text-2xl font-bold text-amber-500 mb-2">Benediction</h3>
+                        <p class="text-gray-400 mb-4 flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>The Devil's Dog, Digbeth</p>
+                        <p class="text-gray-300 font-bold text-lg"><i class="fas fa-calendar-alt mr-2"></i>October 3, 2025</p>
+                    </div>
+                    <div class="gig-card-date p-4 text-center">
+                        <a href="#" class="font-bold text-white hover:text-amber-400 transition duration-300">Get Tickets</a>
+                    </div>
+                </div>
+                 <!-- Gig Card 6 -->
+                <div class="gig-card rounded-lg overflow-hidden flex flex-col">
+                    <div class="p-6 flex-grow">
+                        <h3 class="text-2xl font-bold text-amber-500 mb-2">SHVPES</h3>
+                        <p class="text-gray-400 mb-4 flex items-center"><i class="fas fa-map-marker-alt mr-2"></i>Castle & Falcon, Birmingham</p>
+                        <p class="text-gray-300 font-bold text-lg"><i class="fas fa-calendar-alt mr-2"></i>October 17, 2025</p>
+                    </div>
+                    <div class="gig-card-date p-4 text-center">
+                        <a href="#" class="font-bold text-white hover:text-amber-400 transition duration-300">Find Out More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login/Register Section -->
+    <section id="login" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto form-container rounded-2xl shadow-2xl overflow-hidden">
+                <!-- Tabs -->
+                <div class="flex">
+                    <button data-target="fans" class="tab-btn flex-1 py-4 px-2 font-bebas text-xl md:text-2xl tracking-wider text-center active"><i class="fas fa-users mr-2"></i>Fans</button>
+                    <button data-target="bands" class="tab-btn flex-1 py-4 px-2 font-bebas text-xl md:text-2xl tracking-wider text-center"><i class="fas fa-guitar mr-2"></i>Bands</button>
+                    <button data-target="venues" class="tab-btn flex-1 py-4 px-2 font-bebas text-xl md:text-2xl tracking-wider text-center"><i class="fas fa-store-alt mr-2"></i>Venues</button>
+                    <button data-target="promoters" class="tab-btn flex-1 py-4 px-2 font-bebas text-xl md:text-2xl tracking-wider text-center"><i class="fas fa-bullhorn mr-2"></i>Promoters</button>
+                </div>
+
+                <!-- Fans Form -->
+                <div id="fans" class="form-section p-8 md:p-12 active">
+                    <div class="login-form">
+                        <h3 class="text-3xl font-bold mb-6 text-center text-white">Fan Login</h3>
+                        <form>
+                            <div class="mb-4">
+                                <label for="fan-login-email" class="block mb-2 text-sm font-bold">Email</label>
+                                <input type="email" id="fan-login-email" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="you@fan.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="fan-login-password" class="block mb-2 text-sm font-bold">Password</label>
+                                <input type="password" id="fan-login-password" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="w-full submit-btn text-gray-900 font-bold py-3 px-4 rounded-lg uppercase tracking-wider">Login</button>
+                        </form>
+                        <p class="text-center mt-6">Not a member yet? <button class="switch-form-btn font-bold">Register here</button></p>
+                    </div>
+                    <div class="register-form hidden">
+                        <h3 class="text-3xl font-bold mb-6 text-center text-white">Fan Registration</h3>
+                        <form>
+                            <div class="mb-4">
+                                <label for="fan-reg-name" class="block mb-2 text-sm font-bold">Username</label>
+                                <input type="text" id="fan-reg-name" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="YourFanName">
+                            </div>
+                            <div class="mb-4">
+                                <label for="fan-reg-email" class="block mb-2 text-sm font-bold">Email</label>
+                                <input type="email" id="fan-reg-email" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="you@fan.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="fan-reg-password" class="block mb-2 text-sm font-bold">Password</label>
+                                <input type="password" id="fan-reg-password" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Create a strong password">
+                            </div>
+                            <button type="submit" class="w-full submit-btn text-gray-900 font-bold py-3 px-4 rounded-lg uppercase tracking-wider">Register</button>
+                        </form>
+                        <p class="text-center mt-6">Already a member? <button class="switch-form-btn font-bold">Login here</button></p>
+                    </div>
+                </div>
+
+                <!-- Venues Form -->
+                <div id="venues" class="form-section p-8 md:p-12">
+                    <div class="login-form">
+                        <h3 class="text-3xl font-bold mb-6 text-center text-white">Venue Login</h3>
+                        <form>
+                            <div class="mb-4">
+                                <label for="venue-login-email" class="block mb-2 text-sm font-bold">Email</label>
+                                <input type="email" id="venue-login-email" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="you@venue.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="venue-login-password" class="block mb-2 text-sm font-bold">Password</label>
+                                <input type="password" id="venue-login-password" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="w-full submit-btn text-gray-900 font-bold py-3 px-4 rounded-lg uppercase tracking-wider">Login</button>
+                        </form>
+                        <p class="text-center mt-6">Don't have an account? <button class="switch-form-btn font-bold">Register here</button></p>
+                    </div>
+                    <div class="register-form hidden">
+                        <h3 class="text-3xl font-bold mb-6 text-center text-white">Venue Registration</h3>
+                        <form>
+                            <div class="mb-4">
+                                <label for="venue-reg-name" class="block mb-2 text-sm font-bold">Venue Name</label>
+                                <input type="text" id="venue-reg-name" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="The Rock Pit">
+                            </div>
+                            <div class="mb-4">
+                                <label for="venue-reg-email" class="block mb-2 text-sm font-bold">Email</label>
+                                <input type="email" id="venue-reg-email" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="you@venue.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="venue-reg-password" class="block mb-2 text-sm font-bold">Password</label>
+                                <input type="password" id="venue-reg-password" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Create a strong password">
+                            </div>
+                            <button type="submit" class="w-full submit-btn text-gray-900 font-bold py-3 px-4 rounded-lg uppercase tracking-wider">Register</button>
+                        </form>
+                        <p class="text-center mt-6">Already have an account? <button class="switch-form-btn font-bold">Login here</button></p>
+                    </div>
+                </div>
+
+                <!-- Promoters Form -->
+                <div id="promoters" class="form-section p-8 md:p-12">
+                     <div class="login-form">
+                        <h3 class="text-3xl font-bold mb-6 text-center text-white">Promoter Login</h3>
+                        <form>
+                            <div class="mb-4">
+                                <label for="promoter-login-email" class="block mb-2 text-sm font-bold">Email</label>
+                                <input type="email" id="promoter-login-email" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="you@promotions.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="promoter-login-password" class="block mb-2 text-sm font-bold">Password</label>
+                                <input type="password" id="promoter-login-password" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="w-full submit-btn text-gray-900 font-bold py-3 px-4 rounded-lg uppercase tracking-wider">Login</button>
+                        </form>
+                        <p class="text-center mt-6">Don't have an account? <button class="switch-form-btn font-bold">Register here</button></p>
+                    </div>
+                    <div class="register-form hidden">
+                        <h3 class="text-3xl font-bold mb-6 text-center text-white">Promoter Registration</h3>
+                        <form>
+                            <div class="mb-4">
+                                <label for="promoter-reg-name" class="block mb-2 text-sm font-bold">Promoter/Company Name</label>
+                                <input type="text" id="promoter-reg-name" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Amplify Events">
+                            </div>
+                            <div class="mb-4">
+                                <label for="promoter-reg-email" class="block mb-2 text-sm font-bold">Email</label>
+                                <input type="email" id="promoter-reg-email" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="you@promotions.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="promoter-reg-password" class="block mb-2 text-sm font-bold">Password</label>
+                                <input type="password" id="promoter-reg-password" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Create a strong password">
+                            </div>
+                            <button type="submit" class="w-full submit-btn text-gray-900 font-bold py-3 px-4 rounded-lg uppercase tracking-wider">Register</button>
+                        </form>
+                        <p class="text-center mt-6">Already have an account? <button class="switch-form-btn font-bold">Login here</button></p>
+                    </div>
+                </div>
+
+                <!-- Bands Form -->
+                <div id="bands" class="form-section p-8 md:p-12">
+                    <div class="login-form">
+                        <h3 class="text-3xl font-bold mb-6 text-center text-white">Artist Login</h3>
+                        <form>
+                            <div class="mb-4">
+                                <label for="band-login-email" class="block mb-2 text-sm font-bold">Email</label>
+                                <input type="email" id="band-login-email" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="contact@yourband.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="band-login-password" class="block mb-2 text-sm font-bold">Password</label>
+                                <input type="password" id="band-login-password" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="w-full submit-btn text-gray-900 font-bold py-3 px-4 rounded-lg uppercase tracking-wider">Login</button>
+                        </form>
+                        <p class="text-center mt-6">Don't have a band profile? <button class="switch-form-btn font-bold">Register here</button></p>
+                    </div>
+                    <div class="register-form hidden">
+                        <h3 class="text-3xl font-bold mb-6 text-center text-white">Artist Registration</h3>
+                        <form>
+                            <div class="mb-4">
+                                <label for="band-reg-name" class="block mb-2 text-sm font-bold">Artist Name</label>
+                                <input type="text" id="band-reg-name" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Your Awesome Band">
+                            </div>
+                            <div class="mb-4">
+                                <label for="band-reg-email" class="block mb-2 text-sm font-bold">Contact Email</label>
+                                <input type="email" id="band-reg-email" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="contact@yourband.com">
+                            </div>
+                            <div class="mb-6">
+                                <label for="band-reg-password" class="block mb-2 text-sm font-bold">Password</label>
+                                <input type="password" id="band-reg-password" class="w-full px-4 py-3 rounded-lg form-input focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Create a strong password">
+                            </div>
+                            <button type="submit" class="w-full submit-btn text-gray-900 font-bold py-3 px-4 rounded-lg uppercase tracking-wider">Register</button>
+                        </form>
+                         <p class="text-center mt-6">Already have a profile? <button class="switch-form-btn font-bold">Login here</button></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-center py-6">
+        <p>&copy; 2024 GigForge. All Rights Reserved.</p>
+        <p class="text-amber-500">Rock On!</p>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mobile menu toggle
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Tabs functionality
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const formSections = document.querySelectorAll('.form-section');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Deactivate all buttons and hide all sections
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    formSections.forEach(sec => sec.classList.remove('active'));
+
+                    // Activate clicked button and corresponding section
+                    button.classList.add('active');
+                    const targetId = button.getAttribute('data-target');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+
+            // Login/Register form switching
+            const switchButtons = document.querySelectorAll('.switch-form-btn');
+            switchButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const formSection = button.closest('.form-section');
+                    const loginForm = formSection.querySelector('.login-form');
+                    const registerForm = formSection.querySelector('.register-form');
+
+                    loginForm.classList.toggle('hidden');
+                    registerForm.classList.toggle('hidden');
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
