@@ -222,13 +222,17 @@
     <div class="container">
         <div class="header">
             <h1>🎨 Drawing Duel</h1>
-            <p>Betsy and Daisy Edition</p>
+            <p>Betsy & Daisy Edition</p>
         </div>
 
         <div class="game-info">
             <div>Player <span id="currentPlayer">1</span>'s Turn</div>
             <div class="timer" id="timer">60</div>
             <div>Score: <span id="player1Score">0</span> - <span id="player2Score">0</span></div>
+        </div>
+
+        <div class="prompt-area" id="promptArea">
+            Ready to play!
         </div>
 
         <div class="action-buttons" id="drawingButtons">
@@ -404,6 +408,7 @@
             gamePhase = 'drawing';
             currentPrompt = disneyPixarFilms[Math.floor(Math.random() * disneyPixarFilms.length)];
             
+            document.getElementById('promptArea').textContent = `Draw: ${currentPrompt}`;
             document.querySelector('.btn-primary').classList.add('hidden');
             document.querySelector('.btn-secondary').classList.remove('hidden');
             
@@ -430,6 +435,7 @@
             clearInterval(timerInterval);
             gamePhase = 'guessing';
             
+            document.getElementById('promptArea').textContent = `Player ${currentPlayer === 1 ? 2 : 1}, what did they draw?`;
             document.getElementById('drawingButtons').classList.add('hidden');
             document.getElementById('guessArea').classList.remove('hidden');
             document.getElementById('timer').textContent = '∞';
@@ -490,6 +496,7 @@
             if (roundsPlayed >= maxRounds) {
                 endGame();
             } else {
+                document.getElementById('promptArea').textContent = `Player ${currentPlayer}, click "Start Round" when ready!`;
                 gamePhase = 'waiting';
             }
         }
@@ -530,6 +537,7 @@
             document.getElementById('drawingButtons').classList.remove('hidden');
             document.querySelector('.btn-primary').classList.remove('hidden');
             document.querySelector('.btn-secondary').classList.add('hidden');
+            document.getElementById('promptArea').textContent = 'Ready to play!';
             document.getElementById('timer').textContent = '60';
             
             clearCanvas();
