@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Who do I contact? - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .contact-finder-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-finder-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .contact-finder-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .contact-finder-title {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .contact-finder-subtitle {
+      text-align: center;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 2rem;
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 50px;
+      outline: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.95);
+      color: #333;
+    }
+
+    .search-input:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+      background: white;
+    }
+
+    .search-input::placeholder {
+      color: #666;
+      font-style: italic;
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+
+    .results-container {
+      min-height: 100px;
+      animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
+    .no-results {
+      text-align: center;
+      opacity: 0.7;
+      font-style: italic;
+      padding: 2rem;
+      animation: pulse 2s infinite;
+    }
+
+    .contact-card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: slideInUp 0.5s ease-out forwards;
+    }
+
+    .contact-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.2);
+    }
+
+    .contact-card.match-high {
+      border-left: 5px solid #4ade80;
+      animation-delay: 0.1s;
+    }
+
+    .contact-card.match-medium {
+      border-left: 5px solid #fbbf24;
+      animation-delay: 0.2s;
+    }
+
+    .contact-card.match-low {
+      border-left: 5px solid #f87171;
+      animation-delay: 0.3s;
+    }
+
+    .team-name {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .match-score {
+      background: rgba(255,255,255,0.3);
+      padding: 0.2rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin-left: auto;
+    }
+
+    .contact-emails {
+      margin-bottom: 1rem;
+    }
+
+    .email-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      margin: 0.2rem 0.3rem 0.2rem 0;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .email-tag:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.05);
+    }
+
+    .matched-keywords {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      font-style: italic;
+    }
+
+    .keyword-highlight {
+      background: rgba(255,255,0,0.3);
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+
+    .suggestions {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .suggestion-chip {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      margin: 0.3rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .suggestion-chip:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    .typing-indicator {
+      display: none;
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .typing-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      margin: 0 2px;
+      animation: typingDots 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingDots {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+      30% { transform: translateY(-10px); opacity: 1; }
+    }
+
+    @media (max-width: 768px) {
+      .contact-finder-container {
+        margin: 1rem;
+        padding: 1.5rem;
+        border-radius: 15px;
+      }
+      
+      .contact-finder-title {
+        font-size: 2rem;
+      }
+      
+      .search-input {
+        font-size: 1rem;
+        padding: 0.8rem 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+<header>
+  <button id="menu-toggle" class="hamburger">&#9776;</button>
+  <h1>Castle Comms</h1>
+</header>
+
+<div id="notification-bell" class="notification-bell hidden">
+  🔔 <span id="notification-count" class="count-badge">0</span>
+</div>
+
+<div id="sidebar-container"></div>
+
+<main id="main">
+  <div class="contact-finder-container">
+    <div class="contact-finder-content">
+      <h1 class="contact-finder-title">🤔 Who do I contact?</h1>
+      <p class="contact-finder-subtitle">
+        Describe your question or issue, and we'll find the right team for you!
+      </p>
+      
+      <div class="search-container">
+        <input 
+          type="text" 
+          id="contact-search" 
+          class="search-input" 
+          placeholder="e.g., I need to cancel my order, or I have a complaint about damaged artwork..."
+        />
+        <span class="search-icon">🔍</span>
+      </div>
+
+      <div class="typing-indicator" id="typing-indicator">
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+        <span class="typing-dot"></span>
+      </div>
+
+      <div class="results-container" id="results-container">
+        <div class="no-results">
+          💭 Type your question above and I'll find the perfect team to help you!
+        </div>
+      </div>
+
+      <div class="suggestions">
+        <p style="margin-bottom: 0.5rem; opacity: 0.8;">💡 Quick suggestions:</p>
+        <span class="suggestion-chip" data-query="cancel my order">Cancel Order</span>
+        <span class="suggestion-chip" data-query="damaged artwork complaint">Damaged Item</span>
+        <span class="suggestion-chip" data-query="shipping tracking">Track Package</span>
+        <span class="suggestion-chip" data-query="artist event">Artist Events</span>
+        <span class="suggestion-chip" data-query="stock availability">Check Stock</span>
+        <span class="suggestion-chip" data-query="installation help">Installation</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<!-- Firebase config -->
+<script src="firebase-init.js"></script>
+
+<!-- Shared components -->
+<script src="shared-components.js"></script>
+
+<!-- Contact Finder Logic -->
+<script>
+let teamContacts = [];
+
+// Load team contacts data
+async function loadTeamContacts() {
+  try {
+    const response = await fetch('team_contacts.json');
+    teamContacts = await response.json();
+    console.log('✅ Team contacts loaded:', teamContacts.length, 'teams');
+  } catch (error) {
+    console.error('❌ Failed to load team contacts:', error);
+  }
+}
+
+// Smart keyword matching with scoring
+function findMatchingTeams(query) {
+  if (!query.trim() || teamContacts.length === 0) return [];
+  
+  const queryWords = query.toLowerCase().split(/\s+/).filter(word => word.length > 2);
+  const matches = [];
+  
+  teamContacts.forEach(team => {
+    let score = 0;
+    const matchedKeywords = [];
+    
+    team.keywords.forEach(keyword => {
+      const keywordWords = keyword.toLowerCase().split(/\s+/);
+      
+      // Check for exact keyword match
+      if (query.toLowerCase().includes(keyword.toLowerCase())) {
+        score += 10;
+        matchedKeywords.push(keyword);
+        return;
+      }
+      
+      // Check for partial matches
+      queryWords.forEach(queryWord => {
+        keywordWords.forEach(keywordWord => {
+          if (queryWord.includes(keywordWord) || keywordWord.includes(queryWord)) {
+            score += 3;
+            if (!matchedKeywords.includes(keyword)) {
+              matchedKeywords.push(keyword);
+            }
+          }
+        });
+      });
+    });
+    
+    if (score > 0) {
+      matches.push({
+        ...team,
+        score,
+        matchedKeywords
+      });
+    }
+  });
+  
+  return matches.sort((a, b) => b.score - a.score);
+}
+
+// Render search results with animations
+function renderResults(matches, query) {
+  const resultsContainer = document.getElementById('results-container');
+  
+  if (matches.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="no-results">
+        🤷‍♀️ No specific team found for "${query}". 
+        <br>Try different keywords or contact Client Services for general help.
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '';
+  matches.forEach((match, index) => {
+    const matchLevel = match.score >= 10 ? 'high' : match.score >= 5 ? 'medium' : 'low';
+    const matchPercentage = Math.min(Math.round((match.score / 15) * 100), 100);
+    
+    const emailTags = match.emails.map(email => 
+      `<span class="email-tag" onclick="copyToClipboard('${email}')" title="Click to copy">${email}</span>`
+    ).join('');
+    
+    const keywordHighlights = match.matchedKeywords.map(keyword => 
+      `<span class="keyword-highlight">${keyword}</span>`
+    ).join(', ');
+    
+    html += `
+      <div class="contact-card match-${matchLevel}" style="animation-delay: ${index * 0.1}s">
+        <div class="team-name">
+          <span>💼 ${match.team}</span>
+          <span class="match-score">${matchPercentage}% match</span>
+        </div>
+        <div class="contact-emails">
+          ${emailTags}
+        </div>
+        <div class="matched-keywords">
+          Matched: ${keywordHighlights}
+        </div>
+      </div>
+    `;
+  });
+  
+  resultsContainer.innerHTML = html;
+}
+
+// Copy email to clipboard
+async function copyToClipboard(email) {
+  try {
+    await navigator.clipboard.writeText(email);
+    // Visual feedback
+    event.target.style.background = 'rgba(34, 197, 94, 0.5)';
+    event.target.innerHTML = `${email} ✓ Copied!`;
+    
+    setTimeout(() => {
+      event.target.style.background = 'rgba(255,255,255,0.2)';
+      event.target.innerHTML = email;
+    }, 2000);
+  } catch (error) {
+    console.error('Failed to copy email:', error);
+  }
+}
+
+// Debounced search function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Search handler
+const handleSearch = debounce((query) => {
+  const typingIndicator = document.getElementById('typing-indicator');
+  
+  if (!query.trim()) {
+    document.getElementById('results-container').innerHTML = `
+      <div class="no-results">
+        💭 Type your question above and I'll find the perfect team to help you!
+      </div>
+    `;
+    return;
+  }
+  
+  // Show typing indicator
+  typingIndicator.style.display = 'block';
+  
+  // Simulate thinking time for better UX
+  setTimeout(() => {
+    const matches = findMatchingTeams(query);
+    renderResults(matches, query);
+    typingIndicator.style.display = 'none';
+  }, 500);
+}, 300);
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadTeamContacts();
+  
+  const searchInput = document.getElementById('contact-search');
+  const suggestionChips = document.querySelectorAll('.suggestion-chip');
+  
+  // Search input handler
+  searchInput.addEventListener('input', (e) => {
+    handleSearch(e.target.value);
+  });
+  
+  // Suggestion chip handlers
+  suggestionChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const query = chip.dataset.query;
+      searchInput.value = query;
+      handleSearch(query);
+      searchInput.focus();
+    });
+  });
+  
+  // Auto-focus search input
+  searchInput.focus();
+});
+</script>
+
+<!-- Site scripts -->
+<script src="script.js"></script>
+</body>
+</html>

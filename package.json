@@ -1,0 +1,17 @@
+{
+  "name": "castle-comms-admin-setup",
+  "version": "1.0.0",
+  "description": "Admin user setup for Castle Comms internal website",
+  "main": "setup-admin.js",
+  "scripts": {
+    "setup-admin": "node setup-admin.js",
+    "make-admin": "node setup-admin.js make-admin",
+    "check-admin": "node setup-admin.js check"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  },
+  "keywords": ["firebase", "admin", "castle-comms"],
+  "author": "Castle Fine Art",
+  "license": "MIT"
+}

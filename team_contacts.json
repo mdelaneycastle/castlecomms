@@ -1,0 +1,106 @@
+[
+  {
+    "team": "Order Processing",
+    "emails": [
+      "orderprocessingteam@washingtongreen.co.uk"
+    ],
+    "keywords": [
+      "cancellations",
+      "chasing orders",
+      "damaged artwork",
+      "frames",
+      "framing queries",
+      "order delays",
+      "orders",
+      "returns"
+    ]
+  },
+  {
+    "team": "Stock Team",
+    "emails": [
+      "stockcontrol@castlefineart.com"
+    ],
+    "keywords": [
+      "art availability",
+      "inventory",
+      "restock",
+      "sourcing stock",
+      "stock levels",
+      "stock queries"
+    ]
+  },
+  {
+    "team": "Client Services",
+    "emails": [
+      "clientservices@castlefineart.com"
+    ],
+    "keywords": [
+      "bad experience",
+      "complaints",
+      "customer complaint",
+      "feedback",
+      "service"
+    ]
+  },
+  {
+    "team": "Events",
+    "emails": [
+      "amarchington@washingtongreen.co.uk",
+      "rholland@castlefineart.com"
+    ],
+    "keywords": [
+      "VIP",
+      "artist appearances",
+      "events",
+      "exhibition",
+      "launch party",
+      "meet the artist",
+      "shows"
+    ]
+  },
+  {
+    "team": "Logistics",
+    "emails": [
+      "nsmethurst@castlefineart.com",
+      "swhitehouse@washingtongreen.co.uk"
+    ],
+    "keywords": [
+      "courier",
+      "delivery",
+      "lost shipment",
+      "shipping damage",
+      "shipping international and domestic queries",
+      "tracking"
+    ]
+  },
+  {
+    "team": "Installations and PDs",
+    "emails": [
+      "installationandpd@washingtongreen.co.uk"
+    ],
+    "keywords": [
+      "home installations and personal deliveries"
+    ]
+  },
+  {
+    "team": "Artist Management",
+    "emails": [
+      "artistmanagement@washingtongreen.co.uk"
+    ],
+    "keywords": [
+      "artist commissions",
+      "dedications",
+      "general enquiries about artists"
+    ]
+  },
+  {
+    "team": "Halcyon Team",
+    "emails": [
+      "rhercombe@washingtongreen.co.uk",
+      "acoulthard@washingtongreen.co.uk"
+    ],
+    "keywords": [
+      "halcyon stock and orders"
+    ]
+  }
+]
