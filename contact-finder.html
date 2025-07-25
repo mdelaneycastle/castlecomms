@@ -362,7 +362,7 @@ async function loadTeamContacts() {
   }
 }
 
-// Smart keyword matching with scoring
+// Smart keyword matching with scoring - prioritizes single word exact matches
 function findMatchingTeams(query) {
   if (!query.trim() || teamContacts.length === 0) return [];
   
@@ -376,20 +376,36 @@ function findMatchingTeams(query) {
     team.keywords.forEach(keyword => {
       const keywordWords = keyword.toLowerCase().split(/\s+/);
       
-      // Check for exact keyword match
+      // PRIORITY 1: Check for exact single word matches first
+      queryWords.forEach(queryWord => {
+        keywordWords.forEach(keywordWord => {
+          if (queryWord === keywordWord) {
+            score += 15; // Higher score for exact single word matches
+            if (!matchedKeywords.includes(keyword)) {
+              matchedKeywords.push(keyword);
+            }
+          }
+        });
+      });
+      
+      // PRIORITY 2: Check for exact full keyword phrase match
       if (query.toLowerCase().includes(keyword.toLowerCase())) {
-        score += 10;
-        matchedKeywords.push(keyword);
+        score += 12;
+        if (!matchedKeywords.includes(keyword)) {
+          matchedKeywords.push(keyword);
+        }
         return;
       }
       
-      // Check for partial matches
+      // PRIORITY 3: Check for partial word matches (substring matches)
       queryWords.forEach(queryWord => {
         keywordWords.forEach(keywordWord => {
           if (queryWord.includes(keywordWord) || keywordWord.includes(queryWord)) {
-            score += 3;
-            if (!matchedKeywords.includes(keyword)) {
-              matchedKeywords.push(keyword);
+            if (queryWord !== keywordWord) { // Only if not already counted as exact match
+              score += 3;
+              if (!matchedKeywords.includes(keyword)) {
+                matchedKeywords.push(keyword);
+              }
             }
           }
         });
