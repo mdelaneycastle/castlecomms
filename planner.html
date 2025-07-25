@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Castle Comms</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .calendar-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: 0;
+    }
+    .calendar-note {
+      background: #f9fafb;
+      border: 1px solid #d1d5db;
+      padding: 1rem;
+      margin: 2rem auto;
+      max-width: 700px;
+      border-radius: 0.5rem;
+    }
+    .calendar-note code {
+      display: block;
+      background: #e5e7eb;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      margin: 0.5rem 0;
+      word-break: break-all;
+    }
+    .calendar-note img {
+      margin-top: 1rem;
+      width: 150px;
+      height: 150px;
+      border-radius: 0.25rem;
+      border: 1px solid #ccc;
+    }
+    .download-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 0.375rem;
+    }
+  </style>
+</head>
+<body>
+  
+<header>
+  <button id="menu-toggle" class="hamburger">&#9776;</button>
+  <h1>Castle Comms</h1>
+</header>
+<div id="notification-bell" class="notification-bell hidden">
+  🔔 <span id="notification-count" class="count-badge">0</span>
+</div>
+<div id="sidebar-container"></div>
+
+<main id="main">
+  <h2>Planner</h2>
+  <p>Upcoming events and scheduling go here.</p>
+
+  <div class="calendar-container">
+    <iframe 
+      src="https://calendar.google.com/calendar/embed?src=7a2b68949fab28bdbe91979576d3bc792425a664a58b41d3c3953550a3f72e60%40group.calendar.google.com&ctz=Europe%2FLondon"
+      frameborder="0"
+      scrolling="no">
+    </iframe>
+  </div>
+
+  <div class="calendar-note">
+    <h3>📅 Keep this calendar synced</h3>
+    <p>If you'd like this calendar to stay updated automatically in your device's calendar app (like Apple Calendar or Outlook), use this link to <strong>subscribe</strong> instead of downloading it:</p>
+    <code>https://bit.ly/4jHjbud</code>
+    <p>On iPhone: <em>Settings → Calendar → Accounts → Add Subscribed Calendar</em></p>
+    <p>Scan this QR code to copy the link on your phone:</p>
+    <img src="qr-code.png" alt="QR Code to subscribe to calendar" />
+  </div>
+
+  <p>
+    <a href="https://bit.ly/4jHjbud" 
+       class="download-btn" target="_blank">
+      📥 Download One-Time Calendar Snapshot
+    </a>
+  </p>
+</main>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<!-- Firebase init -->
+<script src="firebase-init.js"></script>
+
+<!-- Shared components -->
+<script src="shared-components.js"></script>
+
+<!-- Site scripts -->
+<script src="script.js"></script>
+</body>
+</html>

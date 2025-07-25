@@ -1,0 +1,67 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
+        ".write": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
+        ".validate": "newData.hasChildren(['name']) && newData.child('name').isString()"
+      }
+    },
+    
+    "posts": {
+      ".read": "auth != null",
+      ".indexOn": ["timestamp"],
+      "$postId": {
+        ".write": "auth != null && (
+          (!data.exists() && auth.uid != null) || 
+          (data.exists() && data.child('userId').val() == auth.uid) ||
+          auth.token.admin == true
+        )",
+        ".validate": "newData.hasChildren(['name', 'message', 'timestamp']) && 
+                     newData.child('name').isString() && 
+                     newData.child('message').isString() && 
+                     newData.child('timestamp').isNumber()",
+        "comments": {
+          "$commentId": {
+            ".write": "auth != null",
+            ".validate": "newData.hasChildren(['text', 'timestamp']) && 
+                         newData.child('text').isString() && 
+                         newData.child('timestamp').isNumber()"
+          }
+        }
+      }
+    },
+    
+    "files": {
+      ".read": "auth != null",
+      "$fileId": {
+        ".write": "auth != null && (
+          (!data.exists() && auth.uid != null) || 
+          (data.exists() && data.child('uploadedBy').val() == auth.uid) ||
+          auth.token.admin == true
+        )",
+        ".validate": "newData.hasChildren(['name', 'url', 'uploadedBy', 'timestamp']) && 
+                     newData.child('name').isString() && 
+                     newData.child('url').isString() && 
+                     newData.child('uploadedBy').isString() && 
+                     newData.child('timestamp').isNumber()"
+      }
+    },
+    
+    "notifications": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
+        "$notificationId": {
+          ".validate": "newData.hasChildren(['message', 'timestamp', 'read']) && 
+                       newData.child('message').isString() && 
+                       newData.child('timestamp').isNumber() && 
+                       newData.child('read').isBoolean()"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 4rem auto;
+      padding: 2rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #f8f8f8;
+    }
+    h2 {
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #555;
+    }
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 0.75rem;
+      font-size: 0.9rem;
+    }
+    #status {
+      text-align: center;
+      margin-top: 1rem;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Castle Comms Login</h2>
+
+  <form id="login-form">
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit">Log In</button>
+  </form>
+
+  <a href="#" id="forgot-password">Forgot your password?</a>
+
+  <p id="status"></p>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <!-- Firebase init config -->
+  <script src="firebase-init.js"></script>
+  
+  <script>
+    // Wait for Firebase to initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!window.isFirebaseReady()) {
+        document.getElementById("status").textContent = "❌ Firebase not initialized properly";
+        return;
+      }
+
+      const auth = firebase.auth();
+      const loginForm = document.getElementById("login-form");
+      const status = document.getElementById("status");
+
+      loginForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        // Show loading state
+        status.style.color = "blue";
+        status.textContent = "🔄 Signing in...";
+
+        auth.signInWithEmailAndPassword(email, password)
+          .then(() => {
+            status.style.color = "green";
+            status.textContent = "✅ Login successful!";
+            setTimeout(() => {
+              window.location.href = "main.html";
+            }, 1000);
+          })
+          .catch(error => {
+            status.style.color = "red";
+            status.textContent = "❌ " + window.handleFirebaseError(error, "Login");
+          });
+      });
+
+      // Password Reset
+      document.getElementById("forgot-password").addEventListener("click", () => {
+        const email = document.getElementById("email").value.trim();
+        if (!email) {
+          status.style.color = "red";
+          status.textContent = "Please enter your email above first.";
+          return;
+        }
+
+        // Show loading state
+        status.style.color = "blue";
+        status.textContent = "🔄 Sending reset email...";
+
+        auth.sendPasswordResetEmail(email)
+          .then(() => {
+            status.style.color = "green";
+            status.textContent = "📧 Password reset email sent!";
+          })
+          .catch(error => {
+            status.style.color = "red";
+            status.textContent = "❌ " + window.handleFirebaseError(error, "Password reset");
+          });
+      });
+    });
+  </script>
+</body>
+</html>

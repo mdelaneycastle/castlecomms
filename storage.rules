@@ -1,0 +1,45 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // User profile images - users can upload their own profile picture
+    match /profiles/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+                   request.auth.uid == userId &&
+                   resource.size < 5 * 1024 * 1024 && // 5MB limit
+                   request.resource.contentType.matches('image/.*');
+    }
+    
+    // Post images - authenticated users can upload images for posts
+    match /posts/{postId}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+                   resource.size < 10 * 1024 * 1024 && // 10MB limit
+                   request.resource.contentType.matches('image/.*|video/.*');
+      allow delete: if request.auth != null &&
+                    (request.auth.uid == resource.metadata.uploadedBy ||
+                     request.auth.token.admin == true);
+    }
+    
+    // Shared files - authenticated users can upload, admins can delete
+    match /files/{fileId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+                   resource.size < 50 * 1024 * 1024; // 50MB limit for documents
+      allow delete: if request.auth != null &&
+                    (request.auth.uid == resource.metadata.uploadedBy ||
+                     request.auth.token.admin == true);
+    }
+    
+    // Admin only files
+    match /admin/{allPaths=**} {
+      allow read, write: if request.auth != null && 
+                         request.auth.token.admin == true;
+    }
+    
+    // Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

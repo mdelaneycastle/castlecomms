@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin – User Management</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
+    header {
+      display: flex;
+      align-items: center;
+      background: #333;
+      color: white;
+      padding: 0.5rem 1rem;
+    }
+    header h1 { margin: 0 0 0 1rem; font-size: 1.25rem; }
+    .hamburger {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 250px;
+      height: 100%;
+      background: #222;
+      color: white;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      padding-top: 2rem;
+      box-sizing: border-box;
+      z-index: 1000;
+    }
+    .sidebar.show { transform: translateX(0); }
+    .sidebar .close-btn {
+      position: absolute; top: 0.5rem; right: 1rem;
+      background: none; border: none; color: white;
+      font-size: 1.5rem; cursor: pointer;
+    }
+    .sidebar ul {
+      list-style: none; padding: 0; margin: 2rem 0 0 0;
+    }
+    .sidebar li {
+      margin: 1rem 0;
+    }
+    .sidebar a {
+      color: white; text-decoration: none; padding: 0.5rem 1rem; display: block;
+    }
+    main {
+      margin: 2rem auto;
+      max-width: 900px;
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <button id="menu-toggle" class="hamburger">&#9776;</button>
+  <h1>Castle Comms Admin</h1>
+</header>
+<div id="notification-bell" class="notification-bell hidden">
+  🔔 <span id="notification-count" class="count-badge">0</span>
+</div>
+<!-- sidebar will be injected here -->
+<div id="sidebar-container"></div>
+
+  
+
+<main>
+<form id="create-user-form" style="margin-bottom:2rem;">
+  <input id="new-email"       type="email"    placeholder="Email"        required />
+  <input id="new-password"    type="password" placeholder="Password"     required />
+  <input id="new-displayName" type="text"     placeholder="Display Name" />
+  <label>
+    <input id="new-admin" type="checkbox" />
+    Admin
+  </label>
+  <button type="submit">Create User</button>
+</form>
+  
+  <h2>User Management</h2>
+  <table id="user-table">
+    <thead>
+      <tr><th>UID</th><th>Email</th><th>Display Name</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<script src="firebase-init.js"></script>
+<script src="shared-components.js"></script>
+<script src="script.js"></script>
+
+<!-- Admin page specific logic -->
+<script>
+  // Additional admin-specific auth check
+  firebase.auth().onAuthStateChanged(async user => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+    
+    // Check if user has admin permissions
+    const isAdmin = await window.authUtils.isAdmin(user);
+    if (!isAdmin) {
+      alert("❌ Access denied. Admin privileges required.");
+      window.location.href = "main.html";
+      return;
+    }
+  });
+</script>
+
+</body>
+</html>
