@@ -93,7 +93,7 @@
 
         .drawing-controls {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
             margin-top: 10px;
             gap: 10px;
@@ -231,8 +231,9 @@
             <div>Score: <span id="player1Score">0</span> - <span id="player2Score">0</span></div>
         </div>
 
-        <div class="prompt-area" id="promptArea">
-            Click "Start Round" to begin!
+        <div class="action-buttons" id="drawingButtons">
+            <button class="btn btn-primary" onclick="startRound()">Start Round</button>
+            <button class="btn btn-secondary hidden" onclick="submitDrawing()">Submit Drawing</button>
         </div>
 
         <div class="canvas-container">
@@ -248,11 +249,6 @@
                 </div>
                 <button class="btn btn-danger" onclick="clearCanvas()">Clear</button>
             </div>
-        </div>
-
-        <div class="action-buttons" id="drawingButtons">
-            <button class="btn btn-primary" onclick="startRound()">Start Round</button>
-            <button class="btn btn-secondary hidden" onclick="submitDrawing()">Submit Drawing</button>
         </div>
 
         <div class="guess-area hidden" id="guessArea">
@@ -408,7 +404,6 @@
             gamePhase = 'drawing';
             currentPrompt = disneyPixarFilms[Math.floor(Math.random() * disneyPixarFilms.length)];
             
-            document.getElementById('promptArea').textContent = `Draw: ${currentPrompt}`;
             document.querySelector('.btn-primary').classList.add('hidden');
             document.querySelector('.btn-secondary').classList.remove('hidden');
             
@@ -435,7 +430,6 @@
             clearInterval(timerInterval);
             gamePhase = 'guessing';
             
-            document.getElementById('promptArea').textContent = `Player ${currentPlayer === 1 ? 2 : 1}, what did they draw?`;
             document.getElementById('drawingButtons').classList.add('hidden');
             document.getElementById('guessArea').classList.remove('hidden');
             document.getElementById('timer').textContent = '∞';
@@ -496,7 +490,6 @@
             if (roundsPlayed >= maxRounds) {
                 endGame();
             } else {
-                document.getElementById('promptArea').textContent = `Player ${currentPlayer}, click "Start Round" when ready!`;
                 gamePhase = 'waiting';
             }
         }
@@ -537,7 +530,6 @@
             document.getElementById('drawingButtons').classList.remove('hidden');
             document.querySelector('.btn-primary').classList.remove('hidden');
             document.querySelector('.btn-secondary').classList.add('hidden');
-            document.getElementById('promptArea').textContent = 'Click "Start Round" to begin!';
             document.getElementById('timer').textContent = '60';
             
             clearCanvas();
