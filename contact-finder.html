@@ -365,7 +365,7 @@ async function loadTeamContacts() {
   }
 }
 
-// Smart keyword matching with scoring - TRULY prioritizes single word exact matches
+// Smart keyword matching with scoring - TRULY prioritizes single word exact matches + fuzzy matching
 function findMatchingTeams(query) {
   if (!query.trim() || teamContacts.length === 0) return [];
   
@@ -376,6 +376,7 @@ function findMatchingTeams(query) {
     let score = 0;
     const matchedKeywords = [];
     let hasExactWordMatch = false;
+    let hasFuzzyMatch = false;
     
     // PASS 1: Look for exact single word matches first - these get massive priority
     team.keywords.forEach(keyword => {
@@ -394,8 +395,27 @@ function findMatchingTeams(query) {
       });
     });
     
-    // PASS 2: Only if no exact word matches, look for other types
+    // PASS 2: Look for fuzzy matches (misspellings) - high priority but not as high as exact
     if (!hasExactWordMatch) {
+      team.keywords.forEach(keyword => {
+        const keywordWords = keyword.toLowerCase().split(/\s+/);
+        
+        queryWords.forEach(queryWord => {
+          keywordWords.forEach(keywordWord => {
+            if (isFuzzyMatch(queryWord, keywordWord)) {
+              score += 80; // High score for fuzzy matches (likely misspellings)
+              hasFuzzyMatch = true;
+              if (!matchedKeywords.includes(keyword)) {
+                matchedKeywords.push(`${keyword} (did you mean "${keywordWord}"?)`);
+              }
+            }
+          });
+        });
+      });
+    }
+    
+    // PASS 3: Only if no exact or fuzzy matches, look for other types
+    if (!hasExactWordMatch && !hasFuzzyMatch) {
       team.keywords.forEach(keyword => {
         const keywordWords = keyword.toLowerCase().split(/\s+/);
         
@@ -482,6 +502,47 @@ function renderResults(matches, query) {
 
 // Store current query for mailto links
 let currentQuery = '';
+
+// Calculate Levenshtein distance for fuzzy matching
+function levenshteinDistance(str1, str2) {
+  const matrix = [];
+  const len1 = str1.length;
+  const len2 = str2.length;
+
+  // Create matrix
+  for (let i = 0; i <= len2; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= len1; j++) {
+    matrix[0][j] = j;
+  }
+
+  // Fill matrix
+  for (let i = 1; i <= len2; i++) {
+    for (let j = 1; j <= len1; j++) {
+      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        );
+      }
+    }
+  }
+
+  return matrix[len2][len1];
+}
+
+// Check if two words are similar (fuzzy match)
+function isFuzzyMatch(word1, word2, maxDistance = 2) {
+  if (word1.length < 4 || word2.length < 4) return false; // Skip short words
+  if (Math.abs(word1.length - word2.length) > maxDistance) return false; // Length difference too big
+  
+  const distance = levenshteinDistance(word1.toLowerCase(), word2.toLowerCase());
+  return distance <= maxDistance;
+}
 
 // Debounced search function
 function debounce(func, wait) {
