@@ -113,30 +113,78 @@ header h1 {
 .sidebar {
   position: fixed;
   top: 0;
-  left: -260px;
-  width: 240px;
+  left: -280px;
+  width: 260px;
   height: 100%;
-  background-color: #1f2937;
+  background: linear-gradient(180deg, 
+    rgba(31, 41, 55, 0.95) 0%, 
+    rgba(17, 24, 39, 0.98) 100%);
+  backdrop-filter: blur(20px);
   color: white;
-  padding: 1rem;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-  transition: left 0.3s ease;
+  padding: 0;
+  box-shadow: var(--shadow-heavy);
+  transition: var(--transition);
   z-index: 1000;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: var(--primary-gradient);
+  opacity: 0.1;
+  z-index: -1;
 }
 
 .sidebar ul {
   list-style: none;
-  padding: 0;
+  padding: 2rem 0 0 0;
+  margin: 0;
 }
 
 .sidebar ul li {
-  margin: 1rem 0;
+  margin: 0;
 }
 
 .sidebar ul li a {
-  color: white;
+  display: block;
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 1rem 1.5rem;
+  margin: 0.25rem 1rem;
+  border-radius: 12px;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar ul li a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--primary-gradient);
+  opacity: 0;
+  transition: var(--transition);
+  z-index: -1;
+}
+
+.sidebar ul li a:hover {
+  color: white;
+  transform: translateX(8px);
+  box-shadow: var(--shadow-light);
+}
+
+.sidebar ul li a:hover::before {
+  opacity: 1;
 }
 
 .sidebar.show {
@@ -144,14 +192,28 @@ header h1 {
 }
 
 .close-btn {
-  font-size: 1.5rem;
-  background: none;
-  border: none;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
   color: white;
   cursor: pointer;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: var(--transition);
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: var(--shadow-light);
 }
 
 main {
