@@ -1,5 +1,132 @@
 console.log("🔌 script.js initialized");
 
+// ─── Modern Gallery Component ───
+class ModernGallery {
+  constructor() {
+    this.images = [
+      '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg', '9.jpg', '10.jpg',
+      '11.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg', '17.jpg',
+      '20230518_095610.jpg', '20230518_100059.jpg', '20230518_100201.jpg', '20230518_100550.jpg',
+      'IMG_1329.jpg', 'IMG_1334.jpg', 'IMG_1335.jpg', 'IMG_1344.jpg'
+    ];
+    this.currentIndex = 0;
+    this.init();
+  }
+
+  init() {
+    this.generateThumbnails();
+    this.bindEvents();
+    this.updateCounter();
+  }
+
+  generateThumbnails() {
+    const thumbnailContainer = document.getElementById('gallery-thumbnails');
+    if (!thumbnailContainer) return;
+
+    thumbnailContainer.innerHTML = '';
+    
+    this.images.forEach((image, index) => {
+      const thumbnail = document.createElement('div');
+      thumbnail.className = `gallery-thumbnail ${index === 0 ? 'active' : ''}`;
+      thumbnail.innerHTML = `<img src="images/web-optimized/thumbnails/${image}" alt="Thumbnail ${index + 1}" loading="lazy">`;
+      
+      thumbnail.addEventListener('click', () => this.showImage(index));
+      thumbnailContainer.appendChild(thumbnail);
+    });
+  }
+
+  bindEvents() {
+    const prevBtn = document.getElementById('gallery-prev');
+    const nextBtn = document.getElementById('gallery-next');
+    const mainImage = document.getElementById('gallery-main-image');
+
+    if (prevBtn) prevBtn.addEventListener('click', () => this.previousImage());
+    if (nextBtn) nextBtn.addEventListener('click', () => this.nextImage());
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') this.previousImage();
+      if (e.key === 'ArrowRight') this.nextImage();
+    });
+
+    // Touch/swipe support
+    if (mainImage) {
+      let startX = null;
+      
+      mainImage.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+      });
+
+      mainImage.addEventListener('touchend', (e) => {
+        if (!startX) return;
+        
+        const endX = e.changedTouches[0].clientX;
+        const diff = startX - endX;
+        
+        if (Math.abs(diff) > 50) { // Minimum swipe distance
+          if (diff > 0) {
+            this.nextImage();
+          } else {
+            this.previousImage();
+          }
+        }
+        startX = null;
+      });
+    }
+  }
+
+  showImage(index) {
+    this.currentIndex = index;
+    const mainImage = document.getElementById('gallery-main-image');
+    
+    if (mainImage) {
+      // Smooth transition effect
+      mainImage.style.opacity = '0.5';
+      
+      setTimeout(() => {
+        mainImage.src = `images/web-optimized/${this.images[index]}`;
+        mainImage.style.opacity = '1';
+      }, 150);
+    }
+
+    this.updateThumbnails();
+    this.updateCounter();
+  }
+
+  previousImage() {
+    const newIndex = this.currentIndex === 0 ? this.images.length - 1 : this.currentIndex - 1;
+    this.showImage(newIndex);
+  }
+
+  nextImage() {
+    const newIndex = this.currentIndex === this.images.length - 1 ? 0 : this.currentIndex + 1;
+    this.showImage(newIndex);
+  }
+
+  updateThumbnails() {
+    const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+    thumbnails.forEach((thumb, index) => {
+      thumb.classList.toggle('active', index === this.currentIndex);
+    });
+  }
+
+  updateCounter() {
+    const currentSpan = document.getElementById('gallery-current');
+    const totalSpan = document.getElementById('gallery-total');
+    
+    if (currentSpan) currentSpan.textContent = this.currentIndex + 1;
+    if (totalSpan) totalSpan.textContent = this.images.length;
+  }
+}
+
+// Initialize gallery when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  const gallerySection = document.querySelector('.gallery-section');
+  if (gallerySection) {
+    new ModernGallery();
+  }
+});
+
 // ─── Helper: Create a new user ───
 async function createUser({ email, password, displayName, admin: wantAdmin }) {
   try {
