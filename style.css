@@ -191,41 +191,6 @@ header h1 {
   left: 0;
 }
 
-.close-btn {
-  position: absolute;
-  top: 6rem;
-  right: 1.5rem;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  transition: var(--transition);
-  z-index: 1001;
-}
-
-.close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: rotate(90deg) scale(1.1);
-  box-shadow: var(--shadow-light);
-}
-
-.close-btn::before {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  right: -10px;
-  bottom: -10px;
-  z-index: -1;
-}
 
 main {
   padding: 2rem;
