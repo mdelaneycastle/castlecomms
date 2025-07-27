@@ -44,7 +44,8 @@ body {
   opacity: 1;
 }
 
-/* Color Overlay */
+/* Color Overlay - Temporarily Disabled for Testing */
+/*
 body::before {
   content: '';
   position: fixed;
@@ -58,6 +59,7 @@ body::before {
   z-index: -1;
   pointer-events: none;
 }
+*/
 
 header {
   background: rgba(255, 255, 255, 0.95);
