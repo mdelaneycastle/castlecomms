@@ -118,8 +118,83 @@ class ModernGallery {
   }
 }
 
-// Initialize gallery when DOM is loaded
+// ─── Background Slideshow Component ───
+class BackgroundSlideshow {
+  constructor() {
+    this.images = [
+      '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg', '9.jpg', '10.jpg',
+      '11.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg', '17.jpg',
+      '20230518_095610.jpg', '20230518_100059.jpg', '20230518_100201.jpg', '20230518_100550.jpg'
+    ];
+    this.currentIndex = 0;
+    this.interval = null;
+    this.init();
+  }
+
+  init() {
+    this.createSlideshow();
+    this.startSlideshow();
+  }
+
+  createSlideshow() {
+    const container = document.getElementById('background-slideshow');
+    if (!container) return;
+
+    // Create image elements
+    this.images.forEach((image, index) => {
+      const img = document.createElement('img');
+      img.src = `images/web-optimized/${image}`;
+      img.alt = `Background ${index + 1}`;
+      img.loading = index < 3 ? 'eager' : 'lazy'; // Load first 3 eagerly
+      
+      if (index === 0) {
+        img.classList.add('active');
+      }
+      
+      container.appendChild(img);
+    });
+  }
+
+  nextImage() {
+    const container = document.getElementById('background-slideshow');
+    if (!container) return;
+
+    const images = container.querySelectorAll('img');
+    
+    // Remove active class from current image
+    images[this.currentIndex].classList.remove('active');
+    
+    // Move to next image
+    this.currentIndex = (this.currentIndex + 1) % this.images.length;
+    
+    // Add active class to new image
+    images[this.currentIndex].classList.add('active');
+  }
+
+  startSlideshow() {
+    // Change image every 4 seconds
+    this.interval = setInterval(() => {
+      this.nextImage();
+    }, 4000);
+  }
+
+  stopSlideshow() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
+  }
+}
+
+// Initialize components when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize background slideshow
+  const backgroundContainer = document.getElementById('background-slideshow');
+  if (backgroundContainer) {
+    new BackgroundSlideshow();
+  }
+
+  // Initialize gallery (if not commented out)
   const gallerySection = document.querySelector('.gallery-section');
   if (gallerySection) {
     new ModernGallery();
