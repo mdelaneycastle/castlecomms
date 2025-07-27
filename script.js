@@ -121,14 +121,24 @@ class ModernGallery {
 // ─── Background Slideshow Component ───
 class BackgroundSlideshow {
   constructor() {
-    this.images = [
+    this.originalImages = [
       '1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg', '7.jpg', '8.jpg', '9.jpg', '10.jpg',
       '11.jpg', '12.jpg', '13.jpg', '14.jpg', '15.jpg', '16.jpg', '17.jpg',
       '20230518_095610.jpg', '20230518_100059.jpg', '20230518_100201.jpg', '20230518_100550.jpg'
     ];
-    this.currentIndex = 0;
+    this.images = this.shuffleArray([...this.originalImages]);
+    this.currentIndex = Math.floor(Math.random() * this.images.length);
     this.interval = null;
     this.init();
+  }
+
+  // Fisher-Yates shuffle algorithm
+  shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   }
 
   init() {
@@ -145,9 +155,11 @@ class BackgroundSlideshow {
       const img = document.createElement('img');
       img.src = `images/web-optimized/${image}`;
       img.alt = `Background ${index + 1}`;
-      img.loading = index < 3 ? 'eager' : 'lazy'; // Load first 3 eagerly
+      // Load current and next few images eagerly, rest lazy
+      img.loading = (index >= this.currentIndex && index <= this.currentIndex + 2) ? 'eager' : 'lazy';
       
-      if (index === 0) {
+      // Set the randomly selected starting image as active
+      if (index === this.currentIndex) {
         img.classList.add('active');
       }
       
