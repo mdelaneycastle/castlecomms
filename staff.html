@@ -140,6 +140,15 @@
       animation: growLine 0.5s ease-out 0.3s forwards;
     }
 
+    .connection-line-top {
+      width: 2px;
+      height: 20px;
+      background: rgba(255,255,255,0.5);
+      margin: 0 auto;
+      opacity: 0;
+      animation: growLine 0.5s ease-out 0.1s forwards;
+    }
+
     .connection-branch {
       display: flex;
       justify-content: center;
@@ -230,17 +239,21 @@
       to { height: 40px; opacity: 1; }
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
     .staff-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 2rem;
       margin-top: 2rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
 
     @media (max-width: 768px) {
       .staff-container {
@@ -297,9 +310,9 @@
 
       <!-- Senior Coordinators Level -->
       <div class="subordinates" id="chappie-subordinates">
-        <div class="connection-line"></div>
+        <div class="connection-line-top"></div>
         <div class="connection-branch">
-          <div class="staff-member clickable" data-staff="jenny" style="animation-delay: 0.4s">
+          <div class="staff-member clickable" data-staff="team" style="animation-delay: 0.4s">
             <div class="staff-card">
               <img src="Staff/Jenny.png" alt="Jenny Peet" class="staff-photo" />
               <div class="staff-name">Jenny Peet</div>
@@ -308,7 +321,7 @@
             </div>
           </div>
           
-          <div class="staff-member clickable" data-staff="gerald" style="animation-delay: 0.6s">
+          <div class="staff-member clickable" data-staff="team" style="animation-delay: 0.6s">
             <div class="staff-card">
               <img src="Staff/Gerald.png" alt="Gerald Hooper" class="staff-photo" />
               <div class="staff-name">Gerald Hooper</div>
@@ -319,10 +332,10 @@
         </div>
       </div>
 
-      <!-- Coordinators Level -->
-      <div class="subordinates" id="jenny-subordinates">
+      <!-- Coordinators Level - Managed by both Jenny and Gerald together -->
+      <div class="subordinates" id="team-subordinates">
         <div class="connection-line"></div>
-        <div class="level-title">Jenny's Team - Order Processing Coordinators</div>
+        <div class="level-title">Order Processing Coordinators</div>
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 0.8s">
             <div class="staff-card">
@@ -339,13 +352,7 @@
               <div class="staff-title-role">Order Processing Coordinator</div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="subordinates" id="gerald-subordinates">
-        <div class="connection-line"></div>
-        <div class="level-title">Gerald's Team - Order Processing Coordinators</div>
-        <div class="staff-grid">
+          
           <div class="staff-member" style="animation-delay: 1.2s">
             <div class="staff-card">
               <img src="Staff/Pip.png" alt="Phillippa Beevor-Reid" class="staff-photo" />
@@ -391,34 +398,56 @@ document.addEventListener('DOMContentLoaded', function() {
       if (subordinates) {
         const isCurrentlyExpanded = this.classList.contains('expanded');
         
-        // Close all other expanded sections
-        document.querySelectorAll('.staff-member.expanded').forEach(expandedMember => {
-          if (expandedMember !== this) {
-            expandedMember.classList.remove('expanded');
-            const otherSubordinatesId = `${expandedMember.dataset.staff}-subordinates`;
-            const otherSubordinates = document.getElementById(otherSubordinatesId);
-            if (otherSubordinates) {
-              otherSubordinates.classList.remove('show');
-            }
-          }
-        });
-        
-        // Toggle current section
-        if (isCurrentlyExpanded) {
-          this.classList.remove('expanded');
-          subordinates.classList.remove('show');
-        } else {
-          this.classList.add('expanded');
-          subordinates.classList.add('show');
+        // For team members (Jenny/Gerald), check if any team member is already expanded
+        if (staffId === 'team') {
+          const anyTeamExpanded = document.querySelector('.staff-member[data-staff="team"].expanded');
           
-          // Smooth scroll to show the expanded content
-          setTimeout(() => {
-            subordinates.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'nearest' 
+          if (anyTeamExpanded && !isCurrentlyExpanded) {
+            // If another team member is expanded, just mark this one as expanded too
+            this.classList.add('expanded');
+            return;
+          } else if (isCurrentlyExpanded) {
+            // If clicking an expanded team member, collapse all team members
+            document.querySelectorAll('.staff-member[data-staff="team"]').forEach(teamMember => {
+              teamMember.classList.remove('expanded');
             });
-          }, 300);
+            subordinates.classList.remove('show');
+            return;
+          } else {
+            // If no team member is expanded, expand all team members
+            document.querySelectorAll('.staff-member[data-staff="team"]').forEach(teamMember => {
+              teamMember.classList.add('expanded');
+            });
+            subordinates.classList.add('show');
+          }
+        } else {
+          // For non-team members (like Chappie), normal behavior
+          if (isCurrentlyExpanded) {
+            this.classList.remove('expanded');
+            subordinates.classList.remove('show');
+            // Also collapse any team members if closing Chappie
+            if (staffId === 'chappie') {
+              document.querySelectorAll('.staff-member[data-staff="team"]').forEach(teamMember => {
+                teamMember.classList.remove('expanded');
+              });
+              const teamSubordinates = document.getElementById('team-subordinates');
+              if (teamSubordinates) {
+                teamSubordinates.classList.remove('show');
+              }
+            }
+          } else {
+            this.classList.add('expanded');
+            subordinates.classList.add('show');
+          }
         }
+        
+        // Smooth scroll to show the expanded content
+        setTimeout(() => {
+          subordinates.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest' 
+          });
+        }, 300);
       }
     });
   });
