@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Staff Hierarchy - Castle Comms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Order Processing - Castle Comms</title>
   
   <!-- Security Headers -->
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
@@ -256,24 +256,63 @@
 
 
     @media (max-width: 768px) {
+      /* Force desktop-like layout on mobile */
       .staff-container {
-        margin: 1rem;
-        padding: 1.5rem;
+        margin: 0.5rem;
+        padding: 1rem;
         border-radius: 15px;
+        min-height: auto;
+        overflow-x: auto;
+        min-width: 100vw;
+        transform: scale(0.8);
+        transform-origin: top left;
       }
       
       .staff-title {
-        font-size: 2rem;
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
       }
       
       .staff-photo {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
+      }
+      
+      .staff-card {
+        padding: 1rem;
+      }
+      
+      .staff-name {
+        font-size: 1.1rem;
+      }
+      
+      .staff-title-role {
+        font-size: 0.85rem;
+      }
+      
+      .connection-branch {
+        flex-wrap: nowrap;
+        justify-content: center;
+        gap: 1rem;
       }
       
       .staff-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
+        max-width: 600px;
+      }
+      
+      .level-title {
+        font-size: 1rem;
+      }
+      
+      /* Ensure content fits horizontally */
+      body {
+        overflow-x: auto;
+      }
+      
+      .staff-member {
+        min-width: 140px;
       }
     }
   </style>
@@ -299,7 +338,7 @@
 <main id="main">
   <div class="staff-container">
     <div class="staff-content">
-      <h1 class="staff-title">👥 Staff Hierarchy</h1>
+      <h1 class="staff-title">👥 Order Processing</h1>
       
       <!-- Manager Level -->
       <div class="hierarchy-level">
