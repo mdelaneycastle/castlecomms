@@ -111,10 +111,16 @@
       height: 120px;
       border-radius: 50%;
       object-fit: cover;
+      object-position: center top;
       border: 4px solid rgba(255,255,255,0.3);
       background: white;
       margin-bottom: 1rem;
       transition: all 0.3s ease;
+    }
+
+    /* Specific positioning for Raksha's photo */
+    .staff-photo[alt="Raksha Hercombe"] {
+      object-position: center 20%;
     }
 
     .staff-member.clickable:hover .staff-photo {
