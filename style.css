@@ -517,6 +517,13 @@ admin-link {
   padding: 0 1rem;
 }
 
+.quick-link-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .quick-links a {
   position: relative;
   width: 100%;
@@ -535,6 +542,19 @@ admin-link {
   box-shadow: var(--shadow-light);
   border: 1px solid rgba(255, 255, 255, 0.3);
   overflow: hidden;
+}
+
+.quick-link-label {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+  max-width: 100%;
+  word-wrap: break-word;
 }
 
 .quick-links a::before {
@@ -813,6 +833,11 @@ admin-link {
   .quick-links {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
+  }
+  
+  .quick-link-label {
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
   }
   
   .cta-button {
