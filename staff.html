@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Order Processing - Castle Comms</title>
+  <title>Staff Directory - Castle Comms</title>
   
   <!-- Security Headers -->
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
@@ -58,8 +58,10 @@
 
     .hierarchy-level {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
+      justify-content: center;
+      gap: 3rem;
       margin-bottom: 2rem;
     }
 
@@ -151,41 +153,16 @@
 
     .connection-branch {
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
       align-items: flex-start;
-      position: relative;
-      opacity: 0;
-      animation: fadeIn 0.5s ease-out 0.5s forwards;
-    }
-
-    .connection-branch::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 25%;
-      right: 25%;
-      height: 2px;
-      background: rgba(255,255,255,0.5);
-    }
-
-    .connection-branch .staff-member {
-      position: relative;
-    }
-
-    .connection-branch .staff-member::before {
-      content: '';
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 2px;
-      height: 20px;
-      background: rgba(255,255,255,0.5);
+      gap: 2rem;
+      margin-top: 1rem;
     }
 
     .subordinates {
       display: none;
-      animation: slideDown 0.6s ease-out;
+      animation: slideDown 0.5s ease-out;
     }
 
     .subordinates.show {
@@ -249,23 +226,10 @@
       margin-right: auto;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-
-    @media (max-width: 768px) {
-      /* Force desktop-like layout on mobile */
+    @media screen and (max-width: 768px) {
       .staff-container {
-        margin: 0.5rem;
+        margin: 1rem;
         padding: 1rem;
-        border-radius: 15px;
-        min-height: auto;
-        overflow-x: auto;
-        min-width: 100vw;
-        transform: scale(0.8);
-        transform-origin: top left;
       }
       
       .staff-title {
@@ -306,7 +270,11 @@
         font-size: 1rem;
       }
       
-      /* Ensure content fits horizontally */
+      .hierarchy-level {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
       body {
         overflow-x: auto;
       }
@@ -338,68 +306,133 @@
 <main id="main">
   <div class="staff-container">
     <div class="staff-content">
-      <h1 class="staff-title">👥 Order Processing</h1>
+      <h1 class="staff-title">👥 Company Structure</h1>
       
-      <!-- Manager Level -->
+      <!-- Top Level Leadership -->
       <div class="hierarchy-level">
-        <div class="staff-member clickable" data-staff="chappie" style="animation-delay: 0.2s">
+        <div class="staff-member clickable" data-staff="gary-turpin" style="animation-delay: 0.1s">
           <div class="staff-card">
-            <img src="Staff/Chappie.png" alt="Paul Chapman" class="staff-photo" />
-            <div class="staff-name">Paul Chapman</div>
-            <div class="staff-title-role">Order Processing Manager</div>
+            <img src="staff/Gary Turpin - Head of Operations.png" alt="Gary Turpin" class="staff-photo" />
+            <div class="staff-name">Gary Turpin</div>
+            <div class="staff-title-role">Head of Operations</div>
+            <div class="expand-indicator">▼</div>
+          </div>
+        </div>
+        
+        <div class="staff-member clickable" data-staff="matt-king" style="animation-delay: 0.2s">
+          <div class="staff-card">
+            <img src="staff/Matt King - Head Of Inventory.png" alt="Matt King" class="staff-photo" />
+            <div class="staff-name">Matt King</div>
+            <div class="staff-title-role">Head Of Inventory</div>
             <div class="expand-indicator">▼</div>
           </div>
         </div>
       </div>
 
-      <!-- Senior Coordinators Level -->
-      <div class="subordinates" id="chappie-subordinates">
+      <!-- Gary Turpin's Direct Reports -->
+      <div class="subordinates" id="gary-turpin-subordinates">
         <div class="connection-line-top"></div>
         <div class="connection-branch">
-          <div class="staff-member clickable" data-staff="team" style="animation-delay: 0.4s">
+          <div class="staff-member clickable" data-staff="paul-chapman" style="animation-delay: 0.3s">
             <div class="staff-card">
-              <img src="Staff/Jenny.png" alt="Jenny Peet" class="staff-photo" />
-              <div class="staff-name">Jenny Peet</div>
-              <div class="staff-title-role">Senior Order Processing Coordinator</div>
+              <img src="staff/Order Processing/Chappie.png" alt="Paul Chapman" class="staff-photo" />
+              <div class="staff-name">Paul Chapman</div>
+              <div class="staff-title-role">Order Processing Manager</div>
               <div class="expand-indicator">▼</div>
             </div>
           </div>
           
-          <div class="staff-member clickable" data-staff="team" style="animation-delay: 0.6s">
+          <div class="staff-member clickable" data-staff="stuart-whitehouse" style="animation-delay: 0.4s">
             <div class="staff-card">
-              <img src="Staff/Gerald.png" alt="Gerald Hooper" class="staff-photo" />
-              <div class="staff-name">Gerald Hooper</div>
-              <div class="staff-title-role">Senior Order Processing Coordinator</div>
+              <img src="staff/Stuart Whitehouse - Logistics Manager.png" alt="Stuart Whitehouse" class="staff-photo" />
+              <div class="staff-name">Stuart Whitehouse</div>
+              <div class="staff-title-role">Logistics Manager</div>
+              <div class="expand-indicator">▼</div>
+            </div>
+          </div>
+          
+          <div class="staff-member clickable" data-staff="martin-harrison" style="animation-delay: 0.5s">
+            <div class="staff-card">
+              <img src="staff/Martin Harrison - Head of Manufacturing and QC.png" alt="Martin Harrison" class="staff-photo" />
+              <div class="staff-name">Martin Harrison</div>
+              <div class="staff-title-role">Head of Manufacturing and QC</div>
               <div class="expand-indicator">▼</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Coordinators Level - Managed by both Jenny and Gerald together -->
-      <div class="subordinates" id="team-subordinates">
-        <div class="connection-line"></div>
-        <div class="level-title">Order Processing Coordinators</div>
-        <div class="staff-grid">
+      <!-- Matt King's Direct Reports -->
+      <div class="subordinates" id="matt-king-subordinates">
+        <div class="connection-line-top"></div>
+        <div class="connection-branch">
+          <div class="staff-member clickable" data-staff="martin-sumner" style="animation-delay: 0.6s">
+            <div class="staff-card">
+              <img src="staff/Martin Sumner - Head Of Stock Control.png" alt="Martin Sumner" class="staff-photo" />
+              <div class="staff-name">Martin Sumner</div>
+              <div class="staff-title-role">Head Of Stock Control</div>
+              <div class="expand-indicator">▼</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 0.7s">
+            <div class="staff-card">
+              <img src="staff/Raksha Hercombe - Halcyon Support Manager.png" alt="Raksha Hercombe" class="staff-photo" />
+              <div class="staff-name">Raksha Hercombe</div>
+              <div class="staff-title-role">Halcyon Support Manager</div>
+            </div>
+          </div>
+          
           <div class="staff-member" style="animation-delay: 0.8s">
             <div class="staff-card">
-              <img src="Staff/Katie.png" alt="Katie Lewis" class="staff-photo" />
-              <div class="staff-name">Katie Lewis</div>
-              <div class="staff-title-role">Order Processing Coordinator</div>
+              <img src="staff/Alexandra Bradley - Originals Admin.png" alt="Alexandra Bradley" class="staff-photo" />
+              <div class="staff-name">Alexandra Bradley</div>
+              <div class="staff-title-role">Originals Admin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paul Chapman's Team -->
+      <div class="subordinates" id="paul-chapman-subordinates">
+        <div class="connection-line-top"></div>
+        <div class="level-title">Order Processing Team</div>
+        <div class="staff-grid">
+          <div class="staff-member" style="animation-delay: 0.9s">
+            <div class="staff-card">
+              <img src="staff/Order Processing/Jenny.png" alt="Jenny Peet" class="staff-photo" />
+              <div class="staff-name">Jenny Peet</div>
+              <div class="staff-title-role">Senior Order Processing Coordinator</div>
             </div>
           </div>
           
           <div class="staff-member" style="animation-delay: 1.0s">
             <div class="staff-card">
-              <img src="Staff/Tara.png" alt="Tara Platts" class="staff-photo" />
-              <div class="staff-name">Tara Platts</div>
+              <img src="staff/Order Processing/Gerald.png" alt="Gerald Brannigan" class="staff-photo" />
+              <div class="staff-name">Gerald Brannigan</div>
+              <div class="staff-title-role">Senior Order Processing Coordinator</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 1.1s">
+            <div class="staff-card">
+              <img src="staff/Order Processing/Katie.png" alt="Katie Turner" class="staff-photo" />
+              <div class="staff-name">Katie Turner</div>
               <div class="staff-title-role">Order Processing Coordinator</div>
             </div>
           </div>
           
           <div class="staff-member" style="animation-delay: 1.2s">
             <div class="staff-card">
-              <img src="Staff/Pip.png" alt="Phillippa Beevor-Reid" class="staff-photo" />
+              <img src="staff/Order Processing/Tara.png" alt="Tara Spencer" class="staff-photo" />
+              <div class="staff-name">Tara Spencer</div>
+              <div class="staff-title-role">Order Processing Coordinator</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 1.3s">
+            <div class="staff-card">
+              <img src="staff/Order Processing/Pip.png" alt="Phillippa Beevor-Reid" class="staff-photo" />
               <div class="staff-name">Phillippa Beevor-Reid</div>
               <div class="staff-title-role">Order Processing Coordinator</div>
             </div>
@@ -407,9 +440,109 @@
           
           <div class="staff-member" style="animation-delay: 1.4s">
             <div class="staff-card">
-              <img src="Staff/Amelia.png" alt="Amelia Rush" class="staff-photo" />
+              <img src="staff/Order Processing/Amelia.png" alt="Amelia Rush" class="staff-photo" />
               <div class="staff-name">Amelia Rush</div>
               <div class="staff-title-role">Order Processing Coordinator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stuart Whitehouse's Team -->
+      <div class="subordinates" id="stuart-whitehouse-subordinates">
+        <div class="connection-line-top"></div>
+        <div class="level-title">Logistics Team</div>
+        <div class="staff-grid">
+          <div class="staff-member" style="animation-delay: 1.5s">
+            <div class="staff-card">
+              <img src="staff/Nathan Smethurst - Shipping Supervisor.png" alt="Nathan Smethurst" class="staff-photo" />
+              <div class="staff-name">Nathan Smethurst</div>
+              <div class="staff-title-role">Shipping Supervisor</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 1.6s">
+            <div class="staff-card">
+              <img src="staff/Olly Clark - Packing Supervisor.png" alt="Olly Clark" class="staff-photo" />
+              <div class="staff-name">Olly Clark</div>
+              <div class="staff-title-role">Packing Supervisor</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 1.7s">
+            <div class="staff-card">
+              <img src="staff/Zara Chaudhry - Logistics Admin Assistant.png" alt="Zara Chaudhry" class="staff-photo" />
+              <div class="staff-name">Zara Chaudhry</div>
+              <div class="staff-title-role">Logistics Admin Assistant</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Martin Harrison's Team -->
+      <div class="subordinates" id="martin-harrison-subordinates">
+        <div class="connection-line-top"></div>
+        <div class="connection-branch">
+          <div class="staff-member clickable" data-staff="gary-day" style="animation-delay: 1.8s">
+            <div class="staff-card">
+              <img src="staff/Gary Day - Framing Production Manager.png" alt="Gary Day" class="staff-photo" />
+              <div class="staff-name">Gary Day</div>
+              <div class="staff-title-role">Framing Production Manager</div>
+              <div class="expand-indicator">▼</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 1.9s">
+            <div class="staff-card">
+              <img src="staff/Tom Harrison - Senior Mounting Operative.png" alt="Tom Harrison" class="staff-photo" />
+              <div class="staff-name">Tom Harrison</div>
+              <div class="staff-title-role">Senior Mounting Operative</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Martin Sumner's Team -->
+      <div class="subordinates" id="martin-sumner-subordinates">
+        <div class="connection-line-top"></div>
+        <div class="level-title">Stock Control Team</div>
+        <div class="staff-grid">
+          <div class="staff-member" style="animation-delay: 2.0s">
+            <div class="staff-card">
+              <img src="staff/Kerry Hinks - Stock Admin Manager.png" alt="Kerry Hinks" class="staff-photo" />
+              <div class="staff-name">Kerry Hinks</div>
+              <div class="staff-title-role">Stock Admin Manager</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 2.1s">
+            <div class="staff-card">
+              <img src="staff/Adam Hercombe - Warehouse Stock Manager.png" alt="Adam Hercombe" class="staff-photo" />
+              <div class="staff-name">Adam Hercombe</div>
+              <div class="staff-title-role">Warehouse Stock Manager</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gary Day's Team -->
+      <div class="subordinates" id="gary-day-subordinates">
+        <div class="connection-line-top"></div>
+        <div class="level-title">Framing Team</div>
+        <div class="staff-grid">
+          <div class="staff-member" style="animation-delay: 2.2s">
+            <div class="staff-card">
+              <img src="staff/Bill Chand - Framing Supervisor.png" alt="Bill Chand" class="staff-photo" />
+              <div class="staff-name">Bill Chand</div>
+              <div class="staff-title-role">Framing Supervisor</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 2.3s">
+            <div class="staff-card">
+              <img src="staff/Adam Hyde - Framing Supervisor (Cutting Room).png" alt="Adam Hyde" class="staff-photo" />
+              <div class="staff-name">Adam Hyde</div>
+              <div class="staff-title-role">Framing Supervisor (Cutting Room)</div>
             </div>
           </div>
         </div>
@@ -442,72 +575,27 @@ document.addEventListener('DOMContentLoaded', function() {
       if (subordinates) {
         const isCurrentlyExpanded = this.classList.contains('expanded');
         
-        // For team members (Jenny/Gerald), check if any team member is already expanded
-        if (staffId === 'team') {
-          const anyTeamExpanded = document.querySelector('.staff-member[data-staff="team"].expanded');
-          
-          if (anyTeamExpanded && !isCurrentlyExpanded) {
-            // If another team member is expanded, just mark this one as expanded too
-            this.classList.add('expanded');
-            return;
-          } else if (isCurrentlyExpanded) {
-            // If clicking an expanded team member, collapse all team members
-            document.querySelectorAll('.staff-member[data-staff="team"]').forEach(teamMember => {
-              teamMember.classList.remove('expanded');
-            });
-            subordinates.classList.remove('show');
-            return;
-          } else {
-            // If no team member is expanded, expand all team members
-            document.querySelectorAll('.staff-member[data-staff="team"]').forEach(teamMember => {
-              teamMember.classList.add('expanded');
-            });
-            subordinates.classList.add('show');
-          }
-        } else {
-          // For non-team members (like Chappie), normal behavior
-          if (isCurrentlyExpanded) {
-            this.classList.remove('expanded');
-            subordinates.classList.remove('show');
-            // Also collapse any team members if closing Chappie
-            if (staffId === 'chappie') {
-              document.querySelectorAll('.staff-member[data-staff="team"]').forEach(teamMember => {
-                teamMember.classList.remove('expanded');
-              });
-              const teamSubordinates = document.getElementById('team-subordinates');
-              if (teamSubordinates) {
-                teamSubordinates.classList.remove('show');
-              }
+        // Collapse all other expanded sections first
+        document.querySelectorAll('.staff-member.expanded').forEach(expandedMember => {
+          if (expandedMember !== this) {
+            expandedMember.classList.remove('expanded');
+            const expandedId = expandedMember.dataset.staff;
+            const expandedSubordinates = document.getElementById(`${expandedId}-subordinates`);
+            if (expandedSubordinates) {
+              expandedSubordinates.classList.remove('show');
             }
-          } else {
-            this.classList.add('expanded');
-            subordinates.classList.add('show');
           }
-        }
+        });
         
-        // Smooth scroll to show the expanded content
-        setTimeout(() => {
-          subordinates.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'nearest' 
-          });
-        }, 300);
+        // Toggle current section
+        if (isCurrentlyExpanded) {
+          this.classList.remove('expanded');
+          subordinates.classList.remove('show');
+        } else {
+          this.classList.add('expanded');
+          subordinates.classList.add('show');
+        }
       }
-    });
-  });
-  
-  // Add click effect
-  staffMembers.forEach(member => {
-    member.addEventListener('mousedown', function() {
-      this.style.transform = 'translateY(-5px) scale(0.98)';
-    });
-    
-    member.addEventListener('mouseup', function() {
-      this.style.transform = '';
-    });
-    
-    member.addEventListener('mouseleave', function() {
-      this.style.transform = '';
     });
   });
 });
