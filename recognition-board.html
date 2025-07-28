@@ -223,6 +223,37 @@
       margin-top: 0.25rem;
     }
 
+    .delete-note-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ff4444;
+      color: white;
+      border: 2px solid white;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .delete-note-btn:hover {
+      background: #cc0000;
+      transform: scale(1.1);
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0; transform: scale(0.8); }
+    }
+
     .loading {
       text-align: center;
       padding: 3rem;
@@ -372,7 +403,9 @@
 <!-- Recognition Board Logic -->
 <script>
 let db;
+let currentUser = null;
 const colors = ['yellow', 'pink', 'blue', 'green', 'orange', 'purple'];
+const placedNotes = []; // Track placed note positions for collision avoidance
 
 // Initialize Firebase and load notes
 document.addEventListener('DOMContentLoaded', async function() {
@@ -392,6 +425,21 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     db = firebase.firestore();
+    
+    // Check user authentication and admin status
+    firebase.auth().onAuthStateChanged(async (user) => {
+      if (user) {
+        const token = await user.getIdTokenResult();
+        currentUser = {
+          uid: user.uid,
+          email: user.email,
+          admin: token.claims.admin || false
+        };
+      } else {
+        currentUser = null;
+      }
+    });
+    
     await loadNotes();
     setupNoteForm();
   } catch (error) {
@@ -420,9 +468,12 @@ async function loadNotes() {
       return;
     }
     
+    // Clear previous positions tracking
+    placedNotes.length = 0;
+    
     snapshot.docs.forEach((doc, index) => {
       const noteData = doc.data();
-      createPostItNote(noteData, index);
+      createPostItNote(noteData, index, doc.id);
     });
     
   } catch (error) {
@@ -431,46 +482,53 @@ async function loadNotes() {
   }
 }
 
-// Create a post-it note element
-function createPostItNote(noteData, index) {
+// Create a post-it note element with collision avoidance
+function createPostItNote(noteData, index, docId = null) {
   const container = document.getElementById('postItContainer');
-  const corkBoard = container.parentElement; // Get the actual cork board element
+  const corkBoard = container.parentElement;
   const postIt = document.createElement('div');
   postIt.className = `post-it ${colors[index % colors.length]}`;
   
-  // Add to container first
+  // Store document ID for admin deletion
+  if (docId) {
+    postIt.dataset.docId = docId;
+  }
+  
   container.appendChild(postIt);
   
-  // Use requestAnimationFrame for better timing with rendering
   requestAnimationFrame(() => {
     setTimeout(() => {
-      // Use CSS min-height values directly for reliable positioning
       const isMobile = window.innerWidth <= 768;
-      const boardHeight = isMobile ? 800 : 1000; // Use known CSS min-heights
+      const boardHeight = isMobile ? 800 : 1000;
       const boardWidth = corkBoard.offsetWidth || (isMobile ? 300 : 800);
       
-      
-      // Post-it note dimensions
       const noteWidth = isMobile ? 160 : 200;
       const noteHeight = isMobile ? 120 : 150;
-      
-      // Calculate safe positioning area (with padding from edges)
       const padding = 30;
-      const maxX = Math.max(0, boardWidth - noteWidth - padding);
-      const maxY = Math.max(0, boardHeight - noteHeight - padding);
+      const minDistance = isMobile ? 40 : 60; // Minimum distance between notes
       
-      // Generate truly random positions across the full board
-      const randomX = Math.random() * maxX + (padding / 2);
-      const randomY = Math.random() * maxY + (padding / 2);
-      const randomRotation = (Math.random() - 0.5) * 20; // -10 to 10 degrees
+      // Find a position with collision avoidance
+      const position = findAvailablePosition(
+        boardWidth, boardHeight, noteWidth, noteHeight, 
+        padding, minDistance, placedNotes
+      );
       
+      const randomRotation = (Math.random() - 0.5) * 20;
       
       // Apply positioning
-      postIt.style.left = `${randomX}px`;
-      postIt.style.top = `${randomY}px`;
+      postIt.style.left = `${position.x}px`;
+      postIt.style.top = `${position.y}px`;
       postIt.style.transform = `rotate(${randomRotation}deg)`;
       
-    }, index * 100); // Longer stagger for better distribution
+      // Track this note's position
+      placedNotes.push({
+        x: position.x,
+        y: position.y,
+        width: noteWidth,
+        height: noteHeight
+      });
+      
+    }, index * 100);
   });
   
   postIt.style.animationDelay = `${index * 0.1}s`;
@@ -478,7 +536,12 @@ function createPostItNote(noteData, index) {
   const date = noteData.timestamp ? noteData.timestamp.toDate().toLocaleDateString() : 'Recently';
   const author = noteData.author || 'Anonymous';
   
+  // Add admin delete button if user is admin
+  const deleteButton = docId && currentUser?.admin ? 
+    `<button class="delete-note-btn" onclick="deleteNote('${docId}', this)" title="Delete note">✕</button>` : '';
+  
   postIt.innerHTML = `
+    ${deleteButton}
     <div class="post-it-content">${escapeHtml(noteData.content)}</div>
     <div class="post-it-author">- ${escapeHtml(author)}</div>
     <div class="post-it-date">${date}</div>
@@ -566,6 +629,91 @@ function showSuccess(message) {
   setTimeout(() => {
     messageArea.innerHTML = '';
   }, 3000);
+}
+
+// Collision avoidance algorithm
+function findAvailablePosition(boardWidth, boardHeight, noteWidth, noteHeight, padding, minDistance, existingNotes) {
+  const maxX = Math.max(0, boardWidth - noteWidth - padding);
+  const maxY = Math.max(0, boardHeight - noteHeight - padding);
+  
+  let attempts = 0;
+  const maxAttempts = 100;
+  
+  while (attempts < maxAttempts) {
+    const x = Math.random() * maxX + (padding / 2);
+    const y = Math.random() * maxY + (padding / 2);
+    
+    // Check if this position overlaps with existing notes
+    let hasCollision = false;
+    for (const existing of existingNotes) {
+      const distance = Math.sqrt(
+        Math.pow(x - existing.x, 2) + Math.pow(y - existing.y, 2)
+      );
+      
+      if (distance < minDistance) {
+        hasCollision = true;
+        break;
+      }
+    }
+    
+    if (!hasCollision) {
+      return { x, y };
+    }
+    
+    attempts++;
+  }
+  
+  // If we can't find a collision-free spot, use a grid-based fallback
+  return getGridPosition(existingNotes.length, boardWidth, boardHeight, noteWidth, noteHeight, padding);
+}
+
+// Grid-based positioning fallback for when board gets crowded
+function getGridPosition(index, boardWidth, boardHeight, noteWidth, noteHeight, padding) {
+  const cols = Math.floor((boardWidth - padding) / (noteWidth + 20));
+  const rows = Math.floor((boardHeight - padding) / (noteHeight + 20));
+  
+  const col = index % cols;
+  const row = Math.floor(index / cols) % rows;
+  
+  const x = col * (noteWidth + 20) + padding + Math.random() * 10;
+  const y = row * (noteHeight + 20) + padding + Math.random() * 10;
+  
+  return { x, y };
+}
+
+// Admin function to delete a note
+async function deleteNote(docId, buttonElement) {
+  if (!currentUser?.admin) {
+    showError('Only admins can delete notes.');
+    return;
+  }
+  
+  if (!confirm('Are you sure you want to delete this recognition note?')) {
+    return;
+  }
+  
+  try {
+    await db.collection('recognition-notes').doc(docId).delete();
+    
+    // Remove the note from DOM
+    const postIt = buttonElement.closest('.post-it');
+    if (postIt) {
+      postIt.style.animation = 'fadeOut 0.3s ease-out';
+      setTimeout(() => {
+        postIt.remove();
+        // Remove from placedNotes tracking
+        const index = Array.from(postIt.parentElement.children).indexOf(postIt);
+        if (index >= 0 && index < placedNotes.length) {
+          placedNotes.splice(index, 1);
+        }
+      }, 300);
+    }
+    
+    showSuccess('Note deleted successfully.');
+  } catch (error) {
+    console.error('Error deleting note:', error);
+    showError('Failed to delete note. Please try again.');
+  }
 }
 </script>
 
