@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staff Hierarchy - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .staff-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      color: white;
+      min-height: 80vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .staff-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 4s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .staff-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .staff-title {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 3rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .hierarchy-level {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .staff-member {
+      position: relative;
+      margin: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: slideInUp 0.6s ease-out forwards;
+    }
+
+    .staff-member.clickable:hover {
+      transform: translateY(-10px) scale(1.05);
+    }
+
+    .staff-card {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .staff-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .staff-member.clickable:hover .staff-card::before {
+      left: 100%;
+    }
+
+    .staff-photo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid rgba(255,255,255,0.3);
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .staff-member.clickable:hover .staff-photo {
+      border-color: rgba(255,255,255,0.8);
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+
+    .staff-name {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .staff-title-role {
+      font-size: 1rem;
+      opacity: 0.9;
+      font-style: italic;
+    }
+
+    .connection-line {
+      width: 2px;
+      height: 40px;
+      background: rgba(255,255,255,0.5);
+      margin: 0 auto;
+      opacity: 0;
+      animation: growLine 0.5s ease-out 0.3s forwards;
+    }
+
+    .connection-branch {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      position: relative;
+      opacity: 0;
+      animation: fadeIn 0.5s ease-out 0.5s forwards;
+    }
+
+    .connection-branch::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 25%;
+      right: 25%;
+      height: 2px;
+      background: rgba(255,255,255,0.5);
+    }
+
+    .connection-branch .staff-member {
+      position: relative;
+    }
+
+    .connection-branch .staff-member::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 20px;
+      background: rgba(255,255,255,0.5);
+    }
+
+    .subordinates {
+      display: none;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    .subordinates.show {
+      display: block;
+    }
+
+    .expand-indicator {
+      position: absolute;
+      bottom: 10px;
+      right: 15px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .staff-member.expanded .expand-indicator {
+      transform: rotate(180deg);
+      background: rgba(34, 197, 94, 0.5);
+    }
+
+    .level-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin: 1rem 0;
+      opacity: 0.9;
+      text-align: center;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes growLine {
+      from { height: 0; opacity: 0; }
+      to { height: 40px; opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .staff-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .staff-container {
+        margin: 1rem;
+        padding: 1.5rem;
+        border-radius: 15px;
+      }
+      
+      .staff-title {
+        font-size: 2rem;
+      }
+      
+      .staff-photo {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .staff-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+<header>
+  <button id="menu-toggle" class="hamburger">&#9776;</button>
+  <h1>Castle Comms</h1>
+</header>
+
+<div id="notification-bell" class="notification-bell hidden">
+  🔔 <span id="notification-count" class="count-badge">0</span>
+</div>
+
+<div id="sidebar-container"></div>
+
+<main id="main">
+  <div class="staff-container">
+    <div class="staff-content">
+      <h1 class="staff-title">👥 Staff Hierarchy</h1>
+      
+      <!-- Manager Level -->
+      <div class="hierarchy-level">
+        <div class="staff-member clickable" data-staff="chappie" style="animation-delay: 0.2s">
+          <div class="staff-card">
+            <img src="Staff/Chappie.png" alt="Paul Chapman" class="staff-photo" />
+            <div class="staff-name">Paul Chapman</div>
+            <div class="staff-title-role">Order Processing Manager</div>
+            <div class="expand-indicator">▼</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Senior Coordinators Level -->
+      <div class="subordinates" id="chappie-subordinates">
+        <div class="connection-line"></div>
+        <div class="connection-branch">
+          <div class="staff-member clickable" data-staff="jenny" style="animation-delay: 0.4s">
+            <div class="staff-card">
+              <img src="Staff/Jenny.png" alt="Jenny Peet" class="staff-photo" />
+              <div class="staff-name">Jenny Peet</div>
+              <div class="staff-title-role">Senior Order Processing Coordinator</div>
+              <div class="expand-indicator">▼</div>
+            </div>
+          </div>
+          
+          <div class="staff-member clickable" data-staff="gerald" style="animation-delay: 0.6s">
+            <div class="staff-card">
+              <img src="Staff/Gerald.png" alt="Gerald Hooper" class="staff-photo" />
+              <div class="staff-name">Gerald Hooper</div>
+              <div class="staff-title-role">Senior Order Processing Coordinator</div>
+              <div class="expand-indicator">▼</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coordinators Level -->
+      <div class="subordinates" id="jenny-subordinates">
+        <div class="connection-line"></div>
+        <div class="level-title">Jenny's Team - Order Processing Coordinators</div>
+        <div class="staff-grid">
+          <div class="staff-member" style="animation-delay: 0.8s">
+            <div class="staff-card">
+              <img src="Staff/Katie.png" alt="Katie Lewis" class="staff-photo" />
+              <div class="staff-name">Katie Lewis</div>
+              <div class="staff-title-role">Order Processing Coordinator</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 1.0s">
+            <div class="staff-card">
+              <img src="Staff/Tara.png" alt="Tara Platts" class="staff-photo" />
+              <div class="staff-name">Tara Platts</div>
+              <div class="staff-title-role">Order Processing Coordinator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subordinates" id="gerald-subordinates">
+        <div class="connection-line"></div>
+        <div class="level-title">Gerald's Team - Order Processing Coordinators</div>
+        <div class="staff-grid">
+          <div class="staff-member" style="animation-delay: 1.2s">
+            <div class="staff-card">
+              <img src="Staff/Pip.png" alt="Phillippa Beevor-Reid" class="staff-photo" />
+              <div class="staff-name">Phillippa Beevor-Reid</div>
+              <div class="staff-title-role">Order Processing Coordinator</div>
+            </div>
+          </div>
+          
+          <div class="staff-member" style="animation-delay: 1.4s">
+            <div class="staff-card">
+              <img src="Staff/Amelia.png" alt="Amelia Rush" class="staff-photo" />
+              <div class="staff-name">Amelia Rush</div>
+              <div class="staff-title-role">Order Processing Coordinator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<!-- Firebase config -->
+<script src="firebase-init.js"></script>
+
+<!-- Shared components -->
+<script src="shared-components.js"></script>
+
+<!-- Staff Hierarchy Logic -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const staffMembers = document.querySelectorAll('.staff-member.clickable');
+  
+  staffMembers.forEach(member => {
+    member.addEventListener('click', function() {
+      const staffId = this.dataset.staff;
+      const subordinatesId = `${staffId}-subordinates`;
+      const subordinates = document.getElementById(subordinatesId);
+      
+      if (subordinates) {
+        const isCurrentlyExpanded = this.classList.contains('expanded');
+        
+        // Close all other expanded sections
+        document.querySelectorAll('.staff-member.expanded').forEach(expandedMember => {
+          if (expandedMember !== this) {
+            expandedMember.classList.remove('expanded');
+            const otherSubordinatesId = `${expandedMember.dataset.staff}-subordinates`;
+            const otherSubordinates = document.getElementById(otherSubordinatesId);
+            if (otherSubordinates) {
+              otherSubordinates.classList.remove('show');
+            }
+          }
+        });
+        
+        // Toggle current section
+        if (isCurrentlyExpanded) {
+          this.classList.remove('expanded');
+          subordinates.classList.remove('show');
+        } else {
+          this.classList.add('expanded');
+          subordinates.classList.add('show');
+          
+          // Smooth scroll to show the expanded content
+          setTimeout(() => {
+            subordinates.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'nearest' 
+            });
+          }, 300);
+        }
+      }
+    });
+  });
+  
+  // Add click effect
+  staffMembers.forEach(member => {
+    member.addEventListener('mousedown', function() {
+      this.style.transform = 'translateY(-5px) scale(0.98)';
+    });
+    
+    member.addEventListener('mouseup', function() {
+      this.style.transform = '';
+    });
+    
+    member.addEventListener('mouseleave', function() {
+      this.style.transform = '';
+    });
+  });
+});
+</script>
+
+<!-- Site scripts -->
+<script src="script.js"></script>
+</body>
+</html>
