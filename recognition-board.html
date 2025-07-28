@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recognition Board - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .recognition-container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .recognition-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .recognition-title {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #8B4513;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      margin-bottom: 1rem;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .recognition-subtitle {
+      font-size: 1.2rem;
+      color: #654321;
+      font-style: italic;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .add-note-section {
+      background: rgba(139, 69, 19, 0.1);
+      border: 3px solid #8B4513;
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 10px 30px rgba(139, 69, 19, 0.2);
+      position: relative;
+      z-index: 10;
+      animation: slideInUp 0.8s ease-out 0.4s both;
+    }
+
+    .add-note-title {
+      font-size: 1.5rem;
+      color: #8B4513;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .note-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .note-input {
+      padding: 1rem;
+      border: 2px solid #D2691E;
+      border-radius: 10px;
+      font-size: 1rem;
+      resize: vertical;
+      min-height: 100px;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #FFF8DC;
+      color: #654321;
+    }
+
+    .note-input:focus {
+      outline: none;
+      border-color: #8B4513;
+      box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
+    }
+
+    .author-input {
+      padding: 0.75rem;
+      border: 2px solid #D2691E;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #FFF8DC;
+      color: #654321;
+    }
+
+    .author-input:focus {
+      outline: none;
+      border-color: #8B4513;
+      box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
+    }
+
+    .submit-btn {
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(139, 69, 19, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+    }
+
+    .submit-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .cork-board {
+      background: linear-gradient(45deg, #DEB887 0%, #D2B48C 25%, #DEB887 50%, #D2B48C 75%, #DEB887 100%);
+      background-size: 60px 60px;
+      border: 8px solid #8B4513;
+      border-radius: 20px;
+      min-height: 800px;
+      position: relative;
+      box-shadow: inset 0 0 50px rgba(139, 69, 19, 0.2), 0 15px 40px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .cork-board::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(139, 69, 19, 0.1) 2px, transparent 2px),
+        radial-gradient(circle at 80% 80%, rgba(139, 69, 19, 0.1) 2px, transparent 2px),
+        radial-gradient(circle at 40% 60%, rgba(139, 69, 19, 0.1) 1px, transparent 1px);
+      background-size: 100px 100px, 150px 150px, 80px 80px;
+    }
+
+    .post-it-notes {
+      position: relative;
+      padding: 2rem;
+      z-index: 2;
+    }
+
+    .post-it {
+      position: absolute;
+      width: 200px;
+      min-height: 150px;
+      padding: 1rem;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      transform-origin: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border-radius: 5px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .post-it::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 15px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 3px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .post-it:hover {
+      transform: scale(1.05) rotate(0deg) !important;
+      z-index: 100;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+    .post-it.yellow { background: linear-gradient(135deg, #FFEB3B 0%, #FDD835 100%); color: #5D4037; }
+    .post-it.pink { background: linear-gradient(135deg, #E91E63 0%, #AD1457 100%); color: white; }
+    .post-it.blue { background: linear-gradient(135deg, #2196F3 0%, #1565C0 100%); color: white; }
+    .post-it.green { background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); color: white; }
+    .post-it.orange { background: linear-gradient(135deg, #FF9800 0%, #E65100 100%); color: white; }
+    .post-it.purple { background: linear-gradient(135deg, #9C27B0 0%, #6A1B9A 100%); color: white; }
+
+    .post-it-content {
+      margin-bottom: 0.5rem;
+      word-wrap: break-word;
+    }
+
+    .post-it-author {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      font-style: italic;
+      text-align: right;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      padding-top: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .post-it-date {
+      font-size: 0.65rem;
+      opacity: 0.6;
+      text-align: right;
+      margin-top: 0.25rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      font-size: 1.2rem;
+      color: #8B4513;
+    }
+
+    .error-message {
+      background: #ffebee;
+      color: #c62828;
+      padding: 1rem;
+      border-radius: 10px;
+      margin: 1rem 0;
+      text-align: center;
+      border: 1px solid #ef5350;
+    }
+
+    .success-message {
+      background: #e8f5e8;
+      color: #2e7d32;
+      padding: 1rem;
+      border-radius: 10px;
+      margin: 1rem 0;
+      text-align: center;
+      border: 1px solid #4caf50;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .recognition-container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+      
+      .recognition-title {
+        font-size: 2rem;
+      }
+      
+      .add-note-section {
+        padding: 1.5rem;
+      }
+      
+      .post-it {
+        width: 160px;
+        min-height: 120px;
+        font-size: 0.8rem;
+        padding: 0.75rem;
+      }
+      
+      .cork-board {
+        min-height: 600px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background Slideshow -->
+<div class="background-slideshow" id="background-slideshow">
+  <!-- Images will be injected by JavaScript -->
+</div>
+
+<header>
+  <button id="menu-toggle" class="hamburger">&#9776;</button>
+  <h1>Castle Comms</h1>
+</header>
+
+<div id="notification-bell" class="notification-bell hidden">
+  🔔 <span id="notification-count" class="count-badge">0</span>
+</div>
+
+<div id="sidebar-container"></div>
+
+<main id="main">
+  <div class="recognition-container">
+    <div class="recognition-header">
+      <h1 class="recognition-title">🏆 Recognition Board</h1>
+      <p class="recognition-subtitle">Celebrate achievements, share kudos, and spread positivity!</p>
+    </div>
+
+    <div class="add-note-section">
+      <h2 class="add-note-title">✨ Add a Recognition Note</h2>
+      <form class="note-form" id="noteForm">
+        <textarea 
+          class="note-input" 
+          id="noteContent" 
+          placeholder="Write your recognition message here... Thank someone, celebrate an achievement, or share positive feedback!"
+          required
+          maxlength="300"
+        ></textarea>
+        <input 
+          type="text" 
+          class="author-input" 
+          id="noteAuthor" 
+          placeholder="Your name (optional)"
+          maxlength="50"
+        />
+        <button type="submit" class="submit-btn">📌 Pin to Board</button>
+      </form>
+      <div id="message-area"></div>
+    </div>
+
+    <div class="cork-board">
+      <div class="post-it-notes" id="postItContainer">
+        <div class="loading" id="loadingMessage">📌 Loading recognition notes...</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- Firebase config -->
+<script src="firebase-init.js"></script>
+
+<!-- Shared components -->
+<script src="shared-components.js"></script>
+
+<!-- Recognition Board Logic -->
+<script>
+let db;
+const colors = ['yellow', 'pink', 'blue', 'green', 'orange', 'purple'];
+
+// Initialize Firebase and load notes
+document.addEventListener('DOMContentLoaded', async function() {
+  try {
+    // Wait for Firebase to be ready
+    await new Promise(resolve => {
+      if (window.firebase && window.firebase.apps.length > 0) {
+        resolve();
+      } else {
+        const checkFirebase = setInterval(() => {
+          if (window.firebase && window.firebase.apps.length > 0) {
+            clearInterval(checkFirebase);
+            resolve();
+          }
+        }, 100);
+      }
+    });
+
+    db = firebase.firestore();
+    await loadNotes();
+    setupNoteForm();
+  } catch (error) {
+    console.error('Failed to initialize Recognition Board:', error);
+    showError('Failed to connect to database. Please refresh the page.');
+  }
+});
+
+// Load all recognition notes from Firebase
+async function loadNotes() {
+  try {
+    const snapshot = await db.collection('recognition-notes')
+      .orderBy('timestamp', 'desc')
+      .limit(50)
+      .get();
+    
+    const container = document.getElementById('postItContainer');
+    const loadingMessage = document.getElementById('loadingMessage');
+    
+    if (loadingMessage) {
+      loadingMessage.remove();
+    }
+    
+    if (snapshot.empty) {
+      container.innerHTML = '<div class="loading">🎉 Be the first to add a recognition note!</div>';
+      return;
+    }
+    
+    snapshot.docs.forEach((doc, index) => {
+      const noteData = doc.data();
+      createPostItNote(noteData, index);
+    });
+    
+  } catch (error) {
+    console.error('Error loading notes:', error);
+    showError('Failed to load recognition notes.');
+  }
+}
+
+// Create a post-it note element
+function createPostItNote(noteData, index) {
+  const container = document.getElementById('postItContainer');
+  const postIt = document.createElement('div');
+  postIt.className = `post-it ${colors[index % colors.length]}`;
+  
+  // Random positioning within the board
+  const maxX = Math.max(0, container.offsetWidth - 220);
+  const maxY = Math.max(0, container.offsetHeight - 170);
+  const randomX = Math.random() * maxX;
+  const randomY = Math.random() * maxY;
+  const randomRotation = (Math.random() - 0.5) * 10; // -5 to 5 degrees
+  
+  postIt.style.left = `${randomX}px`;
+  postIt.style.top = `${randomY}px`;
+  postIt.style.transform = `rotate(${randomRotation}deg)`;
+  postIt.style.animationDelay = `${index * 0.1}s`;
+  
+  const date = noteData.timestamp ? noteData.timestamp.toDate().toLocaleDateString() : 'Recently';
+  const author = noteData.author || 'Anonymous';
+  
+  postIt.innerHTML = `
+    <div class="post-it-content">${escapeHtml(noteData.content)}</div>
+    <div class="post-it-author">- ${escapeHtml(author)}</div>
+    <div class="post-it-date">${date}</div>
+  `;
+  
+  container.appendChild(postIt);
+}
+
+// Setup form submission
+function setupNoteForm() {
+  const form = document.getElementById('noteForm');
+  const contentInput = document.getElementById('noteContent');
+  const authorInput = document.getElementById('noteAuthor');
+  
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const content = contentInput.value.trim();
+    const author = authorInput.value.trim();
+    
+    if (!content) {
+      showError('Please write a recognition message!');
+      return;
+    }
+    
+    if (content.length > 300) {
+      showError('Message is too long! Please keep it under 300 characters.');
+      return;
+    }
+    
+    try {
+      // Disable form while submitting
+      const submitBtn = form.querySelector('.submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '📌 Pinning...';
+      
+      // Add to Firebase
+      const noteData = {
+        content: content,
+        author: author || 'Anonymous',
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      
+      await db.collection('recognition-notes').add(noteData);
+      
+      // Clear form
+      contentInput.value = '';
+      authorInput.value = '';
+      
+      // Show success message
+      showSuccess('🎉 Your recognition note has been pinned to the board!');
+      
+      // Reload notes to show the new one
+      setTimeout(() => {
+        location.reload();
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Error adding note:', error);
+      showError('Failed to add your note. Please try again.');
+    } finally {
+      const submitBtn = form.querySelector('.submit-btn');
+      submitBtn.disabled = false;
+      submitBtn.textContent = '📌 Pin to Board';
+    }
+  });
+}
+
+// Utility functions
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showError(message) {
+  const messageArea = document.getElementById('message-area');
+  messageArea.innerHTML = `<div class="error-message">${message}</div>`;
+  setTimeout(() => {
+    messageArea.innerHTML = '';
+  }, 5000);
+}
+
+function showSuccess(message) {
+  const messageArea = document.getElementById('message-area');
+  messageArea.innerHTML = `<div class="success-message">${message}</div>`;
+  setTimeout(() => {
+    messageArea.innerHTML = '';
+  }, 3000);
+}
+</script>
+
+<!-- Site scripts -->
+<script src="script.js"></script>
+</body>
+</html>
