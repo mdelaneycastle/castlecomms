@@ -434,30 +434,44 @@ async function loadNotes() {
 // Create a post-it note element
 function createPostItNote(noteData, index) {
   const container = document.getElementById('postItContainer');
+  const corkBoard = container.parentElement; // Get the actual cork board element
   const postIt = document.createElement('div');
   postIt.className = `post-it ${colors[index % colors.length]}`;
   
-  // Wait for container to be fully rendered before calculating positions
-  setTimeout(() => {
-    // Get actual container dimensions
-    const containerRect = container.getBoundingClientRect();
-    const containerWidth = container.offsetWidth || containerRect.width;
-    const containerHeight = container.offsetHeight || Math.max(800, containerRect.height);
-    
-    // Random positioning across the entire board area
-    const noteWidth = 200;
-    const noteHeight = 150;
-    const maxX = Math.max(0, containerWidth - noteWidth - 40); // 40px padding from edges
-    const maxY = Math.max(0, containerHeight - noteHeight - 40);
-    
-    const randomX = Math.random() * maxX + 20; // 20px minimum from left edge
-    const randomY = Math.random() * maxY + 20; // 20px minimum from top edge
-    const randomRotation = (Math.random() - 0.5) * 15; // -7.5 to 7.5 degrees
-    
-    postIt.style.left = `${randomX}px`;
-    postIt.style.top = `${randomY}px`;
-    postIt.style.transform = `rotate(${randomRotation}deg)`;
-  }, index * 50); // Stagger the positioning slightly
+  // Add to container first
+  container.appendChild(postIt);
+  
+  // Use requestAnimationFrame for better timing with rendering
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      // Use CSS min-height values directly for reliable positioning
+      const isMobile = window.innerWidth <= 768;
+      const boardHeight = isMobile ? 800 : 1000; // Use known CSS min-heights
+      const boardWidth = corkBoard.offsetWidth || (isMobile ? 300 : 800);
+      
+      
+      // Post-it note dimensions
+      const noteWidth = isMobile ? 160 : 200;
+      const noteHeight = isMobile ? 120 : 150;
+      
+      // Calculate safe positioning area (with padding from edges)
+      const padding = 30;
+      const maxX = Math.max(0, boardWidth - noteWidth - padding);
+      const maxY = Math.max(0, boardHeight - noteHeight - padding);
+      
+      // Generate truly random positions across the full board
+      const randomX = Math.random() * maxX + (padding / 2);
+      const randomY = Math.random() * maxY + (padding / 2);
+      const randomRotation = (Math.random() - 0.5) * 20; // -10 to 10 degrees
+      
+      
+      // Apply positioning
+      postIt.style.left = `${randomX}px`;
+      postIt.style.top = `${randomY}px`;
+      postIt.style.transform = `rotate(${randomRotation}deg)`;
+      
+    }, index * 100); // Longer stagger for better distribution
+  });
   
   postIt.style.animationDelay = `${index * 0.1}s`;
   
@@ -469,8 +483,6 @@ function createPostItNote(noteData, index) {
     <div class="post-it-author">- ${escapeHtml(author)}</div>
     <div class="post-it-date">${date}</div>
   `;
-  
-  container.appendChild(postIt);
 }
 
 // Setup form submission
