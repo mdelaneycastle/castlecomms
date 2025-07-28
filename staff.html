@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (subordinates) {
         const isCurrentlyExpanded = this.classList.contains('expanded');
         
-        // Collapse all other expanded sections first
+        // Collapse all other expanded sections first, but keep the current manager's parent visible
         document.querySelectorAll('.staff-member.expanded').forEach(expandedMember => {
           if (expandedMember !== this) {
             expandedMember.classList.remove('expanded');
@@ -589,10 +589,16 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         });
         
+        // Hide peer sections when expanding a new one
+        if (!isCurrentlyExpanded) {
+          hidePeerSections(staffId, subordinates);
+        }
+        
         // Toggle current section
         if (isCurrentlyExpanded) {
           this.classList.remove('expanded');
           subordinates.classList.remove('show');
+          showAllTopLevelSections();
         } else {
           this.classList.add('expanded');
           subordinates.classList.add('show');
@@ -600,6 +606,43 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+  
+  function hidePeerSections(currentStaffId, currentSubordinates) {
+    // Determine which sections to hide based on the current staff being expanded
+    const parentSection = currentSubordinates.parentElement.closest('.subordinates');
+    
+    if (parentSection) {
+      // Hide peer manager sections
+      const peerSections = parentSection.querySelectorAll('.staff-member.clickable');
+      peerSections.forEach(peer => {
+        if (peer.dataset.staff !== currentStaffId) {
+          peer.style.display = 'none';
+        }
+      });
+    } else {
+      // Top level - hide the other top level manager when one is expanded
+      const topLevelManagers = document.querySelectorAll('.hierarchy-level .staff-member.clickable');
+      topLevelManagers.forEach(manager => {
+        if (manager.dataset.staff !== currentStaffId) {
+          manager.style.display = 'none';
+        }
+      });
+    }
+  }
+  
+  function showAllTopLevelSections() {
+    // Show all top level managers
+    const topLevelManagers = document.querySelectorAll('.hierarchy-level .staff-member');
+    topLevelManagers.forEach(manager => {
+      manager.style.display = 'block';
+    });
+    
+    // Show all peer sections
+    const allManagers = document.querySelectorAll('.staff-member.clickable');
+    allManagers.forEach(manager => {
+      manager.style.display = 'block';
+    });
+  }
 });
 </script>
 
