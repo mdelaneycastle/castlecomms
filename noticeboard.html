@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Noticeboard - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    .noticeboard-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 2rem;
+      position: relative;
+      min-height: 80vh;
+    }
+
+    .whiteboard {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border: 20px solid #8b4513;
+      border-radius: 15px;
+      position: relative;
+      min-height: 600px;
+      box-shadow: 
+        0 0 20px rgba(0,0,0,0.3),
+        inset 0 0 100px rgba(255,255,255,0.5);
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8) 2px, transparent 2px),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.6) 1px, transparent 1px);
+      background-size: 50px 50px, 30px 30px;
+    }
+
+    .whiteboard::before {
+      content: '';
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 30px;
+      background: #2c3e50;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .input-section {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.9);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      backdrop-filter: blur(10px);
+      max-width: 300px;
+    }
+
+    .note-input {
+      width: 100%;
+      min-height: 80px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: 'Kalam', cursive;
+      font-size: 14px;
+      resize: vertical;
+      margin-bottom: 10px;
+    }
+
+    .add-note-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Kalam', cursive;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    .add-note-btn:hover {
+      background: #218838;
+    }
+
+    .note {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      font-weight: 700;
+      color: #2c3e50;
+      cursor: pointer;
+      transform: rotate(-2deg);
+      transition: all 0.3s ease;
+      max-width: 250px;
+      word-wrap: break-word;
+      user-select: none;
+    }
+
+    .note:nth-child(odd) {
+      transform: rotate(1deg);
+    }
+
+    .note:nth-child(3n) {
+      transform: rotate(-1deg);
+    }
+
+    .note:hover {
+      transform: rotate(0deg) scale(1.05);
+      z-index: 10;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+
+    .note.being-erased {
+      opacity: 0.3;
+      transform: scale(0.8);
+    }
+
+    .eraser {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      width: 80px;
+      height: 40px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      border-radius: 15px;
+      cursor: grab;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .eraser:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+
+    .eraser.dragging {
+      cursor: grabbing;
+      transform: scale(1.2);
+      z-index: 1000;
+    }
+
+    .eraser::before {
+      content: '🧽';
+      font-size: 20px;
+    }
+
+    .erase-trail {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      background: rgba(255, 107, 107, 0.3);
+      animation: fadeOut 1s ease-out forwards;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: scale(2);
+      }
+    }
+
+    .note-counter {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(52, 58, 64, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-family: 'Kalam', cursive;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    @media screen and (max-width: 768px) {
+      .noticeboard-container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+      
+      .input-section {
+        position: relative;
+        max-width: 100%;
+        margin-bottom: 20px;
+      }
+      
+      .whiteboard {
+        min-height: 500px;
+      }
+      
+      .note {
+        font-size: 16px;
+        max-width: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Background Slideshow -->
+<div class="background-slideshow" id="background-slideshow">
+  <!-- Images will be injected by JavaScript -->
+</div>
+  
+<header>
+  <button id="menu-toggle" class="hamburger">&#9776;</button>
+  <h1>Castle Comms</h1>
+</header>
+
+<div id="notification-bell" class="notification-bell hidden">
+  🔔 <span id="notification-count" class="count-badge">0</span>
+</div>
+
+<div id="sidebar-container"></div>
+
+<main id="main">
+  <div class="noticeboard-container">
+    <div class="whiteboard" id="whiteboard">
+      <div class="input-section">
+        <h3 style="margin-top: 0; font-family: 'Kalam', cursive; color: #2c3e50;">Add a Note</h3>
+        <textarea 
+          id="noteInput" 
+          class="note-input" 
+          placeholder="Write your note here..."
+          maxlength="200"
+        ></textarea>
+        <button id="addNoteBtn" class="add-note-btn">Pin Note</button>
+      </div>
+      
+      <div class="note-counter" id="noteCounter">
+        Notes: 0
+      </div>
+      
+      <div class="eraser" id="eraser" title="Drag to erase notes">
+        ERASER
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- Firebase config -->
+<script src="firebase-init.js"></script>
+
+<!-- Shared components -->
+<script src="shared-components.js"></script>
+
+<!-- Noticeboard Logic -->
+<script>
+let db;
+let notes = [];
+let isDragging = false;
+let dragElement = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Firebase Firestore
+  if (firebase.apps.length > 0) {
+    db = firebase.firestore();
+    loadNotes();
+  } else {
+    console.error('Firebase not initialized');
+  }
+  
+  // Add note functionality
+  document.getElementById('addNoteBtn').addEventListener('click', addNote);
+  document.getElementById('noteInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      addNote();
+    }
+  });
+  
+  // Eraser functionality
+  const eraser = document.getElementById('eraser');
+  eraser.addEventListener('mousedown', startDrag);
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('mouseup', endDrag);
+  
+  // Touch events for mobile
+  eraser.addEventListener('touchstart', startDrag);
+  document.addEventListener('touchmove', drag);
+  document.addEventListener('touchend', endDrag);
+});
+
+async function addNote() {
+  const input = document.getElementById('noteInput');
+  const text = input.value.trim();
+  
+  if (!text) return;
+  
+  const noteData = {
+    text: text,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    position: getRandomPosition()
+  };
+  
+  try {
+    const docRef = await db.collection('noticeboard').add(noteData);
+    noteData.id = docRef.id;
+    noteData.timestamp = new Date(); // For immediate display
+    
+    createNoteElement(noteData);
+    input.value = '';
+    updateNoteCounter();
+  } catch (error) {
+    console.error('Error adding note:', error);
+    alert('Failed to add note. Please try again.');
+  }
+}
+
+function createNoteElement(noteData) {
+  const whiteboard = document.getElementById('whiteboard');
+  const noteElement = document.createElement('div');
+  noteElement.className = 'note';
+  noteElement.dataset.id = noteData.id;
+  noteElement.textContent = noteData.text;
+  
+  noteElement.style.left = noteData.position.x + 'px';
+  noteElement.style.top = noteData.position.y + 'px';
+  
+  // Add some random rotation for natural look
+  const rotation = (Math.random() - 0.5) * 6; // -3 to +3 degrees
+  noteElement.style.transform = `rotate(${rotation}deg)`;
+  
+  whiteboard.appendChild(noteElement);
+  notes.push(noteData);
+  
+  // Animate in
+  setTimeout(() => {
+    noteElement.style.opacity = '1';
+    noteElement.style.transform += ' scale(1)';
+  }, 100);
+}
+
+function getRandomPosition() {
+  const whiteboard = document.getElementById('whiteboard');
+  const rect = whiteboard.getBoundingClientRect();
+  
+  // Account for input section and eraser areas
+  const minX = 50;
+  const maxX = Math.max(200, rect.width - 300);
+  const minY = 120;
+  const maxY = Math.max(200, rect.height - 150);
+  
+  return {
+    x: Math.random() * (maxX - minX) + minX,
+    y: Math.random() * (maxY - minY) + minY
+  };
+}
+
+async function loadNotes() {
+  try {
+    const snapshot = await db.collection('noticeboard').orderBy('timestamp', 'desc').get();
+    snapshot.forEach(doc => {
+      const noteData = { id: doc.id, ...doc.data() };
+      createNoteElement(noteData);
+    });
+    updateNoteCounter();
+  } catch (error) {
+    console.error('Error loading notes:', error);
+  }
+}
+
+function startDrag(e) {
+  isDragging = true;
+  dragElement = e.target;
+  dragElement.classList.add('dragging');
+  
+  e.preventDefault();
+}
+
+function drag(e) {
+  if (!isDragging || !dragElement) return;
+  
+  const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+  const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+  
+  if (!clientX || !clientY) return;
+  
+  // Move eraser
+  dragElement.style.left = (clientX - 40) + 'px';
+  dragElement.style.top = (clientY - 20) + 'px';
+  
+  // Create erase trail
+  createEraseTrail(clientX, clientY);
+  
+  // Check for collision with notes
+  const notes = document.querySelectorAll('.note');
+  notes.forEach(note => {
+    const rect = note.getBoundingClientRect();
+    const eraserRect = dragElement.getBoundingClientRect();
+    
+    if (isColliding(eraserRect, rect)) {
+      eraseNote(note);
+    }
+  });
+  
+  e.preventDefault();
+}
+
+function endDrag() {
+  if (dragElement) {
+    dragElement.classList.remove('dragging');
+    // Reset eraser position
+    dragElement.style.left = '';
+    dragElement.style.top = '';
+  }
+  isDragging = false;
+  dragElement = null;
+}
+
+function createEraseTrail(x, y) {
+  const trail = document.createElement('div');
+  trail.className = 'erase-trail';
+  trail.style.left = (x - 10) + 'px';
+  trail.style.top = (y - 10) + 'px';
+  trail.style.width = '20px';
+  trail.style.height = '20px';
+  
+  document.body.appendChild(trail);
+  
+  setTimeout(() => {
+    if (trail.parentNode) {
+      trail.parentNode.removeChild(trail);
+    }
+  }, 1000);
+}
+
+function isColliding(rect1, rect2) {
+  return !(rect1.right < rect2.left || 
+           rect1.left > rect2.right || 
+           rect1.bottom < rect2.top || 
+           rect1.top > rect2.bottom);
+}
+
+async function eraseNote(noteElement) {
+  const noteId = noteElement.dataset.id;
+  
+  // Add erasing animation
+  noteElement.classList.add('being-erased');
+  
+  try {
+    // Delete from Firebase
+    await db.collection('noticeboard').doc(noteId).delete();
+    
+    // Remove from DOM after animation
+    setTimeout(() => {
+      if (noteElement.parentNode) {
+        noteElement.parentNode.removeChild(noteElement);
+        notes = notes.filter(note => note.id !== noteId);
+        updateNoteCounter();
+      }
+    }, 300);
+    
+  } catch (error) {
+    console.error('Error deleting note:', error);
+    noteElement.classList.remove('being-erased');
+  }
+}
+
+function updateNoteCounter() {
+  const counter = document.getElementById('noteCounter');
+  const count = document.querySelectorAll('.note').length;
+  counter.textContent = `Notes: ${count}`;
+}
+</script>
+
+<!-- Site scripts -->
+<script src="script.js"></script>
+</body>
+</html>
