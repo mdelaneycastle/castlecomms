@@ -20,9 +20,14 @@
       border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
       color: white;
-      min-height: 80vh;
+      min-height: auto;
       position: relative;
       overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .staff-container.expanded {
+      min-height: 80vh;
     }
 
     .staff-container::before {
@@ -760,6 +765,9 @@ function expandSection(staffId, subordinates, clickedElement) {
   if (context) {
     context.classList.add('show');
   }
+  
+  // Add expanded class to container for larger content
+  document.querySelector('.staff-container').classList.add('expanded');
 }
 
 function goBack() {
@@ -811,6 +819,11 @@ function goBack() {
         element.classList.add('expanded');
       }
     });
+    
+    // Keep container expanded if there are visible sections
+    if (previousState.visibleSections.length > 0) {
+      document.querySelector('.staff-container').classList.add('expanded');
+    }
   }
 }
 
@@ -835,6 +848,9 @@ function showAllSections() {
   document.querySelectorAll('.staff-member.expanded').forEach(element => {
     element.classList.remove('expanded');
   });
+  
+  // Remove expanded class from container to make it compact
+  document.querySelector('.staff-container').classList.remove('expanded');
   
   // Clear navigation stack
   navigationStack = [];
