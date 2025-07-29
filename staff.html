@@ -267,41 +267,37 @@
       margin-right: auto;
     }
 
-    /* Square Action Buttons */
-    .square-actions {
+    /* Action Buttons */
+    .action-buttons {
       display: flex;
       justify-content: center;
-      gap: 1rem;
-      margin: 1.5rem 0;
+      gap: 0.8rem;
+      margin: 1rem 0 2rem 0;
       flex-wrap: wrap;
     }
 
-    .square-button {
-      width: 120px;
-      height: 80px;
-      background: rgba(255,255,255,0.9);
-      color: #333;
-      border: none;
-      border-radius: 15px;
-      font-size: 0.75rem;
-      font-weight: 600;
+    .action-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 0.5rem 1.2rem;
+      font-size: 0.85rem;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      text-decoration: none;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       backdrop-filter: blur(10px);
-      line-height: 1.2;
-      padding: 0.5rem;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      white-space: nowrap;
+      min-width: 120px;
     }
 
-    .square-button:hover {
-      background: rgba(255,255,255,1);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    .action-btn:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
     }
 
     /* Modal Styles */
@@ -429,15 +425,34 @@
       line-height: 1.4;
     }
 
+    /* Copy to clipboard styles */
+    .copy-email {
+      display: inline-block;
+      margin-left: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+    
+    .copy-email:hover {
+      opacity: 1;
+    }
+    
+    .copy-success {
+      color: #4ade80;
+      font-weight: bold;
+    }
+
     @media screen and (max-width: 768px) {
-      .square-actions {
-        gap: 0.7rem;
+      .action-buttons {
+        gap: 0.5rem;
       }
       
-      .square-button {
-        width: 100px;
-        height: 70px;
-        font-size: 0.65rem;
+      .action-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+        min-width: 100px;
       }
       
       .modal-content {
@@ -642,31 +657,31 @@
       <!-- Paul Chapman's Team -->
       <div class="subordinates" id="paul-chapman-subordinates">
         <div class="manager-context" id="paul-chapman-context">
+          <!-- Order Processing Action Buttons -->
+          <div class="action-buttons">
+            <button class="action-btn" onclick="openModal('roles-modal')">Roles & Responsibilities</button>
+            <a href="https://view.pagetiger.com/ibmxza/ReturningPieces.pdf" target="_blank" class="action-btn">Returning Artwork</a>
+            <button class="action-btn" onclick="openModal('instructions-modal')">Gallery Instructions</button>
+            <a href="https://view.pagetiger.com/ibmxza/ItemStatusesGuide.pdf" target="_blank" class="action-btn">Item Status Codes</a>
+            <a href="https://view.pagetiger.com/ibmxza/OrderFlowChart2023.pdf" target="_blank" class="action-btn">Order Statuses</a>
+          </div>
+          
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.3s">
               <div class="staff-card">
                 <img src="staff/Order Processing/Chappie.jpg" alt="Paul Chapman" class="staff-photo" />
-                <div class="staff-name">Paul Chapman</div>
+                <div class="staff-name">Paul Chapman <span class="copy-email" onclick="copyEmail('pchapman@washingtongreen.co.uk', this)" title="Copy email">📋</span></div>
                 <div class="staff-title-role">Order Processing Manager</div>
               </div>
             </div>
           </div>
         </div>
         
-        <!-- Order Processing Action Buttons -->
-        <div class="square-actions">
-          <button class="square-button" onclick="openModal('roles-modal')">Roles &<br>Responsibilities</button>
-          <a href="https://view.pagetiger.com/ibmxza/ReturningPieces.pdf" target="_blank" class="square-button">Returning<br>Artwork</a>
-          <button class="square-button" onclick="openModal('instructions-modal')">Gallery<br>Instructions</button>
-          <a href="https://view.pagetiger.com/ibmxza/ItemStatusesGuide.pdf" target="_blank" class="square-button">Item Status<br>Codes</a>
-          <a href="https://view.pagetiger.com/ibmxza/OrderFlowChart2023.pdf" target="_blank" class="square-button">Order<br>Statuses</a>
-        </div>
-        
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 0.9s">
             <div class="staff-card">
               <img src="staff/Order Processing/Jenny.jpg" alt="Jenny Peet" class="staff-photo" />
-              <div class="staff-name">Jenny Peet</div>
+              <div class="staff-name">Jenny Peet <span class="copy-email" onclick="copyEmail('jpeet@washingtongreen.co.uk', this)" title="Copy email">📋</span></div>
               <div class="staff-title-role">Senior Order Processing Coordinator</div>
             </div>
           </div>
@@ -674,7 +689,7 @@
           <div class="staff-member" style="animation-delay: 1.0s">
             <div class="staff-card">
               <img src="staff/Order Processing/Gerald.jpg" alt="Gerald Hooper" class="staff-photo" />
-              <div class="staff-name">Gerald Hooper</div>
+              <div class="staff-name">Gerald Hooper <span class="copy-email" onclick="copyEmail('ghooper@castlegalleries.com', this)" title="Copy email">📋</span></div>
               <div class="staff-title-role">Senior Order Processing Coordinator</div>
             </div>
           </div>
@@ -682,7 +697,7 @@
           <div class="staff-member" style="animation-delay: 1.1s">
             <div class="staff-card">
               <img src="staff/Order Processing/Katie.jpg" alt="Katie Lewis" class="staff-photo" />
-              <div class="staff-name">Katie Lewis</div>
+              <div class="staff-name">Katie Lewis <span class="copy-email" onclick="copyEmail('klewis@castlefineart.com', this)" title="Copy email">📋</span></div>
               <div class="staff-title-role">Administration Coordinator</div>
             </div>
           </div>
@@ -690,7 +705,7 @@
           <div class="staff-member" style="animation-delay: 1.2s">
             <div class="staff-card">
               <img src="staff/Order Processing/Tara.jpg" alt="Tara Platts" class="staff-photo" />
-              <div class="staff-name">Tara Platts</div>
+              <div class="staff-name">Tara Platts <span class="copy-email" onclick="copyEmail('tplatts@castlefineart.com', this)" title="Copy email">📋</span></div>
               <div class="staff-title-role">Order Processing Coordinator</div>
             </div>
           </div>
@@ -698,7 +713,7 @@
           <div class="staff-member" style="animation-delay: 1.3s">
             <div class="staff-card">
               <img src="staff/Order Processing/Pip.jpg" alt="Phillippa Beevor-Reid" class="staff-photo" />
-              <div class="staff-name">Phillippa Beevor-Reid</div>
+              <div class="staff-name">Phillippa Beevor-Reid <span class="copy-email" onclick="copyEmail('pbeevor-reid@castlefineart.com', this)" title="Copy email">📋</span></div>
               <div class="staff-title-role">Order Processing Coordinator</div>
             </div>
           </div>
@@ -706,7 +721,7 @@
           <div class="staff-member" style="animation-delay: 1.4s">
             <div class="staff-card">
               <img src="staff/Order Processing/Amelia.jpg" alt="Amelia Rush" class="staff-photo" />
-              <div class="staff-name">Amelia Rush</div>
+              <div class="staff-name">Amelia Rush <span class="copy-email" onclick="copyEmail('arush@castlefineart.com', this)" title="Copy email">📋</span></div>
               <div class="staff-title-role">Order Processing Coordinator</div>
             </div>
           </div>
@@ -870,48 +885,6 @@
         <p>You can reach the team on <strong>orderprocessingteam@washingtongreen.co.uk</strong></p>
       </div>
       
-      <div class="modal-section">
-        <h3>Individuals' Contact Information</h3>
-        
-        <div class="contact-card">
-          <div class="contact-name">Paul (Chappie) Chapman - Order Processing Manager</div>
-          <div class="contact-info">07966 570962 or 0121 384 3007 (Ext 256)<br>pchapman@washingtongreen.co.uk</div>
-        </div>
-        
-        <div class="contact-card">
-          <div class="contact-name">Gerald Hooper - Senior Order Processing Coordinator</div>
-          <div class="contact-info">0121 616 1313 (Ext 267)<br>ghooper@castlegalleries.com</div>
-        </div>
-        
-        <div class="contact-card">
-          <div class="contact-name">Jenny Peet - Senior Order Processing Coordinator</div>
-          <div class="contact-info">0121 655 1729 (Ext 357)<br>jpeet@washingtongreen.co.uk</div>
-        </div>
-        
-        <div class="contact-card">
-          <div class="contact-name">Tara Platts - Order Processing Coordinator</div>
-          <div class="contact-info">0121 616 1313 (Ext 317)<br>tplatts@castlefineart.com</div>
-        </div>
-        
-        <div class="contact-card">
-          <div class="contact-name">Philippa Beevor-Reid - Order Processing Coordinator</div>
-          <div class="contact-info">0121 616 1313 (Ext 255)<br>pbeevor-reid@castlefineart.com</div>
-        </div>
-        
-        <div class="contact-card">
-          <div class="contact-name">Amelia Rush - Order Processing Coordinator</div>
-          <div class="contact-info">0121 616 1313 (Ext 239)<br>arush@castlefineart.com</div>
-        </div>
-        
-        <div class="contact-card">
-          <div class="contact-name">Katie Lewis - Administration Coordinator</div>
-          <div class="contact-info">0121 616 1313 (Ext 242)<br>klewis@castlefineart.com</div>
-        </div>
-      </div>
-      
-      <div class="modal-section">
-        <p><em>Galleries should know who their coordinator is to contact.</em></p>
-      </div>
     </div>
   </div>
   
@@ -1212,6 +1185,38 @@ document.addEventListener('keydown', function(e) {
     }
   }
 });
+
+// Copy email to clipboard function
+function copyEmail(email, element) {
+  navigator.clipboard.writeText(email).then(function() {
+    const originalText = element.innerHTML;
+    element.innerHTML = '✓';
+    element.classList.add('copy-success');
+    
+    setTimeout(() => {
+      element.innerHTML = originalText;
+      element.classList.remove('copy-success');
+    }, 1500);
+  }).catch(function(err) {
+    console.error('Could not copy email: ', err);
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = email;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    
+    const originalText = element.innerHTML;
+    element.innerHTML = '✓';
+    element.classList.add('copy-success');
+    
+    setTimeout(() => {
+      element.innerHTML = originalText;
+      element.classList.remove('copy-success');
+    }, 1500);
+  });
+}
 
 </script>
 
