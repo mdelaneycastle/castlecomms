@@ -247,32 +247,41 @@ let isDragging = false;
 let dragElement = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize Firebase Firestore
-  if (firebase.apps.length > 0) {
-    db = firebase.firestore();
-    loadNotes();
-  } else {
-    console.error('Firebase not initialized');
-  }
-  
-  // Add note functionality
-  document.getElementById('addNoteBtn').addEventListener('click', addNote);
-  document.getElementById('noteInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && e.ctrlKey) {
-      addNote();
+  // Check authentication first
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (!user) {
+      console.log('User not authenticated, redirecting to login');
+      window.location.href = 'index.html';
+      return;
     }
+
+    // Initialize Firebase Firestore only if authenticated
+    if (firebase.apps.length > 0) {
+      db = firebase.firestore();
+      loadNotes();
+    } else {
+      console.error('Firebase not initialized');
+    }
+
+    // Add note functionality (only when authenticated)
+    document.getElementById('addNoteBtn').addEventListener('click', addNote);
+    document.getElementById('noteInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        addNote();
+      }
+    });
+    
+    // Eraser functionality
+    const eraser = document.getElementById('eraser');
+    eraser.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', endDrag);
+    
+    // Touch events for mobile
+    eraser.addEventListener('touchstart', startDrag);
+    document.addEventListener('touchmove', drag);
+    document.addEventListener('touchend', endDrag);
   });
-  
-  // Eraser functionality
-  const eraser = document.getElementById('eraser');
-  eraser.addEventListener('mousedown', startDrag);
-  document.addEventListener('mousemove', drag);
-  document.addEventListener('mouseup', endDrag);
-  
-  // Touch events for mobile
-  eraser.addEventListener('touchstart', startDrag);
-  document.addEventListener('touchmove', drag);
-  document.addEventListener('touchend', endDrag);
 });
 
 async function addNote() {
