@@ -25,7 +25,7 @@ window.sharedComponents = {
     if (!sidebarContainer) return;
 
     try {
-      const response = await fetch("sidebar.html");
+      const response = await fetch(`sidebar.html?v=${Date.now()}`);
       const html = await response.text();
       sidebarContainer.innerHTML = html;
 

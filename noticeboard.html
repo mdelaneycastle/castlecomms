@@ -22,18 +22,18 @@
     }
 
     .whiteboard {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      background: #ffffff;
       border: 20px solid #8b4513;
       border-radius: 15px;
       position: relative;
       min-height: 600px;
       box-shadow: 
         0 0 20px rgba(0,0,0,0.3),
-        inset 0 0 100px rgba(255,255,255,0.5);
+        inset 0 0 50px rgba(0,0,0,0.05);
       background-image: 
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8) 2px, transparent 2px),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.6) 1px, transparent 1px);
-      background-size: 50px 50px, 30px 30px;
+        radial-gradient(circle at 20% 20%, rgba(0,0,0,0.02) 1px, transparent 1px),
+        radial-gradient(circle at 80% 80%, rgba(0,0,0,0.01) 1px, transparent 1px);
+      background-size: 40px 40px, 25px 25px;
     }
 
     .whiteboard::before {
@@ -50,15 +50,14 @@
     }
 
     .input-section {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: rgba(255,255,255,0.9);
-      padding: 15px;
+      background: rgba(255,255,255,0.95);
+      padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       backdrop-filter: blur(10px);
-      max-width: 300px;
+      max-width: 400px;
+      margin: 0 auto 20px auto;
+      border: 2px solid #dee2e6;
     }
 
     .note-input {
@@ -233,18 +232,20 @@
 
 <main id="main">
   <div class="noticeboard-container">
-    <div class="whiteboard" id="whiteboard">
-      <div class="input-section">
-        <h3 style="margin-top: 0; font-family: 'Kalam', cursive; color: #2c3e50;">Add a Note</h3>
-        <textarea 
-          id="noteInput" 
-          class="note-input" 
-          placeholder="Write your note here..."
-          maxlength="200"
-        ></textarea>
+    <div class="input-section">
+      <h3 style="margin-top: 0; font-family: 'Kalam', cursive; color: #2c3e50; text-align: center;">Add a Note to the Board</h3>
+      <textarea 
+        id="noteInput" 
+        class="note-input" 
+        placeholder="Write your note here..."
+        maxlength="200"
+      ></textarea>
+      <div style="text-align: center;">
         <button id="addNoteBtn" class="add-note-btn">Pin Note</button>
       </div>
-      
+    </div>
+    
+    <div class="whiteboard" id="whiteboard">
       <div class="note-counter" id="noteCounter">
         Notes: 0
       </div>
@@ -357,11 +358,11 @@ function getRandomPosition() {
   const whiteboard = document.getElementById('whiteboard');
   const rect = whiteboard.getBoundingClientRect();
   
-  // Account for input section and eraser areas
-  const minX = 50;
-  const maxX = Math.max(200, rect.width - 300);
-  const minY = 120;
-  const maxY = Math.max(200, rect.height - 150);
+  // Account for note counter and eraser areas, but no input section
+  const minX = 30;
+  const maxX = Math.max(150, rect.width - 150);
+  const minY = 60; // Space for note counter
+  const maxY = Math.max(150, rect.height - 100); // Space for eraser
   
   return {
     x: Math.random() * (maxX - minX) + minX,
@@ -398,18 +399,32 @@ function drag(e) {
   
   if (!clientX || !clientY) return;
   
-  // Move eraser
-  dragElement.style.left = (clientX - 40) + 'px';
-  dragElement.style.top = (clientY - 20) + 'px';
+  // Get whiteboard container position
+  const whiteboard = document.getElementById('whiteboard');
+  const whiteboardRect = whiteboard.getBoundingClientRect();
   
-  // Create erase trail
+  // Calculate position relative to whiteboard
+  const relativeX = clientX - whiteboardRect.left - 40;
+  const relativeY = clientY - whiteboardRect.top - 20;
+  
+  // Move eraser relative to whiteboard
+  dragElement.style.position = 'absolute';
+  dragElement.style.left = relativeX + 'px';
+  dragElement.style.top = relativeY + 'px';
+  
+  // Create erase trail at cursor position
   createEraseTrail(clientX, clientY);
   
   // Check for collision with notes
   const notes = document.querySelectorAll('.note');
   notes.forEach(note => {
     const rect = note.getBoundingClientRect();
-    const eraserRect = dragElement.getBoundingClientRect();
+    const eraserRect = {
+      left: clientX - 20,
+      right: clientX + 20,
+      top: clientY - 15,
+      bottom: clientY + 15
+    };
     
     if (isColliding(eraserRect, rect)) {
       eraseNote(note);
@@ -422,9 +437,12 @@ function drag(e) {
 function endDrag() {
   if (dragElement) {
     dragElement.classList.remove('dragging');
-    // Reset eraser position
+    // Reset eraser position to original bottom-right
+    dragElement.style.position = 'absolute';
     dragElement.style.left = '';
     dragElement.style.top = '';
+    dragElement.style.bottom = '30px';
+    dragElement.style.right = '30px';
   }
   isDragging = false;
   dragElement = null;
