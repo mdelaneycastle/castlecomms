@@ -128,6 +128,15 @@
       object-position: center 20%;
     }
 
+    /* Gary Turpin hover effect to show alternative image */
+    .staff-photo[alt="Gary Turpin"] {
+      transition: opacity 0.3s ease;
+    }
+
+    .staff-member:hover .staff-photo[alt="Gary Turpin"] {
+      content: url('staff/Gary Turpin2.jpg');
+    }
+
     .staff-member.clickable:hover .staff-photo {
       border-color: rgba(255,255,255,0.8);
       box-shadow: 0 0 20px rgba(255,255,255,0.3);
