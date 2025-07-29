@@ -731,11 +731,17 @@
       <!-- Stuart Whitehouse's Team -->
       <div class="subordinates" id="stuart-whitehouse-subordinates">
         <div class="manager-context" id="stuart-whitehouse-context">
+          <!-- Logistics Action Buttons -->
+          <div class="action-buttons">
+            <button class="action-btn" onclick="openModal('retail-deliveries-modal')">Retail Deliveries</button>
+            <button class="action-btn" onclick="openModal('personal-deliveries-modal')">Personal Deliveries, Installations and Client Viewings</button>
+          </div>
+          
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.4s">
               <div class="staff-card">
                 <img src="staff/Stuart Whitehouse - Logistics Manager.jpg" alt="Stuart Whitehouse" class="staff-photo" />
-                <div class="staff-name">Stuart Whitehouse</div>
+                <div class="staff-name">Stuart Whitehouse <span class="copy-email" onclick="copyEmail('swhitehouse@washingtongreen.co.uk', this)" title="Copy email">📋</span></div>
                 <div class="staff-title-role">Logistics Manager</div>
               </div>
             </div>
@@ -745,7 +751,7 @@
           <div class="staff-member" style="animation-delay: 1.5s">
             <div class="staff-card">
               <img src="staff/Nathan Smethurst - Shipping Supervisor.jpg" alt="Nathan Smethurst" class="staff-photo" />
-              <div class="staff-name">Nathan Smethurst</div>
+              <div class="staff-name">Nathan Smethurst <span class="copy-email" onclick="copyEmail('nsmethurst@castlefineart.com', this)" title="Copy email">📋</span></div>
               <div class="staff-title-role">Shipping Supervisor</div>
             </div>
           </div>
@@ -753,7 +759,7 @@
           <div class="staff-member" style="animation-delay: 1.6s">
             <div class="staff-card">
               <img src="staff/Olly Clark - Packing Supervisor.jpg" alt="Olly Clark" class="staff-photo" />
-              <div class="staff-name">Olly Clark</div>
+              <div class="staff-name">Olly Clark <span class="copy-email" onclick="copyEmail('oclark@washingtongreen.co.uk', this)" title="Copy email">📋</span></div>
               <div class="staff-title-role">Packing Supervisor</div>
             </div>
           </div>
@@ -761,7 +767,7 @@
           <div class="staff-member" style="animation-delay: 1.7s">
             <div class="staff-card">
               <img src="staff/Zara Chaudhry - Logistics Admin Assistant.jpg" alt="Zara Chaudhry" class="staff-photo" />
-              <div class="staff-name">Zara Chaudhry</div>
+              <div class="staff-name">Zara Chaudhry <span class="copy-email" onclick="copyEmail('zchaudhry@washingtongren.co.uk', this)" title="Copy email">📋</span></div>
               <div class="staff-title-role">Logistics Admin Assistant</div>
             </div>
           </div>
@@ -925,6 +931,65 @@
         <h3>Sending Orders Together</h3>
         <p>We can't guarantee orders will be sent together unless the correct process is followed. This is something we can do on request, but as you can imagine the volume of orders coming through on a daily basis, this is very hard to manage and can easily be missed.</p>
         <p>Please can we ask that if you do have any requests for these, you put a DND date in and clearly state in the comments that you would like these orders to be sent together.</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Logistics Modals -->
+  <div class="modal-overlay" id="retail-deliveries-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('retail-deliveries-modal')">&times;</button>
+      <div class="modal-title">Gallery Deliveries</div>
+      
+      <div class="modal-section">
+        <h3>Customer Deliveries</h3>
+        <p>Galleries receive deliveries once a week on average, on delivery days:</p>
+        <ul>
+          <li>There should always be enough staff working to ensure that the gallery is covered and the delivery can be taken. Sometimes this may involve assisting with heavy items.</li>
+          <li>Space must be created in the stock room so new pieces can be easily stored.</li>
+          <li>Ensure that all items promised to other galleries or HO are wrapped and have a Product Return Form attached. It is the gallery team's responsibility to ensure that these go back on the van in a safe condition.</li>
+          <li>Before the van driver leaves, one member of staff should take responsibility for checking that all items listed on the delivery note have been delivered.</li>
+          <li>Each item should be checked for damage within 2 days of receipt, damages must be reported to Spitfire within this time period.</li>
+        </ul>
+      </div>
+      
+      <div class="modal-section">
+        <h3>Shipping Costs</h3>
+        <ul>
+          <li>Free shipping in the UK</li>
+          <li>Free shipping into USA</li>
+          <li>£50.00 into Europe</li>
+          <li>£120.00 Rest of the world</li>
+        </ul>
+      </div>
+      
+      <div class="modal-section">
+        <p>If the client's order is to be delivered directly to their home, the following steps must be taken:</p>
+        <ul>
+          <li>Email a personal delivery request to your Gallery Coordinator at least 5 working days in advance of the required delivery date.</li>
+          <li>The Gallery Coordinator will investigate the most appropriate options for the delivery and confirm with the Gallery.</li>
+        </ul>
+      </div>
+      
+      <div class="modal-section">
+        <h3>Deliveries by Gallery Staff</h3>
+        <p>Gallery staff are permitted to deliver artwork direct to customers' homes if it is deemed to be an appropriate and cost-effective solution. Prior approval must be obtained from your line manager before doing this.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="personal-deliveries-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('personal-deliveries-modal')">&times;</button>
+      <div class="modal-title">Installations</div>
+      
+      <div class="modal-section">
+        <p>Installations must be charged at £250 unless authorised by your Regional Director. You may only offer a discount on the installation fee to clients who have purchased a piece over £10,000.</p>
+      </div>
+      
+      <div class="modal-section">
+        <p><a href="https://view.pagetiger.com/ibmxza/InstallationRequestFormexample.docx" target="_blank" style="color: #fff; text-decoration: underline;">Click here for an example of how to fill out the installation request form</a></p>
+        <p><a href="https://view.pagetiger.com/ibmxza/InstallationRequestForm.docx" target="_blank" style="color: #fff; text-decoration: underline;">Click here for the installation request form</a></p>
       </div>
     </div>
   </div>
