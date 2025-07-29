@@ -362,7 +362,7 @@
 <main id="main">
   <div class="staff-container">
     <div class="staff-content">
-      <h1 class="staff-title">👥 Company Structure</h1>
+      <h1 class="staff-title" id="staff-title">👥 Company Structure</h1>
       
       <!-- Top Level Leadership -->
       <div class="hierarchy-level">
@@ -777,6 +777,9 @@ function expandSection(staffId, subordinates, clickedElement) {
   
   // Add expanded class to container for larger content
   document.querySelector('.staff-container').classList.add('expanded');
+  
+  // Update title based on the manager clicked
+  updateTitle(staffId);
 }
 
 function goBack() {
@@ -833,6 +836,11 @@ function goBack() {
     if (previousState.visibleSections.length > 0) {
       document.querySelector('.staff-container').classList.add('expanded');
     }
+    
+    // Update title based on what's currently visible
+    if (previousState.expandedElements.length > 0) {
+      updateTitle(previousState.expandedElements[previousState.expandedElements.length - 1]);
+    }
   }
 }
 
@@ -863,6 +871,26 @@ function showAllSections() {
   
   // Clear navigation stack
   navigationStack = [];
+  
+  // Reset title to default
+  updateTitle('default');
+}
+
+function updateTitle(staffId) {
+  const titleElement = document.getElementById('staff-title');
+  const titleMap = {
+    'paul-chapman': '👥 Order Processing',
+    'martin-harrison': '👥 Manufacturing and QC',
+    'gary-day': '👥 Framing',
+    'martin-sumner': '👥 Stock Control',
+    'stuart-whitehouse': '👥 Logistics',
+    'gary-turpin': '👥 Operations',
+    'matt-king': '👥 Inventory',
+    'default': '👥 Company Structure'
+  };
+  
+  const newTitle = titleMap[staffId] || titleMap['default'];
+  titleElement.textContent = newTitle;
 }
 </script>
 
