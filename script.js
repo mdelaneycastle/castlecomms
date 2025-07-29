@@ -471,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // Show loading state
           if (submitButton) {
             submitButton.disabled = true;
-            submitButton.textContent = "Posting...";
+            submitButton.textContent = "Sharing...";
           }
 
           // Process tagged users
@@ -546,7 +546,7 @@ document.addEventListener("DOMContentLoaded", () => {
           // Reset button state
           if (submitButton) {
             submitButton.disabled = false;
-            submitButton.textContent = "Post";
+            submitButton.textContent = "Share Post";
           }
         }
       });
@@ -602,7 +602,7 @@ if (!window.userCache) {
           const img = document.createElement("img");
           img.src   = post.imageURL;
           img.alt   = "attachment";
-          img.style = "max-width:100%; margin-top:0.5rem;";
+          img.className = "post-image";
           div.appendChild(img);
         }
 
@@ -615,8 +615,8 @@ if (!window.userCache) {
           </div>
           <div class="post-comments"></div>
           <form class="comment-form" data-postid="${post.postId}">
-            <input type="text" placeholder="Write a comment..." required />
-            <button type="submit">Reply</button>
+            <input type="text" class="comment-input" placeholder="Write a comment..." required />
+            <button type="submit" class="comment-submit">Reply</button>
           </form>
         `;
 
@@ -625,7 +625,8 @@ if (!window.userCache) {
         const commentsDiv = div.querySelector(".post-comments");
         db.ref(`posts/${post.postId}/comments`).on("child_added", snap => {
           const c = snap.val();
-          const p = document.createElement("p");
+          const p = document.createElement("div");
+          p.className = "comment";
           p.textContent = `${new Date(c.timestamp).toLocaleTimeString()}: ${c.text}`;
           commentsDiv.appendChild(p);
         });

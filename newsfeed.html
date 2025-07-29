@@ -2,9 +2,480 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Castle Comms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Newsfeed - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .newsfeed-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .newsfeed-title {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    /* Post Form Styling */
+    .post-form-container {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .post-form-container:hover {
+      border-color: rgba(255,255,255,0.3);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    }
+
+    .post-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .post-textarea {
+      background: rgba(255,255,255,0.9);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 15px;
+      padding: 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 120px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .post-textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      background: rgba(255,255,255,0.95);
+    }
+
+    .post-textarea::placeholder {
+      color: rgba(100, 100, 100, 0.7);
+    }
+
+    .form-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .form-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .image-upload-btn {
+      position: relative;
+      overflow: hidden;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .image-upload-btn:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.4);
+      transform: translateY(-1px);
+    }
+
+    .image-upload-btn input {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .character-count {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .character-count.warning { color: #ffd700; }
+    .character-count.danger { color: #ff6b6b; }
+
+    .post-submit-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .post-submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .post-submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .post-submit-btn.loading {
+      position: relative;
+      color: transparent;
+    }
+
+    .post-submit-btn.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* Image Preview */
+    .image-preview {
+      position: relative;
+      margin-top: 1rem;
+      border-radius: 10px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .image-preview img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+    }
+
+    .image-preview .remove-image {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 99, 99, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Mention Suggestions */
+    .mention-suggestions {
+      position: absolute;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      min-width: 200px;
+    }
+
+    .mention-suggestions li {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      transition: background 0.2s ease;
+    }
+
+    .mention-suggestions li:hover {
+      background: #f5f5f5;
+    }
+
+    .mention-suggestions li:last-child {
+      border-bottom: none;
+    }
+
+    /* Feed Styling */
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .post {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      animation: slideInUp 0.5s ease-out;
+    }
+
+    .post:hover {
+      border-color: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .post-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border: 3px solid rgba(255,255,255,0.3);
+    }
+
+    .post-info {
+      flex: 1;
+    }
+
+    .post-name {
+      font-weight: bold;
+      color: white;
+      font-size: 1.1rem;
+    }
+
+    .post-role {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+      margin: 0.2rem 0;
+    }
+
+    .post-time {
+      color: rgba(255,255,255,0.6);
+      font-size: 0.8rem;
+    }
+
+    .post-message {
+      color: rgba(255,255,255,0.95);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      word-wrap: break-word;
+    }
+
+    .post-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin: 1rem 0;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .post-footer {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      position: relative;
+    }
+
+    .react-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .react-btn:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.4);
+      transform: translateY(-1px);
+    }
+
+    .emoji-picker {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.5rem;
+      display: flex;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10;
+    }
+
+    .emoji-picker.hidden {
+      display: none;
+    }
+
+    .emoji-picker span {
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+      font-size: 1.2rem;
+    }
+
+    .emoji-picker span:hover {
+      background: #f0f0f0;
+    }
+
+    .mention {
+      color: #667eea;
+      font-weight: bold;
+      background: rgba(102, 126, 234, 0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+    }
+
+    /* Comments */
+    .post-comments {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .comment {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.9rem;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .comment-input {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      padding: 0.5rem;
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .comment-input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .comment-submit {
+      background: rgba(102, 126, 234, 0.8);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .comment-submit:hover {
+      background: rgba(102, 126, 234, 1);
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 768px) {
+      .newsfeed-container {
+        margin: 1rem auto;
+        padding: 0 0.5rem;
+      }
+
+      .newsfeed-title {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .post-form-container {
+        padding: 1.5rem;
+      }
+
+      .form-bottom {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form-controls {
+        justify-content: space-between;
+      }
+
+      .post {
+        padding: 1rem;
+      }
+
+      .post-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -13,39 +484,142 @@
   <!-- Images will be injected by JavaScript -->
 </div>
   
-  <header>
-    <button id="menu-toggle" class="hamburger">&#9776;</button>
-    <h1>Castle Comms</h1>
-  </header>
+<header>
+  <button id="menu-toggle" class="hamburger">&#9776;</button>
+  <h1>Castle Comms</h1>
+</header>
+
 <div id="notification-bell" class="notification-bell hidden">
   🔔 <span id="notification-count" class="count-badge">0</span>
 </div>
-  <div id="sidebar-container"></div>
 
-  <main id="main">
-    <h2>Newsfeed</h2>
-    <form id="post-form">
-  <textarea id="message" placeholder="Write a post..." required></textarea>
-      <ul id="mention-suggestions" class="mention-list"></ul>
-  <input type="file" id="image-file" accept="image/*" />
-  <button type="submit">Post</button>
-</form>
-    <div id="feed"></div>
-  </main>
+<div id="sidebar-container"></div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<main id="main">
+  <div class="newsfeed-container">
+    <h1 class="newsfeed-title">📰 Newsfeed</h1>
+    
+    <!-- Post Creation Form -->
+    <div class="post-form-container">
+      <form id="post-form" class="post-form">
+        <textarea 
+          id="message" 
+          class="post-textarea"
+          placeholder="What's happening at Spitfire? Share your thoughts, updates, or ask questions..." 
+          maxlength="500"
+          required
+        ></textarea>
+        
+        <ul id="mention-suggestions" class="mention-suggestions"></ul>
+        
+        <div class="image-preview" id="image-preview">
+          <img id="preview-img" src="" alt="Preview">
+          <button type="button" class="remove-image" id="remove-image">&times;</button>
+        </div>
+        
+        <div class="form-bottom">
+          <div class="form-controls">
+            <label class="image-upload-btn">
+              📷 Add Photo
+              <input type="file" id="image-file" accept="image/*" />
+            </label>
+            <span class="character-count" id="character-count">0/500</span>
+          </div>
+          
+          <button type="submit" class="post-submit-btn" id="post-submit">
+            Share Post
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Posts Feed -->
+    <div id="feed" class="feed"></div>
+  </div>
+</main>
 
-  <!-- Firebase init -->
-  <script src="firebase-init.js"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
-  <!-- Shared components -->
-  <script src="shared-components.js"></script>
+<!-- Firebase init -->
+<script src="firebase-init.js"></script>
 
-  <!-- Site scripts -->
-  <script src="script.js"></script>
+<!-- Shared components -->
+<script src="shared-components.js"></script>
+
+<!-- Site scripts -->
+<script src="script.js"></script>
+
+<script>
+// Enhanced Newsfeed JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+  const messageInput = document.getElementById('message');
+  const characterCount = document.getElementById('character-count');
+  const imageFileInput = document.getElementById('image-file');
+  const imagePreview = document.getElementById('image-preview');
+  const previewImg = document.getElementById('preview-img');
+  const removeImageBtn = document.getElementById('remove-image');
+  const postSubmitBtn = document.getElementById('post-submit');
+
+  // Character counter
+  if (messageInput && characterCount) {
+    messageInput.addEventListener('input', function() {
+      const length = this.value.length;
+      characterCount.textContent = `${length}/500`;
+      
+      // Update color based on character count
+      characterCount.className = 'character-count';
+      if (length > 400) {
+        characterCount.classList.add('warning');
+      }
+      if (length > 450) {
+        characterCount.classList.remove('warning');
+        characterCount.classList.add('danger');
+      }
+    });
+  }
+
+  // Image preview functionality
+  if (imageFileInput && imagePreview) {
+    imageFileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    removeImageBtn.addEventListener('click', function() {
+      imageFileInput.value = '';
+      imagePreview.style.display = 'none';
+      previewImg.src = '';
+    });
+  }
+
+  // Enhanced form submission with loading state
+  const postForm = document.getElementById('post-form');
+  if (postForm && postSubmitBtn) {
+    postForm.addEventListener('submit', function(e) {
+      // Add loading state
+      postSubmitBtn.classList.add('loading');
+      postSubmitBtn.disabled = true;
+      
+      // Remove loading state after submission (will be handled by existing script.js logic)
+      setTimeout(() => {
+        postSubmitBtn.classList.remove('loading');
+        postSubmitBtn.disabled = false;
+      }, 2000);
+    });
+  }
+});
+</script>
+
 </body>
 </html>
