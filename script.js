@@ -376,7 +376,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   firebase.auth().onAuthStateChanged(async user => {
-    if (!user) return window.location.href = "index.html";
+    if (!user) {
+      console.log("User not authenticated in script.js");
+      return;
+    }
 
     // Use the new authorization utilities
     await window.authUtils.toggleAdminElements(user);
