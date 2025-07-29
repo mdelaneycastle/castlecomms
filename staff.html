@@ -227,9 +227,16 @@
       font-size: 0.9rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin: 1rem auto;
-      display: block;
       backdrop-filter: blur(10px);
+      display: none;
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      z-index: 10;
+    }
+
+    .back-button.show {
+      display: block;
     }
 
     .back-button:hover {
@@ -361,6 +368,7 @@
 
 <main id="main">
   <div class="staff-container">
+    <button class="back-button" id="back-button" onclick="goBack()">← Back</button>
     <div class="staff-content">
       <h1 class="staff-title" id="staff-title">👥 Company Structure</h1>
       
@@ -388,7 +396,6 @@
       <!-- Gary Turpin's Direct Reports -->
       <div class="subordinates" id="gary-turpin-subordinates">
         <div class="manager-context" id="gary-turpin-context">
-          <button class="back-button" onclick="goBack()">← Back to Leadership</button>
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.1s">
               <div class="staff-card">
@@ -433,7 +440,6 @@
       <!-- Matt King's Direct Reports -->
       <div class="subordinates" id="matt-king-subordinates">
         <div class="manager-context" id="matt-king-context">
-          <button class="back-button" onclick="goBack()">← Back to Leadership</button>
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.2s">
               <div class="staff-card">
@@ -476,7 +482,6 @@
       <!-- Paul Chapman's Team -->
       <div class="subordinates" id="paul-chapman-subordinates">
         <div class="manager-context" id="paul-chapman-context">
-          <button class="back-button" onclick="goBack()">← Back</button>
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.3s">
               <div class="staff-card">
@@ -488,7 +493,6 @@
           </div>
         </div>
         <div class="connection-line-top"></div>
-        <div class="level-title">Order Processing Team</div>
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 0.9s">
             <div class="staff-card">
@@ -543,7 +547,6 @@
       <!-- Stuart Whitehouse's Team -->
       <div class="subordinates" id="stuart-whitehouse-subordinates">
         <div class="manager-context" id="stuart-whitehouse-context">
-          <button class="back-button" onclick="goBack()">← Back</button>
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.4s">
               <div class="staff-card">
@@ -555,7 +558,6 @@
           </div>
         </div>
         <div class="connection-line-top"></div>
-        <div class="level-title">Logistics Team</div>
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 1.5s">
             <div class="staff-card">
@@ -586,7 +588,6 @@
       <!-- Martin Harrison's Team -->
       <div class="subordinates" id="martin-harrison-subordinates">
         <div class="manager-context" id="martin-harrison-context">
-          <button class="back-button" onclick="goBack()">← Back</button>
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.5s">
               <div class="staff-card">
@@ -621,7 +622,6 @@
       <!-- Martin Sumner's Team -->
       <div class="subordinates" id="martin-sumner-subordinates">
         <div class="manager-context" id="martin-sumner-context">
-          <button class="back-button" onclick="goBack()">← Back</button>
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.6s">
               <div class="staff-card">
@@ -633,7 +633,6 @@
           </div>
         </div>
         <div class="connection-line-top"></div>
-        <div class="level-title">Stock Control Team</div>
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 2.0s">
             <div class="staff-card">
@@ -656,7 +655,6 @@
       <!-- Gary Day's Team -->
       <div class="subordinates" id="gary-day-subordinates">
         <div class="manager-context" id="gary-day-context">
-          <button class="back-button" onclick="goBack()">← Back</button>
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 1.8s">
               <div class="staff-card">
@@ -668,7 +666,6 @@
           </div>
         </div>
         <div class="connection-line-top"></div>
-        <div class="level-title">Framing Team</div>
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 2.2s">
             <div class="staff-card">
@@ -775,6 +772,12 @@ function expandSection(staffId, subordinates, clickedElement) {
     context.classList.add('show');
   }
   
+  // Show the back button
+  const backButton = document.getElementById('back-button');
+  if (backButton) {
+    backButton.classList.add('show');
+  }
+  
   // Add expanded class to container for larger content
   document.querySelector('.staff-container').classList.add('expanded');
   
@@ -800,6 +803,12 @@ function goBack() {
   document.querySelectorAll('.manager-context.show').forEach(context => {
     context.classList.remove('show');
   });
+  
+  // Hide back button if returning to top level
+  const backButton = document.getElementById('back-button');
+  if (navigationStack.length === 0 && backButton) {
+    backButton.classList.remove('show');
+  }
   
   // Remove expanded state from all elements
   document.querySelectorAll('.staff-member.expanded').forEach(element => {
@@ -860,6 +869,12 @@ function showAllSections() {
   document.querySelectorAll('.manager-context').forEach(context => {
     context.classList.remove('show');
   });
+  
+  // Hide back button
+  const backButton = document.getElementById('back-button');
+  if (backButton) {
+    backButton.classList.remove('show');
+  }
   
   // Remove expanded state from all elements
   document.querySelectorAll('.staff-member.expanded').forEach(element => {
