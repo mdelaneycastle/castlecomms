@@ -128,29 +128,23 @@
       position: absolute;
       bottom: 30px;
       right: 30px;
-      width: 60px;
-      height: 40px;
+      width: 180px;
+      height: 120px;
       background: url('eraser.png') no-repeat center center;
       background-size: contain;
-      border-radius: 8px;
       cursor: grab;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       transition: all 0.3s ease;
       z-index: 100;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
     }
 
     .eraser:hover {
       transform: scale(1.1);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-      filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.4));
     }
 
     .eraser.dragging {
       cursor: grabbing;
       transform: scale(1.2);
       z-index: 1000;
-      filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.5));
     }
 
 
