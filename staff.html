@@ -80,9 +80,6 @@
       animation: slideInUp 0.6s ease-out forwards;
     }
 
-    .staff-member.clickable:hover {
-      transform: translateY(-10px) scale(1.05);
-    }
 
     .staff-card {
       background: rgba(255,255,255,0.15);
@@ -107,9 +104,6 @@
       transition: left 0.5s ease;
     }
 
-    .staff-member.clickable:hover .staff-card::before {
-      left: 100%;
-    }
 
     .staff-photo {
       width: 120px;
@@ -129,10 +123,6 @@
     }
 
 
-    .staff-member.clickable:hover .staff-photo {
-      border-color: rgba(255,255,255,0.8);
-      box-shadow: 0 0 20px rgba(255,255,255,0.3);
-    }
 
     .staff-name {
       font-size: 1.4rem;
@@ -165,25 +155,6 @@
       display: block;
     }
 
-    .expand-indicator {
-      position: absolute;
-      bottom: 10px;
-      right: 15px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      transition: all 0.3s ease;
-    }
-
-    .staff-member.expanded .expand-indicator {
-      transform: rotate(180deg);
-      background: rgba(34, 197, 94, 0.5);
-    }
 
     .level-title {
       font-size: 1.2rem;
@@ -539,7 +510,7 @@
   <div class="staff-container">
     <button class="back-button" id="back-button" onclick="goBack()">← Back</button>
     <div class="staff-content">
-      <h1 class="staff-title" id="staff-title">👥 Company Structure</h1>
+      <h1 class="staff-title" id="staff-title">Company Structure</h1>
       
       <!-- Top Level Leadership -->
       <div class="hierarchy-level">
@@ -576,30 +547,27 @@
           </div>
         </div>
         <div class="connection-branch">
-          <div class="staff-member clickable" data-staff="paul-chapman" style="animation-delay: 0.3s">
-            <div class="staff-card">
-              <img src="staff/Order Processing/Chappie.jpg" alt="Paul Chapman" class="staff-photo" />
-              <div class="staff-name">Paul Chapman</div>
-              <div class="staff-title-role">Order Processing Manager</div>
-              <div class="expand-indicator">▼</div>
-            </div>
-          </div>
-          
-          <div class="staff-member clickable" data-staff="stuart-whitehouse" style="animation-delay: 0.4s">
-            <div class="staff-card">
-              <img src="staff/Stuart Whitehouse - Logistics Manager.jpg" alt="Stuart Whitehouse" class="staff-photo" />
-              <div class="staff-name">Stuart Whitehouse</div>
-              <div class="staff-title-role">Logistics Manager</div>
-              <div class="expand-indicator">▼</div>
-            </div>
-          </div>
-          
-          <div class="staff-member clickable" data-staff="martin-harrison" style="animation-delay: 0.5s">
+          <div class="staff-member clickable" data-staff="martin-harrison" style="animation-delay: 0.3s">
             <div class="staff-card">
               <img src="staff/Martin Harrison - Head of Manufacturing and QC.jpg" alt="Martin Harrison" class="staff-photo" />
               <div class="staff-name">Martin Harrison</div>
               <div class="staff-title-role">Head of Manufacturing and QC</div>
-              <div class="expand-indicator">▼</div>
+            </div>
+          </div>
+          
+          <div class="staff-member clickable" data-staff="paul-chapman" style="animation-delay: 0.4s">
+            <div class="staff-card">
+              <img src="staff/Order Processing/Chappie.jpg" alt="Paul Chapman" class="staff-photo" />
+              <div class="staff-name">Paul Chapman</div>
+              <div class="staff-title-role">Order Processing Manager</div>
+            </div>
+          </div>
+          
+          <div class="staff-member clickable" data-staff="stuart-whitehouse" style="animation-delay: 0.5s">
+            <div class="staff-card">
+              <img src="staff/Stuart Whitehouse - Logistics Manager.jpg" alt="Stuart Whitehouse" class="staff-photo" />
+              <div class="staff-name">Stuart Whitehouse</div>
+              <div class="staff-title-role">Logistics Manager</div>
             </div>
           </div>
         </div>
@@ -624,7 +592,6 @@
               <img src="staff/Martin Sumner - Head Of Stock Control.jpg" alt="Martin Sumner" class="staff-photo" />
               <div class="staff-name">Martin Sumner</div>
               <div class="staff-title-role">Head Of Stock Control</div>
-              <div class="expand-indicator">▼</div>
             </div>
           </div>
           
@@ -787,7 +754,6 @@
               <img src="staff/Gary Day - Framing Production Manager.jpg" alt="Gary Day" class="staff-photo" />
               <div class="staff-name">Gary Day</div>
               <div class="staff-title-role">Framing Production Manager</div>
-              <div class="expand-indicator">▼</div>
             </div>
           </div>
           
@@ -1214,14 +1180,14 @@ function showAllSections() {
 function updateTitle(staffId) {
   const titleElement = document.getElementById('staff-title');
   const titleMap = {
-    'paul-chapman': '👥 Order Processing',
-    'martin-harrison': '👥 Manufacturing and QC',
-    'gary-day': '👥 Framing',
-    'martin-sumner': '👥 Stock Control',
-    'stuart-whitehouse': '👥 Logistics',
-    'gary-turpin': '👥 Operations',
-    'matt-king': '👥 Inventory',
-    'default': '👥 Company Structure'
+    'paul-chapman': 'Order Processing',
+    'martin-harrison': 'Manufacturing and QC',
+    'gary-day': 'Framing',
+    'martin-sumner': 'Stock Control',
+    'stuart-whitehouse': 'Logistics',
+    'gary-turpin': 'Operations',
+    'matt-king': 'Inventory',
+    'default': 'Company Structure'
   };
   
   const newTitle = titleMap[staffId] || titleMap['default'];
