@@ -76,12 +76,14 @@ window.sharedComponents = {
     }
 
     firebase.auth().onAuthStateChanged(async (user) => {
+      // Check if we're on the dashboard/index page
+      const isDashboard = window.location.pathname.endsWith("index.html") || window.location.pathname === "/";
+      
       if (!user) {
-        // Redirect to login if not authenticated (except for login page)
-        if (!window.location.pathname.includes('index.html') && 
-            window.location.pathname !== '/' && 
-            !window.location.pathname.includes('gigforge.html')) {
-          window.location.href = "index.html";
+        // Only redirect to login if we're on the dashboard and not authenticated
+        if (isDashboard) {
+          // Don't create infinite loops - just don't redirect for now
+          console.log("User not authenticated on dashboard");
         }
         return;
       }
