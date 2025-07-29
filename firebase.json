@@ -18,11 +18,6 @@
       "storage.rules",
       "*.md"
     ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+    "rewrites": []
   }
 }
