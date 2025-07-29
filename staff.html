@@ -80,6 +80,19 @@
       animation: slideInUp 0.6s ease-out forwards;
     }
 
+    .staff-member.clickable:hover {
+      transform: translateY(-10px) scale(1.05);
+    }
+
+    .staff-member.clickable:hover .staff-card::before {
+      left: 100%;
+    }
+
+    .staff-member.clickable:hover .staff-photo {
+      border-color: rgba(255,255,255,0.8);
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+
 
     .staff-card {
       background: rgba(255,255,255,0.15);
