@@ -129,32 +129,28 @@
       bottom: 30px;
       right: 30px;
       width: 60px;
-      height: 30px;
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-      border-radius: 10px;
+      height: 40px;
+      background: url('eraser.png') no-repeat center center;
+      background-size: contain;
+      border-radius: 8px;
       cursor: grab;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       transition: all 0.3s ease;
       z-index: 100;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
     }
 
     .eraser:hover {
       transform: scale(1.1);
       box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.4));
     }
 
     .eraser.dragging {
       cursor: grabbing;
       transform: scale(1.2);
       z-index: 1000;
-    }
-
-    .eraser::before {
-      content: '🧽';
-      font-size: 24px;
+      filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.5));
     }
 
 
