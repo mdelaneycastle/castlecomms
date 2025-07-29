@@ -55,9 +55,10 @@
       border-radius: 10px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       backdrop-filter: blur(10px);
-      max-width: 400px;
+      max-width: 500px;
       margin: 0 auto 20px auto;
       border: 2px solid #dee2e6;
+      box-sizing: border-box;
     }
 
     .note-input {
@@ -70,6 +71,7 @@
       font-size: 14px;
       resize: vertical;
       margin-bottom: 10px;
+      box-sizing: border-box;
     }
 
     .add-note-btn {
@@ -90,17 +92,15 @@
 
     .note {
       position: absolute;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 10px 15px;
-      border-radius: 8px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      background: transparent;
+      padding: 5px;
       font-family: 'Caveat', cursive;
       font-size: 18px;
       font-weight: 700;
       color: #2c3e50;
       cursor: pointer;
       transform: rotate(-2deg);
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease;
       max-width: 250px;
       word-wrap: break-word;
       user-select: none;
@@ -117,7 +117,6 @@
     .note:hover {
       transform: rotate(0deg) scale(1.05);
       z-index: 10;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     }
 
     .note.being-erased {
@@ -161,20 +160,6 @@
       font-size: 20px;
     }
 
-    .erase-trail {
-      position: absolute;
-      pointer-events: none;
-      border-radius: 50%;
-      background: rgba(255, 107, 107, 0.3);
-      animation: fadeOut 1s ease-out forwards;
-    }
-
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        transform: scale(2);
-      }
-    }
 
     .note-counter {
       position: absolute;
@@ -412,8 +397,6 @@ function drag(e) {
   dragElement.style.left = relativeX + 'px';
   dragElement.style.top = relativeY + 'px';
   
-  // Create erase trail at cursor position
-  createEraseTrail(clientX, clientY);
   
   // Check for collision with notes
   const notes = document.querySelectorAll('.note');
@@ -448,22 +431,6 @@ function endDrag() {
   dragElement = null;
 }
 
-function createEraseTrail(x, y) {
-  const trail = document.createElement('div');
-  trail.className = 'erase-trail';
-  trail.style.left = (x - 10) + 'px';
-  trail.style.top = (y - 10) + 'px';
-  trail.style.width = '20px';
-  trail.style.height = '20px';
-  
-  document.body.appendChild(trail);
-  
-  setTimeout(() => {
-    if (trail.parentNode) {
-      trail.parentNode.removeChild(trail);
-    }
-  }, 1000);
-}
 
 function isColliding(rect1, rect2) {
   return !(rect1.right < rect2.left || 
