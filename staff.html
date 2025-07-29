@@ -154,23 +154,6 @@
       font-style: italic;
     }
 
-    .connection-line {
-      width: 2px;
-      height: 40px;
-      background: rgba(255,255,255,0.5);
-      margin: 0 auto;
-      opacity: 0;
-      animation: growLine 0.5s ease-out 0.3s forwards;
-    }
-
-    .connection-line-top {
-      width: 2px;
-      height: 20px;
-      background: rgba(255,255,255,0.5);
-      margin: 0 auto;
-      opacity: 0;
-      animation: growLine 0.5s ease-out 0.1s forwards;
-    }
 
     .connection-branch {
       display: flex;
@@ -273,10 +256,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes growLine {
-      from { height: 0; opacity: 0; }
-      to { height: 40px; opacity: 1; }
-    }
 
     .staff-grid {
       display: grid;
@@ -406,7 +385,6 @@
             </div>
           </div>
         </div>
-        <div class="connection-line-top"></div>
         <div class="connection-branch">
           <div class="staff-member clickable" data-staff="paul-chapman" style="animation-delay: 0.3s">
             <div class="staff-card">
@@ -450,7 +428,6 @@
             </div>
           </div>
         </div>
-        <div class="connection-line-top"></div>
         <div class="connection-branch">
           <div class="staff-member clickable" data-staff="martin-sumner" style="animation-delay: 0.6s">
             <div class="staff-card">
@@ -492,7 +469,16 @@
             </div>
           </div>
         </div>
-        <div class="connection-line-top"></div>
+        
+        <!-- Order Processing Team Actions -->
+        <div class="team-actions">
+          <button class="action-button" onclick="showPopup('roles-popup')">Roles & Responsibilities</button>
+          <a href="https://view.pagetiger.com/ibmxza/ReturningPieces.pdf" target="_blank" class="action-button">Returning Artwork</a>
+          <button class="action-button" onclick="showPopup('gallery-popup')">Gallery Instructions</button>
+          <a href="https://view.pagetiger.com/ibmxza/ItemStatusesGuide.pdf" target="_blank" class="action-button">Item Status Codes</a>
+          <a href="https://view.pagetiger.com/ibmxza/OrderFlowChart2023.pdf" target="_blank" class="action-button">Order Statuses</a>
+        </div>
+        
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 0.9s">
             <div class="staff-card">
@@ -512,16 +498,16 @@
           
           <div class="staff-member" style="animation-delay: 1.1s">
             <div class="staff-card">
-              <img src="staff/Order Processing/Katie.jpg" alt="Katie Turner" class="staff-photo" />
-              <div class="staff-name">Katie Turner</div>
-              <div class="staff-title-role">Order Processing Coordinator</div>
+              <img src="staff/Order Processing/Katie.jpg" alt="Katie Lewis" class="staff-photo" />
+              <div class="staff-name">Katie Lewis</div>
+              <div class="staff-title-role">Administration Coordinator</div>
             </div>
           </div>
           
           <div class="staff-member" style="animation-delay: 1.2s">
             <div class="staff-card">
-              <img src="staff/Order Processing/Tara.jpg" alt="Tara Spencer" class="staff-photo" />
-              <div class="staff-name">Tara Spencer</div>
+              <img src="staff/Order Processing/Tara.jpg" alt="Tara Platts" class="staff-photo" />
+              <div class="staff-name">Tara Platts</div>
               <div class="staff-title-role">Order Processing Coordinator</div>
             </div>
           </div>
@@ -557,7 +543,6 @@
             </div>
           </div>
         </div>
-        <div class="connection-line-top"></div>
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 1.5s">
             <div class="staff-card">
@@ -598,7 +583,6 @@
             </div>
           </div>
         </div>
-        <div class="connection-line-top"></div>
         <div class="connection-branch">
           <div class="staff-member clickable" data-staff="gary-day" style="animation-delay: 1.8s">
             <div class="staff-card">
@@ -632,7 +616,6 @@
             </div>
           </div>
         </div>
-        <div class="connection-line-top"></div>
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 2.0s">
             <div class="staff-card">
@@ -665,7 +648,6 @@
             </div>
           </div>
         </div>
-        <div class="connection-line-top"></div>
         <div class="staff-grid">
           <div class="staff-member" style="animation-delay: 2.2s">
             <div class="staff-card">
@@ -683,6 +665,110 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Popups -->
+  <div class="popup-overlay" id="roles-popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="hidePopup('roles-popup')">&times;</button>
+      <div class="popup-title">Order Processing Team</div>
+      
+      <div class="popup-section">
+        <p>Please call your assigned coordinator if you need any information on the below:</p>
+        <ul>
+          <li>Chasing orders or query ETAs for clients</li>
+          <li>Framing queries and quotes</li>
+          <li>Track pending shipments with couriers</li>
+          <li>Customer orders needed on your next van</li>
+          <li>Collections from clients</li>
+        </ul>
+        <p>You can reach the team on <strong>orderprocessingteam@washingtongreen.co.uk</strong></p>
+      </div>
+      
+      <div class="popup-section">
+        <h3>Individuals' Contact Information</h3>
+        
+        <div class="contact-item">
+          <div class="contact-name">Paul (Chappie) Chapman - Order Processing Manager</div>
+          <div class="contact-details">07966 570962 or 0121 384 3007 (Ext 256)<br>pchapman@washingtongreen.co.uk</div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-name">Gerald Hooper - Senior Order Processing Coordinator</div>
+          <div class="contact-details">0121 616 1313 (Ext 267)<br>ghooper@castlegalleries.com</div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-name">Jenny Peet - Senior Order Processing Coordinator</div>
+          <div class="contact-details">0121 655 1729 (Ext 357)<br>jpeet@washingtongreen.co.uk</div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-name">Tara Platts - Order Processing Coordinator</div>
+          <div class="contact-details">0121 616 1313 (Ext 317)<br>tplatts@castlefineart.com</div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-name">Philippa Beevor-Reid - Order Processing Coordinator</div>
+          <div class="contact-details">0121 616 1313 (Ext 255)<br>pbeevor-reid@castlefineart.com</div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-name">Amelia Rush - Order Processing Coordinator</div>
+          <div class="contact-details">0121 616 1313 (Ext 239)<br>arush@castlefineart.com</div>
+        </div>
+        
+        <div class="contact-item">
+          <div class="contact-name">Katie Lewis - Administration Coordinator</div>
+          <div class="contact-details">0121 616 1313 (Ext 242)<br>klewis@castlefineart.com</div>
+        </div>
+      </div>
+      
+      <div class="popup-section">
+        <p><em>Galleries should know who their coordinator is to contact.</em></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="popup-overlay" id="gallery-popup">
+    <div class="popup-content">
+      <button class="popup-close" onclick="hidePopup('gallery-popup')">&times;</button>
+      <div class="popup-title">Gallery Instructions</div>
+      
+      <div class="popup-section">
+        <p><strong>ITEM MARKED AS SOLD</strong> – Please make sure any orders sold from the gallery are marked as sold straight away. When item has been marked as sold, please update notes if, for any reason, you can't mark an order as sold.</p>
+      </div>
+      
+      <div class="popup-section">
+        <p><strong>FRAMING CODES</strong> – Please make sure there is always a framing code on the order. If there are special instructions for a different frame code in notes, when being sent back to H/O please cross out the frame code that is on there and write the correct one on.</p>
+      </div>
+      
+      <div class="popup-section">
+        <p><strong>SPECIAL INSTRUCTIONS</strong> – Please make sure any special instructions are entered into the order in the box provided.</p>
+      </div>
+      
+      <div class="popup-section">
+        <p><strong>PRF FORMS</strong> – Please can you make sure there is a frame code on the PRF form and relevant instructions. Please use the correct PRF form and procedure.</p>
+      </div>
+      
+      <div class="popup-section">
+        <p><strong>RETURN OF STOCK FOR CUSTOMER ORDERS</strong> – When a request comes through to be returned to H/O, this must come back on the next available van delivery and wrapped in good condition.</p>
+      </div>
+      
+      <div class="popup-section">
+        <p><strong>LTD FRAMING ORDERS</strong> – When booking on these orders, please make sure in special instructions you add as much info as possible (artist, title, edition number, framing code). This will help us to locate orders when being chased.</p>
+      </div>
+      
+      <div class="popup-section">
+        <p><strong>ORDER PROCESSING EMAIL</strong> – Please send all enquiries to <strong>orderprocessingteam@washingtongreen.co.uk</strong></p>
+      </div>
+      
+      <div class="popup-section">
+        <h3>Sending Orders Together</h3>
+        <p>We can't guarantee orders will be sent together unless the correct process is followed. This is something we can do on request, but as you can imagine the volume of orders coming through on a daily basis, this is very hard to manage and can easily be missed.</p>
+        <p>Please can we ask that if you do have any requests for these, you put a DND date in and clearly state in the comments that you would like these orders to be sent together.</p>
       </div>
     </div>
   </div>
@@ -907,6 +993,41 @@ function updateTitle(staffId) {
   const newTitle = titleMap[staffId] || titleMap['default'];
   titleElement.textContent = newTitle;
 }
+
+// Popup functions
+function showPopup(popupId) {
+  const popup = document.getElementById(popupId);
+  if (popup) {
+    popup.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function hidePopup(popupId) {
+  const popup = document.getElementById(popupId);
+  if (popup) {
+    popup.classList.remove('show');
+    document.body.style.overflow = 'auto';
+  }
+}
+
+// Close popup when clicking outside
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('popup-overlay')) {
+    const popupId = e.target.id;
+    hidePopup(popupId);
+  }
+});
+
+// Close popup with ESC key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const openPopup = document.querySelector('.popup-overlay.show');
+    if (openPopup) {
+      hidePopup(openPopup.id);
+    }
+  }
+});
 </script>
 
 <!-- Site scripts -->
