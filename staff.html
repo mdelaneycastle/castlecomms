@@ -128,14 +128,6 @@
       object-position: center 20%;
     }
 
-    /* Gary Turpin hover effect to show alternative image */
-    .staff-photo[alt="Gary Turpin"] {
-      transition: opacity 0.3s ease;
-    }
-
-    .staff-member:hover .staff-photo[alt="Gary Turpin"] {
-      content: url('staff/Gary Turpin2.jpg');
-    }
 
     .staff-member.clickable:hover .staff-photo {
       border-color: rgba(255,255,255,0.8);
@@ -734,7 +726,9 @@
           <!-- Logistics Action Buttons -->
           <div class="action-buttons">
             <button class="action-btn" onclick="openModal('retail-deliveries-modal')">Retail Deliveries</button>
-            <button class="action-btn" onclick="openModal('personal-deliveries-modal')">Personal Deliveries, Installations and Client Viewings</button>
+            <button class="action-btn" onclick="openModal('personal-deliveries-modal')">Personal Deliveries</button>
+            <button class="action-btn" onclick="openModal('installations-modal')">Installations</button>
+            <button class="action-btn" onclick="openModal('client-viewings-modal')">Client Viewings</button>
           </div>
           
           <div class="manager-header">
@@ -962,6 +956,13 @@
           <li>£120.00 Rest of the world</li>
         </ul>
       </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="personal-deliveries-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('personal-deliveries-modal')">&times;</button>
+      <div class="modal-title">Personal Deliveries</div>
       
       <div class="modal-section">
         <p>If the client's order is to be delivered directly to their home, the following steps must be taken:</p>
@@ -978,9 +979,9 @@
     </div>
   </div>
   
-  <div class="modal-overlay" id="personal-deliveries-modal">
+  <div class="modal-overlay" id="installations-modal">
     <div class="modal-content">
-      <button class="modal-close" onclick="closeModal('personal-deliveries-modal')">&times;</button>
+      <button class="modal-close" onclick="closeModal('installations-modal')">&times;</button>
       <div class="modal-title">Installations</div>
       
       <div class="modal-section">
@@ -990,6 +991,17 @@
       <div class="modal-section">
         <p><a href="https://view.pagetiger.com/ibmxza/InstallationRequestFormexample.docx" target="_blank" style="color: #fff; text-decoration: underline;">Click here for an example of how to fill out the installation request form</a></p>
         <p><a href="https://view.pagetiger.com/ibmxza/InstallationRequestForm.docx" target="_blank" style="color: #fff; text-decoration: underline;">Click here for the installation request form</a></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="client-viewings-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('client-viewings-modal')">&times;</button>
+      <div class="modal-title">Client Viewings</div>
+      
+      <div class="modal-section">
+        <p>Client viewing procedures and guidelines will be displayed here.</p>
       </div>
     </div>
   </div>
