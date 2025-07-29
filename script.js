@@ -557,7 +557,7 @@ if (!window.userCache) {
   window.userCache = snap.val() || {};
 }
 
-      function displayPost(post) {
+      async function displayPost(post) {
         const initials = post.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
 
         const div = document.createElement("div");
@@ -606,12 +606,25 @@ if (!window.userCache) {
           div.appendChild(img);
         }
 
+        // Check if current user is admin to show delete button
+        const currentUser = firebase.auth().currentUser;
+        let isAdmin = false;
+        if (currentUser) {
+          try {
+            const token = await currentUser.getIdTokenResult();
+            isAdmin = token.claims.admin === true;
+          } catch (error) {
+            console.warn("Could not check admin status:", error);
+          }
+        }
+        
         div.innerHTML += `
           <div class="post-footer">
             <button class="react-btn">${post.reaction || "➕ React"}</button>
             <div class="emoji-picker hidden">
               <span>👏</span><span>❤️</span><span>💡</span><span>👍</span><span>🤔</span>
             </div>
+            ${isAdmin ? `<button class="delete-post-btn" data-postid="${post.postId}" title="Delete Post">🗑️ Delete</button>` : ''}
           </div>
           <div class="post-comments"></div>
           <form class="comment-form" data-postid="${post.postId}">
@@ -641,6 +654,8 @@ if (!window.userCache) {
 
         const btn    = div.querySelector(".react-btn");
         const picker = div.querySelector(".emoji-picker");
+        const deleteBtn = div.querySelector(".delete-post-btn");
+        
         btn.addEventListener("click", () => picker.classList.toggle("hidden"));
         picker.querySelectorAll("span").forEach(s => {
           s.addEventListener("click", () => {
@@ -650,12 +665,28 @@ if (!window.userCache) {
             db.ref(`posts/${post.postId}`).update({ reaction: r });
           });
         });
+
+        // Add delete functionality for admins
+        if (deleteBtn) {
+          deleteBtn.addEventListener("click", async () => {
+            if (confirm("Are you sure you want to delete this post? This action cannot be undone.")) {
+              try {
+                await db.ref(`posts/${post.postId}`).remove();
+                div.remove();
+                console.log("✅ Post deleted successfully");
+              } catch (error) {
+                console.error("❌ Failed to delete post:", error);
+                alert("Failed to delete post. Please try again.");
+              }
+            }
+          });
+        }
       }
 
-      db.ref("posts").on("child_added", snap => {
+      db.ref("posts").on("child_added", async snap => {
         const post = snap.val();
         post.postId = post.postId || snap.key;
-        displayPost(post);
+        await displayPost(post);
       });
     }
 
