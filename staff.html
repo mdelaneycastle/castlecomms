@@ -267,6 +267,189 @@
       margin-right: auto;
     }
 
+    /* Square Action Buttons */
+    .square-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+
+    .square-button {
+      width: 120px;
+      height: 80px;
+      background: rgba(255,255,255,0.9);
+      color: #333;
+      border: none;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+      line-height: 1.2;
+      padding: 0.5rem;
+    }
+
+    .square-button:hover {
+      background: rgba(255,255,255,1);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 650px;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+      border: 2px solid rgba(255,255,255,0.1);
+      margin: 1rem;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      font-size: 1.8rem;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(255,255,255,0.3);
+      transform: rotate(90deg);
+    }
+
+    .modal-title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+      padding-bottom: 1rem;
+    }
+
+    .modal-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-section h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: rgba(255,255,255,0.95);
+      border-left: 4px solid rgba(255,255,255,0.4);
+      padding-left: 1rem;
+    }
+
+    .modal-section p, .modal-section ul {
+      line-height: 1.7;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    .modal-section ul {
+      padding-left: 1.5rem;
+    }
+
+    .modal-section li {
+      margin-bottom: 0.5rem;
+    }
+
+    .contact-card {
+      background: rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 0.8rem;
+      border-left: 4px solid rgba(255,255,255,0.4);
+      transition: all 0.3s ease;
+    }
+
+    .contact-card:hover {
+      background: rgba(255,255,255,0.18);
+      transform: translateX(5px);
+    }
+
+    .contact-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .contact-info {
+      font-size: 0.95rem;
+      opacity: 0.9;
+      line-height: 1.4;
+    }
+
+    @media screen and (max-width: 768px) {
+      .square-actions {
+        gap: 0.7rem;
+      }
+      
+      .square-button {
+        width: 100px;
+        height: 70px;
+        font-size: 0.65rem;
+      }
+      
+      .modal-content {
+        margin: 0.5rem;
+        padding: 1.5rem;
+      }
+      
+      .modal-title {
+        font-size: 1.6rem;
+      }
+    }
+
     @media screen and (max-width: 768px) {
       .staff-container {
         margin: 1rem;
@@ -470,13 +653,13 @@
           </div>
         </div>
         
-        <!-- Order Processing Team Actions -->
-        <div class="team-actions">
-          <button class="action-button" onclick="showPopup('roles-popup')">Roles & Responsibilities</button>
-          <a href="https://view.pagetiger.com/ibmxza/ReturningPieces.pdf" target="_blank" class="action-button">Returning Artwork</a>
-          <button class="action-button" onclick="showPopup('gallery-popup')">Gallery Instructions</button>
-          <a href="https://view.pagetiger.com/ibmxza/ItemStatusesGuide.pdf" target="_blank" class="action-button">Item Status Codes</a>
-          <a href="https://view.pagetiger.com/ibmxza/OrderFlowChart2023.pdf" target="_blank" class="action-button">Order Statuses</a>
+        <!-- Order Processing Action Buttons -->
+        <div class="square-actions">
+          <button class="square-button" onclick="openModal('roles-modal')">Roles &<br>Responsibilities</button>
+          <a href="https://view.pagetiger.com/ibmxza/ReturningPieces.pdf" target="_blank" class="square-button">Returning<br>Artwork</a>
+          <button class="square-button" onclick="openModal('instructions-modal')">Gallery<br>Instructions</button>
+          <a href="https://view.pagetiger.com/ibmxza/ItemStatusesGuide.pdf" target="_blank" class="square-button">Item Status<br>Codes</a>
+          <a href="https://view.pagetiger.com/ibmxza/OrderFlowChart2023.pdf" target="_blank" class="square-button">Order<br>Statuses</a>
         </div>
         
         <div class="staff-grid">
@@ -669,13 +852,13 @@
     </div>
   </div>
   
-  <!-- Popups -->
-  <div class="popup-overlay" id="roles-popup">
-    <div class="popup-content">
-      <button class="popup-close" onclick="hidePopup('roles-popup')">&times;</button>
-      <div class="popup-title">Order Processing Team</div>
+  <!-- Modals -->
+  <div class="modal-overlay" id="roles-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('roles-modal')">&times;</button>
+      <div class="modal-title">Order Processing Team</div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <p>Please call your assigned coordinator if you need any information on the below:</p>
         <ul>
           <li>Chasing orders or query ETAs for clients</li>
@@ -687,91 +870,92 @@
         <p>You can reach the team on <strong>orderprocessingteam@washingtongreen.co.uk</strong></p>
       </div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <h3>Individuals' Contact Information</h3>
         
-        <div class="contact-item">
+        <div class="contact-card">
           <div class="contact-name">Paul (Chappie) Chapman - Order Processing Manager</div>
-          <div class="contact-details">07966 570962 or 0121 384 3007 (Ext 256)<br>pchapman@washingtongreen.co.uk</div>
+          <div class="contact-info">07966 570962 or 0121 384 3007 (Ext 256)<br>pchapman@washingtongreen.co.uk</div>
         </div>
         
-        <div class="contact-item">
+        <div class="contact-card">
           <div class="contact-name">Gerald Hooper - Senior Order Processing Coordinator</div>
-          <div class="contact-details">0121 616 1313 (Ext 267)<br>ghooper@castlegalleries.com</div>
+          <div class="contact-info">0121 616 1313 (Ext 267)<br>ghooper@castlegalleries.com</div>
         </div>
         
-        <div class="contact-item">
+        <div class="contact-card">
           <div class="contact-name">Jenny Peet - Senior Order Processing Coordinator</div>
-          <div class="contact-details">0121 655 1729 (Ext 357)<br>jpeet@washingtongreen.co.uk</div>
+          <div class="contact-info">0121 655 1729 (Ext 357)<br>jpeet@washingtongreen.co.uk</div>
         </div>
         
-        <div class="contact-item">
+        <div class="contact-card">
           <div class="contact-name">Tara Platts - Order Processing Coordinator</div>
-          <div class="contact-details">0121 616 1313 (Ext 317)<br>tplatts@castlefineart.com</div>
+          <div class="contact-info">0121 616 1313 (Ext 317)<br>tplatts@castlefineart.com</div>
         </div>
         
-        <div class="contact-item">
+        <div class="contact-card">
           <div class="contact-name">Philippa Beevor-Reid - Order Processing Coordinator</div>
-          <div class="contact-details">0121 616 1313 (Ext 255)<br>pbeevor-reid@castlefineart.com</div>
+          <div class="contact-info">0121 616 1313 (Ext 255)<br>pbeevor-reid@castlefineart.com</div>
         </div>
         
-        <div class="contact-item">
+        <div class="contact-card">
           <div class="contact-name">Amelia Rush - Order Processing Coordinator</div>
-          <div class="contact-details">0121 616 1313 (Ext 239)<br>arush@castlefineart.com</div>
+          <div class="contact-info">0121 616 1313 (Ext 239)<br>arush@castlefineart.com</div>
         </div>
         
-        <div class="contact-item">
+        <div class="contact-card">
           <div class="contact-name">Katie Lewis - Administration Coordinator</div>
-          <div class="contact-details">0121 616 1313 (Ext 242)<br>klewis@castlefineart.com</div>
+          <div class="contact-info">0121 616 1313 (Ext 242)<br>klewis@castlefineart.com</div>
         </div>
       </div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <p><em>Galleries should know who their coordinator is to contact.</em></p>
       </div>
     </div>
   </div>
   
-  <div class="popup-overlay" id="gallery-popup">
-    <div class="popup-content">
-      <button class="popup-close" onclick="hidePopup('gallery-popup')">&times;</button>
-      <div class="popup-title">Gallery Instructions</div>
+  <div class="modal-overlay" id="instructions-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('instructions-modal')">&times;</button>
+      <div class="modal-title">Gallery Instructions</div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <p><strong>ITEM MARKED AS SOLD</strong> – Please make sure any orders sold from the gallery are marked as sold straight away. When item has been marked as sold, please update notes if, for any reason, you can't mark an order as sold.</p>
       </div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <p><strong>FRAMING CODES</strong> – Please make sure there is always a framing code on the order. If there are special instructions for a different frame code in notes, when being sent back to H/O please cross out the frame code that is on there and write the correct one on.</p>
       </div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <p><strong>SPECIAL INSTRUCTIONS</strong> – Please make sure any special instructions are entered into the order in the box provided.</p>
       </div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <p><strong>PRF FORMS</strong> – Please can you make sure there is a frame code on the PRF form and relevant instructions. Please use the correct PRF form and procedure.</p>
       </div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <p><strong>RETURN OF STOCK FOR CUSTOMER ORDERS</strong> – When a request comes through to be returned to H/O, this must come back on the next available van delivery and wrapped in good condition.</p>
       </div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <p><strong>LTD FRAMING ORDERS</strong> – When booking on these orders, please make sure in special instructions you add as much info as possible (artist, title, edition number, framing code). This will help us to locate orders when being chased.</p>
       </div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <p><strong>ORDER PROCESSING EMAIL</strong> – Please send all enquiries to <strong>orderprocessingteam@washingtongreen.co.uk</strong></p>
       </div>
       
-      <div class="popup-section">
+      <div class="modal-section">
         <h3>Sending Orders Together</h3>
         <p>We can't guarantee orders will be sent together unless the correct process is followed. This is something we can do on request, but as you can imagine the volume of orders coming through on a daily basis, this is very hard to manage and can easily be missed.</p>
         <p>Please can we ask that if you do have any requests for these, you put a DND date in and clearly state in the comments that you would like these orders to be sent together.</p>
       </div>
     </div>
   </div>
+  
 </main>
 
 <!-- Firebase SDKs -->
@@ -994,40 +1178,41 @@ function updateTitle(staffId) {
   titleElement.textContent = newTitle;
 }
 
-// Popup functions
-function showPopup(popupId) {
-  const popup = document.getElementById(popupId);
-  if (popup) {
-    popup.classList.add('show');
+// Modal Functions
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
 }
 
-function hidePopup(popupId) {
-  const popup = document.getElementById(popupId);
-  if (popup) {
-    popup.classList.remove('show');
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('active');
     document.body.style.overflow = 'auto';
   }
 }
 
-// Close popup when clicking outside
+// Close modal when clicking outside
 document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('popup-overlay')) {
-    const popupId = e.target.id;
-    hidePopup(popupId);
+  if (e.target.classList.contains('modal-overlay')) {
+    const modalId = e.target.id;
+    closeModal(modalId);
   }
 });
 
-// Close popup with ESC key
+// Close modal with ESC key
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
-    const openPopup = document.querySelector('.popup-overlay.show');
-    if (openPopup) {
-      hidePopup(openPopup.id);
+    const activeModal = document.querySelector('.modal-overlay.active');
+    if (activeModal) {
+      closeModal(activeModal.id);
     }
   }
 });
+
 </script>
 
 <!-- Site scripts -->
