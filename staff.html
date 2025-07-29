@@ -204,6 +204,40 @@
       text-align: center;
     }
 
+    .back-button {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 0.5rem 1.5rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 1rem auto;
+      display: block;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-button:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    .manager-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .manager-context {
+      display: none;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    .manager-context.show {
+      display: block;
+    }
+
     @keyframes fadeInDown {
       from { opacity: 0; transform: translateY(-30px); }
       to { opacity: 1; transform: translateY(0); }
@@ -339,6 +373,18 @@
 
       <!-- Gary Turpin's Direct Reports -->
       <div class="subordinates" id="gary-turpin-subordinates">
+        <div class="manager-context" id="gary-turpin-context">
+          <button class="back-button" onclick="goBack()">← Back to Leadership</button>
+          <div class="manager-header">
+            <div class="staff-member" style="animation-delay: 0.1s">
+              <div class="staff-card">
+                <img src="staff/Gary Turpin - Head of Operations.jpg" alt="Gary Turpin" class="staff-photo" />
+                <div class="staff-name">Gary Turpin</div>
+                <div class="staff-title-role">Head of Operations</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="connection-line-top"></div>
         <div class="connection-branch">
           <div class="staff-member clickable" data-staff="paul-chapman" style="animation-delay: 0.3s">
@@ -372,6 +418,18 @@
 
       <!-- Matt King's Direct Reports -->
       <div class="subordinates" id="matt-king-subordinates">
+        <div class="manager-context" id="matt-king-context">
+          <button class="back-button" onclick="goBack()">← Back to Leadership</button>
+          <div class="manager-header">
+            <div class="staff-member" style="animation-delay: 0.2s">
+              <div class="staff-card">
+                <img src="staff/Matt King - Head Of Inventory.jpg" alt="Matt King" class="staff-photo" />
+                <div class="staff-name">Matt King</div>
+                <div class="staff-title-role">Head Of Inventory</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="connection-line-top"></div>
         <div class="connection-branch">
           <div class="staff-member clickable" data-staff="martin-sumner" style="animation-delay: 0.6s">
@@ -403,6 +461,18 @@
 
       <!-- Paul Chapman's Team -->
       <div class="subordinates" id="paul-chapman-subordinates">
+        <div class="manager-context" id="paul-chapman-context">
+          <button class="back-button" onclick="goBack()">← Back</button>
+          <div class="manager-header">
+            <div class="staff-member" style="animation-delay: 0.3s">
+              <div class="staff-card">
+                <img src="staff/Order Processing/Chappie.jpg" alt="Paul Chapman" class="staff-photo" />
+                <div class="staff-name">Paul Chapman</div>
+                <div class="staff-title-role">Order Processing Manager</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="connection-line-top"></div>
         <div class="level-title">Order Processing Team</div>
         <div class="staff-grid">
@@ -458,6 +528,18 @@
 
       <!-- Stuart Whitehouse's Team -->
       <div class="subordinates" id="stuart-whitehouse-subordinates">
+        <div class="manager-context" id="stuart-whitehouse-context">
+          <button class="back-button" onclick="goBack()">← Back</button>
+          <div class="manager-header">
+            <div class="staff-member" style="animation-delay: 0.4s">
+              <div class="staff-card">
+                <img src="staff/Stuart Whitehouse - Logistics Manager.jpg" alt="Stuart Whitehouse" class="staff-photo" />
+                <div class="staff-name">Stuart Whitehouse</div>
+                <div class="staff-title-role">Logistics Manager</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="connection-line-top"></div>
         <div class="level-title">Logistics Team</div>
         <div class="staff-grid">
@@ -489,6 +571,18 @@
 
       <!-- Martin Harrison's Team -->
       <div class="subordinates" id="martin-harrison-subordinates">
+        <div class="manager-context" id="martin-harrison-context">
+          <button class="back-button" onclick="goBack()">← Back</button>
+          <div class="manager-header">
+            <div class="staff-member" style="animation-delay: 0.5s">
+              <div class="staff-card">
+                <img src="staff/Martin Harrison - Head of Manufacturing and QC.jpg" alt="Martin Harrison" class="staff-photo" />
+                <div class="staff-name">Martin Harrison</div>
+                <div class="staff-title-role">Head of Manufacturing and QC</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="connection-line-top"></div>
         <div class="connection-branch">
           <div class="staff-member clickable" data-staff="gary-day" style="animation-delay: 1.8s">
@@ -512,6 +606,18 @@
 
       <!-- Martin Sumner's Team -->
       <div class="subordinates" id="martin-sumner-subordinates">
+        <div class="manager-context" id="martin-sumner-context">
+          <button class="back-button" onclick="goBack()">← Back</button>
+          <div class="manager-header">
+            <div class="staff-member" style="animation-delay: 0.6s">
+              <div class="staff-card">
+                <img src="staff/Martin Sumner - Head Of Stock Control.jpg" alt="Martin Sumner" class="staff-photo" />
+                <div class="staff-name">Martin Sumner</div>
+                <div class="staff-title-role">Head Of Stock Control</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="connection-line-top"></div>
         <div class="level-title">Stock Control Team</div>
         <div class="staff-grid">
@@ -535,6 +641,18 @@
 
       <!-- Gary Day's Team -->
       <div class="subordinates" id="gary-day-subordinates">
+        <div class="manager-context" id="gary-day-context">
+          <button class="back-button" onclick="goBack()">← Back</button>
+          <div class="manager-header">
+            <div class="staff-member" style="animation-delay: 1.8s">
+              <div class="staff-card">
+                <img src="staff/Gary Day - Framing Production Manager.jpg" alt="Gary Day" class="staff-photo" />
+                <div class="staff-name">Gary Day</div>
+                <div class="staff-title-role">Framing Production Manager</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="connection-line-top"></div>
         <div class="level-title">Framing Team</div>
         <div class="staff-grid">
@@ -571,6 +689,8 @@
 
 <!-- Staff Hierarchy Logic -->
 <script>
+let navigationStack = [];
+
 document.addEventListener('DOMContentLoaded', function() {
   const staffMembers = document.querySelectorAll('.staff-member.clickable');
   
@@ -583,73 +703,142 @@ document.addEventListener('DOMContentLoaded', function() {
       if (subordinates) {
         const isCurrentlyExpanded = this.classList.contains('expanded');
         
-        // Collapse all other expanded sections first, but keep the current manager's parent visible
-        document.querySelectorAll('.staff-member.expanded').forEach(expandedMember => {
-          if (expandedMember !== this) {
-            expandedMember.classList.remove('expanded');
-            const expandedId = expandedMember.dataset.staff;
-            const expandedSubordinates = document.getElementById(`${expandedId}-subordinates`);
-            if (expandedSubordinates) {
-              expandedSubordinates.classList.remove('show');
-            }
-          }
-        });
-        
-        // Hide peer sections when expanding a new one
-        if (!isCurrentlyExpanded) {
-          hidePeerSections(staffId, subordinates);
-        }
-        
-        // Toggle current section
         if (isCurrentlyExpanded) {
-          this.classList.remove('expanded');
-          subordinates.classList.remove('show');
-          showAllTopLevelSections();
+          // Collapsing - go back one level
+          goBack();
         } else {
-          this.classList.add('expanded');
-          subordinates.classList.add('show');
+          // Expanding - show subordinates with manager context
+          expandSection(staffId, subordinates, this);
         }
       }
     });
   });
-  
-  function hidePeerSections(currentStaffId, currentSubordinates) {
-    // Determine which sections to hide based on the current staff being expanded
-    const parentSection = currentSubordinates.parentElement.closest('.subordinates');
-    
-    if (parentSection) {
-      // Hide peer manager sections
-      const peerSections = parentSection.querySelectorAll('.staff-member.clickable');
-      peerSections.forEach(peer => {
-        if (peer.dataset.staff !== currentStaffId) {
-          peer.style.display = 'none';
-        }
-      });
-    } else {
-      // Top level - hide the other top level manager when one is expanded
-      const topLevelManagers = document.querySelectorAll('.hierarchy-level .staff-member.clickable');
-      topLevelManagers.forEach(manager => {
-        if (manager.dataset.staff !== currentStaffId) {
-          manager.style.display = 'none';
-        }
-      });
-    }
-  }
-  
-  function showAllTopLevelSections() {
-    // Show all top level managers
-    const topLevelManagers = document.querySelectorAll('.hierarchy-level .staff-member');
-    topLevelManagers.forEach(manager => {
-      manager.style.display = 'block';
-    });
-    
-    // Show all peer sections
-    const allManagers = document.querySelectorAll('.staff-member.clickable');
-    allManagers.forEach(manager => {
-      manager.style.display = 'block';
-    });
-  }
 });
+
+function expandSection(staffId, subordinates, clickedElement) {
+  // Save current state to navigation stack
+  const currentState = {
+    visibleSections: [],
+    expandedElements: []
+  };
+  
+  // Store currently visible sections
+  document.querySelectorAll('.subordinates.show').forEach(section => {
+    currentState.visibleSections.push(section.id);
+  });
+  
+  // Store currently expanded elements
+  document.querySelectorAll('.staff-member.expanded').forEach(element => {
+    currentState.expandedElements.push(element.dataset.staff);
+  });
+  
+  navigationStack.push(currentState);
+  
+  // Hide all current sections
+  document.querySelectorAll('.subordinates.show').forEach(section => {
+    section.classList.remove('show');
+  });
+  
+  // Remove expanded state from all elements
+  document.querySelectorAll('.staff-member.expanded').forEach(element => {
+    element.classList.remove('expanded');
+  });
+  
+  // Hide top level sections if we're expanding from top level
+  const topLevelSection = document.querySelector('.hierarchy-level');
+  if (clickedElement.closest('.hierarchy-level')) {
+    topLevelSection.style.display = 'none';
+  }
+  
+  // Show the subordinates section with manager context
+  subordinates.classList.add('show');
+  clickedElement.classList.add('expanded');
+  
+  // Show the manager context
+  const contextId = `${staffId}-context`;
+  const context = document.getElementById(contextId);
+  if (context) {
+    context.classList.add('show');
+  }
+}
+
+function goBack() {
+  if (navigationStack.length === 0) {
+    // If no navigation history, show everything
+    showAllSections();
+    return;
+  }
+  
+  const previousState = navigationStack.pop();
+  
+  // Hide all current sections
+  document.querySelectorAll('.subordinates.show').forEach(section => {
+    section.classList.remove('show');
+  });
+  
+  // Hide all manager contexts
+  document.querySelectorAll('.manager-context.show').forEach(context => {
+    context.classList.remove('show');
+  });
+  
+  // Remove expanded state from all elements
+  document.querySelectorAll('.staff-member.expanded').forEach(element => {
+    element.classList.remove('expanded');
+  });
+  
+  if (navigationStack.length === 0) {
+    // Back to top level
+    showAllSections();
+  } else {
+    // Restore previous state
+    previousState.visibleSections.forEach(sectionId => {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.classList.add('show');
+        
+        // Show manager context if it exists
+        const contextId = sectionId.replace('-subordinates', '-context');
+        const context = document.getElementById(contextId);
+        if (context) {
+          context.classList.add('show');
+        }
+      }
+    });
+    
+    previousState.expandedElements.forEach(staffId => {
+      const element = document.querySelector(`[data-staff="${staffId}"]`);
+      if (element) {
+        element.classList.add('expanded');
+      }
+    });
+  }
+}
+
+function showAllSections() {
+  // Show top level
+  const topLevelSection = document.querySelector('.hierarchy-level');
+  if (topLevelSection) {
+    topLevelSection.style.display = 'flex';
+  }
+  
+  // Hide all subordinate sections
+  document.querySelectorAll('.subordinates').forEach(section => {
+    section.classList.remove('show');
+  });
+  
+  // Hide all manager contexts
+  document.querySelectorAll('.manager-context').forEach(context => {
+    context.classList.remove('show');
+  });
+  
+  // Remove expanded state from all elements
+  document.querySelectorAll('.staff-member.expanded').forEach(element => {
+    element.classList.remove('expanded');
+  });
+  
+  // Clear navigation stack
+  navigationStack = [];
+}
 </script>
 
 <!-- Site scripts -->
