@@ -5,11 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin – User Management</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; margin: 0; }
+    /* Background Slideshow Styles */
+    .background-slideshow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .background-slideshow img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .background-slideshow img.active {
+      opacity: 0.3;
+    }
+
+    body { 
+      font-family: Arial, sans-serif; 
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); 
+      margin: 0; 
+      position: relative;
+    }
     header {
       display: flex;
       align-items: center;
-      background: #333;
+      background: rgba(51, 51, 51, 0.95);
+      backdrop-filter: blur(10px);
       color: white;
       padding: 0.5rem 1rem;
     }
@@ -26,7 +58,8 @@
       top: 0; left: 0;
       width: 250px;
       height: 100%;
-      background: #222;
+      background: rgba(34, 34, 34, 0.95);
+      backdrop-filter: blur(15px);
       color: white;
       transform: translateX(-100%);
       transition: transform 0.3s ease;
@@ -52,10 +85,12 @@
     main {
       margin: 2rem auto;
       max-width: 900px;
-      background: white;
-      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
       padding: 2rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     table {
       width: 100%;
