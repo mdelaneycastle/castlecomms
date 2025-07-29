@@ -753,6 +753,15 @@
       <!-- Martin Harrison's Team -->
       <div class="subordinates" id="martin-harrison-subordinates">
         <div class="manager-context" id="martin-harrison-context">
+          <!-- Manufacturing Action Buttons -->
+          <div class="action-buttons">
+            <button class="action-btn" onclick="openModal('framing-modal')">Framing</button>
+            <button class="action-btn" onclick="openModal('mounting-modal')">Mounting</button>
+            <button class="action-btn" onclick="openModal('quality-control-modal')">Quality Control</button>
+            <button class="action-btn" onclick="openModal('requests-modal')">Requests</button>
+            <button class="action-btn" onclick="openModal('handing-art-modal')">Handing Art</button>
+          </div>
+          
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.5s">
               <div class="staff-card">
@@ -998,6 +1007,62 @@
       
       <div class="modal-section">
         <p>Occasionally if we are unable to support, you may need to make prior arrangements for travel.</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Manufacturing Modals -->
+  <div class="modal-overlay" id="framing-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('framing-modal')">&times;</button>
+      <div class="modal-title">Framing</div>
+      
+      <div class="modal-section">
+        <p>Framing information will be displayed here.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="mounting-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('mounting-modal')">&times;</button>
+      <div class="modal-title">Mounting</div>
+      
+      <div class="modal-section">
+        <p>Mounting information will be displayed here.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="quality-control-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('quality-control-modal')">&times;</button>
+      <div class="modal-title">Quality Control</div>
+      
+      <div class="modal-section">
+        <p>Quality Control information will be displayed here.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="requests-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('requests-modal')">&times;</button>
+      <div class="modal-title">Requests</div>
+      
+      <div class="modal-section">
+        <p>Requests information will be displayed here.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="handing-art-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('handing-art-modal')">&times;</button>
+      <div class="modal-title">Handing Art</div>
+      
+      <div class="modal-section">
+        <p>Handing Art information will be displayed here.</p>
       </div>
     </div>
   </div>
