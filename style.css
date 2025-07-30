@@ -521,9 +521,9 @@ admin-link {
   position: relative;
   width: 100%;
   min-height: 140px;
-  background: rgba(255, 255, 255, 0.9);
+  background: #45494e !important;
   backdrop-filter: blur(20px);
-  color: #374151;
+  color: white;
   text-decoration: none;
   display: flex;
   flex-direction: column;
@@ -547,7 +547,7 @@ admin-link {
 .quick-link-text {
   font-size: 0.7rem;
   font-weight: 700;
-  color: #1f2937;
+  color: white;
   text-align: center;
   line-height: 1.2;
   max-width: 100%;
