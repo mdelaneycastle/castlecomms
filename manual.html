@@ -71,7 +71,7 @@
       padding: 2rem;
       box-sizing: border-box;
       transform-origin: center center;
-      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       border: 2px solid rgba(255,255,255,0.3);
       overflow: hidden;
       backface-visibility: hidden;
@@ -1005,7 +1005,7 @@ function showPage(pageNum, direction = 'none') {
         page.classList.add('hidden');
       }
     });
-  }, 800);
+  }, 1000);
   
   currentPageNum = pageNum;
   updatePageIndicator();
@@ -1052,7 +1052,7 @@ function goToPage(pageNum) {
     setTimeout(() => {
       currentPage.classList.add('hidden');
       currentPage.classList.remove('slide-out-left', 'slide-out-right');
-    }, 800);
+    }, 1000);
   }, 100);
 }
 
