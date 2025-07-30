@@ -169,6 +169,7 @@
       justify-content: center;
       text-align: center;
       height: 100%;
+      color: #1e293b !important;
     }
 
     .section-card:hover {
@@ -347,6 +348,21 @@
       border-radius: 8px;
       text-align: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Force manual cards to be white/light */
+    .manual-container .section-card,
+    .page .section-card,
+    div.section-card {
+      background: rgba(255,255,255,0.9) !important;
+      color: #1e293b !important;
+    }
+    
+    .manual-container .section-card:hover,
+    .page .section-card:hover,
+    div.section-card:hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
     }
 
     @media (max-width: 768px) {
