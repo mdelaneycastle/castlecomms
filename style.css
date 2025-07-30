@@ -813,7 +813,7 @@ admin-link {
   position: relative;
   width: 100%;
   min-height: 140px;
-  background: #45494e;
+  background: #45494e !important;
   color: white;
   text-decoration: none;
   display: flex;
