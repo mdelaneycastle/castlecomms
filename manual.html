@@ -57,6 +57,8 @@
       height: calc(100% - 100px);
       margin: 0 auto;
       transform-style: preserve-3d;
+      overflow: hidden;
+      perspective: 1200px;
     }
 
     .page {
@@ -77,22 +79,22 @@
     }
 
     .page.slide-out-left {
-      transform: translateX(-100%) rotateY(-90deg) scale(0.8);
+      transform: translateX(-120%) rotateY(-45deg) scale(0.7);
       opacity: 0;
     }
 
     .page.slide-out-right {
-      transform: translateX(100%) rotateY(90deg) scale(0.8);
+      transform: translateX(120%) rotateY(45deg) scale(0.7);
       opacity: 0;
     }
 
     .page.slide-in-left {
-      transform: translateX(-100%) rotateY(90deg) scale(0.8);
+      transform: translateX(-120%) rotateY(45deg) scale(0.7);
       opacity: 0;
     }
 
     .page.slide-in-right {
-      transform: translateX(100%) rotateY(-90deg) scale(0.8);
+      transform: translateX(120%) rotateY(-45deg) scale(0.7);
       opacity: 0;
     }
 
