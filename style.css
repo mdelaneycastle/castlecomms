@@ -663,12 +663,12 @@ admin-link {
   box-shadow: var(--shadow-medium);
 }
 
-/* Gallery Manual - Complete Redesign */
+/* Gallery Manual - Now matches other buttons */
 .gallery-manual-redesign {
   position: relative;
   width: 100%;
   min-height: 140px;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  background: #45494e !important;
   color: white;
   text-decoration: none;
   display: flex;
