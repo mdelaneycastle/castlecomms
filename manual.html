@@ -1,1 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery Manual - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .manual-container {
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .manual-book {
+      position: relative;
+      width: 90vw;
+      height: 85vh;
+      max-width: 1600px;
+      max-height: 900px;
+      perspective: 2000px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .manual-title {
+      text-align: center;
+      color: white;
+      font-size: 2.2rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .page-container {
+      position: relative;
+      width: 100%;
+      height: calc(100% - 100px);
+      margin: 0 auto;
+      transform-style: preserve-3d;
+      overflow: hidden;
+      perspective: 1200px;
+    }
+
+    .page {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 15px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+      padding: 2rem;
+      box-sizing: border-box;
+      transform-origin: center center;
+      transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      border: 2px solid rgba(255,255,255,0.3);
+      overflow: hidden;
+      backface-visibility: hidden;
+      opacity: 1;
+      z-index: 1;
+    }
+
+    .page.slide-in-right {
+      z-index: 1;
+    }
+
+    .page.slide-in-left {
+      z-index: 1;
+    }
+
+    .page.slide-out-left {
+      transform: translateX(-120%) rotateY(-45deg) scale(0.7);
+      opacity: 0;
+    }
+
+    .page.slide-out-right {
+      transform: translateX(120%) rotateY(45deg) scale(0.7);
+      opacity: 0;
+    }
+
+    .page.slide-in-left {
+      transform: translateX(-120%) rotateY(45deg) scale(0.7);
+      opacity: 0;
+    }
+
+    .page.slide-in-right {
+      transform: translateX(120%) rotateY(-45deg) scale(0.7);
+      opacity: 0;
+    }
+
+    .page.active {
+      transform: translateX(0) rotateY(0deg) scale(1);
+      opacity: 1;
+      z-index: 2;
+    }
+
+    .page.hidden {
+      display: none;
+    }
+
+    .page-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-header {
+      border-bottom: 3px solid var(--primary-gradient);
+      background: var(--primary-gradient);
+      margin: -2rem -2rem 1.5rem -2rem;
+      padding: 1.5rem 2rem;
+      border-radius: 15px 15px 0 0;
+      color: white;
+    }
+
+    .page-number {
+      font-size: 0.8rem;
+      opacity: 0.8;
+      margin-bottom: 0.3rem;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin: 0;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 1rem;
+      height: calc(100% - 2rem);
+    }
+
+    .section-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      color: #1e293b;
+    }
+
+
+    .section-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      background: rgba(255,255,255,0.95);
+    }
+
+    .section-card.clickable:hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .section-card.clickable:hover .section-icon {
+      transform: scale(1.2);
+    }
+
+    .section-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-desc {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .contact-info {
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-left: 4px solid #0ea5e9;
+    }
+
+    .contact-info strong {
+      color: #0c4a6e;
+    }
+
+    .navigation-controls {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1rem;
+      z-index: 1000;
+    }
+
+    .nav-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 0.6rem 1.2rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .page-indicator {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(10px);
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 600;
+      color: white;
+      font-size: 0.9rem;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .close-manual {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .close-manual:hover {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.5);
+      transform: rotate(90deg);
+    }
+
+    .content-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .content-list li {
+      background: rgba(102, 126, 234, 0.1);
+      margin: 0.5rem 0;
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-gradient);
+      transition: all 0.3s ease;
+    }
+
+    .content-list li:hover {
+      background: rgba(102, 126, 234, 0.2);
+      transform: translateX(5px);
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      position: relative;
+    }
+
+    .highlight-box::before {
+      content: "💡";
+      position: absolute;
+      top: -10px;
+      left: 1rem;
+      background: #f59e0b;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .team-member {
+      background: rgba(255,255,255,0.8);
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 768px) {
+      .manual-container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+      
+      .manual-book {
+        padding: 1rem;
+      }
+      
+      .page {
+        padding: 2rem 1.5rem;
+        height: 600px;
+      }
+      
+      .page-header {
+        margin: -2rem -1.5rem 1.5rem -1.5rem;
+        padding: 1.5rem;
+      }
+      
+      .page-title {
+        font-size: 1.5rem;
+      }
+      
+      .section-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+  <style>
+.section-card {
+  background: white !important;
+  color: #1e293b !important;
+}
+</style>
+<body>
+
+<!-- Background Slideshow -->
+<div class="background-slideshow" id="background-slideshow">
+  <!-- Images will be injected by JavaScript -->
+</div>
+
+<header>
+  <button id="menu-toggle" class="hamburger">&#9776;</button>
+  <h1>Castle Comms</h1>
+</header>
+
+<div id="notification-bell" class="notification-bell hidden">
+  🔔 <span id="notification-count" class="count-badge">0</span>
+</div>
+
+<div id="sidebar-container"></div>
+
+<main id="main">
+  <div class="manual-container">
+    <div class="manual-book">
+      <button class="close-manual" onclick="closeManual()">&times;</button>
+      <h1 class="manual-title">Gallery Operations Manual</h1>
+      
+      <div class="page-indicator">
+        Page <span id="current-page">1</span> of <span id="total-pages">10</span>
+      </div>
+      
+      <div class="page-container">
+        
+        <!-- Page 1: Table of Contents -->
+        <div class="page" data-page="1">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 1</div>
+              <h1 class="page-title">Main Navigation Sections</h1>
+            </div>
+            <div class="section-grid">
+              <div class="section-card clickable" onclick="window.location.href='staff.html'">
+                <div class="section-icon">🏢</div>
+                <div class="section-title">Spitfire</div>
+                <div class="section-desc">Meet the team and explore all departments</div>
+              </div>
+              <div class="section-card clickable" onclick="goToPage(8)">
+                <div class="section-icon">👥</div>
+                <div class="section-title">HR, Payroll & Health and Safety</div>
+                <div class="section-desc">Employee policies, payroll, and safety procedures</div>
+              </div>
+              <div class="section-card clickable" onclick="goToPage(10)">
+                <div class="section-icon">🔧</div>
+                <div class="section-title">Maintenance & Repairs</div>
+                <div class="section-desc">Equipment maintenance and repair processes</div>
+              </div>
+              <div class="section-card clickable" onclick="goToPage(2)">
+                <div class="section-icon">🏪</div>
+                <div class="section-title">Client & Gallery Services</div>
+                <div class="section-desc">Customer service and gallery operations</div>
+              </div>
+              <div class="section-card clickable" onclick="goToPage(2)">
+                <div class="section-icon">🛒</div>
+                <div class="section-title">E-Commerce & Marketing</div>
+                <div class="section-desc">Website, online orders, and marketing operations</div>
+              </div>
+              <div class="section-card clickable" onclick="goToPage(6)">
+                <div class="section-icon">💰</div>
+                <div class="section-title">Finance & Compliance</div>
+                <div class="section-desc">AML, KYC, payments, and financial procedures</div>
+              </div>
+              <div class="section-card clickable" onclick="goToPage(7)">
+                <div class="section-icon">🎨</div>
+                <div class="section-title">Originals & Artist Management</div>
+                <div class="section-desc">Original artwork and artist relations</div>
+              </div>
+              <div class="section-card clickable" onclick="goToPage(9)">
+                <div class="section-icon">💻</div>
+                <div class="section-title">IT Support</div>
+                <div class="section-desc">Technology support and system management</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page 2: Client & Gallery Services -->
+        <div class="page hidden" data-page="2">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 2</div>
+              <h1 class="page-title">Client & Gallery Services</h1>
+            </div>
+            
+            <div class="highlight-box">
+              <p><strong>Watch this space for emails from Sam Wood</strong> with updates to the team and their processes. If you have any questions, please contact the emails below.</p>
+            </div>
+
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">📞</div>
+                <div class="section-title">Client Services Contacts</div>
+                <div class="contact-info">
+                  <strong>Email:</strong> hello@castlefineart.com<br>
+                  <strong>Phone:</strong> 0121 655 0610
+                </div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🏪</div>
+                <div class="section-title">Gallery Services Info</div>
+                <div class="section-desc">Comprehensive gallery operations and customer service guidelines</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📧</div>
+                <div class="section-title">Gallery Services Contacts</div>
+                <div class="section-desc">Direct contacts for gallery-specific inquiries and support</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">ℹ️</div>
+                <div class="section-title">Client Services Info</div>
+                <div class="section-desc">Complete client service procedures and best practices</div>
+              </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin-top: 2rem;">E-Commerce Operations</h3>
+            <ul class="content-list">
+              <li>Web Orders in the Gallery</li>
+              <li>Cancelling, Exchanging & Balances</li>
+              <li>Online Customer Support</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Page 3: Manufacturing & Logistics -->
+        <div class="page hidden" data-page="3">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 3</div>
+              <h1 class="page-title">Manufacturing & Logistics</h1>
+            </div>
+            
+            <div class="highlight-box">
+              <p><strong>Meet the Managers:</strong> Click the sections below to find out more about mount production, framing and logistics. <a href="staff.html" style="color: #0ea5e9; text-decoration: underline;">Click here for logistics contacts.</a></p>
+            </div>
+
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">🖼️</div>
+                <div class="section-title">Framing & Frame Handling</div>
+                <div class="section-desc">Professional framing techniques and safe handling procedures</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📐</div>
+                <div class="section-title">Mount Production</div>
+                <div class="section-desc">Precision mounting and conservation standards</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📦</div>
+                <div class="section-title">Specialised Wrapping</div>
+                <div class="section-desc">Protective packaging for different artwork types</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🎨</div>
+                <div class="section-title">Wrapping Box Canvas</div>
+                <div class="section-desc">Specific techniques for canvas artwork protection</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🖌️</div>
+                <div class="section-title">Wrapping Canvas on Board</div>
+                <div class="section-desc">Board-mounted canvas wrapping procedures</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📜</div>
+                <div class="section-title">Unwrapping Artwork</div>
+                <div class="section-desc">Safe unwrapping and inspection procedures</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🔄</div>
+                <div class="section-title">RRO Artwork</div>
+                <div class="section-desc">Return, replace, or order procedures</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">⚠️</div>
+                <div class="section-title">Damaged Artwork</div>
+                <div class="section-desc">Damage assessment and reporting protocols</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🚚</div>
+                <div class="section-title">Deliveries & Installations</div>
+                <div class="section-desc">Delivery logistics and installation services</div>
+              </div>
+            </div>
+
+            <div class="contact-info" style="margin-top: 2rem;">
+              For sundry requests, send to: <strong>CGSupplies@castlefineart.com</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page 4: Order Processing -->
+        <div class="page hidden" data-page="4">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 4</div>
+              <h1 class="page-title">Order Processing</h1>
+            </div>
+            
+            <div class="highlight-box">
+              <p><strong>Meet the Team:</strong> <a href="staff.html" style="color: #0ea5e9; text-decoration: underline;">Click here to meet the order processing team</a> and learn about their roles and responsibilities.</p>
+            </div>
+
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">↩️</div>
+                <div class="section-title">Returning Artwork</div>
+                <div class="section-desc">Complete procedures for artwork returns and exchanges</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">👔</div>
+                <div class="section-title">Roles & Responsibilities</div>
+                <div class="section-desc">Team member duties and contact assignments</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📋</div>
+                <div class="section-title">Gallery Instructions</div>
+                <div class="section-desc">Essential guidelines for gallery operations</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🏷️</div>
+                <div class="section-title">Item Status Codes</div>
+                <div class="section-desc">Understanding order and item status indicators</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📊</div>
+                <div class="section-title">Order Statuses</div>
+                <div class="section-desc">Complete order workflow and status meanings</div>
+              </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin-top: 2rem;">Key Processes</h3>
+            <ul class="content-list">
+              <li>Order Entry and Validation</li>
+              <li>Customer Communication</li>
+              <li>Shipping Coordination</li>
+              <li>Quality Assurance Checks</li>
+              <li>Documentation and Record Keeping</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Page 5: Stock Control -->
+        <div class="page hidden" data-page="5">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 5</div>
+              <h1 class="page-title">Stock Control</h1>
+            </div>
+            
+            <div class="contact-info">
+              <strong>Email:</strong> stockcontrol@castlefineart.com<br>
+              <strong>Phone:</strong> 0121 384 8139
+            </div>
+
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">👥</div>
+                <div class="section-title">Who's Who</div>
+                <div class="section-desc">Meet the stock control team and their specializations</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📋</div>
+                <div class="section-title">Gallery Instructions</div>
+                <div class="section-desc">Essential stock management procedures for galleries</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🎯</div>
+                <div class="section-title">Selling Priorities</div>
+                <div class="section-desc">Strategic guidance on inventory prioritization</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">✨</div>
+                <div class="section-title">Halcyon Stock</div>
+                <div class="section-desc">Specialized procedures for Halcyon artwork</div>
+              </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin-top: 2rem;">Stock Management Principles</h3>
+            <ul class="content-list">
+              <li>Accurate Edition Number Tracking</li>
+              <li>Damage and Theft Reporting</li>
+              <li>Stock Transfer Procedures</li>
+              <li>Inventory Replenishment</li>
+              <li>Quality Control Standards</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Page 6: Finance & Compliance -->
+        <div class="page hidden" data-page="6">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 6</div>
+              <h1 class="page-title">Finance, AML & KYC</h1>
+            </div>
+            
+            <div class="highlight-box">
+              <p><strong>IFC Retailer Guide:</strong> <a href="#" style="color: #0ea5e9; text-decoration: underline;">Click here for the complete IFC Retailer Guide</a> with detailed financial procedures.</p>
+            </div>
+
+            <h3 style="color: #1e293b;">Finance Support Services</h3>
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">💳</div>
+                <div class="section-title">Gallery Payment Policy</div>
+                <div class="section-desc">Payment processing guidelines and procedures</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">💳</div>
+                <div class="section-title">PDQ & Card Payments</div>
+                <div class="section-desc">Card payment systems and troubleshooting</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🏦</div>
+                <div class="section-title">IFC's Support</div>
+                <div class="section-desc">Interest-free credit support and procedures</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📊</div>
+                <div class="section-title">Stock Take Process</div>
+                <div class="section-desc">Inventory valuation and reconciliation</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">💎</div>
+                <div class="section-title">Stripe Support</div>
+                <div class="section-desc">Online payment processing support</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">💰</div>
+                <div class="section-title">Petty Cash Reconciliation</div>
+                <div class="section-desc">Daily cash management procedures</div>
+              </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin-top: 2rem;">AML & KYC Compliance</h3>
+            <ul class="content-list">
+              <li>Introduction to Anti-Money Laundering</li>
+              <li>Customer Due Diligence</li>
+              <li>Reporting Suspicious Activity</li>
+              <li>GDPR FAQ and Compliance</li>
+              <li>Employee Screening Procedures</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Page 7: Originals & Artist Management -->
+        <div class="page hidden" data-page="7">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 7</div>
+              <h1 class="page-title">Originals & Artist Management</h1>
+            </div>
+            
+            <h3 style="color: #1e293b;">Originals Department</h3>
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">📦</div>
+                <div class="section-title">Art Box</div>
+                <div class="section-desc">Original artwork storage and management system</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🏷️</div>
+                <div class="section-title">DNS Stock Codes</div>
+                <div class="section-desc">Do Not Sell coding system for originals</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">💰</div>
+                <div class="section-title">Symbolic Sales Process</div>
+                <div class="section-desc">Special procedures for symbolic artwork sales</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📋</div>
+                <div class="section-title">Original Requests</div>
+                <div class="section-desc">Client requests and availability procedures</div>
+              </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin-top: 2rem;">Artist Management</h3>
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">🎨</div>
+                <div class="section-title">Commissions</div>
+                <div class="section-desc">Custom artwork commission management</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📝</div>
+                <div class="section-title">Artist Submissions</div>
+                <div class="section-desc">New artist evaluation and onboarding</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">❤️</div>
+                <div class="section-title">Dedications</div>
+                <div class="section-desc">Personal dedications and custom messages</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">⏰</div>
+                <div class="section-title">Timings & Updates</div>
+                <div class="section-desc">Project timelines and progress tracking</div>
+              </div>
+            </div>
+
+            <div class="contact-info" style="margin-top: 2rem;">
+              <strong>Project Management:</strong> Check the calendar on monday.com for updates and timelines
+            </div>
+          </div>
+        </div>
+
+        <!-- Page 8: HR, Payroll & Health and Safety -->
+        <div class="page hidden" data-page="8">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 8</div>
+              <h1 class="page-title">HR, Payroll & Health and Safety</h1>
+            </div>
+            
+            <h3 style="color: #1e293b;">Human Resources</h3>
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">👔</div>
+                <div class="section-title">Dress Code</div>
+                <div class="section-desc">Professional appearance standards and guidelines</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📋</div>
+                <div class="section-title">Information to Note</div>
+                <div class="section-desc">Important HR policies and procedures</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🤝</div>
+                <div class="section-title">Recruitment & Joining</div>
+                <div class="section-desc">Hiring process and new employee onboarding</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">💚</div>
+                <div class="section-title">EAP Scheme</div>
+                <div class="section-desc">Employee Assistance Programme support</div>
+              </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin-top: 2rem;">Health & Safety</h3>
+            <ul class="content-list">
+              <li>Lone Working Procedures</li>
+              <li>Security & CCTV Guidelines</li>
+              <li>Manual Handling Training</li>
+              <li>First Aid Procedures</li>
+              <li>Fire Safety Protocols</li>
+              <li>Employee Safety Handbook</li>
+            </ul>
+
+            <h3 style="color: #1e293b; margin-top: 2rem;">Payroll & Benefits</h3>
+            <ul class="content-list">
+              <li>Kronos Time Management</li>
+              <li>Holiday & Absence Requests</li>
+              <li>Payroll & Pension Information</li>
+              <li>Commission & Bonus Structure</li>
+              <li>Leaving the Company Procedures</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Page 9: IT Support -->
+        <div class="page hidden" data-page="9">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 9</div>
+              <h1 class="page-title">IT Support</h1>
+            </div>
+            
+            <div class="highlight-box">
+              <p><strong>Primary Support:</strong> Castle Fine Art & Washington Green are both supported by <strong>Cardonet</strong> for IT services, alongside our in-house team Andy and Marc.</p>
+            </div>
+
+            <div class="contact-info">
+              <p><strong>IT Support Priority:</strong> Contact <strong>Cardonet first</strong> for IT equipment, software, or email issues. Our in-house team can help directly or forward your issue if needed.</p>
+            </div>
+
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">🖥️</div>
+                <div class="section-title">Gallery Technology</div>
+                <div class="section-desc">Point of sale systems, displays, and gallery equipment</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📄</div>
+                <div class="section-title">Downloading Office</div>
+                <div class="section-desc">Microsoft Office installation and setup procedures</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🔐</div>
+                <div class="section-title">Authenticator</div>
+                <div class="section-desc">Two-factor authentication setup and management</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">⚙️</div>
+                <div class="section-title">Our In-House Systems</div>
+                <div class="section-desc">CGNet, Castle Comms, and internal applications</div>
+              </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin-top: 2rem;">Common IT Issues</h3>
+            <ul class="content-list">
+              <li>Network Connectivity Problems</li>
+              <li>Email Setup and Troubleshooting</li>
+              <li>Software Installation Support</li>
+              <li>Hardware Maintenance</li>
+              <li>Security Updates and Patches</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Page 10: Maintenance & Repairs -->
+        <div class="page hidden" data-page="10">
+          <div class="page-content">
+            <div class="page-header">
+              <div class="page-number">Page 10</div>
+              <h1 class="page-title">Maintenance, Repairs & Information</h1>
+            </div>
+            
+            <div class="highlight-box">
+              <p><strong>Learn more</strong> using the sections below and get in touch if you have any queries.</p>
+            </div>
+
+            <div class="section-grid">
+              <div class="section-card">
+                <div class="section-icon">🔧</div>
+                <div class="section-title">Repairs Process</div>
+                <div class="section-desc">Complete workflow for equipment and facility repairs</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📧</div>
+                <div class="section-title">Email Support</div>
+                <div class="section-desc">Direct email channels for maintenance requests</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">📝</div>
+                <div class="section-title">Feedback & Updates</div>
+                <div class="section-desc">System for submitting feedback and receiving updates</div>
+              </div>
+              <div class="section-card">
+                <div class="section-icon">🏗️</div>
+                <div class="section-title">Maintenance Schedules</div>
+                <div class="section-desc">Preventive maintenance calendars and procedures</div>
+              </div>
+            </div>
+
+            <h3 style="color: #1e293b; margin-top: 2rem;">Maintenance Categories</h3>
+            <ul class="content-list">
+              <li>Facility Maintenance (HVAC, Lighting, Security)</li>
+              <li>Equipment Maintenance (Framing, Mounting, POS)</li>
+              <li>Vehicle Maintenance (Delivery Fleet)</li>
+              <li>Emergency Repairs and Response</li>
+              <li>Vendor Management and Contracts</li>
+            </ul>
+
+            <div class="contact-info" style="margin-top: 2rem;">
+              <p><strong>For urgent maintenance issues:</strong> Contact your line manager immediately. For routine maintenance, use the standard request process outlined in your department procedures.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Controls -->
+  <div class="navigation-controls">
+    <button class="nav-btn" id="prev-btn" onclick="previousPage()">← Previous</button>
+    <button class="nav-btn" id="next-btn" onclick="nextPage()">Next →</button>
+  </div>
+</main>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<!-- Firebase config -->
+<script src="firebase-init.js"></script>
+
+<!-- Shared components -->
+<script src="shared-components.js"></script>
+
+<!-- Manual Page Navigation Script -->
+<script>
+let currentPageNum = 1;
+const totalPages = 10;
+
+function updatePageIndicator() {
+  document.getElementById('current-page').textContent = currentPageNum;
+  document.getElementById('total-pages').textContent = totalPages;
+}
+
+function updateNavigationButtons() {
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  
+  prevBtn.disabled = currentPageNum === 1;
+  nextBtn.disabled = currentPageNum === totalPages;
+}
+
+function showPage(pageNum, direction = 'none') {
+  const pages = document.querySelectorAll('.page');
+  const targetPage = document.querySelector(`[data-page="${pageNum}"]`);
+  
+  if (!targetPage) {
+    console.error(`Page ${pageNum} not found`);
+    return;
+  }
+  
+  // Remove all animation classes from all pages
+  pages.forEach(page => {
+    page.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'active');
+  });
+  
+  // Show target page and make it active
+  targetPage.classList.remove('hidden');
+  targetPage.classList.add('active');
+  
+  // Hide other pages immediately (no delay for direct navigation)
+  pages.forEach(page => {
+    if (page !== targetPage) {
+      page.classList.add('hidden');
+    }
+  });
+  
+  currentPageNum = pageNum;
+  updatePageIndicator();
+  updateNavigationButtons();
+}
+
+function goToPage(pageNum) {
+  if (pageNum === currentPageNum) return;
+  
+  const currentPage = document.querySelector(`[data-page="${currentPageNum}"]`);
+  const targetPage = document.querySelector(`[data-page="${pageNum}"]`);
+  
+  if (!currentPage || !targetPage) {
+    console.error(`Page transition failed: current=${currentPageNum}, target=${pageNum}`);
+    // Fallback to direct navigation
+    showPage(pageNum);
+    return;
+  }
+  
+  const direction = pageNum > currentPageNum ? 'next' : 'prev';
+  
+  // Clear all animation classes from both pages first
+  currentPage.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'active');
+  targetPage.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'active', 'hidden');
+  
+  // Force a reflow to ensure classes are cleared
+  currentPage.offsetHeight;
+  targetPage.offsetHeight;
+  
+  // Set proper z-index for layering effect
+  if (direction === 'next') {
+    // For next: new page slides in from behind (lower z-index)
+    currentPage.style.zIndex = '2';
+    targetPage.style.zIndex = '1';
+    targetPage.classList.add('slide-in-right');
+    currentPage.classList.add('slide-out-left');
+  } else {
+    // For previous: new page slides in from behind (lower z-index) 
+    currentPage.style.zIndex = '2';
+    targetPage.style.zIndex = '1';
+    targetPage.classList.add('slide-in-left');
+    currentPage.classList.add('slide-out-right');
+  }
+  
+  // After a short delay, animate target page in
+  setTimeout(() => {
+    targetPage.classList.remove('slide-in-left', 'slide-in-right');
+    targetPage.classList.add('active');
+    targetPage.style.zIndex = '2';
+    
+    currentPageNum = pageNum;
+    updatePageIndicator();
+    updateNavigationButtons();
+    
+    // Hide current page after animation
+    setTimeout(() => {
+      currentPage.classList.add('hidden');
+      currentPage.classList.remove('slide-out-left', 'slide-out-right');
+      currentPage.style.zIndex = '1';
+    }, 1000);
+  }, 100);
+}
+
+function closeManual() {
+  window.history.back();
+}
+
+function nextPage() {
+  if (currentPageNum < totalPages) {
+    goToPage(currentPageNum + 1);
+  }
+}
+
+function previousPage() {
+  if (currentPageNum > 1) {
+    goToPage(currentPageNum - 1);
+  }
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') nextPage();
+  if (e.key === 'ArrowLeft') previousPage();
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  // Set first page as active
+  const firstPage = document.querySelector('[data-page="1"]');
+  if (firstPage) {
+    firstPage.classList.add('active');
+  }
+  
+  updatePageIndicator();
+  updateNavigationButtons();
+});
+</script>
+
+<!-- Site scripts -->
+<script src="script.js"></script>
+</body>
+</html>
 
