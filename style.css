@@ -668,7 +668,7 @@ admin-link {
   position: relative;
   width: 100%;
   min-height: 140px;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
   color: white;
   text-decoration: none;
   display: flex;
@@ -813,7 +813,7 @@ admin-link {
   position: relative;
   width: 100%;
   min-height: 140px;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  background: #45494e;
   color: white;
   text-decoration: none;
   display: flex;
