@@ -155,12 +155,12 @@
     }
 
     .section-card {
-      background: #45494e;
+      background: rgba(255,255,255,0.9);
       backdrop-filter: blur(10px);
       border-radius: 12px;
       padding: 1rem;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
       transition: all 0.3s ease;
       cursor: pointer;
       display: flex;
@@ -169,7 +169,6 @@
       justify-content: center;
       text-align: center;
       height: 100%;
-      color: white;
     }
 
     .section-card:hover {
@@ -196,12 +195,12 @@
     .section-title {
       font-size: 1.2rem;
       font-weight: bold;
-      color: white;
+      color: #1e293b;
       margin-bottom: 0.5rem;
     }
 
     .section-desc {
-      color: rgba(255,255,255,0.8);
+      color: #64748b;
       font-size: 0.9rem;
       line-height: 1.4;
     }
@@ -406,7 +405,7 @@
       <h1 class="manual-title">Gallery Operations Manual</h1>
       
       <div class="page-indicator">
-        Page <span id="current-page">1</span> of <span id="total-pages">10</span>
+        Page <span id="current-page">1</span> of <span id="total-pages">7</span>
       </div>
       
       <div class="page-container">
@@ -424,12 +423,12 @@
                 <div class="section-title">Spitfire</div>
                 <div class="section-desc">Meet the team and explore all departments</div>
               </div>
-              <div class="section-card clickable" onclick="goToPage(8)">
+              <div class="section-card clickable" onclick="goToPage(5)">
                 <div class="section-icon">👥</div>
                 <div class="section-title">HR, Payroll & Health and Safety</div>
                 <div class="section-desc">Employee policies, payroll, and safety procedures</div>
               </div>
-              <div class="section-card clickable" onclick="goToPage(10)">
+              <div class="section-card clickable" onclick="goToPage(7)">
                 <div class="section-icon">🔧</div>
                 <div class="section-title">Maintenance & Repairs</div>
                 <div class="section-desc">Equipment maintenance and repair processes</div>
@@ -444,17 +443,17 @@
                 <div class="section-title">E-Commerce & Marketing</div>
                 <div class="section-desc">Website, online orders, and marketing operations</div>
               </div>
-              <div class="section-card clickable" onclick="goToPage(6)">
+              <div class="section-card clickable" onclick="goToPage(3)">
                 <div class="section-icon">💰</div>
                 <div class="section-title">Finance & Compliance</div>
                 <div class="section-desc">AML, KYC, payments, and financial procedures</div>
               </div>
-              <div class="section-card clickable" onclick="goToPage(7)">
+              <div class="section-card clickable" onclick="goToPage(4)">
                 <div class="section-icon">🎨</div>
                 <div class="section-title">Originals & Artist Management</div>
                 <div class="section-desc">Original artwork and artist relations</div>
               </div>
-              <div class="section-card clickable" onclick="goToPage(9)">
+              <div class="section-card clickable" onclick="goToPage(6)">
                 <div class="section-icon">💻</div>
                 <div class="section-title">IT Support</div>
                 <div class="section-desc">Technology support and system management</div>
@@ -510,175 +509,11 @@
           </div>
         </div>
 
-        <!-- Page 3: Manufacturing & Logistics -->
+        <!-- Page 3: Finance & Compliance -->
         <div class="page hidden" data-page="3">
           <div class="page-content">
             <div class="page-header">
               <div class="page-number">Page 3</div>
-              <h1 class="page-title">Manufacturing & Logistics</h1>
-            </div>
-            
-            <div class="highlight-box">
-              <p><strong>Meet the Managers:</strong> Click the sections below to find out more about mount production, framing and logistics. <a href="staff.html" style="color: #0ea5e9; text-decoration: underline;">Click here for logistics contacts.</a></p>
-            </div>
-
-            <div class="section-grid">
-              <div class="section-card">
-                <div class="section-icon">🖼️</div>
-                <div class="section-title">Framing & Frame Handling</div>
-                <div class="section-desc">Professional framing techniques and safe handling procedures</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">📐</div>
-                <div class="section-title">Mount Production</div>
-                <div class="section-desc">Precision mounting and conservation standards</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">📦</div>
-                <div class="section-title">Specialised Wrapping</div>
-                <div class="section-desc">Protective packaging for different artwork types</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">🎨</div>
-                <div class="section-title">Wrapping Box Canvas</div>
-                <div class="section-desc">Specific techniques for canvas artwork protection</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">🖌️</div>
-                <div class="section-title">Wrapping Canvas on Board</div>
-                <div class="section-desc">Board-mounted canvas wrapping procedures</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">📜</div>
-                <div class="section-title">Unwrapping Artwork</div>
-                <div class="section-desc">Safe unwrapping and inspection procedures</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">🔄</div>
-                <div class="section-title">RRO Artwork</div>
-                <div class="section-desc">Return, replace, or order procedures</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">⚠️</div>
-                <div class="section-title">Damaged Artwork</div>
-                <div class="section-desc">Damage assessment and reporting protocols</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">🚚</div>
-                <div class="section-title">Deliveries & Installations</div>
-                <div class="section-desc">Delivery logistics and installation services</div>
-              </div>
-            </div>
-
-            <div class="contact-info" style="margin-top: 2rem;">
-              For sundry requests, send to: <strong>CGSupplies@castlefineart.com</strong>
-            </div>
-          </div>
-        </div>
-
-        <!-- Page 4: Order Processing -->
-        <div class="page hidden" data-page="4">
-          <div class="page-content">
-            <div class="page-header">
-              <div class="page-number">Page 4</div>
-              <h1 class="page-title">Order Processing</h1>
-            </div>
-            
-            <div class="highlight-box">
-              <p><strong>Meet the Team:</strong> <a href="staff.html" style="color: #0ea5e9; text-decoration: underline;">Click here to meet the order processing team</a> and learn about their roles and responsibilities.</p>
-            </div>
-
-            <div class="section-grid">
-              <div class="section-card">
-                <div class="section-icon">↩️</div>
-                <div class="section-title">Returning Artwork</div>
-                <div class="section-desc">Complete procedures for artwork returns and exchanges</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">👔</div>
-                <div class="section-title">Roles & Responsibilities</div>
-                <div class="section-desc">Team member duties and contact assignments</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">📋</div>
-                <div class="section-title">Gallery Instructions</div>
-                <div class="section-desc">Essential guidelines for gallery operations</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">🏷️</div>
-                <div class="section-title">Item Status Codes</div>
-                <div class="section-desc">Understanding order and item status indicators</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">📊</div>
-                <div class="section-title">Order Statuses</div>
-                <div class="section-desc">Complete order workflow and status meanings</div>
-              </div>
-            </div>
-
-            <h3 style="color: #1e293b; margin-top: 2rem;">Key Processes</h3>
-            <ul class="content-list">
-              <li>Order Entry and Validation</li>
-              <li>Customer Communication</li>
-              <li>Shipping Coordination</li>
-              <li>Quality Assurance Checks</li>
-              <li>Documentation and Record Keeping</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Page 5: Stock Control -->
-        <div class="page hidden" data-page="5">
-          <div class="page-content">
-            <div class="page-header">
-              <div class="page-number">Page 5</div>
-              <h1 class="page-title">Stock Control</h1>
-            </div>
-            
-            <div class="contact-info">
-              <strong>Email:</strong> stockcontrol@castlefineart.com<br>
-              <strong>Phone:</strong> 0121 384 8139
-            </div>
-
-            <div class="section-grid">
-              <div class="section-card">
-                <div class="section-icon">👥</div>
-                <div class="section-title">Who's Who</div>
-                <div class="section-desc">Meet the stock control team and their specializations</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">📋</div>
-                <div class="section-title">Gallery Instructions</div>
-                <div class="section-desc">Essential stock management procedures for galleries</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">🎯</div>
-                <div class="section-title">Selling Priorities</div>
-                <div class="section-desc">Strategic guidance on inventory prioritization</div>
-              </div>
-              <div class="section-card">
-                <div class="section-icon">✨</div>
-                <div class="section-title">Halcyon Stock</div>
-                <div class="section-desc">Specialized procedures for Halcyon artwork</div>
-              </div>
-            </div>
-
-            <h3 style="color: #1e293b; margin-top: 2rem;">Stock Management Principles</h3>
-            <ul class="content-list">
-              <li>Accurate Edition Number Tracking</li>
-              <li>Damage and Theft Reporting</li>
-              <li>Stock Transfer Procedures</li>
-              <li>Inventory Replenishment</li>
-              <li>Quality Control Standards</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Page 6: Finance & Compliance -->
-        <div class="page hidden" data-page="6">
-          <div class="page-content">
-            <div class="page-header">
-              <div class="page-number">Page 6</div>
               <h1 class="page-title">Finance, AML & KYC</h1>
             </div>
             
@@ -731,11 +566,11 @@
           </div>
         </div>
 
-        <!-- Page 7: Originals & Artist Management -->
-        <div class="page hidden" data-page="7">
+        <!-- Page 4: Originals & Artist Management -->
+        <div class="page hidden" data-page="4">
           <div class="page-content">
             <div class="page-header">
-              <div class="page-number">Page 7</div>
+              <div class="page-number">Page 4</div>
               <h1 class="page-title">Originals & Artist Management</h1>
             </div>
             
@@ -793,11 +628,11 @@
           </div>
         </div>
 
-        <!-- Page 8: HR, Payroll & Health and Safety -->
-        <div class="page hidden" data-page="8">
+        <!-- Page 5: HR, Payroll & Health and Safety -->
+        <div class="page hidden" data-page="5">
           <div class="page-content">
             <div class="page-header">
-              <div class="page-number">Page 8</div>
+              <div class="page-number">Page 5</div>
               <h1 class="page-title">HR, Payroll & Health and Safety</h1>
             </div>
             
@@ -846,11 +681,11 @@
           </div>
         </div>
 
-        <!-- Page 9: IT Support -->
-        <div class="page hidden" data-page="9">
+        <!-- Page 6: IT Support -->
+        <div class="page hidden" data-page="6">
           <div class="page-content">
             <div class="page-header">
-              <div class="page-number">Page 9</div>
+              <div class="page-number">Page 6</div>
               <h1 class="page-title">IT Support</h1>
             </div>
             
@@ -896,11 +731,11 @@
           </div>
         </div>
 
-        <!-- Page 10: Maintenance & Repairs -->
-        <div class="page hidden" data-page="10">
+        <!-- Page 7: Maintenance & Repairs -->
+        <div class="page hidden" data-page="7">
           <div class="page-content">
             <div class="page-header">
-              <div class="page-number">Page 10</div>
+              <div class="page-number">Page 7</div>
               <h1 class="page-title">Maintenance, Repairs & Information</h1>
             </div>
             
@@ -970,7 +805,7 @@
 <!-- Manual Page Navigation Script -->
 <script>
 let currentPageNum = 1;
-const totalPages = 10;
+const totalPages = 7;
 
 function updatePageIndicator() {
   document.getElementById('current-page').textContent = currentPageNum;
