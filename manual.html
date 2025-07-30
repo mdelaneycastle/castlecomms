@@ -68,15 +68,37 @@
       box-shadow: 0 15px 40px rgba(0,0,0,0.3);
       padding: 2rem;
       box-sizing: border-box;
-      transform-origin: left center;
-      transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+      transform-origin: center center;
+      transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       border: 2px solid rgba(255,255,255,0.3);
       overflow: hidden;
       backface-visibility: hidden;
+      opacity: 1;
     }
 
-    .page.flipped {
-      transform: rotateY(-180deg);
+    .page.slide-out-left {
+      transform: translateX(-100%) rotateY(-90deg) scale(0.8);
+      opacity: 0;
+    }
+
+    .page.slide-out-right {
+      transform: translateX(100%) rotateY(90deg) scale(0.8);
+      opacity: 0;
+    }
+
+    .page.slide-in-left {
+      transform: translateX(-100%) rotateY(90deg) scale(0.8);
+      opacity: 0;
+    }
+
+    .page.slide-in-right {
+      transform: translateX(100%) rotateY(-90deg) scale(0.8);
+      opacity: 0;
+    }
+
+    .page.active {
+      transform: translateX(0) rotateY(0deg) scale(1);
+      opacity: 1;
     }
 
     .page.hidden {
@@ -959,19 +981,29 @@ function updateNavigationButtons() {
   nextBtn.disabled = currentPageNum === totalPages;
 }
 
-function showPage(pageNum) {
-  // Hide all pages
+function showPage(pageNum, direction = 'none') {
   const pages = document.querySelectorAll('.page');
+  const targetPage = document.querySelector(`[data-page="${pageNum}"]`);
+  
+  if (!targetPage) return;
+  
+  // Remove all animation classes from all pages
   pages.forEach(page => {
-    page.classList.add('hidden');
-    page.classList.remove('flipped');
+    page.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'active');
   });
   
-  // Show current page
-  const currentPage = document.querySelector(`[data-page="${pageNum}"]`);
-  if (currentPage) {
-    currentPage.classList.remove('hidden');
-  }
+  // Show target page and make it active
+  targetPage.classList.remove('hidden');
+  targetPage.classList.add('active');
+  
+  // Hide other pages after transition
+  setTimeout(() => {
+    pages.forEach(page => {
+      if (page !== targetPage) {
+        page.classList.add('hidden');
+      }
+    });
+  }, 800);
   
   currentPageNum = pageNum;
   updatePageIndicator();
@@ -979,14 +1011,45 @@ function showPage(pageNum) {
 }
 
 function goToPage(pageNum) {
+  if (pageNum === currentPageNum) return;
+  
   const currentPage = document.querySelector(`[data-page="${currentPageNum}"]`);
+  const targetPage = document.querySelector(`[data-page="${pageNum}"]`);
   
-  // Add flip animation
-  currentPage.classList.add('flipped');
+  if (!currentPage || !targetPage) return;
   
+  const direction = pageNum > currentPageNum ? 'next' : 'prev';
+  
+  // Prepare target page
+  targetPage.classList.remove('hidden');
+  if (direction === 'next') {
+    targetPage.classList.add('slide-in-right');
+  } else {
+    targetPage.classList.add('slide-in-left');
+  }
+  
+  // Animate current page out
+  if (direction === 'next') {
+    currentPage.classList.add('slide-out-left');
+  } else {
+    currentPage.classList.add('slide-out-right');
+  }
+  
+  // After a short delay, animate target page in
   setTimeout(() => {
-    showPage(pageNum);
-  }, 400);
+    targetPage.classList.remove('slide-in-left', 'slide-in-right');
+    targetPage.classList.add('active');
+    
+    currentPageNum = pageNum;
+    updatePageIndicator();
+    updateNavigationButtons();
+    
+    // Hide current page after animation
+    setTimeout(() => {
+      currentPage.classList.add('hidden');
+      currentPage.classList.remove('slide-out-left', 'slide-out-right', 'active');
+    }, 800);
+  }, 100);
 }
 
 function closeManual() {
@@ -995,30 +1058,13 @@ function closeManual() {
 
 function nextPage() {
   if (currentPageNum < totalPages) {
-    const currentPage = document.querySelector(`[data-page="${currentPageNum}"]`);
-    
-    // Add flip animation
-    currentPage.classList.add('flipped');
-    
-    setTimeout(() => {
-      showPage(currentPageNum + 1);
-    }, 400);
+    goToPage(currentPageNum + 1);
   }
 }
 
 function previousPage() {
   if (currentPageNum > 1) {
-    const targetPageNum = currentPageNum - 1;
-    const targetPage = document.querySelector(`[data-page="${targetPageNum}"]`);
-    
-    // Show target page first, then animate
-    targetPage.classList.remove('hidden');
-    targetPage.classList.add('flipped');
-    
-    setTimeout(() => {
-      targetPage.classList.remove('flipped');
-      showPage(targetPageNum);
-    }, 50);
+    goToPage(currentPageNum - 1);
   }
 }
 
@@ -1030,6 +1076,12 @@ document.addEventListener('keydown', (e) => {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+  // Set first page as active
+  const firstPage = document.querySelector('[data-page="1"]');
+  if (firstPage) {
+    firstPage.classList.add('active');
+  }
+  
   updatePageIndicator();
   updateNavigationButtons();
 });
