@@ -809,6 +809,7 @@ admin-link {
 }
 
 /* Premium Links - Universal Base Styles */
+.quick-links .premium-link,
 .premium-link {
   position: relative;
   width: 100%;
