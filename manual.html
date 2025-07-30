@@ -1022,18 +1022,20 @@ function goToPage(pageNum) {
   
   const direction = pageNum > currentPageNum ? 'next' : 'prev';
   
-  // Prepare target page
-  targetPage.classList.remove('hidden');
+  // Clear all animation classes from both pages first
+  currentPage.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'active');
+  targetPage.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'active', 'hidden');
+  
+  // Force a reflow to ensure classes are cleared
+  currentPage.offsetHeight;
+  targetPage.offsetHeight;
+  
+  // Prepare target page for animation
   if (direction === 'next') {
     targetPage.classList.add('slide-in-right');
-  } else {
-    targetPage.classList.add('slide-in-left');
-  }
-  
-  // Animate current page out
-  if (direction === 'next') {
     currentPage.classList.add('slide-out-left');
   } else {
+    targetPage.classList.add('slide-in-left');
     currentPage.classList.add('slide-out-right');
   }
   
@@ -1049,7 +1051,7 @@ function goToPage(pageNum) {
     // Hide current page after animation
     setTimeout(() => {
       currentPage.classList.add('hidden');
-      currentPage.classList.remove('slide-out-left', 'slide-out-right', 'active');
+      currentPage.classList.remove('slide-out-left', 'slide-out-right');
     }, 800);
   }, 100);
 }
