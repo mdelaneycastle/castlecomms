@@ -76,6 +76,15 @@
       overflow: hidden;
       backface-visibility: hidden;
       opacity: 1;
+      z-index: 1;
+    }
+
+    .page.slide-in-right {
+      z-index: 1;
+    }
+
+    .page.slide-in-left {
+      z-index: 1;
     }
 
     .page.slide-out-left {
@@ -101,6 +110,7 @@
     .page.active {
       transform: translateX(0) rotateY(0deg) scale(1);
       opacity: 1;
+      z-index: 2;
     }
 
     .page.hidden {
@@ -987,7 +997,10 @@ function showPage(pageNum, direction = 'none') {
   const pages = document.querySelectorAll('.page');
   const targetPage = document.querySelector(`[data-page="${pageNum}"]`);
   
-  if (!targetPage) return;
+  if (!targetPage) {
+    console.error(`Page ${pageNum} not found`);
+    return;
+  }
   
   // Remove all animation classes from all pages
   pages.forEach(page => {
@@ -998,14 +1011,12 @@ function showPage(pageNum, direction = 'none') {
   targetPage.classList.remove('hidden');
   targetPage.classList.add('active');
   
-  // Hide other pages after transition
-  setTimeout(() => {
-    pages.forEach(page => {
-      if (page !== targetPage) {
-        page.classList.add('hidden');
-      }
-    });
-  }, 1000);
+  // Hide other pages immediately (no delay for direct navigation)
+  pages.forEach(page => {
+    if (page !== targetPage) {
+      page.classList.add('hidden');
+    }
+  });
   
   currentPageNum = pageNum;
   updatePageIndicator();
@@ -1018,7 +1029,12 @@ function goToPage(pageNum) {
   const currentPage = document.querySelector(`[data-page="${currentPageNum}"]`);
   const targetPage = document.querySelector(`[data-page="${pageNum}"]`);
   
-  if (!currentPage || !targetPage) return;
+  if (!currentPage || !targetPage) {
+    console.error(`Page transition failed: current=${currentPageNum}, target=${pageNum}`);
+    // Fallback to direct navigation
+    showPage(pageNum);
+    return;
+  }
   
   const direction = pageNum > currentPageNum ? 'next' : 'prev';
   
@@ -1030,11 +1046,17 @@ function goToPage(pageNum) {
   currentPage.offsetHeight;
   targetPage.offsetHeight;
   
-  // Prepare target page for animation
+  // Set proper z-index for layering effect
   if (direction === 'next') {
+    // For next: new page slides in from behind (lower z-index)
+    currentPage.style.zIndex = '2';
+    targetPage.style.zIndex = '1';
     targetPage.classList.add('slide-in-right');
     currentPage.classList.add('slide-out-left');
   } else {
+    // For previous: new page slides in from behind (lower z-index) 
+    currentPage.style.zIndex = '2';
+    targetPage.style.zIndex = '1';
     targetPage.classList.add('slide-in-left');
     currentPage.classList.add('slide-out-right');
   }
@@ -1043,6 +1065,7 @@ function goToPage(pageNum) {
   setTimeout(() => {
     targetPage.classList.remove('slide-in-left', 'slide-in-right');
     targetPage.classList.add('active');
+    targetPage.style.zIndex = '2';
     
     currentPageNum = pageNum;
     updatePageIndicator();
@@ -1052,6 +1075,7 @@ function goToPage(pageNum) {
     setTimeout(() => {
       currentPage.classList.add('hidden');
       currentPage.classList.remove('slide-out-left', 'slide-out-right');
+      currentPage.style.zIndex = '1';
     }, 1000);
   }, 100);
 }
