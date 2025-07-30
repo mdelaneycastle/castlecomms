@@ -819,6 +819,13 @@
       <!-- Martin Sumner's Team -->
       <div class="subordinates" id="martin-sumner-subordinates">
         <div class="manager-context" id="martin-sumner-context">
+          <!-- Stock Control Action Buttons -->
+          <div class="action-buttons">
+            <button class="action-btn" onclick="openModal('gallery-instructions-modal')">Gallery Instructions</button>
+            <button class="action-btn" onclick="openModal('selling-priorities-modal')">Selling Priorities</button>
+            <button class="action-btn" onclick="openModal('halcyon-stock-modal')">Halcyon Stock</button>
+          </div>
+          
           <div class="manager-header">
             <div class="staff-member" style="animation-delay: 0.6s">
               <div class="staff-card">
@@ -1275,6 +1282,108 @@
           <li><strong>Incident Analysis:</strong> Investigation of any handling incidents</li>
           <li><strong>Continuous Improvement:</strong> Updates based on best practices</li>
         </ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Stock Control Modals -->
+  <div class="modal-overlay" id="gallery-instructions-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('gallery-instructions-modal')">&times;</button>
+      <div class="modal-title">Gallery Instructions</div>
+      
+      <div class="modal-section">
+        <h3>Must Sell by Correct Edition Number</h3>
+        <p>Please make sure you sell items from your gallery using the correct edition number, this is imperative with the new system we have in place.</p>
+      </div>
+      
+      <div class="modal-section">
+        <h3>Report Any Stock Anomalies</h3>
+        <p>Please report any items you have that are either incorrect by title or edition number, the stock team can correct this.</p>
+        <p>Email the team: <strong>stockcontrol@castlefineart.com</strong></p>
+      </div>
+      
+      <div class="modal-section">
+        <h3>Damages/Thefts</h3>
+        <p>Please make sure you advise us of any damages whether it has arrived in this condition or has happened in the gallery. Report all thefts and we require a CRN from the Police.</p>
+      </div>
+      
+      <div class="modal-section">
+        <h3>Repairs</h3>
+        <p>Please contact us for any items that can be repaired, send as much information to:</p>
+        <ul>
+          <li><strong>ahercombe@washingtongreen.co.uk</strong></li>
+          <li><strong>jsmith@washingtongreen.co.uk</strong></li>
+        </ul>
+      </div>
+      
+      <div class="modal-section">
+        <h3>PRF Forms</h3>
+        <p>Please make sure there are clear transfer instructions of destinations or contact names.</p>
+      </div>
+      
+      <div class="modal-section">
+        <h3>TITU's</h3>
+        <p>CG.NET has a drop down for trade in trade up. Please send back all trade-ins FAO Adam Hercombe and Michael O'Cleary once approved by James Shepherd.</p>
+        <p>Please supply as much information as possible to:</p>
+        <ul>
+          <li><strong>ahercombe@washingtongreen.co.uk</strong></li>
+          <li><strong>mocleary@washingtongreen.co.uk</strong></li>
+        </ul>
+      </div>
+      
+      <div class="modal-section">
+        <h3>Stock Transfers</h3>
+        <p>Please report any stock transfers that are not via the usual delivery schedule i.e. RAM movement.</p>
+      </div>
+      
+      <div class="modal-section">
+        <h3>Stock Replenishment or Requests</h3>
+        <p>Please contact us for any stock requirements, replacements or client viewings for SLE/SCU/ORI's. You will receive an email back stating whether it can or cannot be provided.</p>
+        <p>Please request via Adam Hercombe: <strong>ahercombe@washingtongreen.co.uk</strong></p>
+        <p>Or call the stock team on <strong>01213848139</strong></p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="selling-priorities-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('selling-priorities-modal')">&times;</button>
+      <div class="modal-title">Selling Priorities</div>
+      
+      <div class="modal-section">
+        <p>Categories all have rules in place that the system will adhere to so you will know each item is at the right category before you sell any stock.</p>
+        
+        <p>When you know what category your item is there are work flows to follow for processing your sale. If you need to step outside that work flow you can request to do so.</p>
+        
+        <p>The work flows allow you to process the sale without an approval process and the changes we have made to the system will make much of the back office processes automatic.</p>
+      </div>
+      
+      <div style="text-align: center; margin: 2rem 0;">
+        <img src="stockcontrol.png" alt="Stock Control Process" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" />
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="halcyon-stock-modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal('halcyon-stock-modal')">&times;</button>
+      <div class="modal-title">Halcyon Stock</div>
+      
+      <div class="modal-section">
+        <h3>Stock Movements</h3>
+        <p>All requests for stock for the gallery or to even leave the gallery must go through your Director of Private Clients (DOPC). Your DOPC will then confirm this with you once they have authorisation from Paul Watson.</p>
+        
+        <p><strong>DO NOT move any stock without the correct approval.</strong></p>
+        
+        <p>This means you will not be able to take artwork to a client's house other than a viewing without the correct authorisation as each piece is bonded, this includes LQU's.</p>
+      </div>
+      
+      <div class="modal-section">
+        <h3>QR Code Tracking</h3>
+        <p>Every Halcyon piece of artwork is soon to have a QR code which will need to be scanned at every location (in the same way as WG/CFA stock). This will allow us and Halcyon to keep track of the location of each Halcyon piece, which they may do spot checks.</p>
+        
+        <p><strong>If a piece of artwork is not where it is supposed to be, the gallery will be held accountable. This will be reported to Halcyon Directors.</strong></p>
       </div>
     </div>
   </div>
