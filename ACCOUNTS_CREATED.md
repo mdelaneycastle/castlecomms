@@ -53,7 +53,7 @@ All accounts have been successfully created in Firebase Authentication with the 
 
 **Admin privileges granted to:**
 - `mdelaney@castlefineart.com` (admin)
-- `gturpin@castlefineart.com` (admin)
+- `gturpin@washingtongreen.co.uk` (admin)
 
 ## Notes
 
