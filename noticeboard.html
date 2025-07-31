@@ -454,11 +454,15 @@ function getRandomPosition() {
   const whiteboard = document.getElementById('whiteboard');
   const rect = whiteboard.getBoundingClientRect();
   
-  // Account for note counter and eraser areas, but no input section
+  // Drawing dimensions (doubled from original)
+  const drawingWidth = 400;
+  const drawingHeight = 300;
+  
+  // Account for drawing size, note counter, and eraser areas
   const minX = 30;
-  const maxX = Math.max(150, rect.width - 150);
+  const maxX = Math.max(minX + 50, rect.width - drawingWidth - 30);
   const minY = 60; // Space for note counter
-  const maxY = Math.max(150, rect.height - 100); // Space for eraser
+  const maxY = Math.max(minY + 50, rect.height - drawingHeight - 120); // Space for eraser (120px height)
   
   return {
     x: Math.random() * (maxX - minX) + minX,

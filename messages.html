@@ -947,21 +947,35 @@ async function markModalMessageAsRead() {
 
 // Reply to message
 function replyToMessage() {
-  if (!currentMessage) return;
+  if (!currentMessage) {
+    console.error('No current message to reply to');
+    return;
+  }
+  
+  // Store message data before closing modal
+  const messageToReplyTo = { ...currentMessage };
   
   // Close modal
   closeMessageModal();
   
   // Find the sender in allUsers and add them to selected users
-  const sender = allUsers.find(user => user.email === currentMessage.senderEmail);
+  const sender = allUsers.find(user => user.email === messageToReplyTo.senderEmail);
   if (sender) {
     selectedUsers = [sender];
+    updateSelectedUsersDisplay();
+  } else {
+    // If sender not found in allUsers, create a temporary user object
+    const tempSender = {
+      email: messageToReplyTo.senderEmail,
+      name: messageToReplyTo.senderName || extractNameFromEmail(messageToReplyTo.senderEmail)
+    };
+    selectedUsers = [tempSender];
     updateSelectedUsersDisplay();
   }
   
   // Pre-fill message with "Re: " prefix
   const messageInput = document.getElementById('message-text');
-  const originalMessage = currentMessage.message;
+  const originalMessage = messageToReplyTo.message;
   const replyText = `Re: ${originalMessage.substring(0, 50)}${originalMessage.length > 50 ? '...' : ''}\n\n`;
   messageInput.value = replyText;
   messageInput.focus();
