@@ -9,9 +9,14 @@
     "check-admin": "node setup-admin.js check"
   },
   "dependencies": {
-    "firebase-admin": "^12.0.0"
+    "firebase": "^12.0.0",
+    "firebase-admin": "^12.7.0"
   },
-  "keywords": ["firebase", "admin", "castle-comms"],
+  "keywords": [
+    "firebase",
+    "admin",
+    "castle-comms"
+  ],
   "author": "Castle Fine Art",
   "license": "MIT"
 }
