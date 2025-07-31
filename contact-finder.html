@@ -478,7 +478,9 @@ function renderResults(matches, query) {
     const matchLevel = match.score >= 10 ? 'high' : match.score >= 5 ? 'medium' : 'low';
     const matchPercentage = Math.min(Math.round((match.score / 15) * 100), 100);
     
-    const emailTags = match.emails.map(email => 
+    const phoneLine = match.phone ? `<div class="contact-phone">📞 <a href="tel:${match.phone}" style="color: white; text-decoration: underline;">${match.phone}</a></div>` : '';
+
+    const emailTags = match.emails.map(email =>
       `<a href="mailto:${email}?subject=Who do I contact? - ${encodeURIComponent(query)}" class="email-tag" title="Click to open in email app">${email}</a>`
     ).join('');
     
@@ -492,6 +494,7 @@ function renderResults(matches, query) {
           <span>💼 ${match.team}</span>
           <span class="match-score">${matchPercentage}% match</span>
         </div>
+        ${phoneLine}
         <div class="contact-emails">
           ${emailTags}
         </div>
