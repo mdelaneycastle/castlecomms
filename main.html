@@ -163,6 +163,7 @@
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <!-- Firebase config -->
 <script src="firebase-init.js"></script>
@@ -175,20 +176,24 @@
 
 <script>
 // Personalize welcome message
-firebase.auth().onAuthStateChanged((user) => {
+firebase.auth().onAuthStateChanged(async (user) => {
   if (user) {
     const welcomeText = document.getElementById('welcome-text');
-    if (welcomeText) {
-      // Extract name from email (everything before @)
-      const emailName = user.email.split('@')[0];
-      // Convert to title case and replace common separators with spaces
-      let displayName = emailName
-        .replace(/[._-]/g, ' ')
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
-      
-      welcomeText.textContent = `Hi ${displayName}!`;
+    if (welcomeText && window.sharedComponents) {
+      try {
+        const displayName = await window.sharedComponents.getUserDisplayName(user);
+        welcomeText.textContent = `Hi ${displayName}!`;
+      } catch (error) {
+        console.error('Error loading display name:', error);
+        // Fallback to email extraction
+        const emailName = user.email.split('@')[0];
+        const fallbackName = emailName
+          .replace(/[._-]/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+        welcomeText.textContent = `Hi ${fallbackName}!`;
+      }
     }
   }
 });

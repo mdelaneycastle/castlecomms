@@ -395,6 +395,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
 <!-- Firebase config -->
 <script src="firebase-init.js"></script>
@@ -436,10 +437,27 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load all users for autocomplete
 async function loadAllUsers() {
   try {
-    // Get all users from Firebase Auth (we'll need to store user info in Firestore)
-    // For now, we'll use the accounts we created
+    // Try to get users from the listUsers function (if available)
+    if (typeof listUsers === 'function') {
+      try {
+        const users = await listUsers();
+        allUsers = users
+          .filter(user => user.email !== currentUser.email)
+          .map(user => ({
+            email: user.email,
+            name: user.displayName || extractNameFromEmail(user.email),
+            uid: user.uid
+          }));
+        console.log('Loaded users from admin function:', allUsers.length);
+        return;
+      } catch (error) {
+        console.log('Admin function not available, using static list');
+      }
+    }
+
+    // Fallback: Use static list of accounts we created
     allUsers = [
-      { email: 'mdelaney@castlefineart.com', name: 'M Delaney' },
+      { email: 'mdelaney@castlefineart.com', name: 'Marc Delaney' },
       { email: 'gturpin@washingtongreen.co.uk', name: 'Gary Turpin' },
       { email: 'icc@castlefineart.com', name: 'ICC' },
       { email: 'mailbox@castlefineart.com', name: 'Mailbox' },
@@ -592,10 +610,13 @@ async function sendMessage() {
   sendButton.textContent = 'Sending...';
   
   try {
+    // Get current user's display name
+    const senderName = await getUserDisplayName(currentUser);
+    
     const messageData = {
       senderId: currentUser.uid,
       senderEmail: currentUser.email,
-      senderName: extractNameFromEmail(currentUser.email),
+      senderName: senderName,
       message: messageText,
       recipients: selectedUsers.map(user => user.email),
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -691,8 +712,38 @@ async function markAsRead(messageId) {
   }
 }
 
+// Get user display name from Firebase Realtime Database
+async function getUserDisplayName(user) {
+  try {
+    if (!user || !window.db) {
+      return extractNameFromEmail(user?.email || '');
+    }
+
+    const userRef = window.db.ref(`users/${user.uid}`);
+    const snapshot = await userRef.once('value');
+    const userData = snapshot.val();
+
+    if (userData && userData.name) {
+      return userData.name;
+    }
+
+    // Fallback to Firebase Auth displayName
+    if (user.displayName) {
+      return user.displayName;
+    }
+
+    // Final fallback to email extraction
+    return extractNameFromEmail(user.email || '');
+  } catch (error) {
+    console.error('Error getting user display name:', error);
+    return extractNameFromEmail(user?.email || '');
+  }
+}
+
 // Extract name from email
 function extractNameFromEmail(email) {
+  if (!email) return 'User';
+  
   const emailName = email.split('@')[0];
   return emailName
     .replace(/[._-]/g, ' ')
