@@ -15,6 +15,20 @@ service cloud.firestore {
         && request.auth.token.admin == true;
     }
     
+    // Drawing Noticeboard rules - authenticated users can read and create drawings
+    match /drawings/{drawingId} {
+      // Anyone authenticated can read drawings
+      allow read: if request.auth != null;
+      
+      // Authenticated users can create new drawings with proper validation
+      allow create: if request.auth != null 
+        && validateDrawing(request.resource.data);
+      
+      // Only admins can update or delete drawings
+      allow update, delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
     // Helper function to validate recognition note data
     function validateRecognitionNote(data) {
       return data.keys().hasAll(['content', 'author', 'timestamp'])
@@ -24,6 +38,18 @@ service cloud.firestore {
         && data.author is string
         && data.author.size() <= 50
         && data.timestamp is timestamp;
+    }
+    
+    // Helper function to validate drawing data
+    function validateDrawing(data) {
+      return data.keys().hasAll(['imageData', 'timestamp', 'position'])
+        && data.imageData is string
+        && data.imageData.size() > 0
+        && data.timestamp is timestamp
+        && data.position is map
+        && data.position.keys().hasAll(['x', 'y'])
+        && data.position.x is number
+        && data.position.y is number;
     }
     
     // Default deny for all other documents

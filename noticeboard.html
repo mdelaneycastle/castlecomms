@@ -34,6 +34,17 @@
         radial-gradient(circle at 20% 20%, rgba(0,0,0,0.02) 1px, transparent 1px),
         radial-gradient(circle at 80% 80%, rgba(0,0,0,0.01) 1px, transparent 1px);
       background-size: 40px 40px, 25px 25px;
+      cursor: crosshair;
+    }
+    
+    .whiteboard canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+      border-radius: inherit;
     }
 
     .whiteboard::before {
@@ -199,37 +210,33 @@
 
 <main id="main">
   <div class="noticeboard-container">
-    <div class="input-section">
-      <h3 style="margin-top: 0; font-family: 'Kalam', cursive; color: #2c3e50; text-align: center;">Draw on the Whiteboard</h3>
+    <!-- Drawing Tools -->
+    <div class="drawing-tools" style="position: fixed; top: 80px; left: 20px; z-index: 1001; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(10px);">
+      <h4 style="margin: 0 0 10px 0; font-family: 'Kalam', cursive; color: #2c3e50; text-align: center;">Drawing Tools</h4>
       
-      <!-- Drawing Canvas -->
-      <canvas id="drawingCanvas" width="400" height="200" style="border: 2px solid #ddd; border-radius: 8px; background: white; display: block; margin: 0 auto 15px auto; cursor: crosshair;"></canvas>
-      
-      <!-- Drawing Tools -->
-      <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 5px;">
-          <label style="font-family: 'Kalam', cursive; font-size: 12px;">Color:</label>
-          <input type="color" id="colorPicker" value="#000000" style="width: 30px; height: 30px; border: none; border-radius: 4px; cursor: pointer;">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-family: 'Kalam', cursive; font-size: 12px; width: 40px;">Color:</label>
+          <input type="color" id="colorPicker" value="#000000" style="width: 40px; height: 30px; border: none; border-radius: 4px; cursor: pointer;">
         </div>
-        <div style="display: flex; align-items: center; gap: 5px;">
-          <label style="font-family: 'Kalam', cursive; font-size: 12px;">Size:</label>
-          <input type="range" id="brushSize" min="1" max="10" value="3" style="width: 80px;">
-          <span id="brushSizeValue" style="font-family: 'Kalam', cursive; font-size: 12px;">3px</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-family: 'Kalam', cursive; font-size: 12px; width: 40px;">Size:</label>
+          <input type="range" id="brushSize" min="2" max="15" value="5" style="width: 80px;">
+          <span id="brushSizeValue" style="font-family: 'Kalam', cursive; font-size: 12px; width: 30px;">5px</span>
         </div>
-        <button id="clearCanvas" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'Kalam', cursive; font-size: 12px;">Clear</button>
-      </div>
-      
-      <div style="text-align: center;">
-        <button id="saveDrawing" class="add-note-btn">Save Drawing</button>
+        <button id="clearDrawing" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-family: 'Kalam', cursive; font-size: 12px; width: 100%;">Clear All</button>
+        <button id="finishDrawing" class="add-note-btn" style="width: 100%; margin: 0; padding: 8px 12px; font-size: 12px;">Finish Drawing</button>
       </div>
     </div>
     
     <div class="whiteboard" id="whiteboard">
+      <canvas id="drawingCanvas" style="position: absolute; top: 0; left: 0; z-index: 1;"></canvas>
+      
       <div class="note-counter" id="noteCounter">
         Drawings: 0
       </div>
       
-      <div class="eraser" id="eraser" title="Drag to erase notes">
+      <div class="eraser" id="eraser" title="Drag to erase drawings">
       </div>
     </div>
   </div>
@@ -279,8 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize drawing canvas
     initializeDrawing();
     
-    // Save drawing functionality
-    document.getElementById('saveDrawing').addEventListener('click', saveDrawing);
+    // Drawing tools are initialized in initializeDrawing function
     
     // Eraser functionality
     const eraser = document.getElementById('eraser');
@@ -298,6 +304,12 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeDrawing() {
   canvas = document.getElementById('drawingCanvas');
   ctx = canvas.getContext('2d');
+  
+  // Size canvas to match whiteboard
+  const whiteboard = document.getElementById('whiteboard');
+  const whiteboardRect = whiteboard.getBoundingClientRect();
+  canvas.width = whiteboard.clientWidth;
+  canvas.height = whiteboard.clientHeight;
   
   // Set drawing properties
   ctx.lineCap = 'round';
@@ -318,7 +330,8 @@ function initializeDrawing() {
   const colorPicker = document.getElementById('colorPicker');
   const brushSize = document.getElementById('brushSize');
   const brushSizeValue = document.getElementById('brushSizeValue');
-  const clearCanvas = document.getElementById('clearCanvas');
+  const clearCanvas = document.getElementById('clearDrawing');
+  const finishDrawing = document.getElementById('finishDrawing');
   
   colorPicker.addEventListener('change', (e) => {
     currentColor = e.target.value;
@@ -332,6 +345,8 @@ function initializeDrawing() {
   clearCanvas.addEventListener('click', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
+  
+  finishDrawing.addEventListener('click', saveDrawing);
 }
 
 function startDrawing(e) {
