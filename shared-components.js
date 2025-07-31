@@ -300,6 +300,46 @@ window.sharedComponents = {
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
     };
+  },
+
+  // Get user display name from Firebase Realtime Database
+  async getUserDisplayName(user) {
+    try {
+      if (!user || !window.db) {
+        return this.extractNameFromEmail(user?.email || '');
+      }
+
+      const userRef = window.db.ref(`users/${user.uid}`);
+      const snapshot = await userRef.once('value');
+      const userData = snapshot.val();
+
+      if (userData && userData.name) {
+        return userData.name;
+      }
+
+      // Fallback to Firebase Auth displayName
+      if (user.displayName) {
+        return user.displayName;
+      }
+
+      // Final fallback to email extraction
+      return this.extractNameFromEmail(user.email || '');
+    } catch (error) {
+      console.error('Error getting user display name:', error);
+      return this.extractNameFromEmail(user?.email || '');
+    }
+  },
+
+  // Extract name from email as fallback
+  extractNameFromEmail(email) {
+    if (!email) return 'User';
+    
+    const emailName = email.split('@')[0];
+    return emailName
+      .replace(/[._-]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 };
 
