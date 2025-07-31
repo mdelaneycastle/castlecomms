@@ -127,6 +127,23 @@
       transform: scale(0.8);
     }
 
+    .drawing.admin-draggable {
+      cursor: move;
+      border: 2px dashed rgba(102, 126, 234, 0.5);
+    }
+
+    .drawing.admin-draggable:hover {
+      border-color: rgba(102, 126, 234, 0.8);
+      box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .drawing.being-dragged {
+      opacity: 0.8;
+      z-index: 1000;
+      transform: scale(1.05);
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+    }
+
     .eraser {
       position: absolute;
       bottom: 30px;
@@ -263,6 +280,15 @@ let isDrawing = false;
 let currentColor = '#000000';
 let currentSize = 3;
 
+// Admin drag variables
+let isAdmin = false;
+let isDraggingDrawing = false;
+let draggedDrawing = null;
+let dragStartX = 0;
+let dragStartY = 0;
+let drawingStartX = 0;
+let drawingStartY = 0;
+
 document.addEventListener('DOMContentLoaded', function() {
   // Check authentication first
   firebase.auth().onAuthStateChanged(async (user) => {
@@ -275,7 +301,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize Firebase Firestore only if authenticated
     if (firebase.apps.length > 0) {
       db = firebase.firestore();
-      loadDrawings();
+      
+      // Check if user is admin
+      if (window.authUtils) {
+        isAdmin = await window.authUtils.isAdmin(user);
+        console.log('Admin status:', isAdmin);
+      }
+      
+      await loadDrawings();
+      
+      // Enable admin drag functionality for existing drawings
+      if (isAdmin) {
+        enableAdminDragForExistingDrawings();
+      }
     } else {
       console.error('Firebase not initialized');
     }
@@ -440,6 +478,13 @@ function createDrawingElement(drawingData) {
   const rotation = (Math.random() - 0.5) * 6; // -3 to +3 degrees
   drawingElement.style.transform = `rotate(${rotation}deg)`;
   
+  // Add admin drag functionality
+  if (isAdmin) {
+    drawingElement.classList.add('admin-draggable');
+    drawingElement.addEventListener('mousedown', startDrawingDrag);
+    drawingElement.addEventListener('touchstart', startDrawingDrag);
+  }
+  
   whiteboard.appendChild(drawingElement);
   drawings.push(drawingData);
   
@@ -481,6 +526,20 @@ async function loadDrawings() {
   } catch (error) {
     console.error('Error loading drawings:', error);
   }
+}
+
+// Function to enable admin mode on existing drawings
+function enableAdminDragForExistingDrawings() {
+  if (!isAdmin) return;
+  
+  const existingDrawings = document.querySelectorAll('.drawing');
+  existingDrawings.forEach(drawing => {
+    if (!drawing.classList.contains('admin-draggable')) {
+      drawing.classList.add('admin-draggable');
+      drawing.addEventListener('mousedown', startDrawingDrag);
+      drawing.addEventListener('touchstart', startDrawingDrag);
+    }
+  });
 }
 
 function startDrag(e) {
@@ -583,6 +642,114 @@ function updateDrawingCounter() {
   const counter = document.getElementById('noteCounter');
   const count = document.querySelectorAll('.drawing').length;
   counter.textContent = `Drawings: ${count}`;
+}
+
+// Admin drawing drag functionality
+function startDrawingDrag(e) {
+  if (!isAdmin || isDraggingDrawing) return;
+  
+  e.preventDefault();
+  e.stopPropagation();
+  
+  isDraggingDrawing = true;
+  draggedDrawing = e.target;
+  
+  const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+  const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+  
+  dragStartX = clientX;
+  dragStartY = clientY;
+  
+  const rect = draggedDrawing.getBoundingClientRect();
+  drawingStartX = rect.left;
+  drawingStartY = rect.top;
+  
+  draggedDrawing.classList.add('being-dragged');
+  
+  // Add global event listeners
+  document.addEventListener('mousemove', dragDrawing);
+  document.addEventListener('mouseup', endDrawingDrag);
+  document.addEventListener('touchmove', dragDrawing);
+  document.addEventListener('touchend', endDrawingDrag);
+}
+
+function dragDrawing(e) {
+  if (!isDraggingDrawing || !draggedDrawing) return;
+  
+  e.preventDefault();
+  
+  const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+  const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+  
+  const deltaX = clientX - dragStartX;
+  const deltaY = clientY - dragStartY;
+  
+  const newLeft = drawingStartX + deltaX;
+  const newTop = drawingStartY + deltaY;
+  
+  // Get whiteboard boundaries
+  const whiteboard = document.getElementById('whiteboard');
+  const whiteboardRect = whiteboard.getBoundingClientRect();
+  
+  // Calculate relative position within whiteboard
+  const relativeX = newLeft - whiteboardRect.left;
+  const relativeY = newTop - whiteboardRect.top;
+  
+  // Constrain within boundaries (accounting for drawing size)
+  const drawingWidth = 400;
+  const drawingHeight = 300;
+  const minX = 0;
+  const maxX = whiteboardRect.width - drawingWidth;
+  const minY = 0;
+  const maxY = whiteboardRect.height - drawingHeight;
+  
+  const constrainedX = Math.max(minX, Math.min(maxX, relativeX));
+  const constrainedY = Math.max(minY, Math.min(maxY, relativeY));
+  
+  draggedDrawing.style.left = constrainedX + 'px';
+  draggedDrawing.style.top = constrainedY + 'px';
+}
+
+function endDrawingDrag(e) {
+  if (!isDraggingDrawing || !draggedDrawing) return;
+  
+  e.preventDefault();
+  
+  // Remove global event listeners
+  document.removeEventListener('mousemove', dragDrawing);
+  document.removeEventListener('mouseup', endDrawingDrag);
+  document.removeEventListener('touchmove', dragDrawing);
+  document.removeEventListener('touchend', endDrawingDrag);
+  
+  draggedDrawing.classList.remove('being-dragged');
+  
+  // Update position in Firebase
+  updateDrawingPosition(draggedDrawing);
+  
+  // Reset drag state
+  isDraggingDrawing = false;
+  draggedDrawing = null;
+}
+
+async function updateDrawingPosition(drawingElement) {
+  try {
+    const drawingId = drawingElement.dataset.id;
+    const newX = parseInt(drawingElement.style.left);
+    const newY = parseInt(drawingElement.style.top);
+    
+    await db.collection('drawings').doc(drawingId).update({
+      position: {
+        x: newX,
+        y: newY
+      }
+    });
+    
+    console.log('Drawing position updated:', drawingId, { x: newX, y: newY });
+    
+  } catch (error) {
+    console.error('Error updating drawing position:', error);
+    // Could show a toast notification here
+  }
 }
 </script>
 
