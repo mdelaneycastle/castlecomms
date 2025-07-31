@@ -103,12 +103,9 @@
 
     .drawing {
       position: absolute;
-      border: 3px solid #fff;
-      border-radius: 8px;
       cursor: pointer;
       transform: rotate(-2deg);
       transition: transform 0.3s ease;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       user-select: none;
     }
 
@@ -433,9 +430,9 @@ function createDrawingElement(drawingData) {
   drawingElement.dataset.id = drawingData.id;
   drawingElement.src = drawingData.imageData;
   
-  // Scale down the image for display on whiteboard
-  drawingElement.style.maxWidth = '200px';
-  drawingElement.style.maxHeight = '150px';
+  // Scale the image for display on whiteboard
+  drawingElement.style.maxWidth = '400px';
+  drawingElement.style.maxHeight = '300px';
   drawingElement.style.left = drawingData.position.x + 'px';
   drawingElement.style.top = drawingData.position.y + 'px';
   

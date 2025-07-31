@@ -308,6 +308,134 @@
       margin-bottom: 1rem;
     }
 
+    /* Message Modal */
+    .message-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .message-modal.show {
+      display: flex;
+    }
+
+    .message-modal-content {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: var(--shadow-heavy);
+    }
+
+    .message-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6c757d;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .message-modal-close:hover {
+      background: #f8f9fa;
+    }
+
+    .message-modal-header {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e1e5e9;
+    }
+
+    .message-modal-sender {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .message-modal-time {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    .message-modal-content-text {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #2c3e50;
+      margin-bottom: 2rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .message-modal-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .reply-button {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--shadow-light);
+    }
+
+    .reply-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .mark-read-button {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--shadow-light);
+    }
+
+    .mark-read-button:hover {
+      background: #218838;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .mark-read-button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     @media (max-width: 768px) {
       .messages-layout {
         grid-template-columns: 1fr;
@@ -391,6 +519,27 @@
   </div>
 </main>
 
+<!-- Message Modal -->
+<div class="message-modal" id="message-modal">
+  <div class="message-modal-content">
+    <button class="message-modal-close" onclick="closeMessageModal()">&times;</button>
+    
+    <div class="message-modal-header">
+      <div class="message-modal-sender" id="modal-sender">From: Sender Name</div>
+      <div class="message-modal-time" id="modal-time">Just now</div>
+    </div>
+    
+    <div class="message-modal-content-text" id="modal-message">
+      Message content will appear here...
+    </div>
+    
+    <div class="message-modal-actions">
+      <button class="mark-read-button" id="modal-mark-read" onclick="markModalMessageAsRead()">Mark as Read</button>
+      <button class="reply-button" onclick="replyToMessage()">Reply</button>
+    </div>
+  </div>
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -409,6 +558,7 @@ let db;
 let currentUser;
 let allUsers = [];
 let selectedUsers = [];
+let currentMessage = null;
 
 document.addEventListener('DOMContentLoaded', function() {
   // Check authentication first
@@ -427,6 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
       await loadAllUsers();
       setupUserSearch();
       setupComposeForm();
+      setupModalEvents();
       loadMessages();
     } else {
       console.error('Firebase not initialized');
@@ -590,6 +741,23 @@ function setupComposeForm() {
   });
 }
 
+// Setup modal events
+function setupModalEvents() {
+  // Close modal when clicking outside
+  document.getElementById('message-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'message-modal') {
+      closeMessageModal();
+    }
+  });
+  
+  // Close modal with ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('message-modal').classList.contains('show')) {
+      closeMessageModal();
+    }
+  });
+}
+
 // Send message
 async function sendMessage() {
   const messageText = document.getElementById('message-text').value.trim();
@@ -679,10 +847,13 @@ async function loadMessages() {
       const data = doc.data();
       const isUnread = !data.read || !data.read.includes(currentUser.email);
       
+      // Truncate message for preview
+      const previewText = data.message.length > 60 ? data.message.substring(0, 60) + '...' : data.message;
+      
       return `
-        <div class="message-item ${isUnread ? 'unread' : ''}" onclick="markAsRead('${doc.id}')">
+        <div class="message-item ${isUnread ? 'unread' : ''}" onclick="openMessage('${doc.id}')">
           <div class="message-sender">From: ${data.senderName}</div>
-          <div class="message-preview">${data.message}</div>
+          <div class="message-preview">${previewText}</div>
           <div class="message-time">${formatTimestamp(data.timestamp)}</div>
         </div>
       `;
@@ -697,19 +868,111 @@ async function loadMessages() {
   }
 }
 
-// Mark message as read
-async function markAsRead(messageId) {
+// Open message in modal
+async function openMessage(messageId) {
   try {
-    const messageRef = db.collection('messages').doc(messageId);
-    await messageRef.update({
-      read: firebase.firestore.FieldValue.arrayUnion(currentUser.email)
-    });
+    const messageDoc = await db.collection('messages').doc(messageId).get();
+    if (!messageDoc.exists) {
+      alert('Message not found.');
+      return;
+    }
     
-    // Reload messages to update the read status
-    loadMessages();
+    const data = messageDoc.data();
+    currentMessage = { id: messageId, ...data };
+    
+    // Populate modal
+    document.getElementById('modal-sender').textContent = `From: ${data.senderName}`;
+    document.getElementById('modal-time').textContent = formatTimestamp(data.timestamp);
+    document.getElementById('modal-message').textContent = data.message;
+    
+    // Update mark as read button
+    const isUnread = !data.read || !data.read.includes(currentUser.email);
+    const markReadBtn = document.getElementById('modal-mark-read');
+    markReadBtn.textContent = isUnread ? 'Mark as Read' : 'Mark as Unread';
+    markReadBtn.disabled = false;
+    
+    // Show modal
+    document.getElementById('message-modal').classList.add('show');
+    
   } catch (error) {
-    console.error('Error marking message as read:', error);
+    console.error('Error opening message:', error);
+    alert('Failed to open message.');
   }
+}
+
+// Close message modal
+function closeMessageModal() {
+  document.getElementById('message-modal').classList.remove('show');
+  currentMessage = null;
+}
+
+// Mark message as read from modal
+async function markModalMessageAsRead() {
+  if (!currentMessage) return;
+  
+  try {
+    const messageRef = db.collection('messages').doc(currentMessage.id);
+    const isCurrentlyRead = currentMessage.read && currentMessage.read.includes(currentUser.email);
+    
+    if (isCurrentlyRead) {
+      // Mark as unread (remove from read array)
+      await messageRef.update({
+        read: firebase.firestore.FieldValue.arrayRemove(currentUser.email)
+      });
+      document.getElementById('modal-mark-read').textContent = 'Mark as Read';
+    } else {
+      // Mark as read (add to read array)
+      await messageRef.update({
+        read: firebase.firestore.FieldValue.arrayUnion(currentUser.email)
+      });
+      document.getElementById('modal-mark-read').textContent = 'Mark as Unread';
+    }
+    
+    // Update current message state
+    if (!currentMessage.read) currentMessage.read = [];
+    if (isCurrentlyRead) {
+      currentMessage.read = currentMessage.read.filter(email => email !== currentUser.email);
+    } else {
+      currentMessage.read.push(currentUser.email);
+    }
+    
+    // Reload messages to update the inbox
+    loadMessages();
+    
+  } catch (error) {
+    console.error('Error updating message read status:', error);
+    alert('Failed to update message status.');
+  }
+}
+
+// Reply to message
+function replyToMessage() {
+  if (!currentMessage) return;
+  
+  // Close modal
+  closeMessageModal();
+  
+  // Find the sender in allUsers and add them to selected users
+  const sender = allUsers.find(user => user.email === currentMessage.senderEmail);
+  if (sender) {
+    selectedUsers = [sender];
+    updateSelectedUsersDisplay();
+  }
+  
+  // Pre-fill message with "Re: " prefix
+  const messageInput = document.getElementById('message-text');
+  const originalMessage = currentMessage.message;
+  const replyText = `Re: ${originalMessage.substring(0, 50)}${originalMessage.length > 50 ? '...' : ''}\n\n`;
+  messageInput.value = replyText;
+  messageInput.focus();
+  
+  // Scroll to compose section
+  document.querySelector('.compose-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Mark message as read (legacy function for compatibility)
+async function markAsRead(messageId) {
+  openMessage(messageId);
 }
 
 // Get user display name from Firebase Realtime Database
