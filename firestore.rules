@@ -29,6 +29,26 @@ service cloud.firestore {
         && request.auth.token.admin == true;
     }
     
+    // Messages rules - users can read messages sent to them and create messages
+    match /messages/{messageId} {
+      // Users can read messages if they are in the recipients list
+      allow read: if request.auth != null 
+        && request.auth.token.email in resource.data.recipients;
+      
+      // Authenticated users can create messages with proper validation
+      allow create: if request.auth != null 
+        && validateMessage(request.resource.data);
+      
+      // Users can update messages to mark them as read
+      allow update: if request.auth != null 
+        && request.auth.token.email in resource.data.recipients
+        && onlyUpdatingReadStatus(request.resource.data, resource.data);
+      
+      // Only admins can delete messages
+      allow delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
     // Helper function to validate recognition note data
     function validateRecognitionNote(data) {
       return data.keys().hasAll(['content', 'author', 'timestamp'])
@@ -50,6 +70,34 @@ service cloud.firestore {
         && data.position.keys().hasAll(['x', 'y'])
         && data.position.x is number
         && data.position.y is number;
+    }
+    
+    // Helper function to validate message data
+    function validateMessage(data) {
+      return data.keys().hasAll(['senderId', 'senderEmail', 'senderName', 'message', 'recipients', 'timestamp'])
+        && data.senderId is string
+        && data.senderId.size() > 0
+        && data.senderEmail is string
+        && data.senderEmail.size() > 0
+        && data.senderName is string
+        && data.senderName.size() > 0
+        && data.message is string
+        && data.message.size() > 0
+        && data.message.size() <= 2000
+        && data.recipients is list
+        && data.recipients.size() > 0
+        && data.timestamp is timestamp;
+    }
+    
+    // Helper function to check if only read status is being updated
+    function onlyUpdatingReadStatus(newData, oldData) {
+      return newData.keys() == oldData.keys()
+        && newData.senderId == oldData.senderId
+        && newData.senderEmail == oldData.senderEmail
+        && newData.senderName == oldData.senderName
+        && newData.message == oldData.message
+        && newData.recipients == oldData.recipients
+        && newData.timestamp == oldData.timestamp;
     }
     
     // Default deny for all other documents
