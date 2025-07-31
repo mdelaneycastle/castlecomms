@@ -130,6 +130,7 @@
     .drawing.admin-draggable {
       cursor: move;
       border: 2px dashed rgba(102, 126, 234, 0.5);
+      z-index: 10; /* Above canvas but below dragged state */
     }
 
     .drawing.admin-draggable:hover {
@@ -142,6 +143,7 @@
       z-index: 1000;
       transform: scale(1.05);
       filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+      pointer-events: none; /* Prevent interference during drag */
     }
 
     .eraser {
@@ -385,6 +387,11 @@ function initializeDrawing() {
 }
 
 function startDrawing(e) {
+  // Check if we're clicking on an existing drawing (for admin drag)
+  if (isAdmin && isClickingOnDrawing(e)) {
+    return; // Don't start drawing if clicking on an existing drawing
+  }
+  
   isDrawing = true;
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
@@ -392,6 +399,35 @@ function startDrawing(e) {
   
   ctx.beginPath();
   ctx.moveTo(x, y);
+}
+
+// Helper function to check if click is on an existing drawing
+function isClickingOnDrawing(e) {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  // Get all drawings
+  const drawings = document.querySelectorAll('.drawing');
+  
+  for (let drawing of drawings) {
+    const drawingRect = drawing.getBoundingClientRect();
+    const canvasRect = canvas.getBoundingClientRect();
+    
+    // Convert drawing position to canvas coordinates
+    const drawingX = drawingRect.left - canvasRect.left;
+    const drawingY = drawingRect.top - canvasRect.top;
+    const drawingWidth = drawingRect.width;
+    const drawingHeight = drawingRect.height;
+    
+    // Check if click is within drawing bounds
+    if (x >= drawingX && x <= drawingX + drawingWidth &&
+        y >= drawingY && y <= drawingY + drawingHeight) {
+      return true;
+    }
+  }
+  
+  return false;
 }
 
 function draw(e) {
@@ -650,6 +686,11 @@ function startDrawingDrag(e) {
   
   e.preventDefault();
   e.stopPropagation();
+  
+  // Prevent any drawing from starting
+  if (isDrawing) {
+    isDrawing = false;
+  }
   
   isDraggingDrawing = true;
   draggedDrawing = e.target;
