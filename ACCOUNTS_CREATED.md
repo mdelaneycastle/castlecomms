@@ -18,7 +18,7 @@ All accounts have been successfully created in Firebase Authentication with the 
 | Milton Keynes | miltonkeynes@castlefineart.com |
 | Nottingham | nottingham@castlefineart.com |
 | Stamford | stamford@castlefineart.com |
-| Stratford-upon-Avon | stratforduponavon@castlefineart.com |
+| Stratford | stratford@castlefineart.com |
 | Chester | chester@castlefineart.com |
 | Harrogate | harrogate@castlefineart.com |
 | Leeds | leeds@castlefineart.com |
