@@ -90,36 +90,31 @@
       background: #218838;
     }
 
-    .note {
+    .drawing {
       position: absolute;
-      background: transparent;
-      padding: 5px;
-      font-family: 'Caveat', cursive;
-      font-size: 36px;
-      font-weight: 700;
-      color: #2c3e50;
+      border: 3px solid #fff;
+      border-radius: 8px;
       cursor: pointer;
       transform: rotate(-2deg);
       transition: transform 0.3s ease;
-      max-width: 350px;
-      word-wrap: break-word;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       user-select: none;
     }
 
-    .note:nth-child(odd) {
+    .drawing:nth-child(odd) {
       transform: rotate(1deg);
     }
 
-    .note:nth-child(3n) {
+    .drawing:nth-child(3n) {
       transform: rotate(-1deg);
     }
 
-    .note:hover {
+    .drawing:hover {
       transform: rotate(0deg) scale(1.05);
       z-index: 10;
     }
 
-    .note.being-erased {
+    .drawing.being-erased {
       opacity: 0.3;
       transform: scale(0.8);
     }
@@ -205,21 +200,33 @@
 <main id="main">
   <div class="noticeboard-container">
     <div class="input-section">
-      <h3 style="margin-top: 0; font-family: 'Kalam', cursive; color: #2c3e50; text-align: center;">Add a Note to the Board</h3>
-      <textarea 
-        id="noteInput" 
-        class="note-input" 
-        placeholder="Write your note here..."
-        maxlength="200"
-      ></textarea>
+      <h3 style="margin-top: 0; font-family: 'Kalam', cursive; color: #2c3e50; text-align: center;">Draw on the Whiteboard</h3>
+      
+      <!-- Drawing Canvas -->
+      <canvas id="drawingCanvas" width="400" height="200" style="border: 2px solid #ddd; border-radius: 8px; background: white; display: block; margin: 0 auto 15px auto; cursor: crosshair;"></canvas>
+      
+      <!-- Drawing Tools -->
+      <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <label style="font-family: 'Kalam', cursive; font-size: 12px;">Color:</label>
+          <input type="color" id="colorPicker" value="#000000" style="width: 30px; height: 30px; border: none; border-radius: 4px; cursor: pointer;">
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          <label style="font-family: 'Kalam', cursive; font-size: 12px;">Size:</label>
+          <input type="range" id="brushSize" min="1" max="10" value="3" style="width: 80px;">
+          <span id="brushSizeValue" style="font-family: 'Kalam', cursive; font-size: 12px;">3px</span>
+        </div>
+        <button id="clearCanvas" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-family: 'Kalam', cursive; font-size: 12px;">Clear</button>
+      </div>
+      
       <div style="text-align: center;">
-        <button id="addNoteBtn" class="add-note-btn">Pin Note</button>
+        <button id="saveDrawing" class="add-note-btn">Save Drawing</button>
       </div>
     </div>
     
     <div class="whiteboard" id="whiteboard">
       <div class="note-counter" id="noteCounter">
-        Notes: 0
+        Drawings: 0
       </div>
       
       <div class="eraser" id="eraser" title="Drag to erase notes">
@@ -239,12 +246,18 @@
 <!-- Shared components -->
 <script src="shared-components.js"></script>
 
-<!-- Noticeboard Logic -->
+<!-- Drawing Noticeboard Logic -->
 <script>
 let db;
-let notes = [];
+let drawings = [];
 let isDragging = false;
 let dragElement = null;
+
+// Drawing variables
+let canvas, ctx;
+let isDrawing = false;
+let currentColor = '#000000';
+let currentSize = 3;
 
 document.addEventListener('DOMContentLoaded', function() {
   // Check authentication first
@@ -258,18 +271,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize Firebase Firestore only if authenticated
     if (firebase.apps.length > 0) {
       db = firebase.firestore();
-      loadNotes();
+      loadDrawings();
     } else {
       console.error('Firebase not initialized');
     }
 
-    // Add note functionality (only when authenticated)
-    document.getElementById('addNoteBtn').addEventListener('click', addNote);
-    document.getElementById('noteInput').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter' && e.ctrlKey) {
-        addNote();
-      }
-    });
+    // Initialize drawing canvas
+    initializeDrawing();
+    
+    // Save drawing functionality
+    document.getElementById('saveDrawing').addEventListener('click', saveDrawing);
     
     // Eraser functionality
     const eraser = document.getElementById('eraser');
@@ -284,53 +295,146 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-async function addNote() {
-  const input = document.getElementById('noteInput');
-  const text = input.value.trim();
+function initializeDrawing() {
+  canvas = document.getElementById('drawingCanvas');
+  ctx = canvas.getContext('2d');
   
-  if (!text) return;
+  // Set drawing properties
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   
-  const noteData = {
-    text: text,
+  // Drawing event listeners
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseout', stopDrawing);
+  
+  // Touch events for mobile
+  canvas.addEventListener('touchstart', handleTouch);
+  canvas.addEventListener('touchmove', handleTouch);
+  canvas.addEventListener('touchend', stopDrawing);
+  
+  // Tool controls
+  const colorPicker = document.getElementById('colorPicker');
+  const brushSize = document.getElementById('brushSize');
+  const brushSizeValue = document.getElementById('brushSizeValue');
+  const clearCanvas = document.getElementById('clearCanvas');
+  
+  colorPicker.addEventListener('change', (e) => {
+    currentColor = e.target.value;
+  });
+  
+  brushSize.addEventListener('input', (e) => {
+    currentSize = e.target.value;
+    brushSizeValue.textContent = currentSize + 'px';
+  });
+  
+  clearCanvas.addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+}
+
+function startDrawing(e) {
+  isDrawing = true;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  ctx.lineWidth = currentSize;
+  ctx.strokeStyle = currentColor;
+  ctx.lineTo(x, y);
+  ctx.stroke();
+}
+
+function stopDrawing() {
+  isDrawing = false;
+}
+
+function handleTouch(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                   e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+    clientX: touch.clientX,
+    clientY: touch.clientY
+  });
+  canvas.dispatchEvent(mouseEvent);
+}
+
+async function saveDrawing() {
+  // Check if canvas has content by checking if it's all white/transparent
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = imageData.data;
+  let hasContent = false;
+  
+  for (let i = 0; i < pixels.length; i += 4) {
+    if (pixels[i + 3] > 0) { // Check alpha channel
+      hasContent = true;
+      break;
+    }
+  }
+  
+  if (!hasContent) {
+    alert('Please draw something first!');
+    return;
+  }
+  
+  const drawingData = {
+    imageData: canvas.toDataURL('image/png'),
     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     position: getRandomPosition()
   };
   
   try {
-    const docRef = await db.collection('noticeboard').add(noteData);
-    noteData.id = docRef.id;
-    noteData.timestamp = new Date(); // For immediate display
+    const docRef = await db.collection('drawings').add(drawingData);
+    drawingData.id = docRef.id;
+    drawingData.timestamp = new Date(); // For immediate display
     
-    createNoteElement(noteData);
-    input.value = '';
-    updateNoteCounter();
+    createDrawingElement(drawingData);
+    // Clear canvas after saving
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updateDrawingCounter();
   } catch (error) {
-    console.error('Error adding note:', error);
-    alert('Failed to add note. Please try again.');
+    console.error('Error saving drawing:', error);
+    alert('Failed to save drawing. Please try again.');
   }
 }
 
-function createNoteElement(noteData) {
+function createDrawingElement(drawingData) {
   const whiteboard = document.getElementById('whiteboard');
-  const noteElement = document.createElement('div');
-  noteElement.className = 'note';
-  noteElement.dataset.id = noteData.id;
-  noteElement.textContent = noteData.text;
+  const drawingElement = document.createElement('img');
+  drawingElement.className = 'drawing';
+  drawingElement.dataset.id = drawingData.id;
+  drawingElement.src = drawingData.imageData;
   
-  noteElement.style.left = noteData.position.x + 'px';
-  noteElement.style.top = noteData.position.y + 'px';
+  // Scale down the image for display on whiteboard
+  drawingElement.style.maxWidth = '200px';
+  drawingElement.style.maxHeight = '150px';
+  drawingElement.style.left = drawingData.position.x + 'px';
+  drawingElement.style.top = drawingData.position.y + 'px';
   
   // Add some random rotation for natural look
   const rotation = (Math.random() - 0.5) * 6; // -3 to +3 degrees
-  noteElement.style.transform = `rotate(${rotation}deg)`;
+  drawingElement.style.transform = `rotate(${rotation}deg)`;
   
-  whiteboard.appendChild(noteElement);
-  notes.push(noteData);
+  whiteboard.appendChild(drawingElement);
+  drawings.push(drawingData);
   
   // Animate in
   setTimeout(() => {
-    noteElement.style.opacity = '1';
-    noteElement.style.transform += ' scale(1)';
+    drawingElement.style.opacity = '1';
+    drawingElement.style.transform += ' scale(1)';
   }, 100);
 }
 
@@ -350,16 +454,16 @@ function getRandomPosition() {
   };
 }
 
-async function loadNotes() {
+async function loadDrawings() {
   try {
-    const snapshot = await db.collection('noticeboard').orderBy('timestamp', 'desc').get();
+    const snapshot = await db.collection('drawings').orderBy('timestamp', 'desc').get();
     snapshot.forEach(doc => {
-      const noteData = { id: doc.id, ...doc.data() };
-      createNoteElement(noteData);
+      const drawingData = { id: doc.id, ...doc.data() };
+      createDrawingElement(drawingData);
     });
-    updateNoteCounter();
+    updateDrawingCounter();
   } catch (error) {
-    console.error('Error loading notes:', error);
+    console.error('Error loading drawings:', error);
   }
 }
 
@@ -393,10 +497,10 @@ function drag(e) {
   dragElement.style.top = relativeY + 'px';
   
   
-  // Check for collision with notes
-  const notes = document.querySelectorAll('.note');
-  notes.forEach(note => {
-    const rect = note.getBoundingClientRect();
+  // Check for collision with drawings
+  const drawings = document.querySelectorAll('.drawing');
+  drawings.forEach(drawing => {
+    const rect = drawing.getBoundingClientRect();
     const eraserRect = {
       left: clientX - 20,
       right: clientX + 20,
@@ -405,7 +509,7 @@ function drag(e) {
     };
     
     if (isColliding(eraserRect, rect)) {
-      eraseNote(note);
+      eraseDrawing(drawing);
     }
   });
   
@@ -434,35 +538,35 @@ function isColliding(rect1, rect2) {
            rect1.top > rect2.bottom);
 }
 
-async function eraseNote(noteElement) {
-  const noteId = noteElement.dataset.id;
+async function eraseDrawing(drawingElement) {
+  const drawingId = drawingElement.dataset.id;
   
   // Add erasing animation
-  noteElement.classList.add('being-erased');
+  drawingElement.classList.add('being-erased');
   
   try {
     // Delete from Firebase
-    await db.collection('noticeboard').doc(noteId).delete();
+    await db.collection('drawings').doc(drawingId).delete();
     
     // Remove from DOM after animation
     setTimeout(() => {
-      if (noteElement.parentNode) {
-        noteElement.parentNode.removeChild(noteElement);
-        notes = notes.filter(note => note.id !== noteId);
-        updateNoteCounter();
+      if (drawingElement.parentNode) {
+        drawingElement.parentNode.removeChild(drawingElement);
+        drawings = drawings.filter(drawing => drawing.id !== drawingId);
+        updateDrawingCounter();
       }
     }, 300);
     
   } catch (error) {
-    console.error('Error deleting note:', error);
-    noteElement.classList.remove('being-erased');
+    console.error('Error deleting drawing:', error);
+    drawingElement.classList.remove('being-erased');
   }
 }
 
-function updateNoteCounter() {
+function updateDrawingCounter() {
   const counter = document.getElementById('noteCounter');
-  const count = document.querySelectorAll('.note').length;
-  counter.textContent = `Notes: ${count}`;
+  const count = document.querySelectorAll('.drawing').length;
+  counter.textContent = `Drawings: ${count}`;
 }
 </script>
 
