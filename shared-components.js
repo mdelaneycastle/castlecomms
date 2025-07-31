@@ -80,9 +80,17 @@ window.sharedComponents = {
   // Handle user signout
   async handleSignout() {
     try {
+      // Clear any local storage or session storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Sign out from Firebase
       await firebase.auth().signOut();
+      
       console.log("👋 User signed out successfully");
-      window.location.href = 'index.html';
+      
+      // Force a hard redirect to clear any cached state
+      window.location.replace('index.html');
     } catch (error) {
       console.error("❌ Error signing out:", error);
       alert("Error signing out. Please try again.");
@@ -97,20 +105,30 @@ window.sharedComponents = {
     }
 
     firebase.auth().onAuthStateChanged(async (user) => {
-      // Check if we're on the dashboard/index page
-      const isDashboard = window.location.pathname.endsWith("index.html") || window.location.pathname === "/";
+      // Check if we're on the login page
+      const isLoginPage = window.location.pathname.endsWith("index.html") || window.location.pathname === "/";
       
       if (!user) {
-        // Only redirect to login if we're on the dashboard and not authenticated
-        if (isDashboard) {
-          // Don't create infinite loops - just don't redirect for now
-          console.log("User not authenticated on dashboard");
+        // User is not authenticated
+        if (!isLoginPage) {
+          // Redirect to login page if not already there
+          console.log("User not authenticated, redirecting to login");
+          window.location.replace('index.html');
+          return;
         }
+        console.log("User not authenticated on login page");
         return;
       }
 
       // User is authenticated
       console.log("👤 User authenticated:", user.email);
+
+      // If user is authenticated and on login page, redirect to main
+      if (isLoginPage) {
+        console.log("Authenticated user on login page, redirecting to main");
+        window.location.replace('main.html');
+        return;
+      }
 
       // Update admin permissions
       if (window.authUtils) {
