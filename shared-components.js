@@ -49,6 +49,7 @@ window.sharedComponents = {
     const toggleBtn = document.getElementById("menu-toggle");
     const closeBtn = document.getElementById("close-btn");
     const sidebar = document.getElementById("sidebar");
+    const signoutBtn = document.getElementById("signout-btn");
     
     if (toggleBtn && sidebar) {
       toggleBtn.onclick = () => sidebar.classList.add("show");
@@ -56,6 +57,14 @@ window.sharedComponents = {
     
     if (closeBtn && sidebar) {
       closeBtn.onclick = () => sidebar.classList.remove("show");
+    }
+
+    // Setup signout functionality
+    if (signoutBtn) {
+      signoutBtn.onclick = (e) => {
+        e.preventDefault();
+        this.handleSignout();
+      };
     }
 
     // Close sidebar when clicking outside
@@ -66,6 +75,18 @@ window.sharedComponents = {
         }
       }
     });
+  },
+
+  // Handle user signout
+  async handleSignout() {
+    try {
+      await firebase.auth().signOut();
+      console.log("👋 User signed out successfully");
+      window.location.href = 'index.html';
+    } catch (error) {
+      console.error("❌ Error signing out:", error);
+      alert("Error signing out. Please try again.");
+    }
   },
 
   // Centralized authentication state handler
