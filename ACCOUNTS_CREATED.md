@@ -49,13 +49,21 @@ All accounts have been successfully created in Firebase Authentication with the 
 | Glasgow | glasgow@castlefineart.com |
 | Cardiff | cardiff@castlefineart.com |
 
+## Admin Accounts
+
+**Admin privileges granted to:**
+- `mdelaney@castlefineart.com` (admin)
+- `gturpin@castlefineart.com` (admin)
+
 ## Notes
 
 - All accounts were created using Firebase Admin SDK
 - Email formatting: spaces and special characters removed, converted to lowercase
 - All accounts tested and verified working
-- Total accounts created: **38**
+- Total location accounts created: **38**
+- Additional admin accounts: **2**
 - All accounts use the same password: `Letmein1!`
+- **Only admin accounts have elevated privileges** - all location accounts are standard users
 
 ## Usage
 
