@@ -100,6 +100,60 @@ service cloud.firestore {
         && newData.timestamp == oldData.timestamp;
     }
     
+    // Tickets rules - users can read tickets they created or are assigned to
+    match /tickets/{ticketId} {
+      // Users can read tickets if they created them or are assigned to them
+      allow read: if request.auth != null 
+        && (request.auth.uid == resource.data.createdBy.uid 
+            || request.auth.token.email == resource.data.assignedTo.email);
+      
+      // Authenticated users can create tickets with proper validation
+      allow create: if request.auth != null 
+        && validateTicket(request.resource.data);
+      
+      // Only ticket creator and assignee can update tickets
+      allow update: if request.auth != null 
+        && (request.auth.uid == resource.data.createdBy.uid 
+            || request.auth.token.email == resource.data.assignedTo.email)
+        && validateTicketUpdate(request.resource.data, resource.data);
+      
+      // Only admins can delete tickets
+      allow delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Helper function to validate ticket data
+    function validateTicket(data) {
+      return data.keys().hasAll(['ticketId', 'title', 'description', 'category', 'status', 'createdBy', 'assignedTo', 'createdAt'])
+        && data.ticketId is string
+        && data.ticketId.size() > 0
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 100
+        && data.description is string
+        && data.description.size() > 0
+        && data.description.size() <= 2000
+        && data.category is string
+        && data.category.size() > 0
+        && data.status in ['open', 'on-hold', 'resolved']
+        && data.createdBy is map
+        && data.createdBy.keys().hasAll(['uid', 'email', 'name'])
+        && data.assignedTo is map
+        && data.assignedTo.keys().hasAll(['email', 'name'])
+        && data.createdAt is timestamp;
+    }
+    
+    // Helper function to validate ticket updates
+    function validateTicketUpdate(newData, oldData) {
+      return newData.ticketId == oldData.ticketId
+        && newData.title == oldData.title
+        && newData.description == oldData.description
+        && newData.category == oldData.category
+        && newData.createdBy == oldData.createdBy
+        && newData.assignedTo == oldData.assignedTo
+        && newData.createdAt == oldData.createdAt;
+    }
+    
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
