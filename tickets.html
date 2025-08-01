@@ -1403,7 +1403,7 @@ async function sendTicketMessage() {
       message: messageText,
       senderEmail: currentUser.email,
       senderName: senderName,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      timestamp: new Date()
     };
     
     // Add message to ticket's messages array
@@ -1438,7 +1438,7 @@ async function addSystemMessage(message) {
       message: message,
       senderEmail: 'system',
       senderName: 'System',
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      timestamp: new Date()
     };
     
     await db.collection('tickets').doc(currentTicket.id).update({
