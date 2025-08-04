@@ -162,22 +162,22 @@ service cloud.firestore {
         && request.auth.token.admin == true;
     }
     
-    // Communication reads tracking - users can manage their own read status
+    // Communication reads tracking - users can manage their own read status, admins can read all for analytics
     match /communication-reads/{readId} {
-      // Users can read their own read status records
+      // Users can read their own read status records, admins can read all for analytics
       allow read: if request.auth != null 
-        && request.auth.uid == resource.data.userId;
+        && (request.auth.uid == resource.data.userId || request.auth.token.admin == true);
       
       // Users can create and delete their own read status records
       allow create, delete: if request.auth != null 
         && request.auth.uid == request.resource.data.userId;
     }
     
-    // Communication tasks tracking - users can manage their own task completions
+    // Communication tasks tracking - users can manage their own task completions, admins can read all for analytics
     match /communication-tasks/{taskId} {
-      // Users can read their own task completion records
+      // Users can read their own task completion records, admins can read all for analytics
       allow read: if request.auth != null 
-        && request.auth.uid == resource.data.userId;
+        && (request.auth.uid == resource.data.userId || request.auth.token.admin == true);
       
       // Users can create and delete their own task completion records
       allow create, delete: if request.auth != null 
