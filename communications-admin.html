@@ -573,6 +573,308 @@
       color: #155724;
     }
 
+    /* Read Status Tracking Styles */
+    .read-status-section {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e1e5e9;
+    }
+
+    .read-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .read-stat {
+      text-align: center;
+      padding: 0.5rem;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e1e5e9;
+    }
+
+    .read-stat-number {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .read-stat-label {
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-top: 0.2rem;
+    }
+
+    .read-stat.read .read-stat-number {
+      color: #28a745;
+    }
+
+    .read-stat.unread .read-stat-number {
+      color: #dc3545;
+    }
+
+    .users-read-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .user-read-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e1e5e9;
+      font-size: 0.9rem;
+    }
+
+    .user-read-item.read {
+      border-left: 3px solid #28a745;
+      background: rgba(40, 167, 69, 0.05);
+    }
+
+    .user-read-item.unread {
+      border-left: 3px solid #dc3545;
+      background: rgba(220, 53, 69, 0.05);
+    }
+
+    .user-read-icon {
+      margin-right: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .user-read-info {
+      flex: 1;
+    }
+
+    .user-read-name {
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .user-read-email {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+
+    .user-read-time {
+      font-size: 0.8rem;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    .toggle-read-status {
+      background: none;
+      border: none;
+      color: #667eea;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.3rem;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .toggle-read-status:hover {
+      background: rgba(102, 126, 234, 0.1);
+    }
+
+    .bulk-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e1e5e9;
+    }
+
+    .bulk-action-button {
+      background: #f8f9fa;
+      border: 1px solid #e1e5e9;
+      color: #495057;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .bulk-action-button:hover {
+      background: #e9ecef;
+    }
+
+    .bulk-action-button.primary {
+      background: var(--primary-gradient);
+      color: white;
+      border-color: transparent;
+    }
+
+    .bulk-action-button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-light);
+    }
+
+    /* Email Notification Styles */
+    .email-notification-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #2c3e50;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .email-template-preview {
+      background: #f8f9fa;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .email-template-preview h4 {
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+      font-size: 1.1rem;
+    }
+
+    .email-preview-content {
+      background: white;
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid #e1e5e9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .email-field {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .email-field strong {
+      color: #495057;
+      min-width: 60px;
+      display: inline-block;
+    }
+
+    .email-body-preview {
+      background: #f8f9fa;
+      padding: 0.75rem;
+      border-radius: 4px;
+      border-left: 3px solid #667eea;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #495057;
+    }
+
+    .email-body-preview a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .email-body-preview a:hover {
+      text-decoration: underline;
+    }
+
+    #preview-subject {
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .email-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-left: 1rem;
+      padding-left: 1rem;
+      border-left: 2px solid #e1e5e9;
+    }
+
+    .preview-recipients-button {
+      background: #f8f9fa;
+      border: 1px solid #e1e5e9;
+      color: #495057;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      align-self: flex-start;
+    }
+
+    .preview-recipients-button:hover {
+      background: #e9ecef;
+    }
+
+    .recipients-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .recipients-modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-heavy);
+    }
+
+    .recipients-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .recipient-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #e1e5e9;
+      font-size: 0.9rem;
+    }
+
+    .close-modal {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      float: right;
+      margin-top: 1rem;
+    }
+
     .error, .success {
       padding: 1rem;
       border-radius: 8px;
@@ -712,6 +1014,41 @@
           </div>
         </div>
 
+        <div class="form-section">
+          <h3>📧 Email Notifications</h3>
+          <div class="email-notification-options">
+            <label class="checkbox-container">
+              <input type="checkbox" id="send-email-notification" checked>
+              <span class="checkmark"></span>
+              Send email notification to all users when published
+            </label>
+            <div class="email-options" id="email-options">
+              <label class="checkbox-container">
+                <input type="checkbox" id="urgent-only-notification">
+                <span class="checkmark"></span>
+                Only notify for urgent communications
+              </label>
+              <button type="button" class="preview-recipients-button" onclick="previewEmailRecipients()">
+                👥 Preview Recipients
+              </button>
+            </div>
+            <div class="email-template-preview" id="email-template-preview">
+              <h4>📧 Email Preview</h4>
+              <div class="email-preview-content">
+                <div class="email-field"><strong>To:</strong> All Users (BCC)</div>
+                <div class="email-field"><strong>Subject:</strong> <span id="preview-subject">New Communication: [Title will appear here]</span></div>
+                <div class="email-field"><strong>Body:</strong></div>
+                <div class="email-body-preview" id="preview-body">
+                  A new communication has been posted: "[Title]"<br><br>
+                  [Summary will appear here]<br><br>
+                  Please visit the communications page to view the full details:<br>
+                  <a href="#">View Communication</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="action-buttons">
           <button type="button" class="save-draft-button" onclick="saveDraft()">💾 Save Draft</button>
           <button type="button" class="preview-button" onclick="previewCommunication()">👁️ Preview</button>
@@ -752,6 +1089,18 @@
     </div>
   </div>
 </main>
+
+<!-- Recipients Preview Modal -->
+<div class="recipients-modal" id="recipients-modal">
+  <div class="recipients-modal-content">
+    <h3>📧 Email Recipients Preview</h3>
+    <p id="recipients-count">Loading recipients...</p>
+    <div class="recipients-list" id="recipients-list">
+      <!-- Recipients will be loaded here -->
+    </div>
+    <button class="close-modal" onclick="closeRecipientsModal()">Close</button>
+  </div>
+</div>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -848,6 +1197,23 @@ function setupTabs() {
       }
     });
   });
+  
+  // Setup email preview updates
+  setupEmailPreview();
+}
+
+// Setup email preview functionality
+function setupEmailPreview() {
+  const titleInput = document.getElementById('comm-title');
+  const summaryInput = document.getElementById('comm-summary');
+  
+  if (titleInput && summaryInput) {
+    titleInput.addEventListener('input', updateEmailPreview);
+    summaryInput.addEventListener('input', updateEmailPreview);
+    
+    // Initial preview update
+    updateEmailPreview();
+  }
 }
 
 // Analytics Functions
@@ -1486,6 +1852,188 @@ async function publishCommunication() {
   await saveCommunication('published');
 }
 
+// Email Notification Functions
+
+// Update email preview in real-time
+function updateEmailPreview() {
+  const title = document.getElementById('comm-title').value.trim() || '[Title]';
+  const summary = document.getElementById('comm-summary').value.trim() || '[Summary]';
+  
+  // Update subject preview
+  document.getElementById('preview-subject').textContent = `New Communication: ${title}`;
+  
+  // Update body preview
+  const currentUrl = window.location.origin + window.location.pathname.replace('communications-admin.html', 'communications.html');
+  document.getElementById('preview-body').innerHTML = `
+    A new communication has been posted: "<strong>${title}</strong>"<br><br>
+    ${summary}<br><br>
+    Please visit the communications page to view the full details:<br>
+    <a href="${currentUrl}" target="_blank">View Communication →</a>
+  `;
+}
+
+// Collect all user emails from the database
+async function getAllUserEmails() {
+  try {
+    const realtimeDb = firebase.database();
+    const usersSnapshot = await realtimeDb.ref('users').once('value');
+    const usersData = usersSnapshot.val() || {};
+    
+    const emails = [];
+    Object.keys(usersData).forEach(uid => {
+      const userData = usersData[uid];
+      let email = userData.email;
+      
+      // If no email, construct one from name
+      if (!email && userData.name) {
+        email = userData.name.toLowerCase().replace(/\s+/g, '.') + '@company.com';
+      }
+      
+      if (email && email.includes('@')) {
+        emails.push(email);
+      }
+    });
+    
+    return emails;
+  } catch (error) {
+    console.error('Error getting user emails:', error);
+    return [];
+  }
+}
+
+// Generate mailto link for communication notification
+async function generateEmailNotification(title, summary) {
+  try {
+    const emails = await getAllUserEmails();
+    
+    if (emails.length === 0) {
+      throw new Error('No user emails found');
+    }
+    
+    const subject = `New Communication: ${title}`;
+    const currentUrl = window.location.origin + window.location.pathname.replace('communications-admin.html', 'communications.html');
+    
+    const body = `A new communication has been posted: "${title}"
+
+${summary}
+
+Please visit the communications page to view the full details:
+${currentUrl}
+
+---
+Castle Comms Communications System`;
+    
+    // Use BCC to protect user privacy
+    const mailtoUrl = `mailto:?bcc=${encodeURIComponent(emails.join(','))}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    return {
+      url: mailtoUrl,
+      recipientCount: emails.length,
+      recipients: emails
+    };
+  } catch (error) {
+    console.error('Error generating email notification:', error);
+    throw error;
+  }
+}
+
+// Open email client with notification
+async function sendEmailNotification(title, summary) {
+  try {
+    showStatus('Preparing email notification...', 'info');
+    
+    const emailData = await generateEmailNotification(title, summary);
+    
+    // Check URL length (browsers have limits)
+    if (emailData.url.length > 2000) {
+      // Fallback for very long URLs
+      const shortBody = `New communication "${title}" has been posted. Please check the communications page.`;
+      const fallbackUrl = `mailto:?bcc=${encodeURIComponent(emailData.recipients.join(','))}&subject=${encodeURIComponent(`New Communication: ${title}`)}&body=${encodeURIComponent(shortBody)}`;
+      window.open(fallbackUrl, '_blank');
+    } else {
+      window.open(emailData.url, '_blank');
+    }
+    
+    showStatus(`Email notification prepared for ${emailData.recipientCount} users`, 'success');
+    return true;
+  } catch (error) {
+    console.error('Failed to send email notification:', error);
+    showStatus('Failed to prepare email notification: ' + error.message, 'error');
+    return false;
+  }
+}
+
+// Preview email recipients
+async function previewEmailRecipients() {
+  try {
+    const modal = document.getElementById('recipients-modal');
+    const countEl = document.getElementById('recipients-count');
+    const listEl = document.getElementById('recipients-list');
+    
+    // Show modal
+    modal.style.display = 'flex';
+    countEl.textContent = 'Loading recipients...';
+    listEl.innerHTML = '';
+    
+    // Get user data
+    const realtimeDb = firebase.database();
+    const usersSnapshot = await realtimeDb.ref('users').once('value');
+    const usersData = usersSnapshot.val() || {};
+    
+    const recipients = [];
+    Object.keys(usersData).forEach(uid => {
+      const userData = usersData[uid];
+      let email = userData.email;
+      
+      // If no email, construct one from name
+      if (!email && userData.name) {
+        email = userData.name.toLowerCase().replace(/\s+/g, '.') + '@company.com';
+      }
+      
+      if (email && email.includes('@')) {
+        recipients.push({
+          name: userData.name || userData.displayName || 'Unknown User',
+          email: email
+        });
+      }
+    });
+    
+    // Update modal content
+    countEl.textContent = `${recipients.length} recipients will receive email notifications`;
+    
+    if (recipients.length === 0) {
+      listEl.innerHTML = '<div style="text-align: center; color: #6c757d;">No email recipients found</div>';
+    } else {
+      listEl.innerHTML = recipients.map(recipient => `
+        <div class="recipient-item">
+          <span>📧</span>
+          <div style="margin-left: 0.5rem;">
+            <div style="font-weight: 500;">${recipient.name}</div>
+            <div style="font-size: 0.8rem; color: #6c757d;">${recipient.email}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+  } catch (error) {
+    console.error('Error loading recipients:', error);
+    document.getElementById('recipients-count').textContent = 'Error loading recipients';
+  }
+}
+
+// Close recipients modal
+function closeRecipientsModal() {
+  document.getElementById('recipients-modal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.addEventListener('click', (event) => {
+  const modal = document.getElementById('recipients-modal');
+  if (event.target === modal) {
+    closeRecipientsModal();
+  }
+});
+
 // Save communication
 async function saveCommunication(status) {
   const title = document.getElementById('comm-title').value.trim();
@@ -1539,8 +2087,26 @@ async function saveCommunication(status) {
     
     showStatus(`Communication ${status} successfully!`, 'success');
     
-    // Reset form if published
+    // Send email notification if published and checkbox is checked
     if (status === 'published') {
+      const sendEmailCheckbox = document.getElementById('send-email-notification');
+      const urgentOnlyCheckbox = document.getElementById('urgent-only-notification');
+      
+      // Check if email should be sent
+      let shouldSendEmail = sendEmailCheckbox && sendEmailCheckbox.checked;
+      
+      // If "urgent only" is checked, only send for urgent communications
+      if (urgentOnlyCheckbox && urgentOnlyCheckbox.checked) {
+        shouldSendEmail = shouldSendEmail && (priority === 'urgent');
+      }
+      
+      if (shouldSendEmail) {
+        // Small delay to let the success message show first
+        setTimeout(async () => {
+          await sendEmailNotification(title, summary || content.replace(/<[^>]*>/g, '').substring(0, 200));
+        }, 500);
+      }
+      
       resetForm();
     }
     
@@ -1597,8 +2163,16 @@ async function loadCommunications() {
       return;
     }
     
-    const items = communications.docs.map(doc => {
+    // Get all users and read status for each communication
+    const [allUsers, readStatusData] = await Promise.all([
+      getAllUsers(),
+      getAllReadStatus()
+    ]);
+    
+    const items = await Promise.all(communications.docs.map(async (doc) => {
       const data = doc.data();
+      const readStatus = await getReadStatusForCommunication(doc.id, allUsers);
+      
       return `
         <div class="communication-summary">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
@@ -1607,7 +2181,8 @@ async function loadCommunications() {
           </div>
           <div class="meta">
             Created: ${data.createdAt?.toDate?.()?.toLocaleDateString() || 'Just now'} | 
-            Priority: ${data.urgent ? 'Urgent' : 'Normal'}
+            Priority: ${data.urgent ? 'Urgent' : 'Normal'} |
+            Read: ${readStatus.readCount}/${readStatus.totalUsers} users
           </div>
           <p>${data.summary || data.content.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
           <div class="actions">
@@ -1617,12 +2192,53 @@ async function loadCommunications() {
             <button class="delete-button" onclick="deleteCommunication('${doc.id}')">
               🗑️ Delete
             </button>
+            <button class="toggle-read-status" onclick="toggleReadStatusView('${doc.id}')">
+              👥 View Read Status
+            </button>
+          </div>
+          <div class="read-status-section" id="read-status-${doc.id}" style="display: none;">
+            <h4>📊 Read Status Overview</h4>
+            <div class="read-stats">
+              <div class="read-stat read">
+                <div class="read-stat-number">${readStatus.readCount}</div>
+                <div class="read-stat-label">Read</div>
+              </div>
+              <div class="read-stat unread">
+                <div class="read-stat-number">${readStatus.unreadCount}</div>
+                <div class="read-stat-label">Unread</div>
+              </div>
+              <div class="read-stat">
+                <div class="read-stat-number">${Math.round((readStatus.readCount / readStatus.totalUsers) * 100)}%</div>
+                <div class="read-stat-label">Read Rate</div>
+              </div>
+            </div>
+            <h5>👥 Individual Status</h5>
+            <div class="users-read-list">
+              ${readStatus.users.map(user => `
+                <div class="user-read-item ${user.hasRead ? 'read' : 'unread'}">
+                  <span class="user-read-icon">${user.hasRead ? '✅' : '❌'}</span>
+                  <div class="user-read-info">
+                    <div class="user-read-name">${user.displayName || user.email}</div>
+                    <div class="user-read-email">${user.email}</div>
+                    ${user.hasRead && user.readAt ? `<div class="user-read-time">Read: ${formatReadTime(user.readAt)}</div>` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+            <div class="bulk-actions">
+              <button class="bulk-action-button" onclick="exportUnreadUsers('${doc.id}')">
+                📧 Export Unread Users
+              </button>
+              <button class="bulk-action-button primary" onclick="sendFollowUpReminder('${doc.id}')">
+                📢 Send Follow-up
+              </button>
+            </div>
           </div>
         </div>
       `;
-    }).join('');
+    }));
     
-    container.innerHTML = items;
+    container.innerHTML = items.join('');
     
   } catch (error) {
     console.error('Error loading communications:', error);
@@ -1679,6 +2295,184 @@ async function editCommunication(commId) {
   } catch (error) {
     console.error('Error loading communication:', error);
     alert('Failed to load communication for editing.');
+  }
+}
+
+// Read Status Tracking Functions
+
+// Get all users from Firebase Realtime Database
+async function getAllUsers() {
+  try {
+    // Use Firebase Realtime Database for users (matching the existing system)
+    const realtimeDb = firebase.database();
+    const usersSnapshot = await realtimeDb.ref('users').once('value');
+    const usersData = usersSnapshot.val() || {};
+    
+    const users = Object.keys(usersData).map(uid => ({
+      uid: uid,
+      email: usersData[uid].email || (usersData[uid].name ? usersData[uid].name + '@company.com' : 'unknown@company.com'),
+      displayName: usersData[uid].name || usersData[uid].displayName || usersData[uid].email || 'Unknown User'
+    }));
+    
+    // If no users found, return empty array
+    if (users.length === 0) {
+      console.warn('No users found in Realtime Database users collection');
+      return [];
+    }
+    
+    return users;
+  } catch (error) {
+    console.error('Error getting all users:', error);
+    return [];
+  }
+}
+
+// Get all read status data
+async function getAllReadStatus() {
+  try {
+    const readsSnapshot = await db.collection('communication-reads').get();
+    const readStatus = {};
+    
+    readsSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (!readStatus[data.communicationId]) {
+        readStatus[data.communicationId] = [];
+      }
+      readStatus[data.communicationId].push({
+        userId: data.userId,
+        userEmail: data.userEmail,
+        readAt: data.readAt
+      });
+    });
+    
+    return readStatus;
+  } catch (error) {
+    console.error('Error getting read status data:', error);
+    return {};
+  }
+}
+
+// Get read status for a specific communication
+async function getReadStatusForCommunication(commId, allUsers) {
+  try {
+    const readsSnapshot = await db.collection('communication-reads')
+      .where('communicationId', '==', commId)
+      .get();
+    
+    const readUsers = new Set();
+    const readData = {};
+    
+    readsSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      readUsers.add(data.userId);
+      readData[data.userId] = {
+        readAt: data.readAt,
+        userEmail: data.userEmail
+      };
+    });
+    
+    const users = allUsers.map(user => ({
+      ...user,
+      hasRead: readUsers.has(user.uid),
+      readAt: readData[user.uid]?.readAt
+    }));
+    
+    return {
+      totalUsers: allUsers.length,
+      readCount: readUsers.size,
+      unreadCount: allUsers.length - readUsers.size,
+      users: users
+    };
+  } catch (error) {
+    console.error('Error getting read status for communication:', error);
+    return {
+      totalUsers: 0,
+      readCount: 0,
+      unreadCount: 0,
+      users: []
+    };
+  }
+}
+
+// Toggle read status view
+function toggleReadStatusView(commId) {
+  const statusSection = document.getElementById(`read-status-${commId}`);
+  if (statusSection.style.display === 'none') {
+    statusSection.style.display = 'block';
+  } else {
+    statusSection.style.display = 'none';
+  }
+}
+
+// Format read time
+function formatReadTime(timestamp) {
+  if (!timestamp) return 'Unknown';
+  
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+  
+  if (diffHours < 1) return 'Just now';
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  
+  return date.toLocaleDateString();
+}
+
+// Export unread users to CSV
+function exportUnreadUsers(commId) {
+  const statusSection = document.getElementById(`read-status-${commId}`);
+  const unreadItems = statusSection.querySelectorAll('.user-read-item.unread');
+  
+  if (unreadItems.length === 0) {
+    alert('All users have read this communication!');
+    return;
+  }
+  
+  const csvContent = 'Name,Email\n' + 
+    Array.from(unreadItems).map(item => {
+      const name = item.querySelector('.user-read-name').textContent;
+      const email = item.querySelector('.user-read-email').textContent;
+      return `"${name}","${email}"`;
+    }).join('\n');
+  
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `unread-users-${commId}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+
+// Send follow-up reminder (placeholder - would integrate with your notification system)
+function sendFollowUpReminder(commId) {
+  const statusSection = document.getElementById(`read-status-${commId}`);
+  const unreadItems = statusSection.querySelectorAll('.user-read-item.unread');
+  
+  if (unreadItems.length === 0) {
+    alert('All users have read this communication!');
+    return;
+  }
+  
+  const unreadUsers = Array.from(unreadItems).map(item => {
+    return {
+      name: item.querySelector('.user-read-name').textContent,
+      email: item.querySelector('.user-read-email').textContent
+    };
+  });
+  
+  // This would integrate with your email/notification system
+  console.log('Sending follow-up reminders to:', unreadUsers);
+  
+  // For now, show a summary
+  const userList = unreadUsers.map(u => u.name).join(', ');
+  if (confirm(`Send follow-up reminder to ${unreadUsers.length} users?\n\n${userList}`)) {
+    alert('Follow-up reminders would be sent here. This would integrate with your notification system.');
   }
 }
 
