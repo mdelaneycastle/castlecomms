@@ -40,66 +40,74 @@
         background: rgba(255, 255, 255, 0.95) !important;
         backdrop-filter: blur(10px) !important;
         perspective: none !important;
+        display: flex !important;
+        flex-direction: column !important;
       }
       
       .manual-title {
-        font-size: 1.5rem !important;
+        font-size: 1.4rem !important;
         text-align: center !important;
-        margin-bottom: 1rem !important;
+        margin: 0 0 0.5rem 0 !important;
+        padding: 0 3rem !important;
         color: #2c3e50 !important;
         background: var(--primary-gradient) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
+        line-height: 1.3 !important;
+        order: 1 !important;
       }
       
       .close-manual {
         position: absolute !important;
-        top: 1rem !important;
-        right: 1rem !important;
-        width: 35px !important;
-        height: 35px !important;
-        font-size: 1.2rem !important;
+        top: 0.75rem !important;
+        right: 0.75rem !important;
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 1.1rem !important;
         border-radius: 50% !important;
         background: rgba(220, 53, 69, 0.9) !important;
         color: white !important;
         border: none !important;
         cursor: pointer !important;
-        z-index: 100 !important;
+        z-index: 101 !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        order: 0 !important;
       }
       
       .page-indicator {
         text-align: center !important;
-        margin-bottom: 1rem !important;
-        font-size: 0.9rem !important;
+        margin: 0.5rem auto 1rem auto !important;
+        font-size: 0.85rem !important;
         color: #6c757d !important;
         background: rgba(102, 126, 234, 0.1) !important;
-        padding: 0.5rem 1rem !important;
-        border-radius: 20px !important;
+        padding: 0.4rem 0.8rem !important;
+        border-radius: 15px !important;
         display: inline-block !important;
-        margin-left: 50% !important;
-        transform: translateX(-50%) !important;
+        width: fit-content !important;
+        order: 2 !important;
       }
       
       .page-container {
         position: relative !important;
         width: 100% !important;
         height: auto !important;
-        min-height: 400px !important;
+        min-height: 300px !important;
         margin: 0 !important;
         transform-style: none !important;
         overflow: visible !important;
         perspective: none !important;
+        flex: 1 !important;
+        order: 3 !important;
       }
       
       .page {
         position: relative !important;
         width: 100% !important;
         height: auto !important;
-        min-height: 300px !important;
+        min-height: 250px !important;
         padding: 1rem !important;
         background: white !important;
         border-radius: 12px !important;
@@ -117,23 +125,23 @@
       
       .page-header {
         margin: 0 0 1rem 0 !important;
-        padding: 0 !important;
+        padding: 0 0 0.75rem 0 !important;
         border-bottom: 2px solid #f0f0f0 !important;
-        padding-bottom: 1rem !important;
       }
       
       .page-number {
-        font-size: 0.8rem !important;
+        font-size: 0.75rem !important;
         color: #667eea !important;
         font-weight: 600 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
+        margin-bottom: 0.25rem !important;
       }
       
       .page-title {
-        font-size: 1.4rem !important;
+        font-size: 1.2rem !important;
         color: #2c3e50 !important;
-        margin: 0.5rem 0 0 0 !important;
+        margin: 0 !important;
         font-weight: 600 !important;
         line-height: 1.3 !important;
       }
@@ -141,13 +149,13 @@
       .section-grid {
         display: grid !important;
         grid-template-columns: 1fr !important;
-        gap: 1rem !important;
-        margin: 1.5rem 0 !important;
+        gap: 0.75rem !important;
+        margin: 1rem 0 !important;
       }
       
       .section-card {
-        padding: 1rem !important;
-        border-radius: 12px !important;
+        padding: 0.875rem !important;
+        border-radius: 10px !important;
         background: rgba(255, 255, 255, 0.9) !important;
         border: 1px solid #e1e5e9 !important;
         box-shadow: var(--shadow-light) !important;
@@ -156,99 +164,115 @@
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
-        gap: 1rem !important;
+        gap: 0.75rem !important;
       }
       
       .section-card:hover {
         box-shadow: var(--shadow-medium) !important;
-        transform: translateY(-2px) !important;
+        transform: translateY(-1px) !important;
         border-color: #667eea !important;
       }
       
       .section-icon {
-        font-size: 2rem !important;
+        font-size: 1.75rem !important;
         flex-shrink: 0 !important;
-        width: 50px !important;
-        height: 50px !important;
+        width: 42px !important;
+        height: 42px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         background: rgba(102, 126, 234, 0.1) !important;
-        border-radius: 12px !important;
+        border-radius: 10px !important;
       }
       
       .section-title {
-        font-size: 1rem !important;
+        font-size: 0.95rem !important;
         font-weight: 600 !important;
         color: #2c3e50 !important;
-        margin-bottom: 0.25rem !important;
+        margin-bottom: 0.2rem !important;
         line-height: 1.3 !important;
       }
       
       .section-desc {
-        font-size: 0.85rem !important;
+        font-size: 0.8rem !important;
         color: #6c757d !important;
-        line-height: 1.4 !important;
+        line-height: 1.3 !important;
       }
       
       .highlight-box {
         background: rgba(102, 126, 234, 0.1) !important;
         border: 1px solid rgba(102, 126, 234, 0.2) !important;
-        border-radius: 12px !important;
-        padding: 1rem !important;
-        margin: 1rem 0 !important;
+        border-radius: 10px !important;
+        padding: 0.875rem !important;
+        margin: 0.75rem 0 !important;
         color: #2c3e50 !important;
+        font-size: 0.9rem !important;
+        line-height: 1.4 !important;
       }
       
       .contact-info {
         background: rgba(40, 167, 69, 0.1) !important;
         border: 1px solid rgba(40, 167, 69, 0.2) !important;
-        border-radius: 12px !important;
-        padding: 1rem !important;
-        margin: 1rem 0 !important;
+        border-radius: 10px !important;
+        padding: 0.875rem !important;
+        margin: 0.75rem 0 !important;
         color: #2c3e50 !important;
-        font-size: 0.9rem !important;
-        line-height: 1.5 !important;
+        font-size: 0.85rem !important;
+        line-height: 1.4 !important;
       }
       
       .content-list {
         background: rgba(248, 249, 250, 0.9) !important;
-        border-radius: 12px !important;
-        padding: 1rem 1.5rem !important;
-        margin: 1rem 0 !important;
+        border-radius: 10px !important;
+        padding: 0.875rem 1.25rem !important;
+        margin: 0.75rem 0 !important;
         border: 1px solid #e1e5e9 !important;
       }
       
       .content-list li {
-        margin-bottom: 0.5rem !important;
-        font-size: 0.9rem !important;
-        line-height: 1.4 !important;
+        margin-bottom: 0.4rem !important;
+        font-size: 0.85rem !important;
+        line-height: 1.3 !important;
         color: #495057 !important;
       }
       
       .navigation-controls {
-        position: sticky !important;
-        bottom: 1rem !important;
+        position: fixed !important;
+        bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
         transform: none !important;
         display: flex !important;
-        justify-content: center !important;
+        justify-content: space-between !important;
+        align-items: center !important;
         gap: 1rem !important;
-        padding: 1rem !important;
-        background: rgba(255, 255, 255, 0.95) !important;
-        backdrop-filter: blur(10px) !important;
-        border-radius: 12px !important;
-        margin: 1rem 0.5rem 0 0.5rem !important;
-        box-shadow: var(--shadow-light) !important;
-        z-index: 100 !important;
+        padding: 0.75rem 1rem !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        backdrop-filter: blur(15px) !important;
+        border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1) !important;
+        z-index: 1000 !important;
+        order: 4 !important;
+      }
+      
+      .nav-page-indicator {
+        flex: 0 0 auto !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        color: #667eea !important;
+        background: rgba(102, 126, 234, 0.1) !important;
+        padding: 0.5rem 0.75rem !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(102, 126, 234, 0.2) !important;
+        min-width: 60px !important;
+        text-align: center !important;
       }
       
       .nav-btn {
-        flex: 1 !important;
-        max-width: 150px !important;
-        padding: 0.75rem 1rem !important;
-        font-size: 0.9rem !important;
+        flex: 0 0 auto !important;
+        min-width: 100px !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.85rem !important;
         font-weight: 600 !important;
         border: none !important;
         border-radius: 8px !important;
@@ -259,7 +283,8 @@
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 0.5rem !important;
+        gap: 0.4rem !important;
+        white-space: nowrap !important;
       }
       
       .nav-btn:hover {
@@ -272,6 +297,12 @@
         cursor: not-allowed !important;
         transform: none !important;
         box-shadow: none !important;
+        opacity: 0.6 !important;
+      }
+      
+      /* Add bottom padding to prevent content being hidden behind fixed nav */
+      .manual-book {
+        padding-bottom: 5rem !important;
       }
     }
   </style>
@@ -684,6 +715,9 @@
   <!-- Navigation Controls -->
   <div class="navigation-controls">
     <button class="nav-btn" id="prev-btn" onclick="previousPage()">← Previous</button>
+    <div class="nav-page-indicator">
+      <span id="nav-current-page">1</span> / <span id="nav-total-pages">8</span>
+    </div>
     <button class="nav-btn" id="next-btn" onclick="nextPage()">Next →</button>
   </div>
 </main>
@@ -704,8 +738,13 @@ let currentPageNum = 1;
 const totalPages = 8;
 
 function updatePageIndicator() {
+  // Update top page indicator
   document.getElementById('current-page').textContent = currentPageNum;
   document.getElementById('total-pages').textContent = totalPages;
+  
+  // Update navigation page indicator
+  document.getElementById('nav-current-page').textContent = currentPageNum;
+  document.getElementById('nav-total-pages').textContent = totalPages;
 }
 
 function updateNavigationButtons() {
