@@ -152,6 +152,38 @@ service cloud.firestore {
         && newData.createdAt == oldData.createdAt;
     }
     
+    // Communications rules - all authenticated users can read, only admins can write
+    match /communications/{commId} {
+      // Anyone authenticated can read communications
+      allow read: if request.auth != null;
+      
+      // Only admins can create, update, and delete communications
+      allow create, update, delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Communication reads tracking - users can manage their own read status
+    match /communication-reads/{readId} {
+      // Users can read their own read status records
+      allow read: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // Users can create and delete their own read status records
+      allow create, delete: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Communication tasks tracking - users can manage their own task completions
+    match /communication-tasks/{taskId} {
+      // Users can read their own task completion records
+      allow read: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // Users can create and delete their own task completion records
+      allow create, delete: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId;
+    }
+    
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
