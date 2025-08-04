@@ -431,28 +431,44 @@
         padding: 1rem;
         max-width: none;
         min-height: calc(100vh - 140px);
-        background: rgba(255, 255, 255, 0.95) !important;
-        color: #2c3e50 !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
         border-radius: 12px;
         backdrop-filter: blur(10px);
         box-shadow: var(--shadow-light);
         padding-bottom: 6rem;
+        position: relative;
+        overflow: hidden;
       }
       
       .staff-container::before {
-        display: none;
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+        transform: rotate(45deg);
+        animation: shimmer 4s infinite;
+        z-index: 1;
+      }
+      
+      .staff-content {
+        position: relative;
+        z-index: 2;
       }
       
       .staff-title {
         font-size: 1.6rem;
         margin-bottom: 1rem;
         text-align: center;
-        color: #2c3e50 !important;
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        text-shadow: none;
+        color: white !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        background: none !important;
+        -webkit-background-clip: initial !important;
+        -webkit-text-fill-color: initial !important;
+        background-clip: initial !important;
       }
 
       /* Mobile Navigation Header */
@@ -462,24 +478,25 @@
         justify-content: space-between;
         margin-bottom: 1.5rem;
         padding: 0.75rem;
-        background: rgba(102, 126, 234, 0.1);
+        background: rgba(255, 255, 255, 0.15);
         border-radius: 12px;
-        border: 1px solid rgba(102, 126, 234, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
       }
 
       .mobile-breadcrumb {
         flex: 1;
         font-size: 0.9rem;
-        color: #667eea;
+        color: white;
         font-weight: 600;
         margin-right: 1rem;
       }
 
       .mobile-back-button {
         flex: 0 0 auto;
-        background: var(--primary-gradient);
+        background: rgba(255, 255, 255, 0.2);
         color: white;
-        border: none;
+        border: 2px solid rgba(255, 255, 255, 0.3);
         padding: 0.6rem 1rem;
         border-radius: 8px;
         font-size: 0.85rem;
@@ -489,18 +506,23 @@
         align-items: center;
         gap: 0.4rem;
         transition: all 0.3s;
+        backdrop-filter: blur(10px);
       }
 
       .mobile-back-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
         transform: translateY(-1px);
         box-shadow: var(--shadow-light);
       }
 
       .mobile-back-button:disabled {
-        background: #6c757d;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
         cursor: not-allowed;
         transform: none;
         box-shadow: none;
+        opacity: 0.6;
       }
 
       /* Hide desktop hierarchy completely */
@@ -528,11 +550,12 @@
       .mobile-staff-card {
         padding: 1.25rem;
         border-radius: 12px;
-        background: white;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
         box-shadow: var(--shadow-light);
         transition: all 0.3s;
         cursor: pointer;
-        border: 2px solid transparent;
         display: flex;
         align-items: center;
         gap: 1rem;
@@ -540,9 +563,10 @@
       }
       
       .mobile-staff-card:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
         box-shadow: var(--shadow-medium);
         transform: translateY(-2px);
-        border-color: rgba(102, 126, 234, 0.3);
       }
 
       .mobile-staff-card.has-team::after {
@@ -552,8 +576,9 @@
         top: 50%;
         transform: translateY(-50%);
         font-size: 1.5rem;
-        color: #667eea;
+        color: white;
         font-weight: bold;
+        opacity: 0.8;
       }
 
       .mobile-staff-photo {
@@ -562,10 +587,10 @@
         border-radius: 50%;
         object-fit: cover;
         object-position: center top;
-        border: 3px solid rgba(102, 126, 234, 0.2);
+        border: 3px solid rgba(255, 255, 255, 0.3);
         background: white;
         flex-shrink: 0;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       }
 
       .mobile-staff-info {
@@ -576,15 +601,18 @@
 
       .mobile-staff-name {
         font-size: 1.1rem;
-        color: #2c3e50;
+        color: white;
         font-weight: 600;
         margin-bottom: 0.25rem;
         line-height: 1.3;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
 
       .mobile-staff-title {
         font-size: 0.9rem;
-        color: #6c757d;
+        color: rgba(255, 255, 255, 0.9);
         margin-bottom: 0.5rem;
         font-weight: 500;
         line-height: 1.3;
@@ -592,12 +620,41 @@
 
       .mobile-team-count {
         font-size: 0.8rem;
-        color: #667eea;
+        color: white;
         font-weight: 600;
-        background: rgba(102, 126, 234, 0.1);
+        background: rgba(255, 255, 255, 0.2);
         padding: 0.2rem 0.5rem;
         border-radius: 12px;
         display: inline-block;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .mobile-copy-email {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        cursor: pointer;
+        transition: opacity 0.3s ease;
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.2rem 0.4rem;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
+      }
+      
+      .mobile-copy-email:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+      
+      .mobile-copy-success {
+        color: #4ade80 !important;
+        font-weight: bold;
       }
 
       /* Section Headers */
@@ -637,9 +694,9 @@
         flex: 1;
         max-width: 150px;
         padding: 0.75rem 1rem;
-        background: var(--primary-gradient);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        border: none;
+        border: 2px solid rgba(255, 255, 255, 0.2);
         border-radius: 8px;
         font-size: 0.9rem;
         font-weight: 600;
@@ -650,11 +707,13 @@
         justify-content: center;
         gap: 0.5rem;
         white-space: nowrap;
+        backdrop-filter: blur(10px);
       }
 
       .mobile-nav-btn:hover {
         transform: translateY(-1px);
         box-shadow: var(--shadow-light);
+        border-color: rgba(255, 255, 255, 0.4);
       }
 
       /* Loading and Error States */
@@ -1968,6 +2027,7 @@ function buildMobileStaffData() {
           name: 'Gary Turpin',
           title: 'Head of Operations',
           photo: 'staff/Gary Turpin - Head of Operations Updated.jpg',
+          email: 'gturpin@washingtongreen.co.uk',
           hasTeam: true
         },
         {
@@ -1975,6 +2035,7 @@ function buildMobileStaffData() {
           name: 'Matt King',
           title: 'Head Of Inventory',
           photo: 'staff/Matt King - Head Of Inventory.jpg',
+          email: 'mking@castlefineart.com',
           hasTeam: true
         }
       ]
@@ -1987,6 +2048,7 @@ function buildMobileStaffData() {
           name: 'Martin Harrison',
           title: 'Head of Manufacturing and QC',
           photo: 'staff/Martin Harrison - Head of Manufacturing and QC.jpg',
+          email: 'mharrison@washingtongreen.co.uk',
           hasTeam: true
         },
         {
@@ -1994,6 +2056,7 @@ function buildMobileStaffData() {
           name: 'Paul Chapman',
           title: 'Client Order Fulfilment Team Manager',
           photo: 'staff/Order Processing/Chappie.jpg',
+          email: 'pchapman@washingtongreen.co.uk',
           hasTeam: true
         },
         {
@@ -2001,6 +2064,7 @@ function buildMobileStaffData() {
           name: 'Stuart Whitehouse',
           title: 'Logistics Manager',
           photo: 'staff/Stuart Whitehouse - Logistics Manager.jpg',
+          email: 'swhitehouse@washingtongreen.co.uk',
           hasTeam: true
         }
       ]
@@ -2013,6 +2077,7 @@ function buildMobileStaffData() {
           name: 'Martin Sumner',
           title: 'Head Of Stock Control',
           photo: 'staff/Martin Sumner - Head Of Stock Control.jpg',
+          email: 'msumner@washingtongreen.co.uk',
           hasTeam: true
         },
         {
@@ -2020,6 +2085,7 @@ function buildMobileStaffData() {
           name: 'Raksha Hercombe',
           title: 'Halcyon Support Manager',
           photo: 'staff/Raksha Hercombe - Halcyon Support Manager.jpg',
+          email: 'rhercombe@washingtongreen.co.uk',
           hasTeam: false
         },
         {
@@ -2027,6 +2093,7 @@ function buildMobileStaffData() {
           name: 'Alexandra Bradley',
           title: 'Originals Admin',
           photo: 'staff/Alexandra Bradley - Originals Admin.jpg',
+          email: 'abradley@washingtongreen.co.uk',
           hasTeam: false
         }
       ]
@@ -2039,6 +2106,7 @@ function buildMobileStaffData() {
           name: 'Jenny Peet',
           title: 'Senior Client Order Fulfilment Coordinator',
           photo: 'staff/Order Processing/Jenny.jpg',
+          email: 'jpeet@washingtongreen.co.uk',
           hasTeam: false
         },
         {
@@ -2046,6 +2114,7 @@ function buildMobileStaffData() {
           name: 'Gerald Hooper',
           title: 'Senior Client Order Fulfilment Coordinator',
           photo: 'staff/Order Processing/Gerald.jpg',
+          email: 'ghooper@castlegalleries.com',
           hasTeam: false
         },
         {
@@ -2053,6 +2122,7 @@ function buildMobileStaffData() {
           name: 'Katie Lewis',
           title: 'Administration Coordinator',
           photo: 'staff/Order Processing/Katie.jpg',
+          email: 'klewis@castlefineart.com',
           hasTeam: false
         },
         {
@@ -2060,6 +2130,7 @@ function buildMobileStaffData() {
           name: 'Tara Platts',
           title: 'Client Order Fulfilment Coordinator',
           photo: 'staff/Order Processing/Tara.jpg',
+          email: 'tplatts@castlefineart.com',
           hasTeam: false
         },
         {
@@ -2067,6 +2138,7 @@ function buildMobileStaffData() {
           name: 'Phillippa Beevor-Reid',
           title: 'Client Order Fulfilment Coordinator',
           photo: 'staff/Order Processing/Pip.jpg',
+          email: 'pbeevor-reid@castlefineart.com',
           hasTeam: false
         },
         {
@@ -2074,6 +2146,7 @@ function buildMobileStaffData() {
           name: 'Amelia Rush',
           title: 'Client Order Fulfilment Coordinator',
           photo: 'staff/Order Processing/Amelia.jpg',
+          email: 'arush@castlefineart.com',
           hasTeam: false
         }
       ]
@@ -2086,6 +2159,7 @@ function buildMobileStaffData() {
           name: 'Nathan Smethurst',
           title: 'Shipping Supervisor',
           photo: 'staff/Nathan Smethurst - Shipping Supervisor.jpg',
+          email: 'nsmethurst@castlefineart.com',
           hasTeam: false
         },
         {
@@ -2093,6 +2167,7 @@ function buildMobileStaffData() {
           name: 'Olly Clark',
           title: 'Packing Supervisor',
           photo: 'staff/Olly Clark - Packing Supervisor.jpg',
+          email: 'oclark@washingtongreen.co.uk',
           hasTeam: false
         },
         {
@@ -2100,6 +2175,7 @@ function buildMobileStaffData() {
           name: 'Zara Chaudhry',
           title: 'Logistics Admin Assistant',
           photo: 'staff/Zara Chaudhry - Logistics Admin Assistant.jpg',
+          email: 'zchaudhry@washingtongren.co.uk',
           hasTeam: false
         }
       ]
@@ -2112,6 +2188,7 @@ function buildMobileStaffData() {
           name: 'Gary Day',
           title: 'Framing Production Manager',
           photo: 'staff/Gary Day - Framing Production Manager.jpg',
+          email: 'gday@washingtongreen.co.uk',
           hasTeam: true
         },
         {
@@ -2119,6 +2196,7 @@ function buildMobileStaffData() {
           name: 'Tom Harrison',
           title: 'Senior Mounting Operative',
           photo: 'staff/Tom Harrison - Senior Mounting Operative.jpg',
+          email: 'tharrison@castlefineart.com',
           hasTeam: false
         },
         {
@@ -2126,6 +2204,7 @@ function buildMobileStaffData() {
           name: 'Chrissy Hall',
           title: 'Quality Control Supervisor',
           photo: 'staff/Chrissy Hall - Quality Control Supervisor.jpg',
+          email: 'chall@washingtongreen.co.uk',
           hasTeam: false
         }
       ]
@@ -2138,6 +2217,7 @@ function buildMobileStaffData() {
           name: 'Kerry Hinks',
           title: 'Stock Admin Manager',
           photo: 'staff/Kerry Hinks - Stock Admin Manager.jpg',
+          email: 'khinks@washingtongreen.co.uk',
           hasTeam: false
         },
         {
@@ -2145,6 +2225,7 @@ function buildMobileStaffData() {
           name: 'Adam Hercombe',
           title: 'Warehouse Stock Manager',
           photo: 'staff/Adam Hercombe - Warehouse Stock Manager.jpg',
+          email: 'ahercombe@washingtongreen.co.uk',
           hasTeam: false
         }
       ]
@@ -2157,6 +2238,7 @@ function buildMobileStaffData() {
           name: 'Bill Chand',
           title: 'Framing Supervisor',
           photo: 'staff/Bill Chand - Framing Supervisor.jpg',
+          email: null,
           hasTeam: false
         },
         {
@@ -2164,6 +2246,7 @@ function buildMobileStaffData() {
           name: 'Adam Hyde',
           title: 'Framing Supervisor (Cutting Room)',
           photo: 'staff/Adam Hyde - Framing Supervisor (Cutting Room).jpg',
+          email: null,
           hasTeam: false
         }
       ]
@@ -2198,10 +2281,17 @@ function createMobileStaffCard(person) {
   const card = document.createElement('div');
   card.className = `mobile-staff-card ${person.hasTeam ? 'has-team' : ''}`;
   
+  const emailButton = person.email ? 
+    `<span class="mobile-copy-email" onclick="copyEmail('${person.email}', this); event.stopPropagation();" title="Copy email">📋</span>` : 
+    '';
+  
   card.innerHTML = `
     <img src="${person.photo}" alt="${person.name}" class="mobile-staff-photo" />
     <div class="mobile-staff-info">
-      <div class="mobile-staff-name">${person.name}</div>
+      <div class="mobile-staff-name">
+        ${person.name}
+        ${emailButton}
+      </div>
       <div class="mobile-staff-title">${person.title}</div>
       ${person.hasTeam ? '<div class="mobile-team-count">Has team members</div>' : ''}
     </div>
