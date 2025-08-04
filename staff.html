@@ -629,27 +629,13 @@
         border: 1px solid rgba(255, 255, 255, 0.3);
       }
 
-      .mobile-copy-email {
-        font-size: 0.8rem;
-        opacity: 0.8;
+      .mobile-staff-name.clickable {
         cursor: pointer;
         transition: opacity 0.3s ease;
-        color: rgba(255, 255, 255, 0.9);
-        background: rgba(255, 255, 255, 0.1);
-        padding: 0.2rem 0.4rem;
-        border-radius: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 24px;
-        height: 24px;
       }
       
-      .mobile-copy-email:hover {
-        opacity: 1;
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.4);
+      .mobile-staff-name.clickable:hover {
+        opacity: 0.8;
       }
       
       .mobile-copy-success {
@@ -2281,16 +2267,15 @@ function createMobileStaffCard(person) {
   const card = document.createElement('div');
   card.className = `mobile-staff-card ${person.hasTeam ? 'has-team' : ''}`;
   
-  const emailButton = person.email ? 
-    `<span class="mobile-copy-email" onclick="copyEmail('${person.email}', this); event.stopPropagation();" title="Copy email">📋</span>` : 
+  const nameClickHandler = person.email ? 
+    `onclick="copyEmail('${person.email}', this); event.stopPropagation();" class="clickable" title="Click to copy email"` : 
     '';
   
   card.innerHTML = `
     <img src="${person.photo}" alt="${person.name}" class="mobile-staff-photo" />
     <div class="mobile-staff-info">
-      <div class="mobile-staff-name">
+      <div class="mobile-staff-name" ${nameClickHandler}>
         ${person.name}
-        ${emailButton}
       </div>
       <div class="mobile-staff-title">${person.title}</div>
       ${person.hasTeam ? '<div class="mobile-team-count">Has team members</div>' : ''}
