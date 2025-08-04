@@ -1501,6 +1501,70 @@ admin-link {
 }
 
 @media (max-width: 768px) {
+  /* Mobile Sidebar - Make it scrollable and properly sized */
+  .sidebar {
+    width: 280px;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .sidebar nav {
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 2rem;
+  }
+  
+  .sidebar ul {
+    padding: 2rem 0 4rem 0;
+    margin: 0;
+    min-height: calc(100vh - 4rem);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar ul li:last-child {
+    margin-top: auto;
+    margin-bottom: 2rem;
+  }
+  
+  .sidebar ul li a {
+    padding: 1.2rem 1.5rem;
+    margin: 0.25rem 1rem;
+    font-size: 1.1rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .close-btn {
+    position: sticky;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1001;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    margin-left: auto;
+    margin-right: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
   .quick-links {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
