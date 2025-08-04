@@ -15,6 +15,9 @@
   <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <style>
     .admin-container {
       max-width: 1200px;
@@ -397,6 +400,161 @@
       background: #c82333;
     }
 
+    /* Analytics Dashboard Styles */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .analytics-card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .analytics-card:hover {
+      box-shadow: var(--shadow-medium);
+      transform: translateY(-2px);
+    }
+
+    .analytics-card h4 {
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .metric-change {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 12px;
+    }
+
+    .metric-change.positive {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .metric-change.negative {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .metric-change.neutral {
+      background: #e2e3e5;
+      color: #6c757d;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-top: 1rem;
+    }
+
+    .chart-container.large {
+      height: 400px;
+    }
+
+    .analytics-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .analytics-table th,
+    .analytics-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e1e5e9;
+    }
+
+    .analytics-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .analytics-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e1e5e9;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-gradient);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .loading-analytics {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+    }
+
+    .analytics-filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      align-items: center;
+    }
+
+    .date-range-picker {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .date-range-picker input {
+      padding: 0.5rem;
+      border: 1px solid #e1e5e9;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .refresh-button {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+
+    .refresh-button:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-light);
+    }
+
     .status-badge {
       padding: 0.3rem 0.8rem;
       border-radius: 15px;
@@ -576,16 +734,19 @@
     <div class="tab-content" id="analytics-tab">
       <div class="form-section">
         <h3>📊 Communications Analytics</h3>
-        <p>Analytics dashboard coming soon...</p>
-        <div id="analytics-content">
-          <div style="text-align: center; padding: 3rem; color: #6c757d;">
-            📈 Analytics features will include:<br><br>
-            • Read rates per communication<br>
-            • Task completion statistics<br>
-            • Document download tracking<br>
-            • User engagement metrics<br>
-            • PowerBI interaction data
+        
+        <div class="analytics-filters">
+          <div class="date-range-picker">
+            <label>From:</label>
+            <input type="date" id="analytics-start-date">
+            <label>To:</label>
+            <input type="date" id="analytics-end-date">
           </div>
+          <button class="refresh-button" onclick="refreshAnalytics()">🔄 Refresh Data</button>
+        </div>
+
+        <div id="analytics-content">
+          <div class="loading-analytics">Loading analytics data...</div>
         </div>
       </div>
     </div>
@@ -682,8 +843,489 @@ function setupTabs() {
       // Load data for specific tabs
       if (targetTab === 'manage') {
         loadCommunications();
+      } else if (targetTab === 'analytics') {
+        loadAnalytics();
       }
     });
+  });
+}
+
+// Analytics Functions
+let analyticsCharts = {};
+let analyticsData = {};
+
+// Load analytics dashboard
+async function loadAnalytics() {
+  const analyticsContent = document.getElementById('analytics-content');
+  
+  try {
+    // Set default date range (last 30 days)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    
+    document.getElementById('analytics-start-date').value = startDate.toISOString().split('T')[0];
+    document.getElementById('analytics-end-date').value = endDate.toISOString().split('T')[0];
+    
+    await refreshAnalytics();
+  } catch (error) {
+    console.error('Error loading analytics:', error);
+    analyticsContent.innerHTML = '<div class="error">Failed to load analytics data.</div>';
+  }
+}
+
+// Refresh analytics data
+async function refreshAnalytics() {
+  const analyticsContent = document.getElementById('analytics-content');
+  analyticsContent.innerHTML = '<div class="loading-analytics">Loading analytics data...</div>';
+  
+  try {
+    const startDate = new Date(document.getElementById('analytics-start-date').value);
+    const endDate = new Date(document.getElementById('analytics-end-date').value);
+    endDate.setHours(23, 59, 59, 999); // End of day
+    
+    // Fetch all analytics data
+    const [
+      communicationsData,
+      readsData,
+      tasksData
+    ] = await Promise.all([
+      getCommunicationsAnalytics(startDate, endDate),
+      getReadsAnalytics(startDate, endDate),
+      getTasksAnalytics(startDate, endDate)
+    ]);
+    
+    analyticsData = {
+      communications: communicationsData,
+      reads: readsData,
+      tasks: tasksData,
+      dateRange: { startDate, endDate }
+    };
+    
+    renderAnalyticsDashboard();
+    
+  } catch (error) {
+    console.error('Error refreshing analytics:', error);
+    analyticsContent.innerHTML = '<div class="error">Failed to refresh analytics data.</div>';
+  }
+}
+
+// Get communications analytics
+async function getCommunicationsAnalytics(startDate, endDate) {
+  const snapshot = await db.collection('communications')
+    .where('createdAt', '>=', startDate)
+    .where('createdAt', '<=', endDate)
+    .orderBy('createdAt', 'desc')
+    .get();
+  
+  const communications = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+    createdAt: doc.data().createdAt?.toDate() || new Date()
+  }));
+  
+  return {
+    total: communications.length,
+    published: communications.filter(c => c.status === 'published').length,
+    drafts: communications.filter(c => c.status === 'draft').length,
+    urgent: communications.filter(c => c.urgent).length,
+    withDocuments: communications.filter(c => c.documents && c.documents.length > 0).length,
+    withPowerBI: communications.filter(c => c.powerbi && c.powerbi.length > 0).length,
+    withTasks: communications.filter(c => c.tasks && c.tasks.length > 0).length,
+    communications: communications
+  };
+}
+
+// Get reads analytics
+async function getReadsAnalytics(startDate, endDate) {
+  const snapshot = await db.collection('communication-reads')
+    .where('readAt', '>=', startDate)
+    .where('readAt', '<=', endDate)
+    .get();
+  
+  const reads = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+    readAt: doc.data().readAt?.toDate() || new Date()
+  }));
+  
+  // Group by communication
+  const readsByComm = {};
+  reads.forEach(read => {
+    if (!readsByComm[read.communicationId]) {
+      readsByComm[read.communicationId] = [];
+    }
+    readsByComm[read.communicationId].push(read);
+  });
+  
+  return {
+    totalReads: reads.length,
+    uniqueReaders: new Set(reads.map(r => r.userId)).size,
+    readsByComm: readsByComm,
+    reads: reads
+  };
+}
+
+// Get tasks analytics
+async function getTasksAnalytics(startDate, endDate) {
+  const snapshot = await db.collection('communication-tasks')
+    .where('completedAt', '>=', startDate)
+    .where('completedAt', '<=', endDate)
+    .get();
+  
+  const tasks = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+    completedAt: doc.data().completedAt?.toDate() || new Date()
+  }));
+  
+  // Group by communication
+  const tasksByComm = {};
+  tasks.forEach(task => {
+    if (!tasksByComm[task.communicationId]) {
+      tasksByComm[task.communicationId] = [];
+    }
+    tasksByComm[task.communicationId].push(task);
+  });
+  
+  return {
+    totalCompletions: tasks.length,
+    uniqueUsers: new Set(tasks.map(t => t.userId)).size,
+    tasksByComm: tasksByComm,
+    tasks: tasks
+  };
+}
+
+// Render analytics dashboard
+function renderAnalyticsDashboard() {
+  const analyticsContent = document.getElementById('analytics-content');
+  
+  const dashboardHTML = `
+    <!-- Key Metrics -->
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <h4>📢 Total Communications</h4>
+        <div class="metric-value">${analyticsData.communications.total}</div>
+        <div class="metric-label">Published: ${analyticsData.communications.published} | Drafts: ${analyticsData.communications.drafts}</div>
+        <div class="metric-change ${analyticsData.communications.urgent > 0 ? 'negative' : 'neutral'}">
+          ${analyticsData.communications.urgent} urgent communications
+        </div>
+      </div>
+      
+      <div class="analytics-card">
+        <h4>👀 Total Reads</h4>
+        <div class="metric-value">${analyticsData.reads.totalReads}</div>
+        <div class="metric-label">Unique readers: ${analyticsData.reads.uniqueReaders}</div>
+        <div class="metric-change neutral">
+          Avg: ${analyticsData.communications.published > 0 ? Math.round(analyticsData.reads.totalReads / analyticsData.communications.published * 10) / 10 : 0} reads per communication
+        </div>
+      </div>
+      
+      <div class="analytics-card">
+        <h4>✅ Task Completions</h4>
+        <div class="metric-value">${analyticsData.tasks.totalCompletions}</div>
+        <div class="metric-label">Unique users: ${analyticsData.tasks.uniqueUsers}</div>
+        <div class="metric-change positive">
+          ${analyticsData.communications.withTasks > 0 ? Math.round(analyticsData.tasks.totalCompletions / analyticsData.communications.withTasks * 10) / 10 : 0} avg completions per task communication
+        </div>
+      </div>
+      
+      <div class="analytics-card">
+        <h4>📊 Content Types</h4>
+        <div class="metric-value">${analyticsData.communications.withDocuments + analyticsData.communications.withPowerBI}</div>
+        <div class="metric-label">Communications with attachments</div>
+        <div class="metric-change neutral">
+          📎 ${analyticsData.communications.withDocuments} docs | 📊 ${analyticsData.communications.withPowerBI} PowerBI
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <h4>📈 Communications Over Time</h4>
+        <div class="chart-container">
+          <canvas id="communications-timeline-chart"></canvas>
+        </div>
+      </div>
+      
+      <div class="analytics-card">
+        <h4>📊 Content Distribution</h4>
+        <div class="chart-container">
+          <canvas id="content-distribution-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <h4>👀 Read Rates Over Time</h4>
+        <div class="chart-container">
+          <canvas id="read-rates-chart"></canvas>
+        </div>
+      </div>
+      
+      <div class="analytics-card">
+        <h4>✅ Task Completion Rates</h4>
+        <div class="chart-container">
+          <canvas id="task-completion-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Tables -->
+    <div class="analytics-card" style="grid-column: 1 / -1;">
+      <h4>📋 Communication Performance</h4>
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th>Communication</th>
+            <th>Published</th>
+            <th>Reads</th>
+            <th>Read Rate</th>
+            <th>Tasks</th>
+            <th>Task Completion</th>
+            <th>Content</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${renderCommunicationPerformanceTable()}
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  analyticsContent.innerHTML = dashboardHTML;
+  
+  // Render charts after DOM is updated
+  setTimeout(() => {
+    createTimelineChart();
+    createContentDistributionChart();
+    createReadRatesChart();
+    createTaskCompletionChart();
+  }, 100);
+}
+
+// Render communication performance table
+function renderCommunicationPerformanceTable() {
+  return analyticsData.communications.communications
+    .filter(comm => comm.status === 'published')
+    .map(comm => {
+      const reads = analyticsData.reads.readsByComm[comm.id] || [];
+      const tasks = analyticsData.tasks.tasksByComm[comm.id] || [];
+      const totalUsers = new Set([...reads.map(r => r.userId), ...tasks.map(t => t.userId)]).size;
+      const readRate = totalUsers > 0 ? Math.round(reads.length / totalUsers * 100 * 10) / 10 : 0;
+      
+      const contentBadges = [];
+      if (comm.documents && comm.documents.length > 0) contentBadges.push('📎 Docs');
+      if (comm.powerbi && comm.powerbi.length > 0) contentBadges.push('📊 PowerBI');
+      if (comm.tasks && comm.tasks.length > 0) contentBadges.push('✅ Tasks');
+      
+      return `
+        <tr>
+          <td>
+            <strong>${comm.title}</strong>
+            ${comm.urgent ? '<span style="color: #dc3545;">🚨</span>' : ''}
+          </td>
+          <td>${comm.createdAt.toLocaleDateString()}</td>
+          <td>${reads.length}</td>
+          <td>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${Math.min(readRate, 100)}%"></div>
+            </div>
+            ${readRate}%
+          </td>
+          <td>${comm.tasks ? comm.tasks.length : 0}</td>
+          <td>${tasks.length}</td>
+          <td>${contentBadges.join(' ')}</td>
+        </tr>
+      `;
+    }).join('');
+}
+
+// Create timeline chart
+function createTimelineChart() {
+  const ctx = document.getElementById('communications-timeline-chart');
+  if (!ctx) return;
+  
+  // Group communications by day
+  const dailyData = {};
+  analyticsData.communications.communications.forEach(comm => {
+    const day = comm.createdAt.toISOString().split('T')[0];
+    dailyData[day] = (dailyData[day] || 0) + 1;
+  });
+  
+  const labels = Object.keys(dailyData).sort();
+  const data = labels.map(label => dailyData[label]);
+  
+  if (analyticsCharts.timeline) analyticsCharts.timeline.destroy();
+  
+  analyticsCharts.timeline = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.map(date => new Date(date).toLocaleDateString()),
+      datasets: [{
+        label: 'Communications Published',
+        data: data,
+        borderColor: '#667eea',
+        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      }
+    }
+  });
+}
+
+// Create content distribution chart
+function createContentDistributionChart() {
+  const ctx = document.getElementById('content-distribution-chart');
+  if (!ctx) return;
+  
+  const data = [
+    analyticsData.communications.withDocuments,
+    analyticsData.communications.withPowerBI,
+    analyticsData.communications.withTasks,
+    analyticsData.communications.total - analyticsData.communications.withDocuments - analyticsData.communications.withPowerBI - analyticsData.communications.withTasks
+  ];
+  
+  if (analyticsCharts.distribution) analyticsCharts.distribution.destroy();
+  
+  analyticsCharts.distribution = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['With Documents', 'With PowerBI', 'With Tasks', 'Text Only'],
+      datasets: [{
+        data: data,
+        backgroundColor: [
+          '#36a2eb',
+          '#ff6384',
+          '#4bc0c0',
+          '#e1e5e9'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+}
+
+// Create read rates chart
+function createReadRatesChart() {
+  const ctx = document.getElementById('read-rates-chart');
+  if (!ctx) return;
+  
+  // Group reads by day
+  const dailyReads = {};
+  analyticsData.reads.reads.forEach(read => {
+    const day = read.readAt.toISOString().split('T')[0];
+    dailyReads[day] = (dailyReads[day] || 0) + 1;
+  });
+  
+  const labels = Object.keys(dailyReads).sort();
+  const data = labels.map(label => dailyReads[label]);
+  
+  if (analyticsCharts.reads) analyticsCharts.reads.destroy();
+  
+  analyticsCharts.reads = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels.map(date => new Date(date).toLocaleDateString()),
+      datasets: [{
+        label: 'Daily Reads',
+        data: data,
+        backgroundColor: '#28a745',
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      }
+    }
+  });
+}
+
+// Create task completion chart
+function createTaskCompletionChart() {
+  const ctx = document.getElementById('task-completion-chart');
+  if (!ctx) return;
+  
+  // Group task completions by day
+  const dailyCompletions = {};
+  analyticsData.tasks.tasks.forEach(task => {
+    const day = task.completedAt.toISOString().split('T')[0];
+    dailyCompletions[day] = (dailyCompletions[day] || 0) + 1;
+  });
+  
+  const labels = Object.keys(dailyCompletions).sort();
+  const data = labels.map(label => dailyCompletions[label]);
+  
+  if (analyticsCharts.tasks) analyticsCharts.tasks.destroy();
+  
+  analyticsCharts.tasks = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels.map(date => new Date(date).toLocaleDateString()),
+      datasets: [{
+        label: 'Task Completions',
+        data: data,
+        backgroundColor: '#ffc107',
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      }
+    }
   });
 }
 
