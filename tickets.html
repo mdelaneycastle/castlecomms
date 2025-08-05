@@ -1332,7 +1332,7 @@
       
       <!-- Transfer Ticket Section -->
       <div class="ticket-transfer-section">
-        <h4>🔄 Request Ticket Transfer</h4>
+        <h4>🔄 Transfer Ticket</h4>
         <div class="transfer-form">
           <div class="transfer-user-search">
             <label for="transfer-user-input">Transfer to:</label>
@@ -1349,7 +1349,7 @@
           </div>
           
           <button onclick="transferTicket()" id="transfer-ticket-btn" class="transfer-button">
-            📝 Submit Transfer Request
+            🔄 Transfer Ticket
           </button>
         </div>
       </div>
@@ -2197,7 +2197,7 @@ async function transferTicket() {
   
   const transferBtn = document.getElementById('transfer-ticket-btn');
   transferBtn.disabled = true;
-  transferBtn.textContent = 'Submitting Request...';
+  transferBtn.textContent = 'Transferring...';
   
   try {
     // Get current user's display name
@@ -2212,34 +2212,36 @@ async function transferTicket() {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
-    // For now, we'll add a transfer request message instead of directly updating
-    // This works around Firestore security rules that may prevent direct updates
+    // Create a batch write to update both the assignment and add a message
+    const batch = db.batch();
+    const ticketRef = db.collection('tickets').doc(currentTicket.id);
     
-    const transferRequestMessage = {
-      message: `🔄 TRANSFER REQUEST: ${transferredByName} requests to transfer this ticket from ${currentTicket.assignedTo.name} to ${transferSelectedUser.name}.\n\nReason: ${reason}\n\n⚠️ This is a transfer request. The ticket assignment has not been changed yet. An admin or the original assignee should manually update the assignment if approved.`,
-      senderEmail: currentUser.email,
-      senderName: transferredByName,
-      timestamp: new Date(),
-      isTransferRequest: true,
-      transferDetails: {
-        fromUser: currentTicket.assignedTo,
-        toUser: transferSelectedUser,
-        reason: reason,
-        requestedBy: {
-          email: currentUser.email,
-          name: transferredByName
-        }
-      }
+    // Update the ticket assignment
+    batch.update(ticketRef, updateData);
+    
+    // Add transfer confirmation message
+    const transferMessage = {
+      message: `Ticket transferred from ${currentTicket.assignedTo.name} to ${transferSelectedUser.name} by ${transferredByName}. Reason: ${reason}`,
+      senderEmail: 'system',
+      senderName: 'System',
+      timestamp: new Date()
     };
     
-    // Add the transfer request message
-    await db.collection('tickets').doc(currentTicket.id).update({
-      messages: firebase.firestore.FieldValue.arrayUnion(transferRequestMessage),
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    batch.update(ticketRef, {
+      messages: firebase.firestore.FieldValue.arrayUnion(transferMessage)
     });
     
-    // Don't update the ticket object since we're just making a request
-    // The actual assignment will need to be done manually by an admin
+    // Execute the batch
+    await batch.commit();
+    
+    // Update current ticket object
+    currentTicket.assignedTo = {
+      email: transferSelectedUser.email,
+      name: transferSelectedUser.name
+    };
+    
+    // Update modal display
+    document.getElementById('modal-ticket-assignee').textContent = `Assigned to: ${transferSelectedUser.name}`;
     
     // Clear transfer form
     transferSelectedUser = null;
@@ -2247,10 +2249,11 @@ async function transferTicket() {
     document.getElementById('transfer-selected-user').innerHTML = '';
     document.getElementById('transfer-reason-input').value = '';
     
-    // Reload messages to show the transfer request
+    // Reload tickets list and messages
+    loadTickets();
     await loadTicketMessages(currentTicket.id);
     
-    alert('Transfer request submitted successfully! The ticket assignment will need to be manually updated by an admin or the current assignee.');
+    alert('Ticket transferred successfully!');
     
   } catch (error) {
     console.error('Error transferring ticket:', error);
@@ -2266,7 +2269,7 @@ async function transferTicket() {
   }
   
   transferBtn.disabled = false;
-  transferBtn.textContent = '📝 Submit Transfer Request';
+  transferBtn.textContent = '🔄 Transfer Ticket';
 }
 </script>
 
