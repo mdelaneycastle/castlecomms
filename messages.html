@@ -834,34 +834,53 @@ async function initializeChat() {
   }
 }
 
-// Load all users for autocomplete from Firebase Authentication
+// Load all users for autocomplete using the same method as tickets page
 async function loadAllUsers() {
   try {
-    // Unfortunately, Firebase Auth doesn't allow client-side listing of all users for security reasons
-    // We need to use a different approach - check if there's a Cloud Function or API endpoint
-    
-    // For now, let's try to get users from a potential users collection in Firestore
-    // that might mirror the Authentication users
-    const usersSnapshot = await db.collection('users').get();
-    
-    if (!usersSnapshot.empty) {
-      allUsers = usersSnapshot.docs.map(doc => {
-        const userData = doc.data();
-        return {
-          uid: doc.id,
-          email: userData.email,
-          name: userData.displayName || userData.name || extractNameFromEmail(userData.email || '')
-        };
-      }).filter(user => 
-        user.email && 
-        user.email.includes('@') && 
-        user.email !== currentUser.email // Remove current user from list
-      );
-      
-      console.log(`Loaded ${allUsers.length} users from Firestore users collection`);
-    } else {
-      // Fallback: If no Firestore users collection, try Realtime Database
-      console.log('No Firestore users collection found, trying Realtime Database...');
+    // Try to get users from the listUsers function (same as tickets page)
+    if (typeof listUsers === 'function') {
+      try {
+        const users = await listUsers();
+        allUsers = users.map(user => ({
+          email: user.email,
+          name: user.displayName || extractNameFromEmail(user.email),
+          uid: user.uid
+        })).filter(user => 
+          user.email && 
+          user.email !== currentUser.email // Remove current user from list
+        );
+        console.log(`Loaded ${allUsers.length} users from Cloud Function (Firebase Auth)`);
+        return;
+      } catch (error) {
+        console.log('Cloud Function not available, trying fallbacks...', error);
+      }
+    }
+
+    // Fallback 1: Try Firestore users collection
+    try {
+      const usersSnapshot = await db.collection('users').get();
+      if (!usersSnapshot.empty) {
+        allUsers = usersSnapshot.docs.map(doc => {
+          const userData = doc.data();
+          return {
+            uid: doc.id,
+            email: userData.email,
+            name: userData.displayName || userData.name || extractNameFromEmail(userData.email || '')
+          };
+        }).filter(user => 
+          user.email && 
+          user.email.includes('@') && 
+          user.email !== currentUser.email
+        );
+        console.log(`Loaded ${allUsers.length} users from Firestore users collection`);
+        return;
+      }
+    } catch (firestoreError) {
+      console.log('Firestore users collection not accessible, trying Realtime Database...');
+    }
+
+    // Fallback 2: Try Realtime Database
+    try {
       const realtimeDb = firebase.database();
       const usersSnapshot = await realtimeDb.ref('users').once('value');
       const usersData = usersSnapshot.val() || {};
@@ -876,20 +895,20 @@ async function loadAllUsers() {
       }).filter(user => 
         user.email && 
         user.email.includes('@') && 
-        user.email !== currentUser.email // Remove current user from list
+        user.email !== currentUser.email
       );
-      
-      console.log(`Loaded ${allUsers.length} users from Realtime Database fallback`);
+      console.log(`Loaded ${allUsers.length} users from Realtime Database`);
+      return;
+    } catch (realtimeError) {
+      console.log('Realtime Database not accessible');
     }
     
-    // If still no users found, log warning but continue
-    if (allUsers.length === 0) {
-      console.warn('No other users found in any database - user can only create chats with themselves');
-    }
+    // If all methods fail, empty array
+    console.warn('No users found from any source - user can only create chats with themselves');
+    allUsers = [];
     
   } catch (error) {
     console.error('Error loading users:', error);
-    // On error, empty list - user can still use chat but can't add others
     allUsers = [];
   }
 }
