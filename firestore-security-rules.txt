@@ -168,6 +168,22 @@ service cloud.firestore {
         && request.auth.token.email == resource.data.userEmail;
     }
     
+    // User reports rules - for PowerBI reports page
+    match /user-reports/{userId} {
+      // Users can read their own reports
+      allow read: if request.auth != null 
+        && request.auth.uid == userId;
+      
+      // Users can create/update their own reports collection
+      allow create, update: if request.auth != null 
+        && request.auth.uid == userId
+        && validateUserReports(request.resource.data);
+      
+      // Users can delete their own reports
+      allow delete: if request.auth != null 
+        && request.auth.uid == userId;
+    }
+    
     // Helper function to validate recognition note data
     function validateRecognitionNote(data) {
       return data.keys().hasAll(['content', 'author', 'timestamp'])
@@ -303,6 +319,12 @@ service cloud.firestore {
         && newData.timestamp == oldData.timestamp;
     }
     
+    // Helper function to validate user reports data
+    function validateUserReports(data) {
+      return data.keys().hasAll(['reports'])
+        && data.reports is list;
+    }
+    
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
@@ -315,9 +337,11 @@ service cloud.firestore {
 // 2. Replace the existing rules with the rules above
 // 3. Click "Publish" to apply the changes
 //
-// Key changes for chat enhancements:
+// Key changes for chat enhancements and reports:
 // - Added support for typing indicators with chat-typing collection
 // - Enhanced chat-messages rules to allow read receipt updates
+// - Added user-reports collection rules for PowerBI reports page
 // - Added onlyUpdatingReadBy helper function for read receipt validation
-// - Users can now mark messages as read and see typing indicators
+// - Added validateUserReports helper function for reports validation
+// - Users can now mark messages as read, see typing indicators, and manage personal reports
 // - Keeps all existing functionality for recognition board, messages, communications, tickets, etc.
