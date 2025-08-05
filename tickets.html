@@ -151,15 +151,16 @@
       justify-content: center;
       margin-top: 2rem;
       width: 100%;
-      min-width: 900px;
       overflow-x: auto;
     }
 
     .monday-iframe-container iframe {
-      width: 900px;
-      min-width: 900px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
       height: 1200px;
       border-radius: 10px;
+      box-sizing: border-box;
     }
 
     /* View Tickets Section */
@@ -812,8 +813,6 @@
 
       .monday-iframe-container iframe {
         width: 100%;
-        min-width: 350px;
-        max-width: 400px;
         height: 900px;
       }
 
