@@ -323,11 +323,14 @@
       background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
     }
 
-    /* Hide main header and sidebar when viewing reports */
-    body.viewing-reports header,
-    body.viewing-reports #sidebar-container,
-    body.viewing-reports .hamburger {
+    /* Hide main header when viewing reports but keep sidebar accessible */
+    body.viewing-reports header {
       display: none !important;
+    }
+
+    /* Adjust reports container to account for sidebar */
+    body.viewing-reports .reports-container {
+      padding-left: 0;
     }
 
     /* Back to selector button */
@@ -442,6 +445,10 @@
       
       <div class="reports-content" id="reports-content" style="display: none;">
         <div class="report-navigation">
+          <button class="nav-btn hamburger-btn" onclick="toggleSidebar()" title="Menu">
+            <span>☰</span>
+          </button>
+          
           <button class="nav-btn prev-btn" onclick="switchReport('prev')" title="Previous Report">
             <span>‹</span>
           </button>
@@ -745,6 +752,14 @@
       document.getElementById('reports-content').style.display = 'none';
       document.getElementById('report-selector-section').style.display = 'block';
       document.body.classList.remove('viewing-reports');
+    }
+
+    // Toggle sidebar function
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('open');
+      }
     }
 
     // Load saved selection from localStorage
