@@ -184,6 +184,20 @@ service cloud.firestore {
         && request.auth.uid == userId;
     }
     
+    // Users collection rules - for authentication user data
+    match /users/{userId} {
+      // All authenticated users can read user profiles (needed for chat participant selection)
+      allow read: if request.auth != null;
+      
+      // Users can create/update their own profile
+      allow create, update: if request.auth != null 
+        && request.auth.uid == userId;
+      
+      // Only admins can delete user profiles
+      allow delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
     // Helper function to validate recognition note data
     function validateRecognitionNote(data) {
       return data.keys().hasAll(['content', 'author', 'timestamp'])
