@@ -14,19 +14,26 @@
     .reports-container {
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 120px);
+      height: calc(100vh - 80px);
+      width: 100%;
+      max-width: 100%;
       margin: 0;
       padding: 0;
-      position: relative;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-medium);
+      backdrop-filter: blur(10px);
+      box-sizing: border-box;
     }
 
     .reports-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 1.5rem 2rem;
+      padding: 0.75rem 2rem;
       text-align: center;
       box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
       flex-shrink: 0;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
 
     .reports-title {
@@ -53,40 +60,103 @@
       position: relative;
     }
 
-    .powerbi-iframe {
+    .report-navigation {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      flex-shrink: 0;
+      min-height: 50px;
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .nav-btn:active {
+      transform: translateY(0);
+    }
+
+    .report-info {
+      text-align: center;
+      flex: 1;
+      margin: 0 2rem;
+    }
+
+    .report-info h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.3rem;
+      color: #2c3e50;
+      font-weight: 600;
+    }
+
+    .report-indicators {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .report-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #cbd5e0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .report-indicator.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transform: scale(1.2);
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+
+    .report-indicator:hover:not(.active) {
+      background: #a0aec0;
+      transform: scale(1.1);
+    }
+
+    .report-container {
+      flex: 1;
+      display: flex;
+      background: white;
+      position: relative;
+      overflow: hidden;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
+      min-height: calc(100vh - 200px);
+    }
+
+    .report-container iframe {
       width: 100%;
       height: 100%;
+      min-height: calc(100vh - 200px);
       border: none;
       background: white;
-      box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
     }
 
-    .loading-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      color: #6c757d;
-      font-size: 1.2rem;
-      z-index: 1;
-    }
-
-    .loading-spinner {
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
 
     @keyframes fadeInDown {
       from { opacity: 0; transform: translateY(-30px); }
@@ -98,14 +168,190 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Report Selector Styles */
+    .report-selector-section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .selector-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .selector-header h3 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .refresh-reports-btn {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .refresh-reports-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .loading-message {
+      text-align: center;
+      padding: 2rem;
+      color: #667eea;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .reports-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .report-card {
+      background: white;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .report-card:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+    }
+
+    .report-card.selected {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    .report-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .report-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #667eea;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .report-checkbox.checked {
+      background: #667eea;
+      color: white;
+    }
+
+    .report-card-title {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+      flex: 1;
+      margin-right: 1rem;
+    }
+
+    .report-card-info {
+      color: #6c757d;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .selector-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .selector-actions button {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1rem;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .selector-actions button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .clear-all-btn {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    }
+
+    .select-all-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    }
+
+    /* Back to selector button */
+    .back-to-selector-btn {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-left: 1rem;
+    }
+
+    .back-to-selector-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
     /* Mobile Responsive */
     @media (max-width: 768px) {
       .reports-container {
-        height: calc(100vh - 140px);
+        height: calc(100vh - 60px);
+        margin: 0;
       }
       
       .reports-header {
-        padding: 1rem;
+        padding: 0.5rem 1rem;
       }
       
       .reports-title {
@@ -115,250 +361,602 @@
       .reports-subtitle {
         font-size: 0.9rem;
       }
+
+      .report-navigation {
+        padding: 0.5rem;
+        min-height: 40px;
+      }
+
+      .nav-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 1.1rem;
+      }
+
+      .report-info {
+        margin: 0 0.5rem;
+      }
+
+      .report-info h3 {
+        font-size: 1rem;
+      }
+
+      .report-indicator {
+        width: 8px;
+        height: 8px;
+      }
+
+      .back-to-selector-btn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        margin-left: 0.5rem;
+      }
+
+      .report-container {
+        min-height: calc(100vh - 160px);
+      }
+
+      .report-container iframe {
+        min-height: calc(100vh - 160px);
+      }
     }
 
-    /* Power BI embed styling */
-    .powerbi-embed {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-    }
-    
-    .powerbi-info {
-      max-width: 800px;
-      text-align: center;
-    }
-    
-    .powerbi-info h3 {
-      font-size: 2rem;
-      color: #2c3e50;
-      margin-bottom: 1rem;
-    }
-    
-    .powerbi-info p {
-      font-size: 1.1rem;
-      color: #6c757d;
-      margin-bottom: 1.5rem;
-      line-height: 1.6;
-    }
-    
-    .access-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
-      margin-top: 2rem;
-    }
-    
-    .option-card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      transition: all 0.3s ease;
-    }
-    
-    .option-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    }
-    
-    .option-card h4 {
-      font-size: 1.3rem;
-      color: #2c3e50;
-      margin-bottom: 0.5rem;
-    }
-    
-    .option-card p {
-      font-size: 0.95rem;
-      color: #6c757d;
-      margin-bottom: 1.5rem;
-    }
-    
-    .access-btn {
-      display: inline-block;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      margin: 0.25rem;
-    }
-    
-    .access-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .access-btn.primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      font-size: 1.1rem;
-      padding: 1rem 2rem;
-    }
-    
-    .app-links {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    
-    @media (max-width: 768px) {
-      .access-options {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
-      
-      .option-card {
-        padding: 1.5rem;
-      }
-      
-      .powerbi-info h3 {
-        font-size: 1.5rem;
-      }
-      
-      .app-links {
-        flex-direction: column;
-      }
-    }
   </style>
 </head>
 
 <body>
-  <header id="main-header">
-    <h1 class="company-title">Castle Comms</h1>
-    <div class="menu-toggle" onclick="toggleSidebar()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
+  <header>
+    <button id="menu-toggle" class="hamburger">&#9776;</button>
+    <h1>Castle Comms - Reports</h1>
   </header>
 
-  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
-  <div id="sidebar"></div>
+  <div id="sidebar-container"></div>
 
-  <main class="main-content">
+  <main class="main-content" style="max-width: 100%; width: 100%; padding: 0; margin: 0;">
     <div class="reports-container">
       <div class="reports-header">
         <h1 class="reports-title">📊 Reports Dashboard</h1>
         <p class="reports-subtitle">Power BI Analytics & Insights</p>
       </div>
       
-      <div class="reports-content">
-        <div class="loading-message" id="loadingMessage">
-          <div class="loading-spinner"></div>
-          <div>Loading Power BI Dashboard...</div>
+      <!-- Report Selector Section -->
+      <div class="report-selector-section" id="report-selector-section">
+        <div class="selector-header">
+          <h3>📋 Select Reports to View</h3>
+          <button class="refresh-reports-btn" onclick="loadAvailableReports()">🔄 Refresh</button>
         </div>
-        
-        <div class="powerbi-embed" id="powerbiEmbed">
-          <div class="powerbi-info">
-            <h3>Power BI Dashboard Access</h3>
-            <p>Due to security restrictions, Power BI cannot be embedded directly in an iframe.</p>
-            <p>Please use one of the options below to access your reports:</p>
-            
-            <div class="access-options">
-              <div class="option-card">
-                <h4>🌐 Web Browser</h4>
-                <p>Open Power BI in a new tab</p>
-                <a href="https://app.powerbi.com" target="_blank" class="access-btn primary">
-                  Open Power BI →
-                </a>
-              </div>
-              
-              <div class="option-card">
-                <h4>📱 Mobile App</h4>
-                <p>Download the Power BI mobile app</p>
-                <div class="app-links">
-                  <a href="https://apps.apple.com/app/microsoft-power-bi/id929738808" target="_blank" class="access-btn">
-                    📱 iOS App
-                  </a>
-                  <a href="https://play.google.com/store/apps/details?id=com.microsoft.powerbim" target="_blank" class="access-btn">
-                    🤖 Android App
-                  </a>
-                </div>
-              </div>
-              
-              <div class="option-card">
-                <h4>💼 Microsoft Teams</h4>
-                <p>Access through Teams integration</p>
-                <a href="https://teams.microsoft.com" target="_blank" class="access-btn">
-                  Open Teams →
-                </a>
-              </div>
+        <div class="loading-message" id="loading-reports">
+          🔄 Loading your available reports...
+        </div>
+        <div class="reports-grid" id="reports-grid">
+          <!-- Available reports will be populated here -->
+        </div>
+        <div class="selector-actions">
+          <button class="apply-selection-btn" onclick="applyReportSelection()">✅ Apply Selection</button>
+          <button class="select-all-btn" onclick="selectAllReports()">☑️ Select All</button>
+          <button class="clear-all-btn" onclick="clearAllReports()">❌ Clear All</button>
+        </div>
+      </div>
+      
+      <div class="reports-content" id="reports-content" style="display: none;">
+        <div class="report-navigation">
+          <button class="nav-btn prev-btn" onclick="switchReport('prev')" title="Previous Report">
+            <span>‹</span>
+          </button>
+          
+          <div class="report-info">
+            <h3 id="current-report-title">Status Report 1</h3>
+            <div class="report-indicators">
+              <div class="report-indicator active" onclick="switchToReport(0)"></div>
+              <div class="report-indicator" onclick="switchToReport(1)"></div>
+              <div class="report-indicator" onclick="switchToReport(2)"></div>
             </div>
           </div>
+          
+          <button class="nav-btn next-btn" onclick="switchReport('next')" title="Next Report">
+            <span>›</span>
+          </button>
+          
+          <button class="back-to-selector-btn" onclick="backToSelector()" title="Back to Report Selection">
+            ← Back
+          </button>
+        </div>
+        
+        <div class="report-container">
+          <iframe 
+            id="report-iframe"
+            title="Power BI Report" 
+            width="100%" 
+            height="100%" 
+            src="https://app.powerbi.com/reportEmbed?reportId=bae6bdf6-4e60-4ac3-965c-e6c46569e9f5&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a" 
+            frameborder="0" 
+            allowFullScreen="true">
+          </iframe>
         </div>
       </div>
     </div>
   </main>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  
+  <!-- Firebase config -->
+  <script src="firebase-init.js"></script>
+  
+  <!-- Power BI JavaScript SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.min.js"></script>
+  
+  <!-- Azure AD Authentication -->
+  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+  
+  <!-- Backup MSAL from CDN -->
   <script>
-    // Load sidebar functionality without Firebase
-    function loadSidebar() {
-      fetch('sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('sidebar').innerHTML = data;
-          
-          // Add event listeners
-          const closeBtn = document.getElementById('close-btn');
-          const signoutBtn = document.getElementById('signout-btn');
-          
-          if (closeBtn) {
-            closeBtn.addEventListener('click', closeSidebar);
+    // Check if MSAL loaded, if not load from backup CDN
+    if (typeof msal === 'undefined') {
+      console.log('Loading MSAL from backup CDN...');
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js';
+      script.onload = function() {
+        console.log('MSAL loaded from backup CDN');
+        // Reinitialize after MSAL loads
+        setTimeout(() => {
+          if (typeof msal !== 'undefined') {
+            initializeAuthentication();
           }
-          
-          if (signoutBtn) {
-            signoutBtn.addEventListener('click', function() {
-              window.location.href = 'index.html';
-            });
-          }
-          
-          // Highlight current page
-          const reportsLink = document.querySelector('a[href="reports.html"]');
-          if (reportsLink) {
-            reportsLink.classList.add('active');
-          }
-        })
-        .catch(error => console.error('Error loading sidebar:', error));
+        }, 100);
+      };
+      document.head.appendChild(script);
     }
+  </script>
+  
+  <!-- Shared components -->
+  <script src="shared-components.js"></script>
+  
+  <script>
+    // Power BI and Authentication Configuration
+    const powerBIConfig = {
+      clientId: '61920045-21d7-47e7-a0c1-3a915893488a', // Your tenant ID as fallback
+      authority: 'https://login.microsoftonline.com/61920045-21d7-47e7-a0c1-3a915893488a',
+      redirectUri: window.location.origin + window.location.pathname,
+      scopes: ['https://analysis.windows.net/powerbi/api/Report.Read.All']
+    };
+
+    let msalInstance;
+    let currentReportIndex = 0;
+    let availableReports = [];
+    let selectedReports = [];
     
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
-      
-      if (sidebar && overlay) {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-        document.body.classList.toggle('sidebar-open');
-      }
-    }
-    
-    function closeSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
-      
-      if (sidebar && overlay) {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        document.body.classList.remove('sidebar-open');
-      }
-    }
-    
-    // Load sidebar on page load
-    document.addEventListener('DOMContentLoaded', loadSidebar);
-    // Hide loading message after page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(() => {
-        const loadingMessage = document.getElementById('loadingMessage');
-        if (loadingMessage) {
-          loadingMessage.style.display = 'none';
+    // Initialize MSAL and Power BI
+    async function initializeAuthentication() {
+      try {
+        // Check if MSAL is available
+        if (typeof msal === 'undefined') {
+          console.log('MSAL not yet loaded, showing initial state');
+          showInitialState();
+          return;
         }
-      }, 1000);
+
+        msalInstance = new msal.PublicClientApplication({
+          auth: {
+            clientId: powerBIConfig.clientId,
+            authority: powerBIConfig.authority,
+            redirectUri: powerBIConfig.redirectUri
+          },
+          cache: {
+            cacheLocation: "sessionStorage", // Changed from localStorage to sessionStorage
+            storeAuthStateInCookie: false
+          }
+        });
+        
+        await msalInstance.initialize();
+        console.log('MSAL initialized successfully');
+        
+        // Clear any existing cached reports for this user
+        clearCachedReports();
+        
+        // Try to get access token silently first
+        await getAccessTokenSilently();
+        
+      } catch (error) {
+        console.error('Error initializing MSAL:', error);
+        clearCachedReports();
+        showInitialState();
+      }
+    }
+
+    // Get access token silently or prompt for login
+    async function getAccessTokenSilently() {
+      try {
+        if (!msalInstance) {
+          console.error('MSAL instance not initialized');
+          showInitialState();
+          return;
+        }
+
+        const accounts = msalInstance.getAllAccounts();
+        if (accounts.length === 0) {
+          console.log('No cached accounts, showing login prompt');
+          showLoginPrompt();
+          return;
+        }
+
+        const silentRequest = {
+          scopes: powerBIConfig.scopes,
+          account: accounts[0]
+        };
+
+        const response = await msalInstance.acquireTokenSilent(silentRequest);
+        console.log('Access token acquired silently');
+        await loadAvailableReports(response.accessToken);
+        
+      } catch (error) {
+        console.log('Silent token acquisition failed:', error);
+        showLoginPrompt();
+      }
+    }
+
+    // Interactive login
+    async function loginUser() {
+      try {
+        // If MSAL isn't loaded yet, try to initialize first
+        if (typeof msal === 'undefined') {
+          console.log('MSAL not loaded, waiting...');
+          showLoginPrompt();
+          // Try to wait for MSAL and then retry
+          setTimeout(() => {
+            if (typeof msal !== 'undefined') {
+              loginUser();
+            } else {
+              alert('Authentication system is still loading. Please try again in a moment.');
+            }
+          }, 2000);
+          return;
+        }
+
+        if (!msalInstance) {
+          console.log('MSAL instance not initialized, initializing now...');
+          await initializeAuthentication();
+          if (!msalInstance) {
+            throw new Error('Failed to initialize MSAL');
+          }
+        }
+
+        const loginRequest = {
+          scopes: powerBIConfig.scopes
+        };
+
+        const response = await msalInstance.loginPopup(loginRequest);
+        console.log('User logged in successfully');
+        
+        // Clear any cached reports and load fresh ones for this user
+        clearCachedReports();
+        await loadAvailableReports(response.accessToken);
+        
+      } catch (error) {
+        console.error('Login failed:', error);
+        alert('Login failed: ' + error.message);
+        showInitialState();
+      }
+    }
+
+    // Load available reports from Power BI API
+    async function loadAvailableReports(accessToken = null) {
+      const loadingElement = document.getElementById('loading-reports');
+      const gridElement = document.getElementById('reports-grid');
+      
+      if (loadingElement) loadingElement.style.display = 'block';
+      if (gridElement) gridElement.innerHTML = '';
+
+      try {
+        if (!accessToken) {
+          if (!msalInstance) {
+            throw new Error('MSAL instance not initialized');
+          }
+          
+          const accounts = msalInstance.getAllAccounts();
+          if (accounts.length > 0) {
+            const silentRequest = {
+              scopes: powerBIConfig.scopes,
+              account: accounts[0]
+            };
+            const response = await msalInstance.acquireTokenSilent(silentRequest);
+            accessToken = response.accessToken;
+          } else {
+            throw new Error('No access token available - user needs to login');
+          }
+        }
+
+        const response = await fetch('https://api.powerbi.com/v1.0/myorg/reports', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        availableReports = data.value || [];
+        
+        console.log(`Loaded ${availableReports.length} reports for current user`);
+        
+        if (availableReports.length === 0) {
+          showNoReportsMessage();
+          return;
+        }
+
+        displayReportsGrid();
+        // Don't load saved selection - let user choose fresh
+        
+      } catch (error) {
+        console.error('Error loading reports:', error);
+        if (error.message.includes('user needs to login')) {
+          showLoginPrompt();
+        } else {
+          showFallbackReports();
+        }
+      } finally {
+        if (loadingElement) loadingElement.style.display = 'none';
+      }
+    }
+
+    // Show fallback reports if API fails
+    function showFallbackReports() {
+      console.log('Showing fallback reports due to API failure');
+      
+      const gridElement = document.getElementById('reports-grid');
+      if (gridElement) {
+        gridElement.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #8a8886;">
+            <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">Connection Issue</h3>
+            <p style="margin: 0 0 16px 0;">Unable to load reports from Power BI. Please try again.</p>
+            <button onclick="location.reload()" style="background: var(--primary-gradient); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; margin-right: 8px;">
+              Refresh Page
+            </button>
+            <button onclick="loginUser()" style="background: transparent; color: #6264a7; border: 1px solid #6264a7; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer;">
+              Try Login Again
+            </button>
+          </div>
+        `;
+      }
+      
+      const loadingElement = document.getElementById('loading-reports');
+      if (loadingElement) loadingElement.style.display = 'none';
+    }
+
+    // Display reports in grid
+    function displayReportsGrid() {
+      const gridElement = document.getElementById('reports-grid');
+      
+      gridElement.innerHTML = availableReports.map((report, index) => `
+        <div class="report-card" onclick="toggleReportSelection('${report.id}')">
+          <div class="report-card-header">
+            <div class="report-card-title">${report.name}</div>
+            <div class="report-checkbox" id="checkbox-${report.id}">
+              <span style="display: none;">✓</span>
+            </div>
+          </div>
+          <div class="report-card-info">
+            ${report.description || 'Power BI Report'}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Toggle report selection
+    function toggleReportSelection(reportId) {
+      const checkbox = document.getElementById(`checkbox-${reportId}`);
+      const card = checkbox.closest('.report-card');
+      const checkmark = checkbox.querySelector('span');
+      
+      if (checkbox.classList.contains('checked')) {
+        checkbox.classList.remove('checked');
+        card.classList.remove('selected');
+        checkmark.style.display = 'none';
+      } else {
+        checkbox.classList.add('checked');
+        card.classList.add('selected');
+        checkmark.style.display = 'block';
+      }
+    }
+
+    // Select all reports
+    function selectAllReports() {
+      availableReports.forEach(report => {
+        const checkbox = document.getElementById(`checkbox-${report.id}`);
+        const card = checkbox.closest('.report-card');
+        const checkmark = checkbox.querySelector('span');
+        
+        checkbox.classList.add('checked');
+        card.classList.add('selected');
+        checkmark.style.display = 'block';
+      });
+    }
+
+    // Clear all selections
+    function clearAllReports() {
+      availableReports.forEach(report => {
+        const checkbox = document.getElementById(`checkbox-${report.id}`);
+        const card = checkbox.closest('.report-card');
+        const checkmark = checkbox.querySelector('span');
+        
+        checkbox.classList.remove('checked');
+        card.classList.remove('selected');
+        checkmark.style.display = 'none';
+      });
+    }
+
+    // Apply report selection
+    function applyReportSelection() {
+      selectedReports = availableReports.filter(report => {
+        const checkbox = document.getElementById(`checkbox-${report.id}`);
+        return checkbox && checkbox.classList.contains('checked');
+      });
+
+      if (selectedReports.length === 0) {
+        alert('Please select at least one report to view.');
+        return;
+      }
+
+      // Save selection to sessionStorage (per-session only)
+      sessionStorage.setItem('selectedReports', JSON.stringify(selectedReports.map(r => r.id)));
+      
+      // Show reports content area
+      document.getElementById('report-selector-section').style.display = 'none';
+      document.getElementById('reports-content').style.display = 'block';
+      
+      // Initialize report navigation
+      setupReportNavigation();
+      currentReportIndex = 0;
+      updateReport();
+    }
+
+    // Back to selector function
+    function backToSelector() {
+      document.getElementById('reports-content').style.display = 'none';
+      document.getElementById('report-selector-section').style.display = 'block';
+    }
+
+    // Clear cached reports for new user
+    function clearCachedReports() {
+      availableReports = [];
+      selectedReports = [];
+      sessionStorage.removeItem('selectedReports');
+      localStorage.removeItem('selectedReports');
+    }
+
+    // Show initial state before authentication
+    function showInitialState() {
+      const loadingElement = document.getElementById('loading-reports');
+      const gridElement = document.getElementById('reports-grid');
+      
+      if (loadingElement) loadingElement.style.display = 'none';
+      if (gridElement) {
+        gridElement.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #8a8886;">
+            <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">Power BI Reports</h3>
+            <p style="margin: 0 0 16px 0;">Sign in to view your available reports</p>
+            <button onclick="loginUser()" style="background: var(--primary-gradient); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer;">
+              Sign In to Power BI
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // Show login prompt
+    function showLoginPrompt() {
+      const loadingElement = document.getElementById('loading-reports');
+      const gridElement = document.getElementById('reports-grid');
+      
+      if (loadingElement) loadingElement.style.display = 'none';
+      if (gridElement) {
+        gridElement.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #8a8886;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🔐</div>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">Authentication Required</h3>
+            <p style="margin: 0 0 16px 0;">Please sign in to access your Power BI reports</p>
+            <button onclick="loginUser()" style="background: var(--primary-gradient); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer;">
+              Sign In to Power BI
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // Show message when no reports available
+    function showNoReportsMessage() {
+      const gridElement = document.getElementById('reports-grid');
+      if (gridElement) {
+        gridElement.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #8a8886;">
+            <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">No Reports Available</h3>
+            <p style="margin: 0;">You don't have access to any Power BI reports yet.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Load saved selection from sessionStorage (per-session only)
+    function loadSavedSelection() {
+      // Don't auto-load saved selections - let users choose fresh each time
+      // This prevents showing wrong user's reports
+    }
+
+    // Setup report navigation
+    function setupReportNavigation() {
+      const indicatorsContainer = document.querySelector('.report-indicators');
+      indicatorsContainer.innerHTML = selectedReports.map((_, index) => 
+        `<div class="report-indicator ${index === 0 ? 'active' : ''}" onclick="switchToReport(${index})"></div>`
+      ).join('');
+    }
+
+    // Navigation functions
+    function switchReport(direction) {
+      if (selectedReports.length === 0) return;
+      
+      if (direction === 'next') {
+        currentReportIndex = (currentReportIndex + 1) % selectedReports.length;
+      } else {
+        currentReportIndex = (currentReportIndex - 1 + selectedReports.length) % selectedReports.length;
+      }
+      
+      updateReport();
+    }
+    
+    function switchToReport(index) {
+      currentReportIndex = index;
+      updateReport();
+    }
+    
+    function updateReport() {
+      if (selectedReports.length === 0) return;
+      
+      const iframe = document.getElementById('report-iframe');
+      const title = document.getElementById('current-report-title');
+      const indicators = document.querySelectorAll('.report-indicator');
+      
+      const currentReport = selectedReports[currentReportIndex];
+      
+      if (iframe && title && currentReport) {
+        const embedUrl = `https://app.powerbi.com/reportEmbed?reportId=${currentReport.id}&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a`;
+        iframe.src = embedUrl;
+        title.textContent = currentReport.name;
+        
+        // Update indicators
+        indicators.forEach((indicator, index) => {
+          indicator.classList.toggle('active', index === currentReportIndex);
+        });
+      }
+    }
+
+    // Wait for MSAL to load and initialize
+    function waitForMSALAndInitialize() {
+      if (typeof msal !== 'undefined') {
+        console.log('MSAL available, initializing...');
+        initializeAuthentication();
+      } else {
+        console.log('Waiting for MSAL to load...');
+        setTimeout(waitForMSALAndInitialize, 100);
+      }
+    }
+
+    // Initialize everything when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      // Show initial state first
+      showInitialState();
+      
+      // Wait for MSAL to be available, then initialize
+      setTimeout(() => {
+        waitForMSALAndInitialize();
+      }, 500);
     });
   </script>
 </body>

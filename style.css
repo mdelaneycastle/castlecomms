@@ -19,10 +19,12 @@
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-light);
   backdrop-filter: blur(10px);
-  max-width: 600px;
+  max-width: 100%;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
   margin-bottom: 2rem;
+  box-sizing: border-box;
 }
 
 .welcome-message h2 {
@@ -262,8 +264,10 @@ header h1 {
 main {
   padding: 2rem;
   margin-left: 0;
-  max-width: 700px;
+  max-width: 100%;
+  width: 100%;
   margin-inline: auto;
+  box-sizing: border-box;
 }
 
 /* Form Styling */
@@ -500,12 +504,14 @@ form button:hover::before {
 }
 
 .calendar-container {
-  max-width: 1000px;
+  max-width: 100%;
+  width: 100%;
   margin: 2rem auto;
   border: 1px solid #ccc;
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-sizing: border-box;
 }
 
 .download-btn {
@@ -531,11 +537,13 @@ admin-link {
 .quick-links {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
+  gap: 2.5rem;
   justify-items: center;
   max-width: 1000px;
+  width: 100%;
   margin: 2rem auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
+  box-sizing: border-box;
 }
 
 .quick-links a {
@@ -1008,8 +1016,10 @@ admin-link {
 }
 
 .gallery-container {
-  max-width: 800px;
+  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .gallery-main {

@@ -13,14 +13,16 @@
   <link rel="stylesheet" href="style.css?v=20250731" />
   <style>
     .tickets-container {
-      max-width: 1400px;
+      max-width: 100%;
+      width: 100%;
       margin: 2rem auto;
       padding: 2rem;
       background: rgba(255, 255, 255, 0.95);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow-medium);
       backdrop-filter: blur(10px);
-      min-height: 80vh;
+      min-height: 95vh;
+      box-sizing: border-box;
     }
 
     .tickets-header {
@@ -38,52 +40,210 @@
       background-clip: text;
     }
 
+    /* Ticket Type Selection Styles */
+    .ticket-type-selection {
+      margin-bottom: 2rem;
+    }
+
+    .ticket-type-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .ticket-type-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border: 2px solid transparent;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ticket-type-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      border-color: #667eea;
+    }
+
+    .ticket-type-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .ticket-type-card h3 {
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+      font-size: 1.4rem;
+    }
+
+    .ticket-type-card p {
+      color: #6c757d;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .ticket-type-btn {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--shadow-light);
+      pointer-events: none;
+    }
+
+    /* Section Headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-header-full {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      grid-column: 1 / -1;
+    }
+
+    .back-btn {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 1px solid #e1e5e9;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .back-btn:hover {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .section-header h3,
+    .section-header-full h3 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 1.4rem;
+    }
+
+    /* Monday.com Section */
+    .monday-ticket-section {
+      text-align: center;
+    }
+
+    .monday-iframe-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 2rem;
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .monday-iframe-container iframe {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      height: 1200px;
+      border-radius: 10px;
+      box-sizing: border-box;
+    }
+
+    /* View Tickets Section */
+    .view-tickets-section {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 2px solid #e1e5e9;
+    }
+
+    .view-tickets-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      text-decoration: none;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .view-tickets-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(40, 167, 69, 0.4);
+      text-decoration: none;
+      color: white;
+    }
+
     .tickets-layout {
       display: grid;
-      grid-template-columns: 1.2fr 1.8fr;
-      gap: 2rem;
-      min-height: 600px;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      min-height: 700px;
+      align-items: start;
     }
 
     /* Create Ticket Section */
     .create-ticket-section {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.95);
       border-radius: var(--border-radius);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-light);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-medium);
       height: fit-content;
+      border: 1px solid rgba(102, 126, 234, 0.1);
     }
 
     .create-ticket-section h3 {
-      margin: 0 0 1.5rem 0;
+      margin: 0 0 2rem 0;
       color: #2c3e50;
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid rgba(102, 126, 234, 0.1);
     }
 
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
       font-weight: 600;
       color: #2c3e50;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .form-input, .form-select, .form-textarea {
       width: 100%;
-      padding: 0.75rem;
+      padding: 1rem;
       border: 2px solid #e1e5e9;
-      border-radius: 8px;
-      font-size: 1rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
       background: white;
       transition: all 0.3s;
       box-sizing: border-box;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     .form-input:focus, .form-select:focus, .form-textarea:focus {
@@ -93,9 +253,10 @@
     }
 
     .form-textarea {
-      min-height: 120px;
+      min-height: 200px;
       resize: vertical;
       font-family: inherit;
+      line-height: 1.6;
     }
 
     .user-search-container {
@@ -168,14 +329,15 @@
       background: var(--primary-gradient);
       color: white;
       border: none;
-      padding: 1rem 2rem;
-      border-radius: 8px;
-      font-size: 1.1rem;
+      padding: 1.2rem 2.5rem;
+      border-radius: 12px;
+      font-size: 1.2rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s;
-      box-shadow: var(--shadow-light);
+      box-shadow: var(--shadow-medium);
       width: 100%;
+      margin-top: 1rem;
     }
 
     .create-ticket-button:hover {
@@ -192,30 +354,31 @@
 
     /* Tickets List Section */
     .tickets-list-section {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.95);
       border-radius: var(--border-radius);
-      padding: 1.5rem;
-      box-shadow: var(--shadow-light);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-medium);
       display: flex;
       flex-direction: column;
+      border: 1px solid rgba(102, 126, 234, 0.1);
     }
 
     .tickets-list-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid #e1e5e9;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid rgba(102, 126, 234, 0.1);
     }
 
     .tickets-list-header h3 {
       margin: 0;
       color: #2c3e50;
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
     }
 
     .ticket-count {
@@ -261,24 +424,25 @@
     .tickets-list {
       flex: 1;
       overflow-y: auto;
-      max-height: 500px;
+      max-height: 600px;
     }
 
     .ticket-item {
       background: white;
       border: 1px solid #e1e5e9;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
       cursor: pointer;
       transition: all 0.3s;
       position: relative;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .ticket-item:hover {
       border-color: #667eea;
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
-      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+      transform: translateY(-2px);
     }
 
     .ticket-header {
@@ -320,8 +484,9 @@
     .ticket-title {
       font-weight: 600;
       color: #2c3e50;
-      margin-bottom: 0.5rem;
-      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      font-size: 1.2rem;
+      line-height: 1.4;
     }
 
     .ticket-meta {
@@ -343,11 +508,13 @@
 
     .ticket-description {
       color: #6c757d;
-      font-size: 0.9rem;
-      line-height: 1.4;
+      font-size: 0.95rem;
+      line-height: 1.5;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      margin-bottom: 0.5rem;
     }
 
     .no-tickets {
@@ -517,6 +684,77 @@
       cursor: not-allowed;
     }
 
+    /* Transfer Ticket Styles */
+    .ticket-transfer-section {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #17a2b8;
+    }
+
+    .ticket-transfer-section h4 {
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .transfer-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .transfer-user-search label,
+    .transfer-reason label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.95rem;
+    }
+
+    .transfer-reason textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .transfer-button {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--shadow-light);
+      align-self: flex-start;
+    }
+
+    .transfer-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .transfer-button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .transfer-selected-user {
+      margin-top: 0.5rem;
+    }
+
+    .transfer-selected-user .assigned-user {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+
     .ticket-messages-section {
       border-top: 2px solid #e1e5e9;
       padding-top: 1.5rem;
@@ -628,12 +866,54 @@
         margin: 0.5rem;
         padding: 0.75rem;
         max-width: none;
-        min-height: calc(100vh - 140px);
+        min-height: calc(100vh - 80px);
       }
       
       .tickets-header h1 {
         font-size: 1.8rem;
         margin-bottom: 1rem;
+      }
+
+      .ticket-type-options {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .ticket-type-card {
+        padding: 1.5rem;
+      }
+
+      .ticket-type-icon {
+        font-size: 2.5rem;
+      }
+
+      .ticket-type-card h3 {
+        font-size: 1.2rem;
+      }
+
+      .monday-iframe-container {
+        min-width: 350px;
+        overflow-x: auto;
+      }
+
+      .monday-iframe-container iframe {
+        width: 100%;
+        height: 900px;
+      }
+
+      .view-tickets-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+      }
+
+      .section-header,
+      .section-header-full {
+        margin-bottom: 1rem;
+      }
+
+      .section-header h3,
+      .section-header-full h3 {
+        font-size: 1.1rem;
       }
 
       .tickets-layout {
@@ -898,7 +1178,52 @@
       <h1>🎫 Support Tickets</h1>
     </div>
     
-    <div class="tickets-layout">
+    <!-- Ticket Type Selection -->
+    <div class="ticket-type-selection" id="ticket-type-selection">
+      <div class="ticket-type-options">
+        <div class="ticket-type-card" onclick="selectTicketType('monday')">
+          <div class="ticket-type-icon">📋</div>
+          <h3>Monday.com Ticket</h3>
+          <p>Create a ticket in our Monday.com system for comprehensive project management and tracking</p>
+          <button class="ticket-type-btn">Raise Monday.com Ticket</button>
+        </div>
+        
+        <div class="ticket-type-card" onclick="selectTicketType('internal')">
+          <div class="ticket-type-icon">🎫</div>  
+          <h3>Internal System Ticket</h3>
+          <p>Create a ticket in our internal system for quick communication and simple issue tracking</p>
+          <button class="ticket-type-btn">Create Internal Ticket</button>
+        </div>
+      </div>
+      
+      <div class="view-tickets-section">
+        <a href="https://castlefineart-org.monday.com/portal" target="_blank" class="view-tickets-btn">
+          👁️ View My Tickets
+        </a>
+      </div>
+    </div>
+
+    <!-- Monday.com Ticket Section -->
+    <div class="monday-ticket-section" id="monday-ticket-section" style="display: none;">
+      <div class="section-header">
+        <button class="back-btn" onclick="goBackToSelection()">← Back to Options</button>
+        <h3>📋 Monday.com Ticket</h3>
+      </div>
+      <div class="monday-iframe-container">
+        <iframe 
+          src="https://forms.monday.com/forms/embed/142233d15033ec5cb1fe363d7b9eff5b?r=euc1" 
+          style="border: 0; box-shadow: 5px 5px 56px 0px rgba(0,0,0,0.25); border-radius: 10px;">
+        </iframe>
+      </div>
+    </div>
+
+    <!-- Internal System Section -->
+    <div class="tickets-layout" id="internal-ticket-section" style="display: none;">
+      <div class="section-header-full">
+        <button class="back-btn" onclick="goBackToSelection()">← Back to Options</button>
+        <h3>🎫 Internal System Tickets</h3>
+      </div>
+      
       <!-- Create Ticket Section -->
       <div class="create-ticket-section">
         <h3>🆕 Create New Ticket</h3>
@@ -1004,6 +1329,30 @@
           <option value="resolved">Resolved</option>
         </select>
       </div>
+      
+      <!-- Transfer Ticket Section -->
+      <div class="ticket-transfer-section">
+        <h4>🔄 Transfer Ticket</h4>
+        <div class="transfer-form">
+          <div class="transfer-user-search">
+            <label for="transfer-user-input">Transfer to:</label>
+            <div class="user-search-container">
+              <input type="text" id="transfer-user-input" class="form-input" placeholder="Start typing a name or email..." autocomplete="off">
+              <div id="transfer-user-suggestions" class="user-suggestions"></div>
+            </div>
+            <div id="transfer-selected-user"></div>
+          </div>
+          
+          <div class="transfer-reason">
+            <label for="transfer-reason-input">Reason for transfer:</label>
+            <textarea id="transfer-reason-input" class="form-textarea" placeholder="Please provide a reason for transferring this ticket..." rows="3"></textarea>
+          </div>
+          
+          <button onclick="transferTicket()" id="transfer-ticket-btn" class="transfer-button">
+            🔄 Transfer Ticket
+          </button>
+        </div>
+      </div>
     </div>
     
     <div class="ticket-messages-section">
@@ -1041,6 +1390,49 @@ let assignedUser = null;
 let currentFilter = 'all';
 let currentTicket = null;
 
+// Navigation functions
+function selectTicketType(type) {
+  const selectionSection = document.getElementById('ticket-type-selection');
+  const mondaySection = document.getElementById('monday-ticket-section');
+  const internalSection = document.getElementById('internal-ticket-section');
+  
+  selectionSection.style.display = 'none';
+  
+  if (type === 'monday') {
+    mondaySection.style.display = 'block';
+    internalSection.style.display = 'none';
+  } else if (type === 'internal') {
+    mondaySection.style.display = 'none';
+    internalSection.style.display = 'block';
+    
+    // Initialize internal system if not already done
+    if (!db && firebase.apps.length > 0) {
+      initializeInternalSystem();
+    }
+  }
+}
+
+function goBackToSelection() {
+  const selectionSection = document.getElementById('ticket-type-selection');
+  const mondaySection = document.getElementById('monday-ticket-section');
+  const internalSection = document.getElementById('internal-ticket-section');
+  
+  selectionSection.style.display = 'block';
+  mondaySection.style.display = 'none';
+  internalSection.style.display = 'none';
+}
+
+async function initializeInternalSystem() {
+  if (!currentUser) return;
+  
+  db = firebase.firestore();
+  await loadAllUsers();
+  setupUserSearch();
+  setupTicketForm();
+  setupFilters();
+  loadTickets();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // Check authentication first
   firebase.auth().onAuthStateChanged(async (user) => {
@@ -1052,17 +1444,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     currentUser = user;
     
-    // Initialize Firebase Firestore
-    if (firebase.apps.length > 0) {
-      db = firebase.firestore();
-      await loadAllUsers();
-      setupUserSearch();
-      setupTicketForm();
-      setupFilters();
-      loadTickets();
-    } else {
-      console.error('Firebase not initialized');
-    }
+    // Just store the user, don't initialize internal system until selected
+    console.log('User authenticated:', user.email);
   });
 });
 
@@ -1423,8 +1806,22 @@ async function openTicket(ticketId) {
                            currentUser.email === ticketData.assignedTo.email;
     statusSelect.disabled = !canChangeStatus;
     
+    // Show/hide transfer section based on permissions
+    const transferSection = document.querySelector('.ticket-transfer-section');
+    const canTransfer = currentUser.uid === ticketData.createdBy.uid || 
+                       currentUser.email === ticketData.assignedTo.email;
+    
+    if (transferSection) {
+      transferSection.style.display = canTransfer ? 'block' : 'none';
+    }
+    
     // Load messages
     await loadTicketMessages(ticketId);
+    
+    // Setup transfer functionality if user has permissions
+    if (canTransfer) {
+      setupTransferForm();
+    }
     
     // Show modal
     document.getElementById('ticket-modal').classList.add('show');
@@ -1683,6 +2080,197 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+// Transfer functionality
+let transferSelectedUser = null;
+
+// Setup transfer form
+function setupTransferForm() {
+  const transferInput = document.getElementById('transfer-user-input');
+  const transferSuggestions = document.getElementById('transfer-user-suggestions');
+  
+  // Clear previous state
+  transferSelectedUser = null;
+  transferInput.value = '';
+  document.getElementById('transfer-selected-user').innerHTML = '';
+  document.getElementById('transfer-reason-input').value = '';
+  transferSuggestions.style.display = 'none';
+  
+  // Setup user search for transfer
+  transferInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    
+    if (query.length < 1) {
+      transferSuggestions.style.display = 'none';
+      return;
+    }
+    
+    const filteredUsers = allUsers.filter(user => 
+      (user.name.toLowerCase().includes(query) || 
+       user.email.toLowerCase().includes(query)) &&
+      user.email !== currentUser.email && // Don't show current user
+      user.email !== currentTicket.assignedTo.email // Don't show currently assigned user
+    );
+    
+    if (filteredUsers.length > 0) {
+      transferSuggestions.innerHTML = filteredUsers.map(user => 
+        `<div class="user-suggestion" data-email="${user.email}" data-name="${user.name}">
+          <strong>${user.name}</strong><br>
+          <small>${user.email}</small>
+        </div>`
+      ).join('');
+      transferSuggestions.style.display = 'block';
+    } else {
+      transferSuggestions.style.display = 'none';
+    }
+  });
+  
+  // Handle transfer suggestion clicks
+  transferSuggestions.addEventListener('click', (e) => {
+    const suggestion = e.target.closest('.user-suggestion');
+    if (suggestion) {
+      const email = suggestion.dataset.email;
+      const name = suggestion.dataset.name;
+      
+      selectTransferUser({ email, name });
+      transferInput.value = '';
+      transferSuggestions.style.display = 'none';
+    }
+  });
+  
+  // Hide suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.transfer-user-search')) {
+      transferSuggestions.style.display = 'none';
+    }
+  });
+}
+
+// Select user for transfer
+function selectTransferUser(user) {
+  transferSelectedUser = user;
+  updateTransferUserDisplay();
+}
+
+// Update transfer user display
+function updateTransferUserDisplay() {
+  const container = document.getElementById('transfer-selected-user');
+  if (transferSelectedUser) {
+    container.innerHTML = `
+      <div class="assigned-user">
+        ${transferSelectedUser.name}
+        <button type="button" class="remove-user" onclick="removeTransferUser()">&times;</button>
+      </div>
+    `;
+  } else {
+    container.innerHTML = '';
+  }
+}
+
+// Remove transfer user
+function removeTransferUser() {
+  transferSelectedUser = null;
+  updateTransferUserDisplay();
+}
+
+// Transfer ticket
+async function transferTicket() {
+  if (!currentTicket || !transferSelectedUser) {
+    alert('Please select a user to transfer the ticket to.');
+    return;
+  }
+  
+  const reason = document.getElementById('transfer-reason-input').value.trim();
+  if (!reason) {
+    alert('Please provide a reason for the transfer.');
+    return;
+  }
+  
+  // Check permissions - only creator or current assignee can transfer
+  const canTransfer = currentUser.uid === currentTicket.createdBy.uid || 
+                     currentUser.email === currentTicket.assignedTo.email;
+  
+  if (!canTransfer) {
+    alert('You can only transfer tickets that are assigned to you or that you created.');
+    return;
+  }
+  
+  const transferBtn = document.getElementById('transfer-ticket-btn');
+  transferBtn.disabled = true;
+  transferBtn.textContent = 'Transferring...';
+  
+  try {
+    // Get current user's display name
+    const transferredByName = await getUserDisplayName(currentUser);
+    
+    // Create updated ticket data
+    const updateData = {
+      assignedTo: {
+        email: transferSelectedUser.email,
+        name: transferSelectedUser.name
+      },
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    // Create a batch write to update both the assignment and add a message
+    const batch = db.batch();
+    const ticketRef = db.collection('tickets').doc(currentTicket.id);
+    
+    // Update the ticket assignment
+    batch.update(ticketRef, updateData);
+    
+    // Add transfer confirmation message
+    const transferMessage = {
+      message: `Ticket transferred from ${currentTicket.assignedTo.name} to ${transferSelectedUser.name} by ${transferredByName}. Reason: ${reason}`,
+      senderEmail: 'system',
+      senderName: 'System',
+      timestamp: new Date()
+    };
+    
+    batch.update(ticketRef, {
+      messages: firebase.firestore.FieldValue.arrayUnion(transferMessage)
+    });
+    
+    // Execute the batch
+    await batch.commit();
+    
+    // Update current ticket object
+    currentTicket.assignedTo = {
+      email: transferSelectedUser.email,
+      name: transferSelectedUser.name
+    };
+    
+    // Update modal display
+    document.getElementById('modal-ticket-assignee').textContent = `Assigned to: ${transferSelectedUser.name}`;
+    
+    // Clear transfer form
+    transferSelectedUser = null;
+    document.getElementById('transfer-user-input').value = '';
+    document.getElementById('transfer-selected-user').innerHTML = '';
+    document.getElementById('transfer-reason-input').value = '';
+    
+    // Reload tickets list and messages
+    loadTickets();
+    await loadTicketMessages(currentTicket.id);
+    
+    alert('Ticket transferred successfully!');
+    
+  } catch (error) {
+    console.error('Error transferring ticket:', error);
+    
+    // More specific error messages
+    if (error.code === 'permission-denied') {
+      alert('Permission denied. You may not have permission to transfer this ticket.');
+    } else if (error.message.includes('Ticket no longer exists')) {
+      alert('This ticket no longer exists. Please refresh the page.');
+    } else {
+      alert('Failed to transfer ticket. Please try again or contact support.');
+    }
+  }
+  
+  transferBtn.disabled = false;
+  transferBtn.textContent = '🔄 Transfer Ticket';
+}
 </script>
 
 <!-- Site scripts -->
