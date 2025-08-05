@@ -684,6 +684,77 @@
       cursor: not-allowed;
     }
 
+    /* Transfer Ticket Styles */
+    .ticket-transfer-section {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #17a2b8;
+    }
+
+    .ticket-transfer-section h4 {
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .transfer-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .transfer-user-search label,
+    .transfer-reason label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.95rem;
+    }
+
+    .transfer-reason textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .transfer-button {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: var(--shadow-light);
+      align-self: flex-start;
+    }
+
+    .transfer-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .transfer-button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .transfer-selected-user {
+      margin-top: 0.5rem;
+    }
+
+    .transfer-selected-user .assigned-user {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    }
+
     .ticket-messages-section {
       border-top: 2px solid #e1e5e9;
       padding-top: 1.5rem;
@@ -1258,6 +1329,30 @@
           <option value="resolved">Resolved</option>
         </select>
       </div>
+      
+      <!-- Transfer Ticket Section -->
+      <div class="ticket-transfer-section">
+        <h4>🔄 Transfer Ticket</h4>
+        <div class="transfer-form">
+          <div class="transfer-user-search">
+            <label for="transfer-user-input">Transfer to:</label>
+            <div class="user-search-container">
+              <input type="text" id="transfer-user-input" class="form-input" placeholder="Start typing a name or email..." autocomplete="off">
+              <div id="transfer-user-suggestions" class="user-suggestions"></div>
+            </div>
+            <div id="transfer-selected-user"></div>
+          </div>
+          
+          <div class="transfer-reason">
+            <label for="transfer-reason-input">Reason for transfer:</label>
+            <textarea id="transfer-reason-input" class="form-textarea" placeholder="Please provide a reason for transferring this ticket..." rows="3"></textarea>
+          </div>
+          
+          <button onclick="transferTicket()" id="transfer-ticket-btn" class="transfer-button">
+            🔄 Transfer Ticket
+          </button>
+        </div>
+      </div>
     </div>
     
     <div class="ticket-messages-section">
@@ -1714,6 +1809,9 @@ async function openTicket(ticketId) {
     // Load messages
     await loadTicketMessages(ticketId);
     
+    // Setup transfer functionality
+    setupTransferForm();
+    
     // Show modal
     document.getElementById('ticket-modal').classList.add('show');
     
@@ -1971,6 +2069,161 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+// Transfer functionality
+let transferSelectedUser = null;
+
+// Setup transfer form
+function setupTransferForm() {
+  const transferInput = document.getElementById('transfer-user-input');
+  const transferSuggestions = document.getElementById('transfer-user-suggestions');
+  
+  // Clear previous state
+  transferSelectedUser = null;
+  transferInput.value = '';
+  document.getElementById('transfer-selected-user').innerHTML = '';
+  document.getElementById('transfer-reason-input').value = '';
+  transferSuggestions.style.display = 'none';
+  
+  // Setup user search for transfer
+  transferInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    
+    if (query.length < 1) {
+      transferSuggestions.style.display = 'none';
+      return;
+    }
+    
+    const filteredUsers = allUsers.filter(user => 
+      (user.name.toLowerCase().includes(query) || 
+       user.email.toLowerCase().includes(query)) &&
+      user.email !== currentUser.email && // Don't show current user
+      user.email !== currentTicket.assignedTo.email // Don't show currently assigned user
+    );
+    
+    if (filteredUsers.length > 0) {
+      transferSuggestions.innerHTML = filteredUsers.map(user => 
+        `<div class="user-suggestion" data-email="${user.email}" data-name="${user.name}">
+          <strong>${user.name}</strong><br>
+          <small>${user.email}</small>
+        </div>`
+      ).join('');
+      transferSuggestions.style.display = 'block';
+    } else {
+      transferSuggestions.style.display = 'none';
+    }
+  });
+  
+  // Handle transfer suggestion clicks
+  transferSuggestions.addEventListener('click', (e) => {
+    const suggestion = e.target.closest('.user-suggestion');
+    if (suggestion) {
+      const email = suggestion.dataset.email;
+      const name = suggestion.dataset.name;
+      
+      selectTransferUser({ email, name });
+      transferInput.value = '';
+      transferSuggestions.style.display = 'none';
+    }
+  });
+  
+  // Hide suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.transfer-user-search')) {
+      transferSuggestions.style.display = 'none';
+    }
+  });
+}
+
+// Select user for transfer
+function selectTransferUser(user) {
+  transferSelectedUser = user;
+  updateTransferUserDisplay();
+}
+
+// Update transfer user display
+function updateTransferUserDisplay() {
+  const container = document.getElementById('transfer-selected-user');
+  if (transferSelectedUser) {
+    container.innerHTML = `
+      <div class="assigned-user">
+        ${transferSelectedUser.name}
+        <button type="button" class="remove-user" onclick="removeTransferUser()">&times;</button>
+      </div>
+    `;
+  } else {
+    container.innerHTML = '';
+  }
+}
+
+// Remove transfer user
+function removeTransferUser() {
+  transferSelectedUser = null;
+  updateTransferUserDisplay();
+}
+
+// Transfer ticket
+async function transferTicket() {
+  if (!currentTicket || !transferSelectedUser) {
+    alert('Please select a user to transfer the ticket to.');
+    return;
+  }
+  
+  const reason = document.getElementById('transfer-reason-input').value.trim();
+  if (!reason) {
+    alert('Please provide a reason for the transfer.');
+    return;
+  }
+  
+  const transferBtn = document.getElementById('transfer-ticket-btn');
+  transferBtn.disabled = true;
+  transferBtn.textContent = 'Transferring...';
+  
+  try {
+    // Get current user's display name
+    const transferredByName = await getUserDisplayName(currentUser);
+    
+    // Update ticket assignment
+    await db.collection('tickets').doc(currentTicket.id).update({
+      assignedTo: {
+        email: transferSelectedUser.email,
+        name: transferSelectedUser.name
+      },
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Add system message about transfer
+    const transferMessage = `Ticket transferred from ${currentTicket.assignedTo.name} to ${transferSelectedUser.name} by ${transferredByName}. Reason: ${reason}`;
+    await addSystemMessage(transferMessage);
+    
+    // Update current ticket object
+    currentTicket.assignedTo = {
+      email: transferSelectedUser.email,
+      name: transferSelectedUser.name
+    };
+    
+    // Update modal display
+    document.getElementById('modal-ticket-assignee').textContent = `Assigned to: ${transferSelectedUser.name}`;
+    
+    // Clear transfer form
+    transferSelectedUser = null;
+    document.getElementById('transfer-user-input').value = '';
+    document.getElementById('transfer-selected-user').innerHTML = '';
+    document.getElementById('transfer-reason-input').value = '';
+    
+    // Reload tickets list
+    loadTickets();
+    
+    alert('Ticket transferred successfully!');
+    
+  } catch (error) {
+    console.error('Error transferring ticket:', error);
+    alert('Failed to transfer ticket. Please try again.');
+  }
+  
+  transferBtn.disabled = false;
+  transferBtn.textContent = '🔄 Transfer Ticket';
+}
 </script>
 
 <!-- Site scripts -->
