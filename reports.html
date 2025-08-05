@@ -14,10 +14,10 @@
     .reports-container {
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 120px);
+      height: calc(100vh - 80px);
       width: 100%;
       max-width: 100%;
-      margin: 2rem auto;
+      margin: 0;
       padding: 0;
       background: rgba(255, 255, 255, 0.95);
       border-radius: var(--border-radius);
@@ -29,7 +29,7 @@
     .reports-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 1rem 2rem;
+      padding: 0.75rem 2rem;
       text-align: center;
       box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
       flex-shrink: 0;
@@ -64,12 +64,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 2rem;
+      padding: 0.5rem 1rem;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       flex-shrink: 0;
+      min-height: 50px;
     }
 
     .nav-btn {
@@ -144,11 +145,13 @@
       position: relative;
       overflow: hidden;
       border-radius: 0 0 var(--border-radius) var(--border-radius);
+      min-height: calc(100vh - 200px);
     }
 
     .report-container iframe {
       width: 100%;
       height: 100%;
+      min-height: calc(100vh - 200px);
       border: none;
       background: white;
       border-radius: 0 0 var(--border-radius) var(--border-radius);
@@ -343,12 +346,12 @@
     /* Mobile Responsive */
     @media (max-width: 768px) {
       .reports-container {
-        height: calc(100vh - 100px);
-        margin: 0.5rem;
+        height: calc(100vh - 60px);
+        margin: 0;
       }
       
       .reports-header {
-        padding: 0.75rem 1rem;
+        padding: 0.5rem 1rem;
       }
       
       .reports-title {
@@ -360,32 +363,41 @@
       }
 
       .report-navigation {
-        padding: 0.75rem 1rem;
+        padding: 0.5rem;
+        min-height: 40px;
       }
 
       .nav-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
-      }
-
-      .report-info {
-        margin: 0 1rem;
-      }
-
-      .report-info h3 {
+        width: 35px;
+        height: 35px;
         font-size: 1.1rem;
       }
 
+      .report-info {
+        margin: 0 0.5rem;
+      }
+
+      .report-info h3 {
+        font-size: 1rem;
+      }
+
       .report-indicator {
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
       }
 
       .back-to-selector-btn {
         font-size: 0.8rem;
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.8rem;
         margin-left: 0.5rem;
+      }
+
+      .report-container {
+        min-height: calc(100vh - 160px);
+      }
+
+      .report-container iframe {
+        min-height: calc(100vh - 160px);
       }
     }
 
@@ -400,7 +412,7 @@
 
   <div id="sidebar-container"></div>
 
-  <main class="main-content">
+  <main class="main-content" style="max-width: 100%; width: 100%; padding: 0; margin: 0;">
     <div class="reports-container">
       <div class="reports-header">
         <h1 class="reports-title">📊 Reports Dashboard</h1>
