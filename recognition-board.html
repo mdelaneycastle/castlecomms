@@ -12,6 +12,12 @@
   
   <link rel="stylesheet" href="style.css?v=20250731" />
   <style>
+    /* Override global main constraints for recognition board */
+    #main {
+      max-width: none;
+      padding: 1rem;
+    }
+
     .recognition-container {
       max-width: 1400px;
       margin: 2rem auto;
@@ -26,6 +32,7 @@
       width: 100%;
       overflow-x: auto;
       padding: 1rem 0;
+      min-width: 1016px; /* 1000px board + 8px border on each side */
     }
 
     .recognition-header {

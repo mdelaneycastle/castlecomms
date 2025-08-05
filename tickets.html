@@ -154,6 +154,34 @@
       height: auto;
     }
 
+    /* View Tickets Section */
+    .view-tickets-section {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 2px solid #e1e5e9;
+    }
+
+    .view-tickets-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      text-decoration: none;
+      padding: 1rem 2rem;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .view-tickets-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(40, 167, 69, 0.4);
+      text-decoration: none;
+      color: white;
+    }
+
     .tickets-layout {
       display: grid;
       grid-template-columns: 1.2fr 1.8fr;
@@ -772,7 +800,12 @@
       .monday-iframe-container iframe {
         width: 100%;
         max-width: 350px;
-        height: 400px;
+        height: 600px;
+      }
+
+      .view-tickets-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
       }
 
       .section-header,
@@ -1064,6 +1097,12 @@
           <button class="ticket-type-btn">Create Internal Ticket</button>
         </div>
       </div>
+      
+      <div class="view-tickets-section">
+        <a href="https://castlefineart-org.monday.com/portal" target="_blank" class="view-tickets-btn">
+          👁️ View My Tickets
+        </a>
+      </div>
     </div>
 
     <!-- Monday.com Ticket Section -->
@@ -1076,7 +1115,7 @@
         <iframe 
           src="https://forms.monday.com/forms/embed/142233d15033ec5cb1fe363d7b9eff5b?r=euc1" 
           width="650" 
-          height="500" 
+          height="800" 
           style="border: 0; box-shadow: 5px 5px 56px 0px rgba(0,0,0,0.25); border-radius: 10px;">
         </iframe>
       </div>
