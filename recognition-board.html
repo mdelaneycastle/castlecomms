@@ -14,15 +14,19 @@
   <style>
     /* Override global main constraints for recognition board */
     #main {
-      max-width: none;
+      max-width: 100%;
+      width: 100%;
       padding: 1rem;
+      box-sizing: border-box;
     }
 
     .recognition-container {
-      max-width: 1400px;
+      max-width: 100%;
+      width: 100%;
       margin: 2rem auto;
       padding: 2rem;
       position: relative;
+      box-sizing: border-box;
     }
 
     /* Ensure cork board section can accommodate the full 1000px width */
@@ -32,7 +36,7 @@
       width: 100%;
       overflow-x: auto;
       padding: 1rem 0;
-      min-width: 1016px; /* 1000px board + 8px border on each side */
+      box-sizing: border-box;
     }
 
     .recognition-header {
