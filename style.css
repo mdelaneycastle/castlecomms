@@ -537,12 +537,12 @@ admin-link {
 .quick-links {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
+  gap: 2.5rem;
   justify-items: center;
-  max-width: 100%;
+  max-width: 1000px;
   width: 100%;
   margin: 2rem auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
   box-sizing: border-box;
 }
 
