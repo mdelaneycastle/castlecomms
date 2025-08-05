@@ -1,0 +1,54 @@
+// Firestore Security Rules for Castle Comms Ticketing System
+// Add these rules to your Firestore database
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read and write their own user documents
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Tickets collection rules
+    match /tickets/{ticketId} {
+      // Allow read access to tickets where user is creator or assignee
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.createdBy.uid ||
+         request.auth.email == resource.data.assignedTo.email);
+      
+      // Allow create for authenticated users
+      allow create: if request.auth != null;
+      
+      // Allow updates to tickets where user is creator or current assignee
+      // This includes transfers, status changes, and adding messages
+      allow update: if request.auth != null && 
+        (request.auth.uid == resource.data.createdBy.uid ||
+         request.auth.email == resource.data.assignedTo.email);
+      
+      // Allow delete only for the creator
+      allow delete: if request.auth != null && 
+        request.auth.uid == resource.data.createdBy.uid;
+    }
+    
+    // Allow reading posts for authenticated users (for existing newsfeed functionality)
+    match /posts/{postId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Instructions:
+// 1. Go to Firebase Console > Firestore Database > Rules
+// 2. Replace the existing rules with the rules above
+// 3. Click "Publish" to apply the changes
+//
+// These rules allow:
+// - Users to read tickets they created or are assigned to
+// - Users to update (transfer, change status, add messages) tickets they're involved with
+// - Users to create new tickets
+// - Only creators can delete tickets
