@@ -13,9 +13,9 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     .contact-finder-container {
-      max-width: 800px;
+      max-width: 1000px;
       margin: 2rem auto;
-      padding: 2rem;
+      padding: 2.5rem;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
@@ -71,7 +71,7 @@
 
     .search-input {
       width: 100%;
-      padding: 1rem 1.5rem;
+      padding: 1rem 3.5rem 1rem 1.5rem;
       font-size: 1.1rem;
       border: none;
       border-radius: 50px;
@@ -80,6 +80,7 @@
       transition: all 0.3s ease;
       background: rgba(255,255,255,0.95);
       color: #333;
+      box-sizing: border-box;
     }
 
     .search-input:focus {
@@ -101,6 +102,7 @@
       color: #666;
       font-size: 1.2rem;
       pointer-events: none;
+      z-index: 10;
     }
 
     .results-container {
@@ -269,7 +271,7 @@
     @media (max-width: 768px) {
       .contact-finder-container {
         margin: 0.5rem;
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 15px;
         max-width: none;
         min-height: calc(100vh - 140px);
@@ -287,7 +289,7 @@
       
       .search-input {
         font-size: 1rem;
-        padding: 0.75rem 1rem;
+        padding: 0.75rem 3rem 0.75rem 1rem;
         border-radius: 12px;
         width: 100%;
         box-sizing: border-box;
