@@ -108,6 +108,48 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
     
+    // Chat system rules - for Teams-style messaging
+    match /chats/{chatId} {
+      // Users can read chats they're participants in
+      allow read: if request.auth != null 
+        && request.auth.token.email in resource.data.participants;
+      
+      // Authenticated users can create new chats
+      allow create: if request.auth != null 
+        && validateChat(request.resource.data)
+        && request.auth.token.email in request.resource.data.participants;
+      
+      // Participants can update chat metadata (rename, etc.)
+      allow update: if request.auth != null 
+        && request.auth.token.email in resource.data.participants
+        && validateChatUpdate(request.resource.data, resource.data);
+      
+      // Only admins can delete chats
+      allow delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Chat messages rules
+    match /chat-messages/{messageId} {
+      // Users can read messages from chats they're participants in
+      allow read: if request.auth != null 
+        && userInChat(resource.data.chatId, request.auth.token.email);
+      
+      // Authenticated users can create messages in chats they're participants in
+      allow create: if request.auth != null 
+        && validateChatMessage(request.resource.data)
+        && userInChat(request.resource.data.chatId, request.auth.token.email);
+      
+      // Users can update their own messages (edit, reactions)
+      allow update: if request.auth != null 
+        && request.auth.token.email == resource.data.senderEmail;
+      
+      // Users can delete their own messages, admins can delete any
+      allow delete: if request.auth != null 
+        && (request.auth.token.email == resource.data.senderEmail 
+            || request.auth.token.admin == true);
+    }
+    
     // Helper function to validate recognition note data
     function validateRecognitionNote(data) {
       return data.keys().hasAll(['content', 'author', 'timestamp'])
@@ -188,6 +230,50 @@ service cloud.firestore {
         && newData.createdBy == oldData.createdBy
         && newData.createdAt == oldData.createdAt;
         // Removed assignedTo check to allow transfers
+    }
+    
+    // Helper function to validate chat data
+    function validateChat(data) {
+      return data.keys().hasAll(['name', 'participants', 'createdBy', 'createdAt', 'lastMessageAt'])
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 100
+        && data.participants is list
+        && data.participants.size() > 0
+        && data.participants.size() <= 50
+        && data.createdBy is string
+        && data.createdBy.size() > 0
+        && data.createdAt is timestamp
+        && data.lastMessageAt is timestamp;
+    }
+    
+    // Helper function to validate chat updates
+    function validateChatUpdate(newData, oldData) {
+      return newData.createdBy == oldData.createdBy
+        && newData.createdAt == oldData.createdAt
+        && newData.participants is list
+        && newData.participants.size() > 0;
+    }
+    
+    // Helper function to validate chat message data
+    function validateChatMessage(data) {
+      return data.keys().hasAll(['chatId', 'senderEmail', 'senderName', 'message', 'timestamp'])
+        && data.chatId is string
+        && data.chatId.size() > 0
+        && data.senderEmail is string
+        && data.senderEmail.size() > 0
+        && data.senderName is string
+        && data.senderName.size() > 0
+        && data.message is string
+        && data.message.size() > 0
+        && data.message.size() <= 5000
+        && data.timestamp is timestamp;
+    }
+    
+    // Helper function to check if user is in chat
+    function userInChat(chatId, userEmail) {
+      return exists(/databases/$(database)/documents/chats/$(chatId)) 
+        && userEmail in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
     }
     
     // Default deny for all other documents
