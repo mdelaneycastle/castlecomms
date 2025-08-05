@@ -19,6 +19,15 @@
       position: relative;
     }
 
+    /* Ensure cork board section can accommodate the full 1000px width */
+    .cork-board-section {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      overflow-x: auto;
+      padding: 1rem 0;
+    }
+
     .recognition-header {
       text-align: center;
       margin-bottom: 3rem;
@@ -141,11 +150,10 @@
       border-radius: 20px;
       width: 1000px;
       height: 1000px;
-      max-width: 100%;
-      margin: 0 auto;
       position: relative;
       box-shadow: inset 0 0 50px rgba(139, 69, 19, 0.2), 0 15px 40px rgba(0,0,0,0.3);
       overflow: hidden;
+      flex-shrink: 0;
     }
 
     .cork-board::before {
@@ -383,12 +391,20 @@
         box-shadow: var(--shadow-light);
       }
       
+      .cork-board-section {
+        overflow-x: visible;
+        padding: 0;
+      }
+
       .cork-board {
         background: transparent;
         border-radius: 0;
         padding: 0;
-        min-height: auto;
+        width: 100%;
+        height: auto;
         position: relative;
+        border: none;
+        box-shadow: none;
       }
       
       .post-it-notes {
@@ -584,9 +600,11 @@
       <div id="message-area"></div>
     </div>
 
-    <div class="cork-board">
-      <div class="post-it-notes" id="postItContainer">
-        <div class="loading" id="loadingMessage">📌 Loading recognition notes...</div>
+    <div class="cork-board-section">
+      <div class="cork-board">
+        <div class="post-it-notes" id="postItContainer">
+          <div class="loading" id="loadingMessage">📌 Loading recognition notes...</div>
+        </div>
       </div>
     </div>
   </div>
