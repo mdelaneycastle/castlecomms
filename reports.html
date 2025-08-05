@@ -518,7 +518,7 @@
             redirectUri: powerBIConfig.redirectUri
           },
           cache: {
-            cacheLocation: "localStorage",
+            cacheLocation: "sessionStorage", // Changed from localStorage to sessionStorage
             storeAuthStateInCookie: false
           }
         });
@@ -526,21 +526,32 @@
         await msalInstance.initialize();
         console.log('MSAL initialized successfully');
         
+        // Clear any existing cached reports for this user
+        clearCachedReports();
+        
         // Try to get access token silently first
         await getAccessTokenSilently();
         
       } catch (error) {
         console.error('Error initializing MSAL:', error);
-        showFallbackReports();
+        clearCachedReports();
+        showInitialState();
       }
     }
 
     // Get access token silently or prompt for login
     async function getAccessTokenSilently() {
       try {
+        if (!msalInstance) {
+          console.error('MSAL instance not initialized');
+          showInitialState();
+          return;
+        }
+
         const accounts = msalInstance.getAllAccounts();
         if (accounts.length === 0) {
-          await loginUser();
+          console.log('No cached accounts, showing login prompt');
+          showLoginPrompt();
           return;
         }
 
@@ -554,25 +565,34 @@
         await loadAvailableReports(response.accessToken);
         
       } catch (error) {
-        console.log('Silent token acquisition failed, trying interactive login:', error);
-        await loginUser();
+        console.log('Silent token acquisition failed:', error);
+        showLoginPrompt();
       }
     }
 
     // Interactive login
     async function loginUser() {
       try {
+        if (!msalInstance) {
+          console.error('MSAL instance not initialized');
+          showInitialState();
+          return;
+        }
+
         const loginRequest = {
           scopes: powerBIConfig.scopes
         };
 
         const response = await msalInstance.loginPopup(loginRequest);
         console.log('User logged in successfully');
+        
+        // Clear any cached reports and load fresh ones for this user
+        clearCachedReports();
         await loadAvailableReports(response.accessToken);
         
       } catch (error) {
         console.error('Login failed:', error);
-        showFallbackReports();
+        showInitialState();
       }
     }
 
@@ -581,11 +601,15 @@
       const loadingElement = document.getElementById('loading-reports');
       const gridElement = document.getElementById('reports-grid');
       
-      loadingElement.style.display = 'block';
-      gridElement.innerHTML = '';
+      if (loadingElement) loadingElement.style.display = 'block';
+      if (gridElement) gridElement.innerHTML = '';
 
       try {
         if (!accessToken) {
+          if (!msalInstance) {
+            throw new Error('MSAL instance not initialized');
+          }
+          
           const accounts = msalInstance.getAllAccounts();
           if (accounts.length > 0) {
             const silentRequest = {
@@ -595,7 +619,7 @@
             const response = await msalInstance.acquireTokenSilent(silentRequest);
             accessToken = response.accessToken;
           } else {
-            throw new Error('No access token available');
+            throw new Error('No access token available - user needs to login');
           }
         }
 
@@ -613,19 +637,25 @@
         const data = await response.json();
         availableReports = data.value || [];
         
+        console.log(`Loaded ${availableReports.length} reports for current user`);
+        
         if (availableReports.length === 0) {
-          showFallbackReports();
+          showNoReportsMessage();
           return;
         }
 
         displayReportsGrid();
-        loadSavedSelection();
+        // Don't load saved selection - let user choose fresh
         
       } catch (error) {
         console.error('Error loading reports:', error);
-        showFallbackReports();
+        if (error.message.includes('user needs to login')) {
+          showLoginPrompt();
+        } else {
+          showFallbackReports();
+        }
       } finally {
-        loadingElement.style.display = 'none';
+        if (loadingElement) loadingElement.style.display = 'none';
       }
     }
 
@@ -716,7 +746,7 @@
     function applyReportSelection() {
       selectedReports = availableReports.filter(report => {
         const checkbox = document.getElementById(`checkbox-${report.id}`);
-        return checkbox.classList.contains('checked');
+        return checkbox && checkbox.classList.contains('checked');
       });
 
       if (selectedReports.length === 0) {
@@ -724,8 +754,8 @@
         return;
       }
 
-      // Save selection to localStorage
-      localStorage.setItem('selectedReports', JSON.stringify(selectedReports.map(r => r.id)));
+      // Save selection to sessionStorage (per-session only)
+      sessionStorage.setItem('selectedReports', JSON.stringify(selectedReports.map(r => r.id)));
       
       // Show reports content area
       document.getElementById('report-selector-section').style.display = 'none';
@@ -743,28 +773,72 @@
       document.getElementById('report-selector-section').style.display = 'block';
     }
 
-    // Load saved selection from localStorage
-    function loadSavedSelection() {
-      const saved = localStorage.getItem('selectedReports');
-      if (saved) {
-        const savedIds = JSON.parse(saved);
-        savedIds.forEach(reportId => {
-          const checkbox = document.getElementById(`checkbox-${reportId}`);
-          if (checkbox) {
-            const card = checkbox.closest('.report-card');
-            const checkmark = checkbox.querySelector('span');
-            
-            checkbox.classList.add('checked');
-            card.classList.add('selected');
-            checkmark.style.display = 'block';
-          }
-        });
-        
-        // Auto-apply if user has selections
-        if (savedIds.length > 0) {
-          setTimeout(() => applyReportSelection(), 1000);
-        }
+    // Clear cached reports for new user
+    function clearCachedReports() {
+      availableReports = [];
+      selectedReports = [];
+      sessionStorage.removeItem('selectedReports');
+      localStorage.removeItem('selectedReports');
+    }
+
+    // Show initial state before authentication
+    function showInitialState() {
+      const loadingElement = document.getElementById('loading-reports');
+      const gridElement = document.getElementById('reports-grid');
+      
+      if (loadingElement) loadingElement.style.display = 'none';
+      if (gridElement) {
+        gridElement.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #8a8886;">
+            <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">Power BI Reports</h3>
+            <p style="margin: 0 0 16px 0;">Sign in to view your available reports</p>
+            <button onclick="loginUser()" style="background: var(--primary-gradient); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer;">
+              Sign In to Power BI
+            </button>
+          </div>
+        `;
       }
+    }
+
+    // Show login prompt
+    function showLoginPrompt() {
+      const loadingElement = document.getElementById('loading-reports');
+      const gridElement = document.getElementById('reports-grid');
+      
+      if (loadingElement) loadingElement.style.display = 'none';
+      if (gridElement) {
+        gridElement.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #8a8886;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🔐</div>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">Authentication Required</h3>
+            <p style="margin: 0 0 16px 0;">Please sign in to access your Power BI reports</p>
+            <button onclick="loginUser()" style="background: var(--primary-gradient); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer;">
+              Sign In to Power BI
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // Show message when no reports available
+    function showNoReportsMessage() {
+      const gridElement = document.getElementById('reports-grid');
+      if (gridElement) {
+        gridElement.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #8a8886;">
+            <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">No Reports Available</h3>
+            <p style="margin: 0;">You don't have access to any Power BI reports yet.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Load saved selection from sessionStorage (per-session only)
+    function loadSavedSelection() {
+      // Don't auto-load saved selections - let users choose fresh each time
+      // This prevents showing wrong user's reports
     }
 
     // Setup report navigation
@@ -816,7 +890,13 @@
 
     // Initialize everything when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
-      initializeAuthentication();
+      // Show initial state first
+      showInitialState();
+      
+      // Then try to initialize authentication
+      setTimeout(() => {
+        initializeAuthentication();
+      }, 500);
     });
   </script>
 </body>
