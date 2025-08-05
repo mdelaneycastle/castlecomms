@@ -1806,11 +1806,22 @@ async function openTicket(ticketId) {
                            currentUser.email === ticketData.assignedTo.email;
     statusSelect.disabled = !canChangeStatus;
     
+    // Show/hide transfer section based on permissions
+    const transferSection = document.querySelector('.ticket-transfer-section');
+    const canTransfer = currentUser.uid === ticketData.createdBy.uid || 
+                       currentUser.email === ticketData.assignedTo.email;
+    
+    if (transferSection) {
+      transferSection.style.display = canTransfer ? 'block' : 'none';
+    }
+    
     // Load messages
     await loadTicketMessages(ticketId);
     
-    // Setup transfer functionality
-    setupTransferForm();
+    // Setup transfer functionality if user has permissions
+    if (canTransfer) {
+      setupTransferForm();
+    }
     
     // Show modal
     document.getElementById('ticket-modal').classList.add('show');
@@ -2175,6 +2186,15 @@ async function transferTicket() {
     return;
   }
   
+  // Check permissions - only creator or current assignee can transfer
+  const canTransfer = currentUser.uid === currentTicket.createdBy.uid || 
+                     currentUser.email === currentTicket.assignedTo.email;
+  
+  if (!canTransfer) {
+    alert('You can only transfer tickets that are assigned to you or that you created.');
+    return;
+  }
+  
   const transferBtn = document.getElementById('transfer-ticket-btn');
   transferBtn.disabled = true;
   transferBtn.textContent = 'Transferring...';
@@ -2183,18 +2203,39 @@ async function transferTicket() {
     // Get current user's display name
     const transferredByName = await getUserDisplayName(currentUser);
     
-    // Update ticket assignment
-    await db.collection('tickets').doc(currentTicket.id).update({
+    // Create updated ticket data
+    const updateData = {
       assignedTo: {
         email: transferSelectedUser.email,
         name: transferSelectedUser.name
       },
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    };
     
-    // Add system message about transfer
-    const transferMessage = `Ticket transferred from ${currentTicket.assignedTo.name} to ${transferSelectedUser.name} by ${transferredByName}. Reason: ${reason}`;
-    await addSystemMessage(transferMessage);
+    // Update ticket assignment using a transaction for better consistency
+    await db.runTransaction(async (transaction) => {
+      const ticketRef = db.collection('tickets').doc(currentTicket.id);
+      const ticketDoc = await transaction.get(ticketRef);
+      
+      if (!ticketDoc.exists) {
+        throw new Error('Ticket no longer exists');
+      }
+      
+      // Update the ticket
+      transaction.update(ticketRef, updateData);
+      
+      // Add transfer message to the messages array
+      const transferMessage = {
+        message: `Ticket transferred from ${currentTicket.assignedTo.name} to ${transferSelectedUser.name} by ${transferredByName}. Reason: ${reason}`,
+        senderEmail: 'system',
+        senderName: 'System',
+        timestamp: new Date()
+      };
+      
+      transaction.update(ticketRef, {
+        messages: firebase.firestore.FieldValue.arrayUnion(transferMessage)
+      });
+    });
     
     // Update current ticket object
     currentTicket.assignedTo = {
@@ -2211,14 +2252,23 @@ async function transferTicket() {
     document.getElementById('transfer-selected-user').innerHTML = '';
     document.getElementById('transfer-reason-input').value = '';
     
-    // Reload tickets list
+    // Reload tickets list and messages
     loadTickets();
+    await loadTicketMessages(currentTicket.id);
     
     alert('Ticket transferred successfully!');
     
   } catch (error) {
     console.error('Error transferring ticket:', error);
-    alert('Failed to transfer ticket. Please try again.');
+    
+    // More specific error messages
+    if (error.code === 'permission-denied') {
+      alert('Permission denied. You may not have permission to transfer this ticket.');
+    } else if (error.message.includes('Ticket no longer exists')) {
+      alert('This ticket no longer exists. Please refresh the page.');
+    } else {
+      alert('Failed to transfer ticket. Please try again or contact support.');
+    }
   }
   
   transferBtn.disabled = false;
