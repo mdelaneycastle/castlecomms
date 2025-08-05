@@ -53,46 +53,96 @@
       position: relative;
     }
 
-    .reports-content iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+    .report-navigation {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
-    .powerbi-iframe {
+    .nav-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .nav-btn:active {
+      transform: translateY(0);
+    }
+
+    .report-info {
+      text-align: center;
+      flex: 1;
+      margin: 0 2rem;
+    }
+
+    .report-info h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.3rem;
+      color: #2c3e50;
+      font-weight: 600;
+    }
+
+    .report-indicators {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .report-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #cbd5e0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .report-indicator.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transform: scale(1.2);
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+
+    .report-indicator:hover:not(.active) {
+      background: #a0aec0;
+      transform: scale(1.1);
+    }
+
+    .report-container {
+      flex: 1;
+      display: flex;
+      background: #f8f9fa;
+      position: relative;
+    }
+
+    .report-container iframe {
       width: 100%;
       height: 100%;
       border: none;
       background: white;
-      box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    .loading-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      color: #6c757d;
-      font-size: 1.2rem;
-      z-index: 1;
-    }
-
-    .loading-spinner {
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
 
     @keyframes fadeInDown {
       from { opacity: 0; transform: translateY(-30px); }
@@ -121,131 +171,41 @@
       .reports-subtitle {
         font-size: 0.9rem;
       }
+
+      .report-navigation {
+        padding: 0.75rem 1rem;
+      }
+
+      .nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+
+      .report-info {
+        margin: 0 1rem;
+      }
+
+      .report-info h3 {
+        font-size: 1.1rem;
+      }
+
+      .report-indicator {
+        width: 10px;
+        height: 10px;
+      }
     }
 
-    /* Power BI embed styling */
-    .powerbi-embed {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-    }
-    
-    .powerbi-info {
-      max-width: 800px;
-      text-align: center;
-    }
-    
-    .powerbi-info h3 {
-      font-size: 2rem;
-      color: #2c3e50;
-      margin-bottom: 1rem;
-    }
-    
-    .powerbi-info p {
-      font-size: 1.1rem;
-      color: #6c757d;
-      margin-bottom: 1.5rem;
-      line-height: 1.6;
-    }
-    
-    .access-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
-      margin-top: 2rem;
-    }
-    
-    .option-card {
-      background: white;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      transition: all 0.3s ease;
-    }
-    
-    .option-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    }
-    
-    .option-card h4 {
-      font-size: 1.3rem;
-      color: #2c3e50;
-      margin-bottom: 0.5rem;
-    }
-    
-    .option-card p {
-      font-size: 0.95rem;
-      color: #6c757d;
-      margin-bottom: 1.5rem;
-    }
-    
-    .access-btn {
-      display: inline-block;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      margin: 0.25rem;
-    }
-    
-    .access-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    
-    .access-btn.primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      font-size: 1.1rem;
-      padding: 1rem 2rem;
-    }
-    
-    .app-links {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    
-    @media (max-width: 768px) {
-      .access-options {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
-      
-      .option-card {
-        padding: 1.5rem;
-      }
-      
-      .powerbi-info h3 {
-        font-size: 1.5rem;
-      }
-      
-      .app-links {
-        flex-direction: column;
-      }
-    }
   </style>
 </head>
 
 <body>
-  <header id="main-header">
-    <h1 class="company-title">Castle Comms</h1>
-    <div class="menu-toggle" onclick="toggleSidebar()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
+  <header>
+    <button id="menu-toggle" class="hamburger">&#9776;</button>
+    <h1>Castle Comms - Reports</h1>
   </header>
 
-  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
-  <div id="sidebar"></div>
+  <div id="sidebar-container"></div>
 
   <main class="main-content">
     <div class="reports-container">
@@ -255,66 +215,108 @@
       </div>
       
       <div class="reports-content">
-        <iframe title="Status 5" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=803909e0-5ac0-474c-a2ad-2aeca879313d&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a" frameborder="0" allowFullScreen="true"></iframe>
+        <div class="report-navigation">
+          <button class="nav-btn prev-btn" onclick="switchReport('prev')" title="Previous Report">
+            <span>‹</span>
+          </button>
+          
+          <div class="report-info">
+            <h3 id="current-report-title">Status Report 1</h3>
+            <div class="report-indicators">
+              <div class="report-indicator active" onclick="switchToReport(0)"></div>
+              <div class="report-indicator" onclick="switchToReport(1)"></div>
+              <div class="report-indicator" onclick="switchToReport(2)"></div>
+            </div>
+          </div>
+          
+          <button class="nav-btn next-btn" onclick="switchReport('next')" title="Next Report">
+            <span>›</span>
+          </button>
+        </div>
+        
+        <div class="report-container">
+          <iframe 
+            id="report-iframe"
+            title="Power BI Report" 
+            width="100%" 
+            height="100%" 
+            src="https://app.powerbi.com/reportEmbed?reportId=803909e0-5ac0-474c-a2ad-2aeca879313d&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a" 
+            frameborder="0" 
+            allowFullScreen="true">
+          </iframe>
+        </div>
       </div>
     </div>
   </main>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  
+  <!-- Firebase config -->
+  <script src="firebase-init.js"></script>
+  
+  <!-- Shared components -->
+  <script src="shared-components.js"></script>
+  
   <script>
-    // Load sidebar functionality without Firebase
-    function loadSidebar() {
-      fetch('sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('sidebar').innerHTML = data;
-          
-          // Add event listeners
-          const closeBtn = document.getElementById('close-btn');
-          const signoutBtn = document.getElementById('signout-btn');
-          
-          if (closeBtn) {
-            closeBtn.addEventListener('click', closeSidebar);
-          }
-          
-          if (signoutBtn) {
-            signoutBtn.addEventListener('click', function() {
-              window.location.href = 'index.html';
-            });
-          }
-          
-          // Highlight current page
-          const reportsLink = document.querySelector('a[href="reports.html"]');
-          if (reportsLink) {
-            reportsLink.classList.add('active');
-          }
-        })
-        .catch(error => console.error('Error loading sidebar:', error));
+    // Report navigation functionality
+    let currentReportIndex = 0;
+    const reports = [
+      {
+        title: "Status Report 1",
+        src: "https://app.powerbi.com/reportEmbed?reportId=803909e0-5ac0-474c-a2ad-2aeca879313d&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a"
+      },
+      {
+        title: "Status Report 2", 
+        src: "https://app.powerbi.com/reportEmbed?reportId=803909e0-5ac0-474c-a2ad-2aeca879313d&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a"
+      },
+      {
+        title: "Status Report 3",
+        src: "https://app.powerbi.com/reportEmbed?reportId=803909e0-5ac0-474c-a2ad-2aeca879313d&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a"
+      }
+    ];
+    
+    function switchReport(direction) {
+      if (direction === 'next') {
+        currentReportIndex = (currentReportIndex + 1) % reports.length;
+      } else {
+        currentReportIndex = (currentReportIndex - 1 + reports.length) % reports.length;
+      }
+      
+      updateReport();
     }
     
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
+    function switchToReport(index) {
+      currentReportIndex = index;
+      updateReport();
+    }
+    
+    function updateReport() {
+      const iframe = document.getElementById('report-iframe');
+      const title = document.getElementById('current-report-title');
+      const indicators = document.querySelectorAll('.report-indicator');
       
-      if (sidebar && overlay) {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-        document.body.classList.toggle('sidebar-open');
+      if (iframe && title) {
+        iframe.src = reports[currentReportIndex].src;
+        title.textContent = reports[currentReportIndex].title;
+        
+        // Update indicators
+        indicators.forEach((indicator, index) => {
+          if (index === currentReportIndex) {
+            indicator.classList.add('active');
+          } else {
+            indicator.classList.remove('active');
+          }
+        });
       }
     }
     
-    function closeSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
-      
-      if (sidebar && overlay) {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        document.body.classList.remove('sidebar-open');
-      }
-    }
-    
-    // Load sidebar on page load
-    document.addEventListener('DOMContentLoaded', loadSidebar);
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateReport();
+    });
   </script>
 </body>
 </html>
