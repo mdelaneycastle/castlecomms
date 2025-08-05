@@ -53,6 +53,12 @@
       position: relative;
     }
 
+    .reports-content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
     .powerbi-iframe {
       width: 100%;
       height: 100%;
@@ -249,49 +255,7 @@
       </div>
       
       <div class="reports-content">
-        <div class="loading-message" id="loadingMessage">
-          <div class="loading-spinner"></div>
-          <div>Loading Power BI Dashboard...</div>
-        </div>
-        
-        <div class="powerbi-embed" id="powerbiEmbed">
-          <div class="powerbi-info">
-            <h3>Power BI Dashboard Access</h3>
-            <p>Due to security restrictions, Power BI cannot be embedded directly in an iframe.</p>
-            <p>Please use one of the options below to access your reports:</p>
-            
-            <div class="access-options">
-              <div class="option-card">
-                <h4>🌐 Web Browser</h4>
-                <p>Open Power BI in a new tab</p>
-                <a href="https://app.powerbi.com" target="_blank" class="access-btn primary">
-                  Open Power BI →
-                </a>
-              </div>
-              
-              <div class="option-card">
-                <h4>📱 Mobile App</h4>
-                <p>Download the Power BI mobile app</p>
-                <div class="app-links">
-                  <a href="https://apps.apple.com/app/microsoft-power-bi/id929738808" target="_blank" class="access-btn">
-                    📱 iOS App
-                  </a>
-                  <a href="https://play.google.com/store/apps/details?id=com.microsoft.powerbim" target="_blank" class="access-btn">
-                    🤖 Android App
-                  </a>
-                </div>
-              </div>
-              
-              <div class="option-card">
-                <h4>💼 Microsoft Teams</h4>
-                <p>Access through Teams integration</p>
-                <a href="https://teams.microsoft.com" target="_blank" class="access-btn">
-                  Open Teams →
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
+        <iframe title="Status 5" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=803909e0-5ac0-474c-a2ad-2aeca879313d&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a" frameborder="0" allowFullScreen="true"></iframe>
       </div>
     </div>
   </main>
@@ -351,15 +315,6 @@
     
     // Load sidebar on page load
     document.addEventListener('DOMContentLoaded', loadSidebar);
-    // Hide loading message after page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(() => {
-        const loadingMessage = document.getElementById('loadingMessage');
-        if (loadingMessage) {
-          loadingMessage.style.display = 'none';
-        }
-      }, 1000);
-    });
   </script>
 </body>
 </html>
