@@ -188,6 +188,8 @@
       cursor: pointer;
       transition: all 0.3s;
       box-shadow: var(--shadow-light);
+      width: auto;
+      align-self: flex-start;
     }
 
     .send-button:hover {
@@ -489,10 +491,12 @@
       }
       
       .send-button {
-        width: 100%;
-        padding: 0.75rem;
+        width: auto;
+        max-width: 200px;
+        padding: 0.75rem 1.5rem;
         font-size: 1rem;
         margin-top: 0.5rem;
+        align-self: flex-start;
       }
       
       .messages-section {
