@@ -53,18 +53,21 @@
 
     .ticket-type-card {
       background: rgba(255, 255, 255, 0.95);
-      border-radius: var(--border-radius);
+      border-radius: 16px;
       padding: 2rem;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: var(--shadow-light);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       border: 2px solid transparent;
+      display: block;
+      position: relative;
+      z-index: 1;
     }
 
     .ticket-type-card:hover {
       transform: translateY(-5px);
-      box-shadow: var(--shadow-medium);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       border-color: #667eea;
     }
 
@@ -148,14 +151,15 @@
       justify-content: center;
       margin-top: 2rem;
       width: 100%;
-      min-width: 700px;
+      min-width: 900px;
+      overflow-x: auto;
     }
 
     .monday-iframe-container iframe {
-      width: 100%;
-      min-width: 700px;
-      max-width: 800px;
-      height: auto;
+      width: 900px;
+      min-width: 900px;
+      height: 1200px;
+      border-radius: 10px;
     }
 
     /* View Tickets Section */
@@ -810,7 +814,7 @@
         width: 100%;
         min-width: 350px;
         max-width: 400px;
-        height: 600px;
+        height: 900px;
       }
 
       .view-tickets-btn {
@@ -1124,8 +1128,6 @@
       <div class="monday-iframe-container">
         <iframe 
           src="https://forms.monday.com/forms/embed/142233d15033ec5cb1fe363d7b9eff5b?r=euc1" 
-          width="650" 
-          height="800" 
           style="border: 0; box-shadow: 5px 5px 56px 0px rgba(0,0,0,0.25); border-radius: 10px;">
         </iframe>
       </div>
