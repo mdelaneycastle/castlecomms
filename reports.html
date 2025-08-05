@@ -491,6 +491,26 @@
   <!-- Azure AD Authentication -->
   <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
   
+  <!-- Backup MSAL from CDN -->
+  <script>
+    // Check if MSAL loaded, if not load from backup CDN
+    if (typeof msal === 'undefined') {
+      console.log('Loading MSAL from backup CDN...');
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js';
+      script.onload = function() {
+        console.log('MSAL loaded from backup CDN');
+        // Reinitialize after MSAL loads
+        setTimeout(() => {
+          if (typeof msal !== 'undefined') {
+            initializeAuthentication();
+          }
+        }, 100);
+      };
+      document.head.appendChild(script);
+    }
+  </script>
+  
   <!-- Shared components -->
   <script src="shared-components.js"></script>
   
@@ -511,6 +531,13 @@
     // Initialize MSAL and Power BI
     async function initializeAuthentication() {
       try {
+        // Check if MSAL is available
+        if (typeof msal === 'undefined') {
+          console.log('MSAL not yet loaded, showing initial state');
+          showInitialState();
+          return;
+        }
+
         msalInstance = new msal.PublicClientApplication({
           auth: {
             clientId: powerBIConfig.clientId,
@@ -573,10 +600,27 @@
     // Interactive login
     async function loginUser() {
       try {
-        if (!msalInstance) {
-          console.error('MSAL instance not initialized');
-          showInitialState();
+        // If MSAL isn't loaded yet, try to initialize first
+        if (typeof msal === 'undefined') {
+          console.log('MSAL not loaded, waiting...');
+          showLoginPrompt();
+          // Try to wait for MSAL and then retry
+          setTimeout(() => {
+            if (typeof msal !== 'undefined') {
+              loginUser();
+            } else {
+              alert('Authentication system is still loading. Please try again in a moment.');
+            }
+          }, 2000);
           return;
+        }
+
+        if (!msalInstance) {
+          console.log('MSAL instance not initialized, initializing now...');
+          await initializeAuthentication();
+          if (!msalInstance) {
+            throw new Error('Failed to initialize MSAL');
+          }
         }
 
         const loginRequest = {
@@ -592,6 +636,7 @@
         
       } catch (error) {
         console.error('Login failed:', error);
+        alert('Login failed: ' + error.message);
         showInitialState();
       }
     }
@@ -661,23 +706,27 @@
 
     // Show fallback reports if API fails
     function showFallbackReports() {
-      availableReports = [
-        {
-          id: 'bae6bdf6-4e60-4ac3-965c-e6c46569e9f5',
-          name: 'StockNSales',
-          description: 'Stock and Sales Analytics Report'
-        },
-        {
-          id: '5a5e361e-661c-41c9-90ae-821b46de10ae',
-          name: 'YTD Sales Report 2025',
-          description: 'Year to Date Sales Performance'
-        }
-      ];
+      console.log('Showing fallback reports due to API failure');
       
-      displayReportsGrid();
-      loadSavedSelection();
+      const gridElement = document.getElementById('reports-grid');
+      if (gridElement) {
+        gridElement.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #8a8886;">
+            <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">Connection Issue</h3>
+            <p style="margin: 0 0 16px 0;">Unable to load reports from Power BI. Please try again.</p>
+            <button onclick="location.reload()" style="background: var(--primary-gradient); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; margin-right: 8px;">
+              Refresh Page
+            </button>
+            <button onclick="loginUser()" style="background: transparent; color: #6264a7; border: 1px solid #6264a7; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer;">
+              Try Login Again
+            </button>
+          </div>
+        `;
+      }
       
-      document.getElementById('loading-reports').style.display = 'none';
+      const loadingElement = document.getElementById('loading-reports');
+      if (loadingElement) loadingElement.style.display = 'none';
     }
 
     // Display reports in grid
@@ -888,14 +937,25 @@
       }
     }
 
+    // Wait for MSAL to load and initialize
+    function waitForMSALAndInitialize() {
+      if (typeof msal !== 'undefined') {
+        console.log('MSAL available, initializing...');
+        initializeAuthentication();
+      } else {
+        console.log('Waiting for MSAL to load...');
+        setTimeout(waitForMSALAndInitialize, 100);
+      }
+    }
+
     // Initialize everything when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
       // Show initial state first
       showInitialState();
       
-      // Then try to initialize authentication
+      // Wait for MSAL to be available, then initialize
       setTimeout(() => {
-        initializeAuthentication();
+        waitForMSALAndInitialize();
       }, 500);
     });
   </script>
