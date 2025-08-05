@@ -147,10 +147,14 @@
       display: flex;
       justify-content: center;
       margin-top: 2rem;
+      width: 100%;
+      min-width: 700px;
     }
 
     .monday-iframe-container iframe {
-      max-width: 100%;
+      width: 100%;
+      min-width: 700px;
+      max-width: 800px;
       height: auto;
     }
 
@@ -797,9 +801,15 @@
         font-size: 1.2rem;
       }
 
+      .monday-iframe-container {
+        min-width: 350px;
+        overflow-x: auto;
+      }
+
       .monday-iframe-container iframe {
         width: 100%;
-        max-width: 350px;
+        min-width: 350px;
+        max-width: 400px;
         height: 600px;
       }
 
