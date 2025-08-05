@@ -834,36 +834,61 @@ async function initializeChat() {
   }
 }
 
-// Load all users for autocomplete from Firebase Realtime Database
+// Load all users for autocomplete from Firebase Authentication
 async function loadAllUsers() {
   try {
-    // Load users from Firebase Realtime Database (matching admin pages)
-    const realtimeDb = firebase.database();
-    const usersSnapshot = await realtimeDb.ref('users').once('value');
-    const usersData = usersSnapshot.val() || {};
+    // Unfortunately, Firebase Auth doesn't allow client-side listing of all users for security reasons
+    // We need to use a different approach - check if there's a Cloud Function or API endpoint
     
-    allUsers = Object.keys(usersData).map(uid => {
-      const userData = usersData[uid];
-      return {
-        uid: uid,
-        email: userData.email || (userData.name ? userData.name.toLowerCase().replace(/\s+/g, '.') + '@company.com' : 'unknown@company.com'),
-        name: userData.name || userData.displayName || extractNameFromEmail(userData.email || '')
-      };
-    }).filter(user => 
-      user.email && 
-      user.email.includes('@') && 
-      user.email !== currentUser.email // Remove current user from list
-    );
+    // For now, let's try to get users from a potential users collection in Firestore
+    // that might mirror the Authentication users
+    const usersSnapshot = await db.collection('users').get();
     
-    console.log(`Loaded ${allUsers.length} users dynamically from Firebase database`);
+    if (!usersSnapshot.empty) {
+      allUsers = usersSnapshot.docs.map(doc => {
+        const userData = doc.data();
+        return {
+          uid: doc.id,
+          email: userData.email,
+          name: userData.displayName || userData.name || extractNameFromEmail(userData.email || '')
+        };
+      }).filter(user => 
+        user.email && 
+        user.email.includes('@') && 
+        user.email !== currentUser.email // Remove current user from list
+      );
+      
+      console.log(`Loaded ${allUsers.length} users from Firestore users collection`);
+    } else {
+      // Fallback: If no Firestore users collection, try Realtime Database
+      console.log('No Firestore users collection found, trying Realtime Database...');
+      const realtimeDb = firebase.database();
+      const usersSnapshot = await realtimeDb.ref('users').once('value');
+      const usersData = usersSnapshot.val() || {};
+      
+      allUsers = Object.keys(usersData).map(uid => {
+        const userData = usersData[uid];
+        return {
+          uid: uid,
+          email: userData.email || (userData.name ? userData.name.toLowerCase().replace(/\s+/g, '.') + '@company.com' : 'unknown@company.com'),
+          name: userData.name || userData.displayName || extractNameFromEmail(userData.email || '')
+        };
+      }).filter(user => 
+        user.email && 
+        user.email.includes('@') && 
+        user.email !== currentUser.email // Remove current user from list
+      );
+      
+      console.log(`Loaded ${allUsers.length} users from Realtime Database fallback`);
+    }
     
-    // If no users found in database, log warning but continue
+    // If still no users found, log warning but continue
     if (allUsers.length === 0) {
-      console.warn('No other users found in Firebase database - user can only create chats with themselves');
+      console.warn('No other users found in any database - user can only create chats with themselves');
     }
     
   } catch (error) {
-    console.error('Error loading users from Firebase:', error);
+    console.error('Error loading users:', error);
     // On error, empty list - user can still use chat but can't add others
     allUsers = [];
   }
