@@ -353,6 +353,77 @@
       cursor: not-allowed;
     }
 
+    /* Typing Indicators */
+    .typing-indicators {
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #8a8886;
+      font-style: italic;
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .typing-dots {
+      display: inline-flex;
+      gap: 2px;
+    }
+
+    .typing-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #8a8886;
+      animation: typingPulse 1.5s infinite;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.3s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.6s; }
+
+    @keyframes typingPulse {
+      0%, 60%, 100% { opacity: 0.3; }
+      30% { opacity: 1; }
+    }
+
+    /* Read Receipts */
+    .message-read-status {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: #8a8886;
+      margin-top: 4px;
+    }
+
+    .message-group.own .message-read-status {
+      justify-content: flex-end;
+    }
+
+    .read-receipt {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .read-receipt.delivered {
+      color: #8a8886;
+    }
+
+    .read-receipt.read {
+      color: #6264a7;
+    }
+
+    .read-receipt-icon {
+      font-size: 12px;
+    }
+
     /* Empty State */
     .chat-empty {
       flex: 1;
@@ -726,6 +797,9 @@ let allUsers = [];
 let selectedUsers = [];
 let currentChat = null;
 let chatListeners = [];
+let typingUsers = new Set();
+let typingTimer = null;
+let readReceiptListeners = [];
 
 document.addEventListener('DOMContentLoaded', function() {
   // Check authentication first
@@ -1124,6 +1198,7 @@ function displayChatInterface() {
     </div>
     
     <div class="chat-input-area">
+      <div class="typing-indicators" id="typing-indicators"></div>
       <div class="chat-input-container">
         <textarea class="chat-input" id="message-input" placeholder="Type a message..." rows="1"></textarea>
         <button class="send-button" id="send-message-btn" onclick="sendMessage()">Send</button>
@@ -1131,10 +1206,18 @@ function displayChatInterface() {
     </div>
   `;
   
-  // Setup message input auto-resize
+  // Setup message input auto-resize and typing indicators
   const messageInput = document.getElementById('message-input');
-  messageInput.addEventListener('input', autoResizeTextarea);
+  messageInput.addEventListener('input', handleMessageInput);
   messageInput.addEventListener('keydown', handleMessageInputKeydown);
+  messageInput.addEventListener('focus', setupTypingIndicators);
+  messageInput.addEventListener('blur', clearTypingIndicator);
+}
+
+// Handle message input with typing indicators
+function handleMessageInput(e) {
+  autoResizeTextarea(e);
+  handleTypingIndicator();
 }
 
 // Auto-resize textarea
@@ -1142,6 +1225,109 @@ function autoResizeTextarea(e) {
   const textarea = e.target;
   textarea.style.height = 'auto';
   textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+// Handle typing indicator
+function handleTypingIndicator() {
+  if (!currentChat || !currentUser) return;
+  
+  // Clear existing timer
+  if (typingTimer) {
+    clearTimeout(typingTimer);
+  }
+  
+  // Send typing indicator
+  sendTypingIndicator(true);
+  
+  // Clear typing indicator after 2 seconds of inactivity
+  typingTimer = setTimeout(() => {
+    sendTypingIndicator(false);
+  }, 2000);
+}
+
+// Setup typing indicators listener
+function setupTypingIndicators() {
+  if (!currentChat) return;
+  
+  // Clean up existing typing listeners
+  readReceiptListeners.forEach(unsubscribe => unsubscribe());
+  readReceiptListeners = [];
+  
+  // Listen for typing indicators
+  const typingListener = db.collection('chat-typing')
+    .where('chatId', '==', currentChat.id)
+    .onSnapshot((snapshot) => {
+      updateTypingIndicators(snapshot.docs);
+    });
+  
+  readReceiptListeners.push(typingListener);
+}
+
+// Send typing indicator
+async function sendTypingIndicator(isTyping) {
+  if (!currentChat || !currentUser) return;
+  
+  try {
+    const typingDocId = `${currentChat.id}_${currentUser.email}`;
+    
+    if (isTyping) {
+      await db.collection('chat-typing').doc(typingDocId).set({
+        chatId: currentChat.id,
+        userEmail: currentUser.email,
+        userName: await getUserDisplayName(currentUser),
+        isTyping: true,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      await db.collection('chat-typing').doc(typingDocId).delete();
+    }
+  } catch (error) {
+    console.error('Error updating typing indicator:', error);
+  }
+}
+
+// Update typing indicators display
+function updateTypingIndicators(typingDocs) {
+  const typingContainer = document.getElementById('typing-indicators');
+  if (!typingContainer) return;
+  
+  const typingUsers = typingDocs
+    .map(doc => doc.data())
+    .filter(data => data.userEmail !== currentUser.email && data.isTyping)
+    .map(data => data.userName);
+  
+  if (typingUsers.length === 0) {
+    typingContainer.innerHTML = '';
+    return;
+  }
+  
+  let typingText = '';
+  if (typingUsers.length === 1) {
+    typingText = `${typingUsers[0]} is typing`;
+  } else if (typingUsers.length === 2) {
+    typingText = `${typingUsers[0]} and ${typingUsers[1]} are typing`;
+  } else {
+    typingText = `${typingUsers.length} people are typing`;
+  }
+  
+  typingContainer.innerHTML = `
+    <div class="typing-indicator">
+      <span>${typingText}</span>
+      <div class="typing-dots">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+  `;
+}
+
+// Clear typing indicator
+function clearTypingIndicator() {
+  if (typingTimer) {
+    clearTimeout(typingTimer);
+  }
+  sendTypingIndicator(false);
 }
 
 // Handle Enter key in message input
@@ -1219,8 +1405,10 @@ function displayMessages(messageDocs) {
     }
     
     currentGroup.messages.push({
+      id: doc.id,
       message: data.message,
-      timestamp: timestamp
+      timestamp: timestamp,
+      readBy: data.readBy || []
     });
     currentGroup.lastTimestamp = timestamp;
   });
@@ -1240,6 +1428,35 @@ function displayMessages(messageDocs) {
       `;
     }
     
+    // Add read receipt for own messages
+    let readReceiptHTML = '';
+    if (group.isOwn && group.messages.length > 0) {
+      const lastMessage = group.messages[group.messages.length - 1];
+      const otherParticipants = currentChat.participants.filter(email => email !== currentUser.email);
+      const readByOthers = lastMessage.readBy.filter(email => email !== currentUser.email);
+      
+      let receiptClass = 'delivered';
+      let receiptIcon = '✓';
+      let receiptText = 'Sent';
+      
+      if (readByOthers.length > 0) {
+        receiptClass = 'read';
+        receiptIcon = '✓✓';
+        if (readByOthers.length === otherParticipants.length) {
+          receiptText = 'Read by all';
+        } else {
+          receiptText = `Read by ${readByOthers.length}`;
+        }
+      }
+      
+      readReceiptHTML = `<div class="message-read-status" id="read-status-${lastMessage.id}">
+        <div class="read-receipt ${receiptClass}">
+          <span class="read-receipt-icon">${receiptIcon}</span>
+          <span>${receiptText}</span>
+        </div>
+      </div>`;
+    }
+    
     return `
       <div class="message-group ${group.isOwn ? 'own' : ''}">
         <div class="message-header ${group.isOwn ? 'own' : ''}">
@@ -1248,6 +1465,7 @@ function displayMessages(messageDocs) {
           <div class="message-time">${formatTimestamp(group.lastTimestamp)}</div>
         </div>
         ${messagesHTML}
+        ${readReceiptHTML}
       </div>
     `;
   }).join('');
@@ -1256,6 +1474,9 @@ function displayMessages(messageDocs) {
   
   // Scroll to bottom
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+  // Mark messages as read
+  markMessagesAsRead();
 }
 
 // Send message
@@ -1272,12 +1493,13 @@ async function sendMessage() {
     const currentUserName = await getUserDisplayName(currentUser);
     
     // Add message to chat-messages collection
-    await db.collection('chat-messages').add({
+    const messageRef = await db.collection('chat-messages').add({
       chatId: currentChat.id,
       senderEmail: currentUser.email,
       senderName: currentUserName,
       message: message,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      readBy: [currentUser.email] // Mark as read by sender
     });
     
     // Update chat's last message
@@ -1297,6 +1519,41 @@ async function sendMessage() {
   }
   
   sendBtn.disabled = false;
+}
+
+// Mark messages as read
+async function markMessagesAsRead() {
+  if (!currentChat || !currentUser) return;
+  
+  try {
+    // Get unread messages
+    const unreadMessages = await db.collection('chat-messages')
+      .where('chatId', '==', currentChat.id)
+      .where('senderEmail', '!=', currentUser.email)
+      .get();
+    
+    const batch = db.batch();
+    let hasUpdates = false;
+    
+    unreadMessages.docs.forEach(doc => {
+      const data = doc.data();
+      const readBy = data.readBy || [];
+      
+      if (!readBy.includes(currentUser.email)) {
+        batch.update(doc.ref, {
+          readBy: firebase.firestore.FieldValue.arrayUnion(currentUser.email)
+        });
+        hasUpdates = true;
+      }
+    });
+    
+    if (hasUpdates) {
+      await batch.commit();
+    }
+    
+  } catch (error) {
+    console.error('Error marking messages as read:', error);
+  }
 }
 
 // Rename chat prompt
