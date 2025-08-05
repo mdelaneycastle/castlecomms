@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <link rel="stylesheet" href="style.css?v=20250731" />
+  <style>
+    .reports-container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 120px);
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+
+    .reports-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+      flex-shrink: 0;
+    }
+
+    .reports-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .reports-subtitle {
+      font-size: 1.1rem;
+      margin: 0.5rem 0 0 0;
+      opacity: 0.9;
+      font-style: italic;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .reports-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #f8f9fa;
+      position: relative;
+    }
+
+    .powerbi-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .loading-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #6c757d;
+      font-size: 1.2rem;
+      z-index: 1;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .reports-container {
+        height: calc(100vh - 140px);
+      }
+      
+      .reports-header {
+        padding: 1rem;
+      }
+      
+      .reports-title {
+        font-size: 1.8rem;
+      }
+      
+      .reports-subtitle {
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Handle iframe loading */
+    .powerbi-iframe {
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .powerbi-iframe.loaded {
+      opacity: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <header id="main-header">
+    <h1 class="company-title">Castle Comms</h1>
+    <div class="menu-toggle" onclick="toggleSidebar()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </header>
+
+  <div id="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div id="sidebar"></div>
+
+  <main class="main-content">
+    <div class="reports-container">
+      <div class="reports-header">
+        <h1 class="reports-title">📊 Reports Dashboard</h1>
+        <p class="reports-subtitle">Power BI Analytics & Insights</p>
+      </div>
+      
+      <div class="reports-content">
+        <div class="loading-message" id="loadingMessage">
+          <div class="loading-spinner"></div>
+          <div>Loading Power BI Dashboard...</div>
+        </div>
+        
+        <iframe 
+          id="powerbiFrame"
+          class="powerbi-iframe" 
+          src="https://app.powerbi.com"
+          title="Power BI Dashboard"
+          allowfullscreen
+          onload="handleIframeLoad()"
+          onerror="handleIframeError()">
+        </iframe>
+      </div>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    // Handle iframe loading
+    function handleIframeLoad() {
+      const iframe = document.getElementById('powerbiFrame');
+      const loadingMessage = document.getElementById('loadingMessage');
+      
+      // Hide loading message and show iframe
+      setTimeout(() => {
+        loadingMessage.style.display = 'none';
+        iframe.classList.add('loaded');
+      }, 1000);
+    }
+
+    // Handle iframe errors
+    function handleIframeError() {
+      const loadingMessage = document.getElementById('loadingMessage');
+      loadingMessage.innerHTML = `
+        <div style="color: #dc3545;">
+          <i>⚠️</i>
+          <div>Unable to load Power BI Dashboard</div>
+          <div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.8;">
+            Please check your internet connection or try refreshing the page.
+          </div>
+        </div>
+      `;
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set active navigation
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar) {
+        // Wait for sidebar to load, then highlight reports
+        setTimeout(() => {
+          const reportsLink = sidebar.querySelector('a[href="reports.html"]');
+          if (reportsLink) {
+            reportsLink.classList.add('active');
+          }
+        }, 100);
+      }
+    });
+  </script>
+</body>
+</html>
