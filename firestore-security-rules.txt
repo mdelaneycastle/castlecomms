@@ -1,0 +1,294 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Recognition Board rules - authenticated users can read and create notes
+    match /recognition-notes/{noteId} {
+      // Anyone authenticated can read recognition notes
+      allow read: if request.auth != null;
+      
+      // Authenticated users can create new notes with proper validation
+      allow create: if request.auth != null 
+        && validateRecognitionNote(request.resource.data);
+      
+      // Only admins can update or delete notes
+      allow update, delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Drawing Noticeboard rules - authenticated users can read and create drawings
+    match /drawings/{drawingId} {
+      // Anyone authenticated can read drawings
+      allow read: if request.auth != null;
+      
+      // Authenticated users can create new drawings with proper validation
+      allow create: if request.auth != null 
+        && validateDrawing(request.resource.data);
+      
+      // Only admins can update or delete drawings
+      allow update, delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Messages rules - users can read messages sent to them and create messages
+    match /messages/{messageId} {
+      // Users can read messages if they are in the recipients list
+      allow read: if request.auth != null 
+        && request.auth.token.email in resource.data.recipients;
+      
+      // Authenticated users can create messages with proper validation
+      allow create: if request.auth != null 
+        && validateMessage(request.resource.data);
+      
+      // Users can update messages to mark them as read
+      allow update: if request.auth != null 
+        && request.auth.token.email in resource.data.recipients
+        && onlyUpdatingReadStatus(request.resource.data, resource.data);
+      
+      // Only admins can delete messages
+      allow delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Tickets rules - UPDATED FOR TRANSFERS
+    match /tickets/{ticketId} {
+      // Allow authenticated users to read tickets (security handled by queries)
+      allow read: if request.auth != null;
+      
+      // Authenticated users can create tickets with proper validation
+      allow create: if request.auth != null 
+        && validateTicket(request.resource.data);
+      
+      // Allow updates for creator, current assignee, OR new assignee (for transfers)
+      allow update: if request.auth != null 
+        && (request.auth.uid == resource.data.createdBy.uid 
+            || request.auth.token.email == resource.data.assignedTo.email
+            || (exists(/databases/$(database)/documents/tickets/$(ticketId)) 
+                && request.auth.token.email == request.resource.data.assignedTo.email))
+        && validateTicketUpdate(request.resource.data, resource.data);
+      
+      // Only admins can delete tickets
+      allow delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Communications rules - all authenticated users can read, only admins can write
+    match /communications/{commId} {
+      // Anyone authenticated can read communications
+      allow read: if request.auth != null;
+      
+      // Only admins can create, update, and delete communications
+      allow create, update, delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Communication reads tracking - users can manage their own read status, admins can read all for analytics
+    match /communication-reads/{readId} {
+      // Users can read their own read status records, admins can read all for analytics
+      allow read: if request.auth != null 
+        && (request.auth.uid == resource.data.userId || request.auth.token.admin == true);
+      
+      // Users can create and delete their own read status records
+      allow create, delete: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Communication tasks tracking - users can manage their own task completions, admins can read all for analytics
+    match /communication-tasks/{taskId} {
+      // Users can read their own task completion records, admins can read all for analytics
+      allow read: if request.auth != null 
+        && (request.auth.uid == resource.data.userId || request.auth.token.admin == true);
+      
+      // Users can create and delete their own task completion records
+      allow create, delete: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Allow reading posts for authenticated users (for existing newsfeed functionality)
+    match /posts/{postId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Chat system rules - for Teams-style messaging
+    match /chats/{chatId} {
+      // Users can read chats they're participants in
+      allow read: if request.auth != null 
+        && request.auth.token.email in resource.data.participants;
+      
+      // Authenticated users can create new chats
+      allow create: if request.auth != null 
+        && validateChat(request.resource.data)
+        && request.auth.token.email in request.resource.data.participants;
+      
+      // Participants can update chat metadata (rename, etc.)
+      allow update: if request.auth != null 
+        && request.auth.token.email in resource.data.participants
+        && validateChatUpdate(request.resource.data, resource.data);
+      
+      // Only admins can delete chats
+      allow delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Chat messages rules
+    match /chat-messages/{messageId} {
+      // Users can read messages from chats they're participants in
+      allow read: if request.auth != null 
+        && userInChat(resource.data.chatId, request.auth.token.email);
+      
+      // Authenticated users can create messages in chats they're participants in
+      allow create: if request.auth != null 
+        && validateChatMessage(request.resource.data)
+        && userInChat(request.resource.data.chatId, request.auth.token.email);
+      
+      // Users can update their own messages (edit, reactions)
+      allow update: if request.auth != null 
+        && request.auth.token.email == resource.data.senderEmail;
+      
+      // Users can delete their own messages, admins can delete any
+      allow delete: if request.auth != null 
+        && (request.auth.token.email == resource.data.senderEmail 
+            || request.auth.token.admin == true);
+    }
+    
+    // Helper function to validate recognition note data
+    function validateRecognitionNote(data) {
+      return data.keys().hasAll(['content', 'author', 'timestamp'])
+        && data.content is string
+        && data.content.size() > 0
+        && data.content.size() <= 300
+        && data.author is string
+        && data.author.size() <= 50
+        && data.timestamp is timestamp;
+    }
+    
+    // Helper function to validate drawing data
+    function validateDrawing(data) {
+      return data.imageData is string
+        && data.imageData.size() > 0
+        && data.timestamp is timestamp
+        && data.position is map
+        && data.position.keys().hasAll(['x', 'y'])
+        && data.position.x is number
+        && data.position.y is number;
+    }
+    
+    // Helper function to validate message data
+    function validateMessage(data) {
+      return data.keys().hasAll(['senderId', 'senderEmail', 'senderName', 'message', 'recipients', 'timestamp'])
+        && data.senderId is string
+        && data.senderId.size() > 0
+        && data.senderEmail is string
+        && data.senderEmail.size() > 0
+        && data.senderName is string
+        && data.senderName.size() > 0
+        && data.message is string
+        && data.message.size() > 0
+        && data.message.size() <= 2000
+        && data.recipients is list
+        && data.recipients.size() > 0
+        && data.timestamp is timestamp;
+    }
+    
+    // Helper function to check if only read status is being updated
+    function onlyUpdatingReadStatus(newData, oldData) {
+      return newData.keys() == oldData.keys()
+        && newData.senderId == oldData.senderId
+        && newData.senderEmail == oldData.senderEmail
+        && newData.senderName == oldData.senderName
+        && newData.message == oldData.message
+        && newData.recipients == oldData.recipients
+        && newData.timestamp == oldData.timestamp;
+    }
+    
+    // Helper function to validate ticket data
+    function validateTicket(data) {
+      return data.keys().hasAll(['ticketId', 'title', 'description', 'category', 'status', 'createdBy', 'assignedTo', 'createdAt'])
+        && data.ticketId is string
+        && data.ticketId.size() > 0
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 100
+        && data.description is string
+        && data.description.size() > 0
+        && data.description.size() <= 2000
+        && data.category is string
+        && data.category.size() > 0
+        && data.status in ['open', 'on-hold', 'resolved']
+        && data.createdBy is map
+        && data.createdBy.keys().hasAll(['uid', 'email', 'name'])
+        && data.assignedTo is map
+        && data.assignedTo.keys().hasAll(['email', 'name'])
+        && data.createdAt is timestamp;
+    }
+    
+    // Helper function to validate ticket updates - RELAXED FOR TRANSFERS
+    function validateTicketUpdate(newData, oldData) {
+      return newData.ticketId == oldData.ticketId
+        && newData.title == oldData.title
+        && newData.description == oldData.description
+        && newData.category == oldData.category
+        && newData.createdBy == oldData.createdBy
+        && newData.createdAt == oldData.createdAt;
+        // Removed assignedTo check to allow transfers
+    }
+    
+    // Helper function to validate chat data
+    function validateChat(data) {
+      return data.keys().hasAll(['name', 'participants', 'createdBy', 'createdAt', 'lastMessageAt'])
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 100
+        && data.participants is list
+        && data.participants.size() > 0
+        && data.participants.size() <= 50
+        && data.createdBy is string
+        && data.createdBy.size() > 0
+        && data.createdAt is timestamp
+        && data.lastMessageAt is timestamp;
+    }
+    
+    // Helper function to validate chat updates
+    function validateChatUpdate(newData, oldData) {
+      return newData.createdBy == oldData.createdBy
+        && newData.createdAt == oldData.createdAt
+        && newData.participants is list
+        && newData.participants.size() > 0;
+    }
+    
+    // Helper function to validate chat message data
+    function validateChatMessage(data) {
+      return data.keys().hasAll(['chatId', 'senderEmail', 'senderName', 'message', 'timestamp'])
+        && data.chatId is string
+        && data.chatId.size() > 0
+        && data.senderEmail is string
+        && data.senderEmail.size() > 0
+        && data.senderName is string
+        && data.senderName.size() > 0
+        && data.message is string
+        && data.message.size() > 0
+        && data.message.size() <= 5000
+        && data.timestamp is timestamp;
+    }
+    
+    // Helper function to check if user is in chat
+    function userInChat(chatId, userEmail) {
+      return exists(/databases/$(database)/documents/chats/$(chatId)) 
+        && userEmail in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+    }
+    
+    // Default deny for all other documents
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Instructions:
+// 1. Go to Firebase Console > Firestore Database > Rules
+// 2. Replace the existing rules with the rules above
+// 3. Click "Publish" to apply the changes
+//
+// Key changes for ticket transfers:
+// - Removed assignedTo validation restriction in validateTicketUpdate()
+// - Added permission for new assignee to update tickets during transfer
+// - Keeps all existing functionality for recognition board, messages, communications, etc.
