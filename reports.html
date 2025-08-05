@@ -556,17 +556,17 @@
       <!-- My Reports Section -->
       <div class="report-selector-section" id="report-selector-section">
         <div class="selector-header">
-          <h3>📊 My Power BI Reports</h3>
-          <button class="refresh-reports-btn" onclick="showAddReportModal()">+ Add Report</button>
+          <h3>📊 My Public Power BI Reports</h3>
+          <button class="refresh-reports-btn" onclick="showAddReportModal()">+ Add Public Report</button>
         </div>
         
         <div class="reports-grid" id="reports-grid">
           <div class="report-empty" style="text-align: center; padding: 40px; color: #8a8886;">
             <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
-            <h3 style="color: #323130; margin: 0 0 8px 0;">No Reports Added Yet</h3>
-            <p style="margin: 0 0 16px 0;">Click "+ Add Report" to add your PowerBI embed links</p>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">No Public Reports Added Yet</h3>
+            <p style="margin: 0 0 16px 0;">Click "+ Add Public Report" to add your PowerBI public URLs</p>
             <button onclick="showAddReportModal()" style="background: var(--primary-gradient); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer;">
-              Add Your First Report
+              Add Your First Public Report
             </button>
           </div>
         </div>
@@ -618,7 +618,7 @@
   <div class="modal" id="add-report-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">Add Power BI Report</h3>
+        <h3 class="modal-title">Add Public Power BI Report</h3>
         <button class="modal-close" onclick="closeAddReportModal()">&times;</button>
       </div>
       
@@ -629,10 +629,12 @@
         </div>
         
         <div class="form-group">
-          <label class="form-label" for="report-url-input">PowerBI Embed URL</label>
-          <textarea class="form-input" id="report-url-input" rows="3" placeholder="Paste your PowerBI embed URL here..." required style="resize: vertical;"></textarea>
+          <label class="form-label" for="report-url-input">PowerBI Public URL</label>
+          <textarea class="form-input" id="report-url-input" rows="3" placeholder="Paste your PowerBI public URL here..." required style="resize: vertical;"></textarea>
           <small style="color: #8a8886; font-size: 12px; margin-top: 4px; display: block;">
-            💡 Get this from PowerBI: Report → Share → Embed → Copy embed code → paste the src="" URL here
+            💡 <strong>Important:</strong> Use "Publish to Web" URLs from PowerBI (File → Publish to Web) for public access.<br>
+            Regular embed URLs require authentication and won't work here.<br>
+            The URL should look like: https://app.powerbi.com/view?r=...
           </small>
         </div>
         
@@ -717,10 +719,10 @@
         gridElement.innerHTML = `
           <div class="report-empty" style="text-align: center; padding: 40px; color: #8a8886;">
             <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
-            <h3 style="color: #323130; margin: 0 0 8px 0;">No Reports Added Yet</h3>
-            <p style="margin: 0 0 16px 0;">Click "+ Add Report" to add your PowerBI embed links</p>
+            <h3 style="color: #323130; margin: 0 0 8px 0;">No Public Reports Added Yet</h3>
+            <p style="margin: 0 0 16px 0;">Click "+ Add Public Report" to add your PowerBI public URLs</p>
             <button onclick="showAddReportModal()" style="background: var(--primary-gradient); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer;">
-              Add Your First Report
+              Add Your First Public Report
             </button>
           </div>
         `;
@@ -772,9 +774,15 @@
         return;
       }
 
-      // Basic URL validation
-      if (!url.includes('powerbi.com') && !url.includes('http')) {
-        alert('Please enter a valid PowerBI embed URL.');
+      // URL validation for PowerBI public URLs
+      if (!url.includes('powerbi.com') || !url.includes('http')) {
+        alert('Please enter a valid PowerBI URL starting with https://');
+        return;
+      }
+      
+      // Check if it's likely a public URL
+      if (url.includes('/embedreport/') && !url.includes('/view?r=')) {
+        alert('⚠️ This looks like a private embed URL that requires authentication.\n\nFor public access, use "Publish to Web" from PowerBI:\n1. Go to File → Publish to Web\n2. Copy the provided public URL\n3. The URL should contain "/view?r=" not "/embedreport/"');
         return;
       }
 

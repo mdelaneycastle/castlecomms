@@ -834,54 +834,38 @@ async function initializeChat() {
   }
 }
 
-// Load all users for autocomplete
+// Load all users for autocomplete from Firebase Realtime Database
 async function loadAllUsers() {
   try {
-    // Use static list of accounts we created
-    allUsers = [
-      { email: 'mdelaney@castlefineart.com', name: 'Marc Delaney' },
-      { email: 'gturpin@washingtongreen.co.uk', name: 'Gary Turpin' },
-      { email: 'icc@castlefineart.com', name: 'ICC' },
-      { email: 'mailbox@castlefineart.com', name: 'Mailbox' },
-      { email: 'cheltenham@castlefineart.com', name: 'Cheltenham' },
-      { email: 'derby@castlefineart.com', name: 'Derby' },
-      { email: 'leamingtonspa@castlefineart.com', name: 'Leamington Spa' },
-      { email: 'miltonkeynes@castlefineart.com', name: 'Milton Keynes' },
-      { email: 'nottingham@castlefineart.com', name: 'Nottingham' },
-      { email: 'stamford@castlefineart.com', name: 'Stamford' },
-      { email: 'stratford@castlefineart.com', name: 'Stratford' },
-      { email: 'chester@castlefineart.com', name: 'Chester' },
-      { email: 'harrogate@castlefineart.com', name: 'Harrogate' },
-      { email: 'leeds@castlefineart.com', name: 'Leeds' },
-      { email: 'liverpool@castlefineart.com', name: 'Liverpool' },
-      { email: 'manchester@castlefineart.com', name: 'Manchester' },
-      { email: 'newcastle@castlefineart.com', name: 'Newcastle' },
-      { email: 'meadowhall@castlefineart.com', name: 'Meadowhall' },
-      { email: 'york@castlefineart.com', name: 'York' },
-      { email: 'cgn@castlefineart.com', name: 'CGN' },
-      { email: 'sms@castlefineart.com', name: 'SMS' },
-      { email: 'scp@castlefineart.com', name: 'SCP' },
-      { email: 'bath@castlefineart.com', name: 'Bath' },
-      { email: 'brighton@castlefineart.com', name: 'Brighton' },
-      { email: 'bristol@castlefineart.com', name: 'Bristol' },
-      { email: 'cambridge@castlefineart.com', name: 'Cambridge' },
-      { email: 'canterbury@castlefineart.com', name: 'Canterbury' },
-      { email: 'exeter@castlefineart.com', name: 'Exeter' },
-      { email: 'guildford@castlefineart.com', name: 'Guildford' },
-      { email: 'bluewater@castlefineart.com', name: 'Bluewater' },
-      { email: 'marlow@castlefineart.com', name: 'Marlow' },
-      { email: 'norwich@castlefineart.com', name: 'Norwich' },
-      { email: 'oxford@castlefineart.com', name: 'Oxford' },
-      { email: 'reading@castlefineart.com', name: 'Reading' },
-      { email: 'tunbridgewells@castlefineart.com', name: 'Tunbridge Wells' },
-      { email: 'winchester@castlefineart.com', name: 'Winchester' },
-      { email: 'windsor@castlefineart.com', name: 'Windsor' },
-      { email: 'edinburgh@castlefineart.com', name: 'Edinburgh' },
-      { email: 'glasgow@castlefineart.com', name: 'Glasgow' },
-      { email: 'cardiff@castlefineart.com', name: 'Cardiff' }
-    ].filter(user => user.email !== currentUser.email); // Remove current user from list
+    // Load users from Firebase Realtime Database (matching admin pages)
+    const realtimeDb = firebase.database();
+    const usersSnapshot = await realtimeDb.ref('users').once('value');
+    const usersData = usersSnapshot.val() || {};
+    
+    allUsers = Object.keys(usersData).map(uid => {
+      const userData = usersData[uid];
+      return {
+        uid: uid,
+        email: userData.email || (userData.name ? userData.name.toLowerCase().replace(/\s+/g, '.') + '@company.com' : 'unknown@company.com'),
+        name: userData.name || userData.displayName || extractNameFromEmail(userData.email || '')
+      };
+    }).filter(user => 
+      user.email && 
+      user.email.includes('@') && 
+      user.email !== currentUser.email // Remove current user from list
+    );
+    
+    console.log(`Loaded ${allUsers.length} users dynamically from Firebase database`);
+    
+    // If no users found in database, log warning but continue
+    if (allUsers.length === 0) {
+      console.warn('No other users found in Firebase database - user can only create chats with themselves');
+    }
+    
   } catch (error) {
-    console.error('Error loading users:', error);
+    console.error('Error loading users from Firebase:', error);
+    // On error, empty list - user can still use chat but can't add others
+    allUsers = [];
   }
 }
 
