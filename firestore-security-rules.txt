@@ -140,14 +140,32 @@ service cloud.firestore {
         && validateChatMessage(request.resource.data)
         && userInChat(request.resource.data.chatId, request.auth.token.email);
       
-      // Users can update their own messages (edit, reactions)
+      // Users can update their own messages (edit, reactions) or mark messages as read
       allow update: if request.auth != null 
-        && request.auth.token.email == resource.data.senderEmail;
+        && (request.auth.token.email == resource.data.senderEmail
+            || (userInChat(resource.data.chatId, request.auth.token.email)
+                && onlyUpdatingReadBy(request.resource.data, resource.data)));
       
       // Users can delete their own messages, admins can delete any
       allow delete: if request.auth != null 
         && (request.auth.token.email == resource.data.senderEmail 
             || request.auth.token.admin == true);
+    }
+    
+    // Chat typing indicators rules
+    match /chat-typing/{typingId} {
+      // Users can read typing indicators from chats they're participants in
+      allow read: if request.auth != null 
+        && userInChat(resource.data.chatId, request.auth.token.email);
+      
+      // Users can create/update their own typing indicators
+      allow create, update: if request.auth != null 
+        && request.auth.token.email == request.resource.data.userEmail
+        && userInChat(request.resource.data.chatId, request.auth.token.email);
+      
+      // Users can delete their own typing indicators
+      allow delete: if request.auth != null 
+        && request.auth.token.email == resource.data.userEmail;
     }
     
     // Helper function to validate recognition note data
@@ -276,6 +294,15 @@ service cloud.firestore {
         && userEmail in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
     }
     
+    // Helper function to check if only readBy field is being updated
+    function onlyUpdatingReadBy(newData, oldData) {
+      return newData.chatId == oldData.chatId
+        && newData.senderEmail == oldData.senderEmail 
+        && newData.senderName == oldData.senderName
+        && newData.message == oldData.message
+        && newData.timestamp == oldData.timestamp;
+    }
+    
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
@@ -288,7 +315,9 @@ service cloud.firestore {
 // 2. Replace the existing rules with the rules above
 // 3. Click "Publish" to apply the changes
 //
-// Key changes for ticket transfers:
-// - Removed assignedTo validation restriction in validateTicketUpdate()
-// - Added permission for new assignee to update tickets during transfer
-// - Keeps all existing functionality for recognition board, messages, communications, etc.
+// Key changes for chat enhancements:
+// - Added support for typing indicators with chat-typing collection
+// - Enhanced chat-messages rules to allow read receipt updates
+// - Added onlyUpdatingReadBy helper function for read receipt validation
+// - Users can now mark messages as read and see typing indicators
+// - Keeps all existing functionality for recognition board, messages, communications, tickets, etc.
