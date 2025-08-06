@@ -1902,6 +1902,45 @@ async function sendMessage() {
       lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     
+    // Create notifications for other chat participants
+    if (window.notificationManager && currentChat.participants) {
+      const otherParticipants = Object.keys(currentChat.participants)
+        .filter(email => email !== currentUser.email);
+      
+      for (const participantEmail of otherParticipants) {
+        try {
+          // Find the participant's UID from the users database
+          const usersSnapshot = await firebase.database().ref('users')
+            .orderByChild('email')
+            .equalTo(participantEmail)
+            .once('value');
+          
+          const userData = usersSnapshot.val();
+          if (userData) {
+            const participantUid = Object.keys(userData)[0];
+            
+            // Create notification for the participant
+            const notificationRef = firebase.database().ref(`notifications/${participantUid}/${Date.now()}`);
+            await notificationRef.set({
+              type: 'chat_message',
+              title: '💬 New Message',
+              message: `${currentUserName}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
+              timestamp: new Date().toISOString(),
+              read: false,
+              metadata: {
+                chatId: currentChat.id,
+                chatName: currentChat.name,
+                senderName: currentUserName,
+                messageId: messageRef.id
+              }
+            });
+          }
+        } catch (notificationError) {
+          console.error('Error creating message notification:', notificationError);
+        }
+      }
+    }
+    
     // Clear input
     messageInput.value = '';
     messageInput.style.height = 'auto';
@@ -2294,5 +2333,8 @@ function openChatPopout() {
 
 <!-- Site scripts -->
 <script src="script.js"></script>
+
+<!-- Notification system -->
+<script src="notifications.js"></script>
 </body>
 </html>
