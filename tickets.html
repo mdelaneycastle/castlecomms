@@ -2832,7 +2832,7 @@ async function transferTicket() {
           name: transferredByName
         },
         reason: reason,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        timestamp: new Date()
       }),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
