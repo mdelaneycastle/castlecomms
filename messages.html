@@ -1357,6 +1357,7 @@ function displayChatInterface() {
       <div class="chat-actions">
         <button class="chat-action-btn" onclick="renameChatPrompt()">Rename</button>
         <button class="chat-action-btn" onclick="showChatInfo()">Info</button>
+        <button class="chat-action-btn" onclick="openChatPopout()" title="Pop out chat window">🪟 Pop Out</button>
       </div>
     </div>
     
@@ -1905,6 +1906,54 @@ function formatTimestamp(timestamp) {
   if (diffDays < 7) return `${diffDays}d`;
   
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// Chat popout window management
+let popoutWindow = null;
+
+// Open chat in popout window
+function openChatPopout() {
+  if (!currentChat) {
+    alert('Please select a chat first');
+    return;
+  }
+  
+  // If popout already exists, focus it
+  if (popoutWindow && !popoutWindow.closed) {
+    popoutWindow.focus();
+    // Update to current chat
+    popoutWindow.postMessage({
+      type: 'switchChat',
+      chatId: currentChat.id
+    }, window.location.origin);
+    return;
+  }
+  
+  // Calculate center position
+  const width = 500;
+  const height = 650;
+  const left = (screen.width - width) / 2;
+  const top = (screen.height - height) / 2;
+  
+  // Open popout window
+  popoutWindow = window.open(
+    `chat-popout.html?chatId=${currentChat.id}`,
+    'castle-comms-chat',
+    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`
+  );
+  
+  // Handle popout window events
+  if (popoutWindow) {
+    // Check if window is closed periodically
+    const checkClosed = setInterval(() => {
+      if (popoutWindow.closed) {
+        popoutWindow = null;
+        clearInterval(checkClosed);
+      }
+    }, 1000);
+    
+    console.log('Chat popout window opened');
+  }
 }
 
 </script>
