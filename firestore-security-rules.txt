@@ -261,7 +261,7 @@ service cloud.firestore {
         && data.description.size() <= 2000
         && data.category is string
         && data.category.size() > 0
-        && data.status in ['open', 'on-hold', 'resolved']
+        && data.status in ['open', 'in-progress', 'resolved']
         && data.createdBy is map
         && data.createdBy.keys().hasAll(['uid', 'email', 'name'])
         && data.assignedTo is map
