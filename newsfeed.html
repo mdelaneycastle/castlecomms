@@ -232,6 +232,15 @@
       border-bottom: none;
     }
 
+    .mention-suggestions li.selected {
+      background: #667eea;
+      color: white;
+    }
+
+    .mention-suggestions li.selected small {
+      color: rgba(255, 255, 255, 0.8) !important;
+    }
+
     /* Feed Styling */
     .feed {
       display: flex;
@@ -571,6 +580,9 @@
 <!-- Site scripts -->
 <script src="script.js"></script>
 
+<!-- Notification system -->
+<script src="notifications.js"></script>
+
 <script>
 // Enhanced Newsfeed JavaScript
 document.addEventListener('DOMContentLoaded', function() {
@@ -636,6 +648,269 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 2000);
     });
   }
+
+  // @Mention functionality
+  let allUsers = [];
+  let mentionSuggestionsVisible = false;
+  let currentMentionStart = -1;
+
+  // Load all users for @mention functionality
+  async function loadAllUsers() {
+    try {
+      // Use the same approach as messages.html
+      if (typeof listUsers === 'function') {
+        try {
+          const users = await listUsers();
+          allUsers = users.filter(user => user.email && user.name);
+          console.log('Loaded users for mentions:', allUsers.length);
+          return;
+        } catch (error) {
+          console.log('listUsers function failed, trying direct fetch');
+        }
+      }
+
+      // Fallback approach - direct Firebase call
+      const usersSnapshot = await firebase.database().ref('users').once('value');
+      const usersData = usersSnapshot.val() || {};
+      
+      allUsers = Object.keys(usersData)
+        .map(uid => ({ ...usersData[uid], uid }))
+        .filter(user => user.email && user.name && user.email.includes('@'));
+      
+      console.log('Loaded users for mentions (fallback):', allUsers.length);
+    } catch (error) {
+      console.error('Error loading users for mentions:', error);
+      allUsers = [];
+    }
+  }
+
+  // Setup @mention functionality
+  function setupMentionFunctionality() {
+    const textarea = document.getElementById('message');
+    const suggestionsDiv = document.getElementById('mention-suggestions');
+    
+    if (!textarea || !suggestionsDiv) return;
+
+    textarea.addEventListener('input', function(e) {
+      const value = e.target.value;
+      const cursorPos = e.target.selectionStart;
+      
+      // Find the last @ symbol before the cursor
+      const textBeforeCursor = value.substring(0, cursorPos);
+      const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+      
+      if (lastAtIndex === -1) {
+        hideMentionSuggestions();
+        return;
+      }
+      
+      // Check if there's a space after the @ (which would end the mention)
+      const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+      if (textAfterAt.includes(' ')) {
+        hideMentionSuggestions();
+        return;
+      }
+      
+      // Get the query after @
+      const query = textAfterAt.toLowerCase().trim();
+      
+      if (query.length === 0) {
+        // Show all users when @ is typed without query
+        showMentionSuggestions(allUsers, lastAtIndex);
+      } else {
+        // Filter users based on query
+        const filteredUsers = allUsers.filter(user => 
+          user.name.toLowerCase().includes(query) || 
+          user.email.toLowerCase().includes(query)
+        );
+        showMentionSuggestions(filteredUsers, lastAtIndex);
+      }
+    });
+
+    textarea.addEventListener('keydown', function(e) {
+      if (!mentionSuggestionsVisible) return;
+      
+      const suggestions = suggestionsDiv.querySelectorAll('li');
+      const selectedSuggestion = suggestionsDiv.querySelector('li.selected');
+      let selectedIndex = Array.from(suggestions).indexOf(selectedSuggestion);
+      
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, suggestions.length - 1);
+        updateSelectedSuggestion(suggestions, selectedIndex);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, 0);
+        updateSelectedSuggestion(suggestions, selectedIndex);
+      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        if (selectedSuggestion) {
+          selectMention(selectedSuggestion.dataset.name);
+        }
+      } else if (e.key === 'Escape') {
+        hideMentionSuggestions();
+      }
+    });
+
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.post-form-container')) {
+        hideMentionSuggestions();
+      }
+    });
+  }
+
+  function showMentionSuggestions(users, mentionStart) {
+    const suggestionsDiv = document.getElementById('mention-suggestions');
+    const textarea = document.getElementById('message');
+    
+    if (users.length === 0) {
+      hideMentionSuggestions();
+      return;
+    }
+    
+    currentMentionStart = mentionStart;
+    mentionSuggestionsVisible = true;
+    
+    suggestionsDiv.innerHTML = users.slice(0, 8).map((user, index) => 
+      `<li class="mention-suggestion ${index === 0 ? 'selected' : ''}" data-name="${user.name}" data-email="${user.email}">
+        <strong>${user.name}</strong><br>
+        <small style="color: #666;">${user.email}</small>
+      </li>`
+    ).join('');
+    
+    // Position the suggestions div relative to the textarea
+    const textareaRect = textarea.getBoundingClientRect();
+    const containerRect = textarea.closest('.post-form-container').getBoundingClientRect();
+    
+    suggestionsDiv.style.display = 'block';
+    suggestionsDiv.style.left = '1rem';
+    suggestionsDiv.style.top = (textareaRect.bottom - containerRect.top + 5) + 'px';
+    
+    // Add click handlers
+    suggestionsDiv.querySelectorAll('.mention-suggestion').forEach(li => {
+      li.addEventListener('click', () => selectMention(li.dataset.name));
+    });
+  }
+
+  function hideMentionSuggestions() {
+    const suggestionsDiv = document.getElementById('mention-suggestions');
+    suggestionsDiv.style.display = 'none';
+    mentionSuggestionsVisible = false;
+    currentMentionStart = -1;
+  }
+
+  function updateSelectedSuggestion(suggestions, index) {
+    suggestions.forEach((li, i) => {
+      li.classList.toggle('selected', i === index);
+    });
+  }
+
+  function selectMention(userName) {
+    const textarea = document.getElementById('message');
+    const value = textarea.value;
+    const cursorPos = textarea.selectionStart;
+    
+    // Find the end of the current mention
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const mentionEnd = textBeforeCursor.length;
+    
+    // Replace the @query with @username
+    const beforeMention = value.substring(0, currentMentionStart);
+    const afterMention = value.substring(mentionEnd);
+    const newValue = beforeMention + `@${userName} ` + afterMention;
+    
+    textarea.value = newValue;
+    
+    // Set cursor position after the mention
+    const newCursorPos = currentMentionStart + userName.length + 2;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    textarea.focus();
+    
+    hideMentionSuggestions();
+    
+    // Trigger input event to update character count
+    textarea.dispatchEvent(new Event('input'));
+  }
+
+  // Initialize mention functionality
+  loadAllUsers().then(() => {
+    setupMentionFunctionality();
+  });
+
+  // Function to detect mentions in text and create notifications
+  async function processMentions(postText, authorName, postId) {
+    if (!postText || !window.notificationManager || !window.notificationManager.isInitialized) return;
+    
+    // Find all @mentions in the text
+    const mentionRegex = /@(\w+(?:\s+\w+)*)/g;
+    const mentions = [];
+    let match;
+    
+    while ((match = mentionRegex.exec(postText)) !== null) {
+      mentions.push(match[1]);
+    }
+    
+    if (mentions.length === 0) return;
+    
+    // Find users that match the mentions
+    const mentionedUsers = allUsers.filter(user => 
+      mentions.some(mention => 
+        user.name.toLowerCase().includes(mention.toLowerCase()) ||
+        user.displayName?.toLowerCase().includes(mention.toLowerCase())
+      )
+    );
+    
+    // Create notifications for mentioned users
+    for (const user of mentionedUsers) {
+      try {
+        // Create notification for the mentioned user
+        const userNotificationRef = firebase.database().ref(`notifications/${user.uid}/${Date.now()}`);
+        await userNotificationRef.set({
+          type: 'newsfeed_mention',
+          title: '📢 You were mentioned',
+          message: `${authorName} mentioned you in a post`,
+          timestamp: new Date().toISOString(),
+          read: false,
+          metadata: {
+            postId,
+            authorName,
+            excerpt: postText.substring(0, 100) + (postText.length > 100 ? '...' : '')
+          }
+        });
+      } catch (error) {
+        console.error('Error creating mention notification:', error);
+      }
+    }
+  }
+
+  // Override the post submission to include mention processing
+  // This will hook into the existing script.js post submission
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait for the form to be set up by script.js
+    setTimeout(() => {
+      const postForm = document.getElementById('post-form');
+      if (postForm) {
+        // Add our mention processing to form submission
+        postForm.addEventListener('submit', async function(e) {
+          // Let the original handler run first
+          setTimeout(async () => {
+            const messageInput = document.getElementById('message');
+            const user = firebase.auth().currentUser;
+            
+            if (messageInput && user) {
+              const postText = messageInput.value.trim();
+              if (postText) {
+                // Process mentions after a short delay to ensure post is created
+                await processMentions(postText, user.displayName || user.email, Date.now().toString());
+              }
+            }
+          }, 100);
+        });
+      }
+    }, 1000);
+  });
+
 });
 </script>
 

@@ -2811,6 +2811,76 @@ async function createTicketFromModal() {
     
     await db.collection('tickets').add(ticketData);
     
+    // Create notifications for assigned users
+    if (window.notificationManager) {
+      try {
+        if (isTeamAssignment && assignedTeam && assignedTeam.members) {
+          // Create notifications for all team members
+          for (const member of assignedTeam.members) {
+            if (member.email !== currentUser.email) { // Don't notify the creator
+              // Find user UID
+              const usersSnapshot = await firebase.database().ref('users')
+                .orderByChild('email')
+                .equalTo(member.email)
+                .once('value');
+              
+              const userData = usersSnapshot.val();
+              if (userData) {
+                const userUid = Object.keys(userData)[0];
+                
+                // Create notification
+                const notificationRef = firebase.database().ref(`notifications/${userUid}/${Date.now()}`);
+                await notificationRef.set({
+                  type: 'ticket_assigned',
+                  title: '🎫 New Support Ticket Assigned',
+                  message: `New ticket assigned to your team: ${title}`,
+                  timestamp: new Date().toISOString(),
+                  read: false,
+                  metadata: {
+                    ticketId: ticketId,
+                    ticketTitle: title,
+                    category: category,
+                    assignmentType: 'team',
+                    teamName: assignedTeam.name
+                  }
+                });
+              }
+            }
+          }
+        } else if (isIndividualAssignment && assignedUser && assignedUser.email !== currentUser.email) {
+          // Create notification for individual assignee
+          const usersSnapshot = await firebase.database().ref('users')
+            .orderByChild('email')
+            .equalTo(assignedUser.email)
+            .once('value');
+          
+          const userData = usersSnapshot.val();
+          if (userData) {
+            const userUid = Object.keys(userData)[0];
+            
+            // Create notification
+            const notificationRef = firebase.database().ref(`notifications/${userUid}/${Date.now()}`);
+            await notificationRef.set({
+              type: 'ticket_assigned',
+              title: '🎫 New Support Ticket Assigned',
+              message: `New ticket assigned to you: ${title}`,
+              timestamp: new Date().toISOString(),
+              read: false,
+              metadata: {
+                ticketId: ticketId,
+                ticketTitle: title,
+                category: category,
+                assignmentType: 'individual',
+                assigneeName: assignedUser.name
+              }
+            });
+          }
+        }
+      } catch (notificationError) {
+        console.error('Error creating ticket notifications:', notificationError);
+      }
+    }
+    
     showModalStatus('Ticket created successfully!', 'success');
     
     // Close modal after short delay
@@ -3280,5 +3350,8 @@ async function transferTicket() {
 
 <!-- Site scripts -->
 <script src="script.js"></script>
+
+<!-- Notification system -->
+<script src="notifications.js"></script>
 </body>
 </html>
