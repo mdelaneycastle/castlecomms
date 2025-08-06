@@ -1391,9 +1391,14 @@ async function initializeInternalSystem() {
   setupTicketForm();
   setupFilters();
   loadTickets();
+  
+  // Handle direct ticket links (e.g., #ticket-434592)
+  handleDirectTicketLink();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Tickets page loaded, checking authentication...');
+  
   // Check authentication first
   firebase.auth().onAuthStateChanged(async (user) => {
     if (!user) {
@@ -1403,9 +1408,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     currentUser = user;
-    
-    // Just store the user, don't initialize internal system until selected
     console.log('User authenticated:', user.email);
+    
+    // Since we go directly to internal tickets now, initialize immediately
+    try {
+      await initializeTickets(user);
+      console.log('Tickets page fully initialized');
+    } catch (error) {
+      console.error('Error initializing tickets page:', error);
+      const ticketsList = document.getElementById('tickets-list');
+      if (ticketsList) {
+        ticketsList.innerHTML = `
+          <div class="error" style="text-align: center; padding: 40px; color: #d13438;">
+            <h4>Initialization Error</h4>
+            <p style="margin: 10px 0; color: #666;">${error.message}</p>
+            <button onclick="window.location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #6264a7; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              Reload Page
+            </button>
+          </div>
+        `;
+      }
+    }
   });
 });
 
@@ -1653,12 +1676,59 @@ function setupFilters() {
   });
 }
 
+// Handle direct ticket links from chat
+function handleDirectTicketLink() {
+  if (window.location.hash.startsWith('#ticket-')) {
+    const ticketId = window.location.hash.replace('#ticket-', '');
+    console.log('Direct ticket link detected:', ticketId);
+    
+    // Wait a bit for tickets to load, then try to highlight the specific ticket
+    setTimeout(() => {
+      highlightSpecificTicket(ticketId);
+    }, 2000);
+  }
+}
+
+// Highlight a specific ticket in the list
+function highlightSpecificTicket(ticketId) {
+  // Try to find ticket element by ID
+  const ticketElement = document.querySelector(`[data-ticket-id="${ticketId}"], [data-ticket-id="TKT-${ticketId}"]`);
+  
+  if (ticketElement) {
+    // Scroll to the ticket
+    ticketElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Highlight it temporarily
+    ticketElement.style.backgroundColor = '#fff3cd';
+    ticketElement.style.border = '2px solid #ffc107';
+    
+    setTimeout(() => {
+      ticketElement.style.backgroundColor = '';
+      ticketElement.style.border = '';
+    }, 3000);
+    
+    console.log('Highlighted ticket:', ticketId);
+  } else {
+    console.log('Ticket not found in current view:', ticketId);
+  }
+}
+
 // Load tickets for current user
 async function loadTickets() {
   const ticketsList = document.getElementById('tickets-list');
   const ticketCount = document.getElementById('ticket-count');
   
+  if (!ticketsList) {
+    console.error('tickets-list element not found');
+    return;
+  }
+  
+  // Show loading state
+  ticketsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #8a8886;">Loading tickets...</div>';
+  
   try {
+    console.log('Loading tickets for user:', currentUser.email);
+    
     // Get tickets where user is creator or assigned to
     const createdByQuery = db.collection('tickets')
       .where('createdBy.uid', '==', currentUser.uid);
@@ -1708,7 +1778,7 @@ async function loadTickets() {
       const isCreatedByMe = ticket.createdBy.uid === currentUser.uid;
       
       return `
-        <div class="ticket-item" onclick="openTicket('${ticket.id}')">
+        <div class="ticket-item" data-ticket-id="${ticket.ticketId}" onclick="openTicket('${ticket.id}')">
           <div class="ticket-header">
             <div class="ticket-id">${ticket.ticketId}</div>
             <div class="ticket-status ${ticket.status}">${ticket.status.replace('-', ' ')}</div>
@@ -1730,7 +1800,15 @@ async function loadTickets() {
     
   } catch (error) {
     console.error('Error loading tickets:', error);
-    ticketsList.innerHTML = '<div class="error">Failed to load tickets.</div>';
+    ticketsList.innerHTML = `
+      <div class="error" style="text-align: center; padding: 40px; color: #d13438;">
+        <h4>Failed to load tickets</h4>
+        <p style="margin: 10px 0; color: #666;">${error.message}</p>
+        <button onclick="loadTickets()" style="margin-top: 15px; padding: 8px 16px; background: #6264a7; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Try Again
+        </button>
+      </div>
+    `;
   }
 }
 
