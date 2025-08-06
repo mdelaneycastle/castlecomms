@@ -878,7 +878,7 @@
           💬 Chat
         </h2>
         <input type="text" class="chat-search" id="chat-search" placeholder="Search chats...">
-        <button class="new-chat-button" id="new-chat-btn">+ New Chat</button>
+        <button class="new-chat-button" id="new-chat-btn">+ New Chat.</button>
       </div>
       
       <div class="chat-list" id="chat-list">
@@ -2070,12 +2070,13 @@ let activeTicketPreview = null;
 function enhanceMessageWithTickets(messageText) {
   if (!messageText) return messageText;
   
-  // Patterns to detect: #1234, ticket:1234, ticket 1234, TK-1234, etc.
+  // Patterns to detect: #1234, ticket:1234, TKT-434592, etc.
   const ticketPatterns = [
     /\#(\d{1,6})\b/g,                    // #1234
     /ticket:?\s*(\d{1,6})\b/gi,          // ticket:1234, ticket 1234
-    /TK-(\d{1,6})\b/gi,                  // TK-1234
-    /ticket\s+#?(\d{1,6})\b/gi           // ticket #1234
+    /TKT?-(\d{1,6})\b/gi,                // TKT-1234, TK-1234
+    /ticket\s+#?(\d{1,6})\b/gi,          // ticket #1234
+    /(TKT-\d{1,6})\b/gi                  // Full TKT-434592 format
   ];
   
   let enhancedText = messageText;
@@ -2097,19 +2098,35 @@ async function fetchTicketData(ticketId) {
       return ticketCache.get(ticketId);
     }
     
-    // Query Firestore for the ticket
-    const ticketQuery = await db.collection('tickets')
-      .where('ticketId', '==', ticketId)
-      .limit(1)
-      .get();
+    // Try different ticket ID formats
+    const searchFormats = [];
     
-    if (!ticketQuery.empty) {
-      const ticketData = ticketQuery.docs[0].data();
+    if (ticketId.startsWith('TKT-')) {
+      // If already has TKT- prefix, search as-is and without prefix
+      searchFormats.push(ticketId);
+      searchFormats.push(ticketId.replace('TKT-', ''));
+    } else {
+      // If just a number, try with and without TKT- prefix
+      searchFormats.push(ticketId);
+      searchFormats.push(`TKT-${ticketId}`);
+    }
+    
+    // Try each format until we find a match
+    for (const searchId of searchFormats) {
+      const ticketQuery = await db.collection('tickets')
+        .where('ticketId', '==', searchId)
+        .limit(1)
+        .get();
       
-      // Cache the result
-      ticketCache.set(ticketId, ticketData);
-      
-      return ticketData;
+      if (!ticketQuery.empty) {
+        const ticketData = ticketQuery.docs[0].data();
+        
+        // Cache the result for both the original input and found format
+        ticketCache.set(ticketId, ticketData);
+        ticketCache.set(searchId, ticketData);
+        
+        return ticketData;
+      }
     }
     
     // If not found, cache null to avoid repeated queries
@@ -2135,9 +2152,26 @@ async function showTicketPreview(event, ticketId) {
   preview.className = 'ticket-preview';
   preview.innerHTML = '<div class="ticket-preview-loading">Loading ticket...</div>';
   
-  // Position the preview
-  preview.style.left = `${rect.left}px`;
-  preview.style.top = `${rect.bottom + 8}px`;
+  // Position the preview with screen bounds checking
+  let left = rect.left;
+  let top = rect.bottom + 8;
+  
+  // Check right edge - if preview would go off screen, position it to the left of cursor
+  if (left + 320 > window.innerWidth) {
+    left = Math.max(10, rect.right - 320);
+  }
+  
+  // Check bottom edge - if preview would go off screen, position it above the link
+  if (top + 200 > window.innerHeight) {
+    top = rect.top - 8 - 200;
+  }
+  
+  // Ensure preview stays within screen bounds
+  left = Math.max(10, Math.min(left, window.innerWidth - 330));
+  top = Math.max(10, top);
+  
+  preview.style.left = `${left}px`;
+  preview.style.top = `${top}px`;
   
   document.body.appendChild(preview);
   activeTicketPreview = preview;
@@ -2178,9 +2212,9 @@ function hideTicketPreview() {
   }
 }
 
-// Open ticket in new tab
+// Open ticket in new tab - goes directly to internal tickets section
 function openTicket(ticketId) {
-  window.open(`tickets.html?ticket=${ticketId}`, '_blank');
+  window.open(`tickets.html#ticket-${ticketId}`, '_blank');
 }
 
 // Chat popout window management
