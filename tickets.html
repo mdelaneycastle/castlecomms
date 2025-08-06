@@ -1745,6 +1745,12 @@ function setupUserSearch() {
   const searchInput = document.getElementById('assign-to');
   const suggestionsDiv = document.getElementById('user-suggestions');
   
+  // Check if elements exist (they don't since we moved to modal)
+  if (!searchInput || !suggestionsDiv) {
+    console.log('User search elements not found - form moved to modal');
+    return;
+  }
+  
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
     
@@ -1823,6 +1829,13 @@ function updateAssignedUserDisplay() {
 // Setup ticket creation form
 function setupTicketForm() {
   const form = document.getElementById('create-ticket-form');
+  
+  // Check if form exists (it's now in the modal)
+  if (!form) {
+    console.log('Create ticket form not found - using modal version');
+    return;
+  }
+  
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     await createTicketFromModal();
