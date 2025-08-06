@@ -444,35 +444,115 @@
       color: white;
     }
 
+    /* Search Section */
+    .ticket-search-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input-group {
+      position: relative;
+      max-width: 500px;
+    }
+
+    .ticket-search-input {
+      width: 100%;
+      padding: 0.75rem 3rem 0.75rem 2.5rem;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #f8f9fa;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+
+    .ticket-search-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(98, 100, 167, 0.1);
+    }
+
+    .ticket-search-input::placeholder {
+      color: #8a8886;
+    }
+
+    .search-input-group::before {
+      content: "🔍";
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8a8886;
+      font-size: 0.9rem;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #8a8886;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .search-clear-btn:hover {
+      background: #d13438;
+    }
+
     .tickets-list {
       flex: 1;
       overflow-y: auto;
       max-height: 600px;
-    }
-
-    .ticket-item {
       background: white;
+      border-radius: 8px;
       border: 1px solid #e1e5e9;
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+    }
+
+    .tickets-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .tickets-table th {
+      background: #f8f9fa;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #e1e5e9;
+      border-right: 1px solid #e1e5e9;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .tickets-table th:last-child {
+      border-right: none;
+    }
+
+    .tickets-table td {
+      padding: 12px;
+      border-bottom: 1px solid #f1f3f4;
+      border-right: 1px solid #f1f3f4;
+      vertical-align: top;
+    }
+
+    .tickets-table td:last-child {
+      border-right: none;
+    }
+
+    .tickets-table tr:hover {
+      background-color: #f8f9fa;
       cursor: pointer;
-      transition: all 0.3s;
-      position: relative;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .ticket-item:hover {
-      border-color: #667eea;
-      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
-      transform: translateY(-2px);
-    }
-
-    .ticket-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.5rem;
     }
 
     .ticket-id {
@@ -482,11 +562,13 @@
     }
 
     .ticket-status {
-      padding: 0.2rem 0.6rem;
+      padding: 4px 8px;
       border-radius: 12px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 500;
       text-transform: uppercase;
+      display: inline-block;
+      white-space: nowrap;
     }
 
     .ticket-status.open {
@@ -513,37 +595,134 @@
     .ticket-title {
       font-weight: 600;
       color: #2c3e50;
-      margin-bottom: 0.75rem;
-      font-size: 1.2rem;
-      line-height: 1.4;
-    }
-
-    .ticket-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      color: #6c757d;
-      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      line-height: 1.3;
+      max-width: 300px;
+      word-wrap: break-word;
     }
 
     .ticket-category {
       background: #e9ecef;
-      padding: 0.2rem 0.5rem;
-      border-radius: 10px;
-      font-size: 0.8rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
       color: #495057;
+      white-space: nowrap;
     }
 
     .ticket-description {
       color: #6c757d;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      max-width: 250px;
       overflow: hidden;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
-      margin-bottom: 0.5rem;
+      word-wrap: break-word;
+    }
+
+    .ticket-assignee {
+      font-size: 0.85rem;
+      color: #495057;
+    }
+
+    .ticket-creator {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    .ticket-created {
+      font-size: 0.85rem;
+      color: #6c757d;
+      white-space: nowrap;
+    }
+
+    /* Raise Ticket Button */
+    .raise-ticket-btn {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .raise-ticket-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Create Ticket Modal */
+    .create-ticket-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .create-ticket-modal.show {
+      display: flex;
+    }
+
+    .create-ticket-modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .create-ticket-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6c757d;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .create-ticket-modal-close:hover {
+      background: #f8f9fa;
+    }
+
+    .create-ticket-modal h3 {
+      margin: 0 0 2rem 0;
+      color: #2c3e50;
+      font-size: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e1e5e9;
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
     }
 
     .no-tickets {
@@ -1218,58 +1397,23 @@
         <h3>🎫 Internal System Tickets</h3>
       </div>
       
-      <!-- Create Ticket Section -->
+      <!-- Create Ticket Button -->
       <div class="create-ticket-section">
-        <h3>🆕 Create New Ticket</h3>
-        
+        <button class="raise-ticket-btn" onclick="openCreateTicketModal()">🆕 Raise a Ticket</button>
         <div id="ticket-status"></div>
-        
-        <form id="create-ticket-form">
-          <div class="form-group">
-            <label for="assign-to">Assign To:</label>
-            <div class="user-search-container">
-              <input type="text" id="assign-to" class="form-input" placeholder="Start typing a name or email..." autocomplete="off">
-              <div id="user-suggestions" class="user-suggestions"></div>
-            </div>
-            <div id="assigned-user-display"></div>
-          </div>
-          
-          <div class="form-group">
-            <label for="ticket-category">Category:</label>
-            <select id="ticket-category" class="form-select" required>
-              <option value="">Select a department...</option>
-              <option value="Client Order Fulfilment Team">Client Order Fulfilment Team</option>
-              <option value="Manufacturing and QC">Manufacturing and QC</option>
-              <option value="Framing">Framing</option>
-              <option value="Stock Control">Stock Control</option>
-              <option value="Logistics">Logistics</option>
-              <option value="Operations">Operations</option>
-              <option value="Inventory">Inventory</option>
-              <option value="IT Support">IT Support</option>
-              <option value="HR">HR</option>
-              <option value="General">General</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="ticket-title">Subject:</label>
-            <input type="text" id="ticket-title" class="form-input" placeholder="Brief description of the issue..." required maxlength="100">
-          </div>
-          
-          <div class="form-group">
-            <label for="ticket-description">Description:</label>
-            <textarea id="ticket-description" class="form-textarea" placeholder="Please provide details about the issue, including any steps to reproduce, error messages, or relevant information..." required></textarea>
-          </div>
-          
-          <button type="submit" class="create-ticket-button" id="create-ticket-btn">Create Ticket</button>
-        </form>
       </div>
       
       <!-- Tickets List Section -->
       <div class="tickets-list-section">
         <div class="tickets-list-header">
           <h3>📋 My Tickets</h3>
-          <div class="ticket-count" id="ticket-count">0 tickets</div>
+        </div>
+        
+        <div class="ticket-search-section">
+          <div class="search-input-group">
+            <input type="text" id="ticket-search" class="ticket-search-input" placeholder="Search tickets by title, ID, or description...">
+            <button class="search-clear-btn" id="search-clear-btn" onclick="clearSearch()" style="display: none;">×</button>
+          </div>
         </div>
         
         <div class="ticket-filters">
@@ -1374,6 +1518,57 @@
   </div>
 </div>
 
+<!-- Create Ticket Modal -->
+<div class="create-ticket-modal" id="create-ticket-modal">
+  <div class="create-ticket-modal-content">
+    <button class="create-ticket-modal-close" onclick="closeCreateTicketModal()">&times;</button>
+    
+    <h3>🎫 Create New Ticket</h3>
+    
+    <div id="create-ticket-status"></div>
+    
+    <form id="create-ticket-form">
+      <div class="form-group">
+        <label for="modal-assign-to">Assign To:</label>
+        <div class="user-search-container">
+          <input type="text" id="modal-assign-to" class="form-input" placeholder="Start typing a name or email..." autocomplete="off">
+          <div id="modal-user-suggestions" class="user-suggestions"></div>
+        </div>
+        <div id="modal-assigned-user-display"></div>
+      </div>
+      
+      <div class="form-group">
+        <label for="modal-ticket-category">Category:</label>
+        <select id="modal-ticket-category" class="form-select" required>
+          <option value="">Select a department...</option>
+          <option value="Client Order Fulfilment Team">Client Order Fulfilment Team</option>
+          <option value="Manufacturing and QC">Manufacturing and QC</option>
+          <option value="Framing">Framing</option>
+          <option value="Stock Control">Stock Control</option>
+          <option value="Logistics">Logistics</option>
+          <option value="Operations">Operations</option>
+          <option value="Inventory">Inventory</option>
+          <option value="IT Support">IT Support</option>
+          <option value="HR">HR</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="modal-ticket-title">Subject:</label>
+        <input type="text" id="modal-ticket-title" class="form-input" placeholder="Brief description of the issue..." required maxlength="100">
+      </div>
+      
+      <div class="form-group">
+        <label for="modal-ticket-description">Description:</label>
+        <textarea id="modal-ticket-description" class="form-textarea" placeholder="Please provide detailed information about the issue, including any steps to reproduce, error messages, or other relevant details that might help resolve the problem..." required></textarea>
+      </div>
+      
+      <button type="submit" class="create-ticket-button" id="modal-create-ticket-btn">Create Ticket</button>
+    </form>
+  </div>
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -1435,6 +1630,7 @@ async function initializeInternalSystem() {
   setupUserSearch();
   setupTicketForm();
   setupFilters();
+  setupSearch();
   loadTickets();
   
   // Handle direct ticket links (e.g., #ticket-434592)
@@ -1629,7 +1825,7 @@ function setupTicketForm() {
   const form = document.getElementById('create-ticket-form');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    await createTicket();
+    await createTicketFromModal();
   });
 }
 
@@ -1721,6 +1917,43 @@ function setupFilters() {
   });
 }
 
+// Setup search functionality
+function setupSearch() {
+  const searchInput = document.getElementById('ticket-search');
+  const clearBtn = document.getElementById('search-clear-btn');
+  
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const hasValue = e.target.value.trim() !== '';
+      clearBtn.style.display = hasValue ? 'block' : 'none';
+      
+      // Debounce search
+      clearTimeout(window.searchTimeout);
+      window.searchTimeout = setTimeout(() => {
+        loadTickets();
+      }, 300);
+    });
+    
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        clearSearch();
+      }
+    });
+  }
+}
+
+// Clear search
+function clearSearch() {
+  const searchInput = document.getElementById('ticket-search');
+  const clearBtn = document.getElementById('search-clear-btn');
+  
+  if (searchInput) {
+    searchInput.value = '';
+    clearBtn.style.display = 'none';
+    loadTickets();
+  }
+}
+
 // Handle direct ticket links from chat
 function handleDirectTicketLink() {
   if (window.location.hash.startsWith('#ticket-')) {
@@ -1761,7 +1994,6 @@ function highlightSpecificTicket(ticketId) {
 // Load tickets for current user
 async function loadTickets() {
   const ticketsList = document.getElementById('tickets-list');
-  const ticketCount = document.getElementById('ticket-count');
   
   if (!ticketsList) {
     console.error('tickets-list element not found');
@@ -1828,6 +2060,18 @@ async function loadTickets() {
       }
     }
     
+    // Apply search filter
+    const searchInput = document.getElementById('ticket-search');
+    if (searchInput && searchInput.value.trim()) {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      tickets = tickets.filter(ticket => 
+        ticket.ticketId.toLowerCase().includes(searchTerm) ||
+        ticket.title.toLowerCase().includes(searchTerm) ||
+        ticket.description.toLowerCase().includes(searchTerm) ||
+        ticket.category.toLowerCase().includes(searchTerm)
+      );
+    }
+    
     // Sort by creation date (newest first)
     tickets.sort((a, b) => {
       const aTime = a.createdAt?.toDate?.() || new Date(0);
@@ -1837,11 +2081,27 @@ async function loadTickets() {
     
     if (tickets.length === 0) {
       ticketsList.innerHTML = '<div class="no-tickets">No tickets found.</div>';
-      ticketCount.textContent = '0 tickets';
       return;
     }
     
-    const ticketItems = tickets.map(ticket => {
+    // Create table structure
+    const tableHeader = `
+      <table class="tickets-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Department</th>
+            <th>Title</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+            <th>Created By</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    
+    const ticketRows = tickets.map(ticket => {
       const createdDate = ticket.createdAt?.toDate?.() || new Date();
       const isAssignedToMe = ticket.assignedTo.email === currentUser.email;
       const isCreatedByMe = ticket.createdBy.uid === currentUser.uid;
@@ -1852,25 +2112,24 @@ async function loadTickets() {
       const statusText = isTransferred ? 'transferred' : ticket.status.replace('-', ' ');
       
       return `
-        <div class="ticket-item ${isTransferred ? 'transferred' : ''}" data-ticket-id="${ticket.ticketId}" onclick="openTicket('${ticket.id}')">
-          <div class="ticket-header">
-            <div class="ticket-id">${ticket.ticketId}</div>
-            <div class="ticket-status ${displayStatus}">${statusText}</div>
-          </div>
-          <div class="ticket-title">${ticket.title}</div>
-          <div class="ticket-meta">
-            <span>Created by: ${ticket.createdBy.name}</span>
-            <span>${isTransferred ? `Transferred to: ${ticket.assignedTo.name}` : `Assigned to: ${ticket.assignedTo.name}`}</span>
-            <span>${formatTimestamp(createdDate)}</span>
-          </div>
-          <div class="ticket-category">${ticket.category}</div>
-          <div class="ticket-description">${ticket.description}</div>
-        </div>
+        <tr onclick="openTicket('${ticket.id}')" data-ticket-id="${ticket.ticketId}">
+          <td><div class="ticket-id">${ticket.ticketId}</div></td>
+          <td><div class="ticket-category">${ticket.category}</div></td>
+          <td><div class="ticket-title">${ticket.title}</div></td>
+          <td><div class="ticket-assignee">${isTransferred ? `Transferred to: ${ticket.assignedTo.name}` : ticket.assignedTo.name}</div></td>
+          <td><div class="ticket-status ${displayStatus}">${statusText}</div></td>
+          <td><div class="ticket-creator">${ticket.createdBy.name}</div></td>
+          <td><div class="ticket-created">${formatTimestamp(createdDate)}</div></td>
+        </tr>
       `;
     }).join('');
     
-    ticketsList.innerHTML = ticketItems;
-    ticketCount.textContent = `${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`;
+    const tableFooter = `
+        </tbody>
+      </table>
+    `;
+    
+    ticketsList.innerHTML = tableHeader + ticketRows + tableFooter;
     
   } catch (error) {
     console.error('Error loading tickets:', error);
@@ -2062,6 +2321,181 @@ function closeTicketModal() {
   currentTicket = null;
 }
 
+// Open create ticket modal
+function openCreateTicketModal() {
+  document.getElementById('create-ticket-modal').classList.add('show');
+  setupModalUserSearch();
+}
+
+// Close create ticket modal
+function closeCreateTicketModal() {
+  document.getElementById('create-ticket-modal').classList.remove('show');
+  
+  // Clear form
+  document.getElementById('create-ticket-form').reset();
+  document.getElementById('modal-assigned-user-display').innerHTML = '';
+  document.getElementById('create-ticket-status').innerHTML = '';
+  assignedUser = null;
+}
+
+// Setup user search for modal
+function setupModalUserSearch() {
+  const searchInput = document.getElementById('modal-assign-to');
+  const suggestionsDiv = document.getElementById('modal-user-suggestions');
+  
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    
+    if (query.length < 1) {
+      suggestionsDiv.style.display = 'none';
+      return;
+    }
+    
+    const filteredUsers = allUsers.filter(user => 
+      (user.name.toLowerCase().includes(query) || 
+       user.email.toLowerCase().includes(query)) &&
+      user.email !== currentUser.email // Don't show current user
+    );
+    
+    if (filteredUsers.length > 0) {
+      suggestionsDiv.innerHTML = filteredUsers.map(user => 
+        `<div class="user-suggestion" data-email="${user.email}" data-name="${user.name}">
+          <strong>${user.name}</strong><br>
+          <small>${user.email}</small>
+        </div>`
+      ).join('');
+      suggestionsDiv.style.display = 'block';
+    } else {
+      suggestionsDiv.style.display = 'none';
+    }
+  });
+  
+  // Handle suggestion clicks
+  suggestionsDiv.addEventListener('click', (e) => {
+    const suggestion = e.target.closest('.user-suggestion');
+    if (suggestion) {
+      const email = suggestion.dataset.email;
+      const name = suggestion.dataset.name;
+      
+      assignModalUser({ email, name });
+      searchInput.value = '';
+      suggestionsDiv.style.display = 'none';
+    }
+  });
+  
+  // Hide suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#modal-user-suggestions') && !e.target.closest('#modal-assign-to')) {
+      suggestionsDiv.style.display = 'none';
+    }
+  });
+}
+
+// Assign user in modal
+function assignModalUser(user) {
+  assignedUser = user;
+  updateModalAssignedUserDisplay();
+}
+
+// Update modal assigned user display
+function updateModalAssignedUserDisplay() {
+  const container = document.getElementById('modal-assigned-user-display');
+  if (assignedUser) {
+    container.innerHTML = `
+      <div class="assigned-user">
+        ${assignedUser.name}
+        <button type="button" class="remove-user" onclick="removeModalAssignedUser()">&times;</button>
+      </div>
+    `;
+  } else {
+    container.innerHTML = '';
+  }
+}
+
+// Remove assigned user in modal
+function removeModalAssignedUser() {
+  assignedUser = null;
+  updateModalAssignedUserDisplay();
+}
+
+// Create ticket from modal
+async function createTicketFromModal() {
+  const title = document.getElementById('modal-ticket-title').value.trim();
+  const description = document.getElementById('modal-ticket-description').value.trim();
+  const category = document.getElementById('modal-ticket-category').value;
+  const createBtn = document.getElementById('modal-create-ticket-btn');
+  
+  if (!title || !description || !category) {
+    showModalStatus('Please fill in all required fields.', 'error');
+    return;
+  }
+  
+  if (!assignedUser) {
+    showModalStatus('Please assign the ticket to a user.', 'error');
+    return;
+  }
+  
+  createBtn.disabled = true;
+  createBtn.textContent = 'Creating...';
+  
+  try {
+    // Get current user's display name
+    const creatorName = await getUserDisplayName(currentUser);
+    
+    // Generate ticket ID
+    const ticketId = 'TKT-' + Date.now().toString().slice(-6);
+    
+    const ticketData = {
+      ticketId: ticketId,
+      title: title,
+      description: description,
+      category: category,
+      status: 'open',
+      createdBy: {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        name: creatorName
+      },
+      assignedTo: {
+        email: assignedUser.email,
+        name: assignedUser.name
+      },
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      messages: []
+    };
+    
+    await db.collection('tickets').add(ticketData);
+    
+    showModalStatus('Ticket created successfully!', 'success');
+    
+    // Close modal after short delay
+    setTimeout(() => {
+      closeCreateTicketModal();
+      loadTickets();
+    }, 1500);
+    
+  } catch (error) {
+    console.error('Error creating ticket:', error);
+    showModalStatus('Failed to create ticket. Please try again.', 'error');
+  }
+  
+  createBtn.disabled = false;
+  createBtn.textContent = 'Create Ticket';
+}
+
+// Show status message in modal
+function showModalStatus(message, type) {
+  const statusDiv = document.getElementById('create-ticket-status');
+  statusDiv.innerHTML = `<div class="${type}">${message}</div>`;
+  
+  if (type === 'success') {
+    setTimeout(() => {
+      statusDiv.innerHTML = '';
+    }, 3000);
+  }
+}
+
 // Update ticket status
 async function updateTicketStatus() {
   if (!currentTicket) return;
@@ -2219,17 +2653,29 @@ async function addSystemMessage(message) {
 
 // Setup modal events
 document.addEventListener('DOMContentLoaded', function() {
-  // Close modal when clicking outside
+  // Close ticket detail modal when clicking outside
   document.getElementById('ticket-modal').addEventListener('click', (e) => {
     if (e.target.id === 'ticket-modal') {
       closeTicketModal();
     }
   });
   
-  // Close modal with ESC key
+  // Close create ticket modal when clicking outside
+  document.getElementById('create-ticket-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'create-ticket-modal') {
+      closeCreateTicketModal();
+    }
+  });
+  
+  // Close modals with ESC key
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.getElementById('ticket-modal').classList.contains('show')) {
-      closeTicketModal();
+    if (e.key === 'Escape') {
+      if (document.getElementById('ticket-modal').classList.contains('show')) {
+        closeTicketModal();
+      }
+      if (document.getElementById('create-ticket-modal').classList.contains('show')) {
+        closeCreateTicketModal();
+      }
     }
   });
 });
