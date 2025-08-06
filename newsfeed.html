@@ -657,31 +657,69 @@ document.addEventListener('DOMContentLoaded', function() {
   // Load all users for @mention functionality
   async function loadAllUsers() {
     try {
-      // Use the same approach as messages.html
+      // Try to get users from the listUsers function (same as tickets page)
       if (typeof listUsers === 'function') {
         try {
           const users = await listUsers();
-          allUsers = users.filter(user => user.email && user.name);
-          console.log('Loaded users for mentions:', allUsers.length);
+          allUsers = users.map(user => ({
+            email: user.email,
+            name: user.displayName || extractNameFromEmail(user.email),
+            uid: user.uid
+          })).filter(user => 
+            user.email && 
+            user.email !== firebase.auth().currentUser.email // Remove current user from list
+          );
+          console.log(`Loaded ${allUsers.length} users from Cloud Function (Firebase Auth)`);
           return;
         } catch (error) {
-          console.log('listUsers function failed, trying direct fetch');
+          console.log('Cloud Function not available, trying fallbacks...', error);
         }
       }
 
-      // Fallback approach - direct Firebase call
-      const usersSnapshot = await firebase.database().ref('users').once('value');
-      const usersData = usersSnapshot.val() || {};
-      
-      allUsers = Object.keys(usersData)
-        .map(uid => ({ ...usersData[uid], uid }))
-        .filter(user => user.email && user.name && user.email.includes('@'));
-      
-      console.log('Loaded users for mentions (fallback):', allUsers.length);
+      // Fallback 1: Try Firebase Database users
+      if (firebase.database) {
+        try {
+          const usersSnapshot = await firebase.database().ref('users').once('value');
+          const usersData = usersSnapshot.val() || {};
+          
+          allUsers = Object.keys(usersData)
+            .map(uid => ({ 
+              ...usersData[uid], 
+              uid,
+              name: usersData[uid].displayName || usersData[uid].name || extractNameFromEmail(usersData[uid].email)
+            }))
+            .filter(user => 
+              user.email && 
+              user.email.includes('@') && 
+              user.email !== firebase.auth().currentUser.email
+            );
+          
+          console.log(`Loaded ${allUsers.length} users from Firebase Database fallback`);
+          return;
+        } catch (error) {
+          console.log('Firebase Database fallback failed:', error);
+        }
+      }
+
+      // Final fallback: empty array
+      console.log('All user loading methods failed, using empty array');
+      allUsers = [];
     } catch (error) {
       console.error('Error loading users for mentions:', error);
       allUsers = [];
     }
+  }
+
+  // Helper function to extract name from email
+  function extractNameFromEmail(email) {
+    if (!email || !email.includes('@')) return 'User';
+    
+    const emailName = email.split('@')[0];
+    return emailName
+      .replace(/[._-]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   }
 
   // Setup @mention functionality
@@ -833,9 +871,14 @@ document.addEventListener('DOMContentLoaded', function() {
     textarea.dispatchEvent(new Event('input'));
   }
 
-  // Initialize mention functionality
-  loadAllUsers().then(() => {
-    setupMentionFunctionality();
+  // Wait for authentication before loading users and setting up mentions
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      // User is authenticated, now we can load users and setup mentions
+      loadAllUsers().then(() => {
+        setupMentionFunctionality();
+      });
+    }
   });
 
   // Function to detect mentions in text and create notifications
