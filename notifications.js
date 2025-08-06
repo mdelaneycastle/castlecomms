@@ -240,6 +240,13 @@ class NotificationManager {
 
   async loadNotifications() {
     try {
+      // Check if Firebase database is available
+      if (!firebase.database) {
+        console.warn('Firebase database not available, notifications will be stored in memory only');
+        this.updateNotificationCount();
+        return;
+      }
+
       // Load from Firebase
       const userNotificationsRef = firebase.database().ref(`notifications/${this.currentUser.uid}`);
       const snapshot = await userNotificationsRef.once('value');
@@ -253,6 +260,8 @@ class NotificationManager {
       this.updateNotificationCount();
     } catch (error) {
       console.error('Error loading notifications:', error);
+      // Continue with empty notifications on error
+      this.updateNotificationCount();
     }
   }
 
@@ -269,9 +278,11 @@ class NotificationManager {
     };
 
     try {
-      // Save to Firebase
-      const userNotificationsRef = firebase.database().ref(`notifications/${this.currentUser.uid}/${notificationId}`);
-      await userNotificationsRef.set(notification);
+      // Save to Firebase if available
+      if (firebase.database) {
+        const userNotificationsRef = firebase.database().ref(`notifications/${this.currentUser.uid}/${notificationId}`);
+        await userNotificationsRef.set(notification);
+      }
       
       // Add to local cache
       this.notifications.set(notificationId, notification);
@@ -280,6 +291,10 @@ class NotificationManager {
       this.showTemporaryNotification(title, message);
     } catch (error) {
       console.error('Error adding notification:', error);
+      // Still add to local cache even if Firebase save fails
+      this.notifications.set(notificationId, notification);
+      this.updateNotificationCount();
+      this.showTemporaryNotification(title, message);
     }
   }
 
@@ -288,9 +303,11 @@ class NotificationManager {
     if (!notification || notification.read) return;
 
     try {
-      // Update in Firebase
-      const notificationRef = firebase.database().ref(`notifications/${this.currentUser.uid}/${notificationId}`);
-      await notificationRef.update({ read: true });
+      // Update in Firebase if available
+      if (firebase.database) {
+        const notificationRef = firebase.database().ref(`notifications/${this.currentUser.uid}/${notificationId}`);
+        await notificationRef.update({ read: true });
+      }
       
       // Update local cache
       notification.read = true;
@@ -299,6 +316,10 @@ class NotificationManager {
       this.updateNotificationCount();
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      // Still update local cache on error
+      notification.read = true;
+      this.notifications.set(notificationId, notification);
+      this.updateNotificationCount();
     }
   }
 
@@ -464,6 +485,8 @@ class NotificationManager {
 
   async checkNewChatMessages() {
     try {
+      if (!firebase.database) return;
+      
       const chatsRef = firebase.database().ref('chats');
       const snapshot = await chatsRef.once('value');
       const chats = snapshot.val() || {};
@@ -516,6 +539,8 @@ class NotificationManager {
 
   async checkNewsfeedMentions() {
     try {
+      if (!firebase.database) return;
+      
       const postsRef = firebase.database().ref('posts');
       const snapshot = await postsRef
         .orderByChild('timestamp')
