@@ -1936,15 +1936,25 @@ function openChatPopout() {
   const left = (screen.width - width) / 2;
   const top = (screen.height - height) / 2;
   
-  // Open popout window
+  // Open popout window with enhanced parameters
   popoutWindow = window.open(
     `chat-popout.html?chatId=${currentChat.id}`,
     'castle-comms-chat',
-    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`
+    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no,directories=no,titlebar=yes`
   );
   
   // Handle popout window events
   if (popoutWindow) {
+    // Try to resize after a brief delay (some browsers need this)
+    setTimeout(() => {
+      try {
+        popoutWindow.resizeTo(width, height);
+        popoutWindow.moveTo(left, top);
+      } catch (error) {
+        console.log('Could not resize popup window:', error);
+      }
+    }, 100);
+    
     // Check if window is closed periodically
     const checkClosed = setInterval(() => {
       if (popoutWindow.closed) {
@@ -1954,6 +1964,9 @@ function openChatPopout() {
     }, 1000);
     
     console.log('Chat popout window opened');
+  } else {
+    // Popup was blocked
+    alert('Popup blocked! Please allow popups for this site and try again. You may need to resize the chat window manually.');
   }
 }
 
