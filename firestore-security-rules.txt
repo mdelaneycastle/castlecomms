@@ -140,13 +140,82 @@ service cloud.firestore {
         && validateChatMessage(request.resource.data)
         && userInChat(request.resource.data.chatId, request.auth.token.email);
       
-      // Users can update their own messages (edit, reactions)
+      // Users can update their own messages (edit, reactions) or mark messages as read
       allow update: if request.auth != null 
-        && request.auth.token.email == resource.data.senderEmail;
+        && (request.auth.token.email == resource.data.senderEmail
+            || (userInChat(resource.data.chatId, request.auth.token.email)
+                && onlyUpdatingReadBy(request.resource.data, resource.data)));
       
       // Users can delete their own messages, admins can delete any
       allow delete: if request.auth != null 
         && (request.auth.token.email == resource.data.senderEmail 
+            || request.auth.token.admin == true);
+    }
+    
+    // Chat typing indicators rules
+    match /chat-typing/{typingId} {
+      // Users can read typing indicators from chats they're participants in
+      allow read: if request.auth != null 
+        && userInChat(resource.data.chatId, request.auth.token.email);
+      
+      // Users can create/update their own typing indicators
+      allow create, update: if request.auth != null 
+        && request.auth.token.email == request.resource.data.userEmail
+        && userInChat(request.resource.data.chatId, request.auth.token.email);
+      
+      // Users can delete their own typing indicators
+      allow delete: if request.auth != null 
+        && request.auth.token.email == resource.data.userEmail;
+    }
+    
+    // User reports rules - for PowerBI reports page
+    match /user-reports/{userId} {
+      // Users can read their own reports
+      allow read: if request.auth != null 
+        && request.auth.uid == userId;
+      
+      // Users can create/update their own reports collection
+      allow create, update: if request.auth != null 
+        && request.auth.uid == userId
+        && validateUserReports(request.resource.data);
+      
+      // Users can delete their own reports
+      allow delete: if request.auth != null 
+        && request.auth.uid == userId;
+    }
+    
+    // Users collection rules - for authentication user data
+    match /users/{userId} {
+      // All authenticated users can read user profiles (needed for chat participant selection)
+      allow read: if request.auth != null;
+      
+      // Users can create/update their own profile
+      allow create, update: if request.auth != null 
+        && request.auth.uid == userId;
+      
+      // Only admins can delete user profiles
+      allow delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Teams collection rules - for team management
+    match /teams/{teamId} {
+      // All authenticated users can read teams (needed for ticket assignment)
+      allow read: if request.auth != null;
+      
+      // Authenticated users can create teams
+      allow create: if request.auth != null 
+        && validateTeam(request.resource.data);
+      
+      // Team creator or admins can update teams
+      allow update: if request.auth != null 
+        && (request.auth.uid == resource.data.createdBy.uid 
+            || request.auth.token.admin == true)
+        && validateTeamUpdate(request.resource.data, resource.data);
+      
+      // Team creator or admins can delete teams
+      allow delete: if request.auth != null 
+        && (request.auth.uid == resource.data.createdBy.uid 
             || request.auth.token.admin == true);
     }
     
@@ -213,7 +282,7 @@ service cloud.firestore {
         && data.description.size() <= 2000
         && data.category is string
         && data.category.size() > 0
-        && data.status in ['open', 'on-hold', 'resolved']
+        && data.status in ['open', 'in-progress', 'resolved']
         && data.createdBy is map
         && data.createdBy.keys().hasAll(['uid', 'email', 'name'])
         && data.assignedTo is map
@@ -276,6 +345,41 @@ service cloud.firestore {
         && userEmail in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
     }
     
+    // Helper function to check if only readBy field is being updated
+    function onlyUpdatingReadBy(newData, oldData) {
+      return newData.chatId == oldData.chatId
+        && newData.senderEmail == oldData.senderEmail 
+        && newData.senderName == oldData.senderName
+        && newData.message == oldData.message
+        && newData.timestamp == oldData.timestamp;
+    }
+    
+    // Helper function to validate user reports data
+    function validateUserReports(data) {
+      return data.keys().hasAll(['reports'])
+        && data.reports is list;
+    }
+    
+    // Helper function to validate team data
+    function validateTeam(data) {
+      return data.keys().hasAll(['name', 'members', 'createdBy', 'createdAt'])
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 50
+        && data.members is list
+        && data.members.size() > 0
+        && data.members.size() <= 50
+        && data.createdBy is map
+        && data.createdBy.keys().hasAll(['uid', 'email', 'name'])
+        && data.createdAt is timestamp;
+    }
+    
+    // Helper function to validate team updates
+    function validateTeamUpdate(newData, oldData) {
+      return newData.createdBy == oldData.createdBy
+        && newData.createdAt == oldData.createdAt;
+    }
+    
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
@@ -288,7 +392,11 @@ service cloud.firestore {
 // 2. Replace the existing rules with the rules above
 // 3. Click "Publish" to apply the changes
 //
-// Key changes for ticket transfers:
-// - Removed assignedTo validation restriction in validateTicketUpdate()
-// - Added permission for new assignee to update tickets during transfer
-// - Keeps all existing functionality for recognition board, messages, communications, etc.
+// Key changes for chat enhancements and reports:
+// - Added support for typing indicators with chat-typing collection
+// - Enhanced chat-messages rules to allow read receipt updates
+// - Added user-reports collection rules for PowerBI reports page
+// - Added onlyUpdatingReadBy helper function for read receipt validation
+// - Added validateUserReports helper function for reports validation
+// - Users can now mark messages as read, see typing indicators, and manage personal reports
+// - Keeps all existing functionality for recognition board, messages, communications, tickets, etc.

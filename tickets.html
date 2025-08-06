@@ -421,35 +421,138 @@
       background: var(--primary-gradient);
     }
 
+    .filter-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .count-badge {
+      background: rgba(255, 255, 255, 0.2);
+      color: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .filter-button:not(.active) .count-badge {
+      background: #6c757d;
+      color: white;
+    }
+
+    /* Search Section */
+    .ticket-search-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .search-input-group {
+      position: relative;
+      max-width: 500px;
+    }
+
+    .ticket-search-input {
+      width: 100%;
+      padding: 0.75rem 3rem 0.75rem 2.5rem;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      background: #f8f9fa;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+
+    .ticket-search-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(98, 100, 167, 0.1);
+    }
+
+    .ticket-search-input::placeholder {
+      color: #8a8886;
+    }
+
+    .search-input-group::before {
+      content: "🔍";
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8a8886;
+      font-size: 0.9rem;
+    }
+
+    .search-clear-btn {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #8a8886;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .search-clear-btn:hover {
+      background: #d13438;
+    }
+
     .tickets-list {
       flex: 1;
       overflow-y: auto;
       max-height: 600px;
-    }
-
-    .ticket-item {
       background: white;
+      border-radius: 8px;
       border: 1px solid #e1e5e9;
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+    }
+
+    .tickets-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .tickets-table th {
+      background: #f8f9fa;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #e1e5e9;
+      border-right: 1px solid #e1e5e9;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .tickets-table th:last-child {
+      border-right: none;
+    }
+
+    .tickets-table td {
+      padding: 12px;
+      border-bottom: 1px solid #f1f3f4;
+      border-right: 1px solid #f1f3f4;
+      vertical-align: top;
+    }
+
+    .tickets-table td:last-child {
+      border-right: none;
+    }
+
+    .tickets-table tr:hover {
+      background-color: #f8f9fa;
       cursor: pointer;
-      transition: all 0.3s;
-      position: relative;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .ticket-item:hover {
-      border-color: #667eea;
-      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
-      transform: translateY(-2px);
-    }
-
-    .ticket-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.5rem;
     }
 
     .ticket-id {
@@ -459,11 +562,13 @@
     }
 
     .ticket-status {
-      padding: 0.2rem 0.6rem;
+      padding: 4px 8px;
       border-radius: 12px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 500;
       text-transform: uppercase;
+      display: inline-block;
+      white-space: nowrap;
     }
 
     .ticket-status.open {
@@ -471,7 +576,7 @@
       color: #155724;
     }
 
-    .ticket-status.on-hold {
+    .ticket-status.in-progress {
       background: #fff3cd;
       color: #856404;
     }
@@ -481,40 +586,160 @@
       color: #0c5460;
     }
 
+    .ticket-status.transferred {
+      background: #e2e3f0;
+      color: #6c5ce7;
+      border: 1px solid #a29bfe;
+    }
+
     .ticket-title {
       font-weight: 600;
       color: #2c3e50;
-      margin-bottom: 0.75rem;
-      font-size: 1.2rem;
-      line-height: 1.4;
-    }
-
-    .ticket-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-      color: #6c757d;
-      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      line-height: 1.3;
+      max-width: 300px;
+      word-wrap: break-word;
     }
 
     .ticket-category {
       background: #e9ecef;
-      padding: 0.2rem 0.5rem;
-      border-radius: 10px;
-      font-size: 0.8rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
       color: #495057;
+      white-space: nowrap;
     }
 
     .ticket-description {
       color: #6c757d;
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      max-width: 250px;
       overflow: hidden;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
-      margin-bottom: 0.5rem;
+      word-wrap: break-word;
+    }
+
+    .ticket-assignee {
+      font-size: 0.85rem;
+      color: #495057;
+    }
+
+    .ticket-creator {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    .ticket-created {
+      font-size: 0.85rem;
+      color: #6c757d;
+      white-space: nowrap;
+    }
+
+    /* Raise Ticket Button */
+    .raise-ticket-btn {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 2rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .raise-ticket-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Create Ticket Modal */
+    .create-ticket-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .create-ticket-modal.show {
+      display: flex;
+    }
+
+    .create-ticket-modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 600px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .create-ticket-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6c757d;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .create-ticket-modal-close:hover {
+      background: #f8f9fa;
+    }
+
+    .create-ticket-modal h3 {
+      margin: 0 0 2rem 0;
+      color: #2c3e50;
+      font-size: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e1e5e9;
+    }
+
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .assignment-type-selector {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .assignment-type-selector input[type="radio"] {
+      margin-right: 0.5rem;
+    }
+
+    .assignment-type-selector label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-weight: normal;
     }
 
     .no-tickets {
@@ -1008,12 +1233,17 @@
         border-left-color: #dc3545;
       }
       
-      .ticket-card.on-hold {
+      .ticket-card.in-progress {
         border-left-color: #ffc107;
       }
       
       .ticket-card.resolved {
         border-left-color: #28a745;
+      }
+
+      .ticket-card.transferred {
+        border-left-color: #6c5ce7;
+        background: #f8f9ff;
       }
       
       .ticket-header {
@@ -1178,111 +1408,47 @@
       <h1>🎫 Support Tickets</h1>
     </div>
     
-    <!-- Ticket Type Selection -->
-    <div class="ticket-type-selection" id="ticket-type-selection">
-      <div class="ticket-type-options">
-        <div class="ticket-type-card" onclick="selectTicketType('monday')">
-          <div class="ticket-type-icon">📋</div>
-          <h3>Monday.com Ticket</h3>
-          <p>Create a ticket in our Monday.com system for comprehensive project management and tracking</p>
-          <button class="ticket-type-btn">Raise Monday.com Ticket</button>
-        </div>
-        
-        <div class="ticket-type-card" onclick="selectTicketType('internal')">
-          <div class="ticket-type-icon">🎫</div>  
-          <h3>Internal System Ticket</h3>
-          <p>Create a ticket in our internal system for quick communication and simple issue tracking</p>
-          <button class="ticket-type-btn">Create Internal Ticket</button>
-        </div>
-      </div>
-      
-      <div class="view-tickets-section">
-        <a href="https://castlefineart-org.monday.com/portal" target="_blank" class="view-tickets-btn">
-          👁️ View My Tickets
-        </a>
-      </div>
-    </div>
-
-    <!-- Monday.com Ticket Section -->
-    <div class="monday-ticket-section" id="monday-ticket-section" style="display: none;">
-      <div class="section-header">
-        <button class="back-btn" onclick="goBackToSelection()">← Back to Options</button>
-        <h3>📋 Monday.com Ticket</h3>
-      </div>
-      <div class="monday-iframe-container">
-        <iframe 
-          src="https://forms.monday.com/forms/embed/142233d15033ec5cb1fe363d7b9eff5b?r=euc1" 
-          style="border: 0; box-shadow: 5px 5px 56px 0px rgba(0,0,0,0.25); border-radius: 10px;">
-        </iframe>
-      </div>
-    </div>
-
-    <!-- Internal System Section -->
-    <div class="tickets-layout" id="internal-ticket-section" style="display: none;">
+    <!-- Internal System Section (now default) -->
+    <div class="tickets-layout" id="internal-ticket-section">
       <div class="section-header-full">
-        <button class="back-btn" onclick="goBackToSelection()">← Back to Options</button>
         <h3>🎫 Internal System Tickets</h3>
       </div>
       
-      <!-- Create Ticket Section -->
+      <!-- Create Ticket Button -->
       <div class="create-ticket-section">
-        <h3>🆕 Create New Ticket</h3>
-        
+        <button class="raise-ticket-btn" onclick="openCreateTicketModal()">🆕 Raise a Ticket</button>
         <div id="ticket-status"></div>
-        
-        <form id="create-ticket-form">
-          <div class="form-group">
-            <label for="assign-to">Assign To:</label>
-            <div class="user-search-container">
-              <input type="text" id="assign-to" class="form-input" placeholder="Start typing a name or email..." autocomplete="off">
-              <div id="user-suggestions" class="user-suggestions"></div>
-            </div>
-            <div id="assigned-user-display"></div>
-          </div>
-          
-          <div class="form-group">
-            <label for="ticket-category">Category:</label>
-            <select id="ticket-category" class="form-select" required>
-              <option value="">Select a department...</option>
-              <option value="Client Order Fulfilment Team">Client Order Fulfilment Team</option>
-              <option value="Manufacturing and QC">Manufacturing and QC</option>
-              <option value="Framing">Framing</option>
-              <option value="Stock Control">Stock Control</option>
-              <option value="Logistics">Logistics</option>
-              <option value="Operations">Operations</option>
-              <option value="Inventory">Inventory</option>
-              <option value="IT Support">IT Support</option>
-              <option value="HR">HR</option>
-              <option value="General">General</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="ticket-title">Subject:</label>
-            <input type="text" id="ticket-title" class="form-input" placeholder="Brief description of the issue..." required maxlength="100">
-          </div>
-          
-          <div class="form-group">
-            <label for="ticket-description">Description:</label>
-            <textarea id="ticket-description" class="form-textarea" placeholder="Please provide details about the issue, including any steps to reproduce, error messages, or relevant information..." required></textarea>
-          </div>
-          
-          <button type="submit" class="create-ticket-button" id="create-ticket-btn">Create Ticket</button>
-        </form>
       </div>
       
       <!-- Tickets List Section -->
       <div class="tickets-list-section">
         <div class="tickets-list-header">
           <h3>📋 My Tickets</h3>
-          <div class="ticket-count" id="ticket-count">0 tickets</div>
+        </div>
+        
+        <div class="ticket-search-section">
+          <div class="search-input-group">
+            <input type="text" id="ticket-search" class="ticket-search-input" placeholder="Search tickets by title, ID, or description...">
+            <button class="search-clear-btn" id="search-clear-btn" onclick="clearSearch()" style="display: none;">×</button>
+          </div>
         </div>
         
         <div class="ticket-filters">
-          <button class="filter-button active" data-filter="all">All</button>
-          <button class="filter-button" data-filter="open">Open</button>
-          <button class="filter-button" data-filter="on-hold">On Hold</button>
-          <button class="filter-button" data-filter="resolved">Resolved</button>
+          <button class="filter-button active" data-filter="all">
+            <span class="filter-count">All <span class="count-badge" id="count-all">0</span></span>
+          </button>
+          <button class="filter-button" data-filter="open">
+            <span class="filter-count">Open <span class="count-badge" id="count-open">0</span></span>
+          </button>
+          <button class="filter-button" data-filter="in-progress">
+            <span class="filter-count">In Progress <span class="count-badge" id="count-in-progress">0</span></span>
+          </button>
+          <button class="filter-button" data-filter="resolved">
+            <span class="filter-count">Resolved <span class="count-badge" id="count-resolved">0</span></span>
+          </button>
+          <button class="filter-button" data-filter="transferred">
+            <span class="filter-count">Transferred <span class="count-badge" id="count-transferred">0</span></span>
+          </button>
         </div>
         
         <div class="tickets-list" id="tickets-list">
@@ -1325,7 +1491,7 @@
         <label for="ticket-status-select">Status:</label>
         <select id="ticket-status-select" onchange="updateTicketStatus()">
           <option value="open">Open</option>
-          <option value="on-hold">On Hold</option>
+          <option value="in-progress">In Progress</option>
           <option value="resolved">Resolved</option>
         </select>
       </div>
@@ -1369,6 +1535,75 @@
   </div>
 </div>
 
+<!-- Create Ticket Modal -->
+<div class="create-ticket-modal" id="create-ticket-modal">
+  <div class="create-ticket-modal-content">
+    <button class="create-ticket-modal-close" onclick="closeCreateTicketModal()">&times;</button>
+    
+    <h3>🎫 Create New Ticket</h3>
+    
+    <div id="create-ticket-status"></div>
+    
+    <form id="create-ticket-form">
+      <div class="form-group">
+        <label>Assign To:</label>
+        <div class="assignment-type-selector">
+          <input type="radio" id="assign-individual" name="assign-type" value="individual" checked>
+          <label for="assign-individual">Individual</label>
+          <input type="radio" id="assign-team" name="assign-type" value="team">
+          <label for="assign-team">Team</label>
+        </div>
+      </div>
+      
+      <div class="form-group" id="individual-assignment">
+        <label for="modal-assign-to">Select User:</label>
+        <div class="user-search-container">
+          <input type="text" id="modal-assign-to" class="form-input" placeholder="Start typing a name or email..." autocomplete="off">
+          <div id="modal-user-suggestions" class="user-suggestions"></div>
+        </div>
+        <div id="modal-assigned-user-display"></div>
+      </div>
+      
+      <div class="form-group" id="team-assignment" style="display: none;">
+        <label for="modal-assign-team">Select Team:</label>
+        <select id="modal-assign-team" class="form-select">
+          <option value="">Select a team...</option>
+          <!-- Teams will be populated by JavaScript -->
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="modal-ticket-category">Category:</label>
+        <select id="modal-ticket-category" class="form-select" required>
+          <option value="">Select a department...</option>
+          <option value="Client Order Fulfilment Team">Client Order Fulfilment Team</option>
+          <option value="Manufacturing and QC">Manufacturing and QC</option>
+          <option value="Framing">Framing</option>
+          <option value="Stock Control">Stock Control</option>
+          <option value="Logistics">Logistics</option>
+          <option value="Operations">Operations</option>
+          <option value="Inventory">Inventory</option>
+          <option value="IT Support">IT Support</option>
+          <option value="HR">HR</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="modal-ticket-title">Subject:</label>
+        <input type="text" id="modal-ticket-title" class="form-input" placeholder="Brief description of the issue..." required maxlength="100">
+      </div>
+      
+      <div class="form-group">
+        <label for="modal-ticket-description">Description:</label>
+        <textarea id="modal-ticket-description" class="form-textarea" placeholder="Please provide detailed information about the issue, including any steps to reproduce, error messages, or other relevant details that might help resolve the problem..." required></textarea>
+      </div>
+      
+      <button type="submit" class="create-ticket-button" id="modal-create-ticket-btn">Create Ticket</button>
+    </form>
+  </div>
+</div>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -1386,7 +1621,9 @@
 let db;
 let currentUser;
 let allUsers = [];
+let allTeams = [];
 let assignedUser = null;
+let assignedTeam = null;
 let currentFilter = 'all';
 let currentTicket = null;
 
@@ -1427,13 +1664,20 @@ async function initializeInternalSystem() {
   
   db = firebase.firestore();
   await loadAllUsers();
+  await loadAllTeams();
   setupUserSearch();
   setupTicketForm();
   setupFilters();
+  setupSearch();
   loadTickets();
+  
+  // Handle direct ticket links (e.g., #ticket-434592)
+  handleDirectTicketLink();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Tickets page loaded, checking authentication...');
+  
   // Check authentication first
   firebase.auth().onAuthStateChanged(async (user) => {
     if (!user) {
@@ -1443,9 +1687,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     currentUser = user;
-    
-    // Just store the user, don't initialize internal system until selected
     console.log('User authenticated:', user.email);
+    
+    // Since we go directly to internal tickets now, initialize immediately
+    try {
+      await initializeInternalSystem();
+      console.log('Tickets page fully initialized');
+    } catch (error) {
+      console.error('Error initializing tickets page:', error);
+      const ticketsList = document.getElementById('tickets-list');
+      if (ticketsList) {
+        ticketsList.innerHTML = `
+          <div class="error" style="text-align: center; padding: 40px; color: #d13438;">
+            <h4>Initialization Error</h4>
+            <p style="margin: 10px 0; color: #666;">${error.message}</p>
+            <button onclick="window.location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #6264a7; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              Reload Page
+            </button>
+          </div>
+        `;
+      }
+    }
   });
 });
 
@@ -1516,10 +1778,30 @@ async function loadAllUsers() {
   }
 }
 
+// Load all teams for assignment
+async function loadAllTeams() {
+  try {
+    const teamsSnapshot = await db.collection('teams').get();
+    allTeams = teamsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    console.log('Loaded teams:', allTeams.length);
+  } catch (error) {
+    console.error('Error loading teams:', error);
+  }
+}
+
 // Setup user search functionality
 function setupUserSearch() {
   const searchInput = document.getElementById('assign-to');
   const suggestionsDiv = document.getElementById('user-suggestions');
+  
+  // Check if elements exist (they don't since we moved to modal)
+  if (!searchInput || !suggestionsDiv) {
+    console.log('User search elements not found - form moved to modal');
+    return;
+  }
   
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
@@ -1599,9 +1881,16 @@ function updateAssignedUserDisplay() {
 // Setup ticket creation form
 function setupTicketForm() {
   const form = document.getElementById('create-ticket-form');
+  
+  // Check if form exists (it's now in the modal)
+  if (!form) {
+    console.log('Create ticket form not found - using modal version');
+    return;
+  }
+  
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    await createTicket();
+    await createTicketFromModal();
   });
 }
 
@@ -1693,40 +1982,215 @@ function setupFilters() {
   });
 }
 
+// Setup search functionality
+function setupSearch() {
+  const searchInput = document.getElementById('ticket-search');
+  const clearBtn = document.getElementById('search-clear-btn');
+  
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const hasValue = e.target.value.trim() !== '';
+      clearBtn.style.display = hasValue ? 'block' : 'none';
+      
+      // Debounce search
+      clearTimeout(window.searchTimeout);
+      window.searchTimeout = setTimeout(() => {
+        loadTickets();
+      }, 300);
+    });
+    
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        clearSearch();
+      }
+    });
+  }
+}
+
+// Clear search
+function clearSearch() {
+  const searchInput = document.getElementById('ticket-search');
+  const clearBtn = document.getElementById('search-clear-btn');
+  
+  if (searchInput) {
+    searchInput.value = '';
+    clearBtn.style.display = 'none';
+    loadTickets();
+  }
+}
+
+// Handle direct ticket links from chat
+function handleDirectTicketLink() {
+  if (window.location.hash.startsWith('#ticket-')) {
+    const ticketId = window.location.hash.replace('#ticket-', '');
+    console.log('Direct ticket link detected:', ticketId);
+    
+    // Wait a bit for tickets to load, then try to highlight the specific ticket
+    setTimeout(() => {
+      highlightSpecificTicket(ticketId);
+    }, 2000);
+  }
+}
+
+// Highlight a specific ticket in the list
+function highlightSpecificTicket(ticketId) {
+  // Try to find ticket element by ID
+  const ticketElement = document.querySelector(`[data-ticket-id="${ticketId}"], [data-ticket-id="TKT-${ticketId}"]`);
+  
+  if (ticketElement) {
+    // Scroll to the ticket
+    ticketElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // Highlight it temporarily
+    ticketElement.style.backgroundColor = '#fff3cd';
+    ticketElement.style.border = '2px solid #ffc107';
+    
+    setTimeout(() => {
+      ticketElement.style.backgroundColor = '';
+      ticketElement.style.border = '';
+    }, 3000);
+    
+    console.log('Highlighted ticket:', ticketId);
+  } else {
+    console.log('Ticket not found in current view:', ticketId);
+  }
+}
+
+// Check if user has access to a ticket (individual, team member, or creator)
+function checkUserTicketAccess(ticket, user) {
+  // User created the ticket
+  if (ticket.createdBy.uid === user.uid) {
+    return true;
+  }
+  
+  // Check if assigned to user individually
+  if (ticket.assignedTo.type === 'individual' && ticket.assignedTo.email === user.email) {
+    return true;
+  }
+  
+  // Check if assigned to a team that user is a member of
+  if (ticket.assignedTo.type === 'team' && ticket.assignedTo.teamMembers) {
+    return ticket.assignedTo.teamMembers.some(member => member.email === user.email);
+  }
+  
+  // Legacy tickets (before team system) - check direct email assignment
+  if (!ticket.assignedTo.type && ticket.assignedTo.email === user.email) {
+    return true;
+  }
+  
+  return false;
+}
+
+// Check if ticket was transferred away from user (for transferred filter)
+function checkTicketTransferred(ticket, user) {
+  // User created the ticket but it's no longer assigned to them (individually or via team)
+  if (ticket.createdBy.uid === user.uid) {
+    // Individual assignment that's not to this user
+    if (ticket.assignedTo.type === 'individual' && ticket.assignedTo.email !== user.email) {
+      return true;
+    }
+    
+    // Team assignment that doesn't include this user
+    if (ticket.assignedTo.type === 'team' && ticket.assignedTo.teamMembers) {
+      return !ticket.assignedTo.teamMembers.some(member => member.email === user.email);
+    }
+    
+    // Legacy tickets - check direct email
+    if (!ticket.assignedTo.type && ticket.assignedTo.email !== user.email) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+// Check if user can manage a ticket (change status, transfer, etc.)
+function checkUserCanManageTicket(ticket, user) {
+  // User created the ticket
+  if (ticket.createdBy.uid === user.uid) {
+    return true;
+  }
+  
+  // Check if assigned to user individually
+  if (ticket.assignedTo.type === 'individual' && ticket.assignedTo.email === user.email) {
+    return true;
+  }
+  
+  // Check if assigned to a team that user is a member of
+  if (ticket.assignedTo.type === 'team' && ticket.assignedTo.teamMembers) {
+    return ticket.assignedTo.teamMembers.some(member => member.email === user.email);
+  }
+  
+  // Legacy tickets (before team system) - check direct email assignment
+  if (!ticket.assignedTo.type && ticket.assignedTo.email === user.email) {
+    return true;
+  }
+  
+  return false;
+}
+
 // Load tickets for current user
 async function loadTickets() {
   const ticketsList = document.getElementById('tickets-list');
-  const ticketCount = document.getElementById('ticket-count');
+  
+  if (!ticketsList) {
+    console.error('tickets-list element not found');
+    return;
+  }
+  
+  // Show loading state
+  ticketsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #8a8886;">Loading tickets...</div>';
   
   try {
-    // Get tickets where user is creator or assigned to
-    const createdByQuery = db.collection('tickets')
-      .where('createdBy.uid', '==', currentUser.uid);
+    console.log('Loading tickets for user:', currentUser.email);
     
-    const assignedToQuery = db.collection('tickets')
-      .where('assignedTo.email', '==', currentUser.email);
-    
-    const [createdBySnapshot, assignedToSnapshot] = await Promise.all([
-      createdByQuery.get(),
-      assignedToQuery.get()
-    ]);
-    
-    // Combine and deduplicate tickets
+    // Get all tickets and filter by relevance to current user
+    const allTicketsSnapshot = await db.collection('tickets').get();
     const ticketMap = new Map();
     
-    createdBySnapshot.docs.forEach(doc => {
-      ticketMap.set(doc.id, { id: doc.id, ...doc.data() });
-    });
-    
-    assignedToSnapshot.docs.forEach(doc => {
-      ticketMap.set(doc.id, { id: doc.id, ...doc.data() });
+    // Process each ticket to check if user has access
+    allTicketsSnapshot.docs.forEach(doc => {
+      const ticket = { id: doc.id, ...doc.data() };
+      
+      // Check if user has access to this ticket
+      const hasAccess = checkUserTicketAccess(ticket, currentUser);
+      
+      if (hasAccess) {
+        ticketMap.set(doc.id, ticket);
+      }
     });
     
     let tickets = Array.from(ticketMap.values());
     
+    // Calculate counts for all categories before filtering
+    updateFilterCounts(tickets);
+    
     // Apply filter
-    if (currentFilter !== 'all') {
-      tickets = tickets.filter(ticket => ticket.status === currentFilter);
+    if (currentFilter === 'transferred') {
+      // Show tickets originally created by this user but now transferred away
+      tickets = tickets.filter(ticket => checkTicketTransferred(ticket, currentUser));
+    } else {
+      // For all other filters, exclude transferred-away tickets
+      if (currentFilter === 'all') {
+        tickets = tickets.filter(ticket => !checkTicketTransferred(ticket, currentUser));
+      } else {
+        // Apply status filter and exclude transferred-away tickets
+        tickets = tickets.filter(ticket => 
+          ticket.status === currentFilter && !checkTicketTransferred(ticket, currentUser)
+        );
+      }
+    }
+    
+    // Apply search filter
+    const searchInput = document.getElementById('ticket-search');
+    if (searchInput && searchInput.value.trim()) {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      tickets = tickets.filter(ticket => 
+        ticket.ticketId.toLowerCase().includes(searchTerm) ||
+        ticket.title.toLowerCase().includes(searchTerm) ||
+        ticket.description.toLowerCase().includes(searchTerm) ||
+        ticket.category.toLowerCase().includes(searchTerm)
+      );
     }
     
     // Sort by creation date (newest first)
@@ -1738,39 +2202,121 @@ async function loadTickets() {
     
     if (tickets.length === 0) {
       ticketsList.innerHTML = '<div class="no-tickets">No tickets found.</div>';
-      ticketCount.textContent = '0 tickets';
       return;
     }
     
-    const ticketItems = tickets.map(ticket => {
+    // Create table structure
+    const tableHeader = `
+      <table class="tickets-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Department</th>
+            <th>Title</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+            <th>Created By</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    
+    const ticketRows = tickets.map(ticket => {
       const createdDate = ticket.createdAt?.toDate?.() || new Date();
-      const isAssignedToMe = ticket.assignedTo.email === currentUser.email;
       const isCreatedByMe = ticket.createdBy.uid === currentUser.uid;
+      const isTransferred = checkTicketTransferred(ticket, currentUser);
+      
+      // Show transferred status or actual status
+      const displayStatus = isTransferred ? 'transferred' : ticket.status;
+      const statusText = isTransferred ? 'transferred' : ticket.status.replace('-', ' ');
+      
+      // Determine assignment display text
+      let assignmentText = '';
+      if (isTransferred) {
+        if (ticket.assignedTo.type === 'team') {
+          assignmentText = `Transferred to: ${ticket.assignedTo.teamName} team`;
+        } else {
+          assignmentText = `Transferred to: ${ticket.assignedTo.name || ticket.assignedTo.email}`;
+        }
+      } else {
+        if (ticket.assignedTo.type === 'team') {
+          assignmentText = `${ticket.assignedTo.teamName} team`;
+        } else {
+          assignmentText = ticket.assignedTo.name || ticket.assignedTo.email;
+        }
+      }
       
       return `
-        <div class="ticket-item" onclick="openTicket('${ticket.id}')">
-          <div class="ticket-header">
-            <div class="ticket-id">${ticket.ticketId}</div>
-            <div class="ticket-status ${ticket.status}">${ticket.status.replace('-', ' ')}</div>
-          </div>
-          <div class="ticket-title">${ticket.title}</div>
-          <div class="ticket-meta">
-            <span>Created by: ${ticket.createdBy.name}</span>
-            <span>Assigned to: ${ticket.assignedTo.name}</span>
-            <span>${formatTimestamp(createdDate)}</span>
-          </div>
-          <div class="ticket-category">${ticket.category}</div>
-          <div class="ticket-description">${ticket.description}</div>
-        </div>
+        <tr onclick="openTicket('${ticket.id}')" data-ticket-id="${ticket.ticketId}">
+          <td><div class="ticket-id">${ticket.ticketId}</div></td>
+          <td><div class="ticket-category">${ticket.category}</div></td>
+          <td><div class="ticket-title">${ticket.title}</div></td>
+          <td><div class="ticket-assignee">${assignmentText}</div></td>
+          <td><div class="ticket-status ${displayStatus}">${statusText}</div></td>
+          <td><div class="ticket-creator">${ticket.createdBy.name}</div></td>
+          <td><div class="ticket-created">${formatTimestamp(createdDate)}</div></td>
+        </tr>
       `;
     }).join('');
     
-    ticketsList.innerHTML = ticketItems;
-    ticketCount.textContent = `${tickets.length} ticket${tickets.length !== 1 ? 's' : ''}`;
+    const tableFooter = `
+        </tbody>
+      </table>
+    `;
+    
+    ticketsList.innerHTML = tableHeader + ticketRows + tableFooter;
     
   } catch (error) {
     console.error('Error loading tickets:', error);
-    ticketsList.innerHTML = '<div class="error">Failed to load tickets.</div>';
+    ticketsList.innerHTML = `
+      <div class="error" style="text-align: center; padding: 40px; color: #d13438;">
+        <h4>Failed to load tickets</h4>
+        <p style="margin: 10px 0; color: #666;">${error.message}</p>
+        <button onclick="loadTickets()" style="margin-top: 15px; padding: 8px 16px; background: #6264a7; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Try Again
+        </button>
+      </div>
+    `;
+  }
+}
+
+// Update filter count badges
+function updateFilterCounts(allTickets) {
+  try {
+    // Calculate counts for each category
+    const counts = {
+      all: 0,
+      open: 0,
+      'in-progress': 0,
+      resolved: 0,
+      transferred: 0
+    };
+    
+    allTickets.forEach(ticket => {
+      const isTransferred = checkTicketTransferred(ticket, currentUser);
+      
+      if (isTransferred) {
+        // This is a transferred ticket
+        counts.transferred++;
+      } else {
+        // This is an active ticket (assigned to me individually, via team, or created by me and still mine)
+        counts.all++;
+        counts[ticket.status]++;
+      }
+    });
+    
+    // Update count badges
+    document.getElementById('count-all').textContent = counts.all;
+    document.getElementById('count-open').textContent = counts.open;
+    document.getElementById('count-in-progress').textContent = counts['in-progress'];
+    document.getElementById('count-resolved').textContent = counts.resolved;
+    document.getElementById('count-transferred').textContent = counts.transferred;
+    
+    console.log('Filter counts updated:', counts);
+    
+  } catch (error) {
+    console.error('Error updating filter counts:', error);
   }
 }
 
@@ -1794,25 +2340,29 @@ async function openTicket(ticketId) {
     document.getElementById('modal-ticket-category').textContent = ticketData.category;
     document.getElementById('modal-ticket-description').textContent = ticketData.description;
     document.getElementById('modal-ticket-creator').textContent = `Created by: ${ticketData.createdBy.name}`;
-    document.getElementById('modal-ticket-assignee').textContent = `Assigned to: ${ticketData.assignedTo.name}`;
+    // Display assignment info (individual or team)
+    let assignmentDisplayText = 'Assigned to: ';
+    if (ticketData.assignedTo.type === 'team') {
+      assignmentDisplayText += `${ticketData.assignedTo.teamName} team (${ticketData.assignedTo.teamMembers.length} members)`;
+    } else {
+      assignmentDisplayText += ticketData.assignedTo.name || ticketData.assignedTo.email;
+    }
+    document.getElementById('modal-ticket-assignee').textContent = assignmentDisplayText;
     document.getElementById('modal-ticket-date').textContent = formatTimestamp(ticketData.createdAt?.toDate?.() || new Date());
     
     // Update status dropdown
     const statusSelect = document.getElementById('ticket-status-select');
     statusSelect.value = ticketData.status;
     
-    // Show/hide status change based on permissions
-    const canChangeStatus = currentUser.uid === ticketData.createdBy.uid || 
-                           currentUser.email === ticketData.assignedTo.email;
-    statusSelect.disabled = !canChangeStatus;
+    // Check permissions for team-aware access
+    const canManageTicket = checkUserCanManageTicket(ticketData, currentUser);
+    statusSelect.disabled = !canManageTicket;
     
     // Show/hide transfer section based on permissions
     const transferSection = document.querySelector('.ticket-transfer-section');
-    const canTransfer = currentUser.uid === ticketData.createdBy.uid || 
-                       currentUser.email === ticketData.assignedTo.email;
     
     if (transferSection) {
-      transferSection.style.display = canTransfer ? 'block' : 'none';
+      transferSection.style.display = canManageTicket ? 'block' : 'none';
     }
     
     // Load messages
@@ -1907,6 +2457,243 @@ function formatTimestamp(timestamp) {
 function closeTicketModal() {
   document.getElementById('ticket-modal').classList.remove('show');
   currentTicket = null;
+}
+
+// Open create ticket modal
+function openCreateTicketModal() {
+  document.getElementById('create-ticket-modal').classList.add('show');
+  setupModalUserSearch();
+  populateTeamDropdown();
+  setupAssignmentTypeHandlers();
+}
+
+// Close create ticket modal
+function closeCreateTicketModal() {
+  document.getElementById('create-ticket-modal').classList.remove('show');
+  
+  // Clear form
+  document.getElementById('create-ticket-form').reset();
+  document.getElementById('modal-assigned-user-display').innerHTML = '';
+  document.getElementById('create-ticket-status').innerHTML = '';
+  assignedUser = null;
+}
+
+// Setup user search for modal
+function setupModalUserSearch() {
+  const searchInput = document.getElementById('modal-assign-to');
+  const suggestionsDiv = document.getElementById('modal-user-suggestions');
+  
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    
+    if (query.length < 1) {
+      suggestionsDiv.style.display = 'none';
+      return;
+    }
+    
+    const filteredUsers = allUsers.filter(user => 
+      (user.name.toLowerCase().includes(query) || 
+       user.email.toLowerCase().includes(query)) &&
+      user.email !== currentUser.email // Don't show current user
+    );
+    
+    if (filteredUsers.length > 0) {
+      suggestionsDiv.innerHTML = filteredUsers.map(user => 
+        `<div class="user-suggestion" data-email="${user.email}" data-name="${user.name}">
+          <strong>${user.name}</strong><br>
+          <small>${user.email}</small>
+        </div>`
+      ).join('');
+      suggestionsDiv.style.display = 'block';
+    } else {
+      suggestionsDiv.style.display = 'none';
+    }
+  });
+  
+  // Handle suggestion clicks
+  suggestionsDiv.addEventListener('click', (e) => {
+    const suggestion = e.target.closest('.user-suggestion');
+    if (suggestion) {
+      const email = suggestion.dataset.email;
+      const name = suggestion.dataset.name;
+      
+      assignModalUser({ email, name });
+      searchInput.value = '';
+      suggestionsDiv.style.display = 'none';
+    }
+  });
+  
+  // Hide suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#modal-user-suggestions') && !e.target.closest('#modal-assign-to')) {
+      suggestionsDiv.style.display = 'none';
+    }
+  });
+}
+
+// Assign user in modal
+function assignModalUser(user) {
+  assignedUser = user;
+  updateModalAssignedUserDisplay();
+}
+
+// Update modal assigned user display
+function updateModalAssignedUserDisplay() {
+  const container = document.getElementById('modal-assigned-user-display');
+  if (assignedUser) {
+    container.innerHTML = `
+      <div class="assigned-user">
+        ${assignedUser.name}
+        <button type="button" class="remove-user" onclick="removeModalAssignedUser()">&times;</button>
+      </div>
+    `;
+  } else {
+    container.innerHTML = '';
+  }
+}
+
+// Remove assigned user in modal
+function removeModalAssignedUser() {
+  assignedUser = null;
+  updateModalAssignedUserDisplay();
+}
+
+// Create ticket from modal
+async function createTicketFromModal() {
+  const title = document.getElementById('modal-ticket-title').value.trim();
+  const description = document.getElementById('modal-ticket-description').value.trim();
+  const category = document.getElementById('modal-ticket-category').value;
+  const createBtn = document.getElementById('modal-create-ticket-btn');
+  
+  if (!title || !description || !category) {
+    showModalStatus('Please fill in all required fields.', 'error');
+    return;
+  }
+  
+  // Check if either individual or team is assigned
+  const isIndividualAssignment = document.getElementById('assign-individual').checked;
+  const isTeamAssignment = document.getElementById('assign-team').checked;
+  
+  if (isIndividualAssignment && !assignedUser) {
+    showModalStatus('Please assign the ticket to a user.', 'error');
+    return;
+  }
+  
+  if (isTeamAssignment) {
+    const selectedTeamId = document.getElementById('modal-assign-team').value;
+    if (!selectedTeamId) {
+      showModalStatus('Please select a team.', 'error');
+      return;
+    }
+    assignedTeam = allTeams.find(team => team.id === selectedTeamId);
+  }
+  
+  createBtn.disabled = true;
+  createBtn.textContent = 'Creating...';
+  
+  try {
+    // Get current user's display name
+    const creatorName = await getUserDisplayName(currentUser);
+    
+    // Generate ticket ID
+    const ticketId = 'TKT-' + Date.now().toString().slice(-6);
+    
+    const ticketData = {
+      ticketId: ticketId,
+      title: title,
+      description: description,
+      category: category,
+      status: 'open',
+      createdBy: {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        name: creatorName
+      },
+      assignedTo: isTeamAssignment ? {
+        type: 'team',
+        teamId: assignedTeam.id,
+        teamName: assignedTeam.name,
+        teamMembers: assignedTeam.members
+      } : {
+        type: 'individual',
+        email: assignedUser.email,
+        name: assignedUser.name
+      },
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      messages: []
+    };
+    
+    await db.collection('tickets').add(ticketData);
+    
+    showModalStatus('Ticket created successfully!', 'success');
+    
+    // Close modal after short delay
+    setTimeout(() => {
+      closeCreateTicketModal();
+      loadTickets();
+    }, 1500);
+    
+  } catch (error) {
+    console.error('Error creating ticket:', error);
+    showModalStatus('Failed to create ticket. Please try again.', 'error');
+  }
+  
+  createBtn.disabled = false;
+  createBtn.textContent = 'Create Ticket';
+}
+
+// Show status message in modal
+function showModalStatus(message, type) {
+  const statusDiv = document.getElementById('create-ticket-status');
+  statusDiv.innerHTML = `<div class="${type}">${message}</div>`;
+  
+  if (type === 'success') {
+    setTimeout(() => {
+      statusDiv.innerHTML = '';
+    }, 3000);  
+  }
+}
+
+// Populate team dropdown
+function populateTeamDropdown() {
+  const teamSelect = document.getElementById('modal-assign-team');
+  
+  // Clear existing options except the first one
+  teamSelect.innerHTML = '<option value="">Select a team...</option>';
+  
+  // Add teams
+  allTeams.forEach(team => {
+    const option = document.createElement('option');
+    option.value = team.id;
+    option.textContent = team.name;
+    teamSelect.appendChild(option);
+  });
+}
+
+// Setup assignment type handlers
+function setupAssignmentTypeHandlers() {
+  const individualRadio = document.getElementById('assign-individual');
+  const teamRadio = document.getElementById('assign-team');
+  const individualSection = document.getElementById('individual-assignment');
+  const teamSection = document.getElementById('team-assignment');
+  
+  individualRadio.addEventListener('change', () => {
+    if (individualRadio.checked) {
+      individualSection.style.display = 'block';
+      teamSection.style.display = 'none';
+      assignedTeam = null;
+    }
+  });
+  
+  teamRadio.addEventListener('change', () => {
+    if (teamRadio.checked) {
+      individualSection.style.display = 'none';
+      teamSection.style.display = 'block';
+      assignedUser = null;
+      updateModalAssignedUserDisplay();
+    }
+  });
 }
 
 // Update ticket status
@@ -2066,17 +2853,29 @@ async function addSystemMessage(message) {
 
 // Setup modal events
 document.addEventListener('DOMContentLoaded', function() {
-  // Close modal when clicking outside
+  // Close ticket detail modal when clicking outside
   document.getElementById('ticket-modal').addEventListener('click', (e) => {
     if (e.target.id === 'ticket-modal') {
       closeTicketModal();
     }
   });
   
-  // Close modal with ESC key
+  // Close create ticket modal when clicking outside
+  document.getElementById('create-ticket-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'create-ticket-modal') {
+      closeCreateTicketModal();
+    }
+  });
+  
+  // Close modals with ESC key
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.getElementById('ticket-modal').classList.contains('show')) {
-      closeTicketModal();
+    if (e.key === 'Escape') {
+      if (document.getElementById('ticket-modal').classList.contains('show')) {
+        closeTicketModal();
+      }
+      if (document.getElementById('create-ticket-modal').classList.contains('show')) {
+        closeCreateTicketModal();
+      }
     }
   });
 });
@@ -2186,12 +2985,11 @@ async function transferTicket() {
     return;
   }
   
-  // Check permissions - only creator or current assignee can transfer
-  const canTransfer = currentUser.uid === currentTicket.createdBy.uid || 
-                     currentUser.email === currentTicket.assignedTo.email;
+  // Check permissions - use team-aware permission check
+  const canTransfer = checkUserCanManageTicket(currentTicket, currentUser);
   
   if (!canTransfer) {
-    alert('You can only transfer tickets that are assigned to you or that you created.');
+    alert('You can only transfer tickets that are assigned to you (or your team) or that you created.');
     return;
   }
   
@@ -2206,9 +3004,23 @@ async function transferTicket() {
     // Create updated ticket data
     const updateData = {
       assignedTo: {
+        type: 'individual',
         email: transferSelectedUser.email,
         name: transferSelectedUser.name
       },
+      transferHistory: firebase.firestore.FieldValue.arrayUnion({
+        from: currentTicket.assignedTo,
+        to: {
+          email: transferSelectedUser.email,
+          name: transferSelectedUser.name
+        },
+        transferredBy: {
+          email: currentUser.email,
+          name: transferredByName
+        },
+        reason: reason,
+        timestamp: new Date()
+      }),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
@@ -2220,8 +3032,15 @@ async function transferTicket() {
     batch.update(ticketRef, updateData);
     
     // Add transfer confirmation message
+    let fromText = '';
+    if (currentTicket.assignedTo.type === 'team') {
+      fromText = `${currentTicket.assignedTo.teamName} team`;
+    } else {
+      fromText = currentTicket.assignedTo.name || currentTicket.assignedTo.email;
+    }
+    
     const transferMessage = {
-      message: `Ticket transferred from ${currentTicket.assignedTo.name} to ${transferSelectedUser.name} by ${transferredByName}. Reason: ${reason}`,
+      message: `Ticket transferred from ${fromText} to ${transferSelectedUser.name} by ${transferredByName}. Reason: ${reason}`,
       senderEmail: 'system',
       senderName: 'System',
       timestamp: new Date()
@@ -2236,6 +3055,7 @@ async function transferTicket() {
     
     // Update current ticket object
     currentTicket.assignedTo = {
+      type: 'individual',
       email: transferSelectedUser.email,
       name: transferSelectedUser.name
     };

@@ -353,6 +353,234 @@
       cursor: not-allowed;
     }
 
+    /* Typing Indicators */
+    .typing-indicators {
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #8a8886;
+      font-style: italic;
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .typing-dots {
+      display: inline-flex;
+      gap: 2px;
+    }
+
+    .typing-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #8a8886;
+      animation: typingPulse 1.5s infinite;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: 0s; }
+    .typing-dot:nth-child(2) { animation-delay: 0.3s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.6s; }
+
+    @keyframes typingPulse {
+      0%, 60%, 100% { opacity: 0.3; }
+      30% { opacity: 1; }
+    }
+
+    /* Ticket Links */
+    .ticket-link {
+      color: #6264a7;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(98, 100, 167, 0.1);
+      border: 1px solid rgba(98, 100, 167, 0.2);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ticket-link:hover {
+      background: rgba(98, 100, 167, 0.15);
+      border-color: rgba(98, 100, 167, 0.3);
+      text-decoration: none;
+    }
+
+    .ticket-link::before {
+      content: "📋";
+      font-size: 12px;
+    }
+
+    /* Ticket Preview Card */
+    .ticket-preview {
+      position: absolute;
+      background: white;
+      border: 1px solid #e1e1e1;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      min-width: 280px;
+      max-width: 320px;
+      font-size: 13px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: all 0.2s ease;
+    }
+
+    .ticket-preview.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .ticket-preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .ticket-preview-id {
+      font-weight: 600;
+      color: #6264a7;
+      font-size: 12px;
+    }
+
+    .ticket-preview-status {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .ticket-preview-status.open {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .ticket-preview-status.resolved {
+      background: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .ticket-preview-status.in-progress {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+
+    .ticket-preview-title {
+      font-weight: 600;
+      color: #323130;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .ticket-preview-description {
+      color: #605e5c;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .ticket-preview-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #8a8886;
+    }
+
+    .ticket-preview-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      color: #8a8886;
+      font-size: 12px;
+    }
+
+    .ticket-preview-error {
+      color: #d13438;
+      font-size: 12px;
+      text-align: center;
+      padding: 8px;
+    }
+
+    /* Read Receipts */
+    .message-read-status {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: #8a8886;
+      margin-top: 4px;
+    }
+
+    .message-group.own .message-read-status {
+      justify-content: flex-end;
+    }
+
+    .read-receipt {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .read-receipt.delivered {
+      color: #8a8886;
+    }
+
+    .read-receipt.read {
+      color: #6264a7;
+    }
+
+    .read-receipt-icon {
+      font-size: 12px;
+    }
+
+    /* Notification Status */
+    .notification-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .notification-status.show {
+      display: block;
+      animation: fadeInDown 0.3s ease;
+    }
+
+    .notification-status.success {
+      background: rgba(40, 167, 69, 0.9);
+    }
+
+    .notification-status.warning {
+      background: rgba(255, 193, 7, 0.9);
+      color: #000;
+    }
+
     /* Empty State */
     .chat-empty {
       flex: 1;
@@ -650,7 +878,7 @@
           💬 Chat
         </h2>
         <input type="text" class="chat-search" id="chat-search" placeholder="Search chats...">
-        <button class="new-chat-button" id="new-chat-btn">+ New Chat</button>
+        <button class="new-chat-button" id="new-chat-btn">+ New Chat.</button>
       </div>
       
       <div class="chat-list" id="chat-list">
@@ -674,6 +902,9 @@
     </div>
   </div>
 </main>
+
+<!-- Notification Status -->
+<div id="notification-status" class="notification-status"></div>
 
 <!-- New Chat Modal -->
 <div class="modal" id="new-chat-modal">
@@ -726,6 +957,12 @@ let allUsers = [];
 let selectedUsers = [];
 let currentChat = null;
 let chatListeners = [];
+let typingUsers = new Set();
+let typingTimer = null;
+let readReceiptListeners = [];
+let notificationPermission = false;
+let audioContext = null;
+let lastMessageCount = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
   // Check authentication first
@@ -753,6 +990,7 @@ async function initializeChat() {
   try {
     await loadAllUsers();
     setupEventListeners();
+    setupNotifications();
     loadChats();
     console.log('Chat system initialized successfully');
   } catch (error) {
@@ -760,55 +998,194 @@ async function initializeChat() {
   }
 }
 
-// Load all users for autocomplete
+// Load all users for autocomplete using the same method as tickets page
 async function loadAllUsers() {
   try {
-    // Use static list of accounts we created
-    allUsers = [
-      { email: 'mdelaney@castlefineart.com', name: 'Marc Delaney' },
-      { email: 'gturpin@washingtongreen.co.uk', name: 'Gary Turpin' },
-      { email: 'icc@castlefineart.com', name: 'ICC' },
-      { email: 'mailbox@castlefineart.com', name: 'Mailbox' },
-      { email: 'cheltenham@castlefineart.com', name: 'Cheltenham' },
-      { email: 'derby@castlefineart.com', name: 'Derby' },
-      { email: 'leamingtonspa@castlefineart.com', name: 'Leamington Spa' },
-      { email: 'miltonkeynes@castlefineart.com', name: 'Milton Keynes' },
-      { email: 'nottingham@castlefineart.com', name: 'Nottingham' },
-      { email: 'stamford@castlefineart.com', name: 'Stamford' },
-      { email: 'stratford@castlefineart.com', name: 'Stratford' },
-      { email: 'chester@castlefineart.com', name: 'Chester' },
-      { email: 'harrogate@castlefineart.com', name: 'Harrogate' },
-      { email: 'leeds@castlefineart.com', name: 'Leeds' },
-      { email: 'liverpool@castlefineart.com', name: 'Liverpool' },
-      { email: 'manchester@castlefineart.com', name: 'Manchester' },
-      { email: 'newcastle@castlefineart.com', name: 'Newcastle' },
-      { email: 'meadowhall@castlefineart.com', name: 'Meadowhall' },
-      { email: 'york@castlefineart.com', name: 'York' },
-      { email: 'cgn@castlefineart.com', name: 'CGN' },
-      { email: 'sms@castlefineart.com', name: 'SMS' },
-      { email: 'scp@castlefineart.com', name: 'SCP' },
-      { email: 'bath@castlefineart.com', name: 'Bath' },
-      { email: 'brighton@castlefineart.com', name: 'Brighton' },
-      { email: 'bristol@castlefineart.com', name: 'Bristol' },
-      { email: 'cambridge@castlefineart.com', name: 'Cambridge' },
-      { email: 'canterbury@castlefineart.com', name: 'Canterbury' },
-      { email: 'exeter@castlefineart.com', name: 'Exeter' },
-      { email: 'guildford@castlefineart.com', name: 'Guildford' },
-      { email: 'bluewater@castlefineart.com', name: 'Bluewater' },
-      { email: 'marlow@castlefineart.com', name: 'Marlow' },
-      { email: 'norwich@castlefineart.com', name: 'Norwich' },
-      { email: 'oxford@castlefineart.com', name: 'Oxford' },
-      { email: 'reading@castlefineart.com', name: 'Reading' },
-      { email: 'tunbridgewells@castlefineart.com', name: 'Tunbridge Wells' },
-      { email: 'winchester@castlefineart.com', name: 'Winchester' },
-      { email: 'windsor@castlefineart.com', name: 'Windsor' },
-      { email: 'edinburgh@castlefineart.com', name: 'Edinburgh' },
-      { email: 'glasgow@castlefineart.com', name: 'Glasgow' },
-      { email: 'cardiff@castlefineart.com', name: 'Cardiff' }
-    ].filter(user => user.email !== currentUser.email); // Remove current user from list
+    // Try to get users from the listUsers function (same as tickets page)
+    if (typeof listUsers === 'function') {
+      try {
+        const users = await listUsers();
+        allUsers = users.map(user => ({
+          email: user.email,
+          name: user.displayName || extractNameFromEmail(user.email),
+          uid: user.uid
+        })).filter(user => 
+          user.email && 
+          user.email !== currentUser.email // Remove current user from list
+        );
+        console.log(`Loaded ${allUsers.length} users from Cloud Function (Firebase Auth)`);
+        return;
+      } catch (error) {
+        console.log('Cloud Function not available, trying fallbacks...', error);
+      }
+    }
+
+    // Fallback 1: Try Firestore users collection
+    try {
+      const usersSnapshot = await db.collection('users').get();
+      if (!usersSnapshot.empty) {
+        allUsers = usersSnapshot.docs.map(doc => {
+          const userData = doc.data();
+          return {
+            uid: doc.id,
+            email: userData.email,
+            name: userData.displayName || userData.name || extractNameFromEmail(userData.email || '')
+          };
+        }).filter(user => 
+          user.email && 
+          user.email.includes('@') && 
+          user.email !== currentUser.email
+        );
+        console.log(`Loaded ${allUsers.length} users from Firestore users collection`);
+        return;
+      }
+    } catch (firestoreError) {
+      console.log('Firestore users collection not accessible, trying Realtime Database...');
+    }
+
+    // Fallback 2: Try Realtime Database
+    try {
+      const realtimeDb = firebase.database();
+      const usersSnapshot = await realtimeDb.ref('users').once('value');
+      const usersData = usersSnapshot.val() || {};
+      
+      allUsers = Object.keys(usersData).map(uid => {
+        const userData = usersData[uid];
+        return {
+          uid: uid,
+          email: userData.email || (userData.name ? userData.name.toLowerCase().replace(/\s+/g, '.') + '@company.com' : 'unknown@company.com'),
+          name: userData.name || userData.displayName || extractNameFromEmail(userData.email || '')
+        };
+      }).filter(user => 
+        user.email && 
+        user.email.includes('@') && 
+        user.email !== currentUser.email
+      );
+      console.log(`Loaded ${allUsers.length} users from Realtime Database`);
+      return;
+    } catch (realtimeError) {
+      console.log('Realtime Database not accessible');
+    }
+    
+    // If all methods fail, empty array
+    console.warn('No users found from any source - user can only create chats with themselves');
+    allUsers = [];
+    
   } catch (error) {
     console.error('Error loading users:', error);
+    allUsers = [];
   }
+}
+
+// Setup desktop notifications and audio alerts
+async function setupNotifications() {
+  try {
+    // Request notification permission
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      notificationPermission = permission === 'granted';
+      console.log('Notification permission:', permission);
+      
+      // Show notification status
+      if (permission === 'granted') {
+        showNotificationStatus('🔔 Desktop notifications enabled', 'success');
+      } else if (permission === 'denied') {
+        showNotificationStatus('🔕 Desktop notifications blocked', 'warning');
+      } else {
+        showNotificationStatus('🔔 Desktop notifications need permission', 'warning');
+      }
+    }
+    
+    // Setup audio context for browser sounds
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      console.log('Audio context initialized for notifications');
+    } catch (audioError) {
+      console.log('Audio context not available:', audioError);
+    }
+    
+  } catch (error) {
+    console.error('Error setting up notifications:', error);
+  }
+}
+
+// Show notification status message
+function showNotificationStatus(message, type = '') {
+  const statusElement = document.getElementById('notification-status');
+  if (statusElement) {
+    statusElement.textContent = message;
+    statusElement.className = `notification-status show ${type}`;
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      statusElement.classList.remove('show');
+    }, 3000);
+  }
+}
+
+// Play notification sound
+function playNotificationSound() {
+  try {
+    if (audioContext) {
+      // Create a simple notification beep
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
+  } catch (error) {
+    console.error('Error playing notification sound:', error);
+  }
+}
+
+// Show desktop notification
+function showDesktopNotification(title, message, chatName) {
+  try {
+    if (notificationPermission && 'Notification' in window) {
+      const notification = new Notification(`${chatName}: ${title}`, {
+        body: message,
+        icon: '/favicon.ico',
+        tag: 'castle-comms-chat-' + Date.now(), // Allow multiple notifications
+        requireInteraction: true, // Keep notification until user interacts
+        silent: false,
+        badge: '/favicon.ico'
+      });
+      
+      // Don't auto-close - let user dismiss it
+      // Removed the auto-close timeout
+      
+      // Click to focus window
+      notification.onclick = function() {
+        window.focus();
+        this.close();
+      };
+      
+      // Also close when window regains focus (so they don't pile up)
+      const handleFocus = () => {
+        notification.close();
+        window.removeEventListener('focus', handleFocus);
+      };
+      window.addEventListener('focus', handleFocus);
+    }
+  } catch (error) {
+    console.error('Error showing desktop notification:', error);
+  }
+}
+
+// Check if user is currently viewing the page
+function isPageVisible() {
+  return !document.hidden && document.hasFocus();
 }
 
 // Setup event listeners
@@ -1075,6 +1452,7 @@ async function selectChat(chatId) {
     // Update UI
     updateActiveChatInList(chatId);
     displayChatInterface();
+    lastMessageCount = 0; // Reset message count for new chat
     loadChatMessages(chatId);
     
   } catch (error) {
@@ -1114,6 +1492,8 @@ function displayChatInterface() {
       <div class="chat-actions">
         <button class="chat-action-btn" onclick="renameChatPrompt()">Rename</button>
         <button class="chat-action-btn" onclick="showChatInfo()">Info</button>
+        <!-- Popout button for chat window -->
+        <button class="chat-action-btn" onclick="openChatPopout()" title="Pop out chat window">🪟 Pop Out</button>
       </div>
     </div>
     
@@ -1124,6 +1504,7 @@ function displayChatInterface() {
     </div>
     
     <div class="chat-input-area">
+      <div class="typing-indicators" id="typing-indicators"></div>
       <div class="chat-input-container">
         <textarea class="chat-input" id="message-input" placeholder="Type a message..." rows="1"></textarea>
         <button class="send-button" id="send-message-btn" onclick="sendMessage()">Send</button>
@@ -1131,10 +1512,18 @@ function displayChatInterface() {
     </div>
   `;
   
-  // Setup message input auto-resize
+  // Setup message input auto-resize and typing indicators
   const messageInput = document.getElementById('message-input');
-  messageInput.addEventListener('input', autoResizeTextarea);
+  messageInput.addEventListener('input', handleMessageInput);
   messageInput.addEventListener('keydown', handleMessageInputKeydown);
+  messageInput.addEventListener('focus', setupTypingIndicators);
+  messageInput.addEventListener('blur', clearTypingIndicator);
+}
+
+// Handle message input with typing indicators
+function handleMessageInput(e) {
+  autoResizeTextarea(e);
+  handleTypingIndicator();
 }
 
 // Auto-resize textarea
@@ -1142,6 +1531,109 @@ function autoResizeTextarea(e) {
   const textarea = e.target;
   textarea.style.height = 'auto';
   textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+// Handle typing indicator
+function handleTypingIndicator() {
+  if (!currentChat || !currentUser) return;
+  
+  // Clear existing timer
+  if (typingTimer) {
+    clearTimeout(typingTimer);
+  }
+  
+  // Send typing indicator
+  sendTypingIndicator(true);
+  
+  // Clear typing indicator after 2 seconds of inactivity
+  typingTimer = setTimeout(() => {
+    sendTypingIndicator(false);
+  }, 2000);
+}
+
+// Setup typing indicators listener
+function setupTypingIndicators() {
+  if (!currentChat) return;
+  
+  // Clean up existing typing listeners
+  readReceiptListeners.forEach(unsubscribe => unsubscribe());
+  readReceiptListeners = [];
+  
+  // Listen for typing indicators
+  const typingListener = db.collection('chat-typing')
+    .where('chatId', '==', currentChat.id)
+    .onSnapshot((snapshot) => {
+      updateTypingIndicators(snapshot.docs);
+    });
+  
+  readReceiptListeners.push(typingListener);
+}
+
+// Send typing indicator
+async function sendTypingIndicator(isTyping) {
+  if (!currentChat || !currentUser) return;
+  
+  try {
+    const typingDocId = `${currentChat.id}_${currentUser.email}`;
+    
+    if (isTyping) {
+      await db.collection('chat-typing').doc(typingDocId).set({
+        chatId: currentChat.id,
+        userEmail: currentUser.email,
+        userName: await getUserDisplayName(currentUser),
+        isTyping: true,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      await db.collection('chat-typing').doc(typingDocId).delete();
+    }
+  } catch (error) {
+    console.error('Error updating typing indicator:', error);
+  }
+}
+
+// Update typing indicators display
+function updateTypingIndicators(typingDocs) {
+  const typingContainer = document.getElementById('typing-indicators');
+  if (!typingContainer) return;
+  
+  const typingUsers = typingDocs
+    .map(doc => doc.data())
+    .filter(data => data.userEmail !== currentUser.email && data.isTyping)
+    .map(data => data.userName);
+  
+  if (typingUsers.length === 0) {
+    typingContainer.innerHTML = '';
+    return;
+  }
+  
+  let typingText = '';
+  if (typingUsers.length === 1) {
+    typingText = `${typingUsers[0]} is typing`;
+  } else if (typingUsers.length === 2) {
+    typingText = `${typingUsers[0]} and ${typingUsers[1]} are typing`;
+  } else {
+    typingText = `${typingUsers.length} people are typing`;
+  }
+  
+  typingContainer.innerHTML = `
+    <div class="typing-indicator">
+      <span>${typingText}</span>
+      <div class="typing-dots">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+  `;
+}
+
+// Clear typing indicator
+function clearTypingIndicator() {
+  if (typingTimer) {
+    clearTimeout(typingTimer);
+  }
+  sendTypingIndicator(false);
 }
 
 // Handle Enter key in message input
@@ -1219,8 +1711,10 @@ function displayMessages(messageDocs) {
     }
     
     currentGroup.messages.push({
+      id: doc.id,
       message: data.message,
-      timestamp: timestamp
+      timestamp: timestamp,
+      readBy: data.readBy || []
     });
     currentGroup.lastTimestamp = timestamp;
   });
@@ -1229,15 +1723,44 @@ function displayMessages(messageDocs) {
   const messagesHTML = messageGroups.map(group => {
     const initials = group.senderName ? group.senderName.substring(0, 2).toUpperCase() : '?';
     const messagesHTML = group.messages.map(msg => 
-      `<div class="message-bubble">${msg.message}</div>`
+      `<div class="message-bubble">${enhanceMessageWithTickets(msg.message)}</div>`
     ).join('');
     
     if (group.isSystem) {
       return `
         <div style="text-align: center; margin: 16px 0; color: #8a8886; font-size: 12px;">
-          ${group.messages[0].message}
+          ${enhanceMessageWithTickets(group.messages[0].message)}
         </div>
       `;
+    }
+    
+    // Add read receipt for own messages
+    let readReceiptHTML = '';
+    if (group.isOwn && group.messages.length > 0) {
+      const lastMessage = group.messages[group.messages.length - 1];
+      const otherParticipants = currentChat.participants.filter(email => email !== currentUser.email);
+      const readByOthers = lastMessage.readBy.filter(email => email !== currentUser.email);
+      
+      let receiptClass = 'delivered';
+      let receiptIcon = '✓';
+      let receiptText = 'Sent';
+      
+      if (readByOthers.length > 0) {
+        receiptClass = 'read';
+        receiptIcon = '✓✓';
+        if (readByOthers.length === otherParticipants.length) {
+          receiptText = 'Read by all';
+        } else {
+          receiptText = `Read by ${readByOthers.length}`;
+        }
+      }
+      
+      readReceiptHTML = `<div class="message-read-status" id="read-status-${lastMessage.id}">
+        <div class="read-receipt ${receiptClass}">
+          <span class="read-receipt-icon">${receiptIcon}</span>
+          <span>${receiptText}</span>
+        </div>
+      </div>`;
     }
     
     return `
@@ -1248,14 +1771,93 @@ function displayMessages(messageDocs) {
           <div class="message-time">${formatTimestamp(group.lastTimestamp)}</div>
         </div>
         ${messagesHTML}
+        ${readReceiptHTML}
       </div>
     `;
   }).join('');
   
   messagesContainer.innerHTML = messagesHTML;
   
+  // Check for new messages and trigger notifications
+  const currentMessageCount = messageDocs.length;
+  if (currentMessageCount > lastMessageCount && lastMessageCount > 0) {
+    // New messages arrived
+    const newMessages = messageDocs.slice(lastMessageCount);
+    newMessages.forEach(doc => {
+      const data = doc.data();
+      // Only notify for messages from other users
+      if (data.senderEmail !== currentUser.email) {
+        handleNewMessageNotification(data);
+      }
+    });
+  }
+  lastMessageCount = currentMessageCount;
+  
   // Scroll to bottom
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
+  // Mark messages as read
+  markMessagesAsRead();
+}
+
+// Handle new message notifications
+function handleNewMessageNotification(messageData) {
+  try {
+    // Play sound - repeat 3 times if page is not visible for missed notifications
+    if (!isPageVisible()) {
+      playNotificationSound();
+      setTimeout(() => playNotificationSound(), 500);
+      setTimeout(() => playNotificationSound(), 1000);
+    } else {
+      playNotificationSound();
+    }
+    
+    // Show desktop notification only if page is not visible
+    if (!isPageVisible() && currentChat) {
+      const senderName = messageData.senderName || 'Someone';
+      const message = messageData.message.length > 50 
+        ? messageData.message.substring(0, 47) + '...' 
+        : messageData.message;
+      
+      showDesktopNotification(
+        senderName,
+        message,
+        currentChat.name
+      );
+    }
+    
+    // Update page title to show notification with flashing effect
+    if (!isPageVisible()) {
+      // Start flashing title to grab attention
+      let titleFlashInterval;
+      let flashState = false;
+      
+      const flashTitle = () => {
+        flashState = !flashState;
+        document.title = flashState 
+          ? '🔴 NEW MESSAGE! - Castle Comms' 
+          : '💬 New Message - Castle Comms';
+      };
+      
+      titleFlashInterval = setInterval(flashTitle, 1000); // Flash every second
+      
+      // Reset title when page becomes visible
+      const resetTitle = () => {
+        clearInterval(titleFlashInterval);
+        document.title = 'Chat - Castle Comms';
+        document.removeEventListener('visibilitychange', resetTitle);
+        window.removeEventListener('focus', resetTitle);
+      };
+      
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) resetTitle();
+      });
+      window.addEventListener('focus', resetTitle);
+    }
+    
+  } catch (error) {
+    console.error('Error handling notification:', error);
+  }
 }
 
 // Send message
@@ -1272,12 +1874,13 @@ async function sendMessage() {
     const currentUserName = await getUserDisplayName(currentUser);
     
     // Add message to chat-messages collection
-    await db.collection('chat-messages').add({
+    const messageRef = await db.collection('chat-messages').add({
       chatId: currentChat.id,
       senderEmail: currentUser.email,
       senderName: currentUserName,
       message: message,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      readBy: [currentUser.email] // Mark as read by sender
     });
     
     // Update chat's last message
@@ -1297,6 +1900,41 @@ async function sendMessage() {
   }
   
   sendBtn.disabled = false;
+}
+
+// Mark messages as read
+async function markMessagesAsRead() {
+  if (!currentChat || !currentUser) return;
+  
+  try {
+    // Get unread messages
+    const unreadMessages = await db.collection('chat-messages')
+      .where('chatId', '==', currentChat.id)
+      .where('senderEmail', '!=', currentUser.email)
+      .get();
+    
+    const batch = db.batch();
+    let hasUpdates = false;
+    
+    unreadMessages.docs.forEach(doc => {
+      const data = doc.data();
+      const readBy = data.readBy || [];
+      
+      if (!readBy.includes(currentUser.email)) {
+        batch.update(doc.ref, {
+          readBy: firebase.firestore.FieldValue.arrayUnion(currentUser.email)
+        });
+        hasUpdates = true;
+      }
+    });
+    
+    if (hasUpdates) {
+      await batch.commit();
+    }
+    
+  } catch (error) {
+    console.error('Error marking messages as read:', error);
+  }
 }
 
 // Rename chat prompt
@@ -1422,6 +2060,222 @@ function formatTimestamp(timestamp) {
   if (diffDays < 7) return `${diffDays}d`;
   
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// Ticket linking functionality
+let ticketCache = new Map();
+let activeTicketPreview = null;
+
+// Detect and enhance ticket references in messages
+function enhanceMessageWithTickets(messageText) {
+  if (!messageText) return messageText;
+  
+  // Patterns to detect: #1234, ticket:1234, TKT-434592, etc.
+  const ticketPatterns = [
+    /\#(\d{1,6})\b/g,                    // #1234
+    /ticket:?\s*(\d{1,6})\b/gi,          // ticket:1234, ticket 1234
+    /TKT?-(\d{1,6})\b/gi,                // TKT-1234, TK-1234
+    /ticket\s+#?(\d{1,6})\b/gi,          // ticket #1234
+    /(TKT-\d{1,6})\b/gi                  // Full TKT-434592 format
+  ];
+  
+  let enhancedText = messageText;
+  
+  ticketPatterns.forEach(pattern => {
+    enhancedText = enhancedText.replace(pattern, (match, ticketId) => {
+      return `<span class="ticket-link" data-ticket-id="${ticketId}" onclick="openTicket('${ticketId}')" onmouseenter="showTicketPreview(event, '${ticketId}')" onmouseleave="hideTicketPreview()">${match}</span>`;
+    });
+  });
+  
+  return enhancedText;
+}
+
+// Fetch ticket data from Firestore
+async function fetchTicketData(ticketId) {
+  try {
+    // Check cache first
+    if (ticketCache.has(ticketId)) {
+      return ticketCache.get(ticketId);
+    }
+    
+    // Try different ticket ID formats
+    const searchFormats = [];
+    
+    if (ticketId.startsWith('TKT-')) {
+      // If already has TKT- prefix, search as-is and without prefix
+      searchFormats.push(ticketId);
+      searchFormats.push(ticketId.replace('TKT-', ''));
+    } else {
+      // If just a number, try with and without TKT- prefix
+      searchFormats.push(ticketId);
+      searchFormats.push(`TKT-${ticketId}`);
+    }
+    
+    // Try each format until we find a match
+    for (const searchId of searchFormats) {
+      const ticketQuery = await db.collection('tickets')
+        .where('ticketId', '==', searchId)
+        .limit(1)
+        .get();
+      
+      if (!ticketQuery.empty) {
+        const ticketData = ticketQuery.docs[0].data();
+        
+        // Cache the result for both the original input and found format
+        ticketCache.set(ticketId, ticketData);
+        ticketCache.set(searchId, ticketData);
+        
+        return ticketData;
+      }
+    }
+    
+    // If not found, cache null to avoid repeated queries
+    ticketCache.set(ticketId, null);
+    return null;
+    
+  } catch (error) {
+    console.error('Error fetching ticket data:', error);
+    return null;
+  }
+}
+
+// Show ticket preview on hover
+async function showTicketPreview(event, ticketId) {
+  // Remove any existing preview
+  hideTicketPreview();
+  
+  const ticketLink = event.target;
+  const rect = ticketLink.getBoundingClientRect();
+  
+  // Create preview element
+  const preview = document.createElement('div');
+  preview.className = 'ticket-preview';
+  preview.innerHTML = '<div class="ticket-preview-loading">Loading ticket...</div>';
+  
+  // Position the preview with screen bounds checking
+  let left = rect.left;
+  let top = rect.bottom + 8;
+  
+  // Check right edge - if preview would go off screen, position it to the left of cursor
+  if (left + 320 > window.innerWidth) {
+    left = Math.max(10, rect.right - 320);
+  }
+  
+  // Check bottom edge - if preview would go off screen, position it above the link
+  if (top + 200 > window.innerHeight) {
+    top = rect.top - 8 - 200;
+  }
+  
+  // Ensure preview stays within screen bounds
+  left = Math.max(10, Math.min(left, window.innerWidth - 330));
+  top = Math.max(10, top);
+  
+  preview.style.left = `${left}px`;
+  preview.style.top = `${top}px`;
+  
+  document.body.appendChild(preview);
+  activeTicketPreview = preview;
+  
+  // Show with animation
+  setTimeout(() => preview.classList.add('show'), 10);
+  
+  try {
+    // Fetch ticket data
+    const ticketData = await fetchTicketData(ticketId);
+    
+    if (ticketData) {
+      preview.innerHTML = `
+        <div class="ticket-preview-header">
+          <span class="ticket-preview-id">#${ticketData.ticketId}</span>
+          <span class="ticket-preview-status ${ticketData.status}">${ticketData.status}</span>
+        </div>
+        <div class="ticket-preview-title">${ticketData.title}</div>
+        <div class="ticket-preview-description">${ticketData.description}</div>
+        <div class="ticket-preview-meta">
+          <span>Assigned: ${ticketData.assignedTo.name}</span>
+          <span>Created: ${formatTimestamp(ticketData.createdAt)}</span>
+        </div>
+      `;
+    } else {
+      preview.innerHTML = '<div class="ticket-preview-error">Ticket #' + ticketId + ' not found</div>';
+    }
+  } catch (error) {
+    preview.innerHTML = '<div class="ticket-preview-error">Error loading ticket</div>';
+  }
+}
+
+// Hide ticket preview
+function hideTicketPreview() {
+  if (activeTicketPreview) {
+    activeTicketPreview.remove();
+    activeTicketPreview = null;
+  }
+}
+
+// Open ticket in new tab - goes directly to internal tickets section
+function openTicket(ticketId) {
+  window.open(`tickets.html#ticket-${ticketId}`, '_blank');
+}
+
+// Chat popout window management
+let popoutWindow = null;
+
+// Open chat in popout window
+function openChatPopout() {
+  if (!currentChat) {
+    alert('Please select a chat first');
+    return;
+  }
+  
+  // If popout already exists, focus it
+  if (popoutWindow && !popoutWindow.closed) {
+    popoutWindow.focus();
+    // Update to current chat
+    popoutWindow.postMessage({
+      type: 'switchChat',
+      chatId: currentChat.id
+    }, window.location.origin);
+    return;
+  }
+  
+  // Calculate center position
+  const width = 500;
+  const height = 650;
+  const left = (screen.width - width) / 2;
+  const top = (screen.height - height) / 2;
+  
+  // Open popout window with enhanced parameters
+  popoutWindow = window.open(
+    `chat-popout.html?chatId=${currentChat.id}`,
+    'castle-comms-chat',
+    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no,directories=no,titlebar=yes`
+  );
+  
+  // Handle popout window events
+  if (popoutWindow) {
+    // Try to resize after a brief delay (some browsers need this)
+    setTimeout(() => {
+      try {
+        popoutWindow.resizeTo(width, height);
+        popoutWindow.moveTo(left, top);
+      } catch (error) {
+        console.log('Could not resize popup window:', error);
+      }
+    }, 100);
+    
+    // Check if window is closed periodically
+    const checkClosed = setInterval(() => {
+      if (popoutWindow.closed) {
+        popoutWindow = null;
+        clearInterval(checkClosed);
+      }
+    }, 1000);
+    
+    console.log('Chat popout window opened');
+  } else {
+    // Popup was blocked
+    alert('Popup blocked! Please allow popups for this site and try again. You may need to resize the chat window manually.');
+  }
 }
 
 </script>
