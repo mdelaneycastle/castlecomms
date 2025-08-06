@@ -1026,22 +1026,28 @@ function showDesktopNotification(title, message, chatName) {
     if (notificationPermission && 'Notification' in window) {
       const notification = new Notification(`${chatName}: ${title}`, {
         body: message,
-        icon: '/favicon.ico', // You can add a chat icon here
-        tag: 'castle-comms-chat', // Prevents notification spam
-        requireInteraction: false,
-        silent: false
+        icon: '/favicon.ico',
+        tag: 'castle-comms-chat-' + Date.now(), // Allow multiple notifications
+        requireInteraction: true, // Keep notification until user interacts
+        silent: false,
+        badge: '/favicon.ico'
       });
       
-      // Auto-close notification after 5 seconds
-      setTimeout(() => {
-        notification.close();
-      }, 5000);
+      // Don't auto-close - let user dismiss it
+      // Removed the auto-close timeout
       
       // Click to focus window
       notification.onclick = function() {
         window.focus();
-        notification.close();
+        this.close();
       };
+      
+      // Also close when window regains focus (so they don't pile up)
+      const handleFocus = () => {
+        notification.close();
+        window.removeEventListener('focus', handleFocus);
+      };
+      window.addEventListener('focus', handleFocus);
     }
   } catch (error) {
     console.error('Error showing desktop notification:', error);
@@ -1668,8 +1674,14 @@ function displayMessages(messageDocs) {
 // Handle new message notifications
 function handleNewMessageNotification(messageData) {
   try {
-    // Always play sound
-    playNotificationSound();
+    // Play sound - repeat 3 times if page is not visible for missed notifications
+    if (!isPageVisible()) {
+      playNotificationSound();
+      setTimeout(() => playNotificationSound(), 500);
+      setTimeout(() => playNotificationSound(), 1000);
+    } else {
+      playNotificationSound();
+    }
     
     // Show desktop notification only if page is not visible
     if (!isPageVisible() && currentChat) {
@@ -1685,12 +1697,24 @@ function handleNewMessageNotification(messageData) {
       );
     }
     
-    // Update page title to show notification
+    // Update page title to show notification with flashing effect
     if (!isPageVisible()) {
-      document.title = '💬 New Message - Castle Comms';
+      // Start flashing title to grab attention
+      let titleFlashInterval;
+      let flashState = false;
+      
+      const flashTitle = () => {
+        flashState = !flashState;
+        document.title = flashState 
+          ? '🔴 NEW MESSAGE! - Castle Comms' 
+          : '💬 New Message - Castle Comms';
+      };
+      
+      titleFlashInterval = setInterval(flashTitle, 1000); // Flash every second
       
       // Reset title when page becomes visible
       const resetTitle = () => {
+        clearInterval(titleFlashInterval);
         document.title = 'Chat - Castle Comms';
         document.removeEventListener('visibilitychange', resetTitle);
         window.removeEventListener('focus', resetTitle);
