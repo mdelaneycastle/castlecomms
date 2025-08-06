@@ -426,37 +426,7 @@
 <script src="shared-components.js"></script>
 
 <script>
-// Background slideshow setup
-function setupBackgroundSlideshow() {
-  const slideshow = document.getElementById('background-slideshow');
-  if (!slideshow) return;
-  
-  const images = [
-    'images/bg1.jpg', 'images/bg2.jpg', 'images/bg3.jpg', 'images/bg4.jpg', 
-    'images/bg5.jpg', 'images/bg6.jpg', 'images/bg7.jpg', 'images/bg8.jpg',
-    'images/bg9.jpg', 'images/bg10.jpg'
-  ];
-  
-  images.forEach((src, index) => {
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = `Background ${index + 1}`;
-    if (index === 0) img.classList.add('active');
-    slideshow.appendChild(img);
-  });
-  
-  // Rotate images every 10 seconds
-  let currentIndex = 0;
-  setInterval(() => {
-    const allImages = slideshow.querySelectorAll('img');
-    allImages[currentIndex].classList.remove('active');
-    currentIndex = (currentIndex + 1) % allImages.length;
-    allImages[currentIndex].classList.add('active');
-  }, 10000);
-}
-
-// Initialize background on page load
-document.addEventListener('DOMContentLoaded', setupBackgroundSlideshow);
+// Background handled by CSS - no JavaScript needed
 
 // Global variables
 let currentUser = null;
@@ -509,7 +479,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
   }
 });
 
-// Load all users for team member selection
+// Load all users for team member selection (same as tickets page)
 async function loadAllUsers() {
   try {
     // Try to get users from the listUsers function (if available from admin)
@@ -528,19 +498,20 @@ async function loadAllUsers() {
       }
     }
 
-    // Fallback: Use static list of accounts (including COFT team members)
+    // Fallback: Use same static list as tickets page
     allUsers = [
       { email: 'mdelaney@castlefineart.com', name: 'Marc Delaney' },
       { email: 'gturpin@washingtongreen.co.uk', name: 'Gary Turpin' },
       { email: 'icc@castlefineart.com', name: 'ICC' },
       { email: 'mailbox@castlefineart.com', name: 'Mailbox' },
-      // COFT Team members (from Paul Chapman's team)
-      { email: 'pchapman@castlefineart.com', name: 'Paul Chapman' },
-      { email: 'kgriffin@castlefineart.com', name: 'Katie Griffin' },
-      { email: 'swalsh@castlefineart.com', name: 'Sarah Walsh' },
-      { email: 'lbaker@castlefineart.com', name: 'Lucy Baker' },
-      { email: 'jthomas@castlefineart.com', name: 'Jessica Thomas' },
-      { email: 'mwilliams@castlefineart.com', name: 'Mark Williams' },
+      // COFT Team members (actual team from staff.html)
+      { email: 'pchapman@washingtongreen.co.uk', name: 'Paul Chapman' },
+      { email: 'jpeet@washingtongreen.co.uk', name: 'Jenny Peet' },
+      { email: 'ghooper@castlegalleries.com', name: 'Gerald Hooper' },
+      { email: 'klewis@castlefineart.com', name: 'Katie Lewis' },
+      { email: 'tplatts@castlefineart.com', name: 'Tara Platts' },
+      { email: 'pbeevor-reid@castlefineart.com', name: 'Phillippa Beevor-Reid' },
+      { email: 'arush@castlefineart.com', name: 'Amelia Rush' },
       // Gallery locations
       { email: 'cheltenham@castlefineart.com', name: 'Cheltenham' },
       { email: 'derby@castlefineart.com', name: 'Derby' },
@@ -838,14 +809,15 @@ async function createDefaultCOFTTeam() {
     // Get current user's display name
     const creatorName = await getUserDisplayName(currentUser);
     
-    // Create COFT team with Paul Chapman's team members
+    // Create COFT team with Paul Chapman's actual team members from staff.html
     const coftMembers = [
-      { email: 'pchapman@castlefineart.com', name: 'Paul Chapman' },
-      { email: 'kgriffin@castlefineart.com', name: 'Katie Griffin' },
-      { email: 'swalsh@castlefineart.com', name: 'Sarah Walsh' },
-      { email: 'lbaker@castlefineart.com', name: 'Lucy Baker' },
-      { email: 'jthomas@castlefineart.com', name: 'Jessica Thomas' },
-      { email: 'mwilliams@castlefineart.com', name: 'Mark Williams' }
+      { email: 'pchapman@washingtongreen.co.uk', name: 'Paul Chapman' },
+      { email: 'jpeet@washingtongreen.co.uk', name: 'Jenny Peet' },
+      { email: 'ghooper@castlegalleries.com', name: 'Gerald Hooper' },
+      { email: 'klewis@castlefineart.com', name: 'Katie Lewis' },
+      { email: 'tplatts@castlefineart.com', name: 'Tara Platts' },
+      { email: 'pbeevor-reid@castlefineart.com', name: 'Phillippa Beevor-Reid' },
+      { email: 'arush@castlefineart.com', name: 'Amelia Rush' }
     ];
     
     const coftTeamData = {
