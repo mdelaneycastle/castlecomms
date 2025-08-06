@@ -424,6 +424,34 @@
       font-size: 12px;
     }
 
+    /* Notification Status */
+    .notification-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .notification-status.show {
+      display: block;
+      animation: fadeInDown 0.3s ease;
+    }
+
+    .notification-status.success {
+      background: rgba(40, 167, 69, 0.9);
+    }
+
+    .notification-status.warning {
+      background: rgba(255, 193, 7, 0.9);
+      color: #000;
+    }
+
     /* Empty State */
     .chat-empty {
       flex: 1;
@@ -746,6 +774,9 @@
   </div>
 </main>
 
+<!-- Notification Status -->
+<div id="notification-status" class="notification-status"></div>
+
 <!-- New Chat Modal -->
 <div class="modal" id="new-chat-modal">
   <div class="modal-content">
@@ -800,6 +831,9 @@ let chatListeners = [];
 let typingUsers = new Set();
 let typingTimer = null;
 let readReceiptListeners = [];
+let notificationPermission = false;
+let audioContext = null;
+let lastMessageCount = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
   // Check authentication first
@@ -827,6 +861,7 @@ async function initializeChat() {
   try {
     await loadAllUsers();
     setupEventListeners();
+    setupNotifications();
     loadChats();
     console.log('Chat system initialized successfully');
   } catch (error) {
@@ -911,6 +946,111 @@ async function loadAllUsers() {
     console.error('Error loading users:', error);
     allUsers = [];
   }
+}
+
+// Setup desktop notifications and audio alerts
+async function setupNotifications() {
+  try {
+    // Request notification permission
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      notificationPermission = permission === 'granted';
+      console.log('Notification permission:', permission);
+      
+      // Show notification status
+      if (permission === 'granted') {
+        showNotificationStatus('🔔 Desktop notifications enabled', 'success');
+      } else if (permission === 'denied') {
+        showNotificationStatus('🔕 Desktop notifications blocked', 'warning');
+      } else {
+        showNotificationStatus('🔔 Desktop notifications need permission', 'warning');
+      }
+    }
+    
+    // Setup audio context for browser sounds
+    try {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      console.log('Audio context initialized for notifications');
+    } catch (audioError) {
+      console.log('Audio context not available:', audioError);
+    }
+    
+  } catch (error) {
+    console.error('Error setting up notifications:', error);
+  }
+}
+
+// Show notification status message
+function showNotificationStatus(message, type = '') {
+  const statusElement = document.getElementById('notification-status');
+  if (statusElement) {
+    statusElement.textContent = message;
+    statusElement.className = `notification-status show ${type}`;
+    
+    // Auto-hide after 3 seconds
+    setTimeout(() => {
+      statusElement.classList.remove('show');
+    }, 3000);
+  }
+}
+
+// Play notification sound
+function playNotificationSound() {
+  try {
+    if (audioContext) {
+      // Create a simple notification beep
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
+  } catch (error) {
+    console.error('Error playing notification sound:', error);
+  }
+}
+
+// Show desktop notification
+function showDesktopNotification(title, message, chatName) {
+  try {
+    if (notificationPermission && 'Notification' in window) {
+      const notification = new Notification(`${chatName}: ${title}`, {
+        body: message,
+        icon: '/favicon.ico', // You can add a chat icon here
+        tag: 'castle-comms-chat', // Prevents notification spam
+        requireInteraction: false,
+        silent: false
+      });
+      
+      // Auto-close notification after 5 seconds
+      setTimeout(() => {
+        notification.close();
+      }, 5000);
+      
+      // Click to focus window
+      notification.onclick = function() {
+        window.focus();
+        notification.close();
+      };
+    }
+  } catch (error) {
+    console.error('Error showing desktop notification:', error);
+  }
+}
+
+// Check if user is currently viewing the page
+function isPageVisible() {
+  return !document.hidden && document.hasFocus();
 }
 
 // Setup event listeners
@@ -1177,6 +1317,7 @@ async function selectChat(chatId) {
     // Update UI
     updateActiveChatInList(chatId);
     displayChatInterface();
+    lastMessageCount = 0; // Reset message count for new chat
     loadChatMessages(chatId);
     
   } catch (error) {
@@ -1500,11 +1641,68 @@ function displayMessages(messageDocs) {
   
   messagesContainer.innerHTML = messagesHTML;
   
+  // Check for new messages and trigger notifications
+  const currentMessageCount = messageDocs.length;
+  if (currentMessageCount > lastMessageCount && lastMessageCount > 0) {
+    // New messages arrived
+    const newMessages = messageDocs.slice(lastMessageCount);
+    newMessages.forEach(doc => {
+      const data = doc.data();
+      // Only notify for messages from other users
+      if (data.senderEmail !== currentUser.email) {
+        handleNewMessageNotification(data);
+      }
+    });
+  }
+  lastMessageCount = currentMessageCount;
+  
   // Scroll to bottom
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
   
   // Mark messages as read
   markMessagesAsRead();
+}
+
+// Handle new message notifications
+function handleNewMessageNotification(messageData) {
+  try {
+    // Always play sound
+    playNotificationSound();
+    
+    // Show desktop notification only if page is not visible
+    if (!isPageVisible() && currentChat) {
+      const senderName = messageData.senderName || 'Someone';
+      const message = messageData.message.length > 50 
+        ? messageData.message.substring(0, 47) + '...' 
+        : messageData.message;
+      
+      showDesktopNotification(
+        senderName,
+        message,
+        currentChat.name
+      );
+    }
+    
+    // Update page title to show notification
+    if (!isPageVisible()) {
+      document.title = '💬 New Message - Castle Comms';
+      
+      // Reset title when page becomes visible
+      const resetTitle = () => {
+        document.title = 'Chat - Castle Comms';
+        document.removeEventListener('visibilitychange', resetTitle);
+        window.removeEventListener('focus', resetTitle);
+      };
+      
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) resetTitle();
+      });
+      window.addEventListener('focus', resetTitle);
+    }
+    
+  } catch (error) {
+    console.error('Error handling notification:', error);
+  }
 }
 
 // Send message
