@@ -421,6 +421,29 @@
       background: var(--primary-gradient);
     }
 
+    .filter-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .count-badge {
+      background: rgba(255, 255, 255, 0.2);
+      color: inherit;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .filter-button:not(.active) .count-badge {
+      background: #6c757d;
+      color: white;
+    }
+
     .tickets-list {
       flex: 1;
       overflow-y: auto;
@@ -1250,11 +1273,21 @@
         </div>
         
         <div class="ticket-filters">
-          <button class="filter-button active" data-filter="all">All</button>
-          <button class="filter-button" data-filter="open">Open</button>
-          <button class="filter-button" data-filter="in-progress">In Progress</button>
-          <button class="filter-button" data-filter="resolved">Resolved</button>
-          <button class="filter-button" data-filter="transferred">Transferred</button>
+          <button class="filter-button active" data-filter="all">
+            <span class="filter-count">All <span class="count-badge" id="count-all">0</span></span>
+          </button>
+          <button class="filter-button" data-filter="open">
+            <span class="filter-count">Open <span class="count-badge" id="count-open">0</span></span>
+          </button>
+          <button class="filter-button" data-filter="in-progress">
+            <span class="filter-count">In Progress <span class="count-badge" id="count-in-progress">0</span></span>
+          </button>
+          <button class="filter-button" data-filter="resolved">
+            <span class="filter-count">Resolved <span class="count-badge" id="count-resolved">0</span></span>
+          </button>
+          <button class="filter-button" data-filter="transferred">
+            <span class="filter-count">Transferred <span class="count-badge" id="count-transferred">0</span></span>
+          </button>
         </div>
         
         <div class="tickets-list" id="tickets-list">
@@ -1766,6 +1799,9 @@ async function loadTickets() {
     
     let tickets = Array.from(ticketMap.values());
     
+    // Calculate counts for all categories before filtering
+    updateFilterCounts(tickets);
+    
     // Apply filter
     if (currentFilter === 'transferred') {
       // Show tickets originally created by this user but now assigned to someone else
@@ -1847,6 +1883,47 @@ async function loadTickets() {
         </button>
       </div>
     `;
+  }
+}
+
+// Update filter count badges
+function updateFilterCounts(allTickets) {
+  try {
+    // Calculate counts for each category
+    const counts = {
+      all: 0,
+      open: 0,
+      'in-progress': 0,
+      resolved: 0,
+      transferred: 0
+    };
+    
+    allTickets.forEach(ticket => {
+      const isCreatedByMe = ticket.createdBy.uid === currentUser.uid;
+      const isAssignedToMe = ticket.assignedTo.email === currentUser.email;
+      const isTransferred = isCreatedByMe && !isAssignedToMe;
+      
+      if (isTransferred) {
+        // This is a transferred ticket
+        counts.transferred++;
+      } else if (isAssignedToMe || (isCreatedByMe && isAssignedToMe)) {
+        // This is an active ticket (assigned to me or created by me and still mine)
+        counts.all++;
+        counts[ticket.status]++;
+      }
+    });
+    
+    // Update count badges
+    document.getElementById('count-all').textContent = counts.all;
+    document.getElementById('count-open').textContent = counts.open;
+    document.getElementById('count-in-progress').textContent = counts['in-progress'];
+    document.getElementById('count-resolved').textContent = counts.resolved;
+    document.getElementById('count-transferred').textContent = counts.transferred;
+    
+    console.log('Filter counts updated:', counts);
+    
+  } catch (error) {
+    console.error('Error updating filter counts:', error);
   }
 }
 
