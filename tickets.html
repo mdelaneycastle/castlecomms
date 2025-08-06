@@ -1412,7 +1412,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Since we go directly to internal tickets now, initialize immediately
     try {
-      await initializeTickets(user);
+      await initializeInternalSystem();
       console.log('Tickets page fully initialized');
     } catch (error) {
       console.error('Error initializing tickets page:', error);
