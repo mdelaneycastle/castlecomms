@@ -725,6 +725,23 @@
       resize: vertical;
     }
 
+    .assignment-type-selector {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .assignment-type-selector input[type="radio"] {
+      margin-right: 0.5rem;
+    }
+
+    .assignment-type-selector label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-weight: normal;
+    }
+
     .no-tickets {
       text-align: center;
       color: #6c757d;
@@ -1529,12 +1546,30 @@
     
     <form id="create-ticket-form">
       <div class="form-group">
-        <label for="modal-assign-to">Assign To:</label>
+        <label>Assign To:</label>
+        <div class="assignment-type-selector">
+          <input type="radio" id="assign-individual" name="assign-type" value="individual" checked>
+          <label for="assign-individual">Individual</label>
+          <input type="radio" id="assign-team" name="assign-type" value="team">
+          <label for="assign-team">Team</label>
+        </div>
+      </div>
+      
+      <div class="form-group" id="individual-assignment">
+        <label for="modal-assign-to">Select User:</label>
         <div class="user-search-container">
           <input type="text" id="modal-assign-to" class="form-input" placeholder="Start typing a name or email..." autocomplete="off">
           <div id="modal-user-suggestions" class="user-suggestions"></div>
         </div>
         <div id="modal-assigned-user-display"></div>
+      </div>
+      
+      <div class="form-group" id="team-assignment" style="display: none;">
+        <label for="modal-assign-team">Select Team:</label>
+        <select id="modal-assign-team" class="form-select">
+          <option value="">Select a team...</option>
+          <!-- Teams will be populated by JavaScript -->
+        </select>
       </div>
       
       <div class="form-group">
@@ -1586,7 +1621,9 @@
 let db;
 let currentUser;
 let allUsers = [];
+let allTeams = [];
 let assignedUser = null;
+let assignedTeam = null;
 let currentFilter = 'all';
 let currentTicket = null;
 
@@ -1627,6 +1664,7 @@ async function initializeInternalSystem() {
   
   db = firebase.firestore();
   await loadAllUsers();
+  await loadAllTeams();
   setupUserSearch();
   setupTicketForm();
   setupFilters();
@@ -1737,6 +1775,20 @@ async function loadAllUsers() {
     ];
   } catch (error) {
     console.error('Error loading users:', error);
+  }
+}
+
+// Load all teams for assignment
+async function loadAllTeams() {
+  try {
+    const teamsSnapshot = await db.collection('teams').get();
+    allTeams = teamsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    console.log('Loaded teams:', allTeams.length);
+  } catch (error) {
+    console.error('Error loading teams:', error);
   }
 }
 
@@ -2338,6 +2390,8 @@ function closeTicketModal() {
 function openCreateTicketModal() {
   document.getElementById('create-ticket-modal').classList.add('show');
   setupModalUserSearch();
+  populateTeamDropdown();
+  setupAssignmentTypeHandlers();
 }
 
 // Close create ticket modal
@@ -2443,9 +2497,22 @@ async function createTicketFromModal() {
     return;
   }
   
-  if (!assignedUser) {
+  // Check if either individual or team is assigned
+  const isIndividualAssignment = document.getElementById('assign-individual').checked;
+  const isTeamAssignment = document.getElementById('assign-team').checked;
+  
+  if (isIndividualAssignment && !assignedUser) {
     showModalStatus('Please assign the ticket to a user.', 'error');
     return;
+  }
+  
+  if (isTeamAssignment) {
+    const selectedTeamId = document.getElementById('modal-assign-team').value;
+    if (!selectedTeamId) {
+      showModalStatus('Please select a team.', 'error');
+      return;
+    }
+    assignedTeam = allTeams.find(team => team.id === selectedTeamId);
   }
   
   createBtn.disabled = true;
@@ -2469,7 +2536,13 @@ async function createTicketFromModal() {
         email: currentUser.email,
         name: creatorName
       },
-      assignedTo: {
+      assignedTo: isTeamAssignment ? {
+        type: 'team',
+        teamId: assignedTeam.id,
+        teamName: assignedTeam.name,
+        teamMembers: assignedTeam.members
+      } : {
+        type: 'individual',
         email: assignedUser.email,
         name: assignedUser.name
       },
@@ -2505,8 +2578,49 @@ function showModalStatus(message, type) {
   if (type === 'success') {
     setTimeout(() => {
       statusDiv.innerHTML = '';
-    }, 3000);
+    }, 3000);  
   }
+}
+
+// Populate team dropdown
+function populateTeamDropdown() {
+  const teamSelect = document.getElementById('modal-assign-team');
+  
+  // Clear existing options except the first one
+  teamSelect.innerHTML = '<option value="">Select a team...</option>';
+  
+  // Add teams
+  allTeams.forEach(team => {
+    const option = document.createElement('option');
+    option.value = team.id;
+    option.textContent = team.name;
+    teamSelect.appendChild(option);
+  });
+}
+
+// Setup assignment type handlers
+function setupAssignmentTypeHandlers() {
+  const individualRadio = document.getElementById('assign-individual');
+  const teamRadio = document.getElementById('assign-team');
+  const individualSection = document.getElementById('individual-assignment');
+  const teamSection = document.getElementById('team-assignment');
+  
+  individualRadio.addEventListener('change', () => {
+    if (individualRadio.checked) {
+      individualSection.style.display = 'block';
+      teamSection.style.display = 'none';
+      assignedTeam = null;
+    }
+  });
+  
+  teamRadio.addEventListener('change', () => {
+    if (teamRadio.checked) {
+      individualSection.style.display = 'none';
+      teamSection.style.display = 'block';
+      assignedUser = null;
+      updateModalAssignedUserDisplay();
+    }
+  });
 }
 
 // Update ticket status
