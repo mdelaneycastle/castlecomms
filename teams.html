@@ -418,10 +418,46 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="sidebar.js?v=20250731"></script>
-<script src="background.js?v=20250731"></script>
+
+<!-- Firebase config -->
+<script src="firebase-init.js"></script>
+
+<!-- Shared components -->
+<script src="shared-components.js"></script>
 
 <script>
+// Background slideshow setup
+function setupBackgroundSlideshow() {
+  const slideshow = document.getElementById('background-slideshow');
+  if (!slideshow) return;
+  
+  const images = [
+    'images/bg1.jpg', 'images/bg2.jpg', 'images/bg3.jpg', 'images/bg4.jpg', 
+    'images/bg5.jpg', 'images/bg6.jpg', 'images/bg7.jpg', 'images/bg8.jpg',
+    'images/bg9.jpg', 'images/bg10.jpg'
+  ];
+  
+  images.forEach((src, index) => {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = `Background ${index + 1}`;
+    if (index === 0) img.classList.add('active');
+    slideshow.appendChild(img);
+  });
+  
+  // Rotate images every 10 seconds
+  let currentIndex = 0;
+  setInterval(() => {
+    const allImages = slideshow.querySelectorAll('img');
+    allImages[currentIndex].classList.remove('active');
+    currentIndex = (currentIndex + 1) % allImages.length;
+    allImages[currentIndex].classList.add('active');
+  }, 10000);
+}
+
+// Initialize background on page load
+document.addEventListener('DOMContentLoaded', setupBackgroundSlideshow);
+
 // Global variables
 let currentUser = null;
 let db = null;
@@ -442,39 +478,35 @@ async function initializeTeams() {
   await createDefaultCOFTTeam();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('Teams page loaded, checking authentication...');
-  
-  // Check authentication first
-  firebase.auth().onAuthStateChanged(async (user) => {
-    if (!user) {
-      console.log('User not authenticated, redirecting to login');
-      window.location.href = 'index.html';
-      return;
-    }
+// Initialize teams when firebase auth is ready
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (!user) {
+    console.log('User not authenticated, redirecting to login');
+    window.location.href = 'index.html';
+    return;
+  }
 
-    currentUser = user;
-    console.log('User authenticated:', user.email);
-    
-    try {
-      await initializeTeams();
-      console.log('Teams page fully initialized');
-    } catch (error) {
-      console.error('Error initializing teams page:', error);
-      const teamsList = document.getElementById('teams-list');
-      if (teamsList) {
-        teamsList.innerHTML = `
-          <div class="error" style="text-align: center; padding: 40px; color: #d13438;">
-            <h4>Initialization Error</h4>
-            <p style="margin: 10px 0; color: #666;">${error.message}</p>
-            <button onclick="window.location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #6264a7; color: white; border: none; border-radius: 4px; cursor: pointer;">
-              Reload Page
-            </button>
-          </div>
-        `;
-      }
+  currentUser = user;
+  console.log('User authenticated:', user.email);
+  
+  try {
+    await initializeTeams();
+    console.log('Teams page fully initialized');
+  } catch (error) {
+    console.error('Error initializing teams page:', error);
+    const teamsList = document.getElementById('teams-list');
+    if (teamsList) {
+      teamsList.innerHTML = `
+        <div class="error" style="text-align: center; padding: 40px; color: #d13438;">
+          <h4>Initialization Error</h4>
+          <p style="margin: 10px 0; color: #666;">${error.message}</p>
+          <button onclick="window.location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #6264a7; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Reload Page
+          </button>
+        </div>
+      `;
     }
-  });
+  }
 });
 
 // Load all users for team member selection
