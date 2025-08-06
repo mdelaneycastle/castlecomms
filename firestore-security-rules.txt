@@ -198,6 +198,27 @@ service cloud.firestore {
         && request.auth.token.admin == true;
     }
     
+    // Teams collection rules - for team management
+    match /teams/{teamId} {
+      // All authenticated users can read teams (needed for ticket assignment)
+      allow read: if request.auth != null;
+      
+      // Authenticated users can create teams
+      allow create: if request.auth != null 
+        && validateTeam(request.resource.data);
+      
+      // Team creator or admins can update teams
+      allow update: if request.auth != null 
+        && (request.auth.uid == resource.data.createdBy.uid 
+            || request.auth.token.admin == true)
+        && validateTeamUpdate(request.resource.data, resource.data);
+      
+      // Team creator or admins can delete teams
+      allow delete: if request.auth != null 
+        && (request.auth.uid == resource.data.createdBy.uid 
+            || request.auth.token.admin == true);
+    }
+    
     // Helper function to validate recognition note data
     function validateRecognitionNote(data) {
       return data.keys().hasAll(['content', 'author', 'timestamp'])
@@ -337,6 +358,26 @@ service cloud.firestore {
     function validateUserReports(data) {
       return data.keys().hasAll(['reports'])
         && data.reports is list;
+    }
+    
+    // Helper function to validate team data
+    function validateTeam(data) {
+      return data.keys().hasAll(['name', 'members', 'createdBy', 'createdAt'])
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 50
+        && data.members is list
+        && data.members.size() > 0
+        && data.members.size() <= 50
+        && data.createdBy is map
+        && data.createdBy.keys().hasAll(['uid', 'email', 'name'])
+        && data.createdAt is timestamp;
+    }
+    
+    // Helper function to validate team updates
+    function validateTeamUpdate(newData, oldData) {
+      return newData.createdBy == oldData.createdBy
+        && newData.createdAt == oldData.createdAt;
     }
     
     // Default deny for all other documents
