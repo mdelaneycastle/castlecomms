@@ -202,24 +202,22 @@
     }
 
     /* Create Ticket Section */
-    .create-ticket-section {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: var(--border-radius);
-      padding: 2.5rem;
-      box-shadow: var(--shadow-medium);
-      height: fit-content;
-      border: 1px solid rgba(102, 126, 234, 0.1);
+    .section-header-with-button {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid rgba(102, 126, 234, 0.1);
     }
 
-    .create-ticket-section h3 {
-      margin: 0 0 2rem 0;
+    .section-header-with-button h3 {
+      margin: 0;
       color: #2c3e50;
       font-size: 1.6rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid rgba(102, 126, 234, 0.1);
     }
 
     .form-group {
@@ -326,34 +324,37 @@
     }
 
     .create-ticket-button {
-      background: var(--primary-gradient);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      padding: 1.2rem 2.5rem;
+      padding: 1.25rem 3rem;
       border-radius: 12px;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: var(--shadow-medium);
-      width: 100%;
-      margin-top: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      min-width: 200px;
     }
 
     .create-ticket-button:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow-medium);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.6);
+    }
+
+    .create-ticket-button:active {
+      transform: translateY(0);
     }
 
     .create-ticket-button:disabled {
-      background: #ccc;
+      opacity: 0.6;
       cursor: not-allowed;
       transform: none;
-      box-shadow: none;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
     }
 
     /* Tickets List Section */
-    .tickets-list-section {
+    .tickets-list-section-full {
       background: rgba(255, 255, 255, 0.95);
       border-radius: var(--border-radius);
       padding: 2.5rem;
@@ -361,6 +362,7 @@
       display: flex;
       flex-direction: column;
       border: 1px solid rgba(102, 126, 234, 0.1);
+      width: 100%;
     }
 
     .tickets-list-header {
@@ -680,14 +682,15 @@
 
     .create-ticket-modal-content {
       background: white;
-      border-radius: 16px;
-      padding: 2rem;
-      max-width: 600px;
-      width: 90%;
-      max-height: 85vh;
+      border-radius: 20px;
+      padding: 3rem;
+      max-width: 650px;
+      width: 95%;
+      max-height: 90vh;
       overflow-y: auto;
       position: relative;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(102, 126, 234, 0.1);
     }
 
     .create-ticket-modal-close {
@@ -713,33 +716,131 @@
     }
 
     .create-ticket-modal h3 {
-      margin: 0 0 2rem 0;
+      margin: 0 0 2.5rem 0;
       color: #2c3e50;
-      font-size: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid #e1e5e9;
+      font-size: 1.75rem;
+      font-weight: 600;
+      text-align: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+    }
+
+    /* Modal Form Styling */
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.75rem;
+      color: #2c3e50;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .full-width {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .form-input {
+      padding: 1rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #fafbfc;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .form-textarea {
-      min-height: 120px;
+      padding: 1rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
       resize: vertical;
+      background: #fafbfc;
+      transition: all 0.3s ease;
+      line-height: 1.5;
     }
 
-    .assignment-type-selector {
+    .form-textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Assignment Type Buttons */
+    .assignment-selector {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #e1e5e9;
+    }
+
+    .assignment-type-buttons {
       display: flex;
       gap: 1rem;
-      margin-bottom: 1rem;
     }
 
-    .assignment-type-selector input[type="radio"] {
-      margin-right: 0.5rem;
+    .assignment-type-buttons input[type="radio"] {
+      display: none;
     }
 
-    .assignment-type-selector label {
+    .assignment-btn {
+      flex: 1;
+      padding: 1rem 1.5rem;
+      background: white;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 600;
+      color: #6c757d;
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      cursor: pointer;
-      font-weight: normal;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .assignment-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+      transform: translateY(-1px);
+    }
+
+    .assignment-type-buttons input[type="radio"]:checked + .assignment-btn {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Assignment Field */
+    .assignment-field {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #e1e5e9;
+    }
+
+    /* Form Actions */
+    .form-actions {
+      padding-top: 1rem;
+      border-top: 1px solid #e1e5e9;
+      display: flex;
+      justify-content: center;
     }
 
     .no-tickets {
@@ -1381,6 +1482,85 @@
         font-size: 0.9rem;
         color: #6c757d;
       }
+
+      /* Create Ticket Modal Mobile Styles */
+      .create-ticket-modal-content {
+        margin: 1rem;
+        padding: 2rem;
+        max-width: none;
+        width: calc(100% - 2rem);
+        max-height: 90vh;
+        border-radius: 16px;
+      }
+
+      .create-ticket-modal h3 {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: left;
+        padding-bottom: 1rem;
+      }
+
+      .modal-form {
+        gap: 1.25rem;
+      }
+
+      .assignment-type-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .assignment-btn {
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+      }
+
+      .assignment-selector,
+      .assignment-field {
+        padding: 1.25rem;
+        border-radius: 10px;
+      }
+
+      .form-input,
+      .form-textarea {
+        padding: 0.875rem;
+        font-size: 0.95rem;
+        border-radius: 10px;
+      }
+
+      .form-textarea {
+        min-height: 120px;
+      }
+
+      .create-ticket-button {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        min-width: unset;
+      }
+
+      .form-actions {
+        padding-top: 1.25rem;
+        margin-top: 0.5rem;
+      }
+
+      .section-header-with-button {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .section-header-with-button h3 {
+        text-align: center;
+        font-size: 1.4rem;
+      }
+
+      .raise-ticket-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
+      }
     }
   </style>
 </head>
@@ -1410,18 +1590,13 @@
     
     <!-- Internal System Section (now default) -->
     <div class="tickets-layout" id="internal-ticket-section">
-      <div class="section-header-full">
+      <div class="section-header-with-button">
         <h3>🎫 Internal System Tickets</h3>
-      </div>
-      
-      <!-- Create Ticket Button -->
-      <div class="create-ticket-section">
         <button class="raise-ticket-btn" onclick="openCreateTicketModal()">🆕 Raise a Ticket</button>
-        <div id="ticket-status"></div>
       </div>
       
       <!-- Tickets List Section -->
-      <div class="tickets-list-section">
+      <div class="tickets-list-section-full">
         <div class="tickets-list-header">
           <h3>📋 My Tickets</h3>
         </div>
@@ -1544,37 +1719,41 @@
     
     <div id="create-ticket-status"></div>
     
-    <form id="create-ticket-form">
-      <div class="form-group">
-        <label>Assign To:</label>
-        <div class="assignment-type-selector">
+    <form id="create-ticket-form" class="modal-form">
+      <!-- Assignment Type Selection -->
+      <div class="form-group assignment-selector">
+        <label class="form-label">Assign To:</label>
+        <div class="assignment-type-buttons">
           <input type="radio" id="assign-individual" name="assign-type" value="individual" checked>
-          <label for="assign-individual">Individual</label>
+          <label for="assign-individual" class="assignment-btn">👤 Individual</label>
           <input type="radio" id="assign-team" name="assign-type" value="team">
-          <label for="assign-team">Team</label>
+          <label for="assign-team" class="assignment-btn">👥 Team</label>
         </div>
       </div>
       
-      <div class="form-group" id="individual-assignment">
-        <label for="modal-assign-to">Select User:</label>
+      <!-- Individual Assignment -->
+      <div class="form-group assignment-field" id="individual-assignment">
+        <label for="modal-assign-to" class="form-label">Select Individual:</label>
         <div class="user-search-container">
-          <input type="text" id="modal-assign-to" class="form-input" placeholder="Start typing a name or email..." autocomplete="off">
+          <input type="text" id="modal-assign-to" class="form-input full-width" placeholder="Start typing a name or email..." autocomplete="off">
           <div id="modal-user-suggestions" class="user-suggestions"></div>
         </div>
         <div id="modal-assigned-user-display"></div>
       </div>
       
-      <div class="form-group" id="team-assignment" style="display: none;">
-        <label for="modal-assign-team">Select Team:</label>
-        <select id="modal-assign-team" class="form-select">
-          <option value="">Select a team...</option>
+      <!-- Team Assignment -->
+      <div class="form-group assignment-field" id="team-assignment" style="display: none;">
+        <label for="modal-assign-team" class="form-label">Select Team:</label>
+        <select id="modal-assign-team" class="form-input full-width">
+          <option value="">Choose a team...</option>
           <!-- Teams will be populated by JavaScript -->
         </select>
       </div>
       
+      <!-- Category -->
       <div class="form-group">
-        <label for="modal-ticket-category">Category:</label>
-        <select id="modal-ticket-category" class="form-select" required>
+        <label for="modal-ticket-category" class="form-label">Category:</label>
+        <select id="modal-ticket-category" class="form-input full-width" required>
           <option value="">Select a department...</option>
           <option value="Client Order Fulfilment Team">Client Order Fulfilment Team</option>
           <option value="Manufacturing and QC">Manufacturing and QC</option>
@@ -1589,17 +1768,21 @@
         </select>
       </div>
       
+      <!-- Subject -->
       <div class="form-group">
-        <label for="modal-ticket-title">Subject:</label>
-        <input type="text" id="modal-ticket-title" class="form-input" placeholder="Brief description of the issue..." required maxlength="100">
+        <label for="modal-ticket-title" class="form-label">Subject:</label>
+        <input type="text" id="modal-ticket-title" class="form-input full-width" placeholder="Brief description of the issue..." required maxlength="100">
       </div>
       
+      <!-- Description -->
       <div class="form-group">
-        <label for="modal-ticket-description">Description:</label>
-        <textarea id="modal-ticket-description" class="form-textarea" placeholder="Please provide detailed information about the issue, including any steps to reproduce, error messages, or other relevant details that might help resolve the problem..." required></textarea>
+        <label for="modal-ticket-description" class="form-label">Description:</label>
+        <textarea id="modal-ticket-description" class="form-textarea full-width" placeholder="Please provide detailed information about the issue, including any steps to reproduce, error messages, or other relevant details that might help resolve the problem..." required rows="6"></textarea>
       </div>
       
-      <button type="submit" class="create-ticket-button" id="modal-create-ticket-btn">Create Ticket</button>
+      <div class="form-actions">
+        <button type="submit" class="create-ticket-button">Create Ticket</button>
+      </div>
     </form>
   </div>
 </div>
