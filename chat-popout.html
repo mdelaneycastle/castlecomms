@@ -277,6 +277,138 @@
       margin-bottom: 12px;
     }
 
+    /* Ticket Links */
+    .ticket-link {
+      color: #6264a7;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: rgba(98, 100, 167, 0.1);
+      border: 1px solid rgba(98, 100, 167, 0.2);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 11px;
+    }
+
+    .ticket-link:hover {
+      background: rgba(98, 100, 167, 0.15);
+      border-color: rgba(98, 100, 167, 0.3);
+      text-decoration: none;
+    }
+
+    .ticket-link::before {
+      content: "📋";
+      font-size: 10px;
+    }
+
+    /* Ticket Preview Card - compact for popout */
+    .ticket-preview {
+      position: fixed;
+      background: white;
+      border: 1px solid #e1e1e1;
+      border-radius: 6px;
+      padding: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      min-width: 250px;
+      max-width: 280px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: all 0.2s ease;
+    }
+
+    .ticket-preview.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .ticket-preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .ticket-preview-id {
+      font-weight: 600;
+      color: #6264a7;
+      font-size: 11px;
+    }
+
+    .ticket-preview-status {
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 9px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .ticket-preview-status.open {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .ticket-preview-status.resolved {
+      background: #e8f5e8;
+      color: #2e7d32;
+    }
+
+    .ticket-preview-status.on-hold {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+
+    .ticket-preview-title {
+      font-weight: 600;
+      color: #323130;
+      margin-bottom: 4px;
+      line-height: 1.3;
+      font-size: 12px;
+    }
+
+    .ticket-preview-description {
+      color: #605e5c;
+      line-height: 1.4;
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 11px;
+    }
+
+    .ticket-preview-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #8a8886;
+    }
+
+    .ticket-preview-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      color: #8a8886;
+      font-size: 11px;
+    }
+
+    .ticket-preview-error {
+      color: #d13438;
+      font-size: 11px;
+      text-align: center;
+      padding: 6px;
+    }
+
     /* Responsive */
     @media (max-width: 480px) {
       .chat-selector {
@@ -641,13 +773,13 @@
       const messagesHTML = messageGroups.map(group => {
         const initials = group.senderName ? group.senderName.substring(0, 2).toUpperCase() : '?';
         const messagesHTML = group.messages.map(msg => 
-          `<div class="message-bubble">${msg.message}</div>`
+          `<div class="message-bubble">${enhanceMessageWithTickets(msg.message)}</div>`
         ).join('');
         
         if (group.isSystem) {
           return `
             <div style="text-align: center; margin: 12px 0; color: #8a8886; font-size: 11px;">
-              ${group.messages[0].message}
+              ${enhanceMessageWithTickets(group.messages[0].message)}
             </div>
           `;
         }
@@ -965,6 +1097,131 @@
       if (diffHours < 24) return `${diffHours}h`;
       
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    // Ticket linking functionality for popout
+    let ticketCache = new Map();
+    let activeTicketPreview = null;
+
+    // Detect and enhance ticket references in messages
+    function enhanceMessageWithTickets(messageText) {
+      if (!messageText) return messageText;
+      
+      // Patterns to detect: #1234, ticket:1234, ticket 1234, TK-1234, etc.
+      const ticketPatterns = [
+        /\#(\d{1,6})\b/g,                    // #1234
+        /ticket:?\s*(\d{1,6})\b/gi,          // ticket:1234, ticket 1234
+        /TK-(\d{1,6})\b/gi,                  // TK-1234
+        /ticket\s+#?(\d{1,6})\b/gi           // ticket #1234
+      ];
+      
+      let enhancedText = messageText;
+      
+      ticketPatterns.forEach(pattern => {
+        enhancedText = enhancedText.replace(pattern, (match, ticketId) => {
+          return `<span class="ticket-link" data-ticket-id="${ticketId}" onclick="openTicket('${ticketId}')" onmouseenter="showTicketPreview(event, '${ticketId}')" onmouseleave="hideTicketPreview()">${match}</span>`;
+        });
+      });
+      
+      return enhancedText;
+    }
+
+    // Fetch ticket data from Firestore
+    async function fetchTicketData(ticketId) {
+      try {
+        // Check cache first
+        if (ticketCache.has(ticketId)) {
+          return ticketCache.get(ticketId);
+        }
+        
+        // Query Firestore for the ticket
+        const ticketQuery = await db.collection('tickets')
+          .where('ticketId', '==', ticketId)
+          .limit(1)
+          .get();
+        
+        if (!ticketQuery.empty) {
+          const ticketData = ticketQuery.docs[0].data();
+          
+          // Cache the result
+          ticketCache.set(ticketId, ticketData);
+          
+          return ticketData;
+        }
+        
+        // If not found, cache null to avoid repeated queries
+        ticketCache.set(ticketId, null);
+        return null;
+        
+      } catch (error) {
+        console.error('Error fetching ticket data:', error);
+        return null;
+      }
+    }
+
+    // Show ticket preview on hover
+    async function showTicketPreview(event, ticketId) {
+      // Remove any existing preview
+      hideTicketPreview();
+      
+      const ticketLink = event.target;
+      const rect = ticketLink.getBoundingClientRect();
+      
+      // Create preview element
+      const preview = document.createElement('div');
+      preview.className = 'ticket-preview';
+      preview.innerHTML = '<div class="ticket-preview-loading">Loading ticket...</div>';
+      
+      // Position the preview (fixed position for popout window)
+      preview.style.left = `${rect.left}px`;
+      preview.style.top = `${rect.bottom + 8}px`;
+      
+      document.body.appendChild(preview);
+      activeTicketPreview = preview;
+      
+      // Show with animation
+      setTimeout(() => preview.classList.add('show'), 10);
+      
+      try {
+        // Fetch ticket data
+        const ticketData = await fetchTicketData(ticketId);
+        
+        if (ticketData) {
+          preview.innerHTML = `
+            <div class="ticket-preview-header">
+              <span class="ticket-preview-id">#${ticketData.ticketId}</span>
+              <span class="ticket-preview-status ${ticketData.status}">${ticketData.status}</span>
+            </div>
+            <div class="ticket-preview-title">${ticketData.title}</div>
+            <div class="ticket-preview-description">${ticketData.description}</div>
+            <div class="ticket-preview-meta">
+              <span>Assigned: ${ticketData.assignedTo.name}</span>
+              <span>Created: ${formatTimestamp(ticketData.createdAt)}</span>
+            </div>
+          `;
+        } else {
+          preview.innerHTML = '<div class="ticket-preview-error">Ticket #' + ticketId + ' not found</div>';
+        }
+      } catch (error) {
+        preview.innerHTML = '<div class="ticket-preview-error">Error loading ticket</div>';
+      }
+    }
+
+    // Hide ticket preview
+    function hideTicketPreview() {
+      if (activeTicketPreview) {
+        activeTicketPreview.remove();
+        activeTicketPreview = null;
+      }
+    }
+
+    // Open ticket in parent window
+    function openTicket(ticketId) {
+      if (window.opener) {
+        window.opener.open(`tickets.html?ticket=${ticketId}`, '_blank');
+      } else {
+        window.open(`tickets.html?ticket=${ticketId}`, '_blank');
+      }
     }
 
     // Cleanup when window closes
