@@ -363,6 +363,8 @@
       flex-direction: column;
       border: 1px solid rgba(102, 126, 234, 0.1);
       width: 100%;
+      box-sizing: border-box;
+      max-width: 100%;
     }
 
     .tickets-list-header {
@@ -2552,7 +2554,7 @@ async function openTicket(ticketId) {
     await loadTicketMessages(ticketId);
     
     // Setup transfer functionality if user has permissions
-    if (canTransfer) {
+    if (canManageTicket) {
       setupTransferForm();
     }
     
