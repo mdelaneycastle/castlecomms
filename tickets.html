@@ -1178,49 +1178,9 @@
       <h1>🎫 Support Tickets</h1>
     </div>
     
-    <!-- Ticket Type Selection -->
-    <div class="ticket-type-selection" id="ticket-type-selection">
-      <div class="ticket-type-options">
-        <div class="ticket-type-card" onclick="selectTicketType('monday')">
-          <div class="ticket-type-icon">📋</div>
-          <h3>Monday.com Ticket</h3>
-          <p>Create a ticket in our Monday.com system for comprehensive project management and tracking</p>
-          <button class="ticket-type-btn">Raise Monday.com Ticket</button>
-        </div>
-        
-        <div class="ticket-type-card" onclick="selectTicketType('internal')">
-          <div class="ticket-type-icon">🎫</div>  
-          <h3>Internal System Ticket</h3>
-          <p>Create a ticket in our internal system for quick communication and simple issue tracking</p>
-          <button class="ticket-type-btn">Create Internal Ticket</button>
-        </div>
-      </div>
-      
-      <div class="view-tickets-section">
-        <a href="https://castlefineart-org.monday.com/portal" target="_blank" class="view-tickets-btn">
-          👁️ View My Tickets
-        </a>
-      </div>
-    </div>
-
-    <!-- Monday.com Ticket Section -->
-    <div class="monday-ticket-section" id="monday-ticket-section" style="display: none;">
-      <div class="section-header">
-        <button class="back-btn" onclick="goBackToSelection()">← Back to Options</button>
-        <h3>📋 Monday.com Ticket</h3>
-      </div>
-      <div class="monday-iframe-container">
-        <iframe 
-          src="https://forms.monday.com/forms/embed/142233d15033ec5cb1fe363d7b9eff5b?r=euc1" 
-          style="border: 0; box-shadow: 5px 5px 56px 0px rgba(0,0,0,0.25); border-radius: 10px;">
-        </iframe>
-      </div>
-    </div>
-
-    <!-- Internal System Section -->
-    <div class="tickets-layout" id="internal-ticket-section" style="display: none;">
+    <!-- Internal System Section (now default) -->
+    <div class="tickets-layout" id="internal-ticket-section">
       <div class="section-header-full">
-        <button class="back-btn" onclick="goBackToSelection()">← Back to Options</button>
         <h3>🎫 Internal System Tickets</h3>
       </div>
       
