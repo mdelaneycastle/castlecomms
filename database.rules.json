@@ -52,6 +52,24 @@
       }
     },
     
+    "news-articles": {
+      ".read": "auth != null",
+      ".indexOn": ["timestamp"],
+      "$articleId": {
+        ".write": "auth != null && (
+          (!data.exists() && auth.uid != null) || 
+          (data.exists() && data.child('addedBy').val() == auth.uid) ||
+          auth.token.admin == true
+        )",
+        ".validate": "newData.hasChildren(['url', 'title', 'site_name', 'timestamp', 'addedBy']) && 
+                     newData.child('url').isString() && 
+                     newData.child('title').isString() && 
+                     newData.child('site_name').isString() && 
+                     newData.child('timestamp').isNumber() && 
+                     newData.child('addedBy').isString()"
+      }
+    },
+    
     "notifications": {
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
