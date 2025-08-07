@@ -2864,18 +2864,24 @@ async function createTicketFromModal() {
             if (member.email !== currentUser.email) { // Don't notify the creator
               console.log('🔔 Looking up user UID for:', member.email);
               
-              // Find user UID
-              const usersSnapshot = await firebase.database().ref('users')
-                .orderByChild('email')
-                .equalTo(member.email)
-                .once('value');
+              // Find user UID using listUsers function (Firebase Auth)
+              let userUid = null;
+              try {
+                if (typeof listUsers === 'function') {
+                  const users = await listUsers();
+                  const foundUser = users.find(user => user.email === member.email);
+                  if (foundUser) {
+                    userUid = foundUser.uid;
+                    console.log('🔔 Found user UID from listUsers:', userUid);
+                  }
+                }
+              } catch (error) {
+                console.log('🔔 listUsers function not available, trying fallback');
+              }
               
-              const userData = usersSnapshot.val();
-              console.log('🔔 User data found:', !!userData, userData);
+              console.log('🔔 User UID found:', !!userUid);
               
-              if (userData) {
-                const userUid = Object.keys(userData)[0];
-                console.log('🔔 Found user UID:', userUid);
+              if (userUid) {
                 
                 // Create notification
                 const notificationRef = firebase.database().ref(`notifications/${userUid}/${Date.now()}`);
@@ -2898,7 +2904,7 @@ async function createTicketFromModal() {
                 await notificationRef.set(notificationData);
                 console.log('🔔 Team notification created successfully for', member.email);
               } else {
-                console.log('❌ No user data found for team member:', member.email);
+                console.log('❌ No user found in Firebase Auth for team member:', member.email);
               }
             } else {
               console.log('🔔 Skipping creator (self):', member.email);
@@ -2907,18 +2913,24 @@ async function createTicketFromModal() {
         } else if (isIndividualAssignment && assignedUser && assignedUser.email !== currentUser.email) {
           console.log('🔔 Creating individual notification for:', assignedUser.email);
           
-          // Create notification for individual assignee
-          const usersSnapshot = await firebase.database().ref('users')
-            .orderByChild('email')
-            .equalTo(assignedUser.email)
-            .once('value');
+          // Find user UID using listUsers function (Firebase Auth)
+          let userUid = null;
+          try {
+            if (typeof listUsers === 'function') {
+              const users = await listUsers();
+              const foundUser = users.find(user => user.email === assignedUser.email);
+              if (foundUser) {
+                userUid = foundUser.uid;
+                console.log('🔔 Found individual user UID from listUsers:', userUid);
+              }
+            }
+          } catch (error) {
+            console.log('🔔 listUsers function not available for individual assignment');
+          }
           
-          const userData = usersSnapshot.val();
-          console.log('🔔 Individual user data found:', !!userData, userData);
+          console.log('🔔 Individual user UID found:', !!userUid);
           
-          if (userData) {
-            const userUid = Object.keys(userData)[0];
-            console.log('🔔 Found individual user UID:', userUid);
+          if (userUid) {
             
             // Create notification
             const notificationRef = firebase.database().ref(`notifications/${userUid}/${Date.now()}`);
@@ -2950,7 +2962,7 @@ async function createTicketFromModal() {
             }
             
           } else {
-            console.log('❌ No user data found for individual assignee:', assignedUser.email);
+            console.log('❌ No user found in Firebase Auth for individual assignee:', assignedUser.email);
           }
         } else {
           console.log('❌ No notification created - conditions not met');
