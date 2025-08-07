@@ -55,7 +55,7 @@
     "notifications": {
       "$userId": {
         ".read": "auth != null && auth.uid == $userId",
-        ".write": "auth != null && (auth.uid == $userId || auth.token.admin == true)",
+        ".write": "auth != null",
         "$notificationId": {
           ".validate": "newData.hasChildren(['type', 'title', 'message', 'timestamp', 'read']) && 
                        newData.child('type').isString() && 
