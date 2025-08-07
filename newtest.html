@@ -196,19 +196,36 @@
         }
 
         async function extractUrlMetadata(url) {
-        const urlObj = new URL(url);
-        const hostname = urlObj.hostname.toLowerCase();
+  try {
+    const encodedUrl = encodeURIComponent(url);
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodedUrl}`;
 
-        // Basic fallback using hostname
-        const titleFromPath = urlObj.pathname.split('/').filter(p => p.length > 4).pop()?.replace(/[-_]/g, ' ');
-        const fallbackTitle = titleFromPath ? titleFromPath.charAt(0).toUpperCase() + titleFromPath.slice(1) : "Article";
+            const res = await fetch(proxyUrl);
+            const data = await res.json();
+            const html = data.contents;
 
-        return {
-            title: fallbackTitle,
-            description: `Read more at ${hostname}`,
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const getMeta = (name) => doc.querySelector(`meta[property='${name}']`)?.content?.trim();
+
+            return {
+            url,
+            title: getMeta('og:title') || 'Untitled Article',
+            description: getMeta('og:description') || 'Click to read the full article...',
+            image: getMeta('og:image') || null,
+            site_name: new URL(url).hostname.replace('www.', '')
+            };
+        } catch (err) {
+            console.warn('❌ Metadata scrape failed, using fallback');
+            return {
+            url,
+            title: new URL(url).pathname.split('/').pop().replace(/[-_]/g, ' ').slice(0, 50) || 'Untitled Article',
+            description: 'Click to read the full article...',
             image: null,
-            site_name: hostname.replace('www.', '')
-        };
+            site_name: new URL(url).hostname.replace('www.', '')
+            };
+        }
         }
   </script>
 </body>
