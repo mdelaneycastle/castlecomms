@@ -471,7 +471,7 @@
       <!-- Step 3: Printing -->
       <div class="workflow-step">
         <div class="step-number">3</div>
-        <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-card expanded" onclick="toggleStep(this)">
           <div class="step-icon">
             <span>🖨️</span>
           </div>
@@ -482,13 +482,16 @@
             <span class="step-badge">Various Media</span>
           </div>
           <button class="expand-btn">
-            <span>Learn More</span>
+            <span>Show Less</span>
             <span class="expand-icon">▼</span>
           </button>
-          <div class="step-details">
-            <div class="media-placeholder">
-              <div class="media-placeholder-icon">📊</div>
-              <p>Interactive content: Print types and specifications</p>
+          <div class="step-details expanded">
+            <div class="video-container">
+              <video controls loop autoplay muted style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <source src="videos/printing.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+              <p style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; color: #64748b;">Print Production Process</p>
             </div>
             <p><strong>Print options include:</strong></p>
             <ul>
