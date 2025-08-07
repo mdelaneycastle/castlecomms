@@ -99,10 +99,19 @@
     <h1>📰 Castle Fine Art Media Mentions</h1>
     <div id="stories"></div>
   </div>
+  <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap">
+    <input 
+      id="news-url-input" 
+      placeholder="Paste article URL..." 
+      style="flex:1;min-width:300px;padding:0.75rem;border-radius:8px;border:1px solid #ccc;font-size:1rem;" 
+    />
+    <button onclick="submitArticle()" style="padding:0.75rem 1.5rem;border:none;background:#667eea;color:white;border-radius:8px;cursor:pointer;">Add Article</button>
+  </div>
 
   <!-- Firebase + Init -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="firebase-init.js"></script>
 
   <script>
@@ -160,6 +169,35 @@
       if (days < 7) return `${days}d ago`;
       return new Date(ts).toLocaleDateString();
     }
+
+    async function submitArticle() {
+        const input = document.getElementById('news-url-input');
+        const url = input.value.trim();
+        if (!url) return alert("Please enter a URL.");
+
+        const user = firebase.auth().currentUser;
+        if (!user) return alert("You must be signed in to add articles.");
+
+        const metadata = {
+            url,
+            title: "Placeholder Title",
+            description: "Click to read the full article...",
+            image: null,
+            site_name: new URL(url).hostname.replace('www.', ''),
+            timestamp: Date.now(),
+            addedBy: user.uid // ✅ Required for rules
+        };
+
+        try {
+            await firebase.database().ref('news-articles').push(metadata);
+            input.value = '';
+            alert("✅ Article added!");
+            location.reload();
+        } catch (error) {
+            console.error("Add failed", error);
+            alert("❌ Could not add article: " + error.message);
+        }
+        }
   </script>
 </body>
 </html>
