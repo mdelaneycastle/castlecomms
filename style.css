@@ -549,7 +549,7 @@ admin-link {
 .quick-links a {
   position: relative;
   width: 100%;
-  min-height: 80px;
+  min-height: 72px;
   background: #f8f9fa;
   backdrop-filter: blur(20px);
   color: #495057;
@@ -838,7 +838,7 @@ admin-link {
 .premium-link {
   position: relative;
   width: 100%;
-  min-height: 80px;
+  min-height: 72px;
   background: #f8f9fa;
   color: #495057;
   text-decoration: none;
@@ -1581,8 +1581,9 @@ admin-link {
     margin: 1rem auto;
   }
   
-  .quick-links a {
-    min-height: 70px;
+  .quick-links a,
+  .quick-links .premium-link {
+    min-height: 63px;
     padding: 0.5rem;
   }
   
