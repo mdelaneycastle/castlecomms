@@ -361,7 +361,7 @@
     </div>
 
     <!-- Admin Add Article Section -->
-    <div class="add-article-section hidden" id="admin-section">
+    <div class="add-article-section" id="admin-section" data-admin-only>
       <h2 class="add-article-title">
         🔗 Add News Article
       </h2>
@@ -426,14 +426,11 @@
 <script>
 let articles = [];
 let articleCount = 0;
-let isAdmin = false;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
   firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
-      // Check if user is admin
-      await checkAdminStatus(user);
       // Load articles
       await loadArticles();
     } else {
@@ -447,32 +444,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (e.key === 'Enter') handleAddArticle();
   });
 });
-
-// Check if user is admin
-async function checkAdminStatus(user) {
-  try {
-    // Check if user has admin role in Firebase
-    const token = await user.getIdTokenResult();
-    isAdmin = token.claims.admin === true;
-    
-    // For now, also check by email domain as fallback
-    if (!isAdmin && user.email && 
-        (user.email.includes('@castlefineart.com') || 
-         user.email.includes('@washingtongreen.co.uk'))) {
-      isAdmin = true;
-    }
-    
-    // Show/hide admin section
-    const adminSection = document.getElementById('admin-section');
-    if (isAdmin) {
-      adminSection.classList.remove('hidden');
-    }
-    
-    console.log('Admin status:', isAdmin);
-  } catch (error) {
-    console.error('Error checking admin status:', error);
-  }
-}
 
 // Load articles from Firebase
 async function loadArticles() {
@@ -567,7 +538,8 @@ function createNewspaperItem(article, index) {
 
 // Handle add article
 async function handleAddArticle() {
-  if (!isAdmin) {
+  // Check if user is admin using the centralized system
+  if (!window.authUtils || !(await window.authUtils.isAdmin())) {
     showStatus('You do not have permission to add articles.', 'error');
     return;
   }
