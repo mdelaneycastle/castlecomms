@@ -231,6 +231,7 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-height: 0; /* Important for flexbox to work correctly */
     }
 
     .message-group {
@@ -1805,8 +1806,12 @@ function displayMessages(messageDocs) {
   }
   lastMessageCount = currentMessageCount;
   
-  // Scroll to bottom
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  // Scroll to bottom with proper timing to ensure DOM updates are complete
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    });
+  });
   
   // Mark messages as read
   markMessagesAsRead();
