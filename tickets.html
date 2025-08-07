@@ -1783,7 +1783,7 @@
       </div>
       
       <div class="form-actions">
-        <button type="submit" class="create-ticket-button">Create Ticket</button>
+        <button type="submit" id="modal-create-ticket-btn" class="create-ticket-button">Create Ticket</button>
       </div>
     </form>
   </div>
@@ -2081,10 +2081,10 @@ function setupTicketForm() {
 
 // Create new ticket
 async function createTicket() {
-  const title = document.getElementById('ticket-title').value.trim();
-  const description = document.getElementById('ticket-description').value.trim();
-  const category = document.getElementById('ticket-category').value;
-  const createBtn = document.getElementById('create-ticket-btn');
+  const title = document.getElementById('modal-ticket-title').value.trim();
+  const description = document.getElementById('modal-ticket-description').value.trim();
+  const category = document.getElementById('modal-ticket-category').value;
+  const createBtn = document.getElementById('modal-create-ticket-btn');
   
   if (!title || !description || !category) {
     showStatus('Please fill in all required fields.', 'error');
