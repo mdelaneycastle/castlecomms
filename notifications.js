@@ -21,6 +21,18 @@ class NotificationManager {
     // Start periodic checking
     this.startPeriodicCheck();
     
+    // Add a test notification to show the system is working
+    setTimeout(() => {
+      if (this.notifications.size === 0) {
+        this.addNotification(
+          'system',
+          '🎉 Notifications Active!',
+          'Your notification system is working properly. This is a test notification.',
+          { test: true }
+        );
+      }
+    }, 2000);
+    
     console.log('Notification system initialized for user:', user.email);
   }
 
@@ -45,10 +57,19 @@ class NotificationManager {
       }
     }
 
-    // Add click handler
-    notificationBell.addEventListener('click', () => {
+    // Remove any existing click handlers to prevent conflicts
+    const newNotificationBell = notificationBell.cloneNode(true);
+    notificationBell.parentNode.replaceChild(newNotificationBell, notificationBell);
+    
+    // Add our click handler
+    newNotificationBell.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       this.showNotificationPanel();
     });
+
+    // Make sure the bell is visible and update the reference
+    newNotificationBell.classList.remove('hidden');
 
     // Add CSS if not already present
     this.addNotificationCSS();
@@ -61,24 +82,24 @@ class NotificationManager {
     const style = document.createElement('style');
     style.id = 'notification-styles';
     style.textContent = `
-      .notification-bell {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: rgba(255, 255, 255, 0.95);
+      #notification-bell.notification-bell {
+        position: fixed !important;
+        top: 20px !important;
+        right: 20px !important;
+        background: rgba(255, 255, 255, 0.95) !important;
         backdrop-filter: blur(10px);
-        border: 2px solid rgba(102, 126, 234, 0.2);
-        border-radius: 50px;
-        padding: 12px 16px;
-        cursor: pointer;
+        border: 2px solid rgba(102, 126, 234, 0.2) !important;
+        border-radius: 50px !important;
+        padding: 12px 16px !important;
+        cursor: pointer !important;
         transition: all 0.3s ease;
-        z-index: 1000;
-        display: flex;
+        z-index: 1000 !important;
+        display: flex !important;
         align-items: center;
         gap: 8px;
         font-size: 16px;
         font-weight: 600;
-        color: #2c3e50;
+        color: #2c3e50 !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       }
 
@@ -420,6 +441,16 @@ class NotificationManager {
       case 'newsfeed_mention':
         window.location.href = 'newsfeed.html';
         break;
+      case 'system':
+        // Test notification - just mark as read, no navigation
+        console.log('Test notification clicked - system working!');
+        break;
+    }
+    
+    // Hide the notification panel after clicking
+    const panel = document.getElementById('notification-panel');
+    if (panel) {
+      panel.style.display = 'none';
     }
   }
 
