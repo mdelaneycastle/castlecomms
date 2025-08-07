@@ -311,6 +311,25 @@
       opacity: 0.5;
     }
 
+    /* Video container styling */
+    .video-container {
+      text-align: center;
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .video-container video {
+      transition: all 0.3s ease;
+    }
+
+    .video-container video:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .workflow-step {
@@ -395,9 +414,13 @@
             <span class="expand-icon">▼</span>
           </button>
           <div class="step-details">
-            <div class="media-placeholder">
-              <div class="media-placeholder-icon">📹</div>
-              <p>Video content placeholder: Artist submission process</p>
+            <div class="video-container">
+              <video controls style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <source src="videos/submission.mov" type="video/quicktime">
+                <source src="videos/submission.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+              <p style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; color: #64748b;">Artist Submission Process</p>
             </div>
             <p><strong>What happens here:</strong></p>
             <ul>
@@ -428,9 +451,12 @@
             <span class="expand-icon">▼</span>
           </button>
           <div class="step-details">
-            <div class="media-placeholder">
-              <div class="media-placeholder-icon">🎬</div>
-              <p>Media placeholder: Wayne's World photography process</p>
+            <div class="video-container">
+              <video controls style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <source src="videos/waynesworld.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+              <p style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; color: #64748b;">Wayne's World Photography Process</p>
             </div>
             <p><strong>Photography specifications:</strong></p>
             <ul>
@@ -494,9 +520,12 @@
             <span class="expand-icon">▼</span>
           </button>
           <div class="step-details">
-            <div class="media-placeholder">
-              <div class="media-placeholder-icon">📋</div>
-              <p>Checklist placeholder: Quality control criteria</p>
+            <div class="video-container">
+              <video controls style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <source src="videos/QC.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+              <p style="text-align: center; margin-top: 0.5rem; font-size: 0.9rem; color: #64748b;">Quality Control Process</p>
             </div>
             <p><strong>Quality checks include:</strong></p>
             <ul>
