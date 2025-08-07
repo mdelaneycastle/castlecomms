@@ -399,7 +399,7 @@
       <!-- Step 1: Artist Submission -->
       <div class="workflow-step">
         <div class="step-number">1</div>
-        <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-card expanded" onclick="toggleStep(this)">
           <div class="step-icon">
             <span>🎨</span>
           </div>
@@ -410,13 +410,12 @@
             <span class="step-badge">Quality Review</span>
           </div>
           <button class="expand-btn">
-            <span>Learn More</span>
+            <span>Show Less</span>
             <span class="expand-icon">▼</span>
           </button>
-          <div class="step-details">
+          <div class="step-details expanded">
             <div class="video-container">
-              <video controls style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                <source src="videos/submission.mov" type="video/quicktime">
+              <video controls loop autoplay muted style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                 <source src="videos/submission.mp4" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
@@ -436,7 +435,7 @@
       <!-- Step 2: Wayne's World Photography -->
       <div class="workflow-step">
         <div class="step-number">2</div>
-        <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-card expanded" onclick="toggleStep(this)">
           <div class="step-icon">
             <span>📸</span>
           </div>
@@ -447,12 +446,12 @@
             <span class="step-badge">High-Quality Imaging</span>
           </div>
           <button class="expand-btn">
-            <span>Learn More</span>
+            <span>Show Less</span>
             <span class="expand-icon">▼</span>
           </button>
-          <div class="step-details">
+          <div class="step-details expanded">
             <div class="video-container">
-              <video controls style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+              <video controls loop autoplay muted style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                 <source src="videos/waynesworld.mp4" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
@@ -505,7 +504,7 @@
       <!-- Step 4: Quality Control 1 -->
       <div class="workflow-step">
         <div class="step-number">4</div>
-        <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-card expanded" onclick="toggleStep(this)">
           <div class="step-icon">
             <span>🔍</span>
           </div>
@@ -516,12 +515,12 @@
             <span class="step-badge">First Inspection</span>
           </div>
           <button class="expand-btn">
-            <span>Learn More</span>
+            <span>Show Less</span>
             <span class="expand-icon">▼</span>
           </button>
-          <div class="step-details">
+          <div class="step-details expanded">
             <div class="video-container">
-              <video controls style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+              <video controls loop autoplay muted style="width: 100%; max-width: 500px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                 <source src="videos/QC.mp4" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
@@ -806,11 +805,13 @@
     function toggleStep(stepCard) {
       const isExpanded = stepCard.classList.contains('expanded');
       
-      // Close all other expanded steps
+      // Close all other expanded steps (except those with videos)
       document.querySelectorAll('.step-card.expanded').forEach(card => {
-        if (card !== stepCard) {
+        if (card !== stepCard && !card.querySelector('video')) {
           card.classList.remove('expanded');
           card.querySelector('.step-details').classList.remove('expanded');
+          const btn = card.querySelector('.expand-btn span');
+          btn.textContent = 'Learn More';
         }
       });
       
@@ -826,6 +827,15 @@
       // Update button text
       const btn = stepCard.querySelector('.expand-btn span');
       btn.textContent = isExpanded ? 'Learn More' : 'Show Less';
+      
+      // Handle video autoplay when expanding
+      const video = stepCard.querySelector('video');
+      if (video && !isExpanded) {
+        // Small delay to ensure the element is visible before playing
+        setTimeout(() => {
+          video.play().catch(e => console.log('Autoplay prevented:', e));
+        }, 300);
+      }
     }
 
     // Add smooth scrolling for better UX
@@ -836,6 +846,14 @@
           if (entry.isIntersecting) {
             entry.target.style.opacity = '1';
             entry.target.style.transform = 'translateY(0)';
+            
+            // Start videos when they come into view
+            const video = entry.target.querySelector('video');
+            if (video && entry.target.querySelector('.step-card.expanded')) {
+              setTimeout(() => {
+                video.play().catch(e => console.log('Autoplay prevented:', e));
+              }, 500);
+            }
           }
         });
       }, { threshold: 0.1 });
@@ -843,6 +861,13 @@
       document.querySelectorAll('.workflow-step').forEach(step => {
         observer.observe(step);
       });
+      
+      // Initialize pre-expanded video steps
+      setTimeout(() => {
+        document.querySelectorAll('.step-card.expanded video').forEach(video => {
+          video.play().catch(e => console.log('Autoplay prevented:', e));
+        });
+      }, 1000);
     });
   </script>
 </body>
