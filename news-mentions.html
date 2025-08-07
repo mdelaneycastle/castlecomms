@@ -11,371 +11,292 @@
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   
   <link rel="stylesheet" href="style.css" />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:wght@400;500;700&display=swap" rel="stylesheet">
+  
   <style>
+    body {
+      font-family: 'Lora', serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+    }
+
     .news-container {
-      max-width: 1200px;
+      max-width: 1000px;
       margin: 2rem auto;
       padding: 2rem;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: var(--border-radius);
-      box-shadow: var(--shadow-medium);
-      backdrop-filter: blur(10px);
-      min-height: 90vh;
+      position: relative;
     }
 
     .news-header {
       text-align: center;
       margin-bottom: 3rem;
-      border-bottom: 3px solid var(--primary-gradient);
-      padding-bottom: 2rem;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-medium);
     }
 
     .news-title {
-      font-family: 'Times New Roman', serif;
-      font-size: 3rem;
-      font-weight: bold;
-      color: #1a1a1a;
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #2c3e50;
       margin: 0 0 0.5rem 0;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
 
     .news-subtitle {
-      font-size: 1.2rem;
-      color: #666;
+      font-size: 1.3rem;
+      color: #7f8c8d;
       font-style: italic;
       margin: 0;
     }
 
-    .news-date {
-      font-size: 1rem;
-      color: #888;
-      margin-top: 0.5rem;
-    }
-
-    /* Add URL Form */
-    .add-url-section {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 12px;
+    /* Admin Add Article Section */
+    .add-article-section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: var(--border-radius);
       padding: 2rem;
       margin-bottom: 3rem;
-      color: white;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-medium);
     }
 
-    .add-url-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
+    .add-article-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: #2c3e50;
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
 
-    .url-form {
+    .form-row {
       display: flex;
       gap: 1rem;
-      align-items: flex-start;
-      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      align-items: flex-end;
     }
 
-    .url-input {
+    .form-group {
       flex: 1;
-      min-width: 300px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #34495e;
+      font-size: 0.9rem;
+    }
+
+    .form-input {
+      width: 100%;
       padding: 0.75rem;
-      border: none;
+      border: 2px solid #e9ecef;
       border-radius: 8px;
       font-size: 1rem;
-      outline: none;
+      font-family: 'Lora', serif;
       transition: all 0.3s ease;
+      box-sizing: border-box;
     }
 
-    .url-input:focus {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    .form-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
-    .add-url-btn {
-      background: rgba(255,255,255,0.2);
+    .add-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      border: 2px solid rgba(255,255,255,0.3);
-      padding: 0.75rem 1.5rem;
+      border: none;
+      padding: 0.75rem 2rem;
       border-radius: 8px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
-      white-space: nowrap;
+      font-family: 'Lora', serif;
     }
 
-    .add-url-btn:hover {
-      background: rgba(255,255,255,0.3);
+    .add-btn:hover {
       transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
-    .add-url-btn:disabled {
+    .add-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       transform: none;
     }
 
-    .add-url-btn.loading {
-      position: relative;
-      color: transparent;
-    }
-
-    .add-url-btn.loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
-      border: 2px solid transparent;
-      border-top: 2px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    .url-status {
+    .status-message {
       margin-top: 1rem;
       padding: 0.75rem;
       border-radius: 8px;
       font-size: 0.9rem;
+      text-align: center;
       display: none;
     }
 
-    .url-status.success {
-      background: rgba(34, 197, 94, 0.2);
+    .status-success {
+      background: rgba(34, 197, 94, 0.1);
       color: #15803d;
       border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
-    .url-status.error {
-      background: rgba(239, 68, 68, 0.2);
+    .status-error {
+      background: rgba(239, 68, 68, 0.1);
       color: #dc2626;
       border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
-    /* Newspaper Layout */
-    .news-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .main-stories {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .sidebar-stories {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    /* Featured Story */
-    .featured-story {
-      border: 2px solid #e5e5e5;
-      border-radius: 12px;
-      overflow: hidden;
-      background: white;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .featured-story:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .featured-story .story-image {
-      width: 100%;
-      height: 200px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 3rem;
-      overflow: hidden;
+    /* Newspaper Stand Styles */
+    .newspaper-stand {
       position: relative;
+      min-height: 600px;
+      margin: 3rem auto;
+      perspective: 1000px;
+      transition: height 0.6s ease-out;
     }
 
-    .featured-story .story-image img {
+    .newspaper-item {
+      position: absolute;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      max-width: 800px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    .newspaper-item:hover {
+      transform: translateX(-50%) translateY(-10px) scale(1.02);
+      z-index: 100 !important;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+
+    .newspaper-item:hover ~ .newspaper-item {
+      transform: translateX(-50%) translateY(50px);
+    }
+
+    .newspaper {
+      background: #fdfdf8;
+      border: 2px solid #d4d4aa;
+      box-shadow: 8px 8px 20px rgba(0,0,0,0.15);
+      padding: 2rem;
+      font-family: 'Lora', serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .newspaper::before {
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(90deg, transparent 49%, rgba(0,0,0,0.03) 50%, transparent 51%),
+        linear-gradient(transparent 49%, rgba(0,0,0,0.02) 50%, transparent 51%);
+      background-size: 20px 20px;
+      pointer-events: none;
     }
 
-    .featured-story .story-image .placeholder-icon {
-      z-index: 1;
-      position: relative;
+    .masthead {
+      text-align: center;
+      border-bottom: 4px double #333;
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
 
-    .featured-story .story-content {
-      padding: 1.5rem;
+    .newspaper-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #2c3e50;
+      margin: 0;
+      letter-spacing: 2px;
     }
 
-    .featured-story .story-title {
-      font-family: 'Times New Roman', serif;
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #1a1a1a;
-      margin: 0 0 1rem 0;
-      line-height: 1.3;
-    }
-
-    .featured-story .story-preview {
-      color: #555;
+    .newspaper-date {
       font-size: 1rem;
+      color: #7f8c8d;
+      margin: 0.5rem 0 0 0;
+      font-style: italic;
+    }
+
+    .article-headline {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      line-height: 1.1;
+      font-weight: 700;
+      text-align: center;
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+    }
+
+    .article-meta {
+      text-align: center;
+      padding: 0.5rem 0;
+      border-top: 1px solid #bdc3c7;
+      border-bottom: 1px solid #bdc3c7;
+      margin: 1rem 0;
+      font-style: italic;
+      color: #7f8c8d;
+    }
+
+    .article-content {
+      columns: 2;
+      column-gap: 2rem;
+      column-rule: 1px solid #ecf0f1;
+      text-align: justify;
       line-height: 1.6;
-      margin-bottom: 1rem;
+      color: #2c3e50;
     }
 
-    .featured-story .story-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #888;
-      font-size: 0.9rem;
-      border-top: 1px solid #eee;
-      padding-top: 1rem;
-    }
-
-    /* Regular Stories */
-    .story-card {
-      border: 1px solid #e5e5e5;
-      border-radius: 8px;
-      overflow: hidden;
-      background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .story-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-    }
-
-    .story-card .story-image {
-      width: 100%;
-      height: 120px;
+    .artist-badge {
+      display: inline-block;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       color: white;
-      font-size: 2rem;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .story-card .story-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
-    .story-card .story-image .placeholder-icon {
-      z-index: 1;
-      position: relative;
-    }
-
-    .story-card .story-content {
-      padding: 1rem;
-    }
-
-    .story-card .story-title {
-      font-family: 'Times New Roman', serif;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #1a1a1a;
-      margin: 0 0 0.5rem 0;
-      line-height: 1.4;
-    }
-
-    .story-card .story-preview {
-      color: #666;
-      font-size: 0.9rem;
-      line-height: 1.5;
-      margin-bottom: 0.75rem;
-    }
-
-    .story-card .story-meta {
-      color: #888;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
       font-size: 0.8rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      font-weight: 500;
+      margin-left: 0.5rem;
     }
 
-    .story-source {
-      font-weight: 600;
-      color: var(--primary-color, #667eea);
-    }
-
-    .story-date {
-      font-size: 0.8rem;
-    }
-
-    /* Secondary Stories */
-    .secondary-stories {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-
-    /* Loading States */
-    .loading-placeholder {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      border-radius: 8px;
-      height: 300px;
-    }
-
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+    .loading-state {
+      text-align: center;
+      padding: 3rem;
+      color: #7f8c8d;
+      font-style: italic;
+      font-size: 1.1rem;
     }
 
     .empty-state {
       text-align: center;
-      padding: 4rem 2rem;
-      color: #666;
+      padding: 4rem;
+      color: #7f8c8d;
     }
 
-    .empty-state-icon {
+    .empty-icon {
       font-size: 4rem;
       margin-bottom: 1rem;
-      opacity: 0.5;
     }
 
-    .empty-state h3 {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-      color: #444;
-    }
-
-    .empty-state p {
-      font-size: 1rem;
-      margin: 0;
+    .hidden {
+      display: none !important;
     }
 
     /* Mobile Responsive */
@@ -386,32 +307,29 @@
       }
 
       .news-title {
-        font-size: 2rem;
+        font-size: 2.5rem;
       }
 
-      .news-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
-
-      .url-form {
+      .form-row {
         flex-direction: column;
+        align-items: stretch;
       }
 
-      .url-input {
-        min-width: auto;
+      .newspaper-item:hover,
+      .newspaper-item:hover ~ .newspaper-item {
+        transform: translateX(-50%);
       }
 
-      .secondary-stories {
-        grid-template-columns: 1fr;
+      .article-content {
+        columns: 1;
       }
 
-      .featured-story .story-title {
-        font-size: 1.5rem;
+      .article-headline {
+        font-size: 1.8rem;
       }
 
-      .story-card .story-title {
-        font-size: 1.1rem;
+      .newspaper-name {
+        font-size: 2rem;
       }
     }
   </style>
@@ -436,62 +354,60 @@
 
 <main id="main">
   <div class="news-container">
-    <!-- Newspaper Header -->
+    <!-- Header -->
     <div class="news-header">
       <h1 class="news-title">📰 Castle Fine Art News</h1>
       <p class="news-subtitle">Media Mentions & Press Coverage</p>
-      <p class="news-date" id="current-date"></p>
     </div>
 
-    <!-- Add URL Section -->
-    <div class="add-url-section">
-      <h2 class="add-url-title">
+    <!-- Admin Add Article Section -->
+    <div class="add-article-section hidden" id="admin-section">
+      <h2 class="add-article-title">
         🔗 Add News Article
       </h2>
-      <div class="url-form">
-        <input 
-          type="url" 
-          id="news-url-input" 
-          class="url-input" 
-          placeholder="Paste article URL here (e.g., https://example.com/article)"
-        />
-        <button id="add-url-btn" class="add-url-btn">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="article-url">Article URL</label>
+          <input 
+            type="url" 
+            id="article-url" 
+            class="form-input" 
+            placeholder="https://example.com/article"
+            required
+          />
+        </div>
+        <div class="form-group" style="flex: 0 0 200px;">
+          <label class="form-label" for="artist-code">Artist Short Code</label>
+          <input 
+            type="text" 
+            id="artist-code" 
+            class="form-input" 
+            placeholder="e.g. SH, DT, etc."
+            maxlength="10"
+          />
+        </div>
+        <button id="add-article-btn" class="add-btn">
           Add Article
         </button>
       </div>
-      <div id="url-status" class="url-status"></div>
+      <div id="status-message" class="status-message"></div>
     </div>
 
-    <!-- News Grid -->
-    <div class="news-grid">
-      <!-- Main Stories Column -->
-      <div class="main-stories">
-        <div id="featured-story-container">
-          <!-- Featured story will be inserted here -->
-        </div>
-        <div id="main-stories-container">
-          <!-- Main stories will be inserted here -->
-        </div>
-      </div>
-
-      <!-- Sidebar Stories Column -->
-      <div class="sidebar-stories">
-        <div id="sidebar-stories-container">
-          <!-- Sidebar stories will be inserted here -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Secondary Stories -->
-    <div class="secondary-stories" id="secondary-stories-container">
-      <!-- Secondary stories will be inserted here -->
+    <!-- Loading State -->
+    <div class="loading-state" id="loading-state">
+      Loading articles...
     </div>
 
     <!-- Empty State -->
-    <div id="empty-state" class="empty-state" style="display: none;">
-      <div class="empty-state-icon">📰</div>
+    <div class="empty-state hidden" id="empty-state">
+      <div class="empty-icon">📰</div>
       <h3>No News Articles Yet</h3>
-      <p>Add your first news article using the form above!</p>
+      <p>Articles will appear here once added by administrators.</p>
+    </div>
+
+    <!-- Newspaper Stand -->
+    <div class="newspaper-stand" id="newspaper-stand">
+      <!-- Articles will be dynamically added here -->
     </div>
   </div>
 </main>
@@ -507,365 +423,284 @@
 <!-- Shared components -->
 <script src="shared-components.js"></script>
 
-<!-- News Mentions Logic -->
 <script>
-let newsArticles = [];
+let articles = [];
+let articleCount = 0;
+let isAdmin = false;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-  // Set current date
-  const currentDate = new Date().toLocaleDateString('en-US', {
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      // Check if user is admin
+      await checkAdminStatus(user);
+      // Load articles
+      await loadArticles();
+    } else {
+      document.getElementById('loading-state').innerHTML = 'Please log in to view articles.';
+    }
+  });
+
+  // Setup form submission
+  document.getElementById('add-article-btn').addEventListener('click', handleAddArticle);
+  document.getElementById('article-url').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleAddArticle();
+  });
+});
+
+// Check if user is admin
+async function checkAdminStatus(user) {
+  try {
+    // Check if user has admin role in Firebase
+    const token = await user.getIdTokenResult();
+    isAdmin = token.claims.admin === true;
+    
+    // For now, also check by email domain as fallback
+    if (!isAdmin && user.email && 
+        (user.email.includes('@castlefineart.com') || 
+         user.email.includes('@washingtongreen.co.uk'))) {
+      isAdmin = true;
+    }
+    
+    // Show/hide admin section
+    const adminSection = document.getElementById('admin-section');
+    if (isAdmin) {
+      adminSection.classList.remove('hidden');
+    }
+    
+    console.log('Admin status:', isAdmin);
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+  }
+}
+
+// Load articles from Firebase
+async function loadArticles() {
+  try {
+    const articlesRef = firebase.database().ref('news-articles');
+    const snapshot = await articlesRef.orderByChild('timestamp').once('value');
+    const data = snapshot.val();
+    
+    document.getElementById('loading-state').classList.add('hidden');
+    
+    if (data) {
+      articles = Object.keys(data)
+        .map(key => ({ id: key, ...data[key] }))
+        .sort((a, b) => b.timestamp - a.timestamp);
+      
+      if (articles.length > 0) {
+        renderArticles();
+      } else {
+        showEmptyState();
+      }
+    } else {
+      showEmptyState();
+    }
+    
+    console.log('✅ Articles loaded:', articles.length);
+  } catch (error) {
+    console.error('❌ Error loading articles:', error);
+    document.getElementById('loading-state').innerHTML = 'Error loading articles. Please try refreshing.';
+  }
+}
+
+// Render articles in newspaper stand
+function renderArticles() {
+  const stand = document.getElementById('newspaper-stand');
+  stand.innerHTML = '';
+  articleCount = 0;
+  
+  articles.forEach((article, index) => {
+    createNewspaperItem(article, index);
+  });
+  
+  // Set stand height
+  stand.style.height = `${Math.max(600, articles.length * 120 + 400)}px`;
+}
+
+// Create individual newspaper item
+function createNewspaperItem(article, index) {
+  const stand = document.getElementById('newspaper-stand');
+  
+  const item = document.createElement('div');
+  item.className = 'newspaper-item';
+  item.style.top = `${index * 80}px`;
+  item.style.zIndex = articles.length - index;
+  
+  item.addEventListener('click', () => {
+    window.open(article.url, '_blank');
+  });
+  
+  const newspaper = document.createElement('div');
+  newspaper.className = 'newspaper';
+  
+  const date = new Date(article.timestamp);
+  const formattedDate = date.toLocaleDateString('en-GB', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
-  document.getElementById('current-date').textContent = currentDate;
-
-  // Load existing articles
-  loadNewsArticles();
-
-  // Setup form submission
-  setupUrlForm();
-});
-
-// Load news articles from Firebase
-async function loadNewsArticles() {
-  try {
-    const newsRef = firebase.database().ref('news-articles');
-    const snapshot = await newsRef.orderByChild('timestamp').once('value');
-    const data = snapshot.val();
+  
+  newspaper.innerHTML = `
+    <div class="masthead">
+      <h1 class="newspaper-name">Castle Fine Art</h1>
+      <p class="newspaper-date">${formattedDate}</p>
+    </div>
     
-    if (data) {
-      newsArticles = Object.keys(data)
-        .map(key => ({ id: key, ...data[key] }))
-        .sort((a, b) => b.timestamp - a.timestamp);
-    } else {
-      newsArticles = [];
-    }
-    
-    renderNewsArticles();
-    console.log('✅ News articles loaded:', newsArticles.length);
-  } catch (error) {
-    console.error('❌ Error loading news articles:', error);
-    showEmptyState();
+    <article>
+      <h2 class="article-headline">${article.title}</h2>
+      
+      <div class="article-meta">
+        ${article.site_name}${article.artistCode ? `<span class="artist-badge">${article.artistCode}</span>` : ''}
+      </div>
+      
+      <div class="article-content">
+        ${article.description || 'Click to read the full article...'}
+      </div>
+    </article>
+  `;
+  
+  item.appendChild(newspaper);
+  stand.appendChild(item);
+}
+
+// Handle add article
+async function handleAddArticle() {
+  if (!isAdmin) {
+    showStatus('You do not have permission to add articles.', 'error');
+    return;
   }
-}
-
-// Setup URL form
-function setupUrlForm() {
-  const urlInput = document.getElementById('news-url-input');
-  const addBtn = document.getElementById('add-url-btn');
-  const status = document.getElementById('url-status');
-
-  addBtn.addEventListener('click', async () => {
-    const url = urlInput.value.trim();
-    
-    if (!url) {
-      showStatus('Please enter a valid URL', 'error');
-      return;
-    }
-
-    if (!isValidUrl(url)) {
-      showStatus('Please enter a valid URL starting with http:// or https://', 'error');
-      return;
-    }
-
-    // Show loading state
-    addBtn.classList.add('loading');
-    addBtn.disabled = true;
-
-    try {
-      await addNewsArticle(url);
-      urlInput.value = '';
-      showStatus('Article added successfully!', 'success');
-      
-      // Hide status after 3 seconds
-      setTimeout(() => {
-        status.style.display = 'none';
-      }, 3000);
-      
-    } catch (error) {
-      console.error('Error adding article:', error);
-      showStatus('Failed to add article. Please try again.', 'error');
-    }
-
-    // Remove loading state
-    addBtn.classList.remove('loading');
-    addBtn.disabled = false;
-  });
-
-  // Allow Enter key submission
-  urlInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      addBtn.click();
-    }
-  });
-}
-
-// Add news article
-async function addNewsArticle(url) {
+  
+  const urlInput = document.getElementById('article-url');
+  const codeInput = document.getElementById('artist-code');
+  const addBtn = document.getElementById('add-article-btn');
+  
+  const url = urlInput.value.trim();
+  const artistCode = codeInput.value.trim();
+  
+  if (!url) {
+    showStatus('Please enter a valid URL', 'error');
+    return;
+  }
+  
+  if (!isValidUrl(url)) {
+    showStatus('Please enter a valid URL starting with http:// or https://', 'error');
+    return;
+  }
+  
+  // Disable button and show loading
+  addBtn.disabled = true;
+  addBtn.textContent = 'Adding...';
+  
   try {
-    // Extract metadata from URL
-    const metadata = await extractUrlMetadata(url);
+    await addArticle(url, artistCode);
+    
+    // Clear inputs
+    urlInput.value = '';
+    codeInput.value = '';
+    
+    showStatus('Article added successfully!', 'success');
+    
+    // Reload articles
+    await loadArticles();
+    
+  } catch (error) {
+    console.error('Error adding article:', error);
+    showStatus('Failed to add article. Please try again.', 'error');
+  }
+  
+  // Re-enable button
+  addBtn.disabled = false;
+  addBtn.textContent = 'Add Article';
+}
+
+// Add article to Firebase
+async function addArticle(url, artistCode) {
+  try {
+    // Extract metadata
+    const metadata = await extractMetadata(url);
     
     // Save to Firebase
-    const newsRef = firebase.database().ref('news-articles').push();
-    await newsRef.set({
+    const articlesRef = firebase.database().ref('news-articles').push();
+    await articlesRef.set({
       url: url,
       title: metadata.title,
       description: metadata.description,
       image: metadata.image,
       site_name: metadata.site_name,
+      artistCode: artistCode || null,
       timestamp: Date.now(),
       addedBy: firebase.auth().currentUser?.email || 'unknown'
     });
-
-    // Reload articles
-    await loadNewsArticles();
     
   } catch (error) {
     throw error;
   }
 }
 
-// Extract metadata from URL using multiple methods
-async function extractUrlMetadata(url) {
+// Extract metadata from URL - simplified version focused on intelligence
+async function extractMetadata(url) {
   try {
     const urlObj = new URL(url);
+    const hostname = urlObj.hostname.toLowerCase();
+    const path = urlObj.pathname.toLowerCase();
     
-    // Due to CORS restrictions in production, we'll primarily use the intelligent fallback
-    // but attempt other methods with shorter timeouts
-    let metadata = null;
-    
-    // Method 1: Quick attempt at link preview (with timeout)
-    try {
-      metadata = await Promise.race([
-        extractViaLinkPreview(url),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
-      ]);
-      
-      if (metadata && metadata.title && metadata.title.length > 5) {
-        console.log('✅ Successfully extracted metadata via link preview');
-        return metadata;
-      }
-    } catch (error) {
-      console.log('Link preview method failed (expected due to CORS):', error.message);
-    }
-    
-    // Method 2: Intelligent fallback based on URL patterns (always works)
-    metadata = generateIntelligentFallback(url, urlObj);
-    console.log('✅ Using intelligent fallback metadata extraction');
-    return metadata;
-    
-  } catch (error) {
-    console.error('All metadata extraction methods failed:', error);
-    return {
-      title: 'News Article',
-      description: 'Click to read the full article...',
-      image: null,
-      site_name: 'News Source'
+    // News site patterns
+    const newsPatterns = {
+      'bbc.co.uk': 'BBC News',
+      'bbc.com': 'BBC News',
+      'theguardian.com': 'The Guardian',
+      'independent.co.uk': 'The Independent',
+      'telegraph.co.uk': 'The Telegraph',
+      'dailymail.co.uk': 'Daily Mail',
+      'mirror.co.uk': 'The Mirror',
+      'express.co.uk': 'Daily Express',
+      'metro.co.uk': 'Metro',
+      'standard.co.uk': 'Evening Standard',
+      'reuters.com': 'Reuters',
+      'cnn.com': 'CNN',
+      'nytimes.com': 'New York Times',
+      'washingtonpost.com': 'Washington Post',
+      'wsj.com': 'Wall Street Journal',
+      'bloomberg.com': 'Bloomberg',
+      'ft.com': 'Financial Times',
+      'ap.org': 'Associated Press',
+      'euronews.com': 'Euronews'
     };
-  }
-}
-
-// Method 1: Extract via CORS proxy
-async function extractViaCorProxy(url) {
-  const proxyUrls = [
-    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-    `https://cors-anywhere.herokuapp.com/${url}`,
-  ];
-  
-  for (const proxyUrl of proxyUrls) {
-    try {
-      const response = await fetch(proxyUrl, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; CastleComms/1.0)',
-        },
-        timeout: 10000
-      });
-      
-      if (!response.ok) continue;
-      
-      let html;
-      const data = await response.json();
-      if (data.contents) {
-        html = data.contents; // allorigins format
-      } else {
-        html = await response.text(); // direct fetch format
-      }
-      
-      return parseHtmlMetadata(html, url);
-    } catch (error) {
-      console.log(`Proxy ${proxyUrl} failed:`, error.message);
-      continue;
-    }
-  }
-  
-  throw new Error('All CORS proxies failed');
-}
-
-// Method 2: Extract via link preview services
-async function extractViaLinkPreview(url) {
-  const services = [
-    {
-      name: 'LinkPreview',
-      url: `https://api.linkpreview.net/?key=demo&q=${encodeURIComponent(url)}`,
-      parse: (data) => ({
-        title: data.title,
-        description: data.description,
-        image: data.image,
-        site_name: data.url ? new URL(data.url).hostname.replace('www.', '') : null
-      })
-    }
-  ];
-  
-  for (const service of services) {
-    try {
-      const response = await fetch(service.url, { timeout: 8000 });
-      if (!response.ok) continue;
-      
-      const data = await response.json();
-      const metadata = service.parse(data);
-      
-      if (metadata.title && metadata.title.length > 3) {
-        return metadata;
-      }
-    } catch (error) {
-      console.log(`${service.name} failed:`, error.message);
-      continue;
-    }
-  }
-  
-  throw new Error('All link preview services failed');
-}
-
-// Parse HTML to extract metadata
-function parseHtmlMetadata(html, url) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  const urlObj = new URL(url);
-  
-  // Extract title (priority: og:title > twitter:title > title tag > h1)
-  let title = getMetaContent(doc, 'property', 'og:title') ||
-              getMetaContent(doc, 'name', 'twitter:title') ||
-              doc.querySelector('title')?.textContent?.trim() ||
-              doc.querySelector('h1')?.textContent?.trim();
-  
-  // Extract description (priority: og:description > twitter:description > meta description)
-  let description = getMetaContent(doc, 'property', 'og:description') ||
-                   getMetaContent(doc, 'name', 'twitter:description') ||
-                   getMetaContent(doc, 'name', 'description');
-  
-  // Extract image (priority: og:image > twitter:image > first img)
-  let image = getMetaContent(doc, 'property', 'og:image') ||
-              getMetaContent(doc, 'name', 'twitter:image') ||
-              doc.querySelector('img')?.src;
-  
-  // Make image URL absolute if needed
-  if (image && !image.startsWith('http')) {
-    image = new URL(image, url).href;
-  }
-  
-  // Extract site name
-  let site_name = getMetaContent(doc, 'property', 'og:site_name') ||
-                  urlObj.hostname.replace('www.', '');
-  
-  // Clean up extracted data
-  title = cleanText(title) || `Article from ${site_name}`;
-  description = cleanText(description) || 'Click to read the full article...';
-  
-  return { title, description, image, site_name };
-}
-
-// Helper function to get meta content
-function getMetaContent(doc, attribute, value) {
-  const meta = doc.querySelector(`meta[${attribute}="${value}"]`);
-  return meta?.getAttribute('content')?.trim();
-}
-
-// Helper function to clean extracted text
-function cleanText(text) {
-  if (!text) return null;
-  return text
-    .replace(/\s+/g, ' ')
-    .replace(/[\r\n\t]/g, ' ')
-    .trim()
-    .substring(0, 200); // Limit length
-}
-
-// Method 3: Intelligent fallback based on URL patterns
-function generateIntelligentFallback(url, urlObj) {
-  const hostname = urlObj.hostname.toLowerCase();
-  const path = urlObj.pathname.toLowerCase();
-  
-  // News site patterns and titles
-  const newsPatterns = {
-    'bbc.co.uk': 'BBC News',
-    'bbc.com': 'BBC News', 
-    'theguardian.com': 'The Guardian',
-    'independent.co.uk': 'The Independent',
-    'telegraph.co.uk': 'The Telegraph',
-    'dailymail.co.uk': 'Daily Mail',
-    'mirror.co.uk': 'The Mirror',
-    'express.co.uk': 'Daily Express',
-    'metro.co.uk': 'Metro',
-    'standard.co.uk': 'Evening Standard',
-    'reuters.com': 'Reuters',
-    'cnn.com': 'CNN',
-    'nytimes.com': 'New York Times',
-    'washingtonpost.com': 'Washington Post',
-    'wsj.com': 'Wall Street Journal',
-    'bloomberg.com': 'Bloomberg',
-    'ft.com': 'Financial Times',
-    'ap.org': 'Associated Press',
-    'euronews.com': 'Euronews'
-  };
-  
-  // Art-specific publications
-  const artPatterns = {
-    'artnet.com': 'Artnet News',
-    'artnews.com': 'ARTnews Article',
-    'artforum.com': 'Artforum Article',
-    'frieze.com': 'Frieze Article',
-    'theartnewspaper.com': 'The Art Newspaper Article',
-    'apollo-magazine.com': 'Apollo Magazine Article',
-    'wallpaper.com': 'Wallpaper Magazine Article',
-    'dezeen.com': 'Dezeen Article'
-  };
-  
-  // Try to extract a meaningful title from URL path
-  let extractedTitle = null;
-  if (path.includes('/')) {
+    
+    const artPatterns = {
+      'artnet.com': 'Artnet News',
+      'artnews.com': 'ARTnews',
+      'artforum.com': 'Artforum',
+      'frieze.com': 'Frieze',
+      'theartnewspaper.com': 'The Art Newspaper',
+      'apollo-magazine.com': 'Apollo Magazine',
+      'wallpaper.com': 'Wallpaper Magazine',
+      'dezeen.com': 'Dezeen'
+    };
+    
+    // Extract title from URL path
+    let extractedTitle = null;
     const pathParts = path.split('/').filter(p => p.length > 0);
-    
-    // Look for meaningful path segments (skip common folder names)
     const skipWords = ['culture', 'exhibitions', 'news', 'articles', 'story', 'art'];
-    let meaningfulParts = [];
     
-    // Find the best path segment for title extraction
     for (let i = pathParts.length - 1; i >= 0; i--) {
       const part = pathParts[i];
       if (part && !skipWords.includes(part.toLowerCase()) && 
-          part !== 'index.html' && part !== 'index.php' &&
-          part.length > 3) {
+          part !== 'index.html' && part !== 'index.php' && part.length > 3) {
         
-        // Clean up the part for title
         let cleanedPart = part
           .replace(/[-_]/g, ' ')
           .replace(/\.(html|php|asp|aspx)$/i, '')
-          .replace(/\d{4}\/\d{2}\/\d{2}/g, '') // Remove dates
-          .replace(/[b]\d+\.html$/i, '') // Remove article IDs like b1238712.html
+          .replace(/[b]\d+\.html$/i, '')
           .trim();
         
-        // Convert to title case and clean up
         if (cleanedPart.length > 5) {
           extractedTitle = cleanedPart
             .split(' ')
             .filter(word => word.length > 0)
             .map(word => {
-              // Handle common words
               if (['and', 'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'].includes(word.toLowerCase())) {
                 return word.toLowerCase();
               }
@@ -875,201 +710,46 @@ function generateIntelligentFallback(url, urlObj) {
             .replace(/\s+/g, ' ')
             .trim();
           
-          // Ensure the first word is capitalized
           if (extractedTitle.length > 0) {
             extractedTitle = extractedTitle.charAt(0).toUpperCase() + extractedTitle.slice(1);
           }
-          
           break;
         }
       }
     }
     
-    // Special handling for URLs that contain obvious article titles
-    const fullPath = path.toLowerCase();
-    if (fullPath.includes('johnny-depp') || fullPath.includes('johnny-depps')) {
+    // Special patterns
+    if (path.includes('johnny-depp') || path.includes('johnny-depps')) {
       extractedTitle = "Johnny Depp's Art Exhibition";
     }
-    if (fullPath.includes('let-the-light-in')) {
+    if (path.includes('let-the-light-in')) {
       extractedTitle = "Let the Light In - Johnny Depp's Art Collection";
     }
+    
+    // Determine site name and title
+    const siteName = urlObj.hostname.replace('www.', '');
+    const baseTitle = newsPatterns[hostname] || artPatterns[hostname] || 
+                     `${siteName.split('.')[0].charAt(0).toUpperCase() + siteName.split('.')[0].slice(1)}`;
+    
+    const finalTitle = extractedTitle && extractedTitle.length > 5 ? 
+                       extractedTitle : `Article from ${baseTitle}`;
+    
+    return {
+      title: finalTitle,
+      description: `Read more about this story from ${baseTitle}`,
+      image: null,
+      site_name: siteName
+    };
+    
+  } catch (error) {
+    console.error('Error extracting metadata:', error);
+    return {
+      title: 'News Article',
+      description: 'Click to read the full article...',
+      image: null,
+      site_name: 'News Source'
+    };
   }
-  
-  // Determine site name and base title
-  const siteName = urlObj.hostname.replace('www.', '');
-  const baseTitle = newsPatterns[hostname] || artPatterns[hostname] || 
-                   `${siteName.split('.')[0].charAt(0).toUpperCase() + siteName.split('.')[0].slice(1)}`;
-  
-  const finalTitle = extractedTitle && extractedTitle.length > 5 ? 
-                     extractedTitle : `Article from ${baseTitle}`;
-  
-  // Generate a more descriptive description based on the URL
-  let description = `Read the full article from ${siteName}`;
-  if (extractedTitle && extractedTitle.length > 5) {
-    description = `Read more about this story from ${baseTitle}`;
-  }
-  
-  return {
-    title: finalTitle,
-    description: description,
-    image: null,
-    site_name: siteName
-  };
-}
-
-// Render news articles in newspaper layout
-function renderNewsArticles() {
-  if (newsArticles.length === 0) {
-    showEmptyState();
-    return;
-  }
-
-  hideEmptyState();
-
-  const featured = newsArticles[0];
-  const mainStories = newsArticles.slice(1, 4);
-  const sidebarStories = newsArticles.slice(4, 8);
-  const secondaryStories = newsArticles.slice(8);
-
-  // Render featured story
-  renderFeaturedStory(featured);
-  
-  // Render main stories
-  renderMainStories(mainStories);
-  
-  // Render sidebar stories
-  renderSidebarStories(sidebarStories);
-  
-  // Render secondary stories
-  renderSecondaryStories(secondaryStories);
-}
-
-// Render featured story
-function renderFeaturedStory(story) {
-  const container = document.getElementById('featured-story-container');
-  if (!story) {
-    container.innerHTML = '';
-    return;
-  }
-
-  const imageHtml = story.image ? 
-    `<img src="${story.image}" alt="${story.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-     <div class="placeholder-icon" style="display: none;">📰</div>` :
-    `<div class="placeholder-icon">📰</div>`;
-
-  container.innerHTML = `
-    <div class="featured-story" onclick="openArticle('${story.url}')">
-      <div class="story-image">
-        ${imageHtml}
-      </div>
-      <div class="story-content">
-        <h2 class="story-title">${story.title}</h2>
-        <p class="story-preview">${story.description}</p>
-        <div class="story-meta">
-          <span class="story-source">${story.site_name}</span>
-          <span class="story-date">${formatDate(story.timestamp)}</span>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-// Render main stories
-function renderMainStories(stories) {
-  const container = document.getElementById('main-stories-container');
-  
-  if (!stories || stories.length === 0) {
-    container.innerHTML = '';
-    return;
-  }
-
-  container.innerHTML = stories.map(story => {
-    const imageHtml = story.image ? 
-      `<img src="${story.image}" alt="${story.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-       <div class="placeholder-icon" style="display: none;">📄</div>` :
-      `<div class="placeholder-icon">📄</div>`;
-      
-    return `
-      <div class="story-card" onclick="openArticle('${story.url}')">
-        <div class="story-image">
-          ${imageHtml}
-        </div>
-        <div class="story-content">
-          <h3 class="story-title">${story.title}</h3>
-          <p class="story-preview">${story.description}</p>
-          <div class="story-meta">
-            <span class="story-source">${story.site_name}</span>
-            <span class="story-date">${formatDate(story.timestamp)}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-// Render sidebar stories
-function renderSidebarStories(stories) {
-  const container = document.getElementById('sidebar-stories-container');
-  
-  if (!stories || stories.length === 0) {
-    container.innerHTML = '<div class="loading-placeholder"></div>';
-    return;
-  }
-
-  container.innerHTML = stories.map(story => {
-    const imageHtml = story.image ? 
-      `<img src="${story.image}" alt="${story.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-       <div class="placeholder-icon" style="display: none;">📋</div>` :
-      `<div class="placeholder-icon">📋</div>`;
-      
-    return `
-      <div class="story-card" onclick="openArticle('${story.url}')">
-        <div class="story-image">
-          ${imageHtml}
-        </div>
-        <div class="story-content">
-          <h3 class="story-title">${story.title}</h3>
-          <div class="story-meta">
-            <span class="story-source">${story.site_name}</span>
-            <span class="story-date">${formatDate(story.timestamp)}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-// Render secondary stories
-function renderSecondaryStories(stories) {
-  const container = document.getElementById('secondary-stories-container');
-  
-  if (!stories || stories.length === 0) {
-    container.innerHTML = '';
-    return;
-  }
-
-  container.innerHTML = stories.map(story => {
-    const imageHtml = story.image ? 
-      `<img src="${story.image}" alt="${story.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-       <div class="placeholder-icon" style="display: none;">📰</div>` :
-      `<div class="placeholder-icon">📰</div>`;
-      
-    return `
-      <div class="story-card" onclick="openArticle('${story.url}')">
-        <div class="story-image">
-          ${imageHtml}
-        </div>
-        <div class="story-content">
-          <h3 class="story-title">${story.title}</h3>
-          <p class="story-preview">${story.description}</p>
-          <div class="story-meta">
-            <span class="story-source">${story.site_name}</span>
-            <span class="story-date">${formatDate(story.timestamp)}</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
 }
 
 // Utility functions
@@ -1083,41 +763,24 @@ function isValidUrl(string) {
 }
 
 function showStatus(message, type) {
-  const status = document.getElementById('url-status');
+  const status = document.getElementById('status-message');
   status.textContent = message;
-  status.className = `url-status ${type}`;
+  status.className = `status-message status-${type}`;
   status.style.display = 'block';
-}
-
-function formatDate(timestamp) {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffTime = Math.abs(now - date);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  return date.toLocaleDateString();
-}
-
-function openArticle(url) {
-  window.open(url, '_blank');
+  if (type === 'success') {
+    setTimeout(() => {
+      status.style.display = 'none';
+    }, 3000);
+  }
 }
 
 function showEmptyState() {
-  document.getElementById('empty-state').style.display = 'block';
-  document.querySelector('.news-grid').style.display = 'none';
-  document.getElementById('secondary-stories-container').style.display = 'none';
+  document.getElementById('empty-state').classList.remove('hidden');
 }
 
-function hideEmptyState() {
-  document.getElementById('empty-state').style.display = 'none';
-  document.querySelector('.news-grid').style.display = 'grid';
-  document.getElementById('secondary-stories-container').style.display = 'grid';
-}
-
-// Auto-refresh every 5 minutes
-setInterval(loadNewsArticles, 5 * 60 * 1000);
+// Auto-refresh articles every 5 minutes
+setInterval(loadArticles, 5 * 60 * 1000);
 </script>
 
 <!-- Site scripts -->
