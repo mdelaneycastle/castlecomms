@@ -129,6 +129,30 @@
     </a>
   </div>
 
+  <!-- Dashboard Cards -->
+  <div class="dashboard-cards">
+    <div class="dashboard-card" id="newsfeed-card">
+      <h3>Newsfeed Mentions</h3>
+      <div class="card-content" id="newsfeed-content">
+        <div class="loading">Loading newsfeed mentions...</div>
+      </div>
+    </div>
+    
+    <div class="dashboard-card" id="messages-card">
+      <h3>Messages</h3>
+      <div class="card-content" id="messages-content">
+        <div class="loading">Loading latest messages...</div>
+      </div>
+    </div>
+    
+    <div class="dashboard-card" id="tickets-card">
+      <h3>Tickets</h3>
+      <div class="card-content" id="tickets-content">
+        <div class="loading">Loading latest tickets...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Background Slideshow -->
   <div class="background-slideshow" id="background-slideshow">
     <!-- Images will be injected by JavaScript -->
@@ -164,6 +188,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <!-- Firebase config -->
 <script src="firebase-init.js"></script>
@@ -198,6 +223,124 @@ firebase.auth().onAuthStateChanged(async (user) => {
         welcomeText.textContent = `Hi ${fallbackName}!`;
       }
     }
+  }
+});
+
+// Dashboard Cards Functionality
+document.addEventListener('DOMContentLoaded', function() {
+  // Load dashboard data when user is authenticated
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      loadDashboardData();
+    }
+  });
+
+  async function loadDashboardData() {
+    loadNewsfeedMentions();
+    loadLatestMessages();
+    loadLatestTickets();
+  }
+
+  async function loadNewsfeedMentions() {
+    const container = document.getElementById('newsfeed-content');
+    try {
+      // Load newsfeed posts from Firebase Database (same as newsfeed.html)
+      const newsfeedRef = firebase.database().ref('newsfeed-posts');
+      const snapshot = await newsfeedRef.orderByKey().limitToLast(5).once('value');
+      const data = snapshot.val();
+      
+      if (data) {
+        const items = Object.values(data).reverse();
+        container.innerHTML = items.map(item => `
+          <div class="item">
+            <div class="item-header">${item.author || 'Anonymous'}</div>
+            <div class="item-meta">${formatDate(item.timestamp)}</div>
+            <div class="item-content">${item.message || item.content || 'No content available'}</div>
+          </div>
+        `).join('');
+      } else {
+        container.innerHTML = '<div class="no-data">No recent newsfeed posts found</div>';
+      }
+    } catch (error) {
+      console.error('Error loading newsfeed:', error);
+      container.innerHTML = '<div class="no-data">Error loading newsfeed posts</div>';
+    }
+  }
+
+  async function loadLatestMessages() {
+    const container = document.getElementById('messages-content');
+    try {
+      // Load chat messages from Firestore (same as messages.html uses)
+      if (firebase.firestore) {
+        const db = firebase.firestore();
+        const messagesSnapshot = await db.collection('chat-messages')
+          .orderBy('timestamp', 'desc')
+          .limit(5)
+          .get();
+        
+        if (!messagesSnapshot.empty) {
+          const items = messagesSnapshot.docs.map(doc => doc.data());
+          container.innerHTML = items.map(item => `
+            <div class="item">
+              <div class="item-header">${item.chatName || 'Chat'}</div>
+              <div class="item-meta">${item.senderName || 'Unknown'} • ${formatDate(item.timestamp?.toDate?.() || item.timestamp)}</div>
+              <div class="item-content">${item.message || 'No message content'}</div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<div class="no-data">No recent chat messages found</div>';
+        }
+      } else {
+        container.innerHTML = '<div class="no-data">Firestore not available</div>';
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      container.innerHTML = '<div class="no-data">Error loading chat messages</div>';
+    }
+  }
+
+  async function loadLatestTickets() {
+    const container = document.getElementById('tickets-content');
+    try {
+      // Load tickets from Firestore (same as tickets.html uses)
+      if (firebase.firestore) {
+        const db = firebase.firestore();
+        const ticketsSnapshot = await db.collection('tickets')
+          .orderBy('createdAt', 'desc')
+          .limit(5)
+          .get();
+        
+        if (!ticketsSnapshot.empty) {
+          const items = ticketsSnapshot.docs.map(doc => doc.data());
+          container.innerHTML = items.map(item => `
+            <div class="item">
+              <div class="item-header">#${item.ticketId || 'N/A'} - ${item.title || 'Support Ticket'}</div>
+              <div class="item-meta">${item.status || 'Open'} • ${item.priority || 'Normal'} • ${formatDate(item.createdAt?.toDate?.() || item.createdAt)}</div>
+              <div class="item-content">${item.description || 'No description available'}</div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<div class="no-data">No recent tickets found</div>';
+        }
+      } else {
+        container.innerHTML = '<div class="no-data">Firestore not available</div>';
+      }
+    } catch (error) {
+      console.error('Error loading tickets:', error);
+      container.innerHTML = '<div class="no-data">Error loading tickets</div>';
+    }
+  }
+
+  function formatDate(timestamp) {
+    if (!timestamp) return 'Unknown time';
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString();
   }
 });
 </script>
