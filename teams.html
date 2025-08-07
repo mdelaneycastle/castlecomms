@@ -879,7 +879,7 @@ async function editTeam(teamId) {
     updateTeamMembersDisplay();
     
     // Change form title and button
-    document.querySelector('.form-title').textContent = 'Edit Team';
+    document.querySelector('.section-header h3').textContent = '✏️ Edit Team';
     const createBtn = document.getElementById('create-team-btn');
     createBtn.textContent = 'Update Team';
     createBtn.onclick = () => updateTeam(teamId);
@@ -931,7 +931,9 @@ async function updateTeam(teamId) {
       .where('name', '==', name)
       .get();
       
-    if (!existingTeam.empty && existingTeam.docs[0].id !== teamId) {
+    // Check if any of the found teams is a different team (not the one we're editing)
+    const hasConflict = existingTeam.docs.some(doc => doc.id !== teamId);
+    if (hasConflict) {
       showStatus('A team with that name already exists.', 'error');
       updateBtn.disabled = false;
       updateBtn.textContent = 'Update Team';
@@ -974,7 +976,7 @@ function cancelEdit() {
   updateTeamMembersDisplay();
   
   // Reset form title and button
-  document.querySelector('.form-title').textContent = 'Create New Team';
+  document.querySelector('.section-header h3').textContent = '🆕 Create New Team';
   const createBtn = document.getElementById('create-team-btn');
   createBtn.textContent = 'Create Team';
   createBtn.onclick = createTeam;
