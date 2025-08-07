@@ -209,6 +209,25 @@
       box-shadow: none;
     }
 
+    .cancel-btn {
+      background: #6c757d !important;
+      color: white !important;
+      border: none !important;
+      padding: 0.75rem 1.5rem !important;
+      border-radius: 8px !important;
+      font-size: 1rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      transition: all 0.3s !important;
+      margin-right: 1rem !important;
+      display: none !important;
+    }
+
+    .cancel-btn:hover {
+      background: #5a6268 !important;
+      transform: translateY(-2px) !important;
+    }
+
     .teams-list {
       max-height: 600px;
       overflow-y: auto;
@@ -506,7 +525,7 @@ async function loadAllUsers() {
       { email: 'mailbox@castlefineart.com', name: 'Mailbox' },
       // COFT Team members (actual team from staff.html)
       { email: 'pchapman@washingtongreen.co.uk', name: 'Paul Chapman' },
-      { email: 'jpeet@washingtongreen.co.uk', name: 'Jenny Peet' },
+      { email: 'jpeet@washingtongreen.co.uk', name: 'Jenny Durrant' },
       { email: 'ghooper@castlegalleries.com', name: 'Gerald Hooper' },
       { email: 'klewis@castlefineart.com', name: 'Katie Lewis' },
       { email: 'tplatts@castlefineart.com', name: 'Tara Platts' },
@@ -755,8 +774,7 @@ async function loadTeams() {
     }));
     
     const teamItems = teams.map(team => {
-      const memberNames = team.members.map(member => member.name).slice(0, 3);
-      const remainingCount = team.members.length - 3;
+      const memberNames = team.members.map(member => member.name);
       
       return `
         <div class="team-card">
@@ -771,7 +789,6 @@ async function loadTeams() {
           <div class="team-members-count">${team.members.length} member${team.members.length !== 1 ? 's' : ''}</div>
           <div class="team-members-list">
             ${memberNames.map(name => `<span class="team-member-tag">${name}</span>`).join('')}
-            ${remainingCount > 0 ? `<span class="team-member-tag">+${remainingCount} more</span>` : ''}
           </div>
         </div>
       `;
@@ -812,7 +829,7 @@ async function createDefaultCOFTTeam() {
     // Create COFT team with Paul Chapman's actual team members from staff.html
     const coftMembers = [
       { email: 'pchapman@washingtongreen.co.uk', name: 'Paul Chapman' },
-      { email: 'jpeet@washingtongreen.co.uk', name: 'Jenny Peet' },
+      { email: 'jpeet@washingtongreen.co.uk', name: 'Jenny Durrant' },
       { email: 'ghooper@castlegalleries.com', name: 'Gerald Hooper' },
       { email: 'klewis@castlefineart.com', name: 'Katie Lewis' },
       { email: 'tplatts@castlefineart.com', name: 'Tara Platts' },
@@ -841,9 +858,134 @@ async function createDefaultCOFTTeam() {
   }
 }
 
-// Edit team (placeholder)
-function editTeam(teamId) {
-  alert('Edit team functionality coming soon!');
+// Edit team
+async function editTeam(teamId) {
+  try {
+    // Get the team data
+    const teamDoc = await db.collection('teams').doc(teamId).get();
+    if (!teamDoc.exists) {
+      showStatus('Team not found.', 'error');
+      return;
+    }
+    
+    const teamData = teamDoc.data();
+    
+    // Populate the form with current team data
+    document.getElementById('team-name').value = teamData.name;
+    document.getElementById('team-description').value = teamData.description || '';
+    
+    // Set team members
+    teamMembers = [...teamData.members];
+    updateTeamMembersDisplay();
+    
+    // Change form title and button
+    document.querySelector('.form-title').textContent = 'Edit Team';
+    const createBtn = document.getElementById('create-team-btn');
+    createBtn.textContent = 'Update Team';
+    createBtn.onclick = () => updateTeam(teamId);
+    
+    // Show cancel button
+    let cancelBtn = document.getElementById('cancel-edit-btn');
+    if (!cancelBtn) {
+      cancelBtn = document.createElement('button');
+      cancelBtn.id = 'cancel-edit-btn';
+      cancelBtn.type = 'button';
+      cancelBtn.className = 'form-btn cancel-btn';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.onclick = cancelEdit;
+      createBtn.parentNode.insertBefore(cancelBtn, createBtn);
+    }
+    cancelBtn.style.display = 'inline-block';
+    
+    // Scroll to form
+    document.getElementById('create-team-form').scrollIntoView({ behavior: 'smooth' });
+    
+  } catch (error) {
+    console.error('Error loading team for edit:', error);
+    showStatus('Failed to load team data.', 'error');
+  }
+}
+
+// Update team
+async function updateTeam(teamId) {
+  const name = document.getElementById('team-name').value.trim();
+  const description = document.getElementById('team-description').value.trim();
+  const updateBtn = document.getElementById('create-team-btn');
+  
+  if (!name) {
+    showStatus('Please enter a team name.', 'error');
+    return;
+  }
+  
+  if (teamMembers.length === 0) {
+    showStatus('Please add at least one team member.', 'error');
+    return;
+  }
+  
+  updateBtn.disabled = true;
+  updateBtn.textContent = 'Updating...';
+  
+  try {
+    // Check if new name conflicts with existing teams (exclude current team)
+    const existingTeam = await db.collection('teams')
+      .where('name', '==', name)
+      .get();
+      
+    if (!existingTeam.empty && existingTeam.docs[0].id !== teamId) {
+      showStatus('A team with that name already exists.', 'error');
+      updateBtn.disabled = false;
+      updateBtn.textContent = 'Update Team';
+      return;
+    }
+    
+    const teamData = {
+      name: name,
+      description: description,
+      members: teamMembers,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    await db.collection('teams').doc(teamId).update(teamData);
+    
+    showStatus('Team updated successfully!', 'success');
+    
+    // Reset form
+    cancelEdit();
+    
+    // Reload teams list
+    setTimeout(() => {
+      loadTeams();
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Error updating team:', error);
+    showStatus('Failed to update team. Please try again.', 'error');
+  }
+  
+  updateBtn.disabled = false;
+  updateBtn.textContent = 'Update Team';
+}
+
+// Cancel edit mode
+function cancelEdit() {
+  // Reset form
+  document.getElementById('create-team-form').reset();
+  teamMembers = [];
+  updateTeamMembersDisplay();
+  
+  // Reset form title and button
+  document.querySelector('.form-title').textContent = 'Create New Team';
+  const createBtn = document.getElementById('create-team-btn');
+  createBtn.textContent = 'Create Team';
+  createBtn.onclick = createTeam;
+  
+  // Hide cancel button
+  const cancelBtn = document.getElementById('cancel-edit-btn');
+  if (cancelBtn) {
+    cancelBtn.style.display = 'none';
+  }
+  
+  showStatus('Edit cancelled.', 'info');
 }
 
 // Delete team
