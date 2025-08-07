@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>News & Media Mentions - Castle Comms</title>
+
+  <!-- External CSS + Fonts -->
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #667eea;
+      --text-color: #1a1a1a;
+      --bg-color: #ffffff;
+    }
+    [data-theme="dark"] {
+      --primary-color: #8aa4ff;
+      --text-color: #f1f1f1;
+      --bg-color: #1a1a1a;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+    .news-ticker {
+      background: var(--primary-color);
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+    .ticker-label {
+      font-weight: bold;
+      margin-right: 1rem;
+      white-space: nowrap;
+    }
+    #ticker-content {
+      white-space: nowrap;
+      animation: ticker-scroll 30s linear infinite;
+    }
+    @keyframes ticker-scroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+    .dark-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: 2px solid var(--primary-color);
+      color: var(--primary-color);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .story-card {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      margin-bottom: 1.5rem;
+    }
+    .story-card:hover {
+      transform: translateY(-5px);
+    }
+    .story-title { font-size: 1.3rem; font-weight: 600; }
+    .story-preview { font-size: 1rem; color: #666; }
+    .story-meta { font-size: 0.85rem; color: #999; margin-top: 0.5rem; display: flex; justify-content: space-between; }
+    .story-logo {
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
+      border-radius: 4px;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ticker -->
+  <div class="news-ticker">
+    <span class="ticker-label">Latest:</span>
+    <div id="ticker-content">Loading headlines...</div>
+  </div>
+
+  <!-- Theme toggle -->
+  <button class="dark-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+
+  <!-- News container -->
+  <div class="news-container" style="padding: 2rem; max-width: 1000px; margin: auto;">
+    <h1>📰 Castle Fine Art Media Mentions</h1>
+    <div id="stories"></div>
+  </div>
+
+  <!-- Firebase + Init -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+  <script src="firebase-init.js"></script>
+
+  <script>
+    const logoKey = 'pk_dY48uhk8QLC4AvEiI4wF0w';
+
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', html.dataset.theme);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const theme = localStorage.getItem('theme');
+      if (theme) document.documentElement.dataset.theme = theme;
+
+      const ref = firebase.database().ref('news-articles');
+      const snap = await ref.orderByChild('timestamp').once('value');
+      const data = Object.values(snap.val() || {}).sort((a, b) => b.timestamp - a.timestamp);
+
+      renderTicker(data);
+      renderStories(data);
+    });
+
+    function renderTicker(articles) {
+      const headlines = articles.map(a => a.title).join(" • ");
+      document.getElementById('ticker-content').innerText = headlines;
+    }
+
+    function renderStories(articles) {
+      const container = document.getElementById('stories');
+      container.innerHTML = articles.map(a => `
+        <div class="story-card" onclick="window.open('${a.url}', '_blank')">
+          <div class="story-title">
+            <img class="story-logo" src="https://logo.dev/api/logo?url=${new URL(a.url).hostname}&key=${logoKey}" onerror="this.style.display='none'" />
+            ${a.title}
+          </div>
+          <div class="story-preview">${a.description}</div>
+          <div class="story-meta">
+            <span>${a.site_name}</span>
+            <span>${timeAgo(a.timestamp)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function timeAgo(ts) {
+      const now = Date.now();
+      const diff = now - ts;
+      const minutes = Math.floor(diff / 60000);
+      if (minutes < 1) return "Just now";
+      if (minutes < 60) return `${minutes} min ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      if (days < 7) return `${days}d ago`;
+      return new Date(ts).toLocaleDateString();
+    }
+  </script>
+</body>
+</html>
