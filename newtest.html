@@ -1,232 +1,184 @@
+<!-- Castle Comms | Gemini-style News Aggregator | Updated: 2025-08-07 -->
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>News & Media Mentions - Castle Comms</title>
-
-  <!-- External CSS + Fonts -->
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <title>Castle Comms News - Daily Aggregator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary-color: #667eea;
-      --text-color: #1a1a1a;
-      --bg-color: #ffffff;
-    }
-    [data-theme="dark"] {
-      --primary-color: #8aa4ff;
-      --text-color: #f1f1f1;
-      --bg-color: #1a1a1a;
-    }
-
     body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      background: var(--bg-color);
-      color: var(--text-color);
+      font-family: 'Lora', serif;
+      background-color: #f3f2ee;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4d2cb' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
-    .news-ticker {
-      background: var(--primary-color);
-      color: white;
-      padding: 0.5rem 1rem;
-      font-size: 0.95rem;
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-    }
-    .ticker-label {
-      font-weight: bold;
-      margin-right: 1rem;
-      white-space: nowrap;
-    }
-    #ticker-content {
-      white-space: nowrap;
-      animation: ticker-scroll 30s linear infinite;
-    }
-    @keyframes ticker-scroll {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-    .dark-toggle {
+    .newspaper-link {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: none;
-      border: 2px solid var(--primary-color);
-      color: var(--primary-color);
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      cursor: pointer;
+      width: 100%;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s;
     }
-    .story-card {
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(8px);
-      border-radius: 12px;
-      padding: 1rem;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      margin-bottom: 1.5rem;
+    .newspaper-link:hover {
+      transform: scale(1.03);
+      z-index: 100;
+      box-shadow: 10px 10px 30px rgba(0,0,0,0.25);
     }
-    .story-card:hover {
-      transform: translateY(-5px);
+    .newspaper-link:hover ~ .newspaper-link {
+      transform: translateY(520px);
     }
-    .story-title { font-size: 1.3rem; font-weight: 600; }
-    .story-preview { font-size: 1rem; color: #666; }
-    .story-meta { font-size: 0.85rem; color: #999; margin-top: 0.5rem; display: flex; justify-content: space-between; }
-    .story-logo {
-      width: 24px;
-      height: 24px;
-      vertical-align: middle;
-      border-radius: 4px;
-      margin-right: 0.5rem;
+    .article-text {
+      column-count: 2;
+      column-gap: 2rem;
+      text-align: justify;
+    }
+    @media (max-width: 640px) {
+      .article-text {
+        column-count: 1;
+      }
+      .newspaper-link:hover, .newspaper-link:hover ~ .newspaper-link {
+        transform: none;
+      }
     }
   </style>
 </head>
-<body>
+<body class="text-gray-800 p-4">
+  <div class="w-full max-w-3xl mx-auto">
+    <!-- Input Section -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+      <div class="text-center mb-4">
+        <h1 class="text-3xl font-bold text-gray-900 font-serif">Castle News Aggregator</h1>
+        <p class="text-gray-500 mt-1">Paste a news article link to add it below.</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input type="url" id="articleUrl" placeholder="https://www.bbc.co.uk/..." class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:outline-none" />
+        <button id="submitBtn" class="bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-900 transition flex items-center justify-center">
+          <span id="btnText">Add</span>
+          <div id="loader" class="hidden ml-2 w-4 h-4 border-2 border-t-gray-100 border-gray-600 rounded-full animate-spin"></div>
+        </button>
+      </div>
+      <div id="errorBox" class="hidden text-red-600 bg-red-100 p-3 rounded-lg border border-red-300 mt-4 text-sm"></div>
+    </div>
 
-  <!-- Ticker -->
-  <div class="news-ticker">
-    <span class="ticker-label">Latest:</span>
-    <div id="ticker-content">Loading headlines...</div>
+    <!-- Newspaper Stand -->
+    <main id="newspaperStand" class="relative min-h-[600px]"></main>
   </div>
 
-  <!-- Theme toggle -->
-  <button class="dark-toggle" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-
-  <!-- News container -->
-  <div class="news-container" style="padding: 2rem; max-width: 1000px; margin: auto;">
-    <h1>📰 Castle Fine Art Media Mentions</h1>
-    <div id="stories"></div>
-  </div>
-  <div style="margin:2rem 0;display:flex;gap:1rem;flex-wrap:wrap">
-    <input 
-      id="news-url-input" 
-      placeholder="Paste article URL..." 
-      style="flex:1;min-width:300px;padding:0.75rem;border-radius:8px;border:1px solid #ccc;font-size:1rem;" 
-    />
-    <button onclick="submitArticle()" style="padding:0.75rem 1.5rem;border:none;background:#667eea;color:white;border-radius:8px;cursor:pointer;">Add Article</button>
-  </div>
-
-  <!-- Firebase + Init -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  
   <script src="firebase-init.js"></script>
 
   <script>
-    const logoKey = 'pk_dY48uhk8QLC4AvEiI4wF0w';
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const loader = document.getElementById('loader');
+    const input = document.getElementById('articleUrl');
+    const errorBox = document.getElementById('errorBox');
+    const stand = document.getElementById('newspaperStand');
+    let index = 0;
 
-    function toggleDarkMode() {
-      const html = document.documentElement;
-      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme', html.dataset.theme);
+    submitBtn.addEventListener('click', handleSubmit);
+    input.addEventListener('keypress', e => e.key === 'Enter' && handleSubmit());
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.classList.remove('hidden');
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const theme = localStorage.getItem('theme');
-      if (theme) document.documentElement.dataset.theme = theme;
-
-      const ref = firebase.database().ref('news-articles');
-      const snap = await ref.orderByChild('timestamp').once('value');
-      const data = Object.values(snap.val() || {}).sort((a, b) => b.timestamp - a.timestamp);
-
-      renderTicker(data);
-      renderStories(data);
-    });
-
-    function renderTicker(articles) {
-      const headlines = articles.map(a => a.title).join(" • ");
-      document.getElementById('ticker-content').innerText = headlines;
+    function hideError() {
+      errorBox.classList.add('hidden');
     }
 
-    function renderStories(articles) {
-      const container = document.getElementById('stories');
-      container.innerHTML = articles.map(a => `
-        <div class="story-card" onclick="window.open('${a.url}', '_blank')">
-          <div class="story-title">
-            <img class="story-logo" src="https://logo.dev/api/logo?url=${new URL(a.url).hostname}&key=${logoKey}" onerror="this.style.display='none'" />
-            ${a.title}
-          </div>
-          <div class="story-preview">${a.description}</div>
-          <div class="story-meta">
-            <span>${a.site_name}</span>
-            <span>${timeAgo(a.timestamp)}</span>
-          </div>
-        </div>
-      `).join('');
+    async function handleSubmit() {
+      const url = input.value.trim();
+      if (!url.startsWith('http')) return showError('Please enter a valid URL.');
+      hideError();
+      loader.classList.remove('hidden');
+      btnText.textContent = 'Adding...';
+
+      try {
+        const html = await fetchViaProxy(url);
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const title = doc.querySelector('meta[property="og:title"]')?.content || doc.title || 'Untitled';
+        const desc = doc.querySelector('meta[property="og:description"]')?.content || doc.querySelector('meta[name="description"]')?.content || Array.from(doc.querySelectorAll('p')).slice(0, 3).map(p => p.textContent.trim()).join('\n\n') || 'No summary available.';
+
+        await firebase.database().ref('news-articles').push({
+          url, title, description: desc,
+          site_name: new URL(url).hostname.replace('www.', ''),
+          addedBy: firebase.auth().currentUser?.uid || 'unknown',
+          timestamp: Date.now()
+        });
+
+        input.value = '';
+        loadArticles();
+
+      } catch (e) {
+        showError(e.message);
+      } finally {
+        btnText.textContent = 'Add';
+        loader.classList.add('hidden');
+      }
     }
 
-    function timeAgo(ts) {
-      const now = Date.now();
-      const diff = now - ts;
-      const minutes = Math.floor(diff / 60000);
-      if (minutes < 1) return "Just now";
-      if (minutes < 60) return `${minutes} min ago`;
-      const hours = Math.floor(minutes / 60);
-      if (hours < 24) return `${hours}h ago`;
-      const days = Math.floor(hours / 24);
-      if (days < 7) return `${days}d ago`;
-      return new Date(ts).toLocaleDateString();
-    }
-
-    async function submitArticle() {
-        const input = document.getElementById('news-url-input');
-        const url = input.value.trim();
-        if (!url) return alert("Please enter a URL.");
-
-        const user = firebase.auth().currentUser;
-        if (!user) return alert("You must be signed in to add articles.");
-
+    async function fetchViaProxy(url) {
+      const encoded = encodeURIComponent(url);
+      const proxies = [
+        `https://api.allorigins.win/get?url=${encoded}`,
+        `https://corsproxy.io/?${encoded}`
+      ];
+      for (const proxy of proxies) {
         try {
-            const metadata = await extractUrlMetadata(url);
-            metadata.url = url;
-            metadata.timestamp = Date.now();
-            metadata.addedBy = user.uid;
+          const res = await fetch(proxy);
+          if (proxy.includes('allorigins')) {
+            const json = await res.json();
+            if (json.contents) return json.contents;
+          } else {
+            return await res.text();
+          }
+        } catch {}
+      }
+      throw new Error("Couldn't fetch article metadata.");
+    }
 
-            await firebase.database().ref('news-articles').push(metadata);
-            input.value = '';
-            alert("✅ Article added!");
-            location.reload();
-        } catch (error) {
-            console.error("Add failed", error);
-            alert("❌ Failed to extract or save article: " + error.message);
-        }
-        }
+    function createCard(article) {
+      const a = document.createElement('a');
+      a.href = article.url;
+      a.target = '_blank';
+      a.className = 'newspaper-link';
+      a.style.top = `${index * 90}px`;
+      a.style.zIndex = index;
+      a.innerHTML = `
+        <div class="bg-white border shadow-lg p-6 md:p-8 mb-4">
+          <header class="text-center border-b-2 pb-2 mb-4">
+            <h1 class="text-3xl font-serif font-bold">Castle News</h1>
+            <div class="text-sm italic text-gray-500">${formatDate(article.timestamp)}</div>
+          </header>
+          <h2 class="text-2xl font-serif font-bold mb-2">${article.title}</h2>
+          <div class="article-text text-gray-700 leading-relaxed">${article.description}</div>
+        </div>`;
+      stand.appendChild(a);
+      index++;
+    }
 
-        async function extractUrlMetadata(url) {
-            try {
-                const encodedUrl = encodeURIComponent(url);
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodedUrl}`;
+    function formatDate(ts) {
+      const d = new Date(ts);
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
 
-                const res = await fetch(proxyUrl);
-                const data = await res.json();
-                const html = data.contents;
+    async function loadArticles() {
+      const snapshot = await firebase.database().ref('news-articles').orderByChild('timestamp').once('value');
+      const data = snapshot.val();
+      if (!data) return;
+      const list = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
+      stand.innerHTML = '';
+      index = 0;
+      list.forEach(createCard);
+    }
 
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-
-                const getMeta = (name) => doc.querySelector(`meta[property='${name}']`)?.content?.trim();
-
-                return {
-                url,
-                title: getMeta('og:title') || 'Untitled Article',
-                description: getMeta('og:description') || 'Click to read the full article...',
-                image: getMeta('og:image') || null,
-                site_name: new URL(url).hostname.replace('www.', '')
-                };
-            } catch (err) {
-                console.warn('❌ Metadata scrape failed, using fallback');
-                return {
-                url,
-                title: new URL(url).pathname.split('/').pop().replace(/[-_]/g, ' ').slice(0, 50) || 'Untitled Article',
-                description: 'Click to read the full article...',
-                image: null,
-                site_name: new URL(url).hostname.replace('www.', '')
-                };
-            }
-            }
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) loadArticles();
+    });
   </script>
 </body>
 </html>
