@@ -1655,11 +1655,11 @@
     
     <div class="ticket-modal-details">
       <div class="ticket-detail-section">
-        <h4 id="modal-ticket-title">Ticket Title</h4>
+        <h4 id="view-ticket-title">Ticket Title</h4>
         <div class="ticket-detail-meta">
-          <span class="ticket-category" id="modal-ticket-category">Category</span>
+          <span class="ticket-category" id="view-ticket-category">Category</span>
         </div>
-        <div class="ticket-description" id="modal-ticket-description">
+        <div class="ticket-description" id="view-ticket-description">
           Ticket description will appear here...
         </div>
       </div>
@@ -2519,11 +2519,11 @@ async function openTicket(ticketId) {
     
     // Populate modal
     document.getElementById('modal-ticket-id').textContent = ticketData.ticketId;
-    document.getElementById('modal-ticket-title').textContent = ticketData.title;
+    document.getElementById('view-ticket-title').textContent = ticketData.title;
     document.getElementById('modal-ticket-status').textContent = ticketData.status.replace('-', ' ');
     document.getElementById('modal-ticket-status').className = `ticket-status ${ticketData.status}`;
-    document.getElementById('modal-ticket-category').textContent = ticketData.category;
-    document.getElementById('modal-ticket-description').textContent = ticketData.description;
+    document.getElementById('view-ticket-category').textContent = ticketData.category;
+    document.getElementById('view-ticket-description').textContent = ticketData.description;
     document.getElementById('modal-ticket-creator').textContent = `Created by: ${ticketData.createdBy.name}`;
     // Display assignment info (individual or team)
     let assignmentDisplayText = 'Assigned to: ';
@@ -2745,10 +2745,44 @@ function removeModalAssignedUser() {
 
 // Create ticket from modal
 async function createTicketFromModal() {
-  const title = document.getElementById('modal-ticket-title').value.trim();
-  const description = document.getElementById('modal-ticket-description').value.trim();
-  const category = document.getElementById('modal-ticket-category').value;
+  console.log('🎫 Creating ticket from modal...');
+  
+  // Add debugging for each element
+  const titleElement = document.getElementById('modal-ticket-title');
+  const descriptionElement = document.getElementById('modal-ticket-description');
+  const categoryElement = document.getElementById('modal-ticket-category');
   const createBtn = document.getElementById('modal-create-ticket-btn');
+  
+  console.log('📋 Form elements found:', {
+    titleElement: !!titleElement,
+    descriptionElement: !!descriptionElement,
+    categoryElement: !!categoryElement,
+    createBtn: !!createBtn
+  });
+  
+  if (!titleElement) {
+    console.error('❌ Title element not found');
+    showModalStatus('Form error: Title field not found.', 'error');
+    return;
+  }
+  
+  if (!descriptionElement) {
+    console.error('❌ Description element not found');
+    showModalStatus('Form error: Description field not found.', 'error');
+    return;
+  }
+  
+  if (!categoryElement) {
+    console.error('❌ Category element not found');
+    showModalStatus('Form error: Category field not found.', 'error');
+    return;
+  }
+  
+  const title = titleElement.value ? titleElement.value.trim() : '';
+  const description = descriptionElement.value ? descriptionElement.value.trim() : '';
+  const category = categoryElement.value || '';
+  
+  console.log('📝 Form values:', { title, description, category });
   
   if (!title || !description || !category) {
     showModalStatus('Please fill in all required fields.', 'error');
