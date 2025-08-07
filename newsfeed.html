@@ -883,33 +883,107 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Function to detect mentions in text and create notifications
   async function processMentions(postText, authorName, postId) {
-    if (!postText || !window.notificationManager || !window.notificationManager.isInitialized) return;
+    console.log('🔍 Processing mentions...', { postText, authorName, postId });
+    console.log('📋 Available users for mentions:', allUsers.map(u => ({ name: u.name, email: u.email, uid: u.uid })));
     
-    // Find all @mentions in the text
-    const mentionRegex = /@(\w+(?:\s+\w+)*)/g;
+    if (!postText) {
+      console.log('❌ No post text provided');
+      return;
+    }
+    
+    if (!window.notificationManager || !window.notificationManager.isInitialized) {
+      console.log('❌ Notification manager not ready, trying to create notifications anyway...');
+    }
+    
+    // Find all @mentions in the text - more flexible regex
+    const mentionRegex = /@([a-zA-Z][a-zA-Z0-9\s-_.]*)/g;
     const mentions = [];
     let match;
     
+    console.log('🔍 Searching for mentions in text:', postText);
+    
     while ((match = mentionRegex.exec(postText)) !== null) {
-      mentions.push(match[1]);
+      const mentionText = match[1].trim();
+      if (mentionText.length > 0) {
+        mentions.push(mentionText);
+        console.log('📝 Found mention:', mentionText);
+      }
     }
     
-    if (mentions.length === 0) return;
+    console.log('📝 All mentions found:', mentions);
     
-    // Find users that match the mentions
-    const mentionedUsers = allUsers.filter(user => 
-      mentions.some(mention => 
-        user.name.toLowerCase().includes(mention.toLowerCase()) ||
-        user.displayName?.toLowerCase().includes(mention.toLowerCase())
-      )
+    if (mentions.length === 0) {
+      console.log('❌ No mentions found in text');
+      return;
+    }
+    
+    // Find users that match the mentions - more flexible matching
+    const mentionedUsers = [];
+    
+    for (const mention of mentions) {
+      console.log(`🔍 Looking for users matching "${mention}"`);
+      
+      const matchingUsers = allUsers.filter(user => {
+        if (!user.name || !user.email) {
+          console.log('⚠️ User missing name or email:', user);
+          return false;
+        }
+        
+        const userName = user.name.toLowerCase();
+        const userEmail = user.email.toLowerCase();
+        const mentionLower = mention.toLowerCase();
+        
+        // Multiple matching strategies
+        const exactNameMatch = userName === mentionLower;
+        const partialNameMatch = userName.includes(mentionLower) || mentionLower.includes(userName);
+        const emailMatch = userEmail.includes(mentionLower);
+        const firstNameMatch = userName.split(' ')[0] === mentionLower;
+        const lastNameMatch = userName.split(' ').slice(-1)[0] === mentionLower;
+        
+        const isMatch = exactNameMatch || partialNameMatch || emailMatch || firstNameMatch || lastNameMatch;
+        
+        if (isMatch) {
+          console.log(`✅ Match found: "${mention}" -> ${user.name} (${user.email})`);
+        }
+        
+        return isMatch;
+      });
+      
+      console.log(`👥 Users matching "${mention}":`, matchingUsers.map(u => u.name));
+      mentionedUsers.push(...matchingUsers);
+    }
+    
+    // Remove duplicates
+    const uniqueUsers = mentionedUsers.filter((user, index, self) => 
+      index === self.findIndex(u => u.uid === user.uid)
     );
     
+    console.log('👥 Final unique mentioned users:', uniqueUsers.map(u => ({ name: u.name, uid: u.uid })));
+    
+    if (uniqueUsers.length === 0) {
+      console.log('❌ No matching users found for any mentions');
+      return;
+    }
+    
     // Create notifications for mentioned users
-    for (const user of mentionedUsers) {
+    for (const user of uniqueUsers) {
       try {
+        console.log(`📢 Creating notification for ${user.name} (${user.uid})`);
+        
+        // Check if Firebase database is available
+        if (!firebase.database) {
+          console.error('❌ Firebase database not available');
+          continue;
+        }
+        
         // Create notification for the mentioned user
-        const userNotificationRef = firebase.database().ref(`notifications/${user.uid}/${Date.now()}`);
-        await userNotificationRef.set({
+        const notificationId = Date.now() + Math.random().toString(36).substr(2, 9);
+        console.log(`📋 Generated notification ID: ${notificationId}`);
+        
+        const userNotificationRef = firebase.database().ref(`notifications/${user.uid}/${notificationId}`);
+        console.log(`📍 Firebase path: notifications/${user.uid}/${notificationId}`);
+        
+        const notificationData = {
           type: 'newsfeed_mention',
           title: '📢 You were mentioned',
           message: `${authorName} mentioned you in a post`,
@@ -920,11 +994,43 @@ document.addEventListener('DOMContentLoaded', function() {
             authorName,
             excerpt: postText.substring(0, 100) + (postText.length > 100 ? '...' : '')
           }
-        });
+        };
+        
+        console.log('💾 Notification data to save:', JSON.stringify(notificationData, null, 2));
+        
+        // Try to save the notification
+        try {
+          await userNotificationRef.set(notificationData);
+          console.log('✅ Notification saved successfully to Firebase for', user.name);
+          
+          // Verify it was saved
+          const verification = await userNotificationRef.once('value');
+          if (verification.exists()) {
+            console.log('✅ Notification verified in database:', verification.val());
+          } else {
+            console.log('❌ Notification not found in database after save');
+          }
+          
+        } catch (saveError) {
+          console.error('❌ Error saving notification to Firebase:', saveError);
+          console.error('❌ Firebase error details:', {
+            code: saveError.code,
+            message: saveError.message,
+            stack: saveError.stack
+          });
+        }
+        
       } catch (error) {
-        console.error('Error creating mention notification:', error);
+        console.error('❌ Error creating mention notification for', user.name, ':', error);
+        console.error('❌ Error details:', {
+          code: error.code,
+          message: error.message,
+          stack: error.stack
+        });
       }
     }
+    
+    console.log('🎉 Mention processing completed');
   }
 
   // Override the post submission to include mention processing
