@@ -551,9 +551,9 @@ admin-link {
 .quick-links > * {
   position: relative !important;
   width: 100% !important;
-  height: 72px !important;
-  min-height: 72px !important;
-  max-height: 72px !important;
+  height: 79px !important;
+  min-height: 79px !important;
+  max-height: 79px !important;
   background: #f8f9fa;
   backdrop-filter: blur(20px);
   color: #495057;
@@ -699,18 +699,14 @@ admin-link {
   box-shadow: var(--shadow-medium);
 }
 
-/* Gallery Manual - Now matches other buttons */
-.gallery-manual-redesign {
-  position: relative;
-  width: 100%;
-  min-height: 140px;
-  background: #45494e;
-  color: white;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--border-radius);
+/* Gallery Manual - Override to match other quick-links */
+.quick-links .gallery-manual-redesign {
+  background: #f8f9fa !important;
+  color: #495057 !important;
+  height: 79px !important;
+  min-height: 79px !important;
+  max-height: 79px !important;
+}
   transition: var(--transition);
   box-shadow: 
     0 10px 25px rgba(0, 0, 0, 0.3),
@@ -1582,8 +1578,11 @@ admin-link {
   }
   
   .quick-links a,
-  .quick-links .premium-link {
-    min-height: 63px;
+  .quick-links .premium-link,
+  .quick-links .gallery-manual-redesign {
+    height: 69px !important;
+    min-height: 69px !important;
+    max-height: 69px !important;
     padding: 0.5rem;
   }
   
