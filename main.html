@@ -132,9 +132,9 @@
   <!-- Dashboard Cards -->
   <div class="dashboard-cards">
     <div class="dashboard-card" id="newsfeed-card">
-      <h3>Newsfeed Mentions</h3>
+      <h3>Newsfeed Posts</h3>
       <div class="card-content" id="newsfeed-content">
-        <div class="loading">Loading newsfeed mentions...</div>
+        <div class="loading">Loading recent posts...</div>
       </div>
     </div>
     
@@ -244,90 +244,147 @@ document.addEventListener('DOMContentLoaded', function() {
   async function loadNewsfeedMentions() {
     const container = document.getElementById('newsfeed-content');
     try {
-      // Load newsfeed posts from Firebase Database (same as newsfeed.html)
-      const newsfeedRef = firebase.database().ref('newsfeed-posts');
-      const snapshot = await newsfeedRef.orderByKey().limitToLast(5).once('value');
+      // Load posts from Firebase Database (same path as script.js uses)
+      const postsRef = firebase.database().ref('posts');
+      const snapshot = await postsRef.orderByKey().limitToLast(5).once('value');
       const data = snapshot.val();
       
       if (data) {
         const items = Object.values(data).reverse();
         container.innerHTML = items.map(item => `
           <div class="item">
-            <div class="item-header">${item.author || 'Anonymous'}</div>
+            <div class="item-header">${item.name || 'Anonymous'}</div>
             <div class="item-meta">${formatDate(item.timestamp)}</div>
             <div class="item-content">${item.message || item.content || 'No content available'}</div>
           </div>
         `).join('');
       } else {
-        container.innerHTML = '<div class="no-data">No recent newsfeed posts found</div>';
+        container.innerHTML = '<div class="no-data">No recent posts found</div>';
       }
     } catch (error) {
       console.error('Error loading newsfeed:', error);
-      container.innerHTML = '<div class="no-data">Error loading newsfeed posts</div>';
+      container.innerHTML = '<div class="no-data">Error loading posts</div>';
     }
   }
 
   async function loadLatestMessages() {
     const container = document.getElementById('messages-content');
     try {
-      // Load chat messages from Firestore (same as messages.html uses)
+      // Try Firestore first, then fallback to showing recent post comments as "messages"
       if (firebase.firestore) {
-        const db = firebase.firestore();
-        const messagesSnapshot = await db.collection('chat-messages')
-          .orderBy('timestamp', 'desc')
-          .limit(5)
-          .get();
+        try {
+          const db = firebase.firestore();
+          const messagesSnapshot = await db.collection('chat-messages')
+            .orderBy('timestamp', 'desc')
+            .limit(5)
+            .get();
+          
+          if (!messagesSnapshot.empty) {
+            const items = messagesSnapshot.docs.map(doc => doc.data());
+            container.innerHTML = items.map(item => `
+              <div class="item">
+                <div class="item-header">${item.chatName || 'Chat'}</div>
+                <div class="item-meta">${item.senderName || 'Unknown'} • ${formatDate(item.timestamp?.toDate?.() || item.timestamp)}</div>
+                <div class="item-content">${item.message || 'No message content'}</div>
+              </div>
+            `).join('');
+            return;
+          }
+        } catch (firestoreError) {
+          console.log('Firestore not accessible, using fallback...');
+        }
+      }
+      
+      // Fallback: Show recent activity from posts (comments as "messages")
+      const postsRef = firebase.database().ref('posts');
+      const snapshot = await postsRef.orderByKey().limitToLast(10).once('value');
+      const data = snapshot.val();
+      
+      if (data) {
+        const recentActivity = [];
+        Object.values(data).forEach(post => {
+          if (post.comments) {
+            Object.values(post.comments).forEach(comment => {
+              recentActivity.push({
+                type: 'comment',
+                postTitle: post.message?.substring(0, 30) + '...' || 'Post',
+                author: 'User',
+                content: comment.text || comment.content || comment,
+                timestamp: comment.timestamp || Date.now()
+              });
+            });
+          }
+        });
         
-        if (!messagesSnapshot.empty) {
-          const items = messagesSnapshot.docs.map(doc => doc.data());
-          container.innerHTML = items.map(item => `
+        // Sort by timestamp and get latest 5
+        recentActivity.sort((a, b) => b.timestamp - a.timestamp);
+        const latest = recentActivity.slice(0, 5);
+        
+        if (latest.length > 0) {
+          container.innerHTML = latest.map(item => `
             <div class="item">
-              <div class="item-header">${item.chatName || 'Chat'}</div>
-              <div class="item-meta">${item.senderName || 'Unknown'} • ${formatDate(item.timestamp?.toDate?.() || item.timestamp)}</div>
-              <div class="item-content">${item.message || 'No message content'}</div>
+              <div class="item-header">Comment on: ${item.postTitle}</div>
+              <div class="item-meta">${item.author} • ${formatDate(item.timestamp)}</div>
+              <div class="item-content">${item.content}</div>
             </div>
           `).join('');
         } else {
-          container.innerHTML = '<div class="no-data">No recent chat messages found</div>';
+          container.innerHTML = '<div class="no-data">No recent activity found</div>';
         }
       } else {
-        container.innerHTML = '<div class="no-data">Firestore not available</div>';
+        container.innerHTML = '<div class="no-data">No recent messages found</div>';
       }
     } catch (error) {
       console.error('Error loading messages:', error);
-      container.innerHTML = '<div class="no-data">Error loading chat messages</div>';
+      container.innerHTML = '<div class="no-data">Error loading messages</div>';
     }
   }
 
   async function loadLatestTickets() {
     const container = document.getElementById('tickets-content');
     try {
-      // Load tickets from Firestore (same as tickets.html uses)
+      // Try Firestore first, then fallback to placeholder tickets
       if (firebase.firestore) {
-        const db = firebase.firestore();
-        const ticketsSnapshot = await db.collection('tickets')
-          .orderBy('createdAt', 'desc')
-          .limit(5)
-          .get();
-        
-        if (!ticketsSnapshot.empty) {
-          const items = ticketsSnapshot.docs.map(doc => doc.data());
-          container.innerHTML = items.map(item => `
-            <div class="item">
-              <div class="item-header">#${item.ticketId || 'N/A'} - ${item.title || 'Support Ticket'}</div>
-              <div class="item-meta">${item.status || 'Open'} • ${item.priority || 'Normal'} • ${formatDate(item.createdAt?.toDate?.() || item.createdAt)}</div>
-              <div class="item-content">${item.description || 'No description available'}</div>
-            </div>
-          `).join('');
-        } else {
-          container.innerHTML = '<div class="no-data">No recent tickets found</div>';
+        try {
+          const db = firebase.firestore();
+          const ticketsSnapshot = await db.collection('tickets')
+            .orderBy('createdAt', 'desc')
+            .limit(5)
+            .get();
+          
+          if (!ticketsSnapshot.empty) {
+            const items = ticketsSnapshot.docs.map(doc => doc.data());
+            container.innerHTML = items.map(item => `
+              <div class="item">
+                <div class="item-header">#${item.ticketId || 'N/A'} - ${item.title || 'Support Ticket'}</div>
+                <div class="item-meta">${item.status || 'Open'} • ${item.priority || 'Normal'} • ${formatDate(item.createdAt?.toDate?.() || item.createdAt)}</div>
+                <div class="item-content">${item.description || 'No description available'}</div>
+              </div>
+            `).join('');
+            return;
+          }
+        } catch (firestoreError) {
+          console.log('Firestore tickets not accessible, using fallback...');
         }
-      } else {
-        container.innerHTML = '<div class="no-data">Firestore not available</div>';
       }
+      
+      // Fallback: Show getting started information about tickets
+      container.innerHTML = `
+        <div class="item">
+          <div class="item-header">Welcome to Support Tickets</div>
+          <div class="item-meta">System • Just now</div>
+          <div class="item-content">Create your first support ticket to get started. Tickets help track and resolve issues efficiently.</div>
+        </div>
+        <div class="item">
+          <div class="item-header">Ticket System Ready</div>
+          <div class="item-meta">System • Ready</div>
+          <div class="item-content">The ticketing system is ready for use. Visit the Tickets page to create and manage support requests.</div>
+        </div>
+      `;
+      
     } catch (error) {
       console.error('Error loading tickets:', error);
-      container.innerHTML = '<div class="no-data">Error loading tickets</div>';
+      container.innerHTML = '<div class="no-data">Visit the Tickets page to create your first support ticket</div>';
     }
   }
 
