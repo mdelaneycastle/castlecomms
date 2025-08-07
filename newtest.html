@@ -1,184 +1,157 @@
-<!-- Castle Comms | Gemini-style News Aggregator | Updated: 2025-08-07 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Castle Comms News - Daily Aggregator</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Lora', serif;
-      background-color: #f3f2ee;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4d2cb' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-    .newspaper-link {
-      position: absolute;
-      width: 100%;
-      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s;
-    }
-    .newspaper-link:hover {
-      transform: scale(1.03);
-      z-index: 100;
-      box-shadow: 10px 10px 30px rgba(0,0,0,0.25);
-    }
-    .newspaper-link:hover ~ .newspaper-link {
-      transform: translateY(520px);
-    }
-    .article-text {
-      column-count: 2;
-      column-gap: 2rem;
-      text-align: justify;
-    }
-    @media (max-width: 640px) {
-      .article-text {
-        column-count: 1;
-      }
-      .newspaper-link:hover, .newspaper-link:hover ~ .newspaper-link {
-        transform: none;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Castle Comms News</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="firebase-init.js"></script>
+    <style>
+        body {
+            font-family: 'Lora', serif;
+            background-color: #f3f2ee;
+        }
+        #newspaperStand {
+            position: relative;
+            transition: height 0.5s ease-out;
+        }
+        .newspaper-link {
+            position: absolute;
+            width: 100%;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s;
+            will-change: transform;
+        }
+        .newspaper-link:hover {
+            transform: scale(1.03);
+            z-index: 100 !important;
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.25);
+        }
+        .newspaper-link:hover ~ .newspaper-link {
+            transform: translateY(300px); /* Reduced from 520px to 300px */
+        }
+        .newspaper-container {
+            font-family: 'Lora', serif;
+            background: #fdfdf8;
+            border: 1px solid #d3d3d3;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .masthead {
+            font-family: 'Playfair Display', serif;
+            text-align: center;
+            padding: 0.5rem 0;
+            border-bottom: 3px double #333;
+            margin-bottom: 0.5rem;
+        }
+        .article-headline {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            line-height: 1.2;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: #111;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .meta-info {
+            text-align: center;
+            font-style: italic;
+            color: #555;
+            margin-bottom: 0.5rem;
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            padding: 0.25rem 0;
+        }
+        .article-text {
+            column-count: 2;
+            column-gap: 2rem;
+            column-rule: 1px solid #eee;
+            text-align: justify;
+        }
+        @media (max-width: 640px) {
+            .article-text {
+                column-count: 1;
+            }
+            .article-headline {
+                font-size: 1.25rem;
+            }
+            .newspaper-link:hover,
+            .newspaper-link:hover ~ .newspaper-link {
+                transform: none;
+            }
+        }
+    </style>
 </head>
 <body class="text-gray-800 p-4">
-  <div class="w-full max-w-3xl mx-auto">
-    <!-- Input Section -->
-    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
-      <div class="text-center mb-4">
-        <h1 class="text-3xl font-bold text-gray-900 font-serif">Castle News Aggregator</h1>
-        <p class="text-gray-500 mt-1">Paste a news article link to add it below.</p>
-      </div>
-      <div class="flex flex-col sm:flex-row gap-3">
-        <input type="url" id="articleUrl" placeholder="https://www.bbc.co.uk/..." class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:outline-none" />
-        <button id="submitBtn" class="bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg hover:bg-gray-900 transition flex items-center justify-center">
-          <span id="btnText">Add</span>
-          <div id="loader" class="hidden ml-2 w-4 h-4 border-2 border-t-gray-100 border-gray-600 rounded-full animate-spin"></div>
-        </button>
-      </div>
-      <div id="errorBox" class="hidden text-red-600 bg-red-100 p-3 rounded-lg border border-red-300 mt-4 text-sm"></div>
-    </div>
 
-    <!-- Newspaper Stand -->
-    <main id="newspaperStand" class="relative min-h-[600px]"></main>
-  </div>
+<div class="w-full max-w-3xl mx-auto">
+    <main id="newspaperStand" class="mt-8 min-h-[600px]"></main>
+</div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="firebase-init.js"></script>
+<template id="newspaperTemplate">
+    <a class="newspaper-link no-underline" target="_blank" rel="noopener noreferrer">
+        <div class="newspaper-container p-4 md:p-6">
+            <header class="masthead">
+                <h1 class="text-2xl md:text-3xl">Castle News</h1>
+            </header>
+            <div class="meta-info">
+                <span class="article-date"></span>
+            </div>
+            <article>
+                <h2 class="article-headline"></h2>
+                <p class="article-text text-gray-800 leading-relaxed"></p>
+            </article>
+        </div>
+    </a>
+</template>
 
-  <script>
-    const submitBtn = document.getElementById('submitBtn');
-    const btnText = document.getElementById('btnText');
-    const loader = document.getElementById('loader');
-    const input = document.getElementById('articleUrl');
-    const errorBox = document.getElementById('errorBox');
-    const stand = document.getElementById('newspaperStand');
-    let index = 0;
+<script>
+const newspaperStand = document.getElementById('newspaperStand');
+const template = document.getElementById('newspaperTemplate');
+let articleCount = 0;
 
-    submitBtn.addEventListener('click', handleSubmit);
-    input.addEventListener('keypress', e => e.key === 'Enter' && handleSubmit());
+firebase.auth().onAuthStateChanged(async user => {
+  if (user) {
+    const snapshot = await firebase.database().ref('news-articles').orderByChild('timestamp').once('value');
+    const data = snapshot.val();
+    const articles = Object.values(data || {}).sort((a, b) => b.timestamp - a.timestamp);
+    articles.forEach(addArticle);
+  }
+});
 
-    function showError(msg) {
-      errorBox.textContent = msg;
-      errorBox.classList.remove('hidden');
-    }
+function addArticle(article) {
+  const link = template.content.cloneNode(true);
+  const a = link.querySelector('a');
+  const node = link.querySelector('.newspaper-container');
+  const headline = link.querySelector('.article-headline');
+  const description = link.querySelector('.article-text');
+  const dateSpan = link.querySelector('.article-date');
 
-    function hideError() {
-      errorBox.classList.add('hidden');
-    }
+  a.href = article.url;
+  headline.textContent = article.title;
+  description.textContent = article.description.slice(0, 600) + '...';
 
-    async function handleSubmit() {
-      const url = input.value.trim();
-      if (!url.startsWith('http')) return showError('Please enter a valid URL.');
-      hideError();
-      loader.classList.remove('hidden');
-      btnText.textContent = 'Adding...';
+  const date = new Date(article.timestamp);
+  dateSpan.textContent = date.toLocaleDateString('en-GB', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
 
-      try {
-        const html = await fetchViaProxy(url);
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        const title = doc.querySelector('meta[property="og:title"]')?.content || doc.title || 'Untitled';
-        const desc = doc.querySelector('meta[property="og:description"]')?.content || doc.querySelector('meta[name="description"]')?.content || Array.from(doc.querySelectorAll('p')).slice(0, 3).map(p => p.textContent.trim()).join('\n\n') || 'No summary available.';
+  a.style.top = `${articleCount * 80}px`;
+  a.style.zIndex = articleCount;
+  newspaperStand.appendChild(a);
 
-        await firebase.database().ref('news-articles').push({
-          url, title, description: desc,
-          site_name: new URL(url).hostname.replace('www.', ''),
-          addedBy: firebase.auth().currentUser?.uid || 'unknown',
-          timestamp: Date.now()
-        });
+  newspaperStand.style.height = `${(articleCount + 1) * 300}px`;
+  articleCount++;
+}
+</script>
 
-        input.value = '';
-        loadArticles();
-
-      } catch (e) {
-        showError(e.message);
-      } finally {
-        btnText.textContent = 'Add';
-        loader.classList.add('hidden');
-      }
-    }
-
-    async function fetchViaProxy(url) {
-      const encoded = encodeURIComponent(url);
-      const proxies = [
-        `https://api.allorigins.win/get?url=${encoded}`,
-        `https://corsproxy.io/?${encoded}`
-      ];
-      for (const proxy of proxies) {
-        try {
-          const res = await fetch(proxy);
-          if (proxy.includes('allorigins')) {
-            const json = await res.json();
-            if (json.contents) return json.contents;
-          } else {
-            return await res.text();
-          }
-        } catch {}
-      }
-      throw new Error("Couldn't fetch article metadata.");
-    }
-
-    function createCard(article) {
-      const a = document.createElement('a');
-      a.href = article.url;
-      a.target = '_blank';
-      a.className = 'newspaper-link';
-      a.style.top = `${index * 90}px`;
-      a.style.zIndex = index;
-      a.innerHTML = `
-        <div class="bg-white border shadow-lg p-6 md:p-8 mb-4">
-          <header class="text-center border-b-2 pb-2 mb-4">
-            <h1 class="text-3xl font-serif font-bold">Castle News</h1>
-            <div class="text-sm italic text-gray-500">${formatDate(article.timestamp)}</div>
-          </header>
-          <h2 class="text-2xl font-serif font-bold mb-2">${article.title}</h2>
-          <div class="article-text text-gray-700 leading-relaxed">${article.description}</div>
-        </div>`;
-      stand.appendChild(a);
-      index++;
-    }
-
-    function formatDate(ts) {
-      const d = new Date(ts);
-      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    }
-
-    async function loadArticles() {
-      const snapshot = await firebase.database().ref('news-articles').orderByChild('timestamp').once('value');
-      const data = snapshot.val();
-      if (!data) return;
-      const list = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
-      stand.innerHTML = '';
-      index = 0;
-      list.forEach(createCard);
-    }
-
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) loadArticles();
-    });
-  </script>
 </body>
 </html>
