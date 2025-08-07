@@ -99,7 +99,7 @@
     <h1>📰 Castle Fine Art Media Mentions</h1>
     <div id="stories"></div>
   </div>
-  <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap">
+  <div style="margin:2rem 0;display:flex;gap:1rem;flex-wrap:wrap">
     <input 
       id="news-url-input" 
       placeholder="Paste article URL..." 
@@ -111,7 +111,7 @@
   <!-- Firebase + Init -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  
   <script src="firebase-init.js"></script>
 
   <script>
@@ -178,25 +178,36 @@
         const user = firebase.auth().currentUser;
         if (!user) return alert("You must be signed in to add articles.");
 
-        const metadata = {
-            url,
-            title: "Placeholder Title",
-            description: "Click to read the full article...",
-            image: null,
-            site_name: new URL(url).hostname.replace('www.', ''),
-            timestamp: Date.now(),
-            addedBy: user.uid // ✅ Required for rules
-        };
-
         try {
+            const metadata = await extractUrlMetadata(url);
+            metadata.url = url;
+            metadata.timestamp = Date.now();
+            metadata.addedBy = user.uid;
+
             await firebase.database().ref('news-articles').push(metadata);
             input.value = '';
             alert("✅ Article added!");
             location.reload();
         } catch (error) {
             console.error("Add failed", error);
-            alert("❌ Could not add article: " + error.message);
+            alert("❌ Failed to extract or save article: " + error.message);
         }
+        }
+
+        async function extractUrlMetadata(url) {
+        const urlObj = new URL(url);
+        const hostname = urlObj.hostname.toLowerCase();
+
+        // Basic fallback using hostname
+        const titleFromPath = urlObj.pathname.split('/').filter(p => p.length > 4).pop()?.replace(/[-_]/g, ' ');
+        const fallbackTitle = titleFromPath ? titleFromPath.charAt(0).toUpperCase() + titleFromPath.slice(1) : "Article";
+
+        return {
+            title: fallbackTitle,
+            description: `Read more at ${hostname}`,
+            image: null,
+            site_name: hostname.replace('www.', '')
+        };
         }
   </script>
 </body>
