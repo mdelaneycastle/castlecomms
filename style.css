@@ -537,7 +537,7 @@ admin-link {
 .quick-links {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
+  gap: 1rem !important;
   justify-items: center;
   max-width: 900px;
   width: 100%;
@@ -549,12 +549,14 @@ admin-link {
 .quick-links a {
   position: relative;
   width: 100%;
-  min-height: 72px;
+  min-height: 72px !important;
+  max-height: 72px !important;
   background: #f8f9fa;
   backdrop-filter: blur(20px);
   color: #495057;
   text-decoration: none;
   display: flex;
+  margin: 0 !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -838,7 +840,8 @@ admin-link {
 .premium-link {
   position: relative;
   width: 100%;
-  min-height: 72px;
+  min-height: 72px !important;
+  max-height: 72px !important;
   background: #f8f9fa;
   color: #495057;
   text-decoration: none;

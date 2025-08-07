@@ -228,6 +228,29 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
 // Dashboard Cards Functionality
 document.addEventListener('DOMContentLoaded', function() {
+  // CSS Debug - Check if styles are loaded
+  console.log('🎨 Dashboard CSS loaded - Quick links should have 1rem gap and 72px height');
+  
+  const quickLinks = document.querySelector('.quick-links');
+  if (quickLinks) {
+    const styles = window.getComputedStyle(quickLinks);
+    console.log('🔍 Quick-links computed styles:', {
+      gap: styles.gap,
+      gridTemplateColumns: styles.gridTemplateColumns,
+      display: styles.display
+    });
+    
+    const firstLink = quickLinks.querySelector('a');
+    if (firstLink) {
+      const linkStyles = window.getComputedStyle(firstLink);
+      console.log('🔍 First quick-link computed styles:', {
+        minHeight: linkStyles.minHeight,
+        width: linkStyles.width,
+        position: linkStyles.position
+      });
+    }
+  }
+  
   // Load dashboard data when user is authenticated
   firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
