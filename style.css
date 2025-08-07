@@ -535,10 +535,12 @@ admin-link {
 }
 
 .quick-links {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem !important;
-  justify-items: center;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr 1fr !important;
+  grid-template-rows: auto auto !important;
+  gap: 16px !important;
+  justify-items: stretch !important;
+  align-items: stretch !important;
   max-width: 900px;
   width: 100%;
   margin: 1.5rem auto;
@@ -546,21 +548,24 @@ admin-link {
   box-sizing: border-box;
 }
 
-.quick-links a {
-  position: relative;
-  width: 100%;
+.quick-links > * {
+  position: relative !important;
+  width: 100% !important;
+  height: 72px !important;
   min-height: 72px !important;
   max-height: 72px !important;
   background: #f8f9fa;
   backdrop-filter: blur(20px);
   color: #495057;
   text-decoration: none;
-  display: flex;
+  display: flex !important;
   margin: 0 !important;
+  padding: 0 !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: var(--border-radius);
+  box-sizing: border-box !important;
   transition: var(--transition);
   box-shadow: var(--shadow-light);
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -838,16 +843,8 @@ admin-link {
 /* Premium Links - Universal Base Styles */
 .quick-links .premium-link,
 .premium-link {
-  position: relative;
-  width: 100%;
-  min-height: 72px !important;
-  max-height: 72px !important;
-  background: #f8f9fa;
-  color: #495057;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* Styles already covered by .quick-links > * selector above */
+}
   border-radius: var(--border-radius);
   transition: var(--transition);
   box-shadow: 
