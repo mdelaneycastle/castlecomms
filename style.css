@@ -1699,3 +1699,115 @@ admin-link {
   margin-top: 1rem;
   color: red;
 }
+
+/* Dashboard Cards */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 3rem auto 2rem;
+  max-width: 1200px;
+  padding: 0 1rem;
+}
+
+.dashboard-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  min-height: 250px;
+}
+
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-gradient);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-heavy);
+}
+
+.dashboard-card h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashboard-card .card-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+.dashboard-card .loading {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 2rem 0;
+}
+
+.dashboard-card .item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.75rem;
+}
+
+.dashboard-card .item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.dashboard-card .item-header {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.dashboard-card .item-meta {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-card .item-content {
+  color: #555;
+}
+
+.dashboard-card .no-data {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 2rem 0;
+}
+
+/* Mobile responsiveness for dashboard cards */
+@media (max-width: 768px) {
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: 2rem 1rem;
+  }
+  
+  .dashboard-card {
+    padding: 1.5rem;
+    min-height: 200px;
+  }
+  
+  .dashboard-card h3 {
+    font-size: 1.3rem;
+  }
+}
