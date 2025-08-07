@@ -466,108 +466,21 @@ class NotificationManager {
   }
 
   startPeriodicCheck() {
-    // Check for new notifications every 30 seconds
-    this.checkInterval = setInterval(() => {
-      this.checkForNewNotifications();
-    }, 30000);
+    // Disabled periodic checking to avoid permission issues
+    // Real-time notifications are created when actions happen (messages sent, tickets created, mentions posted)
+    console.log('✅ Real-time notification system active (periodic checking disabled for security)');
   }
 
   async checkForNewNotifications() {
-    // Check for new chat messages
-    await this.checkNewChatMessages();
-    
-    // Check for new support tickets
-    await this.checkNewSupportTickets();
-    
-    // Check for newsfeed mentions
-    await this.checkNewsfeedMentions();
+    // Disabled - notifications are created in real-time when actions occur
+    console.log('Periodic notification checking disabled - using real-time notifications only');
   }
 
-  async checkNewChatMessages() {
-    try {
-      if (!firebase.database) return;
-      
-      const chatsRef = firebase.database().ref('chats');
-      const snapshot = await chatsRef.once('value');
-      const chats = snapshot.val() || {};
-      
-      for (const [chatId, chat] of Object.entries(chats)) {
-        if (!chat.participants || !chat.participants[this.currentUser.uid]) continue;
-        if (!chat.messages) continue;
-        
-        const messages = Object.values(chat.messages);
-        const recentMessages = messages.filter(msg => 
-          new Date(msg.timestamp) > this.lastChecked && 
-          msg.senderId !== this.currentUser.uid
-        );
-        
-        for (const message of recentMessages) {
-          await this.addNotification(
-            'chat_message',
-            '💬 New Message',
-            `${message.senderName}: ${message.message.substring(0, 50)}${message.message.length > 50 ? '...' : ''}`,
-            { chatId, messageId: message.timestamp }
-          );
-        }
-      }
-    } catch (error) {
-      console.error('Error checking chat messages:', error);
-    }
-  }
-
-  async checkNewSupportTickets() {
-    try {
-      const ticketsRef = firebase.firestore().collection('tickets');
-      const snapshot = await ticketsRef
-        .where('assignedTo.email', '==', this.currentUser.email)
-        .where('createdAt', '>', firebase.firestore.Timestamp.fromDate(this.lastChecked))
-        .get();
-      
-      snapshot.forEach(doc => {
-        const ticket = doc.data();
-        this.addNotification(
-          'ticket_assigned',
-          '🎫 New Support Ticket',
-          `Ticket ${ticket.ticketId}: ${ticket.title}`,
-          { ticketId: doc.id }
-        );
-      });
-    } catch (error) {
-      console.error('Error checking support tickets:', error);
-    }
-  }
-
-  async checkNewsfeedMentions() {
-    try {
-      if (!firebase.database) return;
-      
-      const postsRef = firebase.database().ref('posts');
-      const snapshot = await postsRef
-        .orderByChild('timestamp')
-        .startAt(this.lastChecked.getTime())
-        .once('value');
-      
-      const posts = snapshot.val() || {};
-      
-      for (const [postId, post] of Object.entries(posts)) {
-        if (post.authorUid === this.currentUser.uid) continue;
-        if (!post.message) continue;
-        
-        // Check if the current user is mentioned
-        if (post.message.includes(`@${this.currentUser.displayName}`) || 
-            post.message.includes(`@${this.currentUser.name}`)) {
-          await this.addNotification(
-            'newsfeed_mention',
-            '📢 You were mentioned',
-            `${post.authorName} mentioned you in a post`,
-            { postId }
-          );
-        }
-      }
-    } catch (error) {
-      console.error('Error checking newsfeed mentions:', error);
-    }
-  }
+  // These functions are disabled in favor of real-time notifications
+  // Real-time notifications are created directly when:
+  // - Messages are sent (in messages.html sendMessage function)
+  // - Tickets are created (in tickets.html createTicketFromModal function)  
+  // - @Mentions are posted (in newsfeed.html processMentions function)
 
   formatTime(timestamp) {
     const date = new Date(timestamp);
