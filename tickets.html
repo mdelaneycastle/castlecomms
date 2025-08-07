@@ -2846,12 +2846,24 @@ async function createTicketFromModal() {
     await db.collection('tickets').add(ticketData);
     
     // Create notifications for assigned users
+    console.log('🔔 Starting notification creation process...');
+    console.log('🔔 Notification manager available:', !!window.notificationManager);
+    console.log('🔔 Assignment type - isTeamAssignment:', isTeamAssignment, 'isIndividualAssignment:', isIndividualAssignment);
+    console.log('🔔 Assigned user:', assignedUser);
+    console.log('🔔 Assigned team:', assignedTeam);
+    
     if (window.notificationManager) {
       try {
         if (isTeamAssignment && assignedTeam && assignedTeam.members) {
+          console.log('🔔 Creating team notifications for', assignedTeam.members.length, 'members');
+          
           // Create notifications for all team members
           for (const member of assignedTeam.members) {
+            console.log('🔔 Processing team member:', member.email);
+            
             if (member.email !== currentUser.email) { // Don't notify the creator
+              console.log('🔔 Looking up user UID for:', member.email);
+              
               // Find user UID
               const usersSnapshot = await firebase.database().ref('users')
                 .orderByChild('email')
@@ -2859,12 +2871,15 @@ async function createTicketFromModal() {
                 .once('value');
               
               const userData = usersSnapshot.val();
+              console.log('🔔 User data found:', !!userData, userData);
+              
               if (userData) {
                 const userUid = Object.keys(userData)[0];
+                console.log('🔔 Found user UID:', userUid);
                 
                 // Create notification
                 const notificationRef = firebase.database().ref(`notifications/${userUid}/${Date.now()}`);
-                await notificationRef.set({
+                const notificationData = {
                   type: 'ticket_assigned',
                   title: '🎫 New Support Ticket Assigned',
                   message: `New ticket assigned to your team: ${title}`,
@@ -2877,11 +2892,21 @@ async function createTicketFromModal() {
                     assignmentType: 'team',
                     teamName: assignedTeam.name
                   }
-                });
+                };
+                
+                console.log('🔔 Creating team notification:', notificationData);
+                await notificationRef.set(notificationData);
+                console.log('🔔 Team notification created successfully for', member.email);
+              } else {
+                console.log('❌ No user data found for team member:', member.email);
               }
+            } else {
+              console.log('🔔 Skipping creator (self):', member.email);
             }
           }
         } else if (isIndividualAssignment && assignedUser && assignedUser.email !== currentUser.email) {
+          console.log('🔔 Creating individual notification for:', assignedUser.email);
+          
           // Create notification for individual assignee
           const usersSnapshot = await firebase.database().ref('users')
             .orderByChild('email')
@@ -2889,12 +2914,15 @@ async function createTicketFromModal() {
             .once('value');
           
           const userData = usersSnapshot.val();
+          console.log('🔔 Individual user data found:', !!userData, userData);
+          
           if (userData) {
             const userUid = Object.keys(userData)[0];
+            console.log('🔔 Found individual user UID:', userUid);
             
             // Create notification
             const notificationRef = firebase.database().ref(`notifications/${userUid}/${Date.now()}`);
-            await notificationRef.set({
+            const notificationData = {
               type: 'ticket_assigned',
               title: '🎫 New Support Ticket Assigned',
               message: `New ticket assigned to you: ${title}`,
@@ -2907,12 +2935,46 @@ async function createTicketFromModal() {
                 assignmentType: 'individual',
                 assigneeName: assignedUser.name
               }
-            });
+            };
+            
+            console.log('🔔 Creating individual notification:', notificationData);
+            await notificationRef.set(notificationData);
+            console.log('🔔 Individual notification created successfully for', assignedUser.email);
+            
+            // Verify it was saved
+            const verification = await notificationRef.once('value');
+            if (verification.exists()) {
+              console.log('✅ Individual notification verified in database:', verification.val());
+            } else {
+              console.log('❌ Individual notification not found in database after save');
+            }
+            
+          } else {
+            console.log('❌ No user data found for individual assignee:', assignedUser.email);
           }
+        } else {
+          console.log('❌ No notification created - conditions not met');
+          console.log('❌ Conditions:', {
+            isTeamAssignment,
+            hasAssignedTeam: !!assignedTeam,
+            hasTeamMembers: assignedTeam?.members?.length > 0,
+            isIndividualAssignment,
+            hasAssignedUser: !!assignedUser,
+            assignedUserEmail: assignedUser?.email,
+            currentUserEmail: currentUser.email,
+            emailsMatch: assignedUser?.email === currentUser.email
+          });
         }
       } catch (notificationError) {
-        console.error('Error creating ticket notifications:', notificationError);
+        console.error('❌ Error creating ticket notifications:', notificationError);
+        console.error('❌ Notification error details:', {
+          code: notificationError.code,
+          message: notificationError.message,
+          stack: notificationError.stack
+        });
       }
+    } else {
+      console.log('❌ Notification manager not available');
     }
     
     showModalStatus('Ticket created successfully!', 'success');
