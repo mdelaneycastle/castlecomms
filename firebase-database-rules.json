@@ -1,5 +1,15 @@
 {
   "rules": {
+    "users": {
+      "$userId": {
+        ".read": "auth != null",
+        ".write": "auth != null && auth.uid == $userId",
+        ".validate": "newData.hasChildren(['email', 'name', 'uid']) && 
+                     newData.child('email').isString() && 
+                     newData.child('name').isString() && 
+                     newData.child('uid').isString()"
+      }
+    },
     "notifications": {
       "$userId": {
         ".read": "auth != null && auth.uid == $userId",
