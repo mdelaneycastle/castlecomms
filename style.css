@@ -537,19 +537,19 @@ admin-link {
 .quick-links {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2.5rem;
+  gap: 1rem;
   justify-items: center;
-  max-width: 1000px;
+  max-width: 900px;
   width: 100%;
-  margin: 2rem auto;
-  padding: 0 2rem;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
   box-sizing: border-box;
 }
 
 .quick-links a {
   position: relative;
   width: 100%;
-  min-height: 140px;
+  min-height: 80px;
   background: #f8f9fa;
   backdrop-filter: blur(20px);
   color: #495057;
@@ -838,7 +838,7 @@ admin-link {
 .premium-link {
   position: relative;
   width: 100%;
-  min-height: 140px;
+  min-height: 80px;
   background: #f8f9fa;
   color: #495057;
   text-decoration: none;
@@ -908,10 +908,10 @@ admin-link {
 }
 
 .premium-title {
-  font-size: 0.9rem;
-  font-weight: 800;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: #f1f5f9;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.6);
@@ -1577,12 +1577,13 @@ admin-link {
 
   .quick-links {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 0.75rem;
+    margin: 1rem auto;
   }
   
   .quick-links a {
-    min-height: 120px;
-    padding: 0.75rem 0.5rem;
+    min-height: 70px;
+    padding: 0.5rem;
   }
   
   .quick-link-icon {
@@ -1704,8 +1705,8 @@ admin-link {
 .dashboard-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin: 3rem auto 2rem;
+  gap: 1.5rem;
+  margin: 2rem auto;
   max-width: 1200px;
   padding: 0 1rem;
 }
@@ -1715,11 +1716,13 @@ admin-link {
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-medium);
   backdrop-filter: blur(10px);
-  padding: 2rem;
+  padding: 1.5rem;
   transition: var(--transition);
   position: relative;
   overflow: hidden;
-  min-height: 250px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard-card::before {
@@ -1738,32 +1741,60 @@ admin-link {
 }
 
 .dashboard-card h3 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.5rem;
+  margin: 0 0 1rem 0;
+  font-size: 1.3rem;
   font-weight: 600;
   background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  flex-shrink: 0;
 }
 
 .dashboard-card .card-content {
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.9rem;
+  line-height: 1.5;
   color: #555;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  margin-right: -0.5rem;
+}
+
+/* Custom scrollbar for dashboard cards */
+.dashboard-card .card-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-card .card-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.dashboard-card .card-content::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+  border-radius: 3px;
+}
+
+.dashboard-card .card-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.7);
 }
 
 .dashboard-card .loading {
   text-align: center;
   color: #888;
   font-style: italic;
-  padding: 2rem 0;
+  padding: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .dashboard-card .item {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  margin-bottom: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  margin-bottom: 0.6rem;
 }
 
 .dashboard-card .item:last-child {
@@ -1774,40 +1805,49 @@ admin-link {
 .dashboard-card .item-header {
   font-weight: 600;
   color: #333;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+  line-height: 1.3;
 }
 
 .dashboard-card .item-meta {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #666;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .dashboard-card .item-content {
   color: #555;
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .dashboard-card .no-data {
   text-align: center;
   color: #888;
   font-style: italic;
-  padding: 2rem 0;
+  padding: 1rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 /* Mobile responsiveness for dashboard cards */
 @media (max-width: 768px) {
   .dashboard-cards {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin: 2rem 1rem;
+    gap: 1rem;
+    margin: 1.5rem 0.5rem;
   }
   
   .dashboard-card {
-    padding: 1.5rem;
-    min-height: 200px;
+    padding: 1rem;
+    height: 180px;
   }
   
   .dashboard-card h3 {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
   }
 }
