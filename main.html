@@ -274,16 +274,54 @@ document.addEventListener('DOMContentLoaded', function() {
       if (firebase.firestore) {
         try {
           const db = firebase.firestore();
-          const messagesSnapshot = await db.collection('chat-messages')
+          const currentUser = firebase.auth().currentUser;
+          
+          // First, get chats where the user is a participant
+          const chatsSnapshot = await db.collection('chats')
+            .where('participants', 'array-contains', currentUser.email)
+            .get();
+          
+          if (!chatsSnapshot.empty) {
+            const chatIds = chatsSnapshot.docs.map(doc => doc.id);
+            
+            // Get recent messages from those chats
+            const messagesSnapshot = await db.collection('chat-messages')
+              .where('chatId', 'in', chatIds.slice(0, 10)) // Firestore 'in' has limit of 10
+              .orderBy('timestamp', 'desc')
+              .limit(5)
+              .get();
+            
+            if (!messagesSnapshot.empty) {
+              // Get chat names for display
+              const chatLookup = {};
+              chatsSnapshot.docs.forEach(doc => {
+                chatLookup[doc.id] = doc.data().name;
+              });
+              
+              const items = messagesSnapshot.docs.map(doc => doc.data());
+              container.innerHTML = items.map(item => `
+                <div class="item">
+                  <div class="item-header">${chatLookup[item.chatId] || 'Chat'}</div>
+                  <div class="item-meta">${item.senderName || 'Unknown'} • ${formatDate(item.timestamp?.toDate?.() || item.timestamp)}</div>
+                  <div class="item-content">${item.message || 'No message content'}</div>
+                </div>
+              `).join('');
+              return;
+            }
+          }
+          
+          console.log('No chat messages found, trying all messages...');
+          // Fallback: try to get any recent messages
+          const allMessagesSnapshot = await db.collection('chat-messages')
             .orderBy('timestamp', 'desc')
             .limit(5)
             .get();
           
-          if (!messagesSnapshot.empty) {
-            const items = messagesSnapshot.docs.map(doc => doc.data());
+          if (!allMessagesSnapshot.empty) {
+            const items = allMessagesSnapshot.docs.map(doc => doc.data());
             container.innerHTML = items.map(item => `
               <div class="item">
-                <div class="item-header">${item.chatName || 'Chat'}</div>
+                <div class="item-header">Chat Message</div>
                 <div class="item-meta">${item.senderName || 'Unknown'} • ${formatDate(item.timestamp?.toDate?.() || item.timestamp)}</div>
                 <div class="item-content">${item.message || 'No message content'}</div>
               </div>
@@ -291,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
           }
         } catch (firestoreError) {
-          console.log('Firestore not accessible, using fallback...');
+          console.log('Firestore not accessible, using fallback...', firestoreError);
         }
       }
       
