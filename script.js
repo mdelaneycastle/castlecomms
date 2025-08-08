@@ -372,15 +372,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let allUsers = [];
   firebase.auth().onAuthStateChanged(async user => {
-    if (user && window.authUtils) {
-      // Only load users for full admins, not communications admins
-      const isFullAdmin = await window.authUtils.isAdmin(user);
-      if (isFullAdmin) {
-        try {
-          allUsers = await listUsers();
-        } catch (error) {
-          console.warn('Could not load users for mentions:', error.message);
-          allUsers = [];
+    if (user) {
+      // All authenticated users need access to user list for tickets, messages, etc.
+      try {
+        allUsers = await listUsers();
+      } catch (error) {
+        console.warn('Could not load users for system operations:', error.message);
+        // Fallback: try to load from Firebase Realtime Database users
+        if (window.db) {
+          try {
+            const usersSnapshot = await window.db.ref('users').once('value');
+            const usersData = usersSnapshot.val() || {};
+            allUsers = Object.keys(usersData).map(uid => ({
+              uid: uid,
+              email: usersData[uid].email || 'unknown@email.com',
+              displayName: usersData[uid].name || usersData[uid].displayName || 'Unknown User'
+            }));
+            console.log('Loaded users from Realtime Database as fallback:', allUsers.length);
+          } catch (dbError) {
+            console.warn('Could not load users from database:', dbError.message);
+            allUsers = [];
+          }
         }
       }
     }
@@ -703,10 +715,10 @@ if (!window.userCache) {
 
     const tbody = document.querySelector("#user-table tbody");
     if (tbody) {
-      // Only load users for full admins on admin pages
+      // Only load user management table for full admins on admin pages
       const isFullAdmin = await window.authUtils.isAdmin(user);
       if (!isFullAdmin) {
-        tbody.innerHTML = '<tr><td colspan="4">❌ Admin access required</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4">❌ Admin access required for user management</td></tr>';
         return;
       }
       
