@@ -113,7 +113,10 @@ window.authUtils = {
       if (!currentUser) return false;
       
       const tokenResult = await currentUser.getIdTokenResult();
-      return !!(tokenResult.claims.communicationsAdmin || tokenResult.claims.admin);
+      console.log('🔍 Communications admin check - Claims:', tokenResult.claims);
+      const hasCommAdmin = !!(tokenResult.claims.communicationsAdmin || tokenResult.claims.admin);
+      console.log('🔍 isCommunicationsAdmin result:', hasCommAdmin);
+      return hasCommAdmin;
     } catch (error) {
       console.error('Error checking communications admin status:', error);
       return false;
@@ -150,14 +153,18 @@ window.authUtils = {
     const isAdmin = await this.isAdmin(user);
     const isCommunicationsAdmin = await this.isCommunicationsAdmin(user);
     
+    console.log('🔍 toggleAdminElements - isAdmin:', isAdmin, 'isCommunicationsAdmin:', isCommunicationsAdmin);
+    
     // Admin-only elements (visible only to admins)
     const adminElements = document.querySelectorAll('[data-admin-only]');
+    console.log('🔍 Found admin-only elements:', adminElements.length);
     adminElements.forEach(element => {
       element.style.display = isAdmin ? '' : 'none';
     });
     
     // Communications admin elements (visible to communications admins and full admins)
     const communicationsAdminElements = document.querySelectorAll('[data-communications-admin]');
+    console.log('🔍 Found communications-admin elements:', communicationsAdminElements.length);
     communicationsAdminElements.forEach(element => {
       element.style.display = isCommunicationsAdmin ? '' : 'none';
     });
