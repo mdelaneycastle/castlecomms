@@ -1899,24 +1899,42 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load all users for assignment
 async function loadAllUsers() {
   try {
-    // Only try to load all users if current user is a full admin
-    if (typeof listUsers === 'function' && window.authUtils) {
-      const isFullAdmin = await window.authUtils.isAdmin(currentUser);
-      if (isFullAdmin) {
-        try {
-          const users = await listUsers();
-          allUsers = users.map(user => ({
-            email: user.email,
-            name: user.displayName || extractNameFromEmail(user.email),
-            uid: user.uid
-          }));
-          console.log('Loaded users from admin function:', allUsers.length);
+    // Try to load users from cloud function first (all authenticated users need this for tickets/messages)
+    if (typeof listUsers === 'function') {
+      try {
+        const users = await listUsers();
+        allUsers = users.map(user => ({
+          email: user.email,
+          name: user.displayName || extractNameFromEmail(user.email),
+          uid: user.uid
+        }));
+        console.log('Loaded users from cloud function:', allUsers.length);
+        return;
+      } catch (error) {
+        console.log('Cloud function not accessible, trying database fallback');
+      }
+    }
+    
+    // Fallback: Try to load from Firebase Realtime Database
+    if (firebase.database && currentUser) {
+      try {
+        const db = firebase.database();
+        const usersSnapshot = await db.ref('users').once('value');
+        const usersData = usersSnapshot.val() || {};
+        
+        const dbUsers = Object.keys(usersData).map(uid => ({
+          email: usersData[uid].email || 'unknown@email.com',
+          name: usersData[uid].name || usersData[uid].displayName || extractNameFromEmail(usersData[uid].email || ''),
+          uid: uid
+        }));
+        
+        if (dbUsers.length > 0) {
+          allUsers = dbUsers;
+          console.log('Loaded users from Realtime Database:', allUsers.length);
           return;
-        } catch (error) {
-          console.log('Admin function failed, using static list');
         }
-      } else {
-        console.log('Not a full admin, using static list');
+      } catch (dbError) {
+        console.log('Database fallback failed, using static list');
       }
     }
 
