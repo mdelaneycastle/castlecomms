@@ -1899,19 +1899,24 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load all users for assignment
 async function loadAllUsers() {
   try {
-    // Try to get users from the listUsers function (if available from admin)
-    if (typeof listUsers === 'function') {
-      try {
-        const users = await listUsers();
-        allUsers = users.map(user => ({
-          email: user.email,
-          name: user.displayName || extractNameFromEmail(user.email),
-          uid: user.uid
-        }));
-        console.log('Loaded users from admin function:', allUsers.length);
-        return;
-      } catch (error) {
-        console.log('Admin function not available, using static list');
+    // Only try to load all users if current user is a full admin
+    if (typeof listUsers === 'function' && window.authUtils) {
+      const isFullAdmin = await window.authUtils.isAdmin(currentUser);
+      if (isFullAdmin) {
+        try {
+          const users = await listUsers();
+          allUsers = users.map(user => ({
+            email: user.email,
+            name: user.displayName || extractNameFromEmail(user.email),
+            uid: user.uid
+          }));
+          console.log('Loaded users from admin function:', allUsers.length);
+          return;
+        } catch (error) {
+          console.log('Admin function failed, using static list');
+        }
+      } else {
+        console.log('Not a full admin, using static list');
       }
     }
 

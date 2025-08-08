@@ -418,10 +418,21 @@ document.addEventListener('DOMContentLoaded', function() {
       if (firebase.firestore) {
         try {
           const db = firebase.firestore();
-          const ticketsSnapshot = await db.collection('tickets')
-            .orderBy('createdAt', 'desc')
-            .limit(5)
-            .get();
+          const currentUser = firebase.auth().currentUser;
+          let query = db.collection('tickets').orderBy('createdAt', 'desc').limit(5);
+          
+          // Check if user is admin - only admins can see all tickets
+          let isFullAdmin = false;
+          if (currentUser && window.authUtils) {
+            isFullAdmin = await window.authUtils.isAdmin(currentUser);
+          }
+          
+          // If not a full admin, only show tickets created by this user
+          if (!isFullAdmin && currentUser) {
+            query = query.where('createdBy', '==', currentUser.email);
+          }
+          
+          const ticketsSnapshot = await query.get();
           
           if (!ticketsSnapshot.empty) {
             const items = ticketsSnapshot.docs.map(doc => doc.data());
