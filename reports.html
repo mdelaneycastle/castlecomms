@@ -631,11 +631,20 @@
         <div class="form-group">
           <label class="form-label" for="report-url-input">PowerBI Public URL</label>
           <textarea class="form-input" id="report-url-input" rows="3" placeholder="Paste your PowerBI public URL here..." required style="resize: vertical;"></textarea>
-          <small style="color: #8a8886; font-size: 12px; margin-top: 4px; display: block;">
-            💡 <strong>Important:</strong> Use "Publish to Web" URLs from PowerBI (File → Publish to Web) for public access.<br>
-            Regular embed URLs require authentication and won't work here.<br>
-            The URL should look like: https://app.powerbi.com/view?r=...
-          </small>
+          <div style="background: #f0f8ff; border: 1px solid #0078d4; border-radius: 8px; padding: 12px; margin-top: 8px;">
+            <h4 style="margin: 0 0 8px 0; color: #0078d4; font-size: 14px;">📋 How to get the embed link from PowerBI:</h4>
+            <ol style="margin: 0; padding-left: 20px; font-size: 12px; line-height: 1.5;">
+              <li>Go to the report you want on PowerBI</li>
+              <li>Select <strong>File</strong> from the menu</li>
+              <li>Then select <strong>Embed Report</strong></li>
+              <li>Choose <strong>"Website or Portal"</strong></li>
+              <li>Copy the <strong>top link</strong> labelled <strong>"Link to embed this content"</strong></li>
+              <li>Paste that link in the box above</li>
+            </ol>
+            <small style="color: #666; margin-top: 8px; display: block; font-style: italic;">
+              💡 <strong>Note:</strong> This only works with reports you have permission to embed.
+            </small>
+          </div>
         </div>
         
         <div class="form-group">

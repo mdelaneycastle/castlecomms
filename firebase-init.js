@@ -106,6 +106,20 @@ window.authUtils = {
     }
   },
 
+  // Check if current user has communications admin privileges
+  async isCommunicationsAdmin(user = null) {
+    try {
+      const currentUser = user || firebase.auth().currentUser;
+      if (!currentUser) return false;
+      
+      const tokenResult = await currentUser.getIdTokenResult();
+      return !!(tokenResult.claims.communicationsAdmin || tokenResult.claims.admin);
+    } catch (error) {
+      console.error('Error checking communications admin status:', error);
+      return false;
+    }
+  },
+
   // Get user's custom claims
   async getUserClaims(user = null) {
     try {
@@ -131,20 +145,23 @@ window.authUtils = {
     }
   },
 
-  // Show/hide admin elements based on user permissions
+  // Show/hide admin and communications admin elements based on user permissions
   async toggleAdminElements(user = null) {
     const isAdmin = await this.isAdmin(user);
-    const adminElements = document.querySelectorAll('[data-admin-only]');
-    const adminLinks = document.querySelectorAll('#admin-link');
+    const isCommunicationsAdmin = await this.isCommunicationsAdmin(user);
     
+    // Admin-only elements (visible only to admins)
+    const adminElements = document.querySelectorAll('[data-admin-only]');
     adminElements.forEach(element => {
       element.style.display = isAdmin ? '' : 'none';
     });
     
-    adminLinks.forEach(link => {
-      link.style.display = isAdmin ? '' : 'none';
+    // Communications admin elements (visible to communications admins and full admins)
+    const communicationsAdminElements = document.querySelectorAll('[data-communications-admin]');
+    communicationsAdminElements.forEach(element => {
+      element.style.display = isCommunicationsAdmin ? '' : 'none';
     });
     
-    return isAdmin;
+    return { isAdmin, isCommunicationsAdmin };
   }
 };
