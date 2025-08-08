@@ -144,18 +144,15 @@
   <button type="submit">Create User</button>
 </form>
   
-  <!-- Temporary: Manual Claims Update Instructions -->
-  <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
-    <h3 style="color: #856404; margin: 0 0 1rem 0;">⚠️ Communications Admin Setup Required</h3>
-    <p style="color: #856404; margin: 0 0 1rem 0; font-size: 0.9rem;">
-      <strong>To fix communications admin access:</strong>
+  <!-- Communications Admin Status -->
+  <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+    <h3 style="color: #155724; margin: 0 0 1rem 0;">✅ Communications Admin Fixed</h3>
+    <p style="color: #155724; margin: 0; font-size: 0.9rem;">
+      <strong>Status:</strong> Custom claims have been set for <code>nmcmillan@castlefineart.com</code>. 
+      They should now be able to see "Communications Admin" in the sidebar and add news articles.
     </p>
-    <p style="color: #856404; margin: 0 0 1rem 0; font-size: 0.9rem;">
-      <strong>Quick Fix:</strong> Have the communications admin user (<code>nmcmillan@castlefineart.com</code>) log in to test if permissions work. 
-      If they can't see "Communications Admin" in the sidebar, the Firebase Cloud Function needs to be deployed to handle custom claims.
-    </p>
-    <p style="color: #856404; margin: 0; font-size: 0.9rem;">
-      <strong>Root Issue:</strong> The <code>createUserHttp</code> cloud function needs to be updated to set <code>communicationsAdmin</code> custom claims when the checkbox is checked during user creation.
+    <p style="color: #155724; margin: 1rem 0 0 0; font-size: 0.9rem;">
+      <strong>Next:</strong> The <code>createUserHttp</code> cloud function still needs updating to automatically handle communications admin claims for future user creation.
     </p>
   </div>
 
