@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ─── Helper: Create a new user ───
-async function createUser({ email, password, displayName, admin: wantAdmin }) {
+async function createUser({ email, password, displayName, admin: wantAdmin, communicationsAdmin: wantCommunicationsAdmin }) {
   try {
     const user = firebase.auth().currentUser;
     if (!user) {
@@ -239,7 +239,7 @@ async function createUser({ email, password, displayName, admin: wantAdmin }) {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({ email, password, displayName, admin: wantAdmin })
+        body: JSON.stringify({ email, password, displayName, admin: wantAdmin, communicationsAdmin: wantCommunicationsAdmin })
       }
     );
     
@@ -730,12 +730,14 @@ if (!window.userCache) {
           const passwordInput = document.getElementById("new-password");
           const displayNameInput = document.getElementById("new-displayName");
           const adminCheckbox = document.getElementById("new-admin");
+          const communicationsAdminCheckbox = document.getElementById("new-communications-admin");
           
           try {
             const email = emailInput.value.trim();
             const password = passwordInput.value;
             const displayName = displayNameInput.value.trim();
             const wantAdmin = adminCheckbox.checked;
+            const wantCommunicationsAdmin = communicationsAdminCheckbox ? communicationsAdminCheckbox.checked : false;
 
             // Client-side validation
             if (!email) {
@@ -751,7 +753,13 @@ if (!window.userCache) {
               submitButton.textContent = "Creating User...";
             }
 
-            const newUser = await createUser({ email, password, displayName, admin: wantAdmin });
+            const newUser = await createUser({ 
+              email, 
+              password, 
+              displayName, 
+              admin: wantAdmin, 
+              communicationsAdmin: wantCommunicationsAdmin 
+            });
             
             alert(`✅ Successfully created user: ${newUser.email || newUser.uid}`);
             form.reset();
