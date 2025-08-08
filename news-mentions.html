@@ -361,7 +361,7 @@
     </div>
 
     <!-- Admin Add Article Section -->
-    <div class="add-article-section" id="admin-section" data-admin-only>
+    <div class="add-article-section" id="admin-section" data-communications-admin>
       <h2 class="add-article-title">
         🔗 Add News Article
       </h2>
@@ -538,8 +538,8 @@ function createNewspaperItem(article, index) {
 
 // Handle add article
 async function handleAddArticle() {
-  // Check if user is admin using the centralized system
-  if (!window.authUtils || !(await window.authUtils.isAdmin())) {
+  // Check if user is admin or communications admin using the centralized system
+  if (!window.authUtils || !(await window.authUtils.isCommunicationsAdmin())) {
     showStatus('You do not have permission to add articles.', 'error');
     return;
   }

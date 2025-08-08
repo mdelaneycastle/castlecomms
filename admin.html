@@ -144,6 +144,22 @@
   <button type="submit">Create User</button>
 </form>
   
+  <!-- Temporary: Manual Claims Update for Testing -->
+  <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1rem; margin-bottom: 2rem;">
+    <h3 style="color: #856404; margin: 0 0 1rem 0;">⚠️ Temporary: Set Communications Admin Claims</h3>
+    <p style="color: #856404; margin: 0 0 1rem 0; font-size: 0.9rem;">
+      <strong>Note:</strong> The cloud function needs to be updated to handle communications admin claims automatically. 
+      Use this temporary form to manually set claims for testing.
+    </p>
+    <form id="update-claims-form">
+      <input type="email" id="claims-email" placeholder="User Email" required style="margin-right: 0.5rem;">
+      <label style="margin-right: 1rem;">
+        <input type="checkbox" id="set-comm-admin"> Communications Admin
+      </label>
+      <button type="submit">Update Claims</button>
+    </form>
+  </div>
+
   <h2>User Management</h2>
   <table id="user-table">
     <thead>
@@ -176,6 +192,74 @@
       alert("❌ Access denied. Admin privileges required.");
       window.location.href = "main.html";
       return;
+    }
+  });
+
+  // Temporary manual claims update functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const updateClaimsForm = document.getElementById('update-claims-form');
+    if (updateClaimsForm) {
+      updateClaimsForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const emailInput = document.getElementById('claims-email');
+        const commAdminCheckbox = document.getElementById('set-comm-admin');
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        
+        const email = emailInput.value.trim();
+        const setCommunicationsAdmin = commAdminCheckbox.checked;
+        
+        if (!email) {
+          alert('Please enter a user email');
+          return;
+        }
+        
+        try {
+          // Show loading state
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Updating...';
+          
+          const user = firebase.auth().currentUser;
+          const token = await user.getIdToken(true);
+          
+          // Call the cloud function to update custom claims
+          const response = await fetch('https://europe-west1-castle-comms.cloudfunctions.net/setCustomClaimsHttp', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              email: email,
+              customClaims: {
+                communicationsAdmin: setCommunicationsAdmin
+              }
+            })
+          });
+          
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+          }
+          
+          const result = await response.json();
+          console.log('✅ Claims updated successfully:', result);
+          
+          alert(`✅ Successfully updated claims for ${email}\nCommunications Admin: ${setCommunicationsAdmin}`);
+          
+          // Clear form
+          emailInput.value = '';
+          commAdminCheckbox.checked = false;
+          
+        } catch (error) {
+          console.error('❌ Failed to update claims:', error);
+          alert(`❌ Failed to update claims: ${error.message}`);
+        } finally {
+          // Reset button
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Update Claims';
+        }
+      });
     }
   });
 </script>
