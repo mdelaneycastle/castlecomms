@@ -372,7 +372,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let allUsers = [];
   firebase.auth().onAuthStateChanged(async user => {
-    if (user) allUsers = await listUsers();
+    if (user && window.authUtils) {
+      // Only load users for full admins, not communications admins
+      const isFullAdmin = await window.authUtils.isAdmin(user);
+      if (isFullAdmin) {
+        try {
+          allUsers = await listUsers();
+        } catch (error) {
+          console.warn('Could not load users for mentions:', error.message);
+          allUsers = [];
+        }
+      }
+    }
   });
 
   firebase.auth().onAuthStateChanged(async user => {
@@ -692,6 +703,13 @@ if (!window.userCache) {
 
     const tbody = document.querySelector("#user-table tbody");
     if (tbody) {
+      // Only load users for full admins on admin pages
+      const isFullAdmin = await window.authUtils.isAdmin(user);
+      if (!isFullAdmin) {
+        tbody.innerHTML = '<tr><td colspan="4">❌ Admin access required</td></tr>';
+        return;
+      }
+      
       // Load users with proper error handling
       try {
         window.sharedComponents.showLoading(tbody, "Loading users...");
@@ -719,9 +737,9 @@ if (!window.userCache) {
         tbody.innerHTML = `<tr><td colspan="4" class="error-message">❌ ${errorMessage}</td></tr>`;
       }
 
-      // User creation form with enhanced error handling
+      // User creation form with enhanced error handling (admin only)
       const form = document.getElementById("create-user-form");
-      if (form) {
+      if (form && isFullAdmin) {
         form.addEventListener("submit", async e => {
           e.preventDefault();
           
