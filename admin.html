@@ -150,14 +150,13 @@
     <p style="color: #856404; margin: 0 0 1rem 0; font-size: 0.9rem;">
       <strong>To fix communications admin access:</strong>
     </p>
-    <ol style="color: #856404; margin: 0; font-size: 0.9rem;">
-      <li>The Firebase Cloud Function needs to be updated to handle <code>communicationsAdmin</code> claims</li>
-      <li>For now, manually set custom claims in Firebase Console:</li>
-      <li style="margin-left: 1rem;">→ Go to Firebase Console > Authentication > Users</li>
-      <li style="margin-left: 1rem;">→ Find the user and click the 3-dot menu</li>
-      <li style="margin-left: 1rem;">→ Select "Set custom claims"</li>
-      <li style="margin-left: 1rem;">→ Enter: <code>{"communicationsAdmin": true}</code></li>
-    </ol>
+    <p style="color: #856404; margin: 0 0 1rem 0; font-size: 0.9rem;">
+      <strong>Quick Fix:</strong> Have the communications admin user (<code>nmcmillan@castlefineart.com</code>) log in to test if permissions work. 
+      If they can't see "Communications Admin" in the sidebar, the Firebase Cloud Function needs to be deployed to handle custom claims.
+    </p>
+    <p style="color: #856404; margin: 0; font-size: 0.9rem;">
+      <strong>Root Issue:</strong> The <code>createUserHttp</code> cloud function needs to be updated to set <code>communicationsAdmin</code> custom claims when the checkbox is checked during user creation.
+    </p>
   </div>
 
   <h2>User Management</h2>
