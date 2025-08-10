@@ -161,25 +161,32 @@
 
     /* Newspaper Stand Styles */
     .newspaper-stand {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
+      position: relative;
+      height: 600px;
       margin: 3rem auto;
-      max-width: 1400px;
-      padding: 1rem;
+      max-width: 1200px;
+      padding: 2rem;
+      overflow: hidden;
+      perspective: 1000px;
     }
 
     .newspaper-item {
-      position: relative;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: absolute;
+      width: 350px;
+      height: 500px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
-      height: fit-content;
+      transform-origin: center center;
     }
 
     .newspaper-item:hover {
-      transform: translateY(-8px) scale(1.03);
-      z-index: 10;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      transform: translateY(-20px) scale(1.05) rotateY(0deg);
+      z-index: 100 !important;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    }
+
+    .newspaper-item:hover ~ .newspaper-item {
+      transform: translateX(20px);
     }
 
     .newspaper {
@@ -309,13 +316,21 @@
       }
 
       .newspaper-stand {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-        padding: 0.5rem;
+        height: 400px;
+        padding: 1rem;
+      }
+      
+      .newspaper-item {
+        width: 280px !important;
+        height: 350px !important;
       }
       
       .newspaper-item:hover {
-        transform: translateY(-4px) scale(1.01);
+        transform: translateY(-10px) scale(1.02);
+      }
+      
+      .newspaper-item:hover ~ .newspaper-item {
+        transform: translateX(10px);
       }
 
       .article-content {
@@ -482,6 +497,13 @@ function renderArticles() {
   articles.forEach((article, index) => {
     createNewspaperItem(article, index);
   });
+  
+  // Adjust stand width based on number of newspapers
+  const overlapAmount = 80;
+  const startOffset = 50;
+  const newspaperWidth = 350;
+  const totalWidth = startOffset + (articles.length * overlapAmount) + newspaperWidth + 100;
+  stand.style.minWidth = `${Math.min(totalWidth, 1200)}px`;
 }
 
 // Create individual newspaper item
@@ -490,6 +512,13 @@ function createNewspaperItem(article, index) {
   
   const item = document.createElement('div');
   item.className = 'newspaper-item';
+  
+  // Position newspapers horizontally with overlap
+  const overlapAmount = 80; // How much each newspaper overlaps the previous one
+  const startOffset = 50;   // Starting position from left
+  item.style.left = `${startOffset + (index * overlapAmount)}px`;
+  item.style.top = '50px';
+  item.style.zIndex = articles.length - index; // Newest on top
   
   item.addEventListener('click', () => {
     window.open(article.url, '_blank');
