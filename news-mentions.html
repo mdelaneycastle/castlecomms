@@ -161,32 +161,25 @@
 
     /* Newspaper Stand Styles */
     .newspaper-stand {
-      position: relative;
-      min-height: 600px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
       margin: 3rem auto;
-      perspective: 1000px;
-      transition: height 0.6s ease-out;
+      max-width: 1400px;
+      padding: 1rem;
     }
 
     .newspaper-item {
-      position: absolute;
-      width: 100%;
-      max-width: 800px;
-      left: 50%;
-      transform: translateX(-50%);
-      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
-      z-index: 1;
+      height: fit-content;
     }
 
     .newspaper-item:hover {
-      transform: translateX(-50%) translateY(-10px) scale(1.02);
-      z-index: 100 !important;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-    }
-
-    .newspaper-item:hover ~ .newspaper-item {
-      transform: translateX(-50%) translateY(50px);
+      transform: translateY(-8px) scale(1.03);
+      z-index: 10;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
     }
 
     .newspaper {
@@ -315,9 +308,14 @@
         align-items: stretch;
       }
 
-      .newspaper-item:hover,
-      .newspaper-item:hover ~ .newspaper-item {
-        transform: translateX(-50%);
+      .newspaper-stand {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0.5rem;
+      }
+      
+      .newspaper-item:hover {
+        transform: translateY(-4px) scale(1.01);
       }
 
       .article-content {
@@ -484,9 +482,6 @@ function renderArticles() {
   articles.forEach((article, index) => {
     createNewspaperItem(article, index);
   });
-  
-  // Set stand height
-  stand.style.height = `${Math.max(600, articles.length * 120 + 400)}px`;
 }
 
 // Create individual newspaper item
@@ -495,8 +490,6 @@ function createNewspaperItem(article, index) {
   
   const item = document.createElement('div');
   item.className = 'newspaper-item';
-  item.style.top = `${index * 80}px`;
-  item.style.zIndex = articles.length - index;
   
   item.addEventListener('click', () => {
     window.open(article.url, '_blank');
