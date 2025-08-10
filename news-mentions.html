@@ -173,12 +173,12 @@
 
     .newspaper-item {
       position: relative; /* required for z-index to apply */
-      width: clamp(150px, 18vw, 230px);
+      width: clamp(300px, 36vw, 460px);
       aspect-ratio: 3/4;
       border-radius: 12px;
       overflow: hidden;
       background: #fdfdf8;
-      margin-left: -58px; /* overlap */
+      margin-left: -116px; /* overlap - doubled */
       box-shadow: 0 10px 30px rgba(0,0,0,.5);
       transform: translateZ(0) scale(1) translateY(0);
       transition: transform .22s ease, margin .22s ease, filter .22s ease;
@@ -199,8 +199,8 @@
     /* Pop and lift on hover */
     .newspaper-item.active {
       transform: scale(1.12) translateY(-30px);
-      margin-left: 16px;
-      margin-right: 16px;
+      margin-left: 32px;
+      margin-right: 32px;
     }
 
     /* First item should not have negative margin */
@@ -243,7 +243,7 @@
 
     .newspaper-name {
       font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
+      font-size: 1.6rem;
       font-weight: 900;
       color: #2c3e50;
       margin: 0;
@@ -251,7 +251,7 @@
     }
 
     .newspaper-date {
-      font-size: 0.7rem;
+      font-size: 1rem;
       color: #7f8c8d;
       margin: 0.25rem 0 0 0;
       font-style: italic;
@@ -259,11 +259,11 @@
 
     .article-headline {
       font-family: 'Playfair Display', serif;
-      font-size: 1rem;
+      font-size: 1.4rem;
       line-height: 1.2;
       font-weight: 700;
       text-align: center;
-      margin: 0.5rem 0;
+      margin: 0.75rem 0;
       color: #2c3e50;
       flex-grow: 1;
       display: flex;
@@ -273,18 +273,18 @@
 
     .article-meta {
       text-align: center;
-      padding: 0.25rem 0;
+      padding: 0.5rem 0;
       border-top: 1px solid #bdc3c7;
       border-bottom: 1px solid #bdc3c7;
-      margin: 0.5rem 0;
+      margin: 0.75rem 0;
       font-style: italic;
       color: #7f8c8d;
-      font-size: 0.8rem;
+      font-size: 1rem;
     }
 
     .article-content {
-      font-size: 0.7rem;
-      line-height: 1.4;
+      font-size: 0.9rem;
+      line-height: 1.5;
       color: #2c3e50;
       text-align: justify;
       flex-grow: 1;
@@ -295,27 +295,27 @@
       display: inline-block;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 0.2rem 0.5rem;
-      border-radius: 8px;
-      font-size: 0.6rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 10px;
+      font-size: 0.8rem;
       font-weight: 500;
-      margin-left: 0.3rem;
+      margin-left: 0.5rem;
     }
 
     /* Title overlay effect */
     .newspaper-item::after {
       content: attr(data-title);
       position: absolute;
-      left: 10px;
-      right: 10px;
-      bottom: 10px;
-      font-size: 11px;
+      left: 15px;
+      right: 15px;
+      bottom: 15px;
+      font-size: 14px;
       color: #fff;
-      background: rgba(0,0,0,.7);
-      padding: 6px 8px;
-      border-radius: 6px;
+      background: rgba(0,0,0,.75);
+      padding: 10px 12px;
+      border-radius: 8px;
       opacity: 0;
-      transform: translateY(6px);
+      transform: translateY(8px);
       transition: .18s ease;
       white-space: nowrap;
       overflow: hidden;
@@ -374,14 +374,14 @@
       }
       
       .newspaper-item {
-        width: clamp(120px, 25vw, 180px) !important;
-        margin-left: -40px !important; /* smaller overlap on mobile */
+        width: clamp(240px, 50vw, 360px) !important;
+        margin-left: -80px !important; /* smaller overlap on mobile */
       }
       
       .newspaper-item.active {
         transform: scale(1.08) translateY(-20px);
-        margin-left: 12px;
-        margin-right: 12px;
+        margin-left: 24px;
+        margin-right: 24px;
       }
 
       .article-content {
