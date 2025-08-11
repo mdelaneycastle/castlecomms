@@ -92,9 +92,12 @@ export const uploadToGallery = onRequest(
         filename = `upload${timestamp}.${extension}`;
 
         logger.info(`Uploading file: ${filename} (original: ${originalFilename})`);
+        logger.info(`File details - Size: ${fs.statSync(tmpFilePath).size} bytes, MIME: ${mimetype}`);
 
         // Initialize Google Drive client
+        logger.info('Initializing Google Drive client...');
         const drive = getDriveClientFromSecret(DRIVE_SA_JSON.value());
+        logger.info('Google Drive client initialized successfully');
 
         // Upload to Google Drive
         const fileMetadata = {
@@ -107,17 +110,20 @@ export const uploadToGallery = onRequest(
           body: fs.createReadStream(tmpFilePath),
         };
 
+        logger.info('Starting Google Drive upload...');
         const createResp = await drive.files.create({
           requestBody: fileMetadata,
           media,
           fields: "id, name, size, mimeType, webViewLink, webContentLink",
           supportsAllDrives: true,
         });
+        logger.info('Google Drive upload completed');
 
         const fileId = createResp.data.id;
         logger.info(`File uploaded to Drive with ID: ${fileId}`);
 
         // Make the file publicly viewable
+        logger.info('Setting file permissions...');
         await drive.permissions.create({
           fileId,
           requestBody: { 
@@ -126,10 +132,10 @@ export const uploadToGallery = onRequest(
           },
           supportsAllDrives: true,
         });
-
         logger.info(`File permissions set to public for: ${fileId}`);
 
         // Save metadata to Firebase Realtime Database
+        logger.info('Saving metadata to Firebase...');
         const db = getDatabase();
         const imageData = {
           filename: filename,
