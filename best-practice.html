@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Best Practice Gallery - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  
+  <style>
+    .best-practice-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .best-practice-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 3rem 2rem;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .best-practice-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.1)"><polygon points="0,0 1000,80 1000,100 0,100"/></svg>') no-repeat bottom;
+      background-size: cover;
+    }
+
+    .best-practice-title {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .best-practice-subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      font-weight: 300;
+      position: relative;
+      z-index: 1;
+    }
+
+    .star-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+      position: relative;
+      z-index: 1;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .image-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .image-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .image-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #ffd700, #ffed4a, #ffd700);
+      z-index: 1;
+    }
+
+    .image-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .image-container:hover img {
+      transform: scale(1.1);
+    }
+
+    .best-practice-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: linear-gradient(135deg, #ffd700, #ffed4a);
+      color: #8b4513;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+      z-index: 2;
+    }
+
+    .image-info {
+      padding: 1.5rem;
+      background: white;
+    }
+
+    .image-filename {
+      font-weight: 700;
+      color: #1a365d;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .image-date {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 1rem;
+    }
+
+    .image-uploader {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      background: #f1f5f9;
+      padding: 0.3rem 0.8rem;
+      border-radius: 12px;
+      display: inline-block;
+    }
+
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+      grid-column: 1 / -1;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .empty-cta {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .empty-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+      text-decoration: none;
+      color: white;
+    }
+
+    /* Modal for enlarged images */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.95);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      padding: 2rem;
+    }
+
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .close-modal:hover {
+      background: rgba(255,255,255,0.2);
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 768px) {
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+      
+      .best-practice-container {
+        padding: 1rem;
+      }
+
+      .best-practice-title {
+        font-size: 2rem;
+      }
+
+      .image-container {
+        height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-container"></div>
+  
+  <div class="page-container">
+    <button id="menu-toggle" class="menu-toggle">☰</button>
+    
+    <div class="best-practice-container">
+      <div class="best-practice-header">
+        <div class="star-icon">⭐</div>
+        <h1 class="best-practice-title">Best Practice Gallery</h1>
+        <p class="best-practice-subtitle">Curated collection of exemplary gallery artwork</p>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading best practice images...</p>
+      </div>
+
+      <!-- Gallery Grid -->
+      <div class="gallery-grid" id="gallery-grid">
+        <!-- Images will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Modal -->
+  <div id="image-modal" class="modal">
+    <button class="close-modal" id="close-modal">&times;</button>
+    <div class="modal-content">
+      <img id="modal-image" src="" alt="">
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="firebase-init.js"></script>
+  <script src="shared-components.js"></script>
+  <script src="google-drive-integration.js"></script>
+  
+  <script>
+    class BestPracticeGallery {
+      constructor() {
+        this.driveIntegration = window.googleDriveIntegration;
+        this.images = new Map();
+      }
+
+      async init() {
+        try {
+          // Setup UI event listeners
+          this.setupEventListeners();
+          
+          // Load best practice images
+          await this.loadBestPracticeImages();
+          
+          console.log('✅ Best Practice Gallery initialized');
+        } catch (error) {
+          console.error('❌ Failed to initialize Best Practice Gallery:', error);
+          this.showError('Failed to load the best practice gallery');
+        }
+      }
+
+      setupEventListeners() {
+        const modal = document.getElementById('image-modal');
+        const closeModal = document.getElementById('close-modal');
+
+        // Modal events
+        closeModal.addEventListener('click', () => this.closeModal());
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) this.closeModal();
+        });
+
+        // Keyboard events
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') this.closeModal();
+        });
+      }
+
+      async loadBestPracticeImages() {
+        try {
+          const loadingSpinner = document.getElementById('loading-spinner');
+          const galleryGrid = document.getElementById('gallery-grid');
+
+          loadingSpinner.style.display = 'block';
+          galleryGrid.innerHTML = '';
+
+          // Load image metadata from Firebase, filtered by bestPractice = true
+          const snapshot = await firebase.database().ref('gallery-images')
+            .orderByChild('bestPractice').equalTo(true).once('value');
+          const images = snapshot.val() || {};
+
+          loadingSpinner.style.display = 'none';
+
+          if (Object.keys(images).length === 0) {
+            this.showEmptyState();
+            return;
+          }
+
+          // Sort images by upload date (newest first)
+          const sortedImages = Object.entries(images).sort(([,a], [,b]) => 
+            new Date(b.uploadDate) - new Date(a.uploadDate)
+          );
+
+          for (const [key, imageData] of sortedImages) {
+            this.createImageCard(key, imageData);
+          }
+
+        } catch (error) {
+          console.error('Error loading best practice images:', error);
+          this.showError('Failed to load best practice images');
+          document.getElementById('loading-spinner').style.display = 'none';
+        }
+      }
+
+      showEmptyState() {
+        const galleryGrid = document.getElementById('gallery-grid');
+        galleryGrid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🎨</div>
+            <div class="empty-title">No Best Practice Images Yet</div>
+            <div class="empty-text">Best practice images will appear here when they are marked by administrators.</div>
+            <a href="gallery-images.html" class="empty-cta" id="manage-link" style="display: none;">Manage Gallery Images</a>
+          </div>
+        `;
+
+        // Show manage link only for admins
+        firebase.auth().onAuthStateChanged(async (user) => {
+          if (user && window.authUtils) {
+            const isAdmin = await window.authUtils.isAdmin(user);
+            if (isAdmin) {
+              document.getElementById('manage-link').style.display = 'inline-block';
+            }
+          }
+        });
+      }
+
+      createImageCard(key, imageData) {
+        const galleryGrid = document.getElementById('gallery-grid');
+        
+        const card = document.createElement('div');
+        card.className = 'image-card';
+        
+        // Get image URL from Google Drive
+        const imageUrl = imageData.driveFileId ? 
+          this.driveIntegration.getImageUrl(imageData.driveFileId) :
+          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmQ3MDAiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmZmVkNGEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMzUwIiBoZWlnaHQ9IjMwMCIgZmlsbD0idXJsKCNhKSIgb3BhY2l0eT0iMC4xIi8+PHRleHQgeD0iNTAlIiB5PSI0NSUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2cHgiIGZpbGw9IiM4YjQ1MTMiIGZvbnQtd2VpZ2h0PSI2MDAiPkJlc3QgUHJhY3RpY2UgSW1hZ2U8L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI2MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjEycHgiIGZpbGw9IiNhYTZjMzkiPkxvYWRpbmcgZnJvbSBHb29nbGUgRHJpdmUuLi48L3RleHQ+PC9zdmc+';
+        
+        card.innerHTML = `
+          <div class="best-practice-badge">
+            <span>⭐</span>
+            <span>Best Practice</span>
+          </div>
+          <div class="image-container" onclick="bestPracticeGallery.openModal('${imageData.driveFileId || imageData.filename}')">
+            <img src="${imageUrl}" 
+                 alt="${imageData.originalName}"
+                 loading="lazy"
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzUwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2ZlZTJlMiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNnB4IiBmaWxsPSIjZGM0NDQ0Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+PC9zdmc+'">
+          </div>
+          <div class="image-info">
+            <div class="image-filename">${imageData.originalName}</div>
+            <div class="image-date">Added ${new Date(imageData.uploadDate).toLocaleDateString()}</div>
+            <span class="image-uploader">by ${imageData.uploaderName}</span>
+          </div>
+        `;
+        
+        galleryGrid.appendChild(card);
+      }
+
+      openModal(fileIdOrFilename) {
+        const modal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        
+        // Get high resolution image URL from Google Drive
+        const imageUrl = this.driveIntegration.getHighResImageUrl(fileIdOrFilename);
+        modalImage.src = imageUrl;
+        modalImage.alt = fileIdOrFilename;
+        
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+
+      closeModal() {
+        const modal = document.getElementById('image-modal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+
+      showError(message) {
+        console.error('❌', message);
+        const galleryGrid = document.getElementById('gallery-grid');
+        galleryGrid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <div class="empty-title">Error Loading Gallery</div>
+            <div class="empty-text">${message}</div>
+          </div>
+        `;
+      }
+    }
+
+    // Initialize when DOM is ready
+    let bestPracticeGallery;
+    document.addEventListener('DOMContentLoaded', function() {
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (!user) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        // Initialize best practice gallery (accessible to all authenticated users)
+        bestPracticeGallery = new BestPracticeGallery();
+        await bestPracticeGallery.init();
+      });
+    });
+  </script>
+</body>
+</html>

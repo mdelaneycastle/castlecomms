@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery Images - Castle Comms</title>
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  
+  <!-- Microsoft Graph SDK -->
+  <script src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/umd/msal-browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@microsoft/microsoft-graph-client@3.0.7/lib/graph-js-sdk.min.js"></script>
+  
+  <style>
+    .gallery-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .gallery-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #1a365d;
+      margin-bottom: 1rem;
+    }
+
+    .upload-section {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 3rem;
+    }
+
+    .upload-area {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 3rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+    }
+
+    .upload-area:hover {
+      border-color: #667eea;
+      background: #f1f5f9;
+    }
+
+    .upload-area.dragover {
+      border-color: #667eea;
+      background: #e0e7ff;
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      color: #94a3b8;
+      margin-bottom: 1rem;
+    }
+
+    .upload-text {
+      font-size: 1.2rem;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-subtext {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .image-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .image-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+
+    .image-container {
+      position: relative;
+      width: 100%;
+      height: 250px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .image-container:hover img {
+      transform: scale(1.05);
+    }
+
+    .image-info {
+      padding: 1rem;
+    }
+
+    .image-filename {
+      font-weight: 600;
+      color: #1a365d;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .image-date {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 1rem;
+    }
+
+    .best-practice-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0.5rem;
+      border-radius: 8px;
+    }
+
+    .best-practice-btn:hover {
+      background: rgba(255, 215, 0, 0.1);
+      transform: scale(1.1);
+    }
+
+    .best-practice-btn.active {
+      color: #ffd700;
+    }
+
+    .best-practice-btn.inactive {
+      color: #d1d5db;
+    }
+
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Modal for enlarged images */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.9);
+    }
+
+    .modal-content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      padding: 2rem;
+    }
+
+    .modal img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      cursor: pointer;
+      background: rgba(0,0,0,0.5);
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-modal:hover {
+      background: rgba(0,0,0,0.7);
+    }
+
+    .upload-progress {
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .progress-text {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+      
+      .gallery-container {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar-container"></div>
+  
+  <div class="page-container">
+    <button id="menu-toggle" class="menu-toggle">☰</button>
+    
+    <div class="gallery-container">
+      <div class="gallery-header">
+        <h1 class="gallery-title">Gallery Images</h1>
+        <p style="color: #64748b;">Upload and manage gallery artwork images</p>
+      </div>
+
+      <!-- Upload Section -->
+      <div class="upload-section">
+        <div class="upload-area" id="upload-area">
+          <div class="upload-icon">📸</div>
+          <div class="upload-text">Drag & drop images here or click to browse</div>
+          <div class="upload-subtext">Supported formats: JPG, PNG, GIF (Max 10MB each)</div>
+        </div>
+        
+        <div class="upload-progress" id="upload-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-text" id="progress-text">Uploading...</div>
+        </div>
+        
+        <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
+      </div>
+
+      <!-- Loading Spinner -->
+      <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading images...</p>
+      </div>
+
+      <!-- Gallery Grid -->
+      <div class="gallery-grid" id="gallery-grid">
+        <!-- Images will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Modal -->
+  <div id="image-modal" class="modal">
+    <button class="close-modal" id="close-modal">&times;</button>
+    <div class="modal-content">
+      <img id="modal-image" src="" alt="">
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="firebase-init.js"></script>
+  <script src="shared-components.js"></script>
+  <script src="google-drive-integration.js"></script>
+  
+  <script>
+    class GalleryImagesManager {
+      constructor() {
+        this.driveIntegration = window.googleDriveIntegration;
+        this.images = new Map();
+      }
+
+      async init() {
+        try {
+          // Initialize Google Drive integration
+          await this.driveIntegration.initialize();
+          
+          // Setup UI event listeners
+          this.setupEventListeners();
+          
+          // Load existing images
+          await this.loadImages();
+          
+          console.log('✅ Gallery Images Manager initialized');
+        } catch (error) {
+          console.error('❌ Failed to initialize Gallery Images Manager:', error);
+          this.showError('Failed to initialize the gallery system');
+        }
+      }
+
+
+      setupEventListeners() {
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const modal = document.getElementById('image-modal');
+        const closeModal = document.getElementById('close-modal');
+
+        // Upload area events
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+        uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
+        uploadArea.addEventListener('drop', this.handleDrop.bind(this));
+
+        // File input change
+        fileInput.addEventListener('change', (e) => this.handleFileSelect(e.target.files));
+
+        // Modal events
+        closeModal.addEventListener('click', () => this.closeModal());
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) this.closeModal();
+        });
+
+        // Keyboard events
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') this.closeModal();
+        });
+      }
+
+      handleDragOver(e) {
+        e.preventDefault();
+        document.getElementById('upload-area').classList.add('dragover');
+      }
+
+      handleDragLeave(e) {
+        e.preventDefault();
+        document.getElementById('upload-area').classList.remove('dragover');
+      }
+
+      handleDrop(e) {
+        e.preventDefault();
+        document.getElementById('upload-area').classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+        this.handleFileSelect(files);
+      }
+
+      async handleFileSelect(files) {
+        if (!files || files.length === 0) return;
+
+        const validFiles = Array.from(files).filter(file => {
+          const validation = this.driveIntegration.validateFile(file);
+          if (!validation.valid) {
+            this.showError(`${file.name}: ${validation.error}`);
+            return false;
+          }
+          return true;
+        });
+
+        if (validFiles.length === 0) return;
+
+        for (const file of validFiles) {
+          await this.uploadFile(file);
+        }
+      }
+
+      async uploadFile(file) {
+        try {
+          const progressEl = document.getElementById('upload-progress');
+          const progressFill = document.getElementById('progress-fill');
+          const progressText = document.getElementById('progress-text');
+
+          progressEl.style.display = 'block';
+          progressText.textContent = `Uploading ${file.name}...`;
+
+          // Generate filename with user display name and timestamp
+          const user = firebase.auth().currentUser;
+          const displayName = user.displayName || user.email.split('@')[0] || 'user';
+          const filename = this.driveIntegration.generateFilename(file.name, displayName);
+
+          // Upload to Google Drive with progress tracking
+          const fileId = await this.driveIntegration.uploadFile(file, filename, (progress) => {
+            progressFill.style.width = `${progress}%`;
+            if (progress >= 100) {
+              progressText.textContent = 'Upload complete!';
+            }
+          });
+
+          // Save metadata to Firebase
+          const imageData = {
+            filename: filename,
+            originalName: file.name,
+            uploadDate: new Date().toISOString(),
+            uploadedBy: user.uid,
+            uploaderName: displayName,
+            bestPractice: false,
+            fileSize: file.size,
+            mimeType: file.type,
+            driveFileId: fileId // Store Google Drive file ID
+          };
+
+          const firebaseKey = filename.replace(/\./g, '_').replace(/[^a-zA-Z0-9_]/g, '_');
+          await firebase.database().ref(`gallery-images/${firebaseKey}`).set(imageData);
+
+          // Hide progress and refresh gallery
+          setTimeout(() => {
+            progressEl.style.display = 'none';
+            this.loadImages();
+          }, 1000);
+
+          this.showSuccess(`${file.name} uploaded successfully!`);
+
+        } catch (error) {
+          console.error('Upload error:', error);
+          this.showError(`Failed to upload ${file.name}`);
+          document.getElementById('upload-progress').style.display = 'none';
+        }
+      }
+
+      async loadImages() {
+        try {
+          const loadingSpinner = document.getElementById('loading-spinner');
+          const galleryGrid = document.getElementById('gallery-grid');
+
+          loadingSpinner.style.display = 'block';
+          galleryGrid.innerHTML = '';
+
+          // Load image metadata from Firebase
+          const snapshot = await firebase.database().ref('gallery-images').once('value');
+          const images = snapshot.val() || {};
+
+          loadingSpinner.style.display = 'none';
+
+          if (Object.keys(images).length === 0) {
+            galleryGrid.innerHTML = '<p style="text-align: center; color: #64748b; grid-column: 1 / -1;">No images uploaded yet. Upload some images to get started!</p>';
+            return;
+          }
+
+          // Sort images by upload date (newest first)
+          const sortedImages = Object.entries(images).sort(([,a], [,b]) => 
+            new Date(b.uploadDate) - new Date(a.uploadDate)
+          );
+
+          for (const [key, imageData] of sortedImages) {
+            this.createImageCard(key, imageData);
+          }
+
+        } catch (error) {
+          console.error('Error loading images:', error);
+          this.showError('Failed to load images');
+          document.getElementById('loading-spinner').style.display = 'none';
+        }
+      }
+
+      createImageCard(key, imageData) {
+        const galleryGrid = document.getElementById('gallery-grid');
+        
+        const card = document.createElement('div');
+        card.className = 'image-card';
+        
+        // Get image URL from Google Drive
+        const imageUrl = imageData.driveFileId ? 
+          this.driveIntegration.getImageUrl(imageData.driveFileId) :
+          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2Y4ZmFmYyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNHB4IiBmaWxsPSIjOTRhM2I4Ij5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==';
+        
+        card.innerHTML = `
+          <div class="image-container" onclick="galleryManager.openModal('${imageData.driveFileId || imageData.filename}')">
+            <img src="${imageUrl}" 
+                 alt="${imageData.originalName}"
+                 loading="lazy"
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2ZlZTJlMiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNHB4IiBmaWxsPSIjZGM0NDQ0Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+PC9zdmc+'">
+          </div>
+          <div class="image-info">
+            <div class="image-filename">${imageData.originalName}</div>
+            <div class="image-date">Uploaded ${new Date(imageData.uploadDate).toLocaleDateString()} by ${imageData.uploaderName}</div>
+            <button class="best-practice-btn ${imageData.bestPractice ? 'active' : 'inactive'}" 
+                    onclick="galleryManager.toggleBestPractice('${key}', ${!imageData.bestPractice})"
+                    title="${imageData.bestPractice ? 'Remove from Best Practice' : 'Mark as Best Practice'}">
+              ⭐
+            </button>
+          </div>
+        `;
+        
+        galleryGrid.appendChild(card);
+      }
+
+      async toggleBestPractice(key, status) {
+        try {
+          await firebase.database().ref(`gallery-images/${key}/bestPractice`).set(status);
+          
+          // Update UI
+          const btn = event.target;
+          btn.className = `best-practice-btn ${status ? 'active' : 'inactive'}`;
+          btn.title = status ? 'Remove from Best Practice' : 'Mark as Best Practice';
+          
+          this.showSuccess(status ? 'Added to Best Practice!' : 'Removed from Best Practice');
+        } catch (error) {
+          console.error('Error toggling best practice:', error);
+          this.showError('Failed to update best practice status');
+        }
+      }
+
+      openModal(fileIdOrFilename) {
+        const modal = document.getElementById('image-modal');
+        const modalImage = document.getElementById('modal-image');
+        
+        // Get high resolution image URL from Google Drive
+        const imageUrl = this.driveIntegration.getHighResImageUrl(fileIdOrFilename);
+        modalImage.src = imageUrl;
+        modalImage.alt = fileIdOrFilename;
+        
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+
+      closeModal() {
+        const modal = document.getElementById('image-modal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+
+      showSuccess(message) {
+        // TODO: Implement toast notification
+        console.log('✅', message);
+        alert(message);
+      }
+
+      showError(message) {
+        // TODO: Implement toast notification
+        console.error('❌', message);
+        alert(message);
+      }
+    }
+
+    // Initialize when DOM is ready
+    let galleryManager;
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check authentication first
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (!user) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        // Check admin privileges
+        const isAdmin = await window.authUtils.isAdmin(user);
+        if (!isAdmin) {
+          alert('Access denied. Admin privileges required.');
+          window.location.href = 'main.html';
+          return;
+        }
+
+        // Initialize gallery manager
+        galleryManager = new GalleryImagesManager();
+        await galleryManager.init();
+      });
+    });
+  </script>
+</body>
+</html>
