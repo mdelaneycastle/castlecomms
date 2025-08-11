@@ -165,6 +165,30 @@
       color: #d1d5db;
     }
 
+    .delete-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0.5rem;
+      border-radius: 8px;
+      color: #ef4444;
+      margin-left: 0.5rem;
+    }
+
+    .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+      transform: scale(1.1);
+    }
+
+    .image-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.5rem;
+    }
+
     .loading-spinner {
       display: none;
       text-align: center;
@@ -528,11 +552,18 @@
           <div class="image-info">
             <div class="image-filename">${imageData.originalName}</div>
             <div class="image-date">Uploaded ${new Date(imageData.uploadDate).toLocaleDateString()} by ${imageData.uploaderName}</div>
-            <button class="best-practice-btn ${imageData.bestPractice ? 'active' : 'inactive'}" 
-                    onclick="galleryManager.toggleBestPractice('${key}', ${!imageData.bestPractice})"
-                    title="${imageData.bestPractice ? 'Remove from Best Practice' : 'Mark as Best Practice'}">
-              ⭐
-            </button>
+            <div class="image-actions">
+              <button class="best-practice-btn ${imageData.bestPractice ? 'active' : 'inactive'}" 
+                      onclick="galleryManager.toggleBestPractice('${key}', ${!imageData.bestPractice})"
+                      title="${imageData.bestPractice ? 'Remove from Best Practice' : 'Mark as Best Practice'}">
+                ⭐
+              </button>
+              <button class="delete-btn" 
+                      onclick="galleryManager.deleteImage('${key}', '${imageData.originalName}')"
+                      title="Delete Image">
+                🗑️
+              </button>
+            </div>
           </div>
         `;
         
@@ -552,6 +583,42 @@
         } catch (error) {
           console.error('Error toggling best practice:', error);
           this.showError('Failed to update best practice status');
+        }
+      }
+
+      async deleteImage(key, originalName) {
+        try {
+          // Show confirmation dialog
+          const confirmed = confirm(`Are you sure you want to delete "${originalName}"?\\n\\nThis will remove it from the gallery but the file will remain in Google Drive.`);
+          
+          if (!confirmed) {
+            return;
+          }
+
+          // Delete from Firebase
+          await firebase.database().ref(`gallery-images/${key}`).remove();
+          
+          // Remove the image card from UI
+          const imageCards = document.querySelectorAll('.image-card');
+          imageCards.forEach(card => {
+            const deleteBtn = card.querySelector(`[onclick*="'${key}'"]`);
+            if (deleteBtn) {
+              card.remove();
+            }
+          });
+          
+          this.showSuccess(`"${originalName}" has been deleted from the gallery`);
+          
+          // Check if gallery is now empty
+          const remainingCards = document.querySelectorAll('.image-card');
+          if (remainingCards.length === 0) {
+            const galleryGrid = document.getElementById('gallery-grid');
+            galleryGrid.innerHTML = '<p style="text-align: center; color: #64748b; grid-column: 1 / -1;">No images uploaded yet. Upload some images to get started!</p>';
+          }
+
+        } catch (error) {
+          console.error('Error deleting image:', error);
+          this.showError(`Failed to delete "${originalName}"`);
         }
       }
 
