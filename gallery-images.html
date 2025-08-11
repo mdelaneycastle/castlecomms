@@ -349,22 +349,31 @@
     </div>
   </div>
 
+  <!-- Firebase SDK v9 (modular) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
+  
   <!-- Scripts -->
   <script src="firebase-init.js"></script>
   <script src="shared-components.js"></script>
-  <script src="google-drive-integration.js"></script>
   
   <script>
     class GalleryImagesManager {
       constructor() {
-        this.driveIntegration = window.googleDriveIntegration;
+        this.functions = null;
         this.images = new Map();
+        this.uploadEndpoint = null;
       }
 
       async init() {
         try {
-          // Initialize Google Drive integration
-          await this.driveIntegration.initialize();
+          // Initialize Firebase Functions
+          this.functions = firebase.functions();
+          
+          // Set upload endpoint URL - update this after deployment
+          this.uploadEndpoint = 'https://europe-west2-castle-comms.cloudfunctions.net/uploadToGallery';
           
           // Setup UI event listeners
           this.setupEventListeners();
@@ -428,9 +437,12 @@
         if (!files || files.length === 0) return;
 
         const validFiles = Array.from(files).filter(file => {
-          const validation = this.driveIntegration.validateFile(file);
-          if (!validation.valid) {
-            this.showError(`${file.name}: ${validation.error}`);
+          if (!file.type.startsWith('image/')) {
+            this.showError(`${file.name}: File must be an image`);
+            return false;
+          }
+          if (file.size > 10 * 1024 * 1024) {
+            this.showError(`${file.name}: File size must be less than 10MB`);
             return false;
           }
           return true;
@@ -451,35 +463,43 @@
 
           progressEl.style.display = 'block';
           progressText.textContent = `Uploading ${file.name}...`;
+          progressFill.style.width = '10%';
 
-          // Generate filename with user display name and timestamp
+          // Get current user info
           const user = firebase.auth().currentUser;
           const displayName = user.displayName || user.email.split('@')[0] || 'user';
-          const filename = this.driveIntegration.generateFilename(file.name, displayName);
 
-          // Upload to Google Drive with progress tracking
-          const fileId = await this.driveIntegration.uploadFile(file, filename, (progress) => {
-            progressFill.style.width = `${progress}%`;
-            if (progress >= 100) {
-              progressText.textContent = 'Upload complete!';
-            }
+          // Create FormData for the upload
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('uploadedBy', user.uid);
+          formData.append('uploaderName', displayName);
+
+          progressFill.style.width = '30%';
+
+          // Upload to Firebase Function
+          const response = await fetch(this.uploadEndpoint, {
+            method: 'POST',
+            body: formData,
           });
 
-          // Save metadata to Firebase
-          const imageData = {
-            filename: filename,
-            originalName: file.name,
-            uploadDate: new Date().toISOString(),
-            uploadedBy: user.uid,
-            uploaderName: displayName,
-            bestPractice: false,
-            fileSize: file.size,
-            mimeType: file.type,
-            driveFileId: fileId // Store Google Drive file ID
-          };
+          progressFill.style.width = '90%';
 
-          const firebaseKey = filename.replace(/\./g, '_').replace(/[^a-zA-Z0-9_]/g, '_');
-          await firebase.database().ref(`gallery-images/${firebaseKey}`).set(imageData);
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Upload failed');
+          }
+
+          const result = await response.json();
+          
+          if (!result.success) {
+            throw new Error(result.message || 'Upload failed');
+          }
+
+          progressFill.style.width = '100%';
+          progressText.textContent = 'Upload complete!';
+
+          console.log('✅ Upload successful:', result);
 
           // Hide progress and refresh gallery
           setTimeout(() => {
@@ -487,11 +507,11 @@
             this.loadImages();
           }, 1000);
 
-          this.showSuccess(`${file.name} uploaded successfully!`);
+          this.showSuccess(`${file.name} uploaded successfully to Google Drive!`);
 
         } catch (error) {
-          console.error('Upload error:', error);
-          this.showError(`Failed to upload ${file.name}`);
+          console.error('❌ Upload error:', error);
+          this.showError(`Failed to upload ${file.name}: ${error.message}`);
           document.getElementById('upload-progress').style.display = 'none';
         }
       }
@@ -537,13 +557,13 @@
         const card = document.createElement('div');
         card.className = 'image-card';
         
-        // Get image URL from Google Drive
-        const imageUrl = imageData.driveFileId ? 
-          this.driveIntegration.getImageUrl(imageData.driveFileId) :
-          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2Y4ZmFmYyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNHB4IiBmaWxsPSIjOTRhM2I4Ij5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==';
+        // Get image URL - use webContentLink if available, fallback to Drive API
+        const imageUrl = imageData.webContentLink || 
+          (imageData.driveFileId ? `https://drive.google.com/thumbnail?id=${imageData.driveFileId}&sz=w400-h300-c` : 
+          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2Y4ZmFmYyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNHB4IiBmaWxsPSIjOTRhM2I4Ij5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==');
         
         card.innerHTML = `
-          <div class="image-container" onclick="galleryManager.openModal('${imageData.driveFileId || imageData.filename}')">
+          <div class="image-container" onclick="galleryManager.openModal('${imageData.driveFileId || imageData.filename}', '${imageData.webContentLink || ''}')">
             <img src="${imageUrl}" 
                  alt="${imageData.originalName}"
                  loading="lazy"
@@ -559,7 +579,7 @@
                 ⭐
               </button>
               <button class="delete-btn" 
-                      onclick="galleryManager.deleteImage('${key}', '${imageData.originalName}')"
+                      onclick="galleryManager.deleteImage('${key}', '${imageData.originalName}', '${imageData.driveFileId || ''}')"
                       title="Delete Image">
                 🗑️
               </button>
@@ -586,17 +606,23 @@
         }
       }
 
-      async deleteImage(key, originalName) {
+      async deleteImage(key, originalName, driveFileId) {
         try {
           // Show confirmation dialog
-          const confirmed = confirm(`Are you sure you want to delete "${originalName}"?\\n\\nThis will remove it from the gallery but the file will remain in Google Drive.`);
+          const confirmed = confirm(`Are you sure you want to delete "${originalName}"?\\n\\nThis will permanently remove the file from both the gallery and Google Drive.`);
           
           if (!confirmed) {
             return;
           }
 
-          // Delete from Firebase
-          await firebase.database().ref(`gallery-images/${key}`).remove();
+          if (driveFileId) {
+            // Delete from both Google Drive and Firebase using the Firebase Function
+            const deleteFunction = this.functions.httpsCallable('deleteFromGallery');
+            await deleteFunction({ fileId: driveFileId, firebaseKey: key });
+          } else {
+            // Just delete from Firebase if no Drive file ID
+            await firebase.database().ref(`gallery-images/${key}`).remove();
+          }
           
           // Remove the image card from UI
           const imageCards = document.querySelectorAll('.image-card');
@@ -607,7 +633,7 @@
             }
           });
           
-          this.showSuccess(`"${originalName}" has been deleted from the gallery`);
+          this.showSuccess(`"${originalName}" has been deleted from both the gallery and Google Drive`);
           
           // Check if gallery is now empty
           const remainingCards = document.querySelectorAll('.image-card');
@@ -618,18 +644,20 @@
 
         } catch (error) {
           console.error('Error deleting image:', error);
-          this.showError(`Failed to delete "${originalName}"`);
+          this.showError(`Failed to delete "${originalName}": ${error.message}`);
         }
       }
 
-      openModal(fileIdOrFilename) {
+      openModal(fileId, webContentLink) {
         const modal = document.getElementById('image-modal');
         const modalImage = document.getElementById('modal-image');
         
-        // Get high resolution image URL from Google Drive
-        const imageUrl = this.driveIntegration.getHighResImageUrl(fileIdOrFilename);
+        // Use webContentLink if available, otherwise fallback to Drive API
+        const imageUrl = webContentLink || 
+          (fileId ? `https://drive.google.com/uc?id=${fileId}` : '');
+        
         modalImage.src = imageUrl;
-        modalImage.alt = fileIdOrFilename;
+        modalImage.alt = fileId;
         
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
