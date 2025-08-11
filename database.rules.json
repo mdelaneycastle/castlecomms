@@ -70,6 +70,21 @@
       }
     },
     
+    "gallery-images": {
+      ".read": "auth != null",
+      ".indexOn": ["uploadDate", "bestPractice"],
+      "$imageId": {
+        ".write": "auth != null && auth.token.admin == true",
+        ".validate": "newData.hasChildren(['filename', 'originalName', 'uploadDate', 'uploadedBy', 'uploaderName', 'bestPractice']) && 
+                     newData.child('filename').isString() && 
+                     newData.child('originalName').isString() && 
+                     newData.child('uploadDate').isString() && 
+                     newData.child('uploadedBy').isString() && 
+                     newData.child('uploaderName').isString() && 
+                     newData.child('bestPractice').isBoolean()"
+      }
+    },
+    
     "notifications": {
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
