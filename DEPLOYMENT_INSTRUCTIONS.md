@@ -20,7 +20,7 @@
 ### 1.2 Share Drive Folder with Service Account
 1. Open your Drive folder: https://drive.google.com/drive/folders/1FGhH16oogIvS3hy_sACyyxfKScfq6v_G
 2. Right-click → **Share**
-3. Add: `103339227671509166248-compute@developer.gserviceaccount.com`
+3. Add: `castle-comms@appspot.gserviceaccount.com`
 4. Set permission: **"Content manager"**
 5. Click **Send**
 
