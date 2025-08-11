@@ -1,4 +1,4 @@
-// functions/src/index.ts (ESM)
+// functions/index.js (ESM)
 
 import express from "express";
 import multer from "multer";
@@ -27,7 +27,7 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 
 // --- Helpers ---
-function getDriveClientFromSecret(jsonString: string) {
+function getDriveClientFromSecret(jsonString) {
   const creds = JSON.parse(jsonString);
   const jwt = new google.auth.JWT(
     creds.client_email,
@@ -38,7 +38,7 @@ function getDriveClientFromSecret(jsonString: string) {
   return google.drive({ version: "v3", auth: jwt });
 }
 
-function setCors(res: any, reqOrigin?: string) {
+function setCors(res, reqOrigin) {
   const origin = reqOrigin && ALLOWED_ORIGINS.has(reqOrigin) ? reqOrigin : "*";
   res.header("Access-Control-Allow-Origin", origin);
   res.header("Vary", "Origin"); // caching correctness
@@ -54,7 +54,7 @@ const uploadApp = express();
 
 // CORS (single layer)
 uploadApp.use((req, res, next) => {
-  setCors(res, req.headers.origin as string | undefined);
+  setCors(res, req.headers.origin);
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
@@ -75,7 +75,7 @@ uploadApp.post("/", upload.single("file"), async (req, res) => {
 
     const { buffer, mimetype, originalname } = req.file;
     const { uploadedBy = "unknown", uploaderName = "Unknown User" } =
-      (req.body as any) || {};
+      req.body || {};
 
     // Filename like your convention
     const timestamp = new Date()
@@ -105,9 +105,9 @@ uploadApp.post("/", upload.single("file"), async (req, res) => {
     });
 
     // Clean up temp file early
-    try { fs.unlinkSync(tmpPath); } catch {}
+    try { fs.unlinkSync(tmpPath); } catch (e) {}
 
-    const fileId = createResp.data.id!;
+    const fileId = createResp.data.id;
     logger.info(`Drive upload OK id=${fileId}`);
 
     // Public permission
@@ -150,7 +150,7 @@ uploadApp.post("/", upload.single("file"), async (req, res) => {
       webContentLink: createResp.data.webContentLink,
       firebaseKey,
     });
-  } catch (err: any) {
+  } catch (err) {
     logger.error("Upload failed:", err);
     return res
       .status(500)
@@ -159,7 +159,7 @@ uploadApp.post("/", upload.single("file"), async (req, res) => {
 });
 
 uploadApp.all("*", (req, res) => {
-  setCors(res, req.headers.origin as string | undefined);
+  setCors(res, req.headers.origin);
   if (req.method === "OPTIONS") return res.sendStatus(204);
   return res.status(405).json({ error: "Method not allowed. Use POST." });
 });
@@ -183,7 +183,7 @@ const deleteApp = express();
 
 // CORS
 deleteApp.use((req, res, next) => {
-  setCors(res, req.headers.origin as string | undefined);
+  setCors(res, req.headers.origin);
   if (req.method === "OPTIONS") return res.sendStatus(204);
   next();
 });
@@ -209,7 +209,7 @@ deleteApp.post("/", async (req, res) => {
     try {
       await drive.files.delete({ fileId, supportsAllDrives: true });
       logger.info(`Drive deleted: ${fileId}`);
-    } catch (e: any) {
+    } catch (e) {
       if (e?.code === 404) {
         logger.warn(`Drive file not found: ${fileId} (continuing)`);
       } else {
@@ -225,7 +225,7 @@ deleteApp.post("/", async (req, res) => {
       success: true,
       message: "File deleted successfully from both Google Drive and Firebase",
     });
-  } catch (err: any) {
+  } catch (err) {
     logger.error("Delete failed:", err);
     return res
       .status(500)
@@ -234,7 +234,7 @@ deleteApp.post("/", async (req, res) => {
 });
 
 deleteApp.all("*", (req, res) => {
-  setCors(res, req.headers.origin as string | undefined);
+  setCors(res, req.headers.origin);
   if (req.method === "OPTIONS") return res.sendStatus(204);
   return res.status(405).json({ error: "Method not allowed. Use POST." });
 });
