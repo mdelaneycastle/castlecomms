@@ -372,8 +372,8 @@
           // Initialize Firebase Functions
           this.functions = firebase.functions();
           
-          // Set upload endpoint URL - update this after deployment
-          this.uploadEndpoint = 'https://europe-west2-castle-comms.cloudfunctions.net/uploadToGallery';
+          // Set upload endpoint URL - matches your existing functions region
+          this.uploadEndpoint = 'https://europe-west1-castle-comms.cloudfunctions.net/uploadToGallery';
           
           // Setup UI event listeners
           this.setupEventListeners();

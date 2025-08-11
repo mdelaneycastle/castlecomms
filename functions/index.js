@@ -42,7 +42,7 @@ function getDriveClientFromSecret(jsonString) {
 export const uploadToGallery = onRequest(
   { 
     secrets: [DRIVE_SA_JSON], 
-    region: "europe-west2", 
+    region: "europe-west1", 
     memory: "1GiB", 
     timeoutSeconds: 300,
     cors: true
@@ -192,7 +192,7 @@ export const uploadToGallery = onRequest(
 export const deleteFromGallery = onCall(
   { 
     secrets: [DRIVE_SA_JSON], 
-    region: "europe-west2" 
+    region: "europe-west1" 
   },
   async (request) => {
     const { fileId, firebaseKey } = request.data;
@@ -234,7 +234,7 @@ export const deleteFromGallery = onCall(
 /**
  * Health check endpoint
  */
-export const healthCheck = onRequest({ region: "europe-west2" }, (req, res) => {
+export const healthCheck = onRequest({ region: "europe-west1" }, (req, res) => {
   res.json({ 
     status: "ok", 
     timestamp: new Date().toISOString(),
