@@ -349,28 +349,25 @@
     </div>
   </div>
 
-  <!-- Firebase SDK v9 (modular) -->
+  <!-- Firebase SDK v9 (compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
+  <!-- Functions SDK removed - using direct HTTP calls -->
   
   <!-- Scripts -->
-  <script src="firebase-init.js?v=5"></script>
-  <script src="shared-components.js?v=5"></script>
+  <script src="firebase-init.js?v=FIXED2025"></script>
+  <script src="shared-components.js?v=FIXED2025"></script>
   
   <script>
     class GalleryImagesManager {
       constructor() {
-        this.functions = null;
         this.images = new Map();
         this.uploadEndpoint = null;
       }
 
       async init() {
         try {
-          // Use global Firebase Functions instance
-          this.functions = window.functions || firebase.functions();
           
           // Production endpoint URL - functions are now deployed
           this.uploadEndpoint = 'https://europe-west1-castle-comms.cloudfunctions.net/uploadToGallery';
