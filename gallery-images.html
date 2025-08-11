@@ -356,8 +356,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
   
   <!-- Scripts -->
-  <script src="firebase-init.js"></script>
-  <script src="shared-components.js"></script>
+  <script src="firebase-init.js?v=4"></script>
+  <script src="shared-components.js?v=4"></script>
   
   <script>
     class GalleryImagesManager {
@@ -369,8 +369,8 @@
 
       async init() {
         try {
-          // Initialize Firebase Functions
-          this.functions = firebase.functions();
+          // Use global Firebase Functions instance (initialized with correct region)
+          this.functions = window.functions || firebase.functions('europe-west1');
           
           // Production endpoint URL - functions are now deployed
           this.uploadEndpoint = 'https://europe-west1-castle-comms.cloudfunctions.net/uploadToGallery';
@@ -609,7 +609,7 @@
       async deleteImage(key, originalName, driveFileId) {
         try {
           // Show confirmation dialog
-          const confirmed = confirm(`Are you sure you want to delete "${originalName}"?\\n\\nThis will permanently remove the file from both the gallery and Google Drive.`);
+          const confirmed = confirm(`Are you sure you want to delete "${originalName}"?\n\nThis will permanently remove the file from both the gallery and Google Drive.`);
           
           if (!confirmed) {
             return;

@@ -31,7 +31,8 @@ try {
 window.firebaseServices = {
   auth: null,
   db: null,
-  storage: null
+  storage: null,
+  functions: null
 };
 
 // Auth initialization
@@ -66,6 +67,19 @@ try {
   }
 } catch (error) {
   console.error("❌ Firebase Storage initialization failed:", error);
+}
+
+// Functions initialization
+try {
+  if (typeof firebase.functions === "function") {
+    window.firebaseServices.functions = firebase.functions('europe-west1');
+    window.functions = window.firebaseServices.functions; // Maintain backward compatibility
+    console.log("⚡ Firebase Functions initialized (region: europe-west1)");
+  } else {
+    console.warn("⚠️ Firebase Functions SDK not loaded");
+  }
+} catch (error) {
+  console.error("❌ Firebase Functions initialization failed:", error);
 }
 
 // Utility function to check if Firebase is ready
