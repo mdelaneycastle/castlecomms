@@ -2,7 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import cors from "cors";
-import formidable from "formidable";
+import multiparty from "multiparty";
 import { google } from "googleapis";
 import fs from "fs";
 import os from "os";
@@ -57,14 +57,22 @@ export const uploadToGallery = onRequest(
       let uploadedBy, uploaderName;
 
       try {
-        // Parse multipart/form-data with formidable
-        const form = formidable({
-          maxFileSize: 10 * 1024 * 1024, // 10MB limit
-          keepExtensions: true,
+        // Parse multipart/form-data with multiparty
+        logger.info('Starting multipart form parsing...');
+        
+        const form = new multiparty.Form({
+          maxFilesSize: 10 * 1024 * 1024, // 10MB limit
           uploadDir: os.tmpdir()
         });
 
-        const [fields, files] = await form.parse(req);
+        const { fields, files } = await new Promise((resolve, reject) => {
+          form.parse(req, (err, fields, files) => {
+            if (err) reject(err);
+            else resolve({ fields, files });
+          });
+        });
+        
+        logger.info('Multipart form parsing completed');
         
         // Get form fields
         uploadedBy = fields.uploadedBy?.[0];
@@ -78,8 +86,8 @@ export const uploadToGallery = onRequest(
         
         const uploadedFile = fileArray[0];
         originalFilename = uploadedFile.originalFilename;
-        mimetype = uploadedFile.mimetype;
-        tmpFilePath = uploadedFile.filepath;
+        mimetype = uploadedFile.headers['content-type'];
+        tmpFilePath = uploadedFile.path;
         
         // Generate filename with timestamp (like your current system)
         const now = new Date();
