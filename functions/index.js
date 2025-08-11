@@ -1,13 +1,15 @@
-import { onRequest } from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
-import cors from "cors";
-import { google } from "googleapis";
-import fs from "fs";
-import os from "os";
-import path from "path";
-import { defineSecret } from "firebase-functions/params";
-import { initializeApp } from "firebase-admin/app";
-import { getDatabase } from "firebase-admin/database";
+const { onRequest } = require("firebase-functions/v2/https");
+const logger = require("firebase-functions/logger");
+const cors = require("cors");
+const { google } = require("googleapis");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { defineSecret } = require("firebase-functions/params");
+const { initializeApp } = require("firebase-admin/app");
+const { getDatabase } = require("firebase-admin/database");
+const multer = require('multer');
+const express = require('express');
 
 // Initialize Firebase Admin
 initializeApp();
@@ -15,13 +17,17 @@ initializeApp();
 const DRIVE_SA_JSON = defineSecret("DRIVE_SA_JSON");
 const DRIVE_FOLDER_ID = "1FGhH16oogIvS3hy_sACyyxfKScfq6v_G";
 
-const corsHandler = cors({ 
+const corsOptions = {
   origin: [
     "https://mdelaneycastle.github.io",
     "http://localhost:3000",
     "http://127.0.0.1:3000"
-  ]
-});
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+const corsHandler = cors(corsOptions);
 
 function getDriveClientFromSecret(jsonString) {
   const creds = JSON.parse(jsonString);
@@ -37,45 +43,139 @@ function getDriveClientFromSecret(jsonString) {
 /**
  * Upload file to Google Drive and save metadata to Firebase
  */
-export const uploadToGallery = onRequest(
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  }
+});
+
+const uploadToGallery = onRequest(
   { 
     secrets: [DRIVE_SA_JSON], 
     region: "europe-west1", 
     memory: "1GiB", 
-    timeoutSeconds: 300,
-    cors: true
+    timeoutSeconds: 300
   },
-  async (req, res) => {
-    corsHandler(req, res, async () => {
+  (req, res) => {
+    return corsHandler(req, res, async () => {
+      if (req.method === 'OPTIONS') {
+        res.status(204).send('');
+        return;
+      }
+
       if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed. Use POST." });
       }
 
-      try {
-        logger.info('Upload request received');
-        
-        // Simple body parsing for test
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', async () => {
-          logger.info('Request body received, size:', body.length);
+      // Use multer middleware
+      upload.single('file')(req, res, async (err) => {
+        if (err) {
+          logger.error('Multer error:', err);
+          return res.status(400).json({ 
+            success: false, 
+            error: "File upload error", 
+            message: err.message 
+          });
+        }
+
+        try {
+          logger.info('Upload request received');
           
-          // For now, return a simple response to test the connection
+          if (!req.file) {
+            return res.status(400).json({ 
+              success: false, 
+              error: "No file uploaded" 
+            });
+          }
+
+          const { uploadedBy, uploaderName } = req.body;
+          if (!uploadedBy || !uploaderName) {
+            return res.status(400).json({ 
+              success: false, 
+              error: "uploadedBy and uploaderName are required" 
+            });
+          }
+
+          logger.info(`Processing upload: ${req.file.originalname}, size: ${req.file.size}`);
+
+          // Get Google Drive client
+          const drive = getDriveClientFromSecret(DRIVE_SA_JSON.value());
+
+          // Generate unique filename with timestamp
+          const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+          const fileExtension = path.extname(req.file.originalname);
+          const uniqueFilename = `${uploaderName}${timestamp}${fileExtension}`;
+
+          // Upload to Google Drive
+          const driveResponse = await drive.files.create({
+            requestBody: {
+              name: uniqueFilename,
+              parents: [DRIVE_FOLDER_ID]
+            },
+            media: {
+              mimeType: req.file.mimetype,
+              body: require('stream').Readable.from(req.file.buffer)
+            }
+          });
+
+          const fileId = driveResponse.data.id;
+          logger.info(`File uploaded to Drive with ID: ${fileId}`);
+
+          // Make file publicly viewable
+          await drive.permissions.create({
+            fileId: fileId,
+            requestBody: {
+              role: 'reader',
+              type: 'anyone'
+            }
+          });
+
+          // Get file metadata for webContentLink
+          const fileMetadata = await drive.files.get({
+            fileId: fileId,
+            fields: 'id,name,webContentLink,webViewLink,thumbnailLink'
+          });
+
+          // Save metadata to Firebase
+          const db = getDatabase();
+          const imageRef = db.ref('gallery-images').push();
+          const imageData = {
+            originalName: req.file.originalname,
+            filename: uniqueFilename,
+            driveFileId: fileId,
+            webContentLink: fileMetadata.data.webContentLink,
+            webViewLink: fileMetadata.data.webViewLink,
+            thumbnailLink: fileMetadata.data.thumbnailLink,
+            uploadDate: new Date().toISOString(),
+            uploadedBy: uploadedBy,
+            uploaderName: uploaderName,
+            fileSize: req.file.size,
+            mimeType: req.file.mimetype,
+            bestPractice: false
+          };
+
+          await imageRef.set(imageData);
+          logger.info(`Metadata saved to Firebase with key: ${imageRef.key}`);
+
           res.status(200).json({
             success: true,
-            message: "Upload endpoint is working, multipart parsing in progress...",
-            bodySize: body.length
+            message: "File uploaded successfully to Google Drive and metadata saved to Firebase",
+            fileId: fileId,
+            firebaseKey: imageRef.key,
+            filename: uniqueFilename,
+            webContentLink: fileMetadata.data.webContentLink
           });
-        });
 
-      } catch (error) {
-        logger.error("Upload failed:", error);
-        res.status(500).json({ 
-          success: false, 
-          error: "Upload failed", 
-          message: error.message 
-        });
-      }
+        } catch (error) {
+          logger.error("Upload failed:", error);
+          res.status(500).json({ 
+            success: false, 
+            error: "Upload failed", 
+            message: error.message 
+          });
+        }
+      });
     });
   }
 );
@@ -83,14 +183,18 @@ export const uploadToGallery = onRequest(
 /**
  * Delete file from Google Drive and Firebase
  */
-export const deleteFromGallery = onRequest(
+const deleteFromGallery = onRequest(
   { 
     secrets: [DRIVE_SA_JSON], 
-    region: "europe-west1",
-    cors: true
+    region: "europe-west1"
   },
-  async (req, res) => {
-    corsHandler(req, res, async () => {
+  (req, res) => {
+    return corsHandler(req, res, async () => {
+      if (req.method === 'OPTIONS') {
+        res.status(204).send('');
+        return;
+      }
+
       if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed. Use POST." });
       }
@@ -148,10 +252,16 @@ export const deleteFromGallery = onRequest(
 /**
  * Health check endpoint
  */
-export const healthCheck = onRequest({ region: "europe-west1" }, (req, res) => {
+const healthCheck = onRequest({ region: "europe-west1" }, (req, res) => {
   res.json({ 
     status: "ok", 
     timestamp: new Date().toISOString(),
     service: "Castle Comms Gallery Functions" 
   });
 });
+
+module.exports = {
+  uploadToGallery,
+  deleteFromGallery,
+  healthCheck
+};
