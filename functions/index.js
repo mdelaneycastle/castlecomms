@@ -195,21 +195,30 @@ export const uploadToGallery = onRequest(
 );
 
 /**
- * Delete file from Google Drive (callable function with auth)
+ * Delete file from Google Drive (HTTP function)
  */
-export const deleteFromGallery = onCall(
+export const deleteFromGallery = onRequest(
   { 
     secrets: [DRIVE_SA_JSON], 
-    region: "europe-west1" 
+    region: "europe-west1",
+    cors: true
   },
-  async (request) => {
-    const { fileId, firebaseKey } = request.data;
+  async (req, res) => {
+    corsHandler(req, res, async () => {
+      if (req.method !== "POST") {
+        return res.status(405).json({ error: "Method not allowed. Use POST." });
+      }
 
-    if (!fileId || !firebaseKey) {
-      throw new Error("fileId and firebaseKey are required");
-    }
+      const { fileId, firebaseKey } = req.body.data;
 
-    try {
+      if (!fileId || !firebaseKey) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "fileId and firebaseKey are required" 
+        });
+      }
+
+      try {
       // Initialize Google Drive client
       const drive = getDriveClientFromSecret(DRIVE_SA_JSON.value());
 
@@ -233,17 +242,22 @@ export const deleteFromGallery = onCall(
       const db = getDatabase();
       await db.ref(`gallery-images/${firebaseKey}`).remove();
 
-      logger.info(`Metadata deleted from Firebase: ${firebaseKey}`);
+        logger.info(`Metadata deleted from Firebase: ${firebaseKey}`);
 
-      return { 
-        success: true, 
-        message: "File deleted successfully from both Google Drive and Firebase" 
-      };
+        res.status(200).json({ 
+          success: true, 
+          message: "File deleted successfully from both Google Drive and Firebase" 
+        });
 
-    } catch (error) {
-      logger.error("Delete failed:", error);
-      throw new Error(`Delete failed: ${error.message}`);
-    }
+      } catch (error) {
+        logger.error("Delete failed:", error);
+        res.status(500).json({ 
+          success: false, 
+          error: "Delete failed", 
+          message: error.message 
+        });
+      }
+    });
   }
 );
 
