@@ -55,21 +55,22 @@ class GoogleDriveIntegration {
       xhr.onload = () => {
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
+          console.log('✅ Google Drive upload successful:', response);
           resolve(response.id);
         } else {
-          reject(new Error(`Upload failed: ${xhr.status}`));
+          console.error('❌ Google Drive upload failed:', xhr.status, xhr.responseText);
+          reject(new Error(`Upload failed: ${xhr.status} - ${xhr.responseText}`));
         }
       };
 
-      xhr.onerror = () => reject(new Error('Upload failed'));
+      xhr.onerror = () => {
+        console.error('❌ Google Drive upload network error');
+        reject(new Error('Upload failed due to network error'));
+      };
 
-      // For now, simulate the upload since we need Google API key setup
-      // In production, this would be:
-      // xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&key=' + this.apiKey);
-      // xhr.send(formData);
-
-      // Simulate upload for testing
-      this.simulateUpload(file, filename, progressCallback, resolve, reject);
+      // Use real Google Drive API upload
+      xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&key=' + this.apiKey);
+      xhr.send(formData);
     });
   }
 
@@ -113,11 +114,8 @@ class GoogleDriveIntegration {
       return `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iIzY2N2VlYSIgb3BhY2l0eT0iMC4xIi8+PHRleHQgeD0iNTAlIiB5PSI0NSUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0cHgiIGZpbGw9IiM2Njc3ZWEiIGZvbnQtd2VpZ2h0PSI2MDAiPlRlc3QgSW1hZ2U8L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI2MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwcHgiIGZpbGw9IiM5NGEzYjgiPiR7ZmlsZUlkfTwvdGV4dD48L3N2Zz4=`.replace('${fileId}', fileId);
     }
 
-    // In production with API key, this would be:
-    // return `https://drive.google.com/uc?id=${fileId}`;
-    
-    // For now, return the standard Google Drive thumbnail URL
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400-h300-c`;
+    // Use Google Drive direct view URL with API key for better reliability
+    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.apiKey}`;
   }
 
   /**
@@ -131,10 +129,8 @@ class GoogleDriveIntegration {
       return `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgZmlsbD0iIzY2N2VlYSIgb3BhY2l0eT0iMC4xNSIvPjx0ZXh0IHg9IjUwJSIgeT0iNDUlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNHB4IiBmaWxsPSIjNjY3ZWVhIiBmb250LXdlaWdodD0iNzAwIj5IaWdoIFJlcyBUZXN0IEltYWdlPC90ZXh0Pjx0ZXh0IHg9IjUwJSIgeT0iNjAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNnB4IiBmaWxsPSIjOTRhM2I4Ij4ke2ZpbGVJZH08L3RleHQ+PC9zdmc+`.replace('${fileId}', fileId);
     }
 
-    // In production, this would be:
-    // return `https://drive.google.com/uc?id=${fileId}`;
-    
-    return `https://drive.google.com/file/d/${fileId}/view`;
+    // Use same API endpoint for high-res images
+    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.apiKey}`;
   }
 
   /**
