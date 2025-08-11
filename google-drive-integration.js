@@ -26,6 +26,7 @@ class GoogleDriveIntegration {
 
   /**
    * Upload file to Google Drive folder
+   * Note: This currently simulates upload since OAuth2 is required for real uploads
    * @param {File} file - File to upload
    * @param {string} filename - Custom filename for the file
    * @param {function} progressCallback - Progress callback function
@@ -33,44 +34,12 @@ class GoogleDriveIntegration {
    */
   async uploadFile(file, filename, progressCallback) {
     return new Promise((resolve, reject) => {
-      const formData = new FormData();
-      const metadata = {
-        name: filename,
-        parents: [this.folderId]
-      };
-
-      formData.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
-      formData.append('file', file);
-
-      const xhr = new XMLHttpRequest();
+      console.log('📤 Simulating Google Drive upload for:', filename);
+      console.log('ℹ️  Real uploads require OAuth2 authentication setup');
       
-      // Track upload progress
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable && progressCallback) {
-          const percentComplete = (e.loaded / e.total) * 100;
-          progressCallback(percentComplete);
-        }
-      });
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText);
-          console.log('✅ Google Drive upload successful:', response);
-          resolve(response.id);
-        } else {
-          console.error('❌ Google Drive upload failed:', xhr.status, xhr.responseText);
-          reject(new Error(`Upload failed: ${xhr.status} - ${xhr.responseText}`));
-        }
-      };
-
-      xhr.onerror = () => {
-        console.error('❌ Google Drive upload network error');
-        reject(new Error('Upload failed due to network error'));
-      };
-
-      // Use real Google Drive API upload
-      xhr.open('POST', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&key=' + this.apiKey);
-      xhr.send(formData);
+      // For now, simulate upload since OAuth2 setup is complex
+      // TODO: Implement OAuth2 authentication for real uploads
+      this.simulateUpload(file, filename, progressCallback, resolve, reject);
     });
   }
 
@@ -114,8 +83,14 @@ class GoogleDriveIntegration {
       return `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iIzY2N2VlYSIgb3BhY2l0eT0iMC4xIi8+PHRleHQgeD0iNTAlIiB5PSI0NSUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0cHgiIGZpbGw9IiM2Njc3ZWEiIGZvbnQtd2VpZ2h0PSI2MDAiPlRlc3QgSW1hZ2U8L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI2MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwcHgiIGZpbGw9IiM5NGEzYjgiPiR7ZmlsZUlkfTwvdGV4dD48L3N2Zz4=`.replace('${fileId}', fileId);
     }
 
-    // Use Google Drive direct view URL with API key for better reliability
-    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.apiKey}`;
+    // Try multiple approaches for displaying Google Drive images
+    // Method 1: Direct API call (works for public files)
+    if (this.apiKey && fileId.match(/^[a-zA-Z0-9_-]+$/)) {
+      return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${this.apiKey}`;
+    }
+    
+    // Method 2: Google Drive thumbnail (more reliable for public files)
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400-h300-c`;
   }
 
   /**
@@ -209,6 +184,38 @@ class GoogleDriveIntegration {
     }
 
     return { valid: true };
+  }
+
+  /**
+   * Test method: Create an entry with a real Google Drive file ID
+   * This allows testing image display while upload simulation is in place
+   * @param {string} realFileId - Actual Google Drive file ID to test with
+   * @param {string} filename - Filename for the test
+   */
+  async createTestImageEntry(realFileId, filename) {
+    console.log('🧪 Creating test image entry with real Google Drive file ID:', realFileId);
+    
+    // Create a test entry in Firebase with the real file ID
+    const user = firebase.auth().currentUser;
+    const displayName = user.displayName || user.email.split('@')[0] || 'user';
+    
+    const imageData = {
+      filename: filename,
+      originalName: filename,
+      uploadDate: new Date().toISOString(),
+      uploadedBy: user.uid,
+      uploaderName: displayName,
+      bestPractice: false,
+      fileSize: 0, // Unknown for test
+      mimeType: 'image/jpeg',
+      driveFileId: realFileId // Use real Google Drive file ID
+    };
+
+    const firebaseKey = filename.replace(/\./g, '_').replace(/[^a-zA-Z0-9_]/g, '_');
+    await firebase.database().ref(`gallery-images/${firebaseKey}`).set(imageData);
+    
+    console.log('✅ Test image entry created successfully');
+    return firebaseKey;
   }
 }
 
