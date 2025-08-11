@@ -15,10 +15,10 @@
   "main": "index.js",
   "type": "module",
   "dependencies": {
-    "@fastify/busboy": "^3.1.1",
     "cors": "^2.8.5",
     "firebase-admin": "^12.0.0",
     "firebase-functions": "^5.0.0",
+    "formidable": "^3.5.4",
     "googleapis": "^130.0.0"
   },
   "devDependencies": {

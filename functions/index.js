@@ -2,7 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import cors from "cors";
-import { Busboy } from "@fastify/busboy";
+import formidable from "formidable";
 import { google } from "googleapis";
 import fs from "fs";
 import os from "os";
@@ -57,55 +57,39 @@ export const uploadToGallery = onRequest(
       let uploadedBy, uploaderName;
 
       try {
-        // Parse multipart/form-data with @fastify/busboy
-        await new Promise((resolve, reject) => {
-          const bb = new Busboy({ headers: req.headers });
-          let fileReceived = false;
-          let writeStreamFinished = false;
-
-          bb.on("file", (_name, file, info) => {
-            fileReceived = true;
-            originalFilename = info.filename;
-            mimetype = info.mimeType;
-            
-            // Generate filename with timestamp (like your current system)
-            const now = new Date();
-            const timestamp = now.toISOString()
-              .replace(/[-:]/g, '')
-              .replace(/\..+/, '')
-              .replace('T', '');
-            
-            const extension = originalFilename.split('.').pop();
-            filename = `upload${timestamp}.${extension}`;
-            
-            const tmpDir = os.tmpdir();
-            tmpFilePath = path.join(tmpDir, filename);
-            const writeStream = fs.createWriteStream(tmpFilePath);
-            
-            file.pipe(writeStream);
-            writeStream.on('error', reject);
-            writeStream.on('close', () => {
-              writeStreamFinished = true;
-              if (fileReceived && writeStreamFinished) resolve();
-            });
-          });
-
-          bb.on("field", (name, value) => {
-            if (name === 'uploadedBy') uploadedBy = value;
-            if (name === 'uploaderName') uploaderName = value;
-          });
-
-          bb.on("error", reject);
-          bb.on("close", () => {
-            if (!fileReceived) {
-              reject(new Error("No file received"));
-            } else if (writeStreamFinished) {
-              resolve();
-            }
-          });
-
-          req.pipe(bb);
+        // Parse multipart/form-data with formidable
+        const form = formidable({
+          maxFileSize: 10 * 1024 * 1024, // 10MB limit
+          keepExtensions: true,
+          uploadDir: os.tmpdir()
         });
+
+        const [fields, files] = await form.parse(req);
+        
+        // Get form fields
+        uploadedBy = fields.uploadedBy?.[0];
+        uploaderName = fields.uploaderName?.[0];
+        
+        // Get uploaded file
+        const fileArray = files.file;
+        if (!fileArray || fileArray.length === 0) {
+          throw new Error("No file received");
+        }
+        
+        const uploadedFile = fileArray[0];
+        originalFilename = uploadedFile.originalFilename;
+        mimetype = uploadedFile.mimetype;
+        tmpFilePath = uploadedFile.filepath;
+        
+        // Generate filename with timestamp (like your current system)
+        const now = new Date();
+        const timestamp = now.toISOString()
+          .replace(/[-:]/g, '')
+          .replace(/\..+/, '')
+          .replace('T', '');
+        
+        const extension = originalFilename.split('.').pop();
+        filename = `upload${timestamp}.${extension}`;
 
         logger.info(`Uploading file: ${filename} (original: ${originalFilename})`);
 
