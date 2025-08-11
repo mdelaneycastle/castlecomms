@@ -2,7 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import cors from "cors";
-import Busboy from "busboy";
+import busboy from "busboy";
 import { google } from "googleapis";
 import fs from "fs";
 import os from "os";
@@ -57,11 +57,14 @@ export const uploadToGallery = onRequest(
       let uploadedBy, uploaderName;
 
       try {
-        // Parse multipart/form-data with Busboy
+        // Parse multipart/form-data with busboy
         await new Promise((resolve, reject) => {
-          const bb = Busboy({ headers: req.headers });
+          const bb = busboy({ headers: req.headers });
+          let fileReceived = false;
+          let writeStreamFinished = false;
 
           bb.on("file", (_name, file, info) => {
+            fileReceived = true;
             originalFilename = info.filename;
             mimetype = info.mimeType;
             
@@ -81,7 +84,10 @@ export const uploadToGallery = onRequest(
             
             file.pipe(writeStream);
             writeStream.on('error', reject);
-            writeStream.on('close', resolve);
+            writeStream.on('close', () => {
+              writeStreamFinished = true;
+              if (fileReceived && writeStreamFinished) resolve();
+            });
           });
 
           bb.on("field", (name, value) => {
@@ -90,8 +96,12 @@ export const uploadToGallery = onRequest(
           });
 
           bb.on("error", reject);
-          bb.on("finish", () => {
-            if (!tmpFilePath) reject(new Error("No file received"));
+          bb.on("close", () => {
+            if (!fileReceived) {
+              reject(new Error("No file received"));
+            } else if (writeStreamFinished) {
+              resolve();
+            }
           });
 
           req.pipe(bb);
@@ -205,13 +215,21 @@ export const deleteFromGallery = onCall(
       // Initialize Google Drive client
       const drive = getDriveClientFromSecret(DRIVE_SA_JSON.value());
 
-      // Delete from Google Drive
-      await drive.files.delete({
-        fileId: fileId,
-        supportsAllDrives: true
-      });
-
-      logger.info(`File deleted from Drive: ${fileId}`);
+      // Try to delete from Google Drive (handle case where file doesn't exist)
+      try {
+        await drive.files.delete({
+          fileId: fileId,
+          supportsAllDrives: true
+        });
+        logger.info(`File deleted from Drive: ${fileId}`);
+      } catch (driveError) {
+        // If file doesn't exist in Drive, log but continue
+        if (driveError.code === 404) {
+          logger.warn(`File not found in Drive: ${fileId} - continuing with Firebase deletion`);
+        } else {
+          throw driveError; // Re-throw other Drive errors
+        }
+      }
 
       // Delete from Firebase
       const db = getDatabase();
