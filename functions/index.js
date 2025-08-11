@@ -2,7 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import cors from "cors";
-import busboy from "busboy";
+import { Busboy } from "@fastify/busboy";
 import { google } from "googleapis";
 import fs from "fs";
 import os from "os";
@@ -57,9 +57,9 @@ export const uploadToGallery = onRequest(
       let uploadedBy, uploaderName;
 
       try {
-        // Parse multipart/form-data with busboy
+        // Parse multipart/form-data with @fastify/busboy
         await new Promise((resolve, reject) => {
-          const bb = busboy({ headers: req.headers });
+          const bb = new Busboy({ headers: req.headers });
           let fileReceived = false;
           let writeStreamFinished = false;
 
