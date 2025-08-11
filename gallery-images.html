@@ -369,8 +369,8 @@
       async init() {
         try {
           
-          // Production endpoint URL - functions are now deployed
-          this.uploadEndpoint = 'https://europe-west1-castle-comms.cloudfunctions.net/uploadToGallery';
+          // Production endpoint URL - using new 2nd gen function URLs
+          this.uploadEndpoint = 'https://uploadtogallery-ngp3khlsna-ew.a.run.app';
           
           // Setup UI event listeners
           this.setupEventListeners();
@@ -614,14 +614,14 @@
 
           if (driveFileId) {
             // Delete from both Google Drive and Firebase using the Firebase Function
-            // Manually call the europe-west1 function since callable functions default to us-central1
-            const response = await fetch('https://europe-west1-castle-comms.cloudfunctions.net/deleteFromGallery', {
+            const response = await fetch('https://deletefromgallery-ngp3khlsna-ew.a.run.app', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                data: { fileId: driveFileId, firebaseKey: key }
+                firebaseKey: key,
+                fileId: driveFileId
               })
             });
             
