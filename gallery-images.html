@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gallery Images - Castle Comms</title>
   
+  <!-- Force cache refresh -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
   <!-- Security Headers -->
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -17,9 +22,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://apis.google.com/js/api.js"></script>
+  <!-- No external dependencies needed for Firebase Storage -->
   
   <!-- Microsoft Graph SDK -->
   <script src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/umd/msal-browser.min.js"></script>
@@ -316,10 +319,14 @@
 
       <!-- Upload Section -->
       <div class="upload-section">
+        <!-- Simplified upload section - no Google Drive needed -->
+        
         <div class="upload-area" id="upload-area">
           <div class="upload-icon">📸</div>
           <div class="upload-text">Drag & drop images here or click to browse</div>
-          <div class="upload-subtext">Supported formats: JPG, PNG, GIF (Max 10MB each)</div>
+          <div class="upload-subtext">Supported formats: JPG, PNG, GIF (Max 10MB each)<br>
+            <span style="color: #0f9d58; font-weight: 600;">✅ Now using Firebase Storage - fast & reliable!</span>
+          </div>
         </div>
         
         <div class="upload-progress" id="upload-progress">
@@ -353,34 +360,23 @@
     </div>
   </div>
 
-  <!-- Firebase SDK v9 (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <!-- Functions SDK removed - using direct HTTP calls -->
+  <!-- Firebase scripts already loaded in head -->
   
   <!-- Scripts -->
-  <script src="firebase-init.js?v=FIXED2025"></script>
-  <script src="shared-components.js?v=FIXED2025"></script>
+  <script src="firebase-init.js?v=NOGOOGLE2025"></script>
+  <script src="shared-components.js?v=NOGOOGLE2025"></script>
   
   <script>
     class GalleryImagesManager {
       constructor() {
         this.images = new Map();
         this.uploadEndpoint = null;
-        this.googleAuth = null;
-        this.GOOGLE_CLIENT_ID = '959264765744-qhc7l933ptagmefckffgi6juku8b2ff9.apps.googleusercontent.com';
-        this.DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
       }
 
       async init() {
         try {
-          
-          // Production endpoint URL - using new 2nd gen function URLs
+          // Production endpoint URL - using Firebase Functions
           this.uploadEndpoint = 'https://uploadtogallery-ngp3khlsna-ew.a.run.app';
-          
-          // Initialize Google API
-          await this.initGoogleAPI();
           
           // Setup UI event listeners
           this.setupEventListeners();
@@ -395,83 +391,18 @@
         }
       }
 
-      async initGoogleAPI() {
-        try {
-          // Wait for Google Identity Services to load
-          await new Promise((resolve, reject) => {
-            if (typeof google !== 'undefined' && google.accounts) {
-              resolve();
-            } else {
-              const checkInterval = setInterval(() => {
-                if (typeof google !== 'undefined' && google.accounts) {
-                  clearInterval(checkInterval);
-                  resolve();
-                }
-              }, 100);
-              
-              // Timeout after 10 seconds
-              setTimeout(() => {
-                clearInterval(checkInterval);
-                reject(new Error('Google Identity Services failed to load'));
-              }, 10000);
-            }
-          });
+      // No Google API initialization needed anymore
 
-          // Initialize the OAuth client
-          this.tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: this.GOOGLE_CLIENT_ID,
-            scope: this.DRIVE_SCOPE,
-            callback: (response) => {
-              if (response.error) {
-                console.error('❌ OAuth error:', response.error);
-              } else {
-                console.log('✅ Got access token from OAuth');
-                this.accessToken = response.access_token;
-              }
-            }
-          });
-
-          console.log('✅ Google Identity Services initialized');
-        } catch (error) {
-          console.error('❌ Google API initialization failed:', error);
-          throw error;
-        }
-      }
-
-      async getGoogleAccessToken() {
-        try {
-          if (!this.tokenClient) {
-            throw new Error('Google OAuth not initialized');
-          }
-
-          return new Promise((resolve, reject) => {
-            // Set callback for this specific request
-            this.tokenClient.callback = (response) => {
-              if (response.error) {
-                console.error('❌ OAuth error:', response.error);
-                reject(new Error(response.error));
-              } else {
-                console.log('✅ Got Google Drive access token');
-                resolve(response.access_token);
-              }
-            };
-
-            // Request access token
-            this.tokenClient.requestAccessToken({ prompt: '' });
-          });
-        } catch (error) {
-          console.error('❌ Failed to get Google access token:', error);
-          throw error;
-        }
-      }
+      // No Google OAuth needed anymore
 
       setupEventListeners() {
         const uploadArea = document.getElementById('upload-area');
         const fileInput = document.getElementById('file-input');
         const modal = document.getElementById('image-modal');
         const closeModal = document.getElementById('close-modal');
+        // No Google Drive connection needed
 
-        // Upload area events
+        // Upload area events - only open file picker
         uploadArea.addEventListener('click', () => fileInput.click());
         uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
         uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
@@ -526,6 +457,8 @@
 
         if (validFiles.length === 0) return;
 
+        // Direct upload to Firebase Storage - no external services needed
+
         for (const file of validFiles) {
           await this.uploadFile(file);
         }
@@ -545,24 +478,13 @@
           const user = firebase.auth().currentUser;
           const displayName = user.displayName || user.email.split('@')[0] || 'user';
 
-          // Get Google Drive access token via OAuth
-          let accessToken = null;
-          try {
-            accessToken = await this.getGoogleAccessToken();
-            console.log('✅ Using Google OAuth for upload');
-          } catch (error) {
-            console.warn('❌ Could not get Google access token, falling back to service account:', error);
-            this.showError('Please grant Google Drive access for uploads to work properly');
-          }
+          console.log('✅ Uploading to Firebase Storage');
 
           // Create FormData for the upload
           const formData = new FormData();
           formData.append('file', file);
           formData.append('uploadedBy', user.uid);
           formData.append('uploaderName', displayName);
-          if (accessToken) {
-            formData.append('accessToken', accessToken);
-          }
 
           progressFill.style.width = '30%';
 
@@ -596,7 +518,7 @@
             this.loadImages();
           }, 1000);
 
-          this.showSuccess(`${file.name} uploaded successfully to Google Drive!`);
+          this.showSuccess(`${file.name} uploaded successfully to Firebase Storage!`);
 
         } catch (error) {
           console.error('❌ Upload error:', error);
@@ -646,13 +568,12 @@
         const card = document.createElement('div');
         card.className = 'image-card';
         
-        // Get image URL - use webContentLink if available, fallback to Drive API
-        const imageUrl = imageData.webContentLink || 
-          (imageData.driveFileId ? `https://drive.google.com/thumbnail?id=${imageData.driveFileId}&sz=w400-h300-c` : 
-          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2Y4ZmFmYyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNHB4IiBmaWxsPSIjOTRhM2I4Ij5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==');
+        // Get image URL from Firebase Storage
+        const imageUrl = imageData.storageUrl || 
+          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2Y4ZmFmYyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNHB4IiBmaWxsPSIjOTRhM2I4Ij5Mb2FkaW5nLi4uPC90ZXh0Pjwvc3ZnPg==';
         
         card.innerHTML = `
-          <div class="image-container" onclick="galleryManager.openModal('${imageData.driveFileId || imageData.filename}', '${imageData.webContentLink || ''}')">
+          <div class="image-container" onclick="galleryManager.openModal('${imageData.filename}', '${imageData.storageUrl || ''}')">
             <img src="${imageUrl}" 
                  alt="${imageData.originalName}"
                  loading="lazy"
@@ -668,7 +589,7 @@
                 ⭐
               </button>
               <button class="delete-btn" 
-                      onclick="galleryManager.deleteImage('${key}', '${imageData.originalName}', '${imageData.driveFileId || ''}')"
+                      onclick="galleryManager.deleteImage('${key}', '${imageData.originalName}', '${imageData.filename || ''}')"
                       title="Delete Image">
                 🗑️
               </button>
@@ -695,17 +616,17 @@
         }
       }
 
-      async deleteImage(key, originalName, driveFileId) {
+      async deleteImage(key, originalName, filename) {
         try {
           // Show confirmation dialog
-          const confirmed = confirm(`Are you sure you want to delete "${originalName}"?\n\nThis will permanently remove the file from both the gallery and Google Drive.`);
+          const confirmed = confirm(`Are you sure you want to delete "${originalName}"?\n\nThis will permanently remove the file from Firebase Storage.`);
           
           if (!confirmed) {
             return;
           }
 
-          if (driveFileId) {
-            // Delete from both Google Drive and Firebase using the Firebase Function
+          if (filename) {
+            // Delete from Firebase Storage and Database using the Firebase Function
             const response = await fetch('https://deletefromgallery-ngp3khlsna-ew.a.run.app', {
               method: 'POST',
               headers: {
@@ -713,7 +634,7 @@
               },
               body: JSON.stringify({
                 firebaseKey: key,
-                fileId: driveFileId
+                filename: filename
               })
             });
             
@@ -739,7 +660,7 @@
             }
           });
           
-          this.showSuccess(`"${originalName}" has been deleted from both the gallery and Google Drive`);
+          this.showSuccess(`"${originalName}" has been deleted from Firebase Storage`);
           
           // Check if gallery is now empty
           const remainingCards = document.querySelectorAll('.image-card');
@@ -754,16 +675,15 @@
         }
       }
 
-      openModal(fileId, webContentLink) {
+      openModal(filename, storageUrl) {
         const modal = document.getElementById('image-modal');
         const modalImage = document.getElementById('modal-image');
         
-        // Use webContentLink if available, otherwise fallback to Drive API
-        const imageUrl = webContentLink || 
-          (fileId ? `https://drive.google.com/uc?id=${fileId}` : '');
+        // Use Firebase Storage URL
+        const imageUrl = storageUrl || '';
         
         modalImage.src = imageUrl;
-        modalImage.alt = fileId;
+        modalImage.alt = filename;
         
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden';
