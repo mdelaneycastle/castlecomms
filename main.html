@@ -9,9 +9,26 @@
 </head>
 <body>
   
-<header>
-  <button id="menu-toggle" class="hamburger">&#9776;</button>
-  <h1>Castle Comms</h1>
+<header class="modern-header">
+  <div class="header-content">
+    <div class="header-left">
+      <button id="menu-toggle" class="modern-hamburger" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="brand-logo">
+        <span class="brand-initials">CC</span>
+      </div>
+      <div class="brand-text">
+        <div class="brand-subtitle">CASTLE COMMS</div>
+        <div class="brand-title">Dashboard</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="user-greeting">Hi <span class="user-name" id="user-name-display">Marc Delaney</span></div>
+    </div>
+  </div>
 </header>
   <div id="notification-bell" class="notification-bell hidden">
   🔔 <span id="notification-count" class="count-badge">0</span>
@@ -19,118 +36,71 @@
 
 <div id="sidebar-container"></div>
 
-<main id="main">
-  <div class="welcome-message" id="welcome-message">
-    <h2 id="welcome-text">Welcome to Castle Comms</h2>
-  </div>
-  
-  <div class="quick-links">
-    <a href="http://192.168.28.246/CGNET2024/rptLeagueTable.aspx" target="_blank" title="Target League Table" class="premium-link target-league">
-      <div class="premium-backdrop"></div>
-      <div class="premium-content">
-        <div class="premium-header">
-          <div class="premium-badge">TARGETS</div>
-          <div class="premium-glow"></div>
-        </div>
-        <div class="premium-title">League Table</div>
-        <div class="premium-subtitle">Performance Rankings</div>
-        <div class="premium-arrow">→</div>
-      </div>
+<main id="main" class="modern-main">
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <a href="contact-finder.html" class="pill-button">
+      <span>🤔</span> Who should I contact?
     </a>
-    <a href="https://secure.workforceready.eu/ta/6164422.home?rnd=FRX&showAdmin=1&Ext=clock&sft=YLYWTXGNBA&ActiveSessionId=5177576674#home" target="_blank" title="Kronos" class="premium-link kronos">
-      <div class="premium-backdrop"></div>
-      <div class="premium-content">
-        <div class="premium-header">
-          <div class="premium-badge">TIME</div>
-          <div class="premium-glow"></div>
-        </div>
-        <div class="premium-title">Kronos</div>
-        <div class="premium-subtitle">Workforce Management</div>
-        <div class="premium-arrow">→</div>
-      </div>
-    </a>
-    <a href="http://192.168.28.246/cgnet2024/login.aspx" target="_blank" title="CGNet" class="premium-link cgnet">
-      <div class="premium-backdrop"></div>
-      <div class="premium-content">
-        <div class="premium-header">
-          <div class="premium-badge">SYSTEM</div>
-          <div class="premium-glow"></div>
-        </div>
-        <div class="premium-title">CGNet</div>
-        <div class="premium-subtitle">Core Management</div>
-        <div class="premium-arrow">→</div>
-      </div>
-    </a>
-    <a href="http://www.castlefineart.com/" target="_blank" title="CFA Website" class="premium-link cfa-website">
-      <div class="premium-backdrop"></div>
-      <div class="premium-content">
-        <div class="premium-header">
-          <div class="premium-badge">WEBSITE</div>
-          <div class="premium-glow"></div>
-        </div>
-        <div class="premium-title">CFA Website</div>
-        <div class="premium-subtitle">Public Portal</div>
-        <div class="premium-arrow">→</div>
-      </div>
-    </a>
-    <a href="https://castlefineart.storiq.net/files?expandedFolder=%2FCompliance%2F&bucket_key=castlefineart-storiq-net" target="_blank" title="Anti Money Laundering" class="premium-link aml">
-      <div class="premium-backdrop"></div>
-      <div class="premium-content">
-        <div class="premium-header">
-          <div class="premium-badge">COMPLIANCE</div>
-          <div class="premium-glow"></div>
-        </div>
-        <div class="premium-title">Anti Money Laundering</div>
-        <div class="premium-subtitle">Legal Documentation</div>
-        <div class="premium-arrow">→</div>
-      </div>
-    </a>
-    <a href="https://washingtongreen.pagetiger.com/bimunif" target="_blank" title="Gallery Technician Manual" class="premium-link tech-manual">
-      <div class="premium-backdrop"></div>
-      <div class="premium-content">
-        <div class="premium-header">
-          <div class="premium-badge">TECHNICAL</div>
-          <div class="premium-glow"></div>
-        </div>
-        <div class="premium-title">Technician Manual</div>
-        <div class="premium-subtitle">Technical Reference</div>
-        <div class="premium-arrow">→</div>
-      </div>
-    </a>
-    <a href="https://washingtongreen.pagetiger.com/ibmxza" target="_blank" title="Gallery Manual" class="gallery-manual-redesign">
-      <div class="manual-backdrop"></div>
-      <div class="manual-content">
-        <div class="manual-header">
-          <div class="manual-badge">GUIDE</div>
-          <div class="manual-glow"></div>
-        </div>
-        <div class="premium-title">Gallery Manual</div>
-        <div class="premium-subtitle">Complete Reference</div>
-        <div class="manual-arrow">→</div>
-      </div>
-    </a>
-    <a href="https://app.powerbi.com/reportEmbed?reportId=5a5e361e-661c-41c9-90ae-821b46de10ae&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a" target="_blank" title="YTD Sales Report 2025" class="premium-link sales-ytd">
-      <div class="premium-backdrop"></div>
-      <div class="premium-content">
-        <div class="premium-header">
-          <div class="premium-badge">ANALYTICS</div>
-          <div class="premium-glow"></div>
-        </div>
-        <div class="premium-title">Sales YTD</div>
-        <div class="premium-subtitle">Performance Data</div>
-        <div class="premium-arrow">→</div>
-      </div>
+    <a href="news-mentions.html" class="pill-button">
+      <span>📰</span> News and Media mentions
     </a>
   </div>
 
-  <div style="text-align: center; margin-top: 3rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-    <a href="contact-finder.html" class="cta-button">
-      🤔 Who do I contact? - Smart Team Finder
+  <!-- Quicklinks Section -->
+  <section class="quicklinks-section">
+    <h2 class="section-title">Quicklinks</h2>
+    <div class="modern-quick-links">
+    <a href="http://192.168.28.246/CGNET2024/rptLeagueTable.aspx" target="_blank" title="Target League Table" class="modern-quicklink">
+      <div class="quicklink-content">
+        <span class="quicklink-label">League Table</span>
+        <span class="quicklink-arrow">→</span>
+      </div>
     </a>
-    <a href="news-mentions.html" class="cta-button">
-      📰 News & Media Mentions
+    <a href="https://secure.workforceready.eu/ta/6164422.home?rnd=FRX&showAdmin=1&Ext=clock&sft=YLYWTXGNBA&ActiveSessionId=5177576674#home" target="_blank" title="Kronos" class="modern-quicklink">
+      <div class="quicklink-content">
+        <span class="quicklink-label">Kronos</span>
+        <span class="quicklink-arrow">→</span>
+      </div>
+    </a>
+    <a href="http://192.168.28.246/cgnet2024/login.aspx" target="_blank" title="CGNet" class="modern-quicklink">
+      <div class="quicklink-content">
+        <span class="quicklink-label">CGNet</span>
+        <span class="quicklink-arrow">→</span>
+      </div>
+    </a>
+    <a href="http://www.castlefineart.com/" target="_blank" title="CFA Website" class="modern-quicklink">
+      <div class="quicklink-content">
+        <span class="quicklink-label">CFA Website</span>
+        <span class="quicklink-arrow">→</span>
+      </div>
+    </a>
+    <a href="https://castlefineart.storiq.net/files?expandedFolder=%2FCompliance%2F&bucket_key=castlefineart-storiq-net" target="_blank" title="Anti Money Laundering" class="modern-quicklink">
+      <div class="quicklink-content">
+        <span class="quicklink-label">Anti Money Laundering</span>
+        <span class="quicklink-arrow">→</span>
+      </div>
+    </a>
+    <a href="https://washingtongreen.pagetiger.com/bimunif" target="_blank" title="Gallery Technician Manual" class="modern-quicklink">
+      <div class="quicklink-content">
+        <span class="quicklink-label">Technician Manual</span>
+        <span class="quicklink-arrow">→</span>
+      </div>
+    </a>
+    <a href="https://washingtongreen.pagetiger.com/ibmxza" target="_blank" title="Gallery Manual" class="modern-quicklink">
+      <div class="quicklink-content">
+        <span class="quicklink-label">Gallery Manual</span>
+        <span class="quicklink-arrow">→</span>
+      </div>
+    </a>
+    <a href="https://app.powerbi.com/reportEmbed?reportId=5a5e361e-661c-41c9-90ae-821b46de10ae&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a" target="_blank" title="YTD Sales Report 2025" class="modern-quicklink">
+      <div class="quicklink-content">
+        <span class="quicklink-label">Sales YTD</span>
+        <span class="quicklink-arrow">→</span>
+      </div>
     </a>
   </div>
+  </section>
 
   <!-- Dashboard Cards -->
   <div class="dashboard-cards">
