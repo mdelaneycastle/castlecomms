@@ -1,22 +1,16 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const cors = require("cors");
-const { google } = require("googleapis");
-const fs = require("fs");
-const os = require("os");
 const path = require("path");
-const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getDatabase } = require("firebase-admin/database");
-const multer = require('multer');
-const express = require('express');
+const { getStorage } = require("firebase-admin/storage");
 
 // Initialize Firebase Admin
 initializeApp();
 
-const DRIVE_SA_JSON = defineSecret("DRIVE_SA_JSON");
-// Use the shared folder when OAuth is available, root when service account
-const DRIVE_FOLDER_ID = "1FGhH16oogIvS3hy_sACyyxfKScfq6v_G";
+// Firebase Storage bucket
+const bucket = getStorage().bucket();
 
 const corsOptions = {
   origin: [
@@ -30,64 +24,19 @@ const corsOptions = {
 
 const corsHandler = cors(corsOptions);
 
-function getDriveClientFromAccessToken(accessToken) {
-  try {
-    logger.info('Using OAuth access token for Drive API');
-    
-    const oauth2Client = new google.auth.OAuth2();
-    oauth2Client.setCredentials({
-      access_token: accessToken
-    });
-    
-    return google.drive({ version: "v3", auth: oauth2Client });
-  } catch (error) {
-    logger.error('OAuth setup failed:', error);
-    throw new Error(`Failed to setup OAuth: ${error.message}`);
-  }
-}
-
-function getDriveClientFromSecret(jsonString) {
-  try {
-    logger.info(`JSON string length: ${jsonString.length}, starts with: ${jsonString.substring(0, 50)}`);
-    
-    const creds = JSON.parse(jsonString);
-    
-    // Validate required fields
-    if (!creds.client_email || !creds.private_key) {
-      throw new Error('Missing required fields: client_email or private_key');
-    }
-    
-    // Ensure private key has proper line breaks
-    let privateKey = creds.private_key;
-    if (privateKey && typeof privateKey === 'string') {
-      // Replace any escaped newlines with actual newlines
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
-    
-    logger.info(`Using client_email: ${creds.client_email}`);
-    logger.info(`Private key starts with: ${privateKey.substring(0, 50)}...`);
-    
-    const jwt = new google.auth.JWT(
-      creds.client_email,
-      null,
-      privateKey,
-      ["https://www.googleapis.com/auth/drive.file"]
-    );
-    
-    return google.drive({ version: "v3", auth: jwt });
-  } catch (error) {
-    logger.error('Service account setup failed:', error);
-    logger.error('Raw JSON string (first 100 chars):', jsonString ? jsonString.substring(0, 100) : 'undefined');
-    throw new Error(`Failed to setup service account: ${error.message}`);
-  }
+// Firebase Storage utilities
+function generateUniqueFilename(originalName, uploaderName) {
+  const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
+  const fileExtension = path.extname(originalName);
+  const baseName = path.basename(originalName, fileExtension);
+  return `gallery/${uploaderName}_${timestamp}_${baseName}${fileExtension}`;
 }
 
 /**
- * Upload file to Google Drive and save metadata to Firebase
+ * Upload file to Firebase Storage and save metadata to Firebase Database
  */
 const uploadToGallery = onRequest(
   { 
-    secrets: [DRIVE_SA_JSON], 
     region: "europe-west1", 
     memory: "1GiB", 
     timeoutSeconds: 300
@@ -147,7 +96,7 @@ const uploadToGallery = onRequest(
               });
             }
 
-            const { uploadedBy, uploaderName, accessToken } = formFields;
+            const { uploadedBy, uploaderName } = formFields;
             if (!uploadedBy || !uploaderName) {
               return res.status(400).json({ 
                 success: false, 
@@ -157,67 +106,42 @@ const uploadToGallery = onRequest(
 
             logger.info(`Processing upload: ${fileInfo.filename}, size: ${fileBuffer.length}`);
 
-            // Get Google Drive client - try OAuth first, fallback to service account
-            let drive;
-            if (accessToken) {
-              logger.info('Using OAuth access token');
-              drive = getDriveClientFromAccessToken(accessToken);
-            } else {
-              logger.info('Using service account (fallback)');
-              drive = getDriveClientFromSecret(DRIVE_SA_JSON.value());
-            }
+            // Generate unique filename for Firebase Storage
+            const uniqueFilename = generateUniqueFilename(fileInfo.filename, uploaderName);
+            logger.info(`Uploading to Firebase Storage as: ${uniqueFilename}`);
 
-            // Generate unique filename with timestamp
-            const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
-            const fileExtension = path.extname(fileInfo.filename);
-            const uniqueFilename = `${uploaderName}${timestamp}${fileExtension}`;
-
-            // Upload to Google Drive (to service account's root folder)
-            const requestBody = {
-              name: uniqueFilename
-            };
-            
-            // Only add parents if DRIVE_FOLDER_ID is not null
-            if (DRIVE_FOLDER_ID) {
-              requestBody.parents = [DRIVE_FOLDER_ID];
-            }
-            
-            const driveResponse = await drive.files.create({
-              requestBody,
-              media: {
-                mimeType: fileInfo.mimeType,
-                body: require('stream').Readable.from(fileBuffer)
-              }
+            // Upload to Firebase Storage
+            const file = bucket.file(uniqueFilename);
+            const stream = file.createWriteStream({
+              metadata: {
+                contentType: fileInfo.mimeType,
+                metadata: {
+                  uploadedBy: uploadedBy,
+                  uploaderName: uploaderName,
+                  originalName: fileInfo.filename
+                }
+              },
+              public: true // Make file publicly accessible
             });
 
-            const fileId = driveResponse.data.id;
-            logger.info(`File uploaded to Drive with ID: ${fileId}`);
-
-            // Make file publicly viewable
-            await drive.permissions.create({
-              fileId: fileId,
-              requestBody: {
-                role: 'reader',
-                type: 'anyone'
-              }
+            // Upload file as a promise
+            await new Promise((resolve, reject) => {
+              stream.on('error', reject);
+              stream.on('finish', resolve);
+              stream.end(fileBuffer);
             });
 
-            // Get file metadata for webContentLink
-            const fileMetadata = await drive.files.get({
-              fileId: fileId,
-              fields: 'id,name,webContentLink,webViewLink,thumbnailLink'
-            });
+            // Get public URL
+            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${uniqueFilename}`;
+            logger.info(`File uploaded to Firebase Storage: ${publicUrl}`);
 
-            // Save metadata to Firebase
+            // Save metadata to Firebase Database
             const db = getDatabase();
             const imageRef = db.ref('gallery-images').push();
             const imageData = {
               originalName: fileInfo.filename,
               filename: uniqueFilename,
-              driveFileId: fileId,
-              webContentLink: fileMetadata.data.webContentLink,
-              webViewLink: fileMetadata.data.webViewLink,
-              thumbnailLink: fileMetadata.data.thumbnailLink,
+              storageUrl: publicUrl,
               uploadDate: new Date().toISOString(),
               uploadedBy: uploadedBy,
               uploaderName: uploaderName,
@@ -227,15 +151,14 @@ const uploadToGallery = onRequest(
             };
 
             await imageRef.set(imageData);
-            logger.info(`Metadata saved to Firebase with key: ${imageRef.key}`);
+            logger.info(`Metadata saved to Firebase Database with key: ${imageRef.key}`);
 
             res.status(200).json({
               success: true,
-              message: "File uploaded successfully to Google Drive and metadata saved to Firebase",
-              fileId: fileId,
+              message: "File uploaded successfully to Firebase Storage",
               firebaseKey: imageRef.key,
               filename: uniqueFilename,
-              webContentLink: fileMetadata.data.webContentLink
+              storageUrl: publicUrl
             });
 
           } catch (error) {
@@ -273,11 +196,10 @@ const uploadToGallery = onRequest(
 );
 
 /**
- * Delete file from Google Drive and Firebase
+ * Delete file from Firebase Storage and Firebase Database
  */
 const deleteFromGallery = onRequest(
   { 
-    secrets: [DRIVE_SA_JSON], 
     region: "europe-west1"
   },
   async (req, res) => {
@@ -294,40 +216,36 @@ const deleteFromGallery = onRequest(
       try {
         logger.info('Delete request received:', req.body);
         
-        const { fileId, firebaseKey } = req.body || {};
+        const { filename, firebaseKey } = req.body || {};
 
-        if (!fileId || !firebaseKey) {
+        if (!filename || !firebaseKey) {
           return res.status(400).json({ 
             success: false, 
-            error: "fileId and firebaseKey are required" 
+            error: "filename and firebaseKey are required" 
           });
         }
 
-        const drive = getDriveClientFromSecret(DRIVE_SA_JSON.value());
-
-        // Try to delete from Google Drive (handle case where file doesn't exist)
+        // Delete from Firebase Storage
         try {
-          await drive.files.delete({
-            fileId: fileId,
-            supportsAllDrives: true
-          });
-          logger.info(`File deleted from Drive: ${fileId}`);
-        } catch (driveError) {
-          if (driveError.code === 404) {
-            logger.warn(`File not found in Drive: ${fileId} - continuing with Firebase deletion`);
+          const file = bucket.file(filename);
+          await file.delete();
+          logger.info(`File deleted from Firebase Storage: ${filename}`);
+        } catch (storageError) {
+          if (storageError.code === 404) {
+            logger.warn(`File not found in Storage: ${filename} - continuing with database deletion`);
           } else {
-            throw driveError;
+            throw storageError;
           }
         }
 
-        // Delete from Firebase
+        // Delete from Firebase Database
         const db = getDatabase();
         await db.ref(`gallery-images/${firebaseKey}`).remove();
-        logger.info(`Metadata deleted from Firebase: ${firebaseKey}`);
+        logger.info(`Metadata deleted from Firebase Database: ${firebaseKey}`);
 
         res.status(200).json({ 
           success: true, 
-          message: "File deleted successfully from both Google Drive and Firebase" 
+          message: "File deleted successfully from Firebase Storage and Database" 
         });
 
       } catch (error) {

@@ -1,8 +1,0 @@
-[
-  {
-    "origin": ["https://mdelaneycastle.github.io"],
-    "method": ["GET", "PUT", "POST", "HEAD"],
-    "maxAgeSeconds": 3600,
-    "responseHeader": ["Content-Type", "x-goog-resumable"]
-  }
-]
