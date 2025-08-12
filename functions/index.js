@@ -15,6 +15,7 @@ const express = require('express');
 initializeApp();
 
 const DRIVE_SA_JSON = defineSecret("DRIVE_SA_JSON");
+// Use the shared folder when OAuth is available, root when service account
 const DRIVE_FOLDER_ID = "1FGhH16oogIvS3hy_sACyyxfKScfq6v_G";
 
 const corsOptions = {
@@ -29,37 +30,42 @@ const corsOptions = {
 
 const corsHandler = cors(corsOptions);
 
+function getDriveClientFromAccessToken(accessToken) {
+  try {
+    logger.info('Using OAuth access token for Drive API');
+    
+    const oauth2Client = new google.auth.OAuth2();
+    oauth2Client.setCredentials({
+      access_token: accessToken
+    });
+    
+    return google.drive({ version: "v3", auth: oauth2Client });
+  } catch (error) {
+    logger.error('OAuth setup failed:', error);
+    throw new Error(`Failed to setup OAuth: ${error.message}`);
+  }
+}
+
 function getDriveClientFromSecret(jsonString) {
   try {
-    // Clean and validate JSON string
-    let cleanJsonString = jsonString.trim();
+    logger.info(`JSON string length: ${jsonString.length}, starts with: ${jsonString.substring(0, 50)}`);
     
-    // Handle potential line ending issues and malformed JSON
-    cleanJsonString = cleanJsonString.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    
-    // If the string doesn't start with {, it might be base64 encoded
-    if (!cleanJsonString.startsWith('{')) {
-      try {
-        cleanJsonString = Buffer.from(cleanJsonString, 'base64').toString('utf8');
-      } catch (b64Error) {
-        logger.warn('Not base64 encoded, using as-is');
-      }
-    }
-    
-    logger.info(`JSON string length: ${cleanJsonString.length}, starts with: ${cleanJsonString.substring(0, 10)}`);
-    
-    const creds = JSON.parse(cleanJsonString);
+    const creds = JSON.parse(jsonString);
     
     // Validate required fields
     if (!creds.client_email || !creds.private_key) {
       throw new Error('Missing required fields: client_email or private_key');
     }
     
-    // Clean up private key format
+    // Ensure private key has proper line breaks
     let privateKey = creds.private_key;
-    if (privateKey && !privateKey.includes('\n')) {
+    if (privateKey && typeof privateKey === 'string') {
+      // Replace any escaped newlines with actual newlines
       privateKey = privateKey.replace(/\\n/g, '\n');
     }
+    
+    logger.info(`Using client_email: ${creds.client_email}`);
+    logger.info(`Private key starts with: ${privateKey.substring(0, 50)}...`);
     
     const jwt = new google.auth.JWT(
       creds.client_email,
@@ -67,11 +73,12 @@ function getDriveClientFromSecret(jsonString) {
       privateKey,
       ["https://www.googleapis.com/auth/drive.file"]
     );
+    
     return google.drive({ version: "v3", auth: jwt });
   } catch (error) {
-    logger.error('JSON parsing error:', error);
+    logger.error('Service account setup failed:', error);
     logger.error('Raw JSON string (first 100 chars):', jsonString ? jsonString.substring(0, 100) : 'undefined');
-    throw new Error(`Failed to parse service account JSON: ${error.message}`);
+    throw new Error(`Failed to setup service account: ${error.message}`);
   }
 }
 
@@ -100,10 +107,11 @@ const uploadToGallery = onRequest(
       try {
         logger.info('Upload request received');
 
-        // Use busboy directly for better control
+        // Use busboy directly for better control with Cloud Functions v2
         const Busboy = require('busboy');
+        const contentType = req.headers['content-type'] || '';
         const busboy = Busboy({ 
-          headers: req.headers,
+          headers: { 'content-type': contentType },
           limits: {
             fileSize: 10 * 1024 * 1024 // 10MB limit
           }
@@ -114,14 +122,16 @@ const uploadToGallery = onRequest(
         let formFields = {};
 
         busboy.on('file', (fieldname, file, info) => {
-          if (fieldname === 'file') {
-            fileInfo = info;
-            const chunks = [];
-            file.on('data', (chunk) => chunks.push(chunk));
-            file.on('end', () => {
-              fileBuffer = Buffer.concat(chunks);
-            });
+          if (fieldname !== 'file') {
+            file.resume(); // Ignore non-file fields
+            return;
           }
+          fileInfo = info;
+          const chunks = [];
+          file.on('data', (chunk) => chunks.push(chunk));
+          file.on('end', () => {
+            fileBuffer = Buffer.concat(chunks);
+          });
         });
 
         busboy.on('field', (fieldname, value) => {
@@ -137,7 +147,7 @@ const uploadToGallery = onRequest(
               });
             }
 
-            const { uploadedBy, uploaderName } = formFields;
+            const { uploadedBy, uploaderName, accessToken } = formFields;
             if (!uploadedBy || !uploaderName) {
               return res.status(400).json({ 
                 success: false, 
@@ -147,20 +157,33 @@ const uploadToGallery = onRequest(
 
             logger.info(`Processing upload: ${fileInfo.filename}, size: ${fileBuffer.length}`);
 
-            // Get Google Drive client
-            const drive = getDriveClientFromSecret(DRIVE_SA_JSON.value());
+            // Get Google Drive client - try OAuth first, fallback to service account
+            let drive;
+            if (accessToken) {
+              logger.info('Using OAuth access token');
+              drive = getDriveClientFromAccessToken(accessToken);
+            } else {
+              logger.info('Using service account (fallback)');
+              drive = getDriveClientFromSecret(DRIVE_SA_JSON.value());
+            }
 
             // Generate unique filename with timestamp
             const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..+/, '');
             const fileExtension = path.extname(fileInfo.filename);
             const uniqueFilename = `${uploaderName}${timestamp}${fileExtension}`;
 
-            // Upload to Google Drive
+            // Upload to Google Drive (to service account's root folder)
+            const requestBody = {
+              name: uniqueFilename
+            };
+            
+            // Only add parents if DRIVE_FOLDER_ID is not null
+            if (DRIVE_FOLDER_ID) {
+              requestBody.parents = [DRIVE_FOLDER_ID];
+            }
+            
             const driveResponse = await drive.files.create({
-              requestBody: {
-                name: uniqueFilename,
-                parents: [DRIVE_FOLDER_ID]
-              },
+              requestBody,
               media: {
                 mimeType: fileInfo.mimeType,
                 body: require('stream').Readable.from(fileBuffer)
@@ -234,7 +257,8 @@ const uploadToGallery = onRequest(
           });
         });
 
-        req.pipe(busboy);
+        // IMPORTANT for Cloud Functions v2: Use req.rawBody instead of req.pipe(busboy)
+        busboy.end(req.rawBody);
 
       } catch (error) {
         logger.error("Upload failed:", error);
@@ -270,8 +294,7 @@ const deleteFromGallery = onRequest(
       try {
         logger.info('Delete request received:', req.body);
         
-        const { data } = req.body || {};
-        const { fileId, firebaseKey } = data || {};
+        const { fileId, firebaseKey } = req.body || {};
 
         if (!fileId || !firebaseKey) {
           return res.status(400).json({ 

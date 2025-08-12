@@ -17,6 +17,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js"></script>
+  
   <!-- Microsoft Graph SDK -->
   <script src="https://unpkg.com/@azure/msal-browser@2.38.3/lib/umd/msal-browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@microsoft/microsoft-graph-client@3.0.7/lib/graph-js-sdk.min.js"></script>
@@ -364,6 +368,9 @@
       constructor() {
         this.images = new Map();
         this.uploadEndpoint = null;
+        this.googleAuth = null;
+        this.GOOGLE_CLIENT_ID = '959264765744-qhc7l933ptagmefckffgi6juku8b2ff9.apps.googleusercontent.com';
+        this.DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
       }
 
       async init() {
@@ -371,6 +378,9 @@
           
           // Production endpoint URL - using new 2nd gen function URLs
           this.uploadEndpoint = 'https://uploadtogallery-ngp3khlsna-ew.a.run.app';
+          
+          // Initialize Google API
+          await this.initGoogleAPI();
           
           // Setup UI event listeners
           this.setupEventListeners();
@@ -385,6 +395,75 @@
         }
       }
 
+      async initGoogleAPI() {
+        try {
+          // Wait for Google Identity Services to load
+          await new Promise((resolve, reject) => {
+            if (typeof google !== 'undefined' && google.accounts) {
+              resolve();
+            } else {
+              const checkInterval = setInterval(() => {
+                if (typeof google !== 'undefined' && google.accounts) {
+                  clearInterval(checkInterval);
+                  resolve();
+                }
+              }, 100);
+              
+              // Timeout after 10 seconds
+              setTimeout(() => {
+                clearInterval(checkInterval);
+                reject(new Error('Google Identity Services failed to load'));
+              }, 10000);
+            }
+          });
+
+          // Initialize the OAuth client
+          this.tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: this.GOOGLE_CLIENT_ID,
+            scope: this.DRIVE_SCOPE,
+            callback: (response) => {
+              if (response.error) {
+                console.error('❌ OAuth error:', response.error);
+              } else {
+                console.log('✅ Got access token from OAuth');
+                this.accessToken = response.access_token;
+              }
+            }
+          });
+
+          console.log('✅ Google Identity Services initialized');
+        } catch (error) {
+          console.error('❌ Google API initialization failed:', error);
+          throw error;
+        }
+      }
+
+      async getGoogleAccessToken() {
+        try {
+          if (!this.tokenClient) {
+            throw new Error('Google OAuth not initialized');
+          }
+
+          return new Promise((resolve, reject) => {
+            // Set callback for this specific request
+            this.tokenClient.callback = (response) => {
+              if (response.error) {
+                console.error('❌ OAuth error:', response.error);
+                reject(new Error(response.error));
+              } else {
+                console.log('✅ Got Google Drive access token');
+                resolve(response.access_token);
+              }
+            };
+
+            // Request access token
+            this.tokenClient.requestAccessToken({ prompt: '' });
+          });
+        } catch (error) {
+          console.error('❌ Failed to get Google access token:', error);
+          throw error;
+        }
+      }
 
       setupEventListeners() {
         const uploadArea = document.getElementById('upload-area');
@@ -466,11 +545,24 @@
           const user = firebase.auth().currentUser;
           const displayName = user.displayName || user.email.split('@')[0] || 'user';
 
+          // Get Google Drive access token via OAuth
+          let accessToken = null;
+          try {
+            accessToken = await this.getGoogleAccessToken();
+            console.log('✅ Using Google OAuth for upload');
+          } catch (error) {
+            console.warn('❌ Could not get Google access token, falling back to service account:', error);
+            this.showError('Please grant Google Drive access for uploads to work properly');
+          }
+
           // Create FormData for the upload
           const formData = new FormData();
           formData.append('file', file);
           formData.append('uploadedBy', user.uid);
           formData.append('uploaderName', displayName);
+          if (accessToken) {
+            formData.append('accessToken', accessToken);
+          }
 
           progressFill.style.width = '30%';
 
