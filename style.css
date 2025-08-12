@@ -880,7 +880,7 @@ admin-link {
 .header-content {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   max-width: 1200px;
   margin: 0 auto;
   position: relative;
@@ -890,6 +890,7 @@ admin-link {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex: 1;
 }
 
 .modern-hamburger {
@@ -950,12 +951,18 @@ admin-link {
   letter-spacing: var(--letter-spacing-headers);
 }
 
-.header-right {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+.header-center {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
 }
 
 .user-greeting {
