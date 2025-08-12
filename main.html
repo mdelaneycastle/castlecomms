@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Castle Comms</title>
-  <link rel="stylesheet" href="style.css?v=20250731" />
+  <link rel="stylesheet" href="style.css?v=20250812_glassmorphism" />
 </head>
 <body>
   
@@ -201,34 +201,34 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
 // Dashboard Cards Functionality
 document.addEventListener('DOMContentLoaded', function() {
-  // CSS Debug - Check if styles are loaded
-  console.log('🎨 FIXED: Dashboard CSS loaded - Quick links should have 16px gap and 79px height (10% bigger)');
+  // CSS Debug - Check if new glass morphism styles are loaded
+  console.log('✨ GLASS MORPHISM: New design loaded with modern-quick-links!');
   
-  const quickLinks = document.querySelector('.quick-links');
-  if (quickLinks) {
-    const styles = window.getComputedStyle(quickLinks);
-    console.log('🔍 FIXED: Quick-links container styles:', {
+  const modernQuickLinks = document.querySelector('.modern-quick-links');
+  if (modernQuickLinks) {
+    const styles = window.getComputedStyle(modernQuickLinks);
+    console.log('🔍 NEW: Modern glass morphism quicklinks styles:', {
       display: styles.display,
       gap: styles.gap,
       gridTemplateColumns: styles.gridTemplateColumns,
-      gridTemplateRows: styles.gridTemplateRows,
-      justifyItems: styles.justifyItems,
-      alignItems: styles.alignItems
+      background: styles.background,
+      backdropFilter: styles.backdropFilter
     });
     
-    const allLinks = quickLinks.querySelectorAll('a, .premium-link');
-    console.log(`🔍 Found ${allLinks.length} quick-link buttons`);
+    const allLinks = modernQuickLinks.querySelectorAll('.modern-quicklink');
+    console.log(`🔍 Found ${allLinks.length} modern glass morphism buttons`);
     
     allLinks.forEach((link, index) => {
       const linkStyles = window.getComputedStyle(link);
-      console.log(`🔍 Button ${index + 1} styles:`, {
-        width: linkStyles.width,
-        height: linkStyles.height,
-        position: linkStyles.position,
-        margin: linkStyles.margin,
-        display: linkStyles.display
+      console.log(`🔍 Glass Button ${index + 1} styles:`, {
+        background: linkStyles.background,
+        backdropFilter: linkStyles.backdropFilter,
+        borderRadius: linkStyles.borderRadius,
+        boxShadow: linkStyles.boxShadow
       });
     });
+  } else {
+    console.log('❌ Modern quicklinks container not found - check HTML structure');
   }
   
   // Load dashboard data when user is authenticated
