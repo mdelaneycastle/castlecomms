@@ -786,9 +786,9 @@ admin-link {
 /* Modern Glass Morphism Quicklinks */
 .modern-quick-links {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  max-width: 1000px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1rem;
 }
@@ -1029,6 +1029,19 @@ admin-link {
   margin-bottom: 2rem;
   letter-spacing: var(--letter-spacing-headers);
   font-family: var(--font-primary);
+}
+
+/* Responsive quicklinks to match dashboard cards */
+@media (max-width: 1024px) {
+  .modern-quick-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .modern-quick-links {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Gallery Manual - Override to match other quick-links */
