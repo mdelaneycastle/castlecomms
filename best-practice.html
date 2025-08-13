@@ -15,7 +15,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   
-  <link rel="stylesheet" href="style.css?v=20250813_din_font_update" />
+  <link rel="stylesheet" href="style.css?v=20250813_comment_display" />
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -455,6 +455,7 @@
           );
 
           for (const [key, imageData] of sortedImages) {
+            console.log('📊 Image data:', { key, bestPractice: imageData.bestPractice, comment: imageData.comment, hasComment: !!imageData.comment });
             this.createImageCard(key, imageData);
           }
 
@@ -512,8 +513,8 @@
             <div class="image-filename">${imageData.originalName}</div>
             <div class="image-date">Added ${new Date(imageData.uploadDate).toLocaleDateString()}</div>
             <span class="image-uploader">by ${imageData.uploaderName}</span>
-            ${imageData.comment ? `<div class="image-comment">
-              <strong>Comment:</strong> ${imageData.comment}
+            ${(imageData.comment && imageData.comment.trim()) ? `<div class="image-comment">
+              <strong>Why this is best practice:</strong> ${imageData.comment}
             </div>` : ''}
           </div>
         `;
