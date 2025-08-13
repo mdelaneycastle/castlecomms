@@ -540,6 +540,9 @@
         }
         
         card.innerHTML = `
+          <div style="background: yellow; border: 5px solid blue; padding: 20px; margin: 10px; font-size: 16px; color: black; position: relative; z-index: 1000;">
+            TEST COMMENT BOX - If you can see this, the HTML is working. Comment: "${imageData.comment || 'NO COMMENT'}"
+          </div>
           <div class="best-practice-badge">
             <span>⭐</span>
             <span>Best Practice</span>
@@ -554,9 +557,6 @@
             <div class="image-filename">${imageData.originalName}</div>
             <div class="image-date">Added ${new Date(imageData.uploadDate).toLocaleDateString()}</div>
             <span class="image-uploader">by ${imageData.uploaderName}</span>
-            <div style="background: yellow; border: 5px solid blue; padding: 20px; margin: 10px; font-size: 16px; color: black;">
-              TEST COMMENT BOX - If you can see this, the HTML is working
-            </div>
             ${commentHtml}
           </div>
         `;
