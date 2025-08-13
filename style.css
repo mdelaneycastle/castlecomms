@@ -315,6 +315,22 @@ header h1 {
   opacity: 1;
 }
 
+/* Sidebar Icons */
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.75rem;
+  vertical-align: middle;
+  opacity: 0.8;
+  transition: var(--transition);
+  filter: contrast(1.2);
+}
+
+.sidebar ul li a:hover .sidebar-icon {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
 .sidebar.show {
   left: 0;
 }
@@ -818,7 +834,7 @@ admin-link {
   padding: 1rem 1.5rem;
   background: #F0EDE9;
   border: 1px solid rgba(216, 209, 197, 0.2);
-  border-radius: 12px;
+  border-radius: 4px;
   color: var(--text-dark);
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
