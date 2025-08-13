@@ -569,6 +569,107 @@
       font-size: 0.9rem;
     }
 
+    .ticket-timer {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: #495057;
+    }
+
+    .timer-display {
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+      background: #f8f9fa;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .timer-display.running {
+      color: #28a745;
+      background: #d4edda;
+    }
+
+    .timer-display.paused {
+      color: #dc3545;
+      background: #f8d7da;
+    }
+
+    .timer-icon {
+      font-size: 0.8rem;
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .timer-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .timer-btn.start {
+      background: #28a745;
+    }
+
+    .timer-btn.pause {
+      background: #ffc107;
+      color: #212529;
+    }
+
+    .timer-btn.resume {
+      background: #17a2b8;
+    }
+
+    .timer-btn:hover {
+      opacity: 0.8;
+    }
+
+    .timer-btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .timer-display-small {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #f8f9fa;
+      color: #6c757d;
+    }
+
+    .timer-display-small.running {
+      color: #28a745;
+      background: #d4edda;
+    }
+
+    .timer-display-small.paused {
+      color: #dc3545;
+      background: #f8d7da;
+    }
+
+    .timer-display-small.stopped {
+      color: #6c757d;
+      background: #e9ecef;
+    }
+
+    .ticket-timer-cell {
+      min-width: 80px;
+      text-align: center;
+    }
+
     .ticket-status {
       padding: 4px 8px;
       border-radius: 12px;
@@ -587,6 +688,11 @@
     .ticket-status.in-progress {
       background: #fff3cd;
       color: #856404;
+    }
+
+    .ticket-status.on-hold {
+      background: #f8d7da;
+      color: #721c24;
     }
 
     .ticket-status.resolved {
@@ -1671,6 +1777,7 @@
         <div id="modal-ticket-creator">Created by: User</div>
         <div id="modal-ticket-assignee">Assigned to: User</div>
         <div id="modal-ticket-date">Just now</div>
+        <div id="ticket-timer-display"></div>
       </div>
     </div>
     
@@ -1690,6 +1797,7 @@
         <select id="ticket-status-select" onchange="updateTicketStatus()">
           <option value="open">Open</option>
           <option value="in-progress">In Progress</option>
+          <option value="on-hold">On Hold</option>
           <option value="resolved">Resolved</option>
         </select>
       </div>
@@ -2444,6 +2552,7 @@ async function loadTickets() {
             <th>Title</th>
             <th>Assigned To</th>
             <th>Status</th>
+            <th>Timer</th>
             <th>Created By</th>
             <th>Created</th>
           </tr>
@@ -2483,6 +2592,7 @@ async function loadTickets() {
           <td><div class="ticket-title">${ticket.title}</div></td>
           <td><div class="ticket-assignee">${assignmentText}</div></td>
           <td><div class="ticket-status ${displayStatus}">${statusText}</div></td>
+          <td><div class="ticket-timer-cell">${getTimerDisplayForTicket(ticket)}</div></td>
           <td><div class="ticket-creator">${ticket.createdBy.name}</div></td>
           <td><div class="ticket-created">${formatTimestamp(createdDate)}</div></td>
         </tr>
@@ -2578,6 +2688,9 @@ async function openTicket(ticketId) {
     }
     document.getElementById('modal-ticket-assignee').textContent = assignmentDisplayText;
     document.getElementById('modal-ticket-date').textContent = formatTimestamp(ticketData.createdAt?.toDate?.() || new Date());
+    
+    // Initialize timer display
+    updateTimerDisplay(ticketData);
     
     // Update status dropdown
     const statusSelect = document.getElementById('ticket-status-select');
@@ -2884,7 +2997,15 @@ async function createTicketFromModal() {
       },
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      messages: []
+      messages: [],
+      // Timer fields
+      timer: {
+        timeStarted: null,
+        timeElapsed: 0, // Total elapsed time in milliseconds
+        timePaused: null,
+        totalPausedTime: 0, // Total paused time in milliseconds
+        isRunning: false
+      }
     };
     
     await db.collection('tickets').add(ticketData);
@@ -3110,16 +3231,29 @@ async function updateTicketStatus() {
   const newStatus = document.getElementById('ticket-status-select').value;
   if (newStatus === currentTicket.status) return;
   
+  const oldStatus = currentTicket.status;
+  
   try {
+    // Handle timer operations based on status changes
+    const timerUpdates = await handleTimerStatusChange(currentTicket, oldStatus, newStatus);
+    
     await db.collection('tickets').doc(currentTicket.id).update({
       status: newStatus,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      ...timerUpdates
     });
     
     // Update current ticket and UI
     currentTicket.status = newStatus;
+    if (timerUpdates.timer) {
+      currentTicket.timer = { ...currentTicket.timer, ...timerUpdates.timer };
+    }
+    
     document.getElementById('modal-ticket-status').textContent = newStatus.replace('-', ' ');
     document.getElementById('modal-ticket-status').className = `ticket-status ${newStatus}`;
+    
+    // Update timer display
+    updateTimerDisplay(currentTicket);
     
     // Add system message about status change
     await addSystemMessage(`Status changed to ${newStatus.replace('-', ' ')}`);
@@ -3497,6 +3631,163 @@ async function transferTicket() {
   
   transferBtn.disabled = false;
   transferBtn.textContent = '🔄 Transfer Ticket';
+}
+
+// Timer Management Functions
+async function handleTimerStatusChange(ticket, oldStatus, newStatus) {
+  const now = new Date();
+  const timerUpdates = {};
+  
+  // Initialize timer if it doesn't exist
+  if (!ticket.timer) {
+    ticket.timer = {
+      timeStarted: null,
+      timeElapsed: 0,
+      timePaused: null,
+      totalPausedTime: 0,
+      isRunning: false
+    };
+  }
+  
+  // Handle timer based on status transitions
+  if (newStatus === 'in-progress') {
+    // Start timer when moving to in-progress
+    if (!ticket.timer.isRunning) {
+      timerUpdates.timer = {
+        ...ticket.timer,
+        timeStarted: firebase.firestore.Timestamp.fromDate(now),
+        isRunning: true,
+        timePaused: null
+      };
+    }
+  } else if (newStatus === 'on-hold') {
+    // Pause timer when moving to on-hold
+    if (ticket.timer.isRunning) {
+      const currentElapsed = calculateCurrentElapsed(ticket.timer);
+      timerUpdates.timer = {
+        ...ticket.timer,
+        timeElapsed: currentElapsed,
+        timePaused: firebase.firestore.Timestamp.fromDate(now),
+        isRunning: false
+      };
+    }
+  } else if (oldStatus === 'on-hold' && newStatus === 'in-progress') {
+    // Resume timer when moving from on-hold back to in-progress
+    if (ticket.timer.timePaused) {
+      const pausedDuration = now.getTime() - ticket.timer.timePaused.toDate().getTime();
+      timerUpdates.timer = {
+        ...ticket.timer,
+        totalPausedTime: (ticket.timer.totalPausedTime || 0) + pausedDuration,
+        timeStarted: firebase.firestore.Timestamp.fromDate(now),
+        timePaused: null,
+        isRunning: true
+      };
+    }
+  } else if (newStatus === 'resolved') {
+    // Stop and finalize timer when resolved
+    if (ticket.timer.isRunning) {
+      const finalElapsed = calculateCurrentElapsed(ticket.timer);
+      timerUpdates.timer = {
+        ...ticket.timer,
+        timeElapsed: finalElapsed,
+        isRunning: false,
+        timePaused: null
+      };
+    }
+  }
+  
+  return timerUpdates;
+}
+
+function calculateCurrentElapsed(timer) {
+  if (!timer.timeStarted) return timer.timeElapsed || 0;
+  
+  const now = new Date();
+  const startTime = timer.timeStarted.toDate();
+  const currentSession = now.getTime() - startTime.getTime();
+  
+  return (timer.timeElapsed || 0) + currentSession;
+}
+
+function formatTimerDisplay(totalMs) {
+  if (!totalMs) return '00:00:00';
+  
+  const totalSeconds = Math.floor(totalMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function updateTimerDisplay(ticket) {
+  const timerContainer = document.getElementById('ticket-timer-display');
+  if (!timerContainer) return;
+  
+  let displayTime = 0;
+  let timerClass = '';
+  let statusText = '';
+  
+  if (ticket.timer) {
+    if (ticket.timer.isRunning) {
+      displayTime = calculateCurrentElapsed(ticket.timer);
+      timerClass = 'running';
+      statusText = '⏱️ Running';
+    } else if (ticket.status === 'on-hold') {
+      displayTime = ticket.timer.timeElapsed || 0;
+      timerClass = 'paused';
+      statusText = '⏸️ Paused';
+    } else {
+      displayTime = ticket.timer.timeElapsed || 0;
+      timerClass = '';
+      statusText = '⏹️ Stopped';
+    }
+  }
+  
+  timerContainer.innerHTML = `
+    <div class="ticket-timer">
+      <span class="timer-icon">${statusText}</span>
+      <span class="timer-display ${timerClass}">${formatTimerDisplay(displayTime)}</span>
+    </div>
+  `;
+  
+  // Update timer every second if running
+  if (ticket.timer && ticket.timer.isRunning) {
+    if (window.timerInterval) clearInterval(window.timerInterval);
+    window.timerInterval = setInterval(() => {
+      if (currentTicket && currentTicket.id === ticket.id && currentTicket.timer && currentTicket.timer.isRunning) {
+        updateTimerDisplay(currentTicket);
+      } else {
+        clearInterval(window.timerInterval);
+      }
+    }, 1000);
+  }
+}
+
+function getTimerDisplayForTicket(ticket) {
+  if (!ticket.timer) {
+    return '<span class="timer-display-small">--:--:--</span>';
+  }
+  
+  let displayTime = 0;
+  let timerClass = '';
+  let statusIcon = '';
+  
+  if (ticket.timer.isRunning && ticket.status === 'in-progress') {
+    displayTime = calculateCurrentElapsed(ticket.timer);
+    timerClass = 'running';
+    statusIcon = '⏱️';
+  } else if (ticket.status === 'on-hold') {
+    displayTime = ticket.timer.timeElapsed || 0;
+    timerClass = 'paused';
+    statusIcon = '⏸️';
+  } else {
+    displayTime = ticket.timer.timeElapsed || 0;
+    timerClass = 'stopped';
+    statusIcon = '⏹️';
+  }
+  
+  return `<span class="timer-display-small ${timerClass}" title="${statusIcon} Timer: ${formatTimerDisplay(displayTime)}">${formatTimerDisplay(displayTime)}</span>`;
 }
 </script>
 
