@@ -14,42 +14,27 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   
-  <link rel="stylesheet" href="style.css?v=20250812_glassmorphism_v2" />
+  <link rel="stylesheet" href="style.css?v=20250813_staff_modern" />
   <style>
     .staff-container {
       max-width: 1200px;
       margin: 2rem auto;
       padding: 2rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #F0EDE9;
       border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      color: white;
+      box-shadow: 0 8px 32px rgba(69, 73, 78, 0.12);
+      color: var(--text-dark);
       min-height: auto;
       position: relative;
       overflow: hidden;
       transition: all 0.3s ease;
+      border: 1px solid rgba(216, 209, 197, 0.3);
     }
 
     .staff-container.expanded {
       min-height: 80vh;
     }
 
-    .staff-container::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 4s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-    }
 
     .staff-content {
       position: relative;
@@ -59,9 +44,11 @@
     .staff-title {
       text-align: center;
       font-size: 2.5rem;
-      font-weight: bold;
+      font-weight: 500;
       margin-bottom: 3rem;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      color: var(--secondary-color);
+      font-family: var(--font-primary);
+      letter-spacing: var(--letter-spacing-headers);
       animation: fadeInDown 0.8s ease-out;
     }
 
@@ -99,27 +86,17 @@
 
 
     .staff-card {
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255,255,255,0.2);
+      background: white;
+      border: 1px solid rgba(216, 209, 197, 0.3);
       border-radius: 20px;
       padding: 1.5rem;
       text-align: center;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
     }
 
-    .staff-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s ease;
-    }
 
 
     .staff-photo {
@@ -143,14 +120,18 @@
 
     .staff-name {
       font-size: 1.4rem;
-      font-weight: bold;
+      font-weight: 500;
       margin-bottom: 0.5rem;
+      color: var(--secondary-color);
+      font-family: var(--font-primary);
+      letter-spacing: var(--letter-spacing-headers);
     }
 
     .staff-title-role {
       font-size: 1rem;
-      opacity: 0.9;
+      color: var(--tertiary-color);
       font-style: italic;
+      font-family: var(--font-primary);
     }
 
 
@@ -182,15 +163,16 @@
     }
 
     .back-button {
-      background: rgba(255,255,255,0.2);
-      color: white;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 20px;
+      background: #F0EDE9;
+      color: var(--secondary-color);
+      border: 1px solid rgba(216, 209, 197, 0.3);
+      border-radius: 12px;
       padding: 0.5rem 1.5rem;
       font-size: 0.9rem;
+      font-family: var(--font-primary);
       cursor: pointer;
       transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
       display: none;
       position: absolute;
       top: 2rem;
@@ -203,9 +185,10 @@
     }
 
     .back-button:hover {
-      background: rgba(255,255,255,0.3);
-      border-color: rgba(255,255,255,0.5);
+      background: white;
+      border-color: rgba(216, 209, 197, 0.5);
       transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(69, 73, 78, 0.12);
     }
 
     .manager-header {
@@ -257,16 +240,17 @@
     }
 
     .action-btn {
-      background: rgba(255,255,255,0.2);
-      color: white;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 20px;
+      background: #F0EDE9;
+      color: var(--secondary-color);
+      border: 1px solid rgba(216, 209, 197, 0.3);
+      border-radius: 12px;
       padding: 0.5rem 0.8rem;
       font-size: 0.75rem;
       font-weight: 500;
+      font-family: var(--font-primary);
       cursor: pointer;
       transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
       text-decoration: none;
       display: inline-block;
       text-align: center;
@@ -279,9 +263,10 @@
     }
 
     .action-btn:hover {
-      background: rgba(255,255,255,0.3);
-      border-color: rgba(255,255,255,0.5);
+      background: white;
+      border-color: rgba(216, 209, 197, 0.5);
       transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(69, 73, 78, 0.12);
     }
 
     /* Modal Styles */
@@ -306,16 +291,16 @@
     }
 
     .modal-content {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: #F0EDE9;
+      color: var(--secondary-color);
+      border: 1px solid rgba(216, 209, 197, 0.3);
       border-radius: 20px;
       padding: 2rem;
       max-width: 650px;
       max-height: 85vh;
       overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(69, 73, 78, 0.12);
       position: relative;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.4);
-      border: 2px solid rgba(255,255,255,0.1);
       margin: 1rem;
       transform: scale(0.9);
       transition: transform 0.3s ease;
@@ -329,9 +314,9 @@
       position: absolute;
       top: 1rem;
       right: 1.5rem;
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
+      background: white;
+      border: 1px solid rgba(216, 209, 197, 0.3);
+      color: var(--secondary-color);
       font-size: 1.8rem;
       cursor: pointer;
       border-radius: 50%;
@@ -341,19 +326,24 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
     }
 
     .modal-close:hover {
-      background: rgba(255,255,255,0.3);
+      background: var(--primary-color);
       transform: rotate(90deg);
+      box-shadow: 0 6px 16px rgba(69, 73, 78, 0.12);
     }
 
     .modal-title {
       font-size: 2rem;
-      font-weight: bold;
+      font-weight: 500;
+      font-family: var(--font-primary);
+      letter-spacing: var(--letter-spacing-headers);
+      color: var(--secondary-color);
       margin-bottom: 1.5rem;
       text-align: center;
-      border-bottom: 2px solid rgba(255,255,255,0.2);
+      border-bottom: 1px solid rgba(216, 209, 197, 0.3);
       padding-bottom: 1rem;
     }
 
