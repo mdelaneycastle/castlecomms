@@ -200,6 +200,41 @@
       opacity: 1;
     }
 
+    .attention-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 0.5rem;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .attention-btn.active {
+      color: #dc3545;
+      text-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+      filter: drop-shadow(0 2px 4px rgba(220, 53, 69, 0.3));
+    }
+
+    .attention-btn.active:hover {
+      background: rgba(220, 53, 69, 0.15);
+      transform: scale(1.15);
+      color: #c82333;
+    }
+
+    .attention-btn.inactive {
+      color: #9ca3af;
+      opacity: 0.7;
+    }
+
+    .attention-btn.inactive:hover {
+      background: rgba(156, 163, 175, 0.1);
+      transform: scale(1.1);
+      color: #6b7280;
+      opacity: 1;
+    }
+
     .delete-btn {
       background: none;
       border: none;
@@ -779,6 +814,11 @@
                       title="${imageData.bestPractice ? 'Remove from Best Practice' : 'Mark as Best Practice'}">
                 ⭐
               </button>
+              <button class="attention-btn ${imageData.needsAttention ? 'active' : 'inactive'}" 
+                      onclick="galleryManager.toggleAttention('${key}', ${!imageData.needsAttention})"
+                      title="${imageData.needsAttention ? 'Remove Attention Flag' : 'Flag for Attention'}">
+                ❗
+              </button>
               <button class="delete-btn" 
                       onclick="galleryManager.deleteImage('${key}', '${imageData.originalName}', '${imageData.filename || ''}')"
                       title="Delete Image">
@@ -797,28 +837,51 @@
         
         if (status) {
           // Show comment modal for marking as best practice
-          this.showCommentModal(key, true);
+          this.showCommentModal(key, true, 'bestPractice');
         } else {
           // Direct removal without comment
           await this.updateBestPracticeStatus(key, false, '');
         }
       }
 
-      showCommentModal(key, isMarking) {
+      async toggleAttention(key, status) {
+        // Store the key and status for the modal
+        this.pendingAttention = { key, status };
+        
+        if (status) {
+          // Show comment modal for flagging attention
+          this.showCommentModal(key, true, 'attention');
+        } else {
+          // Direct removal without comment
+          await this.updateAttentionStatus(key, false, '');
+        }
+      }
+
+      showCommentModal(key, isMarking, type = 'bestPractice') {
         const modal = document.getElementById('comment-modal');
         const title = document.getElementById('comment-modal-title');
         const description = document.getElementById('comment-modal-description');
         const input = document.getElementById('comment-input');
         const confirmBtn = document.getElementById('comment-confirm-btn');
         
-        title.textContent = isMarking ? 'Mark as Best Practice' : 'Remove from Best Practice';
-        description.textContent = isMarking 
-          ? 'Add a comment explaining why this image is considered best practice:'
-          : 'Add a comment explaining why this image is being removed:';
+        // Store the type for later use
+        this.currentModalType = type;
         
-        confirmBtn.textContent = isMarking ? 'Mark as Best Practice' : 'Remove from Best Practice';
+        if (type === 'attention') {
+          title.textContent = isMarking ? 'Flag for Attention' : 'Remove Attention Flag';
+          description.textContent = isMarking 
+            ? 'What is the issue that needs attention?'
+            : 'Add a comment explaining why this flag is being removed:';
+          confirmBtn.textContent = isMarking ? 'Flag for Attention' : 'Remove Flag';
+        } else {
+          title.textContent = isMarking ? 'Mark as Best Practice' : 'Remove from Best Practice';
+          description.textContent = isMarking 
+            ? 'Add a comment explaining why this image is considered best practice:'
+            : 'Add a comment explaining why this image is being removed:';
+          confirmBtn.textContent = isMarking ? 'Mark as Best Practice' : 'Remove from Best Practice';
+        }
+        
         input.value = '';
-        
         modal.style.display = 'flex';
         input.focus();
       }
@@ -827,21 +890,34 @@
         const modal = document.getElementById('comment-modal');
         modal.style.display = 'none';
         this.pendingBestPractice = null;
+        this.pendingAttention = null;
+        this.currentModalType = null;
       }
 
       async confirmBestPractice() {
-        if (!this.pendingBestPractice) return;
-        
         const comment = document.getElementById('comment-input').value.trim();
-        const { key, status } = this.pendingBestPractice;
         
-        if (status && !comment) {
-          this.showError('Please add a comment when marking as best practice');
-          return;
+        if (this.currentModalType === 'attention' && this.pendingAttention) {
+          const { key, status } = this.pendingAttention;
+          
+          if (status && !comment) {
+            this.showError('Please describe the issue that needs attention');
+            return;
+          }
+          
+          await this.updateAttentionStatus(key, status, comment);
+          this.closeCommentModal();
+        } else if (this.pendingBestPractice) {
+          const { key, status } = this.pendingBestPractice;
+          
+          if (status && !comment) {
+            this.showError('Please add a comment when marking as best practice');
+            return;
+          }
+          
+          await this.updateBestPracticeStatus(key, status, comment);
+          this.closeCommentModal();
         }
-        
-        await this.updateBestPracticeStatus(key, status, comment);
-        this.closeCommentModal();
       }
 
       async updateBestPracticeStatus(key, status, comment) {
@@ -865,6 +941,30 @@
         } catch (error) {
           console.error('Error updating best practice status:', error);
           this.showError('Failed to update best practice status');
+        }
+      }
+
+      async updateAttentionStatus(key, status, comment) {
+        try {
+          const updates = {
+            needsAttention: status,
+            attentionComment: comment || '',
+            attentionDate: status ? new Date().toISOString() : null
+          };
+          
+          await firebase.database().ref(`gallery-images/${key}`).update(updates);
+          
+          // Update UI
+          const btn = document.querySelector(`[onclick*="toggleAttention('${key}'"]`);
+          if (btn) {
+            btn.className = `attention-btn ${status ? 'active' : 'inactive'}`;
+            btn.title = status ? 'Remove Attention Flag' : 'Flag for Attention';
+          }
+          
+          this.showSuccess(status ? 'Flagged for Attention!' : 'Removed Attention Flag');
+        } catch (error) {
+          console.error('Error updating attention status:', error);
+          this.showError('Failed to update attention status');
         }
       }
 

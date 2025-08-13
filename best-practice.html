@@ -143,6 +143,24 @@
       z-index: 2;
     }
 
+    .attention-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #dc3545;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: var(--font-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+      z-index: 2;
+    }
+
     .image-info {
       padding: 1.5rem;
       background: white;
@@ -189,8 +207,19 @@
       box-sizing: border-box !important;
     }
 
+    .image-comment.attention {
+      background: #f8d7da !important;
+      border-top: 3px solid #dc3545 !important;
+      color: #721c24 !important;
+    }
+
     .image-comment strong {
       color: #45494e !important;
+      font-weight: 500 !important;
+    }
+
+    .image-comment.attention strong {
+      color: #721c24 !important;
       font-weight: 500 !important;
     }
 
@@ -454,27 +483,30 @@
           
           console.log('📊 Total images loaded:', Object.keys(allImages).length);
           
-          // Filter for best practice images client-side
-          const bestPracticeImages = {};
+          // Filter for best practice and attention images client-side
+          const displayImages = {};
           Object.entries(allImages).forEach(([key, data]) => {
-            console.log(`Image ${key}:`, { bestPractice: data.bestPractice, comment: data.comment, type: typeof data.bestPractice });
+            console.log(`Image ${key}:`, { bestPractice: data.bestPractice, needsAttention: data.needsAttention });
             if (data.bestPractice === true || data.bestPractice === 'true') {
-              bestPracticeImages[key] = data;
+              displayImages[key] = { ...data, displayType: 'bestPractice' };
               console.log('✅ Added to best practice:', key, 'Comment:', data.comment);
+            } else if (data.needsAttention === true || data.needsAttention === 'true') {
+              displayImages[key] = { ...data, displayType: 'attention' };
+              console.log('⚠️ Added to attention:', key, 'Attention Comment:', data.attentionComment);
             }
           });
 
           loadingSpinner.style.display = 'none';
 
-          console.log('🌟 Best practice images found:', Object.keys(bestPracticeImages).length);
+          console.log('🌟 Display images found:', Object.keys(displayImages).length);
 
-          if (Object.keys(bestPracticeImages).length === 0) {
+          if (Object.keys(displayImages).length === 0) {
             this.showEmptyState();
             return;
           }
 
           // Sort images by upload date (newest first)
-          const sortedImages = Object.entries(bestPracticeImages).sort(([,a], [,b]) => 
+          const sortedImages = Object.entries(displayImages).sort(([,a], [,b]) => 
             new Date(b.uploadDate) - new Date(a.uploadDate)
           );
 
@@ -525,24 +557,32 @@
         const imageUrl = imageData.storageUrl ||
           'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmQ3MDAiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmZmVkNGEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMzUwIiBoZWlnaHQ9IjMwMCIgZmlsbD0idXJsKCNhKSIgb3BhY2l0eT0iMC4xIi8+PHRleHQgeD0iNTAlIiB5PSI0NSUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2cHgiIGZpbGw9IiM4YjQ1MTMiIGZvbnQtd2VpZ2h0PSI2MDAiPkJlc3QgUHJhY3RpY2UgSW1hZ2U8L3RleXQ+PHRleHQgeD0iNTAlIiB5PSI2MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjEycHgiIGZpbGw9IiNhYTZjMzkiPkxvYWRpbmcgZnJvbSBGaXJlYmFzZSBTdG9yYWdlLi4uPC90ZXh0Pjwvc3ZnPg==';
 
-        // Build comment HTML safely
+        // Build comment HTML based on display type
         let commentHtml = '';
-        if (imageData.comment && typeof imageData.comment === 'string' && imageData.comment.trim()) {
-          commentHtml = `<div class="image-comment">
-            <strong>Why this is best practice:</strong> ${imageData.comment.trim()}
-          </div>`;
-          console.log('✅ Comment HTML built:', commentHtml);
+        let hasComment = false;
+        
+        if (imageData.displayType === 'attention') {
+          if (imageData.attentionComment && typeof imageData.attentionComment === 'string' && imageData.attentionComment.trim()) {
+            commentHtml = `<div class="image-comment attention">
+              <strong>Issue requiring attention:</strong> ${imageData.attentionComment.trim()}
+            </div>`;
+            hasComment = true;
+            console.log('⚠️ Attention comment HTML built:', commentHtml);
+          }
         } else {
-          commentHtml = '<div style="color: red; font-size: 0.8rem; margin-top: 0.5rem;">No comment available (debug)</div>';
-          console.log('❌ No comment to display');
+          if (imageData.comment && typeof imageData.comment === 'string' && imageData.comment.trim()) {
+            commentHtml = `<div class="image-comment">
+              <strong>Why this is best practice:</strong> ${imageData.comment.trim()}
+            </div>`;
+            hasComment = true;
+            console.log('✅ Best practice comment HTML built:', commentHtml);
+          }
         }
         
-        const hasComment = imageData.comment && typeof imageData.comment === 'string' && imageData.comment.trim();
-        
         card.innerHTML = `
-          <div class="best-practice-badge">
-            <span>⭐</span>
-            <span>Best Practice</span>
+          <div class="${imageData.displayType === 'attention' ? 'attention-badge' : 'best-practice-badge'}">
+            <span>${imageData.displayType === 'attention' ? '❗' : '⭐'}</span>
+            <span>${imageData.displayType === 'attention' ? 'Attention' : 'Best Practice'}</span>
           </div>
           <div class="image-container ${hasComment ? 'has-comment' : ''}" onclick="bestPracticeGallery.openModal('${imageData.filename}', '${imageData.storageUrl || ''}')">
             <img src="${imageUrl}" 
