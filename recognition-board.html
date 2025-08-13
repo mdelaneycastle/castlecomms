@@ -51,31 +51,29 @@
     }
 
     .recognition-title {
-      font-size: 3rem;
-      font-weight: bold;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      font-size: 2.5rem;
+      font-weight: 500;
+      font-family: var(--font-primary);
+      letter-spacing: var(--letter-spacing-headers);
+      color: var(--secondary-color);
       margin-bottom: 1rem;
       animation: fadeInDown 0.8s ease-out;
     }
 
     .recognition-subtitle {
       font-size: 1.2rem;
-      color: #4c5977;
-      font-style: italic;
+      color: var(--tertiary-color);
+      font-family: var(--font-primary);
       animation: fadeInUp 0.8s ease-out 0.2s both;
     }
 
     .add-note-section {
-      background: rgba(102, 126, 234, 0.1);
-      border: 3px solid #667eea;
-      border-radius: 15px;
+      background: var(--card-background);
+      border: 1px solid rgba(216, 209, 197, 0.3);
+      border-radius: var(--border-radius-large);
       padding: 2rem;
       margin-bottom: 3rem;
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+      box-shadow: var(--shadow-light);
       position: relative;
       z-index: 10;
       animation: slideInUp 0.8s ease-out 0.4s both;
@@ -83,13 +81,12 @@
 
     .add-note-title {
       font-size: 1.5rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: var(--secondary-color);
+      font-family: var(--font-primary);
       margin-bottom: 1rem;
       text-align: center;
-      font-weight: bold;
+      font-weight: 500;
+      letter-spacing: var(--letter-spacing-headers);
     }
 
     .note-form {
@@ -102,60 +99,62 @@
 
     .note-input {
       padding: 1rem;
-      border: 2px solid #D2691E;
-      border-radius: 10px;
+      border: 2px solid #e1e5e9;
+      border-radius: var(--border-radius);
       font-size: 1rem;
       resize: vertical;
       min-height: 100px;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: #FFF8DC;
-      color: #654321;
+      font-family: var(--font-primary);
+      background: white;
+      color: var(--text-dark);
+      transition: var(--transition);
     }
 
     .note-input:focus {
       outline: none;
-      border-color: #8B4513;
-      box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 3px rgba(69, 73, 78, 0.1);
     }
 
     .author-input {
       padding: 0.75rem;
-      border: 2px solid #D2691E;
-      border-radius: 10px;
+      border: 2px solid #e1e5e9;
+      border-radius: var(--border-radius);
       font-size: 1rem;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: #FFF8DC;
-      color: #654321;
+      font-family: var(--font-primary);
+      background: white;
+      color: var(--text-dark);
+      transition: var(--transition);
     }
 
     .author-input:focus {
       outline: none;
-      border-color: #8B4513;
-      box-shadow: 0 0 10px rgba(139, 69, 19, 0.3);
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 3px rgba(69, 73, 78, 0.1);
     }
 
     .submit-btn {
       padding: 1rem 2rem;
-      background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+      background: var(--secondary-color);
       color: white;
       border: none;
-      border-radius: 25px;
+      border-radius: var(--border-radius);
       font-size: 1.1rem;
-      font-weight: bold;
+      font-weight: 500;
+      font-family: var(--font-primary);
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(139, 69, 19, 0.3);
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      transition: var(--transition);
+      box-shadow: var(--shadow-light);
+      letter-spacing: var(--letter-spacing-headers);
     }
 
     .submit-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
     }
 
     .submit-btn:active {
-      transform: translateY(-1px);
+      transform: translateY(0);
     }
 
     .cork-board {
