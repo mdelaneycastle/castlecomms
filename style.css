@@ -244,16 +244,13 @@ header h1 {
   left: -280px;
   width: 260px;
   height: 100vh;
-  background: linear-gradient(180deg, 
-    rgba(31, 41, 55, 0.95) 0%, 
-    rgba(17, 24, 39, 0.98) 100%);
-  backdrop-filter: blur(20px);
-  color: white;
+  background: #F0EDE9;
+  color: var(--text-dark);
   padding: 0;
   box-shadow: var(--shadow-heavy);
   transition: var(--transition);
   z-index: 1000;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(216, 209, 197, 0.3);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -282,7 +279,7 @@ header h1 {
 
 .sidebar ul li a {
   display: block;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-dark);
   text-decoration: none;
   font-size: 1rem;
   font-weight: 500;
@@ -308,9 +305,10 @@ header h1 {
 }
 
 .sidebar ul li a:hover {
-  color: white;
+  color: var(--secondary-color);
   transform: translateX(8px);
   box-shadow: var(--shadow-light);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .sidebar ul li a:hover::before {
@@ -321,22 +319,41 @@ header h1 {
   left: 0;
 }
 
+/* Sidebar overlay for darkening the page */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* Sidebar Scrollbar Styling */
 .sidebar::-webkit-scrollbar {
   width: 6px;
 }
 
 .sidebar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(69, 73, 78, 0.1);
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(69, 73, 78, 0.3);
   border-radius: 3px;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(69, 73, 78, 0.5);
 }
 
 
@@ -867,11 +884,10 @@ admin-link {
 
 /* Modern Header Styles */
 .modern-header {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: #F0EDE9;
+  border-bottom: 1px solid rgba(216, 209, 197, 0.3);
   padding: 1rem 2rem;
-  box-shadow: 0 8px 32px rgba(69, 73, 78, 0.08);
+  box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
 }
 
 .header-content {
