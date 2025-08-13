@@ -261,6 +261,222 @@ const deleteFromGallery = onRequest(
 );
 
 /**
+ * List all users (admin only)
+ */
+const listUsersHttp = onRequest({ region: "europe-west1" }, async (req, res) => {
+  corsHandler(req, res, async () => {
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed. Use POST." });
+    }
+
+    try {
+      // Verify admin authentication
+      const authorization = req.headers.authorization;
+      if (!authorization || !authorization.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "Authorization token required" });
+      }
+
+      const token = authorization.split('Bearer ')[1];
+      const { getAuth } = require("firebase-admin/auth");
+      const decodedToken = await getAuth().verifyIdToken(token);
+      
+      // Check if user is admin
+      if (!decodedToken.admin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      // List users
+      const auth = getAuth();
+      const listUsersResult = await auth.listUsers(1000);
+      
+      const users = listUsersResult.users.map(user => ({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        disabled: user.disabled,
+        emailVerified: user.emailVerified,
+        customClaims: user.customClaims
+      }));
+
+      logger.info(`Listed ${users.length} users for admin ${decodedToken.uid}`);
+
+      res.status(200).json({
+        success: true,
+        users: users
+      });
+
+    } catch (error) {
+      logger.error("List users failed:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to list users",
+        message: error.message
+      });
+    }
+  });
+});
+
+/**
+ * Create new user (admin only)
+ */
+const createUserHttp = onRequest({ region: "europe-west1" }, async (req, res) => {
+  corsHandler(req, res, async () => {
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed. Use POST." });
+    }
+
+    try {
+      // Verify admin authentication
+      const authorization = req.headers.authorization;
+      if (!authorization || !authorization.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "Authorization token required" });
+      }
+
+      const token = authorization.split('Bearer ')[1];
+      const { getAuth } = require("firebase-admin/auth");
+      const decodedToken = await getAuth().verifyIdToken(token);
+      
+      // Check if user is admin
+      if (!decodedToken.admin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { email, password, displayName, admin, communicationsAdmin } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+
+      // Create user
+      const auth = getAuth();
+      const userRecord = await auth.createUser({
+        email: email,
+        password: password,
+        displayName: displayName || null
+      });
+
+      // Set custom claims if specified
+      const customClaims = {};
+      if (admin) customClaims.admin = true;
+      if (communicationsAdmin) customClaims.communicationsAdmin = true;
+
+      if (Object.keys(customClaims).length > 0) {
+        await auth.setCustomUserClaims(userRecord.uid, customClaims);
+      }
+
+      // Also save user data to Realtime Database for profile info
+      const db = getDatabase();
+      await db.ref(`users/${userRecord.uid}`).set({
+        email: email,
+        name: displayName || email.split('@')[0],
+        displayName: displayName || null,
+        role: admin ? 'Admin' : 'User',
+        createdAt: new Date().toISOString()
+      });
+
+      logger.info(`User created successfully: ${userRecord.uid} by admin ${decodedToken.uid}`);
+
+      res.status(200).json({
+        success: true,
+        uid: userRecord.uid,
+        email: userRecord.email,
+        displayName: userRecord.displayName
+      });
+
+    } catch (error) {
+      logger.error("Create user failed:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to create user",
+        message: error.message
+      });
+    }
+  });
+});
+
+/**
+ * Update user (admin only)
+ */
+const updateUserHttp = onRequest({ region: "europe-west1" }, async (req, res) => {
+  corsHandler(req, res, async () => {
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed. Use POST." });
+    }
+
+    try {
+      // Verify admin authentication
+      const authorization = req.headers.authorization;
+      if (!authorization || !authorization.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "Authorization token required" });
+      }
+
+      const token = authorization.split('Bearer ')[1];
+      const { getAuth } = require("firebase-admin/auth");
+      const decodedToken = await getAuth().verifyIdToken(token);
+      
+      // Check if user is admin
+      if (!decodedToken.admin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { uid, displayName, password } = req.body;
+
+      if (!uid) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      // Update user
+      const auth = getAuth();
+      const updateData = {};
+      if (displayName !== undefined) updateData.displayName = displayName;
+      if (password) updateData.password = password;
+
+      const userRecord = await auth.updateUser(uid, updateData);
+
+      // Update Realtime Database if displayName changed
+      if (displayName !== undefined) {
+        const db = getDatabase();
+        await db.ref(`users/${uid}`).update({
+          name: displayName,
+          displayName: displayName
+        });
+      }
+
+      logger.info(`User updated successfully: ${uid} by admin ${decodedToken.uid}`);
+
+      res.status(200).json({
+        success: true,
+        uid: userRecord.uid,
+        displayName: userRecord.displayName
+      });
+
+    } catch (error) {
+      logger.error("Update user failed:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to update user",
+        message: error.message
+      });
+    }
+  });
+});
+
+/**
  * Health check endpoint
  */
 const healthCheck = onRequest({ region: "europe-west1" }, (req, res) => {
@@ -274,5 +490,8 @@ const healthCheck = onRequest({ region: "europe-west1" }, (req, res) => {
 module.exports = {
   uploadToGallery,
   deleteFromGallery,
+  listUsersHttp,
+  createUserHttp,
+  updateUserHttp,
   healthCheck
 };
