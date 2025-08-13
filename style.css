@@ -10,7 +10,7 @@
   --text-light: #6a6e73;
   --text-muted: #999ea3;
   --background-overlay: rgba(216, 209, 197, 0.95);
-  --card-background: #f8f9fa;
+  --card-background: var(--primary-color);
   
   /* Professional Shadows & Effects */
   --shadow-subtle: 0 2px 8px rgba(69, 73, 78, 0.08);
@@ -799,7 +799,7 @@ admin-link {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  background: #f8f9fa;
+  background: var(--primary-color);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 12px;
@@ -2051,7 +2051,7 @@ admin-link {
 }
 
 .dashboard-card {
-  background: #f8f9fa;
+  background: var(--primary-color);
   border-radius: var(--border-radius-large);
   box-shadow: var(--shadow-light);
   backdrop-filter: blur(10px);
