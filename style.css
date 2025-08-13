@@ -1380,10 +1380,19 @@ admin-link {
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2rem;
-  background: var(--primary-gradient);
+  color: var(--secondary-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Fallback for browsers that don't support background-clip: text */
+@supports not (-webkit-background-clip: text) {
+  .gallery-title {
+    color: var(--secondary-color);
+    background: none;
+  }
 }
 
 .gallery-container {
