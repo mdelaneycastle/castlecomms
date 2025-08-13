@@ -554,9 +554,14 @@
             <div class="image-filename">${imageData.originalName}</div>
             <div class="image-date">Added ${new Date(imageData.uploadDate).toLocaleDateString()}</div>
             <span class="image-uploader">by ${imageData.uploaderName}</span>
+            <div style="background: yellow; border: 5px solid blue; padding: 20px; margin: 10px; font-size: 16px; color: black;">
+              TEST COMMENT BOX - If you can see this, the HTML is working
+            </div>
             ${commentHtml}
           </div>
         `;
+        
+        console.log('🔍 Final card HTML:', card.innerHTML);
         
         galleryGrid.appendChild(card);
       }
