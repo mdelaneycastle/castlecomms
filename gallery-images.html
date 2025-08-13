@@ -154,22 +154,34 @@
       border: none;
       font-size: 1.5rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       padding: 0.5rem;
       border-radius: 8px;
-    }
-
-    .best-practice-btn:hover {
-      background: rgba(255, 215, 0, 0.1);
-      transform: scale(1.1);
+      position: relative;
     }
 
     .best-practice-btn.active {
       color: #ffd700;
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+      filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.3));
+    }
+
+    .best-practice-btn.active:hover {
+      background: rgba(255, 215, 0, 0.15);
+      transform: scale(1.15);
+      color: #ffed4a;
     }
 
     .best-practice-btn.inactive {
-      color: #d1d5db;
+      color: #9ca3af;
+      opacity: 0.7;
+    }
+
+    .best-practice-btn.inactive:hover {
+      background: rgba(156, 163, 175, 0.1);
+      transform: scale(1.1);
+      color: #6b7280;
+      opacity: 1;
     }
 
     .delete-btn {
