@@ -15,7 +15,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   
-  <link rel="stylesheet" href="style.css?v=20250813_comment_display" />
+  <link rel="stylesheet" href="style.css?v=20250813_debug_comments" />
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -437,25 +437,39 @@
           loadingSpinner.style.display = 'block';
           galleryGrid.innerHTML = '';
 
-          // Load image metadata from Firebase, filtered by bestPractice = true
-          const snapshot = await firebase.database().ref('gallery-images')
-            .orderByChild('bestPractice').equalTo(true).once('value');
-          const images = snapshot.val() || {};
+          // Load ALL image metadata from Firebase, then filter client-side
+          console.log('🔍 Loading all gallery images...');
+          const snapshot = await firebase.database().ref('gallery-images').once('value');
+          const allImages = snapshot.val() || {};
+          
+          console.log('📊 Total images loaded:', Object.keys(allImages).length);
+          
+          // Filter for best practice images client-side
+          const bestPracticeImages = {};
+          Object.entries(allImages).forEach(([key, data]) => {
+            console.log(`Image ${key}:`, { bestPractice: data.bestPractice, comment: data.comment, type: typeof data.bestPractice });
+            if (data.bestPractice === true || data.bestPractice === 'true') {
+              bestPracticeImages[key] = data;
+              console.log('✅ Added to best practice:', key, 'Comment:', data.comment);
+            }
+          });
 
           loadingSpinner.style.display = 'none';
 
-          if (Object.keys(images).length === 0) {
+          console.log('🌟 Best practice images found:', Object.keys(bestPracticeImages).length);
+
+          if (Object.keys(bestPracticeImages).length === 0) {
             this.showEmptyState();
             return;
           }
 
           // Sort images by upload date (newest first)
-          const sortedImages = Object.entries(images).sort(([,a], [,b]) => 
+          const sortedImages = Object.entries(bestPracticeImages).sort(([,a], [,b]) => 
             new Date(b.uploadDate) - new Date(a.uploadDate)
           );
 
           for (const [key, imageData] of sortedImages) {
-            console.log('📊 Image data:', { key, bestPractice: imageData.bestPractice, comment: imageData.comment, hasComment: !!imageData.comment });
+            console.log('🖼️ Creating card for:', key, 'Comment:', imageData.comment);
             this.createImageCard(key, imageData);
           }
 
@@ -489,6 +503,9 @@
       }
 
       createImageCard(key, imageData) {
+        console.log('🖼️ Creating card with data:', imageData);
+        console.log('💬 Comment check:', { hasComment: !!imageData.comment, commentValue: imageData.comment });
+        
         const galleryGrid = document.getElementById('gallery-grid');
         
         const card = document.createElement('div');
@@ -513,9 +530,9 @@
             <div class="image-filename">${imageData.originalName}</div>
             <div class="image-date">Added ${new Date(imageData.uploadDate).toLocaleDateString()}</div>
             <span class="image-uploader">by ${imageData.uploaderName}</span>
-            ${(imageData.comment && imageData.comment.trim()) ? `<div class="image-comment">
-              <strong>Why this is best practice:</strong> ${imageData.comment}
-            </div>` : ''}
+            ${(imageData.comment && typeof imageData.comment === 'string' && imageData.comment.trim()) ? `<div class="image-comment">
+              <strong>Why this is best practice:</strong> ${imageData.comment.trim()}
+            </div>` : '<div style="color: red; font-size: 0.8rem; margin-top: 0.5rem;">No comment available</div>'}
           </div>
         `;
         

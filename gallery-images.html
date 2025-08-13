@@ -438,10 +438,41 @@
   </style>
 </head>
 <body>
-  <div id="sidebar-container"></div>
+
+<!-- Background Slideshow -->
+<div class="background-slideshow" id="background-slideshow">
+  <!-- Images will be injected by JavaScript -->
+</div>
   
-  <div class="page-container">
-    <button id="menu-toggle" class="menu-toggle">☰</button>
+<header class="modern-header">
+  <div class="header-content">
+    <div class="header-left">
+      <button id="menu-toggle" class="modern-hamburger" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="brand-logo">
+        <span class="brand-initials">CC</span>
+      </div>
+      <div class="brand-text">
+        <span class="brand-subtitle">CASTLE COMMS</span>
+        <span class="brand-title">GALLERY IMAGES</span>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="user-greeting">Hi <span class="user-name" id="user-name-display">Marc Delaney</span></div>
+    </div>
+    <div class="header-right">
+      <!-- Empty right section for balance -->
+    </div>
+  </div>
+</header>
+
+<div id="sidebar-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<main id="main">
     
     <div class="gallery-container">
       <div class="gallery-header">
@@ -482,7 +513,7 @@
         <!-- Images will be loaded here -->
       </div>
     </div>
-  </div>
+</main>
 
   <!-- Image Modal -->
   <div id="image-modal" class="modal">
