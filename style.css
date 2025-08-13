@@ -800,15 +800,12 @@ admin-link {
   justify-content: space-between;
   padding: 1rem 1.5rem;
   background: #F0EDE9;
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(216, 209, 197, 0.2);
   border-radius: 12px;
   color: var(--text-dark);
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 
-    0 8px 32px rgba(69, 73, 78, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
   overflow: hidden;
   font-family: var(--font-primary);
 }
