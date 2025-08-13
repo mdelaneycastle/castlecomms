@@ -15,7 +15,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20250813_din_font_update" />
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -32,38 +32,31 @@
     .best-practice-header {
       text-align: center;
       margin-bottom: 3rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      background: #F0EDE9;
+      color: var(--secondary-color);
       padding: 3rem 2rem;
       border-radius: 20px;
       position: relative;
       overflow: hidden;
-    }
-
-    .best-practice-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="rgba(255,255,255,0.1)"><polygon points="0,0 1000,80 1000,100 0,100"/></svg>') no-repeat bottom;
-      background-size: cover;
+      border: 1px solid rgba(216, 209, 197, 0.3);
+      box-shadow: 0 8px 32px rgba(69, 73, 78, 0.12);
     }
 
     .best-practice-title {
       font-size: 3rem;
-      font-weight: 800;
+      font-weight: 500;
+      font-family: var(--font-primary);
+      letter-spacing: var(--letter-spacing-headers);
       margin-bottom: 1rem;
-      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      color: var(--secondary-color);
       position: relative;
       z-index: 1;
     }
 
     .best-practice-subtitle {
       font-size: 1.2rem;
-      opacity: 0.9;
-      font-weight: 300;
+      color: var(--tertiary-color);
+      font-family: var(--font-primary);
       position: relative;
       z-index: 1;
     }
@@ -71,7 +64,6 @@
     .star-icon {
       font-size: 4rem;
       margin-bottom: 1rem;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
       position: relative;
       z-index: 1;
     }
@@ -87,15 +79,15 @@
       background: white;
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.1);
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
+      transition: all 0.3s ease;
       position: relative;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(216, 209, 197, 0.3);
     }
 
     .image-card:hover {
-      transform: translateY(-10px) scale(1.02);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(69, 73, 78, 0.15);
     }
 
     .image-card::before {
@@ -105,7 +97,7 @@
       left: 0;
       right: 0;
       height: 4px;
-      background: linear-gradient(90deg, #ffd700, #ffed4a, #ffd700);
+      background: var(--primary-color);
       z-index: 1;
     }
 
@@ -132,16 +124,17 @@
       position: absolute;
       top: 1rem;
       right: 1rem;
-      background: linear-gradient(135deg, #ffd700, #ffed4a);
-      color: #8b4513;
+      background: var(--secondary-color);
+      color: white;
       padding: 0.5rem 1rem;
-      border-radius: 20px;
+      border-radius: 12px;
       font-size: 0.8rem;
-      font-weight: 700;
+      font-weight: 500;
+      font-family: var(--font-primary);
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+      box-shadow: 0 4px 12px rgba(69, 73, 78, 0.2);
       z-index: 2;
     }
 
@@ -151,25 +144,44 @@
     }
 
     .image-filename {
-      font-weight: 700;
-      color: #1a365d;
+      font-weight: 500;
+      font-family: var(--font-primary);
+      color: var(--secondary-color);
       margin-bottom: 0.5rem;
       font-size: 1rem;
     }
 
     .image-date {
       font-size: 0.9rem;
-      color: #64748b;
+      color: var(--tertiary-color);
       margin-bottom: 1rem;
+      font-family: var(--font-primary);
     }
 
     .image-uploader {
       font-size: 0.8rem;
-      color: #94a3b8;
-      background: #f1f5f9;
+      color: var(--tertiary-color);
+      background: #F0EDE9;
       padding: 0.3rem 0.8rem;
-      border-radius: 12px;
+      border-radius: 8px;
       display: inline-block;
+      font-family: var(--font-primary);
+    }
+
+    .image-comment {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #F0EDE9;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-color);
+      font-size: 0.9rem;
+      font-family: var(--font-primary);
+      line-height: 1.4;
+    }
+
+    .image-comment strong {
+      color: var(--secondary-color);
+      font-weight: 500;
     }
 
     .loading-spinner {
@@ -180,7 +192,7 @@
 
     .spinner {
       border: 4px solid #f3f3f3;
-      border-top: 4px solid #667eea;
+      border-top: 4px solid var(--secondary-color);
       border-radius: 50%;
       width: 50px;
       height: 50px;
@@ -218,19 +230,20 @@
     }
 
     .empty-cta {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: var(--secondary-color);
       color: white;
       padding: 1rem 2rem;
-      border-radius: 50px;
+      border-radius: 12px;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 500;
+      font-family: var(--font-primary);
       transition: all 0.3s ease;
       display: inline-block;
     }
 
     .empty-cta:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 8px 20px rgba(69, 73, 78, 0.2);
       text-decoration: none;
       color: white;
     }
@@ -270,9 +283,9 @@
       right: 2rem;
       color: white;
       font-size: 2rem;
-      font-weight: bold;
+      font-weight: 500;
       cursor: pointer;
-      background: rgba(255,255,255,0.1);
+      background: rgba(69, 73, 78, 0.8);
       border: none;
       border-radius: 50%;
       width: 60px;
@@ -285,7 +298,7 @@
     }
 
     .close-modal:hover {
-      background: rgba(255,255,255,0.2);
+      background: var(--secondary-color);
       transform: scale(1.1);
     }
 
@@ -310,10 +323,41 @@
   </style>
 </head>
 <body>
-  <div id="sidebar-container"></div>
+
+<!-- Background Slideshow -->
+<div class="background-slideshow" id="background-slideshow">
+  <!-- Images will be injected by JavaScript -->
+</div>
   
-  <div class="page-container">
-    <button id="menu-toggle" class="menu-toggle">☰</button>
+<header class="modern-header">
+  <div class="header-content">
+    <div class="header-left">
+      <button id="menu-toggle" class="modern-hamburger" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="brand-logo">
+        <span class="brand-initials">CC</span>
+      </div>
+      <div class="brand-text">
+        <span class="brand-subtitle">CASTLE COMMS</span>
+        <span class="brand-title">BEST PRACTICE</span>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="user-greeting">Hi <span class="user-name" id="user-name-display">Marc Delaney</span></div>
+    </div>
+    <div class="header-right">
+      <!-- Empty right section for balance -->
+    </div>
+  </div>
+</header>
+
+<div id="sidebar-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<main id="main">
     
     <div class="best-practice-container">
       <div class="best-practice-header">
@@ -333,7 +377,7 @@
         <!-- Images will be loaded here -->
       </div>
     </div>
-  </div>
+</main>
 
   <!-- Image Modal -->
   <div id="image-modal" class="modal">
@@ -468,6 +512,9 @@
             <div class="image-filename">${imageData.originalName}</div>
             <div class="image-date">Added ${new Date(imageData.uploadDate).toLocaleDateString()}</div>
             <span class="image-uploader">by ${imageData.uploaderName}</span>
+            ${imageData.comment ? `<div class="image-comment">
+              <strong>Comment:</strong> ${imageData.comment}
+            </div>` : ''}
           </div>
         `;
         

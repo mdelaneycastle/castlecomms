@@ -15,7 +15,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20250813_din_font_update" />
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -302,6 +302,138 @@
       .gallery-container {
         padding: 1rem;
       }
+    }
+
+    /* Comment Modal Styles */
+    .comment-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+
+    .comment-modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .comment-modal-header {
+      background: #F0EDE9;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid rgba(216, 209, 197, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .comment-modal-header h3 {
+      margin: 0;
+      color: var(--secondary-color);
+      font-family: var(--font-primary);
+      font-weight: 500;
+      font-size: 1.3rem;
+    }
+
+    .comment-modal-close {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--tertiary-color);
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .comment-modal-close:hover {
+      background: rgba(216, 209, 197, 0.2);
+      color: var(--secondary-color);
+    }
+
+    .comment-modal-body {
+      padding: 2rem;
+    }
+
+    .comment-modal-body p {
+      margin: 0 0 1rem 0;
+      color: var(--tertiary-color);
+      font-family: var(--font-primary);
+    }
+
+    #comment-input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid rgba(216, 209, 197, 0.5);
+      border-radius: 8px;
+      resize: vertical;
+      font-family: var(--font-primary);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: var(--secondary-color);
+      background: #fafafa;
+      box-sizing: border-box;
+    }
+
+    #comment-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(216, 209, 197, 0.1);
+    }
+
+    .comment-modal-actions {
+      margin-top: 1.5rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .comment-modal-actions button {
+      padding: 0.7rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      font-family: var(--font-primary);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    #comment-cancel-btn {
+      background: #f5f5f5;
+      color: var(--tertiary-color);
+      border: 1px solid rgba(216, 209, 197, 0.5);
+    }
+
+    #comment-cancel-btn:hover {
+      background: #eeeeee;
+      color: var(--secondary-color);
+    }
+
+    #comment-confirm-btn {
+      background: var(--secondary-color);
+      color: white;
+    }
+
+    #comment-confirm-btn:hover {
+      background: var(--tertiary-color);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(69, 73, 78, 0.2);
     }
   </style>
 </head>
@@ -601,17 +733,78 @@
       }
 
       async toggleBestPractice(key, status) {
+        // Store the key and status for the modal
+        this.pendingBestPractice = { key, status };
+        
+        if (status) {
+          // Show comment modal for marking as best practice
+          this.showCommentModal(key, true);
+        } else {
+          // Direct removal without comment
+          await this.updateBestPracticeStatus(key, false, '');
+        }
+      }
+
+      showCommentModal(key, isMarking) {
+        const modal = document.getElementById('comment-modal');
+        const title = document.getElementById('comment-modal-title');
+        const description = document.getElementById('comment-modal-description');
+        const input = document.getElementById('comment-input');
+        const confirmBtn = document.getElementById('comment-confirm-btn');
+        
+        title.textContent = isMarking ? 'Mark as Best Practice' : 'Remove from Best Practice';
+        description.textContent = isMarking 
+          ? 'Add a comment explaining why this image is considered best practice:'
+          : 'Add a comment explaining why this image is being removed:';
+        
+        confirmBtn.textContent = isMarking ? 'Mark as Best Practice' : 'Remove from Best Practice';
+        input.value = '';
+        
+        modal.style.display = 'flex';
+        input.focus();
+      }
+
+      closeCommentModal() {
+        const modal = document.getElementById('comment-modal');
+        modal.style.display = 'none';
+        this.pendingBestPractice = null;
+      }
+
+      async confirmBestPractice() {
+        if (!this.pendingBestPractice) return;
+        
+        const comment = document.getElementById('comment-input').value.trim();
+        const { key, status } = this.pendingBestPractice;
+        
+        if (status && !comment) {
+          this.showError('Please add a comment when marking as best practice');
+          return;
+        }
+        
+        await this.updateBestPracticeStatus(key, status, comment);
+        this.closeCommentModal();
+      }
+
+      async updateBestPracticeStatus(key, status, comment) {
         try {
-          await firebase.database().ref(`gallery-images/${key}/bestPractice`).set(status);
+          const updates = {
+            bestPractice: status,
+            comment: comment || '',
+            commentDate: status ? new Date().toISOString() : null
+          };
+          
+          await firebase.database().ref(`gallery-images/${key}`).update(updates);
           
           // Update UI
-          const btn = event.target;
-          btn.className = `best-practice-btn ${status ? 'active' : 'inactive'}`;
-          btn.title = status ? 'Remove from Best Practice' : 'Mark as Best Practice';
+          const btn = document.querySelector(`[onclick*="'${key}'"]`);
+          if (btn) {
+            btn.className = `best-practice-btn ${status ? 'active' : 'inactive'}`;
+            btn.title = status ? 'Remove from Best Practice' : 'Mark as Best Practice';
+          }
           
           this.showSuccess(status ? 'Added to Best Practice!' : 'Removed from Best Practice');
         } catch (error) {
-          console.error('Error toggling best practice:', error);
+          console.error('Error updating best practice status:', error);
           this.showError('Failed to update best practice status');
         }
       }
@@ -732,5 +925,24 @@
       });
     });
   </script>
+
+  <!-- Best Practice Comment Modal -->
+  <div id="comment-modal" class="comment-modal" style="display: none;">
+    <div class="comment-modal-content">
+      <div class="comment-modal-header">
+        <h3 id="comment-modal-title">Mark as Best Practice</h3>
+        <button class="comment-modal-close" onclick="galleryManager.closeCommentModal()">&times;</button>
+      </div>
+      <div class="comment-modal-body">
+        <p id="comment-modal-description">Add a comment explaining why this image is considered best practice:</p>
+        <textarea id="comment-input" placeholder="Enter your comment here..." rows="4"></textarea>
+        <div class="comment-modal-actions">
+          <button id="comment-cancel-btn" onclick="galleryManager.closeCommentModal()">Cancel</button>
+          <button id="comment-confirm-btn" onclick="galleryManager.confirmBestPractice()">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
