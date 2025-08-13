@@ -1,4 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=DIN+2014:wght@300;400;500;600&display=swap');
+/* DIN Light Alternate Font */
+@font-face {
+  font-family: 'DIN Light Alternate';
+  src: url('DIN LightAlternate.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   /* New Professional Color Scheme */
@@ -22,7 +29,7 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   /* Typography */
-  --font-primary: 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+  --font-primary: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
   --letter-spacing-headers: 0.025em;
   --letter-spacing-normal: 0;
 }
