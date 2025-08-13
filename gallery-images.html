@@ -38,21 +38,35 @@
     .gallery-header {
       text-align: center;
       margin-bottom: 3rem;
+      background: #F0EDE9;
+      padding: 2rem;
+      border-radius: 20px;
+      border: 1px solid rgba(216, 209, 197, 0.3);
+      box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
     }
 
     .gallery-title {
       font-size: 2.5rem;
-      font-weight: 800;
-      color: #1a365d;
+      font-weight: 500;
+      font-family: var(--font-primary);
+      letter-spacing: var(--letter-spacing-headers);
+      color: var(--secondary-color);
       margin-bottom: 1rem;
+    }
+
+    .gallery-header p {
+      color: var(--tertiary-color);
+      font-family: var(--font-primary);
+      margin: 0;
     }
 
     .upload-section {
       background: white;
       border-radius: 16px;
       padding: 2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
       margin-bottom: 3rem;
+      border: 1px solid rgba(216, 209, 197, 0.3);
     }
 
     .upload-area {
@@ -137,15 +151,17 @@
     }
 
     .image-filename {
-      font-weight: 600;
-      color: #1a365d;
+      font-weight: 500;
+      font-family: var(--font-primary);
+      color: var(--secondary-color);
       margin-bottom: 0.5rem;
       font-size: 0.9rem;
     }
 
     .image-date {
       font-size: 0.8rem;
-      color: #64748b;
+      color: var(--tertiary-color);
+      font-family: var(--font-primary);
       margin-bottom: 1rem;
     }
 
