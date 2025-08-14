@@ -184,6 +184,20 @@ service cloud.firestore {
         && request.auth.uid == request.resource.data.userId;
     }
     
+    // User reports rules - users can manage their own saved reports
+    match /user-reports/{userId} {
+      // Users can only read and write their own reports
+      allow read, write: if request.auth != null 
+        && request.auth.uid == userId;
+    }
+    
+    // User preferences rules - users can manage their own preferences
+    match /user-preferences/{userId} {
+      // Users can only read, write and delete their own preferences
+      allow read, write, delete: if request.auth != null 
+        && request.auth.uid == userId;
+    }
+    
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
