@@ -1084,27 +1084,7 @@
       });
     }
 
-    // Apply report selection
-    function applyReportSelection() {
-      selectedReports = userReports.filter((report, index) => {
-        const checkbox = document.getElementById(`checkbox-${index}`);
-        return checkbox && checkbox.classList.contains('checked');
-      });
-
-      if (selectedReports.length === 0) {
-        alert('Please select at least one report to view.');
-        return;
-      }
-      
-      // Show reports content area
-      document.getElementById('report-selector-section').style.display = 'none';
-      document.getElementById('reports-content').style.display = 'block';
-      
-      // Initialize report navigation
-      setupReportNavigation();
-      currentReportIndex = 0;
-      updateReport();
-    }
+    // Apply report selection - moved to multiview section
 
     // Back to selector function
     function backToSelector() {
@@ -1183,12 +1163,10 @@
     }
 
     function applyReportSelection() {
-      const checkboxes = document.querySelectorAll('.report-checkbox.checked');
-      selectedReports = Array.from(checkboxes).map(cb => {
-        const reportCard = cb.closest('.report-card');
-        const reportId = reportCard.dataset.reportId;
-        return userReports.find(report => report.id === reportId);
-      }).filter(Boolean);
+      selectedReports = userReports.filter((report, index) => {
+        const checkbox = document.getElementById(`checkbox-${index}`);
+        return checkbox && checkbox.classList.contains('checked');
+      });
 
       if (selectedReports.length === 0) {
         alert('Please select at least one report.');
