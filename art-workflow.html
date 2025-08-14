@@ -811,7 +811,7 @@
       <!-- Step 12: Mounting & Framing -->
       <div class="workflow-step">
         <div class="step-number">12</div>
-        <div class="step-card" onclick="toggleStep(this)">
+        <div class="step-card expanded" onclick="toggleStep(this)">
           <div class="step-icon">
             <span>🖼️</span>
           </div>
@@ -822,13 +822,15 @@
             <span class="step-badge">Presentation</span>
           </div>
           <button class="expand-btn">
-            <span>Learn More</span>
+            <span>Show Less</span>
             <span class="expand-icon">▼</span>
           </button>
-          <div class="step-details">
-            <div class="media-placeholder">
-              <div class="media-placeholder-icon">🎥</div>
-              <p>Video placeholder: Mounting and framing process</p>
+          <div class="step-details expanded">
+            <div class="video-container">
+              <video controls loop autoplay muted>
+                <source src="videos/mountingandframing.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
             </div>
             <p><strong>Services include:</strong></p>
             <ul>
