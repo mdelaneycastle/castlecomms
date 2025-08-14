@@ -32,6 +32,9 @@
   --font-primary: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
   --letter-spacing-headers: 0.025em;
   --letter-spacing-normal: 0;
+  
+  /* Gradients */
+  --primary-gradient: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
 }
 
 /* Welcome Message */
@@ -1118,16 +1121,16 @@ admin-link {
 
 .manual-badge {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--card-background);
   backdrop-filter: blur(10px);
-  color: #e2e8f0;
+  color: var(--secondary-color);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--accent-color);
   transition: var(--transition);
 }
 
@@ -1148,11 +1151,10 @@ admin-link {
 .manual-title {
   font-size: 0.9rem;
   font-weight: 800;
-  color: #f1f5f9;
+  color: var(--secondary-color);
   margin-bottom: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .manual-subtitle {
@@ -1179,8 +1181,8 @@ admin-link {
 }
 
 .gallery-manual-redesign:hover .manual-badge {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--secondary-color);
   border-color: rgba(255, 255, 255, 0.4);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
@@ -1252,16 +1254,16 @@ admin-link {
 
 .premium-badge {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--card-background);
   backdrop-filter: blur(10px);
-  color: #e2e8f0;
+  color: var(--secondary-color);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--accent-color);
   transition: var(--transition);
 }
 
@@ -1281,7 +1283,7 @@ admin-link {
 .premium-title {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--secondary-color);
   margin-bottom: 0.15rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1335,8 +1337,8 @@ admin-link {
 }
 
 .premium-link:hover .premium-badge {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--secondary-color);
   border-color: rgba(255, 255, 255, 0.4);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
@@ -1577,11 +1579,11 @@ admin-link {
 
 .manual-title {
   text-align: center;
-  color: white;
+  color: var(--secondary-color);
   font-size: 2.2rem;
-  font-weight: bold;
+  font-weight: 500;
+  font-family: var(--font-primary);
   margin-bottom: 1.5rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .page-container {
@@ -1769,9 +1771,9 @@ admin-link {
 }
 
 .nav-btn {
-  background: rgba(255,255,255,0.2);
+  background: var(--secondary-color);
   color: white;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid var(--tertiary-color);
   padding: 0.6rem 1.2rem;
   border-radius: 25px;
   cursor: pointer;
@@ -1781,8 +1783,8 @@ admin-link {
 }
 
 .nav-btn:hover {
-  background: rgba(255,255,255,0.3);
-  border-color: rgba(255,255,255,0.5);
+  background: var(--tertiary-color);
+  border-color: var(--secondary-color);
   transform: translateY(-2px);
 }
 
@@ -1796,23 +1798,23 @@ admin-link {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: rgba(255,255,255,0.2);
+  background: var(--secondary-color);
   backdrop-filter: blur(10px);
   padding: 0.4rem 0.8rem;
   border-radius: 20px;
   font-weight: 600;
   color: white;
   font-size: 0.9rem;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid var(--tertiary-color);
 }
 
 .close-manual {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  background: rgba(255,255,255,0.2);
+  background: var(--secondary-color);
   color: white;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 2px solid var(--tertiary-color);
   border-radius: 50%;
   width: 40px;
   height: 40px;
