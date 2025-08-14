@@ -744,6 +744,11 @@
           <button class="apply-selection-btn" onclick="applyReportSelection()">✅ View Selected Reports</button>
           <button class="select-all-btn" onclick="selectAllReports()">☑️ Select All</button>
           <button class="clear-all-btn" onclick="clearAllReports()">❌ Clear All</button>
+          <button class="clear-saved-view-btn" id="clear-saved-view-btn" onclick="clearSavedView()" style="display: none; background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%) !important;">🗑️ Clear Saved View</button>
+        </div>
+        
+        <div class="saved-view-indicator" id="saved-view-indicator" style="display: none; text-align: center; padding: 1rem; background: rgba(40, 167, 69, 0.1); border: 2px solid #28a745; border-radius: 8px; margin-top: 1rem;">
+          <span style="color: #28a745; font-weight: 500;">💾 Saved View Active - Your preferences are automatically restored</span>
         </div>
       </div>
       
@@ -874,6 +879,7 @@
     let currentReportIndex = 0;
     let selectedReports = [];
     let db;
+    let userPreferences = null;
 
     document.addEventListener('DOMContentLoaded', function() {
       // Check authentication first
@@ -889,7 +895,8 @@
         // Initialize Firebase Firestore
         if (firebase.apps.length > 0) {
           db = firebase.firestore();
-          loadUserReports();
+          await loadUserReports();
+          await loadUserPreferences();
         } else {
           console.error('Firebase not initialized');
         }
@@ -912,6 +919,133 @@
         console.error('Error loading user reports:', error);
         userReports = [];
         displayUserReports();
+      }
+    }
+
+    // Load user preferences
+    async function loadUserPreferences() {
+      try {
+        const preferencesDoc = await db.collection('user-preferences').doc(currentUser.uid).get();
+        
+        if (preferencesDoc.exists) {
+          userPreferences = preferencesDoc.data().reportView || null;
+          
+          // If user has saved preferences, restore their view automatically
+          if (userPreferences && userPreferences.selectedReportIds && userPreferences.selectedReportIds.length > 0) {
+            setTimeout(() => {
+              restoreUserView();
+            }, 500); // Small delay to ensure DOM is ready
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user preferences:', error);
+      }
+    }
+
+    // Save user preferences
+    async function saveUserPreferences() {
+      try {
+        const preferences = {
+          reportView: {
+            viewMode: currentViewMode,
+            selectedReportIds: selectedReports.map(report => report.id),
+            lastUpdated: new Date().toISOString()
+          }
+        };
+
+        await db.collection('user-preferences').doc(currentUser.uid).set(preferences);
+        userPreferences = preferences.reportView;
+        
+        console.log('User preferences saved successfully');
+      } catch (error) {
+        console.error('Error saving user preferences:', error);
+      }
+    }
+
+    // Restore user's saved view
+    function restoreUserView() {
+      if (!userPreferences || !userPreferences.selectedReportIds) {
+        return;
+      }
+
+      // Find matching reports by ID
+      const savedReports = userPreferences.selectedReportIds
+        .map(id => userReports.find(report => report.id === id))
+        .filter(Boolean);
+
+      if (savedReports.length === 0) {
+        return; // No matching reports found
+      }
+
+      // Select the saved reports
+      userReports.forEach((report, index) => {
+        const checkbox = document.getElementById(`checkbox-${index}`);
+        const card = checkbox.closest('.report-card');
+        const checkmark = checkbox.querySelector('span');
+        
+        if (savedReports.some(savedReport => savedReport.id === report.id)) {
+          checkbox.classList.add('checked');
+          card.classList.add('selected');
+          checkmark.style.display = 'block';
+        }
+      });
+
+      // Set the view mode
+      currentViewMode = userPreferences.viewMode || 'single';
+      document.querySelector(`input[name="view-mode"][value="${currentViewMode}"]`).checked = true;
+
+      // Auto-apply the selection
+      selectedReports = savedReports;
+      
+      // Show the saved view
+      if (currentViewMode === 'single') {
+        showSingleView();
+      } else {
+        showMultiView();
+      }
+
+      // Show an "Edit View" button in the header
+      showEditViewButton();
+    }
+
+    // Show edit view button and saved view indicators
+    function showEditViewButton() {
+      const backButtons = document.querySelectorAll('.back-to-selector-btn');
+      backButtons.forEach(btn => {
+        btn.textContent = '✏️ Edit View';
+        btn.title = 'Edit your saved view';
+      });
+      
+      // Show saved view indicator and clear button when user has a saved view
+      document.getElementById('saved-view-indicator').style.display = 'block';
+      document.getElementById('clear-saved-view-btn').style.display = 'inline-block';
+    }
+
+    // Clear saved view
+    async function clearSavedView() {
+      if (!confirm('Are you sure you want to clear your saved view? This will remove your automatically restored preferences.')) {
+        return;
+      }
+
+      try {
+        // Clear from Firebase
+        await db.collection('user-preferences').doc(currentUser.uid).delete();
+        
+        // Clear local preferences
+        userPreferences = null;
+        
+        // Hide indicators
+        document.getElementById('saved-view-indicator').style.display = 'none';
+        document.getElementById('clear-saved-view-btn').style.display = 'none';
+        
+        // Clear all selections
+        clearAllReports();
+        
+        alert('Saved view cleared successfully!');
+        
+      } catch (error) {
+        console.error('Error clearing saved view:', error);
+        alert('Failed to clear saved view. Please try again.');
       }
     }
 
@@ -1179,6 +1313,9 @@
       } else {
         showMultiView();
       }
+
+      // Save user preferences
+      saveUserPreferences();
     }
 
     function showSingleView() {
@@ -1283,12 +1420,17 @@
       document.getElementById('reports-content').style.display = 'none';
       document.getElementById('multiview-content').style.display = 'none';
       
-      // Reset view mode to single
+      // Reset button text back to "Back"
+      const backButtons = document.querySelectorAll('.back-to-selector-btn');
+      backButtons.forEach(btn => {
+        btn.textContent = '← Back';
+        btn.title = 'Back to Report Selection';
+      });
+      
+      // Don't automatically clear selections - let user modify their saved view
+      // Reset view mode to single for the selector
       currentViewMode = 'single';
       document.querySelector('input[name="view-mode"][value="single"]').checked = true;
-      
-      // Clear selections
-      clearAllReports();
     }
 
   </script>
