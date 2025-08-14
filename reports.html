@@ -27,11 +27,11 @@
     }
 
     .reports-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--primary-gradient);
       color: white;
       padding: 0.75rem 2rem;
       text-align: center;
-      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 20px rgba(69, 73, 78, 0.3);
       flex-shrink: 0;
       border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
@@ -74,7 +74,7 @@
     }
 
     .nav-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--primary-gradient);
       border: none;
       border-radius: 50%;
       width: 50px;
@@ -86,12 +86,12 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 15px rgba(69, 73, 78, 0.3);
     }
 
     .nav-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 6px 25px rgba(69, 73, 78, 0.4);
     }
 
     .nav-btn:active {
@@ -128,9 +128,9 @@
     }
 
     .report-indicator.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--primary-gradient);
       transform: scale(1.2);
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 2px 8px rgba(69, 73, 78, 0.4);
     }
 
     .report-indicator:hover:not(.active) {
@@ -183,7 +183,7 @@
       align-items: center;
       margin-bottom: 1.5rem;
       padding-bottom: 1rem;
-      border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+      border-bottom: 2px solid rgba(69, 73, 78, 0.1);
     }
 
     .selector-header h3 {
@@ -209,7 +209,7 @@
 
     .refresh-reports-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 15px rgba(69, 73, 78, 0.3);
     }
 
     .reports-grid {
@@ -231,14 +231,14 @@
     }
 
     .report-card:hover {
-      border-color: #667eea;
+      border-color: var(--accent-color);
       transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+      box-shadow: 0 4px 16px rgba(69, 73, 78, 0.15);
     }
 
     .report-card.selected {
-      border-color: #667eea;
-      background: rgba(102, 126, 234, 0.05);
+      border-color: var(--accent-color);
+      background: rgba(197, 189, 177, 0.1);
     }
 
     .report-card-header {
@@ -251,7 +251,7 @@
     .report-checkbox {
       width: 20px;
       height: 20px;
-      border: 2px solid #667eea;
+      border: 2px solid var(--accent-color);
       border-radius: 4px;
       display: flex;
       align-items: center;
@@ -262,7 +262,7 @@
     }
 
     .report-checkbox.checked {
-      background: #667eea;
+      background: var(--accent-color);
       color: white;
     }
 
@@ -304,7 +304,7 @@
 
     .selector-actions button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 4px 15px rgba(69, 73, 78, 0.3);
     }
 
     .clear-all-btn {
@@ -412,7 +412,7 @@
 
     .form-input:focus {
       outline: none;
-      border-color: #6264a7;
+      border-color: var(--accent-color);
       background: #ffffff;
     }
 
@@ -437,14 +437,14 @@
     }
 
     .btn-primary {
-      background: #6264a7;
+      background: var(--secondary-color);
       color: white;
-      border-color: #6264a7;
+      border-color: var(--secondary-color);
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: #585a96;
-      border-color: #585a96;
+      background: var(--tertiary-color);
+      border-color: var(--tertiary-color);
     }
 
     .btn:hover {
