@@ -315,10 +315,10 @@ header h1 {
 }
 
 .sidebar ul li a:hover {
-  color: var(--secondary-color);
+  color: white;
   transform: translateX(8px);
   box-shadow: var(--shadow-light);
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--secondary-color);
 }
 
 .sidebar ul li a:hover::before {

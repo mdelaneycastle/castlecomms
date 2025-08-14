@@ -62,9 +62,9 @@
       top: 0; left: 0;
       width: 250px;
       height: 100%;
-      background: rgba(34, 34, 34, 0.95);
+      background: var(--card-background);
       backdrop-filter: blur(15px);
-      color: white;
+      color: var(--text-dark);
       transform: translateX(-100%);
       transition: transform 0.3s ease;
       padding-top: 2rem;
@@ -74,7 +74,7 @@
     .sidebar.show { transform: translateX(0); }
     .sidebar .close-btn {
       position: absolute; top: 0.5rem; right: 1rem;
-      background: none; border: none; color: white;
+      background: none; border: none; color: var(--text-dark);
       font-size: 1.5rem; cursor: pointer;
     }
     .sidebar ul {
@@ -84,7 +84,7 @@
       margin: 1rem 0;
     }
     .sidebar a {
-      color: white; text-decoration: none; padding: 0.5rem 1rem; display: block;
+      color: var(--text-dark); text-decoration: none; padding: 0.5rem 1rem; display: block;
     }
     main {
       margin: 2rem auto;
