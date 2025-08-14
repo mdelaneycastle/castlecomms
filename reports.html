@@ -40,6 +40,7 @@
       font-size: 2.5rem;
       font-weight: bold;
       margin: 0;
+      color: white;
       text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
       animation: fadeInDown 0.8s ease-out;
     }
@@ -535,6 +536,166 @@
         min-height: calc(100vh - 160px);
       }
     }
+
+    /* Multi-view Styling */
+    .view-mode-toggle {
+      display: flex;
+      gap: 1rem;
+      margin-right: 1rem;
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+
+    .view-mode-toggle label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      color: var(--secondary-color);
+      font-weight: 500;
+    }
+
+    .multiview-content {
+      display: none;
+      flex-direction: column;
+      height: calc(100vh - 80px);
+      width: 100%;
+    }
+
+    .multiview-navigation {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.95);
+      border-bottom: 1px solid #e1e5e9;
+      flex-shrink: 0;
+      min-height: 50px;
+    }
+
+    .multiview-info {
+      text-align: center;
+      flex: 1;
+    }
+
+    .multiview-info h3 {
+      margin: 0;
+      color: var(--secondary-color);
+      font-size: 1.2rem;
+    }
+
+    .multiview-info span {
+      color: var(--tertiary-color);
+      font-size: 0.9rem;
+    }
+
+    .multiview-grid {
+      display: grid;
+      gap: 1rem;
+      padding: 1rem;
+      flex: 1;
+      overflow: auto;
+    }
+
+    .multiview-grid.two-reports {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+    }
+
+    .multiview-grid.three-reports {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .multiview-grid.four-reports {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+
+    .multiview-report-container {
+      position: relative;
+      background: white;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+    }
+
+    .multiview-report-container:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(69, 73, 78, 0.15);
+    }
+
+    .multiview-report-header {
+      background: var(--card-background);
+      padding: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e1e5e9;
+    }
+
+    .multiview-report-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--secondary-color);
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .maximize-btn {
+      background: var(--secondary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .maximize-btn:hover {
+      background: var(--tertiary-color);
+      transform: scale(1.1);
+    }
+
+    .multiview-report-iframe {
+      width: 100%;
+      height: calc(100% - 40px);
+      border: none;
+    }
+
+    /* Three reports special layout */
+    .multiview-grid.three-reports .multiview-report-container:first-child {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 768px) {
+      .multiview-grid.two-reports,
+      .multiview-grid.three-reports,
+      .multiview-grid.four-reports {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(auto, 1fr);
+      }
+      
+      .multiview-grid.three-reports .multiview-report-container:first-child {
+        grid-column: span 1;
+      }
+
+      .view-mode-toggle {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
   </style>
 </head>
 
@@ -572,6 +733,14 @@
         </div>
         
         <div class="selector-actions" id="selector-actions" style="display: none;">
+          <div class="view-mode-toggle">
+            <label>
+              <input type="radio" name="view-mode" value="single" checked onchange="setViewMode('single')"> Single View
+            </label>
+            <label>
+              <input type="radio" name="view-mode" value="multi" onchange="setViewMode('multi')"> Multi View
+            </label>
+          </div>
           <button class="apply-selection-btn" onclick="applyReportSelection()">✅ View Selected Reports</button>
           <button class="select-all-btn" onclick="selectAllReports()">☑️ Select All</button>
           <button class="clear-all-btn" onclick="clearAllReports()">❌ Clear All</button>
@@ -609,6 +778,32 @@
             frameborder="0" 
             allowFullScreen="true">
           </iframe>
+        </div>
+      </div>
+      
+      <!-- Multi-view Container -->
+      <div class="multiview-content" id="multiview-content" style="display: none;">
+        <div class="multiview-navigation">
+          <button class="nav-btn multiview-prev-btn" onclick="switchMultiviewPage('prev')" title="Previous Page">
+            <span>‹</span>
+          </button>
+          
+          <div class="multiview-info">
+            <h3 id="multiview-title">Multi View</h3>
+            <span id="multiview-page-indicator">Page 1 of 1</span>
+          </div>
+          
+          <button class="nav-btn multiview-next-btn" onclick="switchMultiviewPage('next')" title="Next Page">
+            <span>›</span>
+          </button>
+          
+          <button class="back-to-selector-btn" onclick="backToSelector()" title="Back to Report Selection">
+            ← Back
+          </button>
+        </div>
+        
+        <div class="multiview-grid" id="multiview-grid">
+          <!-- Reports will be populated here dynamically -->
         </div>
       </div>
     </div>
@@ -976,6 +1171,147 @@
         closeAddReportModal();
       }
     });
+
+    // Multiview functionality
+    let currentViewMode = 'single';
+    let currentMultiviewPage = 0;
+    let reportsPerPage = 4;
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      console.log('View mode set to:', mode);
+    }
+
+    function applyReportSelection() {
+      const checkboxes = document.querySelectorAll('.report-checkbox.checked');
+      selectedReports = Array.from(checkboxes).map(cb => {
+        const reportCard = cb.closest('.report-card');
+        const reportId = reportCard.dataset.reportId;
+        return userReports.find(report => report.id === reportId);
+      }).filter(Boolean);
+
+      if (selectedReports.length === 0) {
+        alert('Please select at least one report.');
+        return;
+      }
+
+      // Check view mode and show appropriate view
+      if (currentViewMode === 'single') {
+        showSingleView();
+      } else {
+        showMultiView();
+      }
+    }
+
+    function showSingleView() {
+      document.getElementById('report-selector-section').style.display = 'none';
+      document.getElementById('reports-content').style.display = 'flex';
+      document.getElementById('multiview-content').style.display = 'none';
+      
+      currentReportIndex = 0;
+      setupReportNavigation();
+      updateReport();
+    }
+
+    function showMultiView() {
+      document.getElementById('report-selector-section').style.display = 'none';
+      document.getElementById('reports-content').style.display = 'none';
+      document.getElementById('multiview-content').style.display = 'flex';
+      
+      currentMultiviewPage = 0;
+      setupMultiviewContent();
+      updateMultiviewDisplay();
+    }
+
+    function setupMultiviewContent() {
+      const totalPages = Math.ceil(selectedReports.length / reportsPerPage);
+      const pageIndicator = document.getElementById('multiview-page-indicator');
+      pageIndicator.textContent = `Page ${currentMultiviewPage + 1} of ${totalPages}`;
+      
+      // Update navigation buttons
+      const prevBtn = document.querySelector('.multiview-prev-btn');
+      const nextBtn = document.querySelector('.multiview-next-btn');
+      
+      prevBtn.disabled = currentMultiviewPage === 0;
+      nextBtn.disabled = currentMultiviewPage >= totalPages - 1;
+    }
+
+    function updateMultiviewDisplay() {
+      const startIndex = currentMultiviewPage * reportsPerPage;
+      const endIndex = Math.min(startIndex + reportsPerPage, selectedReports.length);
+      const pageReports = selectedReports.slice(startIndex, endIndex);
+      
+      const multiviewGrid = document.getElementById('multiview-grid');
+      multiviewGrid.innerHTML = '';
+      
+      // Set grid class based on number of reports on this page
+      multiviewGrid.className = 'multiview-grid';
+      if (pageReports.length === 2) {
+        multiviewGrid.classList.add('two-reports');
+      } else if (pageReports.length === 3) {
+        multiviewGrid.classList.add('three-reports');
+      } else if (pageReports.length === 4) {
+        multiviewGrid.classList.add('four-reports');
+      }
+      
+      // Create report containers
+      pageReports.forEach((report, index) => {
+        const reportContainer = document.createElement('div');
+        reportContainer.className = 'multiview-report-container';
+        
+        reportContainer.innerHTML = `
+          <div class="multiview-report-header">
+            <h4 class="multiview-report-title" title="${report.name}">${report.name}</h4>
+            <button class="maximize-btn" onclick="maximizeReport(${startIndex + index})" title="Maximize">⤢</button>
+          </div>
+          <iframe 
+            class="multiview-report-iframe" 
+            src="${report.url}" 
+            frameborder="0" 
+            allowFullScreen="true"
+            title="${report.name}">
+          </iframe>
+        `;
+        
+        multiviewGrid.appendChild(reportContainer);
+      });
+      
+      setupMultiviewContent();
+    }
+
+    function switchMultiviewPage(direction) {
+      const totalPages = Math.ceil(selectedReports.length / reportsPerPage);
+      
+      if (direction === 'prev' && currentMultiviewPage > 0) {
+        currentMultiviewPage--;
+      } else if (direction === 'next' && currentMultiviewPage < totalPages - 1) {
+        currentMultiviewPage++;
+      }
+      
+      updateMultiviewDisplay();
+    }
+
+    function maximizeReport(reportIndex) {
+      // Switch to single view mode and show the specific report
+      currentViewMode = 'single';
+      document.querySelector('input[name="view-mode"][value="single"]').checked = true;
+      
+      currentReportIndex = reportIndex;
+      showSingleView();
+    }
+
+    function backToSelector() {
+      document.getElementById('report-selector-section').style.display = 'block';
+      document.getElementById('reports-content').style.display = 'none';
+      document.getElementById('multiview-content').style.display = 'none';
+      
+      // Reset view mode to single
+      currentViewMode = 'single';
+      document.querySelector('input[name="view-mode"][value="single"]').checked = true;
+      
+      // Clear selections
+      clearAllReports();
+    }
 
   </script>
 
