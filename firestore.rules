@@ -271,10 +271,15 @@ service cloud.firestore {
       allow read: if request.auth != null 
         && chatParticipantCheck(resource.data.chatId);
       
-      // Users can create/update/delete their own typing indicators
-      allow create, update, delete: if request.auth != null 
+      // Users can create their own typing indicators
+      allow create: if request.auth != null 
         && request.auth.token.email == request.resource.data.userEmail
         && chatParticipantCheck(request.resource.data.chatId);
+      
+      // Users can update/delete their own typing indicators
+      allow update, delete: if request.auth != null 
+        && request.auth.token.email == resource.data.userEmail
+        && chatParticipantCheck(resource.data.chatId);
     }
     
     // Helper function to check if user is a chat participant

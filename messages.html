@@ -2315,8 +2315,39 @@ function enhanceMessageWithTickets(messageText, attachments = null) {
   
   let enhancedText = messageText || '';
   
-  // Handle ticket patterns first
+  // Handle URLs first to avoid conflicts with later HTML generation
   if (messageText) {
+    // Handle GIF URLs first
+    const gifPattern = /(https?:\/\/[^\s]+\.gif(?:\?[^\s]*)?)/gi;
+    enhancedText = enhancedText.replace(gifPattern, (match) => {
+      return `__GIF_PLACEHOLDER_${btoa(match)}__`;
+    });
+    
+    // Handle general image URLs
+    const imagePattern = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s]*)?)/gi;
+    enhancedText = enhancedText.replace(imagePattern, (match) => {
+      return `__IMAGE_PLACEHOLDER_${btoa(match)}__`;
+    });
+    
+    // Handle YouTube links
+    const youtubePattern = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+))/gi;
+    enhancedText = enhancedText.replace(youtubePattern, (match, fullUrl, videoId) => {
+      return `__YOUTUBE_PLACEHOLDER_${btoa(match)}_${videoId}__`;
+    });
+    
+    // Handle general URLs (excluding already processed ones)
+    const urlPattern = /(https?:\/\/[^\s]+)/gi;
+    enhancedText = enhancedText.replace(urlPattern, (match) => {
+      // Skip if already processed as image/gif/youtube (check for placeholders)
+      if (enhancedText.includes(`__GIF_PLACEHOLDER_${btoa(match)}__`) || 
+          enhancedText.includes(`__IMAGE_PLACEHOLDER_${btoa(match)}__`) ||
+          match.includes('youtube.com') || match.includes('youtu.be')) {
+        return match;
+      }
+      return `<a href="${match}" target="_blank" style="color: #6264a7; text-decoration: underline;">${match}</a>`;
+    });
+    
+    // Handle ticket patterns
     const ticketPatterns = [
       /\#(\d{1,6})\b/g,                    // #1234
       /ticket:?\s*(\d{1,6})\b/gi,          // ticket:1234, ticket 1234
@@ -2331,39 +2362,27 @@ function enhanceMessageWithTickets(messageText, attachments = null) {
       });
     });
     
-    // Handle GIF URLs
-    const gifPattern = /(https?:\/\/[^\s]+\.gif(?:\?[^\s]*)?)/gi;
-    enhancedText = enhancedText.replace(gifPattern, (match) => {
-      return `<div class="message-gif"><img src="${match}" alt="GIF" loading="lazy" onclick="openImageModal('${match}')" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;"></div>`;
+    // Replace placeholders with actual HTML
+    enhancedText = enhancedText.replace(/__GIF_PLACEHOLDER_([^_]+)__/g, (match, encodedUrl) => {
+      const url = atob(encodedUrl);
+      return `<div class="message-gif"><img src="${url}" alt="GIF" loading="lazy" onclick="openImageModal('${url}')" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;"></div>`;
     });
     
-    // Handle general image URLs
-    const imagePattern = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s]*)?)/gi;
-    enhancedText = enhancedText.replace(imagePattern, (match) => {
-      return `<div class="message-image"><img src="${match}" alt="Image" loading="lazy" onclick="openImageModal('${match}')" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;"></div>`;
+    enhancedText = enhancedText.replace(/__IMAGE_PLACEHOLDER_([^_]+)__/g, (match, encodedUrl) => {
+      const url = atob(encodedUrl);
+      return `<div class="message-image"><img src="${url}" alt="Image" loading="lazy" onclick="openImageModal('${url}')" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;"></div>`;
     });
     
-    // Handle YouTube links
-    const youtubePattern = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+))/gi;
-    enhancedText = enhancedText.replace(youtubePattern, (match, fullUrl, videoId) => {
+    enhancedText = enhancedText.replace(/__YOUTUBE_PLACEHOLDER_([^_]+)_([^_]+)__/g, (match, encodedUrl, videoId) => {
+      const url = atob(encodedUrl);
       return `<div class="message-youtube">
-        <a href="${match}" target="_blank" style="color: #ff0000; text-decoration: none;">
+        <a href="${url}" target="_blank" style="color: #ff0000; text-decoration: none;">
           📺 YouTube Video
         </a>
         <div style="margin-top: 8px;">
           <iframe width="300" height="169" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe>
         </div>
       </div>`;
-    });
-    
-    // Handle general URLs
-    const urlPattern = /(https?:\/\/[^\s]+)/gi;
-    enhancedText = enhancedText.replace(urlPattern, (match) => {
-      // Skip if already processed as image/gif/youtube
-      if (match.match(/\.(gif|jpg|jpeg|png|webp)(\?.*)?$/i) || match.includes('youtube.com') || match.includes('youtu.be')) {
-        return match;
-      }
-      return `<a href="${match}" target="_blank" style="color: #6264a7; text-decoration: underline;">${match}</a>`;
     });
   }
   
