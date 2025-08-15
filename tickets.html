@@ -1396,6 +1396,82 @@
       background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
     }
 
+    /* COFT Details Section Styles */
+    .coft-details-section {
+      background: rgba(255, 248, 220, 0.8);
+      border: 2px solid #f0ad4e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 8px rgba(240, 173, 78, 0.2);
+    }
+
+    .coft-details-section h4 {
+      margin: 0 0 1rem 0;
+      color: #8a6d3b;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-bottom: 2px solid #f0ad4e;
+      padding-bottom: 0.5rem;
+    }
+
+    .coft-details-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .coft-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(240, 173, 78, 0.2);
+    }
+
+    .coft-detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .coft-label {
+      font-weight: 600;
+      color: #8a6d3b;
+      margin-right: 1rem;
+      flex-shrink: 0;
+      min-width: 160px;
+    }
+
+    .coft-value {
+      color: #5a5a5a;
+      text-align: right;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+
+    .coft-value.highlight {
+      background: rgba(240, 173, 78, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      .coft-detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+      
+      .coft-label {
+        min-width: auto;
+        margin-right: 0;
+      }
+      
+      .coft-value {
+        text-align: left;
+      }
+    }
+
     .ticket-messages-section {
       border-top: 2px solid #e1e5e9;
       padding-top: 1.5rem;
@@ -1992,6 +2068,65 @@
         </div>
         <div class="ticket-description" id="view-ticket-description">
           Ticket description will appear here...
+        </div>
+      </div>
+      
+      <!-- COFT Ticket Details Section -->
+      <div class="coft-details-section" id="coft-details-section" style="display: none;">
+        <h4>📋 COFT Order Details</h4>
+        <div class="coft-details-grid">
+          <div class="coft-detail-row">
+            <span class="coft-label">SO Number:</span>
+            <span class="coft-value" id="coft-detail-so">-</span>
+          </div>
+          <div class="coft-detail-row">
+            <span class="coft-label">Client:</span>
+            <span class="coft-value" id="coft-detail-client">-</span>
+          </div>
+          <div class="coft-detail-row">
+            <span class="coft-label">Item Code:</span>
+            <span class="coft-value" id="coft-detail-item-code">-</span>
+          </div>
+          <div class="coft-detail-row">
+            <span class="coft-label">Artwork Title:</span>
+            <span class="coft-value" id="coft-detail-artwork">-</span>
+          </div>
+          <div class="coft-detail-row">
+            <span class="coft-label">Edition Number:</span>
+            <span class="coft-value" id="coft-detail-edition">-</span>
+          </div>
+          <div class="coft-detail-row">
+            <span class="coft-label">Order Date:</span>
+            <span class="coft-value" id="coft-detail-order-date">-</span>
+          </div>
+          <div class="coft-detail-row">
+            <span class="coft-label">Delivery Method:</span>
+            <span class="coft-value" id="coft-detail-delivery">-</span>
+          </div>
+          <div class="coft-detail-row">
+            <span class="coft-label">Client Aware of 4 Week Time:</span>
+            <span class="coft-value" id="coft-detail-client-aware">-</span>
+          </div>
+          <div class="coft-detail-row">
+            <span class="coft-label">ETA Discussed at Purchase:</span>
+            <span class="coft-value" id="coft-detail-eta-discussed">-</span>
+          </div>
+          <div class="coft-detail-row">
+            <span class="coft-label">Issue Reason:</span>
+            <span class="coft-value" id="coft-detail-reason">-</span>
+          </div>
+          <div class="coft-detail-row" id="coft-specific-date-row" style="display: none;">
+            <span class="coft-label">Specific Date Needed:</span>
+            <span class="coft-value" id="coft-detail-specific-date">-</span>
+          </div>
+          <div class="coft-detail-row" id="coft-photos-row" style="display: none;">
+            <span class="coft-label">Photos Attached:</span>
+            <span class="coft-value" id="coft-detail-photos">-</span>
+          </div>
+          <div class="coft-detail-row" id="coft-additional-row" style="display: none;">
+            <span class="coft-label">Additional Information:</span>
+            <span class="coft-value" id="coft-detail-additional">-</span>
+          </div>
         </div>
       </div>
       
@@ -3037,6 +3172,64 @@ async function openTicket(ticketId) {
     // Initialize timer display
     updateTimerDisplay(ticketData);
     
+    // Check if this is a COFT ticket and populate COFT details if so
+    const coftData = extractComprehensiveCOFTData(ticketData);
+    const coftSection = document.getElementById('coft-details-section');
+    
+    if (coftData.isCOFTTicket) {
+      // Show COFT section and populate data
+      coftSection.style.display = 'block';
+      
+      // Populate COFT details
+      document.getElementById('coft-detail-so').textContent = coftData.soNumber || '-';
+      document.getElementById('coft-detail-client').textContent = coftData.clientName || '-';
+      document.getElementById('coft-detail-item-code').textContent = coftData.itemCode || '-';
+      document.getElementById('coft-detail-artwork').textContent = coftData.artworkTitle || '-';
+      document.getElementById('coft-detail-edition').textContent = coftData.editionNumber || '-';
+      document.getElementById('coft-detail-order-date').textContent = coftData.orderDate || '-';
+      document.getElementById('coft-detail-delivery').textContent = coftData.deliveryMethod || '-';
+      
+      // Add highlighting for important fields
+      if (coftData.clientAware === 'NO') {
+        document.getElementById('coft-detail-client-aware').innerHTML = '<span class="highlight" style="background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; font-weight: 600;">NO ⚠️</span>';
+      } else {
+        document.getElementById('coft-detail-client-aware').textContent = coftData.clientAware || '-';
+      }
+      
+      if (coftData.etaDiscussed === 'NO') {
+        document.getElementById('coft-detail-eta-discussed').innerHTML = '<span class="highlight" style="background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; font-weight: 600;">NO ⚠️</span>';
+      } else {
+        document.getElementById('coft-detail-eta-discussed').textContent = coftData.etaDiscussed || '-';
+      }
+      
+      document.getElementById('coft-detail-reason').textContent = coftData.ticketReason || '-';
+      
+      // Show/hide conditional fields
+      if (coftData.specificDate) {
+        document.getElementById('coft-specific-date-row').style.display = 'flex';
+        document.getElementById('coft-detail-specific-date').textContent = coftData.specificDate;
+      } else {
+        document.getElementById('coft-specific-date-row').style.display = 'none';
+      }
+      
+      if (coftData.photosAttached && coftData.photosAttached !== '0 file(s)') {
+        document.getElementById('coft-photos-row').style.display = 'flex';
+        document.getElementById('coft-detail-photos').textContent = coftData.photosAttached;
+      } else {
+        document.getElementById('coft-photos-row').style.display = 'none';
+      }
+      
+      if (coftData.additionalInfo) {
+        document.getElementById('coft-additional-row').style.display = 'flex';
+        document.getElementById('coft-detail-additional').textContent = coftData.additionalInfo;
+      } else {
+        document.getElementById('coft-additional-row').style.display = 'none';
+      }
+    } else {
+      // Hide COFT section for non-COFT tickets
+      coftSection.style.display = 'none';
+    }
+    
     // Update status dropdown
     const statusSelect = document.getElementById('ticket-status-select');
     statusSelect.value = ticketData.status;
@@ -3955,6 +4148,120 @@ function extractCOFTDataFromTicket(ticket) {
     
   } catch (error) {
     console.log('Error extracting COFT data:', error);
+  }
+  
+  return defaultData;
+}
+
+// Extract comprehensive COFT data from ticket for modal display
+function extractComprehensiveCOFTData(ticket) {
+  const defaultData = {
+    isCOFTTicket: false,
+    soNumber: null,
+    clientName: null,
+    itemCode: null,
+    artworkTitle: null,
+    editionNumber: null,
+    orderDate: null,
+    deliveryMethod: null,
+    clientAware: null,
+    etaDiscussed: null,
+    ticketReason: null,
+    specificDate: null,
+    photosAttached: null,
+    additionalInfo: null
+  };
+  
+  // Check if this is a COFT ticket
+  if (!ticket.title?.includes('COFT Ticket') && !ticket.description?.includes('COFT TICKET')) {
+    return defaultData;
+  }
+  
+  defaultData.isCOFTTicket = true;
+  
+  try {
+    const description = ticket.description || '';
+    
+    // Extract SO Number
+    const soMatch = description.match(/SO Number:\s*([^\n\r]+)/i);
+    if (soMatch) {
+      defaultData.soNumber = soMatch[1].trim();
+    }
+    
+    // Extract Client Name
+    const clientMatch = description.match(/Client:\s*([^\n\r]+)/i);
+    if (clientMatch) {
+      defaultData.clientName = clientMatch[1].trim();
+    }
+    
+    // Extract Item Code
+    const itemCodeMatch = description.match(/Item Code:\s*([^\n\r]+)/i);
+    if (itemCodeMatch) {
+      defaultData.itemCode = itemCodeMatch[1].trim();
+    }
+    
+    // Extract Artwork Title
+    const artworkMatch = description.match(/Artwork Title:\s*([^\n\r]+)/i);
+    if (artworkMatch) {
+      defaultData.artworkTitle = artworkMatch[1].trim();
+    }
+    
+    // Extract Edition Number
+    const editionMatch = description.match(/Edition Number:\s*([^\n\r]+)/i);
+    if (editionMatch) {
+      defaultData.editionNumber = editionMatch[1].trim();
+    }
+    
+    // Extract Order Date
+    const orderDateMatch = description.match(/Order Date:\s*([^\n\r]+)/i);
+    if (orderDateMatch) {
+      defaultData.orderDate = orderDateMatch[1].trim();
+    }
+    
+    // Extract Delivery Method
+    const deliveryMatch = description.match(/Delivery Method:\s*([^\n\r]+)/i);
+    if (deliveryMatch) {
+      defaultData.deliveryMethod = deliveryMatch[1].trim();
+    }
+    
+    // Extract Client Awareness
+    const clientAwareMatch = description.match(/Is client aware of 4 week fulfilment time\?\s*(YES|NO)/i);
+    if (clientAwareMatch) {
+      defaultData.clientAware = clientAwareMatch[1].toUpperCase();
+    }
+    
+    // Extract ETA Discussion
+    const etaDiscussedMatch = description.match(/Has 4 week ETA been discussed at point of purchase\?\s*(YES|NO)/i);
+    if (etaDiscussedMatch) {
+      defaultData.etaDiscussed = etaDiscussedMatch[1].toUpperCase();
+    }
+    
+    // Extract Reason
+    const reasonMatch = description.match(/Reason:\s*([^\n\r]+)/i);
+    if (reasonMatch) {
+      defaultData.ticketReason = reasonMatch[1].trim();
+    }
+    
+    // Extract Specific Date if present
+    const specificDateMatch = description.match(/Specific Date Needed:\s*([^\n\r]+)/i);
+    if (specificDateMatch) {
+      defaultData.specificDate = specificDateMatch[1].trim();
+    }
+    
+    // Extract Photos Info
+    const photosMatch = description.match(/Photos Attached:\s*([^\n\r]+)/i);
+    if (photosMatch) {
+      defaultData.photosAttached = photosMatch[1].trim();
+    }
+    
+    // Extract Additional Information
+    const additionalMatch = description.match(/\*\*Additional Information:\*\*\n([\s\S]+?)(?=\n\n|$)/i);
+    if (additionalMatch) {
+      defaultData.additionalInfo = additionalMatch[1].trim();
+    }
+    
+  } catch (error) {
+    console.log('Error extracting comprehensive COFT data:', error);
   }
   
   return defaultData;
