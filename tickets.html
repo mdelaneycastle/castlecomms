@@ -945,6 +945,140 @@
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
+    /* COFT Form Specific Styles */
+    .coft-warning {
+      background: #fff3cd;
+      border: 1px solid #ffecb5;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .coft-warning p {
+      margin: 0;
+      color: #856404;
+      font-weight: 500;
+    }
+
+    /* Checkbox Styles */
+    .checkbox-container {
+      display: flex;
+      align-items: flex-start;
+      cursor: pointer;
+      padding: 8px 0;
+      user-select: none;
+      line-height: 1.4;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      display: none;
+    }
+
+    .checkmark {
+      height: 20px;
+      width: 20px;
+      background-color: #fff;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      margin-right: 12px;
+      flex-shrink: 0;
+      position: relative;
+      margin-top: 2px;
+    }
+
+    .checkbox-container:hover .checkmark {
+      border-color: #667eea;
+    }
+
+    .checkbox-container input[type="checkbox"]:checked ~ .checkmark {
+      background-color: #667eea;
+      border-color: #667eea;
+    }
+
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+
+    .checkbox-container input[type="checkbox"]:checked ~ .checkmark:after {
+      display: block;
+    }
+
+    .checkbox-container .checkmark:after {
+      left: 6px;
+      top: 2px;
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* Radio Button Styles */
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      margin-top: 8px;
+    }
+
+    .radio-container {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .radio-container input[type="radio"] {
+      display: none;
+    }
+
+    .radio-checkmark {
+      height: 20px;
+      width: 20px;
+      background-color: #fff;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      margin-right: 8px;
+      position: relative;
+    }
+
+    .radio-container:hover .radio-checkmark {
+      border-color: #667eea;
+    }
+
+    .radio-container input[type="radio"]:checked ~ .radio-checkmark {
+      background-color: #667eea;
+      border-color: #667eea;
+    }
+
+    .radio-checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+
+    .radio-container input[type="radio"]:checked ~ .radio-checkmark:after {
+      display: block;
+    }
+
+    .radio-container .radio-checkmark:after {
+      top: 4px;
+      left: 4px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+    }
+
+    /* Form Help Text */
+    .form-help-text {
+      font-size: 12px;
+      color: #6c757d;
+      margin: 4px 0 0 0;
+      font-style: italic;
+    }
+
     /* Assignment Field */
     .assignment-field {
       background: #f8f9fa;
@@ -1881,16 +2015,16 @@
       <!-- Team Assignment -->
       <div class="form-group assignment-field" id="team-assignment" style="display: none;">
         <label for="modal-assign-team" class="form-label">Select Team/Group:</label>
-        <select id="modal-assign-team" class="form-input full-width">
+        <select id="modal-assign-team" class="form-input full-width" onchange="handleTeamSelection()">
           <option value="">Choose a team...</option>
           <!-- Teams will be populated by JavaScript -->
         </select>
       </div>
       
       <!-- Category -->
-      <div class="form-group">
+      <div class="form-group" id="category-section">
         <label for="modal-ticket-category" class="form-label">Category:</label>
-        <select id="modal-ticket-category" class="form-input full-width" required>
+        <select id="modal-ticket-category" class="form-input full-width" required onchange="handleCategorySelection()">
           <option value="">Select a department...</option>
           <option value="Client Order Fulfilment Team/Group">Client Order Fulfilment Team/Group</option>
           <option value="Manufacturing and QC">Manufacturing and QC</option>
@@ -1904,17 +2038,152 @@
           <option value="General">General</option>
         </select>
       </div>
-      
-      <!-- Subject -->
-      <div class="form-group">
-        <label for="modal-ticket-title" class="form-label">Subject:</label>
-        <input type="text" id="modal-ticket-title" class="form-input full-width" placeholder="Brief description of the issue..." required maxlength="100">
+
+      <!-- Standard Form Fields (hidden when COFT is selected) -->
+      <div id="standard-form-fields">
+        <!-- Subject -->
+        <div class="form-group">
+          <label for="modal-ticket-title" class="form-label">Subject:</label>
+          <input type="text" id="modal-ticket-title" class="form-input full-width" placeholder="Brief description of the issue..." required maxlength="100">
+        </div>
+        
+        <!-- Description -->
+        <div class="form-group">
+          <label for="modal-ticket-description" class="form-label">Description:</label>
+          <textarea id="modal-ticket-description" class="form-textarea full-width" placeholder="Please provide detailed information about the issue, including any steps to reproduce, error messages, or other relevant details that might help resolve the problem..." required rows="6"></textarea>
+        </div>
       </div>
-      
-      <!-- Description -->
-      <div class="form-group">
-        <label for="modal-ticket-description" class="form-label">Description:</label>
-        <textarea id="modal-ticket-description" class="form-textarea full-width" placeholder="Please provide detailed information about the issue, including any steps to reproduce, error messages, or other relevant details that might help resolve the problem..." required rows="6"></textarea>
+
+      <!-- COFT Specific Form (hidden by default) -->
+      <div id="coft-form-fields" style="display: none;">
+        <!-- Warning Message -->
+        <div class="coft-warning">
+          <p><strong>Please ensure this ticket is for ORDER CHASING and the order in question is not at ITEM SOURCED/ON ORDER WITH SUPPLIER/GROUP STOCK. Raise a ticket with KATIE if these statuses show.</strong></p>
+        </div>
+
+        <!-- Understanding Checkbox -->
+        <div class="form-group">
+          <label class="checkbox-container">
+            <input type="checkbox" id="coft-understanding" required>
+            <span class="checkmark"></span>
+            I understand the differences between the tickets and am raising the correct one
+          </label>
+        </div>
+
+        <!-- SO Number -->
+        <div class="form-group">
+          <label for="coft-so-number" class="form-label">SO Number:</label>
+          <input type="text" id="coft-so-number" class="form-input full-width" placeholder="Enter SO Number..." required>
+        </div>
+
+        <!-- Client's Full Name -->
+        <div class="form-group">
+          <label for="coft-client-name" class="form-label">Client's Full Name:</label>
+          <input type="text" id="coft-client-name" class="form-input full-width" placeholder="Enter client's full name..." required>
+        </div>
+
+        <!-- Item Code -->
+        <div class="form-group">
+          <label for="coft-item-code" class="form-label">Item Code:</label>
+          <input type="text" id="coft-item-code" class="form-input full-width" placeholder="Enter item code..." required>
+        </div>
+
+        <!-- Artwork Title -->
+        <div class="form-group">
+          <label for="coft-artwork-title" class="form-label">Artwork Title:</label>
+          <input type="text" id="coft-artwork-title" class="form-input full-width" placeholder="Enter artwork title..." required>
+        </div>
+
+        <!-- Edition Number -->
+        <div class="form-group">
+          <label for="coft-edition-number" class="form-label">Edition Number:</label>
+          <input type="text" id="coft-edition-number" class="form-input full-width" placeholder="Enter edition number..." required>
+        </div>
+
+        <!-- Fulfillment Time Questions -->
+        <div class="form-group">
+          <label class="form-label">Is the client aware of the 4 week fulfilment time? *</label>
+          <div class="radio-group">
+            <label class="radio-container">
+              <input type="radio" name="coft-client-aware" value="yes" required>
+              <span class="radio-checkmark"></span>
+              Yes
+            </label>
+            <label class="radio-container">
+              <input type="radio" name="coft-client-aware" value="no" required>
+              <span class="radio-checkmark"></span>
+              No
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Has the 4 week ETA been discussed with the client at the point of purchase?</label>
+          <div class="radio-group">
+            <label class="radio-container">
+              <input type="radio" name="coft-eta-discussed" value="yes" required>
+              <span class="radio-checkmark"></span>
+              Yes
+            </label>
+            <label class="radio-container">
+              <input type="radio" name="coft-eta-discussed" value="no" required>
+              <span class="radio-checkmark"></span>
+              No
+            </label>
+          </div>
+        </div>
+
+        <!-- Date Order Booked -->
+        <div class="form-group">
+          <label for="coft-order-date" class="form-label">Date the order was booked on:</label>
+          <input type="date" id="coft-order-date" class="form-input full-width" required>
+        </div>
+
+        <!-- Delivery Method -->
+        <div class="form-group">
+          <label for="coft-delivery-method" class="form-label">Delivery Method:</label>
+          <select id="coft-delivery-method" class="form-input full-width" required>
+            <option value="">Choose delivery method...</option>
+            <option value="Courier to Client">Courier to Client</option>
+            <option value="PD/Install to Client">PD/Install to Client</option>
+            <option value="Collection from Gallery">Collection from Gallery</option>
+          </select>
+        </div>
+
+        <!-- Reason for Ticket -->
+        <div class="form-group">
+          <label for="coft-ticket-reason" class="form-label">Reason for Raised ticket:</label>
+          <p class="form-help-text">Please select the most appropriate category for the situation.</p>
+          <select id="coft-ticket-reason" class="form-input full-width" required onchange="handleReasonSelection()">
+            <option value="">Choose reason...</option>
+            <option value="Chasing dispatch note">Chasing dispatch note</option>
+            <option value="Something has gone wrong with the order and the client has registered a complaint">Something has gone wrong with the order and the client has registered a complaint</option>
+            <option value="Chasing a delayed order">Chasing a delayed order</option>
+            <option value="A collection needs arranging from the client">A collection needs arranging from the client</option>
+            <option value="Client has multiple orders that need collating to arrange a delivery date (Install/PD-TBC)">Client has multiple orders that need collating to arrange a delivery date (Install/PD-TBC)</option>
+            <option value="Client needs the order by a specific date">Client needs the order by a specific date (enter the latest date the order is needed by below)</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <!-- Specific Date Field (shown when "Client needs order by specific date" is selected) -->
+        <div class="form-group" id="coft-specific-date-section" style="display: none;">
+          <label for="coft-specific-date" class="form-label">Latest date the order is needed by:</label>
+          <input type="date" id="coft-specific-date" class="form-input full-width">
+        </div>
+
+        <!-- Photo Upload -->
+        <div class="form-group">
+          <label for="coft-photo-upload" class="form-label">Upload relevant photos (if required):</label>
+          <input type="file" id="coft-photo-upload" class="form-input full-width" multiple accept="image/*">
+          <p class="form-help-text">You can select multiple photos if needed.</p>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="form-group">
+          <label for="coft-additional-info" class="form-label">Additional Information:</label>
+          <textarea id="coft-additional-info" class="form-textarea full-width" placeholder="Please provide any additional information that might be helpful..." rows="6"></textarea>
+        </div>
       </div>
       
       <div class="form-actions">
@@ -2941,16 +3210,36 @@ async function createTicketFromModal() {
     return;
   }
   
-  const title = titleElement.value ? titleElement.value.trim() : '';
-  const description = descriptionElement.value ? descriptionElement.value.trim() : '';
-  const category = categoryElement.value || '';
+  // Check if COFT form is active
+  const coftFields = document.getElementById('coft-form-fields');
+  const isCOFTForm = coftFields && coftFields.style.display !== 'none';
   
-  console.log('📝 Form values:', { title, description, category });
+  let title, description, category;
   
-  if (!title || !description || !category) {
-    showModalStatus('Please fill in all required fields.', 'error');
-    return;
+  if (isCOFTForm) {
+    // Collect COFT-specific data
+    const coftData = collectCOFTFormData();
+    if (!coftData) {
+      return; // Error already shown in collectCOFTFormData
+    }
+    
+    // Build title and description from COFT data
+    title = `COFT Ticket - SO: ${coftData.soNumber} - ${coftData.clientName}`;
+    description = buildCOFTDescription(coftData);
+    category = categoryElement.value || '';
+  } else {
+    // Standard form data
+    title = titleElement.value ? titleElement.value.trim() : '';
+    description = descriptionElement.value ? descriptionElement.value.trim() : '';
+    category = categoryElement.value || '';
+    
+    if (!title || !description || !category) {
+      showModalStatus('Please fill in all required fields.', 'error');
+      return;
+    }
   }
+  
+  console.log('📝 Form values:', { title, description, category, isCOFTForm });
   
   // Check if either individual or team is assigned
   const isIndividualAssignment = document.getElementById('assign-individual').checked;
@@ -3217,6 +3506,7 @@ function setupAssignmentTypeHandlers() {
       individualSection.style.display = 'block';
       teamSection.style.display = 'none';
       assignedTeam = null;
+      handleFormToggle(); // Check for COFT form
     }
   });
   
@@ -3226,8 +3516,259 @@ function setupAssignmentTypeHandlers() {
       teamSection.style.display = 'block';
       assignedUser = null;
       updateModalAssignedUserDisplay();
+      handleFormToggle(); // Check for COFT form
     }
   });
+}
+
+// Handle team selection to check for COFT
+function handleTeamSelection() {
+  const teamSelect = document.getElementById('modal-assign-team');
+  const categorySelect = document.getElementById('modal-ticket-category');
+  
+  // Reset category when team changes
+  categorySelect.value = '';
+  handleFormToggle();
+}
+
+// Handle category selection to check for COFT
+function handleCategorySelection() {
+  handleFormToggle();
+}
+
+// Handle form toggle between standard and COFT forms
+function handleFormToggle() {
+  const teamRadio = document.getElementById('assign-team');
+  const teamSelect = document.getElementById('modal-assign-team');
+  const categorySelect = document.getElementById('modal-ticket-category');
+  const standardFields = document.getElementById('standard-form-fields');
+  const coftFields = document.getElementById('coft-form-fields');
+  
+  const isTeamAssignment = teamRadio.checked;
+  const selectedTeam = teamSelect.value;
+  const selectedCategory = categorySelect.value;
+  
+  // Check if COFT team is selected and category matches
+  const isCOFTSelected = isTeamAssignment && 
+                        selectedTeam && 
+                        allTeams.find(team => team.id === selectedTeam && team.name === 'COFT') &&
+                        selectedCategory === 'Client Order Fulfilment Team/Group';
+  
+  if (isCOFTSelected) {
+    standardFields.style.display = 'none';
+    coftFields.style.display = 'block';
+    
+    // Remove required from standard fields
+    document.getElementById('modal-ticket-title').removeAttribute('required');
+    document.getElementById('modal-ticket-description').removeAttribute('required');
+    
+    // Add required to COFT fields
+    setCOFTFieldsRequired(true);
+  } else {
+    standardFields.style.display = 'block';
+    coftFields.style.display = 'none';
+    
+    // Add required back to standard fields
+    document.getElementById('modal-ticket-title').setAttribute('required', '');
+    document.getElementById('modal-ticket-description').setAttribute('required', '');
+    
+    // Remove required from COFT fields
+    setCOFTFieldsRequired(false);
+    resetCOFTForm();
+  }
+}
+
+// Set required attribute for COFT fields
+function setCOFTFieldsRequired(required) {
+  const coftFields = [
+    'coft-understanding',
+    'coft-so-number',
+    'coft-client-name',
+    'coft-item-code',
+    'coft-artwork-title',
+    'coft-edition-number',
+    'coft-order-date',
+    'coft-delivery-method',
+    'coft-ticket-reason'
+  ];
+  
+  const radioGroups = ['coft-client-aware', 'coft-eta-discussed'];
+  
+  coftFields.forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (field) {
+      if (required) {
+        field.setAttribute('required', '');
+      } else {
+        field.removeAttribute('required');
+      }
+    }
+  });
+  
+  // Handle radio groups
+  radioGroups.forEach(groupName => {
+    const radios = document.querySelectorAll(`input[name="${groupName}"]`);
+    radios.forEach(radio => {
+      if (required) {
+        radio.setAttribute('required', '');
+      } else {
+        radio.removeAttribute('required');
+      }
+    });
+  });
+}
+
+// Reset COFT form fields
+function resetCOFTForm() {
+  // Reset text inputs
+  const textFields = [
+    'coft-so-number',
+    'coft-client-name', 
+    'coft-item-code',
+    'coft-artwork-title',
+    'coft-edition-number',
+    'coft-order-date',
+    'coft-specific-date',
+    'coft-additional-info'
+  ];
+  
+  textFields.forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (field) field.value = '';
+  });
+  
+  // Reset selects
+  document.getElementById('coft-delivery-method').value = '';
+  document.getElementById('coft-ticket-reason').value = '';
+  
+  // Reset checkboxes and radios
+  document.getElementById('coft-understanding').checked = false;
+  document.querySelectorAll('input[name="coft-client-aware"]').forEach(radio => radio.checked = false);
+  document.querySelectorAll('input[name="coft-eta-discussed"]').forEach(radio => radio.checked = false);
+  
+  // Reset file upload
+  document.getElementById('coft-photo-upload').value = '';
+  
+  // Hide specific date section
+  document.getElementById('coft-specific-date-section').style.display = 'none';
+}
+
+// Handle reason selection to show/hide specific date field
+function handleReasonSelection() {
+  const reasonSelect = document.getElementById('coft-ticket-reason');
+  const specificDateSection = document.getElementById('coft-specific-date-section');
+  const specificDateField = document.getElementById('coft-specific-date');
+  
+  if (reasonSelect.value === 'Client needs the order by a specific date') {
+    specificDateSection.style.display = 'block';
+    specificDateField.setAttribute('required', '');
+  } else {
+    specificDateSection.style.display = 'none';
+    specificDateField.removeAttribute('required');
+    specificDateField.value = '';
+  }
+}
+
+// Collect COFT form data and validate
+function collectCOFTFormData() {
+  // Check understanding checkbox
+  const understanding = document.getElementById('coft-understanding');
+  if (!understanding.checked) {
+    showModalStatus('Please confirm you understand the differences between tickets.', 'error');
+    return null;
+  }
+  
+  // Collect all required fields
+  const soNumber = document.getElementById('coft-so-number').value.trim();
+  const clientName = document.getElementById('coft-client-name').value.trim();
+  const itemCode = document.getElementById('coft-item-code').value.trim();
+  const artworkTitle = document.getElementById('coft-artwork-title').value.trim();
+  const editionNumber = document.getElementById('coft-edition-number').value.trim();
+  const orderDate = document.getElementById('coft-order-date').value;
+  const deliveryMethod = document.getElementById('coft-delivery-method').value;
+  const ticketReason = document.getElementById('coft-ticket-reason').value;
+  const additionalInfo = document.getElementById('coft-additional-info').value.trim();
+  
+  // Check required fields
+  if (!soNumber || !clientName || !itemCode || !artworkTitle || !editionNumber || 
+      !orderDate || !deliveryMethod || !ticketReason) {
+    showModalStatus('Please fill in all required COFT fields.', 'error');
+    return null;
+  }
+  
+  // Get radio button values
+  const clientAware = document.querySelector('input[name="coft-client-aware"]:checked');
+  const etaDiscussed = document.querySelector('input[name="coft-eta-discussed"]:checked');
+  
+  if (!clientAware || !etaDiscussed) {
+    showModalStatus('Please answer all yes/no questions.', 'error');
+    return null;
+  }
+  
+  // Get specific date if required
+  let specificDate = null;
+  if (ticketReason === 'Client needs the order by a specific date') {
+    specificDate = document.getElementById('coft-specific-date').value;
+    if (!specificDate) {
+      showModalStatus('Please provide the specific date needed for the order.', 'error');
+      return null;
+    }
+  }
+  
+  // Get uploaded photos
+  const photoUpload = document.getElementById('coft-photo-upload');
+  const photos = photoUpload.files;
+  
+  return {
+    soNumber,
+    clientName,
+    itemCode,
+    artworkTitle,
+    editionNumber,
+    orderDate,
+    deliveryMethod,
+    ticketReason,
+    clientAware: clientAware.value,
+    etaDiscussed: etaDiscussed.value,
+    specificDate,
+    additionalInfo,
+    photos: Array.from(photos)
+  };
+}
+
+// Build COFT description from collected data
+function buildCOFTDescription(coftData) {
+  let description = `**COFT TICKET - ORDER CHASING**\n\n`;
+  
+  description += `**Order Details:**\n`;
+  description += `• SO Number: ${coftData.soNumber}\n`;
+  description += `• Client: ${coftData.clientName}\n`;
+  description += `• Item Code: ${coftData.itemCode}\n`;
+  description += `• Artwork Title: ${coftData.artworkTitle}\n`;
+  description += `• Edition Number: ${coftData.editionNumber}\n`;
+  description += `• Order Date: ${new Date(coftData.orderDate).toLocaleDateString()}\n`;
+  description += `• Delivery Method: ${coftData.deliveryMethod}\n\n`;
+  
+  description += `**Client Awareness:**\n`;
+  description += `• Is client aware of 4 week fulfilment time? ${coftData.clientAware.toUpperCase()}\n`;
+  description += `• Has 4 week ETA been discussed at point of purchase? ${coftData.etaDiscussed.toUpperCase()}\n\n`;
+  
+  description += `**Issue Details:**\n`;
+  description += `• Reason: ${coftData.ticketReason}\n`;
+  
+  if (coftData.specificDate) {
+    description += `• Specific Date Needed: ${new Date(coftData.specificDate).toLocaleDateString()}\n`;
+  }
+  
+  if (coftData.photos.length > 0) {
+    description += `• Photos Attached: ${coftData.photos.length} file(s)\n`;
+  }
+  
+  if (coftData.additionalInfo) {
+    description += `\n**Additional Information:**\n${coftData.additionalInfo}`;
+  }
+  
+  return description;
 }
 
 // Update ticket status
