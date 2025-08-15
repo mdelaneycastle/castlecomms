@@ -2347,9 +2347,15 @@ let activeTicketPreview = null;
 
 // Detect and enhance ticket references, GIFs, and attachments in messages
 function enhanceMessageWithTickets(messageText, attachments = null) {
+  console.log('enhanceMessageWithTickets called:', { messageText, attachments });
   if (!messageText && !attachments) return messageText;
   
   let enhancedText = messageText || '';
+  
+  // If there's no message text but there are attachments, we still need to process
+  if (!messageText && attachments && attachments.length > 0) {
+    enhancedText = ''; // Ensure we have a string to work with
+  }
   
   // Handle URLs first to avoid conflicts with later HTML generation
   if (messageText) {
@@ -2425,9 +2431,11 @@ function enhanceMessageWithTickets(messageText, attachments = null) {
   // Handle file attachments
   let attachmentHTML = '';
   if (attachments && attachments.length > 0) {
+    console.log('Processing attachments:', attachments);
     attachmentHTML = attachments.map(attachment => {
       const fileIcon = getFileIcon(attachment.type);
       const fileSize = formatFileSize(attachment.size);
+      console.log('Processing attachment:', attachment.name, fileIcon, fileSize);
       return `
         <div class="message-attachment">
           <div class="attachment-info">
@@ -2443,6 +2451,7 @@ function enhanceMessageWithTickets(messageText, attachments = null) {
         </div>
       `;
     }).join('');
+    console.log('Generated attachment HTML:', attachmentHTML);
   }
   
   return enhancedText + (attachmentHTML ? '<div class="message-attachments">' + attachmentHTML + '</div>' : '');
