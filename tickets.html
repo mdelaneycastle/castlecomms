@@ -1109,6 +1109,30 @@
       margin-top: 8px;
     }
 
+    /* Disabled COFT fields */
+    .coft-fields-disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .coft-fields-disabled input,
+    .coft-fields-disabled select,
+    .coft-fields-disabled textarea {
+      background-color: #f5f5f5 !important;
+      color: #999 !important;
+      cursor: not-allowed !important;
+    }
+
+    .coft-fields-disabled .radio-checkmark,
+    .coft-fields-disabled .checkmark {
+      background-color: #f5f5f5 !important;
+      border-color: #ddd !important;
+    }
+
+    .coft-fields-disabled label {
+      color: #999 !important;
+    }
+
     /* Assignment Field */
     .assignment-field {
       background: #f8f9fa;
@@ -2094,11 +2118,14 @@
         <!-- Understanding Checkbox -->
         <div class="form-group">
           <label class="checkbox-container">
-            <input type="checkbox" id="coft-understanding" required>
+            <input type="checkbox" id="coft-understanding" required onchange="toggleCOFTFields()">
             <span class="checkmark"></span>
             I understand the differences between the tickets and am raising the correct one
           </label>
         </div>
+
+        <!-- COFT Fields Container (disabled until understanding is checked) -->
+        <div id="coft-fields-container" class="coft-fields-disabled">
 
         <!-- SO Number -->
         <div class="form-group">
@@ -2214,6 +2241,8 @@
           <label for="coft-additional-info" class="form-label">Additional Information:</label>
           <textarea id="coft-additional-info" class="form-textarea full-width" placeholder="Please provide any additional information that might be helpful..." rows="6"></textarea>
         </div>
+
+        </div> <!-- End COFT Fields Container -->
       </div>
       
       <div class="form-actions">
@@ -3594,6 +3623,19 @@ function handleFormToggle() {
     
     // Add required to COFT fields
     setCOFTFieldsRequired(true);
+    
+    // Initialize COFT form - fields should be disabled initially
+    const understandingCheckbox = document.getElementById('coft-understanding');
+    if (understandingCheckbox && !understandingCheckbox.checked) {
+      const coftFieldsContainer = document.getElementById('coft-fields-container');
+      if (coftFieldsContainer) {
+        coftFieldsContainer.classList.add('coft-fields-disabled');
+        const inputs = coftFieldsContainer.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+          input.disabled = true;
+        });
+      }
+    }
   } else {
     standardFields.style.display = 'block';
     coftFields.style.display = 'none';
@@ -3697,6 +3739,69 @@ function handleReasonSelection() {
     specificDateField.removeAttribute('required');
     specificDateField.value = '';
   }
+}
+
+// Toggle COFT fields based on understanding checkbox
+function toggleCOFTFields() {
+  const understandingCheckbox = document.getElementById('coft-understanding');
+  const coftFieldsContainer = document.getElementById('coft-fields-container');
+  
+  if (understandingCheckbox.checked) {
+    // Enable fields
+    coftFieldsContainer.classList.remove('coft-fields-disabled');
+    
+    // Enable all input fields
+    const inputs = coftFieldsContainer.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      input.disabled = false;
+    });
+  } else {
+    // Disable fields
+    coftFieldsContainer.classList.add('coft-fields-disabled');
+    
+    // Disable all input fields
+    const inputs = coftFieldsContainer.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      input.disabled = true;
+    });
+    
+    // Clear all field values
+    resetCOFTFormFields();
+  }
+}
+
+// Reset COFT form fields when disabling
+function resetCOFTFormFields() {
+  // Reset text inputs
+  const textFields = [
+    'coft-so-number',
+    'coft-client-name', 
+    'coft-item-code',
+    'coft-artwork-title',
+    'coft-edition-number',
+    'coft-order-date',
+    'coft-specific-date',
+    'coft-additional-info'
+  ];
+  
+  textFields.forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (field) field.value = '';
+  });
+  
+  // Reset selects
+  document.getElementById('coft-delivery-method').value = '';
+  document.getElementById('coft-ticket-reason').value = '';
+  
+  // Reset radio buttons
+  document.querySelectorAll('input[name="coft-client-aware"]').forEach(radio => radio.checked = false);
+  document.querySelectorAll('input[name="coft-eta-discussed"]').forEach(radio => radio.checked = false);
+  
+  // Reset file upload
+  document.getElementById('coft-photo-upload').value = '';
+  
+  // Hide specific date section
+  document.getElementById('coft-specific-date-section').style.display = 'none';
 }
 
 // Collect COFT form data and validate
