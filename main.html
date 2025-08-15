@@ -33,7 +33,7 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
       </div>
     </div>
     <div class="header-center">
-      <div class="user-greeting">Hi <span class="user-name" id="user-name-display">Marc Delaney</span></div>
+      <div class="user-greeting">Hi <span class="user-name" id="user-name-display">Loading...</span></div>
     </div>
     <div class="header-right">
       <!-- Empty right section for balance -->
@@ -187,11 +187,11 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
 // Personalize welcome message
 firebase.auth().onAuthStateChanged(async (user) => {
   if (user) {
-    const welcomeText = document.getElementById('welcome-text');
-    if (welcomeText && window.sharedComponents) {
+    const userNameDisplay = document.getElementById('user-name-display');
+    if (userNameDisplay && window.sharedComponents) {
       try {
         const displayName = await window.sharedComponents.getUserDisplayName(user);
-        welcomeText.textContent = `Hi ${displayName}!`;
+        userNameDisplay.textContent = displayName;
       } catch (error) {
         console.error('Error loading display name:', error);
         // Fallback to email extraction
@@ -201,7 +201,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
           .split(' ')
           .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
           .join(' ');
-        welcomeText.textContent = `Hi ${fallbackName}!`;
+        userNameDisplay.textContent = fallbackName;
       }
     }
   }
