@@ -426,7 +426,7 @@
       </div>
     </div>
     <div class="header-center">
-      <div class="user-greeting">Hi <span class="user-name" id="user-name-display">Marc Delaney</span></div>
+      <div class="user-greeting">Hi <span class="user-name" id="user-name-display">Loading...</span></div>
     </div>
     <div class="header-right">
       <!-- Empty right section for balance -->
@@ -852,6 +852,29 @@ function showEmptyState() {
 
 // Auto-refresh articles every 5 minutes
 setInterval(loadArticles, 5 * 60 * 1000);
+
+// Update user display name in header
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (user) {
+    const userNameDisplay = document.getElementById('user-name-display');
+    if (userNameDisplay && window.sharedComponents) {
+      try {
+        const displayName = await window.sharedComponents.getUserDisplayName(user);
+        userNameDisplay.textContent = displayName;
+      } catch (error) {
+        console.error('Error loading display name:', error);
+        // Fallback to email extraction
+        const emailName = user.email.split('@')[0];
+        const fallbackName = emailName
+          .replace(/[._-]/g, ' ')
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+        userNameDisplay.textContent = fallbackName;
+      }
+    }
+  }
+});
 </script>
 
 <!-- Site scripts -->
