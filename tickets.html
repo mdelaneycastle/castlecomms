@@ -529,7 +529,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
-      min-width: 1200px; /* Ensure table doesn't get too compressed */
+      min-width: 1350px; /* Ensure table doesn't get too compressed with additional column */
       table-layout: auto; /* Allow columns to size based on content */
     }
 
@@ -759,6 +759,12 @@
       font-size: 0.85rem;
       color: #6c757d !important;
       white-space: nowrap;
+    }
+
+    .ticket-coft-member {
+      font-size: 0.85rem;
+      color: #495057 !important;
+      font-weight: 500;
     }
 
     /* Raise Ticket Button */
@@ -2879,6 +2885,7 @@ async function loadTickets() {
             <th>ID</th>
             <th>Department</th>
             <th>Gallery</th>
+            <th>COFT Team Member</th>
             <th>SO</th>
             <th>Client Name</th>
             <th>Assigned To</th>
@@ -2919,11 +2926,15 @@ async function loadTickets() {
       // Extract COFT data if this is a COFT ticket
       const coftData = extractCOFTDataFromTicket(ticket);
       
+      // Get COFT team member based on creator's email
+      const coftTeamMember = getCOFTTeamMember(ticket.createdBy.email);
+      
       return `
         <tr onclick="openTicket('${ticket.id}')" data-ticket-id="${ticket.ticketId}">
           <td><div class="ticket-id">${ticket.ticketId}</div></td>
           <td><div class="ticket-category">${ticket.category}</div></td>
           <td><div class="ticket-gallery">${coftData.gallery || '-'}</div></td>
+          <td><div class="ticket-coft-member">${coftTeamMember}</div></td>
           <td><div class="ticket-so">${coftData.soNumber || '-'}</div></td>
           <td><div class="ticket-client">${coftData.clientName || '-'}</div></td>
           <td><div class="ticket-assignee">${assignmentText}</div></td>
@@ -3949,6 +3960,68 @@ function extractCOFTDataFromTicket(ticket) {
   }
   
   return defaultData;
+}
+
+// Get COFT team member based on email address
+function getCOFTTeamMember(email) {
+  if (!email) return '-';
+  
+  const emailLower = email.toLowerCase();
+  
+  // Extract the prefix before @ symbol
+  const emailPrefix = emailLower.split('@')[0];
+  
+  // Philippa's locations
+  const philippaLocations = [
+    'bluewater', 'brighton', 'chester', 'coventgarden', 'guildford', 
+    'harrogate', 'leamington', 'liverpool', 'manchester', 'oxford', 
+    'reading', 'scp', 'windsor'
+  ];
+  
+  // Amelia's locations
+  const ameliaLocations = [
+    'bristol', 'cheltenham', 'edinburgh', 'exeter', 'glasgow', 
+    'mailbox', 'marlow', 'newcastle', 'norwich', 'nottingham', 
+    'tunbridgewells', 'winchester'
+  ];
+  
+  // Tara's locations
+  const taraLocations = [
+    'bath', 'cambridge', 'canterbury', 'cardiff', 'derby', 'icc', 
+    'leeds', 'meadowhall', 'miltonkeynes', 'sms', 'stamford', 
+    'stratforduponavon', 'york'
+  ];
+  
+  // Gerald's locations
+  const geraldLocations = ['usa', 'web'];
+  
+  // Check which team member based on email prefix
+  for (const location of philippaLocations) {
+    if (emailPrefix.startsWith(location)) {
+      return 'Philippa';
+    }
+  }
+  
+  for (const location of ameliaLocations) {
+    if (emailPrefix.startsWith(location)) {
+      return 'Amelia';
+    }
+  }
+  
+  for (const location of taraLocations) {
+    if (emailPrefix.startsWith(location)) {
+      return 'Tara';
+    }
+  }
+  
+  for (const location of geraldLocations) {
+    if (emailPrefix.startsWith(location)) {
+      return 'Gerald';
+    }
+  }
+  
+  // Default if no match found
+  return '-';
 }
 
 // Update ticket status
