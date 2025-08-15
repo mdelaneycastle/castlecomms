@@ -313,9 +313,10 @@ service cloud.firestore {
         && data.senderName is string
         && data.senderName.size() > 0
         && data.message is string
-        && data.message.size() > 0
+        && (data.message.size() > 0 || ('attachments' in data && data.attachments is list && data.attachments.size() > 0))
         && data.message.size() <= 2000
-        && data.timestamp is timestamp;
+        && data.timestamp is timestamp
+        && (!('attachments' in data) || (data.attachments is list && data.attachments.size() <= 10));
     }
     
     // Helper function to check if only read receipts are being updated
