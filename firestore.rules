@@ -327,6 +327,46 @@ service cloud.firestore {
         && newData.timestamp == oldData.timestamp;
     }
 
+    // Teams rules - authenticated users can read all teams, admins can manage teams
+    match /teams/{teamId} {
+      // All authenticated users can read teams (for assignment purposes)
+      allow read: if request.auth != null;
+      
+      // Only admins can create teams with proper validation
+      allow create: if request.auth != null 
+        && request.auth.token.admin == true
+        && validateTeam(request.resource.data);
+      
+      // Only admins can update teams
+      allow update: if request.auth != null 
+        && request.auth.token.admin == true
+        && validateTeamUpdate(request.resource.data, resource.data);
+      
+      // Only admins can delete teams
+      allow delete: if request.auth != null 
+        && request.auth.token.admin == true;
+    }
+    
+    // Helper function to validate team data
+    function validateTeam(data) {
+      return data.keys().hasAll(['name', 'description', 'members', 'createdAt', 'createdBy'])
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 100
+        && data.description is string
+        && data.description.size() <= 500
+        && data.members is list
+        && data.createdAt is timestamp
+        && data.createdBy is map
+        && data.createdBy.keys().hasAll(['uid', 'email', 'name']);
+    }
+    
+    // Helper function to validate team updates
+    function validateTeamUpdate(newData, oldData) {
+      return newData.createdAt == oldData.createdAt
+        && newData.createdBy == oldData.createdBy;
+    }
+
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
