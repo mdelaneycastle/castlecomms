@@ -518,6 +518,7 @@
     .tickets-list {
       flex: 1;
       overflow-y: auto;
+      overflow-x: auto; /* Allow horizontal scrolling for wide table */
       max-height: 600px;
       background: white;
       border-radius: 8px;
@@ -527,7 +528,9 @@
     .tickets-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 14px;
+      font-size: 12px;
+      min-width: 1200px; /* Ensure table doesn't get too compressed */
+      table-layout: auto; /* Allow columns to size based on content */
     }
 
     .tickets-table th {
@@ -2883,12 +2886,14 @@ async function loadTickets() {
           <tr>
             <th>ID</th>
             <th>Department</th>
-            <th>Title</th>
+            <th>Gallery</th>
+            <th>SO</th>
+            <th>Client Name</th>
             <th>Assigned To</th>
-            <th>Status</th>
+            <th>Ticket Status</th>
             <th>Timer</th>
             <th>Created By</th>
-            <th>Created</th>
+            <th>Date Created</th>
           </tr>
         </thead>
         <tbody>
@@ -2919,11 +2924,16 @@ async function loadTickets() {
         }
       }
       
+      // Extract COFT data if this is a COFT ticket
+      const coftData = extractCOFTDataFromTicket(ticket);
+      
       return `
         <tr onclick="openTicket('${ticket.id}')" data-ticket-id="${ticket.ticketId}">
           <td><div class="ticket-id">${ticket.ticketId}</div></td>
           <td><div class="ticket-category">${ticket.category}</div></td>
-          <td><div class="ticket-title">${ticket.title}</div></td>
+          <td><div class="ticket-gallery">${coftData.gallery || '-'}</div></td>
+          <td><div class="ticket-so">${coftData.soNumber || '-'}</div></td>
+          <td><div class="ticket-client">${coftData.clientName || '-'}</div></td>
           <td><div class="ticket-assignee">${assignmentText}</div></td>
           <td><div class="ticket-status ${displayStatus}">${statusText}</div></td>
           <td><div class="ticket-timer-cell">${getTimerDisplayForTicket(ticket)}</div></td>
@@ -3904,6 +3914,49 @@ function buildCOFTDescription(coftData) {
   }
   
   return description;
+}
+
+// Extract COFT data from ticket for table display
+function extractCOFTDataFromTicket(ticket) {
+  const defaultData = {
+    gallery: null,
+    soNumber: null,
+    clientName: null
+  };
+  
+  // Check if this is a COFT ticket
+  if (!ticket.title?.includes('COFT Ticket') && !ticket.description?.includes('COFT TICKET')) {
+    return defaultData;
+  }
+  
+  try {
+    const description = ticket.description || '';
+    
+    // Extract SO Number
+    const soMatch = description.match(/SO Number:\s*([^\n\r]+)/i);
+    if (soMatch) {
+      defaultData.soNumber = soMatch[1].trim();
+    }
+    
+    // Extract Client Name
+    const clientMatch = description.match(/Client:\s*([^\n\r]+)/i);
+    if (clientMatch) {
+      defaultData.clientName = clientMatch[1].trim();
+    }
+    
+    // For Gallery, we'll need to determine this based on business logic
+    // For now, set to a default or extract from title if available
+    if (ticket.title?.includes('COFT Ticket')) {
+      // Could extract gallery from SO number format or other logic
+      // For now, leaving as null to show "-"
+      defaultData.gallery = null;
+    }
+    
+  } catch (error) {
+    console.log('Error extracting COFT data:', error);
+  }
+  
+  return defaultData;
 }
 
 // Update ticket status
