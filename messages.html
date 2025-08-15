@@ -1923,7 +1923,8 @@ function displayMessages(messageDocs) {
       id: doc.id,
       message: data.message,
       timestamp: timestamp,
-      readBy: data.readBy || []
+      readBy: data.readBy || [],
+      attachments: data.attachments || null
     });
     currentGroup.lastTimestamp = timestamp;
   });
@@ -2095,9 +2096,7 @@ async function sendMessage() {
     // Upload files first if any are selected
     let attachments = [];
     if (selectedFiles.length > 0) {
-      console.log('Uploading files:', selectedFiles.length);
       attachments = await uploadFiles();
-      console.log('Upload complete, attachments:', attachments.length);
     }
     
     // Add message to chat-messages collection
@@ -2347,7 +2346,6 @@ let activeTicketPreview = null;
 
 // Detect and enhance ticket references, GIFs, and attachments in messages
 function enhanceMessageWithTickets(messageText, attachments = null) {
-  console.log('enhanceMessageWithTickets called:', { messageText, attachments });
   if (!messageText && !attachments) return messageText;
   
   let enhancedText = messageText || '';
@@ -2431,11 +2429,9 @@ function enhanceMessageWithTickets(messageText, attachments = null) {
   // Handle file attachments
   let attachmentHTML = '';
   if (attachments && attachments.length > 0) {
-    console.log('Processing attachments:', attachments);
     attachmentHTML = attachments.map(attachment => {
       const fileIcon = getFileIcon(attachment.type);
       const fileSize = formatFileSize(attachment.size);
-      console.log('Processing attachment:', attachment.name, fileIcon, fileSize);
       return `
         <div class="message-attachment">
           <div class="attachment-info">
@@ -2451,7 +2447,6 @@ function enhanceMessageWithTickets(messageText, attachments = null) {
         </div>
       `;
     }).join('');
-    console.log('Generated attachment HTML:', attachmentHTML);
   }
   
   return enhancedText + (attachmentHTML ? '<div class="message-attachments">' + attachmentHTML + '</div>' : '');
@@ -2596,8 +2591,6 @@ async function uploadFiles() {
       const timestamp = Date.now();
       const fileName = `chat-attachments/${currentChat.id}/${timestamp}_${file.name}`;
       
-      console.log(`Uploading file: ${file.name} (${file.size} bytes)`);
-      
       // For now, we'll use a simple base64 upload approach
       // In a production environment, you'd want to use proper Firebase Storage
       const base64 = await fileToBase64(file);
@@ -2615,15 +2608,12 @@ async function uploadFiles() {
         url: base64, // In production, this would be a Firebase Storage URL
         fileName: fileName
       });
-      
-      console.log(`File uploaded successfully: ${file.name}`);
     } catch (error) {
       console.error('Error uploading file:', file.name, error);
       alert(`Failed to upload "${file.name}": ${error.message}`);
     }
   }
   
-  console.log(`Upload complete: ${uploads.length} files processed`);
   return uploads;
 }
 
