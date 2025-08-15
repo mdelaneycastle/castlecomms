@@ -883,12 +883,54 @@
         
         input.value = '';
         modal.style.display = 'flex';
-        input.focus();
+        
+        // Ensure input can receive focus and typing events
+        setTimeout(() => {
+          input.focus();
+          input.click();
+        }, 100);
+        
+        // Add event listeners to prevent modal from closing when clicking inside content
+        const modalContent = modal.querySelector('.comment-modal-content');
+        modalContent.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+        
+        // Close modal when clicking outside content
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            this.closeCommentModal();
+          }
+        });
+        
+        // Allow Enter key to confirm (but Shift+Enter for new line)
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            this.confirmBestPractice();
+          }
+        });
       }
 
       closeCommentModal() {
         const modal = document.getElementById('comment-modal');
         modal.style.display = 'none';
+        
+        // Clean up event listeners
+        const modalContent = modal.querySelector('.comment-modal-content');
+        const input = document.getElementById('comment-input');
+        
+        // Remove event listeners by cloning and replacing elements
+        const newModalContent = modalContent.cloneNode(true);
+        modalContent.parentNode.replaceChild(newModalContent, modalContent);
+        
+        const newInput = input.cloneNode(true);
+        input.parentNode.replaceChild(newInput, input);
+        
+        // Remove modal click listener
+        const newModal = modal.cloneNode(true);
+        modal.parentNode.replaceChild(newModal, modal);
+        
         this.pendingBestPractice = null;
         this.pendingAttention = null;
         this.currentModalType = null;

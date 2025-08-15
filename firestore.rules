@@ -137,8 +137,32 @@ service cloud.firestore {
         && data.createdBy is map
         && data.createdBy.keys().hasAll(['uid', 'email', 'name'])
         && data.assignedTo is map
-        && data.assignedTo.keys().hasAll(['email', 'name'])
+        && validateTicketAssignment(data.assignedTo)
         && data.createdAt is timestamp;
+    }
+    
+    // Helper function to validate ticket assignment (individual or team)
+    function validateTicketAssignment(assignedTo) {
+      return (
+        // Individual assignment
+        (assignedTo.type == 'individual' 
+         && assignedTo.keys().hasAll(['type', 'email', 'name'])
+         && assignedTo.email is string
+         && assignedTo.name is string)
+        ||
+        // Team assignment
+        (assignedTo.type == 'team'
+         && assignedTo.keys().hasAll(['type', 'teamId', 'teamName', 'teamMembers'])
+         && assignedTo.teamId is string
+         && assignedTo.teamName is string
+         && assignedTo.teamMembers is list)
+        ||
+        // Legacy format (backwards compatibility)
+        ((!('type' in assignedTo))
+         && assignedTo.keys().hasAll(['email', 'name'])
+         && assignedTo.email is string
+         && assignedTo.name is string)
+      );
     }
     
     // Helper function to validate ticket updates
@@ -198,6 +222,111 @@ service cloud.firestore {
         && request.auth.uid == userId;
     }
     
+    // Chat system rules - authenticated users can participate in chats they're part of
+    match /chats/{chatId} {
+      // Users can read chats they are participants in
+      allow read: if request.auth != null 
+        && request.auth.token.email in resource.data.participants;
+      
+      // Authenticated users can create chats with proper validation
+      allow create: if request.auth != null 
+        && validateChat(request.resource.data)
+        && request.auth.token.email in request.resource.data.participants;
+      
+      // Only participants can update chat metadata
+      allow update: if request.auth != null 
+        && request.auth.token.email in resource.data.participants
+        && validateChatUpdate(request.resource.data, resource.data);
+      
+      // Only participants can delete chats
+      allow delete: if request.auth != null 
+        && request.auth.token.email in resource.data.participants;
+    }
+    
+    // Chat messages rules - participants can read/write messages in their chats
+    match /chat-messages/{messageId} {
+      // Users can read messages from chats they participate in
+      allow read: if request.auth != null 
+        && chatParticipantCheck(resource.data.chatId);
+      
+      // Authenticated users can create messages in chats they participate in
+      allow create: if request.auth != null 
+        && validateChatMessage(request.resource.data)
+        && chatParticipantCheck(request.resource.data.chatId);
+      
+      // Only message sender can update messages (for read receipts)
+      allow update: if request.auth != null 
+        && (request.auth.token.email == resource.data.senderEmail 
+            || onlyUpdatingReadReceipts(request.resource.data, resource.data));
+      
+      // Only message sender and chat participants can delete messages
+      allow delete: if request.auth != null 
+        && (request.auth.token.email == resource.data.senderEmail 
+            || chatParticipantCheck(resource.data.chatId));
+    }
+    
+    // Chat typing indicators - participants can manage typing status
+    match /chat-typing/{typingId} {
+      // Users can read typing indicators from chats they participate in
+      allow read: if request.auth != null 
+        && chatParticipantCheck(resource.data.chatId);
+      
+      // Users can create/update/delete their own typing indicators
+      allow create, update, delete: if request.auth != null 
+        && request.auth.token.email == request.resource.data.userEmail
+        && chatParticipantCheck(request.resource.data.chatId);
+    }
+    
+    // Helper function to check if user is a chat participant
+    function chatParticipantCheck(chatId) {
+      return exists(/databases/$(database)/documents/chats/$(chatId)) 
+        && request.auth.token.email in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+    }
+    
+    // Helper function to validate chat data
+    function validateChat(data) {
+      return data.keys().hasAll(['name', 'participants', 'createdBy', 'createdAt'])
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 100
+        && data.participants is list
+        && data.participants.size() > 0
+        && data.createdBy is string
+        && data.createdBy.size() > 0
+        && data.createdAt is timestamp;
+    }
+    
+    // Helper function to validate chat updates
+    function validateChatUpdate(newData, oldData) {
+      return newData.participants == oldData.participants
+        && newData.createdBy == oldData.createdBy
+        && newData.createdAt == oldData.createdAt;
+    }
+    
+    // Helper function to validate chat message data
+    function validateChatMessage(data) {
+      return data.keys().hasAll(['chatId', 'senderEmail', 'senderName', 'message', 'timestamp'])
+        && data.chatId is string
+        && data.chatId.size() > 0
+        && data.senderEmail is string
+        && data.senderEmail.size() > 0
+        && data.senderName is string
+        && data.senderName.size() > 0
+        && data.message is string
+        && data.message.size() > 0
+        && data.message.size() <= 2000
+        && data.timestamp is timestamp;
+    }
+    
+    // Helper function to check if only read receipts are being updated
+    function onlyUpdatingReadReceipts(newData, oldData) {
+      return newData.chatId == oldData.chatId
+        && newData.senderEmail == oldData.senderEmail
+        && newData.senderName == oldData.senderName
+        && newData.message == oldData.message
+        && newData.timestamp == oldData.timestamp;
+    }
+
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
