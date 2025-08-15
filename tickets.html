@@ -529,7 +529,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
-      min-width: 1350px; /* Ensure table doesn't get too compressed with additional column */
+      min-width: 1250px; /* Ensure table doesn't get too compressed */
       table-layout: auto; /* Allow columns to size based on content */
     }
 
@@ -2884,14 +2884,13 @@ async function loadTickets() {
           <tr>
             <th>ID</th>
             <th>Department</th>
-            <th>Gallery</th>
+            <th>Gallery/Created by</th>
             <th>COFT Team Member</th>
             <th>SO</th>
             <th>Client Name</th>
             <th>Assigned To</th>
             <th>Ticket Status</th>
             <th>Timer</th>
-            <th>Created By</th>
             <th>Date Created</th>
           </tr>
         </thead>
@@ -2933,14 +2932,13 @@ async function loadTickets() {
         <tr onclick="openTicket('${ticket.id}')" data-ticket-id="${ticket.ticketId}">
           <td><div class="ticket-id">${ticket.ticketId}</div></td>
           <td><div class="ticket-category">${ticket.category}</div></td>
-          <td><div class="ticket-gallery">${coftData.gallery || '-'}</div></td>
+          <td><div class="ticket-gallery">${coftData.gallery || ticket.createdBy.name}</div></td>
           <td><div class="ticket-coft-member">${coftTeamMember}</div></td>
           <td><div class="ticket-so">${coftData.soNumber || '-'}</div></td>
           <td><div class="ticket-client">${coftData.clientName || '-'}</div></td>
           <td><div class="ticket-assignee">${assignmentText}</div></td>
           <td><div class="ticket-status ${displayStatus}">${statusText}</div></td>
           <td><div class="ticket-timer-cell">${getTimerDisplayForTicket(ticket)}</div></td>
-          <td><div class="ticket-creator">${ticket.createdBy.name}</div></td>
           <td><div class="ticket-created">${formatTimestamp(createdDate)}</div></td>
         </tr>
       `;
