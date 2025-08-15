@@ -358,6 +358,149 @@
       cursor: not-allowed;
     }
 
+    .attach-button {
+      background: #f8f9fa;
+      color: #6264a7;
+      border: 1px solid #e5e5e5;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+      height: 40px;
+      min-width: 40px;
+    }
+
+    .attach-button:hover {
+      background: #e3f2fd;
+      border-color: #6264a7;
+    }
+
+    .selected-files {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .selected-file {
+      background: #f8f9fa;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      max-width: 200px;
+    }
+
+    .file-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .remove-file {
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .remove-file:hover {
+      background: rgba(220, 53, 69, 0.1);
+    }
+
+    /* Message attachment styles */
+    .message-attachments {
+      margin-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+      padding-top: 8px;
+    }
+
+    .message-attachment {
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .attachment-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .attachment-icon {
+      font-size: 16px;
+    }
+
+    .attachment-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .attachment-name {
+      font-size: 12px;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .attachment-size {
+      font-size: 10px;
+      opacity: 0.8;
+    }
+
+    .attachment-download {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: inherit;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .attachment-download:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* Message media styles */
+    .message-gif, .message-image {
+      margin: 8px 0;
+    }
+
+    .message-gif img, .message-image img {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .message-youtube {
+      margin: 8px 0;
+      background: rgba(255,255,255,0.1);
+      padding: 8px;
+      border-radius: 8px;
+    }
+
     /* Typing Indicators */
     .typing-indicators {
       padding: 8px 16px;
@@ -1540,9 +1683,12 @@ function displayChatInterface() {
     <div class="chat-input-area">
       <div class="typing-indicators" id="typing-indicators"></div>
       <div class="chat-input-container">
-        <textarea class="chat-input" id="message-input" placeholder="Type a message..." rows="1"></textarea>
+        <button class="attach-button" id="attach-button" onclick="triggerFileUpload()" title="Attach file">📎</button>
+        <textarea class="chat-input" id="message-input" placeholder="Type a message or paste a GIF URL..." rows="1"></textarea>
         <button class="send-button" id="send-message-btn" onclick="sendMessage()">Send</button>
       </div>
+      <input type="file" id="file-input" style="display: none;" multiple onchange="handleFileSelection(event)">
+      <div class="selected-files" id="selected-files"></div>
     </div>
   `;
   
@@ -1757,7 +1903,7 @@ function displayMessages(messageDocs) {
   const messagesHTML = messageGroups.map(group => {
     const initials = group.senderName ? group.senderName.substring(0, 2).toUpperCase() : '?';
     const messagesHTML = group.messages.map(msg => 
-      `<div class="message-bubble">${enhanceMessageWithTickets(msg.message)}</div>`
+      `<div class="message-bubble">${enhanceMessageWithTickets(msg.message, msg.attachments)}</div>`
     ).join('');
     
     if (group.isSystem) {
@@ -1904,26 +2050,41 @@ async function sendMessage() {
   const sendBtn = document.getElementById('send-message-btn');
   const message = messageInput.value.trim();
   
-  if (!message || !currentChat) return;
+  if (!message && selectedFiles.length === 0) return;
+  if (!currentChat) return;
   
   sendBtn.disabled = true;
   
   try {
     const currentUserName = await getUserDisplayName(currentUser);
     
+    // Upload files first if any are selected
+    let attachments = [];
+    if (selectedFiles.length > 0) {
+      attachments = await uploadFiles();
+    }
+    
     // Add message to chat-messages collection
-    const messageRef = await db.collection('chat-messages').add({
+    const messageData = {
       chatId: currentChat.id,
       senderEmail: currentUser.email,
       senderName: currentUserName,
       message: message,
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       readBy: [currentUser.email] // Mark as read by sender
-    });
+    };
+    
+    // Add attachments if any
+    if (attachments.length > 0) {
+      messageData.attachments = attachments;
+    }
+    
+    const messageRef = await db.collection('chat-messages').add(messageData);
     
     // Update chat's last message
+    const displayMessage = message || (attachments.length > 0 ? `📎 ${attachments.length} file(s)` : '');
     await db.collection('chats').doc(currentChat.id).update({
-      lastMessage: message.length > 50 ? message.substring(0, 47) + '...' : message,
+      lastMessage: displayMessage.length > 50 ? displayMessage.substring(0, 47) + '...' : displayMessage,
       lastMessageSender: currentUserName,
       lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -1945,12 +2106,15 @@ async function sendMessage() {
           if (userData) {
             const participantUid = Object.keys(userData)[0];
             
+            // Create notification message
+            const notificationMessage = message || `📎 Sent ${attachments.length} file(s)`;
+            
             // Create notification for the participant
             const notificationRef = firebase.database().ref(`notifications/${participantUid}/${Date.now()}`);
             await notificationRef.set({
               type: 'chat_message',
               title: '💬 New Message',
-              message: `${currentUserName}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
+              message: `${currentUserName}: ${notificationMessage.substring(0, 50)}${notificationMessage.length > 50 ? '...' : ''}`,
               timestamp: new Date().toISOString(),
               read: false,
               metadata: {
@@ -1967,9 +2131,11 @@ async function sendMessage() {
       }
     }
     
-    // Clear input
+    // Clear input and selected files
     messageInput.value = '';
     messageInput.style.height = 'auto';
+    selectedFiles = [];
+    updateSelectedFilesDisplay();
     
   } catch (error) {
     console.error('Error sending message:', error);
@@ -2143,28 +2309,249 @@ function formatTimestamp(timestamp) {
 let ticketCache = new Map();
 let activeTicketPreview = null;
 
-// Detect and enhance ticket references in messages
-function enhanceMessageWithTickets(messageText) {
-  if (!messageText) return messageText;
+// Detect and enhance ticket references, GIFs, and attachments in messages
+function enhanceMessageWithTickets(messageText, attachments = null) {
+  if (!messageText && !attachments) return messageText;
   
-  // Patterns to detect: #1234, ticket:1234, TKT-434592, etc.
-  const ticketPatterns = [
-    /\#(\d{1,6})\b/g,                    // #1234
-    /ticket:?\s*(\d{1,6})\b/gi,          // ticket:1234, ticket 1234
-    /TKT?-(\d{1,6})\b/gi,                // TKT-1234, TK-1234
-    /ticket\s+#?(\d{1,6})\b/gi,          // ticket #1234
-    /(TKT-\d{1,6})\b/gi                  // Full TKT-434592 format
-  ];
+  let enhancedText = messageText || '';
   
-  let enhancedText = messageText;
-  
-  ticketPatterns.forEach(pattern => {
-    enhancedText = enhancedText.replace(pattern, (match, ticketId) => {
-      return `<span class="ticket-link" data-ticket-id="${ticketId}" onclick="openTicket('${ticketId}')" onmouseenter="showTicketPreview(event, '${ticketId}')" onmouseleave="hideTicketPreview()">${match}</span>`;
+  // Handle ticket patterns first
+  if (messageText) {
+    const ticketPatterns = [
+      /\#(\d{1,6})\b/g,                    // #1234
+      /ticket:?\s*(\d{1,6})\b/gi,          // ticket:1234, ticket 1234
+      /TKT?-(\d{1,6})\b/gi,                // TKT-1234, TK-1234
+      /ticket\s+#?(\d{1,6})\b/gi,          // ticket #1234
+      /(TKT-\d{1,6})\b/gi                  // Full TKT-434592 format
+    ];
+    
+    ticketPatterns.forEach(pattern => {
+      enhancedText = enhancedText.replace(pattern, (match, ticketId) => {
+        return `<span class="ticket-link" data-ticket-id="${ticketId}" onclick="openTicket('${ticketId}')" onmouseenter="showTicketPreview(event, '${ticketId}')" onmouseleave="hideTicketPreview()">${match}</span>`;
+      });
     });
+    
+    // Handle GIF URLs
+    const gifPattern = /(https?:\/\/[^\s]+\.gif(?:\?[^\s]*)?)/gi;
+    enhancedText = enhancedText.replace(gifPattern, (match) => {
+      return `<div class="message-gif"><img src="${match}" alt="GIF" loading="lazy" onclick="openImageModal('${match}')" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;"></div>`;
+    });
+    
+    // Handle general image URLs
+    const imagePattern = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s]*)?)/gi;
+    enhancedText = enhancedText.replace(imagePattern, (match) => {
+      return `<div class="message-image"><img src="${match}" alt="Image" loading="lazy" onclick="openImageModal('${match}')" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;"></div>`;
+    });
+    
+    // Handle YouTube links
+    const youtubePattern = /(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+))/gi;
+    enhancedText = enhancedText.replace(youtubePattern, (match, fullUrl, videoId) => {
+      return `<div class="message-youtube">
+        <a href="${match}" target="_blank" style="color: #ff0000; text-decoration: none;">
+          📺 YouTube Video
+        </a>
+        <div style="margin-top: 8px;">
+          <iframe width="300" height="169" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe>
+        </div>
+      </div>`;
+    });
+    
+    // Handle general URLs
+    const urlPattern = /(https?:\/\/[^\s]+)/gi;
+    enhancedText = enhancedText.replace(urlPattern, (match) => {
+      // Skip if already processed as image/gif/youtube
+      if (match.match(/\.(gif|jpg|jpeg|png|webp)(\?.*)?$/i) || match.includes('youtube.com') || match.includes('youtu.be')) {
+        return match;
+      }
+      return `<a href="${match}" target="_blank" style="color: #6264a7; text-decoration: underline;">${match}</a>`;
+    });
+  }
+  
+  // Handle file attachments
+  let attachmentHTML = '';
+  if (attachments && attachments.length > 0) {
+    attachmentHTML = attachments.map(attachment => {
+      const fileIcon = getFileIcon(attachment.type);
+      const fileSize = formatFileSize(attachment.size);
+      return `
+        <div class="message-attachment">
+          <div class="attachment-info">
+            <span class="attachment-icon">${fileIcon}</span>
+            <div class="attachment-details">
+              <div class="attachment-name">${attachment.name}</div>
+              <div class="attachment-size">${fileSize}</div>
+            </div>
+          </div>
+          <button class="attachment-download" onclick="downloadAttachment('${attachment.url}', '${attachment.name}')">
+            📥 Download
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  return enhancedText + (attachmentHTML ? '<div class="message-attachments">' + attachmentHTML + '</div>' : '');
+}
+
+// Helper function to get file icon based on file type
+function getFileIcon(fileType) {
+  if (fileType.startsWith('image/')) return '🖼️';
+  if (fileType.startsWith('video/')) return '🎥';
+  if (fileType.startsWith('audio/')) return '🎵';
+  if (fileType.includes('pdf')) return '📄';
+  if (fileType.includes('word') || fileType.includes('document')) return '📝';
+  if (fileType.includes('excel') || fileType.includes('spreadsheet')) return '📊';
+  if (fileType.includes('powerpoint') || fileType.includes('presentation')) return '📑';
+  if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('archive')) return '🗜️';
+  return '📎';
+}
+
+// Helper function to format file size
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Download attachment function
+function downloadAttachment(url, filename) {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.target = '_blank';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Open image modal for GIFs and images
+function openImageModal(imageUrl) {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    cursor: pointer;
+  `;
+  
+  const img = document.createElement('img');
+  img.src = imageUrl;
+  img.style.cssText = `
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+  `;
+  
+  modal.appendChild(img);
+  document.body.appendChild(modal);
+  
+  modal.addEventListener('click', () => {
+    document.body.removeChild(modal);
+  });
+}
+
+// File attachment functionality
+let selectedFiles = [];
+
+// Trigger file upload dialog
+function triggerFileUpload() {
+  document.getElementById('file-input').click();
+}
+
+// Handle file selection
+function handleFileSelection(event) {
+  const files = Array.from(event.target.files);
+  
+  // Add files to selection (avoid duplicates)
+  files.forEach(file => {
+    if (!selectedFiles.find(f => f.name === file.name && f.size === file.size)) {
+      selectedFiles.push(file);
+    }
   });
   
-  return enhancedText;
+  updateSelectedFilesDisplay();
+  event.target.value = ''; // Reset input
+}
+
+// Update the display of selected files
+function updateSelectedFilesDisplay() {
+  const container = document.getElementById('selected-files');
+  if (!container) return;
+  
+  if (selectedFiles.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  
+  container.innerHTML = selectedFiles.map((file, index) => {
+    const fileIcon = getFileIcon(file.type);
+    const fileSize = formatFileSize(file.size);
+    
+    return `
+      <div class="selected-file">
+        <span class="attachment-icon">${fileIcon}</span>
+        <div class="file-name" title="${file.name}">${file.name}</div>
+        <div class="attachment-size">${fileSize}</div>
+        <button class="remove-file" onclick="removeSelectedFile(${index})" title="Remove file">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+// Remove a selected file
+function removeSelectedFile(index) {
+  selectedFiles.splice(index, 1);
+  updateSelectedFilesDisplay();
+}
+
+// Upload files to Firebase Storage
+async function uploadFiles() {
+  if (selectedFiles.length === 0) return [];
+  
+  const uploads = [];
+  
+  for (const file of selectedFiles) {
+    try {
+      // Create a unique filename
+      const timestamp = Date.now();
+      const fileName = `chat-attachments/${currentChat.id}/${timestamp}_${file.name}`;
+      
+      // For now, we'll use a simple base64 upload approach
+      // In a production environment, you'd want to use proper Firebase Storage
+      const base64 = await fileToBase64(file);
+      
+      uploads.push({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: base64, // In production, this would be a Firebase Storage URL
+        fileName: fileName
+      });
+    } catch (error) {
+      console.error('Error uploading file:', file.name, error);
+    }
+  }
+  
+  return uploads;
+}
+
+// Convert file to base64 (for demo purposes)
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 // Fetch ticket data from Firestore
