@@ -975,8 +975,10 @@
     }
 
     .checkmark {
-      height: 24px;
-      width: 24px;
+      height: 24px !important;
+      width: 24px !important;
+      min-height: 24px !important;
+      min-width: 24px !important;
       background-color: #ffffff;
       border: 2px solid #d1d5db;
       border-radius: 6px;
@@ -986,6 +988,7 @@
       margin-top: 2px;
       transition: all 0.2s ease;
       box-sizing: border-box;
+      display: inline-block;
     }
 
     .checkbox-container:hover .checkmark {
@@ -1036,8 +1039,10 @@
     }
 
     .radio-checkmark {
-      height: 24px;
-      width: 24px;
+      height: 24px !important;
+      width: 24px !important;
+      min-height: 24px !important;
+      min-width: 24px !important;
       background-color: #ffffff;
       border: 2px solid #d1d5db;
       border-radius: 50%;
@@ -1046,6 +1051,7 @@
       transition: all 0.2s ease;
       box-sizing: border-box;
       flex-shrink: 0;
+      display: inline-block;
     }
 
     .radio-container:hover .radio-checkmark {
@@ -1080,6 +1086,27 @@
       color: #6c757d;
       margin: 4px 0 0 0;
       font-style: italic;
+    }
+
+    /* Override any global styles that might compress checkboxes/radios */
+    .checkbox-container *, .radio-container * {
+      line-height: normal !important;
+      height: auto !important;
+    }
+
+    .checkbox-container .checkmark,
+    .radio-container .radio-checkmark {
+      line-height: 1 !important;
+      vertical-align: top !important;
+    }
+
+    /* Ensure form groups have proper spacing */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group .radio-group {
+      margin-top: 8px;
     }
 
     /* Assignment Field */
