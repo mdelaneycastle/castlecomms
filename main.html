@@ -397,7 +397,6 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
           const db = firebase.firestore();
           const currentUser = firebase.auth().currentUser;
-          let query = db.collection('tickets').orderBy('createdAt', 'desc').limit(5);
           
           // Check if user is admin - only admins can see all tickets
           let isFullAdmin = false;
@@ -405,26 +404,87 @@ document.addEventListener('DOMContentLoaded', function() {
             isFullAdmin = await window.authUtils.isAdmin(currentUser);
           }
           
-          // If not a full admin, only show tickets created by this user
-          if (!isFullAdmin && currentUser) {
-            query = query.where('createdBy', '==', currentUser.email);
+          let allTickets = [];
+          
+          if (isFullAdmin) {
+            // Admins see all tickets
+            const query = db.collection('tickets').orderBy('createdAt', 'desc').limit(10);
+            const snapshot = await query.get();
+            allTickets = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+          } else if (currentUser) {
+            // Load user's teams first
+            const userTeams = await getUserTeams(currentUser.email);
+            
+            // Collect tickets from multiple sources
+            const queries = [];
+            
+            // 1. Tickets created by user
+            queries.push(
+              db.collection('tickets')
+                .where('createdBy.email', '==', currentUser.email)
+                .orderBy('createdAt', 'desc')
+                .limit(5)
+                .get()
+            );
+            
+            // 2. Tickets assigned to user individually
+            queries.push(
+              db.collection('tickets')
+                .where('assignedTo.email', '==', currentUser.email)
+                .orderBy('createdAt', 'desc')
+                .limit(5)
+                .get()
+            );
+            
+            // 3. Tickets assigned to user's teams
+            userTeams.forEach(team => {
+              queries.push(
+                db.collection('tickets')
+                  .where('assignedTo.teamId', '==', team.id)
+                  .orderBy('createdAt', 'desc')
+                  .limit(5)
+                  .get()
+              );
+            });
+            
+            // Execute all queries and combine results
+            const results = await Promise.all(queries);
+            const ticketMap = new Map(); // Use Map to deduplicate
+            
+            results.forEach(snapshot => {
+              snapshot.docs.forEach(doc => {
+                const ticket = {id: doc.id, ...doc.data()};
+                // Only add if not already added (deduplication)
+                if (!ticketMap.has(ticket.id)) {
+                  ticketMap.set(ticket.id, ticket);
+                }
+              });
+            });
+            
+            allTickets = Array.from(ticketMap.values())
+              .sort((a, b) => {
+                const aTime = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+                const bTime = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+                return bTime - aTime; // Most recent first
+              })
+              .slice(0, 5); // Limit to 5 most recent
           }
           
-          const ticketsSnapshot = await query.get();
-          
-          if (!ticketsSnapshot.empty) {
-            const items = ticketsSnapshot.docs.map(doc => doc.data());
-            container.innerHTML = items.map(item => `
-              <div class="item">
-                <div class="item-header">#${item.ticketId || 'N/A'} - ${item.title || 'Support Ticket'}</div>
-                <div class="item-meta">${item.status || 'Open'} • ${item.priority || 'Normal'} • ${formatDate(item.createdAt?.toDate?.() || item.createdAt)}</div>
-                <div class="item-content">${item.description || 'No description available'}</div>
-              </div>
-            `).join('');
+          if (allTickets.length > 0) {
+            container.innerHTML = allTickets.map(item => {
+              const assignmentInfo = getTicketAssignmentInfo(item, currentUser);
+              return `
+                <div class="item" onclick="window.open('tickets.html#ticket-${item.id}', '_blank')">
+                  <div class="item-header">#${item.ticketId || 'N/A'} - ${item.title || 'Support Ticket'}</div>
+                  <div class="item-meta">${item.status || 'Open'} • ${assignmentInfo} • ${formatDate(item.createdAt?.toDate?.() || item.createdAt)}</div>
+                  <div class="item-content">${(item.description || 'No description available').substring(0, 100)}${item.description?.length > 100 ? '...' : ''}</div>
+                </div>
+              `;
+            }).join('');
             return;
           }
         } catch (firestoreError) {
-          console.log('Firestore tickets not accessible, using fallback...');
+          console.log('Firestore tickets not accessible, using fallback...', firestoreError);
         }
       }
       
@@ -458,6 +518,48 @@ document.addEventListener('DOMContentLoaded', function() {
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
     return date.toLocaleDateString();
+  }
+
+  // Get user's team memberships
+  async function getUserTeams(userEmail) {
+    try {
+      const db = firebase.firestore();
+      const teamsSnapshot = await db.collection('teams').get();
+      
+      const userTeams = [];
+      teamsSnapshot.docs.forEach(doc => {
+        const teamData = doc.data();
+        if (teamData.members && teamData.members.some(member => member.email === userEmail)) {
+          userTeams.push({
+            id: doc.id,
+            name: teamData.name,
+            ...teamData
+          });
+        }
+      });
+      
+      console.log(`Found ${userTeams.length} teams for user ${userEmail}:`, userTeams.map(t => t.name));
+      return userTeams;
+    } catch (error) {
+      console.error('Error loading user teams:', error);
+      return [];
+    }
+  }
+
+  // Get ticket assignment information for display
+  function getTicketAssignmentInfo(ticket, currentUser) {
+    if (!ticket.assignedTo) return 'Unassigned';
+    
+    if (ticket.assignedTo.type === 'team') {
+      return `Team: ${ticket.assignedTo.teamName}`;
+    } else {
+      // Individual assignment
+      if (ticket.assignedTo.email === currentUser.email) {
+        return 'Assigned to: You';
+      } else {
+        return `Assigned to: ${ticket.assignedTo.name || ticket.assignedTo.email}`;
+      }
+    }
   }
 });
 </script>
