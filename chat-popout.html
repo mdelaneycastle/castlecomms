@@ -390,6 +390,17 @@
       font-size: 12px;
     }
 
+    .ticket-preview-coft {
+      background: #f3f2f1;
+      border-radius: 4px;
+      padding: 4px 6px;
+      margin-bottom: 6px;
+      font-size: 10px;
+      color: #323130;
+      font-weight: 500;
+      border-left: 3px solid #0078d4;
+    }
+
     .ticket-preview-description {
       color: #605e5c;
       line-height: 1.4;
@@ -1245,12 +1256,25 @@
         const ticketData = await fetchTicketData(ticketId);
         
         if (ticketData) {
+          // Extract COFT data if available
+          const coftData = extractCOFTDataFromTicket(ticketData);
+          
+          // Build additional COFT info if this is a COFT ticket
+          let coftInfo = '';
+          if (coftData.soNumber || coftData.clientName) {
+            const parts = [];
+            if (coftData.soNumber) parts.push(`SO: ${coftData.soNumber}`);
+            if (coftData.clientName) parts.push(`Client: ${coftData.clientName}`);
+            coftInfo = `<div class="ticket-preview-coft">${parts.join(' • ')}</div>`;
+          }
+          
           preview.innerHTML = `
             <div class="ticket-preview-header">
               <span class="ticket-preview-id">#${ticketData.ticketId}</span>
               <span class="ticket-preview-status ${ticketData.status}">${ticketData.status}</span>
             </div>
             <div class="ticket-preview-title">${ticketData.title}</div>
+            ${coftInfo}
             <div class="ticket-preview-description">${ticketData.description}</div>
             <div class="ticket-preview-meta">
               <span>Assigned: ${ticketData.assignedTo.name}</span>
@@ -1271,6 +1295,40 @@
         activeTicketPreview.remove();
         activeTicketPreview = null;
       }
+    }
+
+    // Extract COFT data from ticket for preview display
+    function extractCOFTDataFromTicket(ticket) {
+      const defaultData = {
+        soNumber: null,
+        clientName: null
+      };
+      
+      // Check if this is a COFT ticket
+      if (!ticket.title?.includes('COFT Ticket') && !ticket.description?.includes('COFT TICKET')) {
+        return defaultData;
+      }
+      
+      try {
+        const description = ticket.description || '';
+        
+        // Extract SO Number
+        const soMatch = description.match(/SO Number:\s*([^\n\r]+)/i);
+        if (soMatch) {
+          defaultData.soNumber = soMatch[1].trim();
+        }
+        
+        // Extract Client Name
+        const clientMatch = description.match(/Client:\s*([^\n\r]+)/i);
+        if (clientMatch) {
+          defaultData.clientName = clientMatch[1].trim();
+        }
+        
+      } catch (error) {
+        console.log('Error extracting COFT data:', error);
+      }
+      
+      return defaultData;
     }
 
     // Open ticket in parent window - goes directly to internal tickets section
