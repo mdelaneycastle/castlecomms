@@ -5,6 +5,7 @@
     
     "users": {
       ".read": "auth != null",
+      ".indexOn": ["email"],
       "$uid": {
         ".read": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
         ".write": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
