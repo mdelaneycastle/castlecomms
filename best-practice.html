@@ -554,7 +554,20 @@
         card.className = 'image-card';
         
         // Get image URL from Firebase Storage
-        const imageUrl = imageData.storageUrl ||
+        console.log('🔍 Image data for', key, ':', imageData);
+        
+        let imageUrl = imageData.storageUrl;
+        
+        // If no storageUrl, try to construct it from filename
+        if (!imageUrl && imageData.filename) {
+          // Construct Firebase Storage URL manually
+          imageUrl = `https://firebasestorage.googleapis.com/v0/b/castle-comms.appspot.com/o/gallery-images%2F${encodeURIComponent(imageData.filename)}?alt=media`;
+          console.log('🔧 Constructed URL:', imageUrl);
+        }
+        
+        // Final fallback to placeholder
+        if (!imageUrl) {
+          imageUrl =
           'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImEiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmQ3MDAiLz48c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmZmVkNGEiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz48cmVjdCB3aWR0aD0iMzUwIiBoZWlnaHQ9IjMwMCIgZmlsbD0idXJsKCNhKSIgb3BhY2l0eT0iMC4xIi8+PHRleHQgeD0iNTAlIiB5PSI0NSUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2cHgiIGZpbGw9IiM4YjQ1MTMiIGZvbnQtd2VpZ2h0PSI2MDAiPkJlc3QgUHJhY3RpY2UgSW1hZ2U8L3RleXQ+PHRleHQgeD0iNTAlIiB5PSI2MCUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjEycHgiIGZpbGw9IiNhYTZjMzkiPkxvYWRpbmcgZnJvbSBGaXJlYmFzZSBTdG9yYWdlLi4uPC90ZXh0Pjwvc3ZnPg==';
 
         // Build comment HTML based on display type
@@ -646,26 +659,26 @@
         // Initialize best practice gallery (accessible to all authenticated users)
         bestPracticeGallery = new BestPracticeGallery();
         await bestPracticeGallery.init();
-      });
 
-      // Update user display name in header
-      const userNameDisplay = document.getElementById('user-name-display');
-      if (userNameDisplay && window.sharedComponents) {
-        try {
-          const displayName = await window.sharedComponents.getUserDisplayName(user);
-          userNameDisplay.textContent = displayName;
-        } catch (error) {
-          console.error('Error loading display name:', error);
-          // Fallback to email extraction
-          const emailName = user.email.split('@')[0];
-          const fallbackName = emailName
-            .replace(/[._-]/g, ' ')
-            .split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-            .join(' ');
-          userNameDisplay.textContent = fallbackName;
+        // Update user display name in header
+        const userNameDisplay = document.getElementById('user-name-display');
+        if (userNameDisplay && window.sharedComponents) {
+          try {
+            const displayName = await window.sharedComponents.getUserDisplayName(user);
+            userNameDisplay.textContent = displayName;
+          } catch (error) {
+            console.error('Error loading display name:', error);
+            // Fallback to email extraction
+            const emailName = user.email.split('@')[0];
+            const fallbackName = emailName
+              .replace(/[._-]/g, ' ')
+              .split(' ')
+              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+              .join(' ');
+            userNameDisplay.textContent = fallbackName;
+          }
         }
-      }
+      });
     });
   </script>
 </body>
