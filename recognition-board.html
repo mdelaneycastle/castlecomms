@@ -201,9 +201,21 @@
       box-shadow: 0 8px 16px rgba(0,0,0,0.15);
       transform-origin: center;
       transition: all 0.3s ease;
-      cursor: pointer;
+      cursor: grab;
       border-radius: 5px;
       animation: fadeIn 0.6s ease-out;
+      user-select: none;
+    }
+    
+    .post-it:active {
+      cursor: grabbing;
+    }
+    
+    .post-it.dragging {
+      z-index: 1000;
+      transition: none;
+      transform: scale(1.05) rotate(5deg);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
     }
 
     .post-it::before {
@@ -748,6 +760,9 @@ function createPostItNote(noteData, index, docId = null) {
   
   container.appendChild(postIt);
   
+  // Add drag functionality
+  makeDraggable(postIt);
+  
   requestAnimationFrame(() => {
     setTimeout(() => {
       const isMobile = window.innerWidth <= 768;
@@ -968,6 +983,99 @@ async function deleteNote(docId, buttonElement) {
     console.error('Error deleting note:', error);
     showError('Failed to delete note. Please try again.');
   }
+}
+
+// Make sticky notes draggable (positions don't save)
+function makeDraggable(postIt) {
+  let isDragging = false;
+  let startX = 0;
+  let startY = 0;
+  let initialLeft = 0;
+  let initialTop = 0;
+
+  function onMouseDown(e) {
+    // Prevent dragging if clicking on delete button
+    if (e.target.classList.contains('delete-note')) {
+      return;
+    }
+    
+    isDragging = true;
+    postIt.classList.add('dragging');
+    
+    // Get current position
+    const rect = postIt.getBoundingClientRect();
+    const containerRect = postIt.offsetParent.getBoundingClientRect();
+    
+    startX = e.clientX;
+    startY = e.clientY;
+    initialLeft = rect.left - containerRect.left;
+    initialTop = rect.top - containerRect.top;
+    
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    
+    e.preventDefault();
+  }
+  
+  function onMouseMove(e) {
+    if (!isDragging) return;
+    
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+    
+    let newLeft = initialLeft + deltaX;
+    let newTop = initialTop + deltaY;
+    
+    // Keep note within container bounds
+    const container = postIt.offsetParent;
+    const maxLeft = container.offsetWidth - postIt.offsetWidth;
+    const maxTop = container.offsetHeight - postIt.offsetHeight;
+    
+    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+    newTop = Math.max(0, Math.min(newTop, maxTop));
+    
+    postIt.style.left = newLeft + 'px';
+    postIt.style.top = newTop + 'px';
+  }
+  
+  function onMouseUp() {
+    isDragging = false;
+    postIt.classList.remove('dragging');
+    
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+  }
+  
+  // Touch events for mobile
+  function onTouchStart(e) {
+    if (e.target.classList.contains('delete-note')) {
+      return;
+    }
+    
+    const touch = e.touches[0];
+    onMouseDown({ 
+      clientX: touch.clientX, 
+      clientY: touch.clientY, 
+      preventDefault: () => e.preventDefault() 
+    });
+  }
+  
+  function onTouchMove(e) {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    onMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+    e.preventDefault();
+  }
+  
+  function onTouchEnd() {
+    onMouseUp();
+  }
+  
+  // Add event listeners
+  postIt.addEventListener('mousedown', onMouseDown);
+  postIt.addEventListener('touchstart', onTouchStart, { passive: false });
+  postIt.addEventListener('touchmove', onTouchMove, { passive: false });
+  postIt.addEventListener('touchend', onTouchEnd);
 }
 </script>
 
