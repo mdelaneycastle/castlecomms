@@ -3568,149 +3568,6 @@ async function createTicketFromModal() {
     
     await db.collection('tickets').add(ticketData);
     
-    // Create notifications for assigned users
-    console.log('🔔 Starting notification creation process...');
-    console.log('🔔 Notification manager available:', !!window.notificationManager);
-    console.log('🔔 Assignment type - isTeamAssignment:', isTeamAssignment, 'isIndividualAssignment:', isIndividualAssignment);
-    console.log('🔔 Assigned user:', assignedUser);
-    console.log('🔔 Assigned team:', assignedTeam);
-    
-    if (window.notificationManager) {
-      try {
-        if (isTeamAssignment && assignedTeam && assignedTeam.members) {
-          console.log('🔔 Creating team notifications for', assignedTeam.members.length, 'members');
-          
-          // Create notifications for all team members
-          for (const member of assignedTeam.members) {
-            console.log('🔔 Processing team member:', member.email);
-            
-            if (member.email !== currentUser.email) { // Don't notify the creator
-              console.log('🔔 Looking up user UID for:', member.email);
-              
-              // Find user UID using listUsers function (Firebase Auth)
-              let userUid = null;
-              try {
-                if (typeof listUsers === 'function') {
-                  const users = await listUsers();
-                  const foundUser = users.find(user => user.email === member.email);
-                  if (foundUser) {
-                    userUid = foundUser.uid;
-                    console.log('🔔 Found user UID from listUsers:', userUid);
-                  }
-                }
-              } catch (error) {
-                console.log('🔔 listUsers function not available, trying fallback');
-              }
-              
-              console.log('🔔 User UID found:', !!userUid);
-              
-              if (userUid) {
-                
-                // Create notification
-                const notificationRef = firebase.database().ref(`notifications/${userUid}/${Date.now()}`);
-                const notificationData = {
-                  type: 'ticket_assigned',
-                  title: '🎫 New Support Ticket Assigned',
-                  message: `New ticket assigned to your team: ${title}`,
-                  timestamp: new Date().toISOString(),
-                  read: false,
-                  metadata: {
-                    ticketId: ticketId,
-                    ticketTitle: title,
-                    category: category,
-                    assignmentType: 'team',
-                    teamName: assignedTeam.name
-                  }
-                };
-                
-                console.log('🔔 Creating team notification:', notificationData);
-                await notificationRef.set(notificationData);
-                console.log('🔔 Team notification created successfully for', member.email);
-              } else {
-                console.log('❌ No user found in Firebase Auth for team member:', member.email);
-              }
-            } else {
-              console.log('🔔 Skipping creator (self):', member.email);
-            }
-          }
-        } else if (isIndividualAssignment && assignedUser && assignedUser.email !== currentUser.email) {
-          console.log('🔔 Creating individual notification for:', assignedUser.email);
-          
-          // Find user UID using listUsers function (Firebase Auth)
-          let userUid = null;
-          try {
-            if (typeof listUsers === 'function') {
-              const users = await listUsers();
-              const foundUser = users.find(user => user.email === assignedUser.email);
-              if (foundUser) {
-                userUid = foundUser.uid;
-                console.log('🔔 Found individual user UID from listUsers:', userUid);
-              }
-            }
-          } catch (error) {
-            console.log('🔔 listUsers function not available for individual assignment');
-          }
-          
-          console.log('🔔 Individual user UID found:', !!userUid);
-          
-          if (userUid) {
-            
-            // Create notification
-            const notificationRef = firebase.database().ref(`notifications/${userUid}/${Date.now()}`);
-            const notificationData = {
-              type: 'ticket_assigned',
-              title: '🎫 New Support Ticket Assigned',
-              message: `New ticket assigned to you: ${title}`,
-              timestamp: new Date().toISOString(),
-              read: false,
-              metadata: {
-                ticketId: ticketId,
-                ticketTitle: title,
-                category: category,
-                assignmentType: 'individual',
-                assigneeName: assignedUser.name
-              }
-            };
-            
-            console.log('🔔 Creating individual notification:', notificationData);
-            await notificationRef.set(notificationData);
-            console.log('🔔 Individual notification created successfully for', assignedUser.email);
-            
-            // Verify it was saved
-            const verification = await notificationRef.once('value');
-            if (verification.exists()) {
-              console.log('✅ Individual notification verified in database:', verification.val());
-            } else {
-              console.log('❌ Individual notification not found in database after save');
-            }
-            
-          } else {
-            console.log('❌ No user found in Firebase Auth for individual assignee:', assignedUser.email);
-          }
-        } else {
-          console.log('❌ No notification created - conditions not met');
-          console.log('❌ Conditions:', {
-            isTeamAssignment,
-            hasAssignedTeam: !!assignedTeam,
-            hasTeamMembers: assignedTeam?.members?.length > 0,
-            isIndividualAssignment,
-            hasAssignedUser: !!assignedUser,
-            assignedUserEmail: assignedUser?.email,
-            currentUserEmail: currentUser.email,
-            emailsMatch: assignedUser?.email === currentUser.email
-          });
-        }
-      } catch (notificationError) {
-        console.error('❌ Error creating ticket notifications:', notificationError);
-        console.error('❌ Notification error details:', {
-          code: notificationError.code,
-          message: notificationError.message,
-          stack: notificationError.stack
-        });
-      }
-    } else {
-      console.log('❌ Notification manager not available');
-    }
     
     showModalStatus('Ticket created successfully!', 'success');
     
@@ -4899,7 +4756,24 @@ function getTimerDisplayForTicket(ticket) {
 <!-- Site scripts -->
 <script src="script.js"></script>
 
-<!-- Notification system -->
-<script src="notifications.js"></script>
+<!-- Notification Badge System -->
+<script src="notification-badges.js"></script>
+
+<script>
+// Mark tickets as seen when page loads
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.notificationBadges && window.notificationBadges.isInitialized) {
+    window.notificationBadges.updateLastSeen('tickets');
+  } else {
+    // Wait for notification system to initialize
+    setTimeout(() => {
+      if (window.notificationBadges && window.notificationBadges.isInitialized) {
+        window.notificationBadges.updateLastSeen('tickets');
+      }
+    }, 2000);
+  }
+});
+</script>
+
 </body>
 </html>

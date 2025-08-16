@@ -342,6 +342,44 @@ header h1 {
   transform: scale(1.05);
 }
 
+/* Notification Badges */
+.notification-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #dc3545;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 10px;
+  min-width: 1.2rem;
+  height: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+  animation: notificationPulse 2s infinite;
+  z-index: 10;
+  line-height: 1;
+  text-align: center;
+}
+
+.notification-badge:empty {
+  display: none;
+}
+
+@keyframes notificationPulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+  }
+  50% { 
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.5);
+  }
+}
+
 .sidebar.show {
   left: 0;
 }
