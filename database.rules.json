@@ -9,7 +9,10 @@
       "$uid": {
         ".read": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
         ".write": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
-        ".validate": "newData.hasChildren(['name']) && newData.child('name').isString()"
+        ".validate": "newData.hasChildren(['name']) && newData.child('name').isString()",
+        "lastSeen": {
+          ".write": "auth != null && auth.uid == $uid"
+        }
       }
     },
     
