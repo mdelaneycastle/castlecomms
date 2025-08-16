@@ -1391,7 +1391,7 @@ admin-link {
   font-weight: 700;
   margin-bottom: 2rem;
   color: var(--secondary-color);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1538,7 +1538,7 @@ admin-link {
 }
 
 .gallery-thumbnail.active {
-  border-color: #667eea;
+  border-color: var(--secondary-color);
   transform: scale(1.15);
   box-shadow: var(--shadow-medium);
 }
@@ -1567,7 +1567,7 @@ admin-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
 }
 
 .manual-book {
@@ -1667,7 +1667,7 @@ admin-link {
 }
 
 .page-header {
-  border-bottom: 3px solid var(--primary-gradient);
+  border-bottom: 3px solid var(--secondary-color);
   background: var(--primary-gradient);
   margin: -2rem -2rem 1.5rem -2rem;
   padding: 1.5rem 2rem;
@@ -1725,7 +1725,7 @@ admin-link {
 }
 
 .section-card.clickable:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--primary-gradient);
   color: white;
 }
 
@@ -1847,16 +1847,16 @@ admin-link {
 }
 
 .content-list li {
-  background: rgba(102, 126, 234, 0.1);
+  background: rgba(216, 209, 197, 0.1);
   margin: 0.5rem 0;
   padding: 0.8rem 1.2rem;
   border-radius: 8px;
-  border-left: 4px solid var(--primary-gradient);
+  border-left: 4px solid var(--secondary-color);
   transition: all 0.3s ease;
 }
 
 .content-list li:hover {
-  background: rgba(102, 126, 234, 0.2);
+  background: rgba(216, 209, 197, 0.2);
   transform: translateX(5px);
 }
 
