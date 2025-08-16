@@ -989,10 +989,10 @@ async function deleteNote(docId, buttonElement) {
 // Make sticky notes draggable (positions don't save)
 function makeDraggable(postIt) {
   let isDragging = false;
-  let startX = 0;
-  let startY = 0;
-  let initialLeft = 0;
-  let initialTop = 0;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let elementStartX = 0;
+  let elementStartY = 0;
 
   function onMouseDown(e) {
     // Prevent dragging if clicking on delete button
@@ -1003,15 +1003,16 @@ function makeDraggable(postIt) {
     isDragging = true;
     postIt.classList.add('dragging');
     
-    // Get current position from the element's style or computed style
-    const computedStyle = window.getComputedStyle(postIt);
-    const currentLeft = parseInt(computedStyle.left) || 0;
-    const currentTop = parseInt(computedStyle.top) || 0;
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
     
-    startX = e.clientX;
-    startY = e.clientY;
-    initialLeft = currentLeft;
-    initialTop = currentTop;
+    dragStartX = clientX;
+    dragStartY = clientY;
+    
+    // Get current absolute position using getBoundingClientRect
+    const rect = postIt.getBoundingClientRect();
+    elementStartX = rect.left;
+    elementStartY = rect.top;
     
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
@@ -1022,22 +1023,32 @@ function makeDraggable(postIt) {
   function onMouseMove(e) {
     if (!isDragging) return;
     
-    const deltaX = e.clientX - startX;
-    const deltaY = e.clientY - startY;
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
     
-    let newLeft = initialLeft + deltaX;
-    let newTop = initialTop + deltaY;
+    const deltaX = clientX - dragStartX;
+    const deltaY = clientY - dragStartY;
     
-    // Keep note within container bounds
+    const newLeft = elementStartX + deltaX;
+    const newTop = elementStartY + deltaY;
+    
+    // Get container boundaries
     const container = postIt.offsetParent;
-    const maxLeft = container.offsetWidth - postIt.offsetWidth;
-    const maxTop = container.offsetHeight - postIt.offsetHeight;
+    const containerRect = container.getBoundingClientRect();
     
-    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-    newTop = Math.max(0, Math.min(newTop, maxTop));
+    // Calculate relative position within container
+    const relativeX = newLeft - containerRect.left;
+    const relativeY = newTop - containerRect.top;
     
-    postIt.style.left = newLeft + 'px';
-    postIt.style.top = newTop + 'px';
+    // Constrain within container boundaries
+    const maxLeft = containerRect.width - postIt.offsetWidth;
+    const maxTop = containerRect.height - postIt.offsetHeight;
+    
+    const constrainedX = Math.max(0, Math.min(maxLeft, relativeX));
+    const constrainedY = Math.max(0, Math.min(maxTop, relativeY));
+    
+    postIt.style.left = constrainedX + 'px';
+    postIt.style.top = constrainedY + 'px';
   }
   
   function onMouseUp() {
@@ -1046,6 +1057,8 @@ function makeDraggable(postIt) {
     
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('touchmove', onMouseMove);
+    document.removeEventListener('touchend', onMouseUp);
   }
   
   // Touch events for mobile
@@ -1055,19 +1068,10 @@ function makeDraggable(postIt) {
     }
     
     const touch = e.touches[0];
+    onMouseDown({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => e.preventDefault() });
     
-    isDragging = true;
-    postIt.classList.add('dragging');
-    
-    // Get current position from the element's style or computed style
-    const computedStyle = window.getComputedStyle(postIt);
-    const currentLeft = parseInt(computedStyle.left) || 0;
-    const currentTop = parseInt(computedStyle.top) || 0;
-    
-    startX = touch.clientX;
-    startY = touch.clientY;
-    initialLeft = currentLeft;
-    initialTop = currentTop;
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd);
     
     e.preventDefault();
   }
@@ -1079,15 +1083,14 @@ function makeDraggable(postIt) {
     e.preventDefault();
   }
   
-  function onTouchEnd() {
+  function onTouchEnd(e) {
     onMouseUp();
+    e.preventDefault();
   }
   
   // Add event listeners
   postIt.addEventListener('mousedown', onMouseDown);
   postIt.addEventListener('touchstart', onTouchStart, { passive: false });
-  postIt.addEventListener('touchmove', onTouchMove, { passive: false });
-  postIt.addEventListener('touchend', onTouchEnd);
 }
 </script>
 
