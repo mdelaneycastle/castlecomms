@@ -1002,14 +1002,15 @@ function makeDraggable(postIt) {
     isDragging = true;
     postIt.classList.add('dragging');
     
-    // Get current position
-    const rect = postIt.getBoundingClientRect();
-    const containerRect = postIt.offsetParent.getBoundingClientRect();
+    // Get current position from the element's style or computed style
+    const computedStyle = window.getComputedStyle(postIt);
+    const currentLeft = parseInt(computedStyle.left) || 0;
+    const currentTop = parseInt(computedStyle.top) || 0;
     
     startX = e.clientX;
     startY = e.clientY;
-    initialLeft = rect.left - containerRect.left;
-    initialTop = rect.top - containerRect.top;
+    initialLeft = currentLeft;
+    initialTop = currentTop;
     
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
@@ -1053,11 +1054,21 @@ function makeDraggable(postIt) {
     }
     
     const touch = e.touches[0];
-    onMouseDown({ 
-      clientX: touch.clientX, 
-      clientY: touch.clientY, 
-      preventDefault: () => e.preventDefault() 
-    });
+    
+    isDragging = true;
+    postIt.classList.add('dragging');
+    
+    // Get current position from the element's style or computed style
+    const computedStyle = window.getComputedStyle(postIt);
+    const currentLeft = parseInt(computedStyle.left) || 0;
+    const currentTop = parseInt(computedStyle.top) || 0;
+    
+    startX = touch.clientX;
+    startY = touch.clientY;
+    initialLeft = currentLeft;
+    initialTop = currentTop;
+    
+    e.preventDefault();
   }
   
   function onTouchMove(e) {
