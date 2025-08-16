@@ -1753,7 +1753,11 @@ admin-link {
 }
 
 .section-card.clickable:hover .section-desc {
-  color: #000000;
+  color: white;
+}
+
+.section-card.clickable:hover .section-title {
+  color: white;
 }
 
 .contact-info {
