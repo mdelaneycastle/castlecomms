@@ -2135,47 +2135,6 @@ async function sendMessage() {
       lastMessageAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     
-    // Create notifications for other chat participants
-    if (window.notificationManager && currentChat.participants) {
-      const otherParticipants = Object.keys(currentChat.participants)
-        .filter(email => email !== currentUser.email);
-      
-      for (const participantEmail of otherParticipants) {
-        try {
-          // Find the participant's UID from the users database
-          const usersSnapshot = await firebase.database().ref('users')
-            .orderByChild('email')
-            .equalTo(participantEmail)
-            .once('value');
-          
-          const userData = usersSnapshot.val();
-          if (userData) {
-            const participantUid = Object.keys(userData)[0];
-            
-            // Create notification message
-            const notificationMessage = message || `📎 Sent ${attachments.length} file(s)`;
-            
-            // Create notification for the participant
-            const notificationRef = firebase.database().ref(`notifications/${participantUid}/${Date.now()}`);
-            await notificationRef.set({
-              type: 'chat_message',
-              title: '💬 New Message',
-              message: `${currentUserName}: ${notificationMessage.substring(0, 50)}${notificationMessage.length > 50 ? '...' : ''}`,
-              timestamp: new Date().toISOString(),
-              read: false,
-              metadata: {
-                chatId: currentChat.id,
-                chatName: currentChat.name,
-                senderName: currentUserName,
-                messageId: messageRef.id
-              }
-            });
-          }
-        } catch (notificationError) {
-          console.error('Error creating message notification:', notificationError);
-        }
-      }
-    }
     
     // Clear input and selected files
     messageInput.value = '';
@@ -2900,7 +2859,24 @@ async function deleteMessage(messageId) {
 <!-- Site scripts -->
 <script src="script.js"></script>
 
-<!-- Notification system -->
-<script src="notifications.js"></script>
+<!-- Notification Badge System -->
+<script src="notification-badges.js"></script>
+
+<script>
+// Mark messages as seen when page loads
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.notificationBadges && window.notificationBadges.isInitialized) {
+    window.notificationBadges.updateLastSeen('messages');
+  } else {
+    // Wait for notification system to initialize
+    setTimeout(() => {
+      if (window.notificationBadges && window.notificationBadges.isInitialized) {
+        window.notificationBadges.updateLastSeen('messages');
+      }
+    }, 2000);
+  }
+});
+</script>
+
 </body>
 </html>
