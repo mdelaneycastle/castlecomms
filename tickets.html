@@ -4931,18 +4931,16 @@ let advancedFilters = {
 // Populate filter dropdowns
 async function populateFilterDropdowns() {
   try {
-    // Populate COFT team members with actual team data
+    // Populate COFT team members with actual COFT team names
     const coftTeamSelect = document.getElementById('coft-team-filter');
-    const coftTeam = allTeams.find(team => team.id === 'coft');
+    const coftMembers = ['Philippa', 'Amelia', 'Tara', 'Gerald'];
     
-    if (coftTeam && coftTeam.members) {
-      coftTeam.members.forEach(member => {
-        const option = document.createElement('option');
-        option.value = member.email;
-        option.textContent = `${member.name} (${member.email})`;
-        coftTeamSelect.appendChild(option);
-      });
-    }
+    coftMembers.forEach(memberName => {
+      const option = document.createElement('option');
+      option.value = memberName;
+      option.textContent = memberName;
+      coftTeamSelect.appendChild(option);
+    });
     
     // Populate Created By filter with all users (alphabetical)
     const createdBySelect = document.getElementById('gallery-created-filter');
@@ -4998,13 +4996,20 @@ function matchesAdvancedFilters(ticket) {
   // COFT Team Member filter
   if (advancedFilters.coftTeamMember) {
     let teamMemberMatch = false;
+    
+    // Check if ticket is assigned to COFT team and get the team member
     if (ticket.assignedTo && ticket.assignedTo.teamMembers) {
-      teamMemberMatch = ticket.assignedTo.teamMembers.some(member => 
-        member.email === advancedFilters.coftTeamMember
-      );
+      // Check team members for COFT assignment
+      teamMemberMatch = ticket.assignedTo.teamMembers.some(member => {
+        const memberName = getCOFTTeamMember(member.email);
+        return memberName === advancedFilters.coftTeamMember;
+      });
     } else if (ticket.assignedTo && ticket.assignedTo.email) {
-      teamMemberMatch = ticket.assignedTo.email === advancedFilters.coftTeamMember;
+      // Check individual assignment
+      const memberName = getCOFTTeamMember(ticket.assignedTo.email);
+      teamMemberMatch = memberName === advancedFilters.coftTeamMember;
     }
+    
     if (!teamMemberMatch) return false;
   }
   

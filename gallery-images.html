@@ -259,6 +259,31 @@
       gap: 0.5rem;
     }
 
+    .image-status {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-badge.best-practice {
+      background: rgba(34, 197, 94, 0.1);
+      color: #16a34a;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .status-badge.needs-attention {
+      background: rgba(251, 146, 60, 0.1);
+      color: #ea580c;
+      border: 1px solid rgba(251, 146, 60, 0.2);
+    }
+
     .loading-spinner {
       display: none;
       text-align: center;
@@ -597,10 +622,13 @@
       constructor() {
         this.images = new Map();
         this.uploadEndpoint = null;
+        this.isAdmin = false;
       }
 
-      async init() {
+      async init(isAdmin = false) {
         try {
+          this.isAdmin = isAdmin;
+          
           // Production endpoint URL - using Firebase Functions
           this.uploadEndpoint = 'https://uploadtogallery-ngp3khlsna-ew.a.run.app';
           
@@ -809,21 +837,29 @@
             <div class="image-filename">${imageData.originalName}</div>
             <div class="image-date">Uploaded ${new Date(imageData.uploadDate).toLocaleDateString()} by ${imageData.uploaderName}</div>
             <div class="image-actions">
-              <button class="best-practice-btn ${imageData.bestPractice ? 'active' : 'inactive'}" 
-                      onclick="galleryManager.toggleBestPractice('${key}', ${!imageData.bestPractice})"
-                      title="${imageData.bestPractice ? 'Remove from Best Practice' : 'Mark as Best Practice'}">
-                ⭐
-              </button>
-              <button class="attention-btn ${imageData.needsAttention ? 'active' : 'inactive'}" 
-                      onclick="galleryManager.toggleAttention('${key}', ${!imageData.needsAttention})"
-                      title="${imageData.needsAttention ? 'Remove Attention Flag' : 'Flag for Attention'}">
-                ❗
-              </button>
-              <button class="delete-btn" 
-                      onclick="galleryManager.deleteImage('${key}', '${imageData.originalName}', '${imageData.filename || ''}')"
-                      title="Delete Image">
-                🗑️
-              </button>
+              ${this.isAdmin ? `
+                <button class="best-practice-btn ${imageData.bestPractice ? 'active' : 'inactive'}" 
+                        onclick="galleryManager.toggleBestPractice('${key}', ${!imageData.bestPractice})"
+                        title="${imageData.bestPractice ? 'Remove from Best Practice' : 'Mark as Best Practice'}">
+                  ⭐
+                </button>
+                <button class="attention-btn ${imageData.needsAttention ? 'active' : 'inactive'}" 
+                        onclick="galleryManager.toggleAttention('${key}', ${!imageData.needsAttention})"
+                        title="${imageData.needsAttention ? 'Remove Attention Flag' : 'Flag for Attention'}">
+                  ❗
+                </button>
+                <button class="delete-btn" 
+                        onclick="galleryManager.deleteImage('${key}', '${imageData.originalName}', '${imageData.filename || ''}')"
+                        title="Delete Image">
+                  🗑️
+                </button>
+              ` : ''}
+              ${!this.isAdmin && (imageData.bestPractice || imageData.needsAttention) ? `
+                <div class="image-status">
+                  ${imageData.bestPractice ? '<span class="status-badge best-practice">⭐ Best Practice</span>' : ''}
+                  ${imageData.needsAttention ? '<span class="status-badge needs-attention">❗ Needs Attention</span>' : ''}
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
@@ -1112,17 +1148,12 @@
           return;
         }
 
-        // Check admin privileges
+        // Check admin privileges for admin features
         const isAdmin = await window.authUtils.isAdmin(user);
-        if (!isAdmin) {
-          alert('Access denied. Admin privileges required.');
-          window.location.href = 'main.html';
-          return;
-        }
-
-        // Initialize gallery manager
+        
+        // Initialize gallery manager (accessible to all users)
         galleryManager = new GalleryImagesManager();
-        await galleryManager.init();
+        await galleryManager.init(isAdmin);
       });
     });
   </script>
