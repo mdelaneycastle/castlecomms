@@ -656,22 +656,39 @@ document.addEventListener('DOMContentLoaded', function() {
   let mentionSuggestionsVisible = false;
   let currentMentionStart = -1;
 
+  // Helper function to extract name from email (fallback if shared components not available)
+  function extractNameFromEmail(email) {
+    if (!email) return 'User';
+    
+    const emailName = email.split('@')[0];
+    return emailName
+      .replace(/[._-]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+
   // Load all users for @mention functionality
   async function loadAllUsers() {
     try {
+      console.log('🔄 Loading users for @ mentions...');
+      
       // Try to get users from the listUsers function (same as tickets page)
       if (typeof listUsers === 'function') {
         try {
           const users = await listUsers();
           allUsers = users.map(user => ({
             email: user.email,
-            name: user.displayName || extractNameFromEmail(user.email),
+            name: user.displayName || 
+                  (window.sharedComponents?.extractNameFromEmail ? 
+                   window.sharedComponents.extractNameFromEmail(user.email) : 
+                   extractNameFromEmail(user.email)),
             uid: user.uid
           })).filter(user => 
             user.email && 
             user.email !== firebase.auth().currentUser.email // Remove current user from list
           );
-          console.log(`Loaded ${allUsers.length} users from Cloud Function (Firebase Auth)`);
+          console.log(`✅ Loaded ${allUsers.length} users from Cloud Function (Firebase Auth)`);
           return;
         } catch (error) {
           console.log('Cloud Function not available, trying fallbacks...', error);
@@ -688,7 +705,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .map(uid => ({ 
               ...usersData[uid], 
               uid,
-              name: usersData[uid].displayName || usersData[uid].name || extractNameFromEmail(usersData[uid].email)
+              name: usersData[uid].displayName || usersData[uid].name || 
+                    (window.sharedComponents?.extractNameFromEmail ? 
+                     window.sharedComponents.extractNameFromEmail(usersData[uid].email) : 
+                     extractNameFromEmail(usersData[uid].email))
             }))
             .filter(user => 
               user.email && 
