@@ -97,6 +97,20 @@ class NotificationBadgeManager {
   }
 
   async updateLastSeen(pageType) {
+    if (!this.isInitialized) {
+      console.warn('⚠️ Notification system not initialized yet, queuing updateLastSeen for:', pageType);
+      // Wait up to 5 seconds for initialization
+      let attempts = 0;
+      while (!this.isInitialized && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      if (!this.isInitialized) {
+        console.error('❌ Notification system failed to initialize, cannot update last seen for:', pageType);
+        return;
+      }
+    }
+
     if (!this.lastSeen.hasOwnProperty(pageType)) {
       console.warn('⚠️ Unknown page type:', pageType);
       return;
@@ -316,15 +330,22 @@ class NotificationBadgeManager {
     };
 
     const linkSelector = selectorMap[pageType];
-    if (!linkSelector) return;
+    if (!linkSelector) {
+      console.warn(`⚠️ No selector found for page type: ${pageType}`);
+      return;
+    }
 
     const linkElement = document.querySelector(linkSelector);
-    if (!linkElement) return;
+    if (!linkElement) {
+      console.warn(`⚠️ No link element found for selector: ${linkSelector}`);
+      return;
+    }
 
     // Remove existing badge
     const existingBadge = linkElement.querySelector('.notification-badge');
     if (existingBadge) {
       existingBadge.remove();
+      console.log(`🗑️ Removed existing badge for ${pageType}`);
     }
 
     // Add new badge if count > 0
@@ -333,6 +354,9 @@ class NotificationBadgeManager {
       badge.className = 'notification-badge';
       badge.textContent = count > 99 ? '99+' : count.toString();
       linkElement.appendChild(badge);
+      console.log(`✨ Added badge for ${pageType} with count: ${count}`);
+    } else {
+      console.log(`✅ No badge needed for ${pageType} (count: ${count})`);
     }
   }
 
@@ -511,6 +535,19 @@ class NotificationBadgeManager {
 
 // Global instance
 window.notificationBadges = new NotificationBadgeManager();
+
+// Helper function for pages to mark themselves as seen
+window.markPageAsSeen = async function(pageType) {
+  try {
+    if (window.notificationBadges) {
+      await window.notificationBadges.updateLastSeen(pageType);
+    } else {
+      console.warn('⚠️ Notification badges not available');
+    }
+  } catch (error) {
+    console.error('❌ Error marking page as seen:', error);
+  }
+};
 
 // Initialize when auth state changes
 if (window.firebase && window.firebase.auth) {
