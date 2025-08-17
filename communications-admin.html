@@ -2518,39 +2518,7 @@ function showStatus(message, type) {
   }, 5000);
 }
 
-// Get user display name
-async function getUserDisplayName(user) {
-  try {
-    if (!user || !window.db) {
-      return extractNameFromEmail(user?.email || '');
-    }
-
-    const userRef = window.db.ref(`users/${user.uid}`);
-    const snapshot = await userRef.once('value');
-    const userData = snapshot.val();
-
-    if (userData && userData.name) {
-      return userData.name;
-    }
-
-    return extractNameFromEmail(user.email || '');
-  } catch (error) {
-    console.error('Error getting user display name:', error);
-    return extractNameFromEmail(user?.email || '');
-  }
-}
-
-// Extract name from email
-function extractNameFromEmail(email) {
-  if (!email) return 'User';
-  
-  const emailName = email.split('@')[0];
-  return emailName
-    .replace(/[._-]/g, ' ')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
+// User name display functions are now handled by shared-components.js
 </script>
 
 <!-- Site scripts -->

@@ -636,30 +636,7 @@
   <!-- Images will be injected by JavaScript -->
 </div>
 
-<header class="modern-header">
-  <div class="header-content">
-    <div class="header-left">
-      <button id="menu-toggle" class="modern-hamburger" aria-label="Open menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <div class="brand-logo">
-        <span class="brand-initials">CC</span>
-      </div>
-      <div class="brand-text">
-        <span class="brand-subtitle">CASTLE COMMS</span>
-        <span class="brand-title">RECOGNITION</span>
-      </div>
-    </div>
-    <div class="header-center">
-      <div class="user-greeting">Hi <span class="user-name" id="user-name-display">Loading...</span></div>
-    </div>
-    <div class="header-right">
-      <!-- Empty right section for balance -->
-    </div>
-  </div>
-</header>
+<div id="header-container"></div>
 
 <div id="sidebar-container"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -873,17 +850,7 @@ function populateUserDropdown() {
   console.log('👥 Populated recognition dropdown with', sortedUsers.length, 'users');
 }
 
-// Extract name from email as fallback
-function extractNameFromEmail(email) {
-  if (!email) return 'User';
-  
-  const emailName = email.split('@')[0];
-  return emailName
-    .replace(/[._-]/g, ' ')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
+// User name display functions are now handled by shared-components.js
 
 // Load all recognition notes from Firebase
 async function loadNotes() {
