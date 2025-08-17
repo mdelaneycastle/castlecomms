@@ -499,6 +499,9 @@ firebase.auth().onAuthStateChanged(async (user) => {
   currentUser = user;
   console.log('User authenticated:', user.email);
   
+  // Update user name display
+  updateUserNameDisplay(user);
+  
   try {
     await initializeTeams();
     console.log('Teams page fully initialized');
@@ -518,6 +521,20 @@ firebase.auth().onAuthStateChanged(async (user) => {
     }
   }
 });
+
+// Update user name display in header
+async function updateUserNameDisplay(user) {
+  const userNameElement = document.getElementById('user-name-display');
+  if (!userNameElement) return;
+  
+  try {
+    const displayName = await getUserDisplayName(user);
+    userNameElement.textContent = displayName;
+  } catch (error) {
+    console.error('Error updating user name display:', error);
+    userNameElement.textContent = extractNameFromEmail(user.email);
+  }
+}
 
 // Load all users for team member selection (same as tickets page)
 async function loadAllUsers() {
@@ -1044,8 +1061,13 @@ function showStatus(message, type) {
 // Get user display name from Firebase Realtime Database
 async function getUserDisplayName(user) {
   try {
-    if (!user || !window.db) {
-      return extractNameFromEmail(user?.email || '');
+    if (!user) {
+      return 'Guest';
+    }
+
+    // Initialize Firebase Realtime Database if not already done
+    if (!window.db) {
+      window.db = firebase.database();
     }
 
     const userRef = window.db.ref(`users/${user.uid}`);
