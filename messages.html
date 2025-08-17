@@ -999,61 +999,99 @@
       cursor: not-allowed;
     }
 
-    /* Mobile Responsive */
+    /* Mobile Responsive - Teams-like behavior */
     @media (max-width: 768px) {
       .chat-container {
         height: calc(100vh - 60px);
+        position: relative;
+        overflow: hidden;
       }
       
+      /* Chat list view - shown by default on mobile */
       .chat-sidebar {
-        width: 280px;
-        min-width: 260px;
-        position: fixed;
-        left: -280px;
-        top: 60px;
-        height: calc(100vh - 60px);
-        z-index: 1000;
-        transition: left 0.3s ease;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-      }
-      
-      .chat-sidebar.open {
+        width: 100%;
+        min-width: unset;
+        position: relative;
         left: 0;
+        top: 0;
+        height: calc(100vh - 60px);
+        z-index: 1;
+        transition: transform 0.3s ease;
+        box-shadow: none;
+        transform: translateX(0);
       }
       
+      /* Hide chat list when viewing a chat */
+      .chat-sidebar.hidden {
+        transform: translateX(-100%);
+        position: absolute;
+      }
+      
+      /* Chat main view - hidden by default on mobile */
       .chat-main {
         width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        background: #ffffff;
+        z-index: 2;
+      }
+      
+      /* Show chat main when active */
+      .chat-main.active {
+        transform: translateX(0);
+      }
+      
+      /* Back button for mobile chat */
+      .mobile-back-button {
+        display: flex;
+        align-items: center;
+        background: none;
+        border: none;
+        font-size: 16px;
+        color: #323130;
+        cursor: pointer;
+        padding: 8px;
+        margin-right: 8px;
+        border-radius: 4px;
+      }
+      
+      .mobile-back-button:hover {
+        background: rgba(0,0,0,0.05);
       }
       
       .mobile-chat-toggle {
-        display: block;
-        background: none;
-        border: none;
-        font-size: 18px;
-        color: #323130;
-        cursor: pointer;
-        margin-right: 12px;
+        display: none; /* Not needed in new design */
       }
       
       .chat-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
-        display: none;
+        display: none; /* Not needed in new design */
       }
       
-      .chat-overlay.show {
-        display: block;
+      /* Ensure chat empty state on mobile shows chat list by default */
+      .chat-empty .mobile-chat-toggle {
+        display: none;
       }
     }
 
     @media (min-width: 769px) {
-      .mobile-chat-toggle {
+      .mobile-chat-toggle,
+      .mobile-back-button {
         display: none;
+      }
+      
+      /* Ensure desktop behavior is preserved */
+      .chat-sidebar.hidden {
+        transform: none;
+        position: relative;
+      }
+      
+      .chat-main.active {
+        transform: none;
+        position: relative;
       }
     }
   </style>
@@ -1119,7 +1157,7 @@
     <!-- Main Chat Area -->
     <div class="chat-main" id="chat-main">
       <div class="chat-empty">
-        <button class="mobile-chat-toggle" onclick="openMobileSidebar()">☰</button>
+        <button class="mobile-back-button" onclick="backToChatList()">← Back</button>
         <div class="chat-empty-icon">💬</div>
         <h3>Welcome to Castle Comms Chat</h3>
         <p>Select a chat from the sidebar or start a new conversation to get started.</p>
@@ -1228,6 +1266,9 @@ async function initializeChat() {
   } catch (error) {
     console.error('Error initializing chat system:', error);
   }
+  
+  // Handle window resize for mobile/desktop transitions
+  window.addEventListener('resize', handleWindowResize);
 }
 
 // Load all users for autocomplete using the same method as tickets page
@@ -1684,6 +1725,16 @@ async function selectChat(chatId) {
     // Update UI
     updateActiveChatInList(chatId);
     displayChatInterface();
+    
+    // Mobile behavior - hide sidebar and show chat
+    if (window.innerWidth <= 768) {
+      const sidebar = document.getElementById('chat-sidebar');
+      const chatMain = document.getElementById('chat-main');
+      
+      if (sidebar) sidebar.classList.add('hidden');
+      if (chatMain) chatMain.classList.add('active');
+    }
+    
     lastMessageCount = 0; // Reset message count for new chat
     loadChatMessages(chatId);
     
@@ -1713,7 +1764,7 @@ function displayChatInterface() {
   
   chatMain.innerHTML = `
     <div class="chat-header">
-      <button class="mobile-chat-toggle" onclick="openMobileSidebar()">☰</button>
+      <button class="mobile-back-button" onclick="backToChatList()">← Back</button>
       <div class="chat-header-info">
         <div class="chat-header-avatar">${initials}</div>
         <div class="chat-header-details">
@@ -2240,37 +2291,59 @@ function showChatInfo() {
   alert(`Chat: ${currentChat.name}\nParticipants: ${participantNames}\nCreated: ${formatTimestamp(currentChat.createdAt)}`);
 }
 
-// Mobile sidebar functions
-function openMobileSidebar() {
-  console.log('Opening mobile sidebar...');
-  const sidebar = document.getElementById('chat-sidebar');
-  const overlay = document.getElementById('chat-overlay');
+// Mobile navigation functions (Teams-like behavior)
+function backToChatList() {
+  console.log('Returning to chat list...');
   
-  if (sidebar) {
-    sidebar.classList.add('open');
-    console.log('Sidebar classes:', sidebar.className);
-  } else {
-    console.error('Chat sidebar not found');
-  }
-  
-  if (overlay) {
-    overlay.classList.add('show');
-  } else {
-    console.error('Chat overlay not found');
+  // Only on mobile
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById('chat-sidebar');
+    const chatMain = document.getElementById('chat-main');
+    
+    if (sidebar) {
+      sidebar.classList.remove('hidden');
+    }
+    
+    if (chatMain) {
+      chatMain.classList.remove('active');
+    }
   }
 }
 
+// Legacy functions for compatibility (now deprecated)
+function openMobileSidebar() {
+  console.log('openMobileSidebar called - using new Teams-like behavior');
+  backToChatList();
+}
+
 function closeMobileSidebar() {
-  console.log('Closing mobile sidebar...');
+  console.log('closeMobileSidebar called - no longer needed in Teams-like design');
+}
+
+// Handle window resize to maintain proper mobile/desktop state
+function handleWindowResize() {
   const sidebar = document.getElementById('chat-sidebar');
-  const overlay = document.getElementById('chat-overlay');
+  const chatMain = document.getElementById('chat-main');
   
-  if (sidebar) {
-    sidebar.classList.remove('open');
-  }
-  
-  if (overlay) {
-    overlay.classList.remove('show');
+  if (window.innerWidth > 768) {
+    // Desktop mode - reset all mobile classes
+    if (sidebar) {
+      sidebar.classList.remove('hidden');
+    }
+    if (chatMain) {
+      chatMain.classList.remove('active');
+    }
+  } else {
+    // Mobile mode - ensure proper state
+    if (currentChat) {
+      // If a chat is selected, show chat and hide sidebar
+      if (sidebar) sidebar.classList.add('hidden');
+      if (chatMain) chatMain.classList.add('active');
+    } else {
+      // No chat selected, show sidebar and hide chat
+      if (sidebar) sidebar.classList.remove('hidden');
+      if (chatMain) chatMain.classList.remove('active');
+    }
   }
 }
 
