@@ -71,13 +71,19 @@ window.sharedComponents = {
   // Update user name display in header
   async updateUserNameDisplay(user) {
     const userNameElement = document.getElementById('user-name-display');
-    if (!userNameElement) return;
+    if (!userNameElement) {
+      console.log('⚠️ user-name-display element not found');
+      return;
+    }
+    
+    console.log('🔄 Updating user name display for:', user?.email);
     
     try {
       const displayName = await this.getUserDisplayName(user);
+      console.log('📝 Setting display name to:', displayName);
       userNameElement.textContent = displayName;
     } catch (error) {
-      console.error('Error updating user name display:', error);
+      console.error('❌ Error updating user name display:', error);
       userNameElement.textContent = this.extractNameFromEmail(user?.email || '');
     }
   },
@@ -89,6 +95,8 @@ window.sharedComponents = {
         return 'Guest';
       }
 
+      console.log('🔍 getUserDisplayName called for user:', user.email);
+
       // Initialize Firebase Realtime Database if not already done
       if (!window.db) {
         window.db = firebase.database();
@@ -98,19 +106,24 @@ window.sharedComponents = {
       const snapshot = await userRef.once('value');
       const userData = snapshot.val();
 
+      console.log('📊 Firebase userData:', userData);
+
       if (userData && userData.name) {
+        console.log('✅ Found name in Firebase Realtime DB:', userData.name);
         return userData.name;
       }
 
       // Fallback to Firebase Auth displayName
       if (user.displayName) {
+        console.log('✅ Found displayName in Firebase Auth:', user.displayName);
         return user.displayName;
       }
 
       // Final fallback to email extraction
+      console.log('⚠️ Falling back to email extraction for:', user.email);
       return this.extractNameFromEmail(user.email || '');
     } catch (error) {
-      console.error('Error getting user display name:', error);
+      console.error('❌ Error getting user display name:', error);
       return this.extractNameFromEmail(user?.email || '');
     }
   },
