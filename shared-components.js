@@ -52,11 +52,17 @@ window.sharedComponents = {
       'teams.html': 'TEAMS/GROUPS',
       'tickets.html': 'TICKETS',
       'newsfeed.html': 'NEWSFEED',
-      'gallery.html': 'GALLERY',
+      'gallery-images.html': 'GALLERY',
       'staff.html': 'STAFF',
-      'chat.html': 'CHAT',
-      'bestpractices.html': 'BEST PRACTICES',
-      'recognition.html': 'RECOGNITION BOARD'
+      'messages.html': 'CHAT',
+      'best-practice.html': 'BEST PRACTICES',
+      'recognition-board.html': 'RECOGNITION BOARD',
+      'contact-finder.html': 'CONTACT FINDER',
+      'planner.html': 'PLANNER',
+      'news-mentions.html': 'NEWS MENTIONS',
+      'manual.html': 'MANUAL',
+      'communications.html': 'COMMUNICATIONS',
+      'admin.html': 'ADMIN'
     };
 
     pageTitleElement.textContent = titles[filename] || 'CASTLE COMMS';
