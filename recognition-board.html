@@ -779,36 +779,106 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 });
 
-// Load all users from Firebase Realtime Database
+// Load all users using the same method as tickets/messages pages
+let allUsers = [];
+
 async function loadUsers() {
   try {
-    const realtimeDb = firebase.database();
-    const usersSnapshot = await realtimeDb.ref('users').once('value');
-    const usersData = usersSnapshot.val() || {};
+    // Try to load users from cloud function first (all authenticated users need this for tickets/messages)
+    if (typeof listUsers === 'function') {
+      try {
+        const users = await listUsers();
+        allUsers = users.map(user => ({
+          email: user.email,
+          name: user.displayName || extractNameFromEmail(user.email),
+          uid: user.uid
+        }));
+        console.log('Loaded users from cloud function:', allUsers.length);
+        populateUserDropdown();
+        return;
+      } catch (error) {
+        console.log('Cloud function not accessible, trying database fallback');
+      }
+    }
     
-    const users = Object.keys(usersData).map(uid => ({
-      uid: uid,
-      email: usersData[uid].email || 'unknown@company.com',
-      displayName: usersData[uid].name || usersData[uid].displayName || usersData[uid].email || 'Unknown User'
-    }));
+    // Fallback: Try to load from Firebase Realtime Database
+    if (firebase.database && currentUser) {
+      try {
+        const db = firebase.database();
+        const usersSnapshot = await db.ref('users').once('value');
+        const usersData = usersSnapshot.val() || {};
+        
+        const dbUsers = Object.keys(usersData).map(uid => ({
+          email: usersData[uid].email || 'unknown@email.com',
+          name: usersData[uid].name || usersData[uid].displayName || extractNameFromEmail(usersData[uid].email || ''),
+          uid: uid
+        }));
+        
+        if (dbUsers.length > 0) {
+          allUsers = dbUsers;
+          console.log('Loaded users from Realtime Database:', allUsers.length);
+          populateUserDropdown();
+          return;
+        }
+      } catch (dbError) {
+        console.log('Database fallback failed, using static list');
+      }
+    }
+
+    // Fallback: Use static list of accounts
+    allUsers = [
+      { email: 'mdelaney@castlefineart.com', name: 'Marc Delaney' },
+      { email: 'gturpin@washingtongreen.co.uk', name: 'Gary Turpin' },
+      { email: 'icc@castlefineart.com', name: 'ICC' },
+      { email: 'mailbox@castlefineart.com', name: 'Mailbox' },
+      { email: 'cheltenham@castlefineart.com', name: 'Cheltenham' },
+      { email: 'derby@castlefineart.com', name: 'Derby' },
+      { email: 'leamingtonspa@castlefineart.com', name: 'Leamington Spa' },
+      { email: 'miltonkeynes@castlefineart.com', name: 'Milton Keynes' },
+      { email: 'nottingham@castlefineart.com', name: 'Nottingham' },
+      { email: 'stamford@castlefineart.com', name: 'Stamford' },
+      { email: 'tewkesbury@castlefineart.com', name: 'Tewkesbury' },
+      { email: 'worcester@castlefineart.com', name: 'Worcester' },
+      { email: 'warwick@castlefineart.com', name: 'Warwick' },
+      { email: 'stratford@castlefineart.com', name: 'Stratford' },
+      { email: 'admin@castlefineart.com', name: 'Admin' }
+    ];
     
-    // Sort users alphabetically by display name
-    users.sort((a, b) => a.displayName.localeCompare(b.displayName));
-    
-    // Populate the user dropdown
-    const userSelect = document.getElementById('recognizedUser');
-    users.forEach(user => {
-      const option = document.createElement('option');
-      option.value = user.displayName;
-      option.textContent = `${user.displayName} (${user.email})`;
-      userSelect.appendChild(option);
-    });
-    
-    console.log('👥 Loaded', users.length, 'users for recognition dropdown');
+    console.log('Using static user list:', allUsers.length);
+    populateUserDropdown();
   } catch (error) {
     console.error('Error loading users:', error);
     showError('Failed to load users for selection.');
   }
+}
+
+// Populate the user dropdown with sorted users
+function populateUserDropdown() {
+  // Sort users alphabetically by name
+  const sortedUsers = [...allUsers].sort((a, b) => a.name.localeCompare(b.name));
+  
+  // Populate the user dropdown
+  const userSelect = document.getElementById('recognizedUser');
+  sortedUsers.forEach(user => {
+    const option = document.createElement('option');
+    option.value = user.name;
+    option.textContent = `${user.name} (${user.email})`;
+    userSelect.appendChild(option);
+  });
+  
+  console.log('👥 Populated recognition dropdown with', sortedUsers.length, 'users');
+}
+
+// Extract name from email as fallback
+function extractNameFromEmail(email) {
+  if (!email) return 'User';
+  
+  const emailName = email.split('@')[0];
+  return emailName
+    .replace(/[._-]/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 
 // Load all recognition notes from Firebase

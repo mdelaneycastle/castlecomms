@@ -4944,9 +4944,10 @@ async function populateFilterDropdowns() {
       });
     }
     
-    // Populate Created By filter with all users
+    // Populate Created By filter with all users (alphabetical)
     const createdBySelect = document.getElementById('gallery-created-filter');
-    allUsers.forEach(user => {
+    const sortedUsers = [...allUsers].sort((a, b) => a.name.localeCompare(b.name));
+    sortedUsers.forEach(user => {
       const option = document.createElement('option');
       option.value = user.email;
       option.textContent = `${user.name} (${user.email})`;
