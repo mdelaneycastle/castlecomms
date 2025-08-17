@@ -2015,51 +2015,23 @@ admin-link {
     align-items: center;
   }
   
-  .close-btn {
-    display: block;
-    color: var(--text-dark);
-    text-decoration: none;
-    font-size: 1.5rem;
-    font-weight: 500;
-    padding: 1.2rem 1.5rem;
-    margin: 0.25rem 1rem;
-    border-radius: 12px;
+  .close-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 0.75rem;
+    vertical-align: middle;
+    opacity: 0.8;
     transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-    border: none;
-    background: none;
-    cursor: pointer;
-    width: calc(100% - 2rem);
-    text-align: center;
-    min-height: 48px;
-    display: flex;
+    font-size: 1.5rem;
+    font-weight: normal;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
   }
   
-  .close-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--primary-gradient);
-    opacity: 0;
-    transition: var(--transition);
-    z-index: -1;
-  }
-  
-  .close-btn:hover {
-    color: white;
-    transform: translateX(8px);
-    box-shadow: var(--shadow-light);
-    background: var(--secondary-color);
-  }
-  
-  .close-btn:hover::before {
+  #close-btn:hover .close-icon {
     opacity: 1;
+    transform: scale(1.05);
   }
 
   .quick-links {
