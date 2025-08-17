@@ -20,6 +20,62 @@ class NotificationBadgeManager {
       recognition: new Date(),
       gallery: new Date()
     };
+    this.notificationSound = null;
+    this.initializeNotificationSound();
+  }
+
+  initializeNotificationSound() {
+    // Create notification sound using Web Audio API for a subtle ding
+    try {
+      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (error) {
+      console.warn('⚠️ Web Audio not supported for notification sounds');
+    }
+  }
+
+  playNotificationSound() {
+    if (!this.audioContext) return;
+    
+    try {
+      // Create a simple ding sound
+      const oscillator = this.audioContext.createOscillator();
+      const gainNode = this.audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(this.audioContext.destination);
+      
+      // Nice ding frequencies
+      oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(600, this.audioContext.currentTime + 0.1);
+      
+      // Volume envelope
+      gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, this.audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+      
+      oscillator.start(this.audioContext.currentTime);
+      oscillator.stop(this.audioContext.currentTime + 0.3);
+    } catch (error) {
+      console.warn('⚠️ Could not play notification sound:', error);
+    }
+  }
+
+  flashMenuButton() {
+    const menuButton = document.getElementById('menu-toggle');
+    if (!menuButton) return;
+    
+    // Add flash animation class
+    menuButton.classList.add('notification-flash');
+    
+    // Remove after animation
+    setTimeout(() => {
+      menuButton.classList.remove('notification-flash');
+    }, 1500);
+  }
+
+  triggerNotificationAlert() {
+    this.playNotificationSound();
+    this.flashMenuButton();
   }
 
   async initialize(user) {
@@ -400,6 +456,7 @@ class NotificationBadgeManager {
                     if (messageData.senderEmail !== this.currentUser.email) {
                       this.badgeData.messages++;
                       this.updateBadgeDisplay('messages');
+                      this.triggerNotificationAlert();
                     }
                   }
                 });
@@ -443,6 +500,7 @@ class NotificationBadgeManager {
                 
                 if (isAssignedToUser) {
                   this.updateTicketsBadge();
+                  this.triggerNotificationAlert();
                 }
               }
             }
@@ -470,6 +528,7 @@ class NotificationBadgeManager {
       if (postDate > this.lastSeen.newsfeed && post.userId !== this.currentUser.uid) {
         this.badgeData.newsfeed++;
         this.updateBadgeDisplay('newsfeed');
+        this.triggerNotificationAlert();
       }
     });
 
@@ -492,6 +551,7 @@ class NotificationBadgeManager {
             if (noteDate > this.lastSeen.recognition) {
               this.badgeData.recognition++;
               this.updateBadgeDisplay('recognition');
+              this.triggerNotificationAlert();
             }
           }
         });
@@ -514,6 +574,7 @@ class NotificationBadgeManager {
           (image.bestPractice === true || image.needsAttention === true)) {
         this.badgeData.gallery++;
         this.updateBadgeDisplay('gallery');
+        this.triggerNotificationAlert();
       }
     });
 
