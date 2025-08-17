@@ -832,16 +832,21 @@ document.addEventListener('DOMContentLoaded', function() {
       </li>`
     ).join('');
     
-    // Position the suggestions div relative to the textarea
+    // Position the suggestions div directly below the textarea
     const textareaRect = textarea.getBoundingClientRect();
-    const formContainer = textarea.closest('.post-form-container');
+    const formContainer = textarea.closest('.post-form');
+    const formContainerRect = formContainer.getBoundingClientRect();
+    
+    // Calculate position relative to the form container
+    const topPosition = textareaRect.bottom - formContainerRect.top + 5;
+    const leftPosition = textareaRect.left - formContainerRect.left;
     
     suggestionsDiv.style.display = 'block';
     suggestionsDiv.style.position = 'absolute';
-    suggestionsDiv.style.left = '1rem';
-    suggestionsDiv.style.top = (textarea.offsetTop + textarea.offsetHeight + 5) + 'px';
-    suggestionsDiv.style.width = 'calc(100% - 2rem)';
-    suggestionsDiv.style.maxWidth = '300px';
+    suggestionsDiv.style.left = leftPosition + 'px';
+    suggestionsDiv.style.top = topPosition + 'px';
+    suggestionsDiv.style.width = (textareaRect.width) + 'px';
+    suggestionsDiv.style.maxWidth = '400px';
     
     // Add click handlers
     suggestionsDiv.querySelectorAll('.mention-suggestion').forEach(li => {
