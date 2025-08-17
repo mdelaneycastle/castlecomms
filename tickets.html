@@ -3958,10 +3958,19 @@ function handleFormToggle() {
                             selectedTeam && 
                             allTeams.find(team => team.id === selectedTeam && team.name === 'COFT');
   
-  // Hide category field when COFT team is selected
+  // Check if IT Support team is selected
+  const isITSupportTeamSelected = isTeamAssignment && 
+                                 selectedTeam && 
+                                 allTeams.find(team => team.id === selectedTeam && team.name === 'IT Support');
+  
+  // Hide category field when COFT or IT Support team is selected
   if (isCOFTTeamSelected) {
     categorySection.style.display = 'none';
     categorySelect.value = 'Client Order Fulfilment Team/Group'; // Auto-set category
+    categorySelect.removeAttribute('required');
+  } else if (isITSupportTeamSelected) {
+    categorySection.style.display = 'none';
+    categorySelect.value = 'IT Support'; // Auto-set category
     categorySelect.removeAttribute('required');
   } else {
     categorySection.style.display = 'block';
@@ -3971,8 +3980,8 @@ function handleFormToggle() {
   // Check if COFT team is selected and should show COFT form
   const isCOFTFormSelected = isCOFTTeamSelected;
   
-  // Check if IT Support category is selected
-  const isITSupportSelected = selectedCategory === 'IT Support';
+  // Check if IT Support team is selected and should show IT Support form
+  const isITSupportFormSelected = isITSupportTeamSelected;
   
   // Handle field visibility
   const itSupportFields = document.getElementById('it-support-fields');
@@ -4002,7 +4011,7 @@ function handleFormToggle() {
         });
       }
     }
-  } else if (isITSupportSelected) {
+  } else if (isITSupportFormSelected) {
     standardFields.style.display = 'none';
     coftFields.style.display = 'none';
     itSupportFields.style.display = 'block';
