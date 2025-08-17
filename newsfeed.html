@@ -214,7 +214,7 @@
 
     /* Mention Suggestions */
     .mention-suggestions {
-      position: absolute;
+      position: fixed;
       background: white;
       border: 1px solid #ddd;
       border-radius: 8px;
@@ -836,15 +836,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!textarea || suggestionsDiv.style.display === 'none') return;
 
     const rect = textarea.getBoundingClientRect();
-    // position using viewport coords + scroll to make it absolute to the page
-    const top = rect.bottom + window.scrollY + 6;
-    const left = rect.left + window.scrollX;
-
-    suggestionsDiv.style.top = `${top}px`;
-    suggestionsDiv.style.left = `${left}px`;
+    suggestionsDiv.style.top = `${rect.bottom + 6}px`;  // just below the textarea
+    suggestionsDiv.style.left = `${rect.left}px`;
     suggestionsDiv.style.width = `${rect.width}px`;
     suggestionsDiv.style.maxWidth = '400px';
   }
+
 
   function showMentionSuggestions(users, mentionStart) {
     if (!users || users.length === 0) { hideMentionSuggestions(); return; }
