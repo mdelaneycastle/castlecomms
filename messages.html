@@ -1251,7 +1251,7 @@ async function loadAllUsers() {
         const users = await listUsers();
         allUsers = users.map(user => ({
           email: user.email,
-          name: user.displayName || extractNameFromEmail(user.email),
+          name: user.displayName || window.sharedComponents.extractNameFromEmail(user.email),
           uid: user.uid
         })).filter(user => 
           user.email && 
@@ -1273,7 +1273,7 @@ async function loadAllUsers() {
           return {
             uid: doc.id,
             email: userData.email,
-            name: userData.displayName || userData.name || extractNameFromEmail(userData.email || '')
+            name: userData.displayName || userData.name || window.sharedComponents.extractNameFromEmail(userData.email || '')
           };
         }).filter(user => 
           user.email && 
@@ -1298,7 +1298,7 @@ async function loadAllUsers() {
         return {
           uid: uid,
           email: userData.email || (userData.name ? userData.name.toLowerCase().replace(/\s+/g, '.') + '@company.com' : 'unknown@company.com'),
-          name: userData.name || userData.displayName || extractNameFromEmail(userData.email || '')
+          name: userData.name || userData.displayName || window.sharedComponents.extractNameFromEmail(userData.email || '')
         };
       }).filter(user => 
         user.email && 
@@ -1580,7 +1580,7 @@ async function createNewChat(e) {
   
   try {
     const participants = [...selectedUsers.map(u => u.email), currentUser.email];
-    const currentUserName = await getUserDisplayName(currentUser);
+    const currentUserName = await window.sharedComponents.getUserDisplayName(currentUser);
     
     const chatData = {
       name: chatName,
@@ -1837,7 +1837,7 @@ async function sendTypingIndicator(isTyping) {
       await db.collection('chat-typing').doc(typingDocId).set({
         chatId: currentChat.id,
         userEmail: currentUser.email,
-        userName: await getUserDisplayName(currentUser),
+        userName: await window.sharedComponents.getUserDisplayName(currentUser),
         isTyping: true,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -2139,7 +2139,7 @@ async function sendMessage() {
   sendBtn.disabled = true;
   
   try {
-    const currentUserName = await getUserDisplayName(currentUser);
+    const currentUserName = await window.sharedComponents.getUserDisplayName(currentUser);
     
     // Upload files first if any are selected
     let attachments = [];
