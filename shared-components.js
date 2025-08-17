@@ -13,10 +13,112 @@ document.addEventListener('DOMContentLoaded', function() {
 window.sharedComponents = {
   // Initialize all shared components
   init() {
+    this.loadHeader();
     this.loadSidebar();
     this.setupAuthStateHandler();
     this.setupNotificationBell();
     console.log("✅ Shared components loaded");
+  },
+
+  // Load and setup header with user name display
+  async loadHeader() {
+    const headerContainer = document.getElementById("header-container");
+    if (!headerContainer) return;
+
+    try {
+      const response = await fetch(`header.html?v=${Date.now()}`);
+      const html = await response.text();
+      headerContainer.innerHTML = html;
+
+      // Set page title based on current page
+      this.setPageTitle();
+
+      console.log("📋 Header loaded successfully");
+    } catch (error) {
+      console.error("❌ Failed to load header:", error);
+    }
+  },
+
+  // Set page title based on current page
+  setPageTitle() {
+    const pageTitleElement = document.getElementById("page-title");
+    if (!pageTitleElement) return;
+
+    const pathname = window.location.pathname;
+    const filename = pathname.split('/').pop() || 'index.html';
+    
+    const titles = {
+      'main.html': 'MAIN',
+      'teams.html': 'TEAMS/GROUPS',
+      'tickets.html': 'TICKETS',
+      'newsfeed.html': 'NEWSFEED',
+      'gallery.html': 'GALLERY',
+      'staff.html': 'STAFF',
+      'chat.html': 'CHAT',
+      'bestpractices.html': 'BEST PRACTICES',
+      'recognition.html': 'RECOGNITION BOARD'
+    };
+
+    pageTitleElement.textContent = titles[filename] || 'CASTLE COMMS';
+  },
+
+  // Update user name display in header
+  async updateUserNameDisplay(user) {
+    const userNameElement = document.getElementById('user-name-display');
+    if (!userNameElement) return;
+    
+    try {
+      const displayName = await this.getUserDisplayName(user);
+      userNameElement.textContent = displayName;
+    } catch (error) {
+      console.error('Error updating user name display:', error);
+      userNameElement.textContent = this.extractNameFromEmail(user?.email || '');
+    }
+  },
+
+  // Get user display name from Firebase Realtime Database
+  async getUserDisplayName(user) {
+    try {
+      if (!user) {
+        return 'Guest';
+      }
+
+      // Initialize Firebase Realtime Database if not already done
+      if (!window.db) {
+        window.db = firebase.database();
+      }
+
+      const userRef = window.db.ref(`users/${user.uid}`);
+      const snapshot = await userRef.once('value');
+      const userData = snapshot.val();
+
+      if (userData && userData.name) {
+        return userData.name;
+      }
+
+      // Fallback to Firebase Auth displayName
+      if (user.displayName) {
+        return user.displayName;
+      }
+
+      // Final fallback to email extraction
+      return this.extractNameFromEmail(user.email || '');
+    } catch (error) {
+      console.error('Error getting user display name:', error);
+      return this.extractNameFromEmail(user?.email || '');
+    }
+  },
+
+  // Extract name from email
+  extractNameFromEmail(email) {
+    if (!email) return 'User';
+    
+    const emailName = email.split('@')[0];
+    return emailName
+      .replace(/[._-]/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   },
 
   // Load and setup sidebar with permissions
@@ -129,6 +231,9 @@ window.sharedComponents = {
         window.location.replace('main.html');
         return;
       }
+
+      // Update user name display in header
+      await this.updateUserNameDisplay(user);
 
       // Update admin permissions
       if (window.authUtils) {
