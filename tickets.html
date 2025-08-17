@@ -4762,16 +4762,7 @@ function getTimerDisplayForTicket(ticket) {
 <script>
 // Mark tickets as seen when page loads
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.notificationBadges && window.notificationBadges.isInitialized) {
-    window.notificationBadges.updateLastSeen('tickets');
-  } else {
-    // Wait for notification system to initialize
-    setTimeout(() => {
-      if (window.notificationBadges && window.notificationBadges.isInitialized) {
-        window.notificationBadges.updateLastSeen('tickets');
-      }
-    }, 2000);
-  }
+  window.markPageAsSeen('tickets');
 });
 </script>
 
