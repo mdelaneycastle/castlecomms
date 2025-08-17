@@ -2162,11 +2162,9 @@
             </div>
             
             <div class="filter-group">
-              <label for="gallery-created-filter">Gallery/Created:</label>
+              <label for="gallery-created-filter">Created By:</label>
               <select id="gallery-created-filter" class="form-select">
-                <option value="">All Sources</option>
-                <option value="gallery">Gallery Tickets</option>
-                <option value="created">Manual Tickets</option>
+                <option value="">All Users</option>
               </select>
             </div>
             
@@ -2613,7 +2611,7 @@ async function initializeInternalSystem() {
   setupTicketForm();
   setupFilters();
   setupSearch();
-  await populateCOFTTeamMembers();
+  await populateFilterDropdowns();
   loadTickets();
   
   // Handle direct ticket links (e.g., #ticket-434592)
@@ -3817,6 +3815,7 @@ function handleFormToggle() {
   const teamRadio = document.getElementById('assign-team');
   const teamSelect = document.getElementById('modal-assign-team');
   const categorySelect = document.getElementById('modal-ticket-category');
+  const categorySection = document.getElementById('category-section');
   const standardFields = document.getElementById('standard-form-fields');
   const coftFields = document.getElementById('coft-form-fields');
   
@@ -3824,13 +3823,25 @@ function handleFormToggle() {
   const selectedTeam = teamSelect.value;
   const selectedCategory = categorySelect.value;
   
-  // Check if COFT team is selected and category matches
-  const isCOFTSelected = isTeamAssignment && 
-                        selectedTeam && 
-                        allTeams.find(team => team.id === selectedTeam && team.name === 'COFT') &&
-                        selectedCategory === 'Client Order Fulfilment Team/Group';
+  // Check if COFT team is selected
+  const isCOFTTeamSelected = isTeamAssignment && 
+                            selectedTeam && 
+                            allTeams.find(team => team.id === selectedTeam && team.name === 'COFT');
   
-  if (isCOFTSelected) {
+  // Hide category field when COFT team is selected
+  if (isCOFTTeamSelected) {
+    categorySection.style.display = 'none';
+    categorySelect.value = 'Client Order Fulfilment Team/Group'; // Auto-set category
+    categorySelect.removeAttribute('required');
+  } else {
+    categorySection.style.display = 'block';
+    categorySelect.setAttribute('required', '');
+  }
+  
+  // Check if COFT team is selected and should show COFT form
+  const isCOFTFormSelected = isCOFTTeamSelected;
+  
+  if (isCOFTFormSelected) {
     standardFields.style.display = 'none';
     coftFields.style.display = 'block';
     
@@ -4917,42 +4928,33 @@ let advancedFilters = {
   dateTo: ''
 };
 
-// Populate COFT team member dropdown
-async function populateCOFTTeamMembers() {
+// Populate filter dropdowns
+async function populateFilterDropdowns() {
   try {
+    // Populate COFT team members with actual team data
     const coftTeamSelect = document.getElementById('coft-team-filter');
+    const coftTeam = allTeams.find(team => team.id === 'coft');
     
-    // Get all tickets to extract unique COFT team members
-    const allTicketsSnapshot = await db.collection('tickets').get();
-    const coftMembers = new Set();
+    if (coftTeam && coftTeam.members) {
+      coftTeam.members.forEach(member => {
+        const option = document.createElement('option');
+        option.value = member.email;
+        option.textContent = `${member.name} (${member.email})`;
+        coftTeamSelect.appendChild(option);
+      });
+    }
     
-    allTicketsSnapshot.docs.forEach(doc => {
-      const ticket = doc.data();
-      if (ticket.assignedTo && ticket.assignedTo.email) {
-        // Check if this is a COFT team assignment
-        if (ticket.assignedTo.teamId === 'coft' || 
-            (ticket.assignedTo.teamMembers && ticket.assignedTo.teamMembers.length > 0)) {
-          if (ticket.assignedTo.teamMembers) {
-            ticket.assignedTo.teamMembers.forEach(member => {
-              coftMembers.add(`${member.name} (${member.email})`);
-            });
-          } else if (ticket.assignedTo.teamId === 'coft') {
-            coftMembers.add(`${ticket.assignedTo.name} (${ticket.assignedTo.email})`);
-          }
-        }
-      }
-    });
-    
-    // Populate dropdown
-    coftMembers.forEach(member => {
+    // Populate Created By filter with all users
+    const createdBySelect = document.getElementById('gallery-created-filter');
+    allUsers.forEach(user => {
       const option = document.createElement('option');
-      option.value = member;
-      option.textContent = member;
-      coftTeamSelect.appendChild(option);
+      option.value = user.email;
+      option.textContent = `${user.name} (${user.email})`;
+      createdBySelect.appendChild(option);
     });
     
   } catch (error) {
-    console.error('Error populating COFT team members:', error);
+    console.error('Error populating filter dropdowns:', error);
   }
 }
 
@@ -4997,10 +4999,10 @@ function matchesAdvancedFilters(ticket) {
     let teamMemberMatch = false;
     if (ticket.assignedTo && ticket.assignedTo.teamMembers) {
       teamMemberMatch = ticket.assignedTo.teamMembers.some(member => 
-        advancedFilters.coftTeamMember.includes(member.email)
+        member.email === advancedFilters.coftTeamMember
       );
     } else if (ticket.assignedTo && ticket.assignedTo.email) {
-      teamMemberMatch = advancedFilters.coftTeamMember.includes(ticket.assignedTo.email);
+      teamMemberMatch = ticket.assignedTo.email === advancedFilters.coftTeamMember;
     }
     if (!teamMemberMatch) return false;
   }
@@ -5012,15 +5014,10 @@ function matchesAdvancedFilters(ticket) {
     }
   }
   
-  // Gallery/Created filter
+  // Created By filter
   if (advancedFilters.galleryCreated) {
-    const coftData = extractCOFTDataFromTicket(ticket);
-    if (advancedFilters.galleryCreated === 'gallery') {
-      // Gallery tickets have gallery numbers/data
-      if (!coftData.gallery) return false;
-    } else if (advancedFilters.galleryCreated === 'created') {
-      // Manual tickets don't have gallery data
-      if (coftData.gallery) return false;
+    if (ticket.createdBy && ticket.createdBy.email !== advancedFilters.galleryCreated) {
+      return false;
     }
   }
   

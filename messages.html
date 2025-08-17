@@ -1200,6 +1200,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     currentUser = user;
     
+    // Update user name display in header
+    const userNameDisplay = document.getElementById('user-name-display');
+    if (userNameDisplay) {
+      const displayName = await getUserDisplayName(user);
+      userNameDisplay.textContent = displayName;
+    }
+    
     // Initialize Firebase Firestore
     if (firebase.apps.length > 0) {
       db = firebase.firestore();
@@ -2235,13 +2242,36 @@ function showChatInfo() {
 
 // Mobile sidebar functions
 function openMobileSidebar() {
-  document.getElementById('chat-sidebar').classList.add('open');
-  document.getElementById('chat-overlay').classList.add('show');
+  console.log('Opening mobile sidebar...');
+  const sidebar = document.getElementById('chat-sidebar');
+  const overlay = document.getElementById('chat-overlay');
+  
+  if (sidebar) {
+    sidebar.classList.add('open');
+    console.log('Sidebar classes:', sidebar.className);
+  } else {
+    console.error('Chat sidebar not found');
+  }
+  
+  if (overlay) {
+    overlay.classList.add('show');
+  } else {
+    console.error('Chat overlay not found');
+  }
 }
 
 function closeMobileSidebar() {
-  document.getElementById('chat-sidebar').classList.remove('open');
-  document.getElementById('chat-overlay').classList.remove('show');
+  console.log('Closing mobile sidebar...');
+  const sidebar = document.getElementById('chat-sidebar');
+  const overlay = document.getElementById('chat-overlay');
+  
+  if (sidebar) {
+    sidebar.classList.remove('open');
+  }
+  
+  if (overlay) {
+    overlay.classList.remove('show');
+  }
 }
 
 // Filter chats

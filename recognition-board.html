@@ -97,6 +97,19 @@
       margin: 0 auto;
     }
 
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      color: var(--secondary-color);
+      font-family: var(--font-primary);
+      font-weight: 500;
+    }
+
     .note-input {
       padding: 1rem;
       border: 2px solid #e1e5e9;
@@ -266,6 +279,17 @@
       margin-top: 0.25rem;
     }
 
+    .post-it-for {
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: rgba(0,0,0,0.8);
+      margin-bottom: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      background: rgba(255,255,255,0.3);
+      border-radius: 3px;
+      border-left: 3px solid rgba(0,0,0,0.2);
+    }
+
     .delete-note-btn {
       position: absolute;
       top: -8px;
@@ -417,6 +441,17 @@
         box-shadow: var(--shadow-light);
       }
       
+      .form-group {
+        margin-bottom: 0.75rem;
+      }
+      
+      .form-group label {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        color: var(--secondary-color);
+        font-weight: 600;
+      }
+      
       .cork-board-section {
         overflow-x: visible;
         padding: 0;
@@ -517,6 +552,17 @@
       .post-it-date {
         font-style: italic;
         opacity: 0.8;
+      }
+      
+      .post-it-for {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        background: rgba(52, 73, 94, 0.1);
+        border-radius: 4px;
+        border-left: 3px solid #3498db;
       }
       
       .delete-note {
@@ -631,6 +677,25 @@
           required
           maxlength="300"
         ></textarea>
+        
+        <div class="form-group">
+          <label for="recognizedUser">Who is this recognition for?</label>
+          <select id="recognizedUser" class="author-input">
+            <option value="">Select a user...</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="otherUser">Or enter name manually:</label>
+          <input 
+            type="text" 
+            class="author-input" 
+            id="otherUser" 
+            placeholder="Enter name if not found above"
+            maxlength="50"
+          />
+        </div>
+        
         <input 
           type="text" 
           class="author-input" 
@@ -706,12 +771,45 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
     
     await loadNotes();
+    await loadUsers();
     setupNoteForm();
   } catch (error) {
     console.error('Failed to initialize Recognition Board:', error);
     showError('Failed to connect to database. Please refresh the page.');
   }
 });
+
+// Load all users from Firebase Realtime Database
+async function loadUsers() {
+  try {
+    const realtimeDb = firebase.database();
+    const usersSnapshot = await realtimeDb.ref('users').once('value');
+    const usersData = usersSnapshot.val() || {};
+    
+    const users = Object.keys(usersData).map(uid => ({
+      uid: uid,
+      email: usersData[uid].email || 'unknown@company.com',
+      displayName: usersData[uid].name || usersData[uid].displayName || usersData[uid].email || 'Unknown User'
+    }));
+    
+    // Sort users alphabetically by display name
+    users.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    
+    // Populate the user dropdown
+    const userSelect = document.getElementById('recognizedUser');
+    users.forEach(user => {
+      const option = document.createElement('option');
+      option.value = user.displayName;
+      option.textContent = `${user.displayName} (${user.email})`;
+      userSelect.appendChild(option);
+    });
+    
+    console.log('👥 Loaded', users.length, 'users for recognition dropdown');
+  } catch (error) {
+    console.error('Error loading users:', error);
+    showError('Failed to load users for selection.');
+  }
+}
 
 // Load all recognition notes from Firebase
 async function loadNotes() {
@@ -808,9 +906,13 @@ function createPostItNote(noteData, index, docId = null) {
   const deleteButton = docId && currentUser?.admin ? 
     `<button class="delete-note" onclick="deleteNote('${docId}', this)" title="Delete note">✕</button>` : '';
   
+  // Build the content with recognized person if available
+  const recognizedFor = noteData.recognizedFor ? `<div class="post-it-for">🎯 For: ${escapeHtml(noteData.recognizedFor)}</div>` : '';
+  
   postIt.innerHTML = `
     ${deleteButton}
     <div class="post-it-content">${escapeHtml(noteData.content)}</div>
+    ${recognizedFor}
     <div class="post-it-meta">
       <div class="post-it-author">- ${escapeHtml(author)}</div>
       <div class="post-it-date">${date}</div>
@@ -823,12 +925,30 @@ function setupNoteForm() {
   const form = document.getElementById('noteForm');
   const contentInput = document.getElementById('noteContent');
   const authorInput = document.getElementById('noteAuthor');
+  const recognizedUserSelect = document.getElementById('recognizedUser');
+  const otherUserInput = document.getElementById('otherUser');
+  
+  // Clear other user field when selecting from dropdown
+  recognizedUserSelect.addEventListener('change', function() {
+    if (this.value) {
+      otherUserInput.value = '';
+    }
+  });
+  
+  // Clear dropdown when typing in other user field
+  otherUserInput.addEventListener('input', function() {
+    if (this.value.trim()) {
+      recognizedUserSelect.value = '';
+    }
+  });
   
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const content = contentInput.value.trim();
     const author = authorInput.value.trim();
+    const selectedUser = recognizedUserSelect.value;
+    const otherUser = otherUserInput.value.trim();
     
     if (!content) {
       showError('Please write a recognition message!');
@@ -840,6 +960,9 @@ function setupNoteForm() {
       return;
     }
     
+    // Determine who this recognition is for
+    const recognizedFor = selectedUser || otherUser || null;
+    
     try {
       // Disable form while submitting
       const submitBtn = form.querySelector('.submit-btn');
@@ -850,6 +973,7 @@ function setupNoteForm() {
       const noteData = {
         content: content,
         author: author || 'Anonymous',
+        recognizedFor: recognizedFor,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
       
@@ -858,6 +982,8 @@ function setupNoteForm() {
       // Clear form
       contentInput.value = '';
       authorInput.value = '';
+      recognizedUserSelect.value = '';
+      otherUserInput.value = '';
       
       // Show success message
       showSuccess('🎉 Your recognition note has been pinned to the board!');
