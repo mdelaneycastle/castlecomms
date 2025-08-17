@@ -475,6 +475,18 @@
       align-items: end;
     }
 
+    @media (max-width: 1200px) {
+      .advanced-filters-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+      
+      .filter-actions {
+        grid-column: 1 / -1;
+        justify-self: start;
+        margin-top: 1rem;
+      }
+    }
+
     .filter-group {
       display: flex;
       flex-direction: column;
@@ -530,6 +542,8 @@
       display: flex;
       gap: 0.5rem;
       align-items: end;
+      flex-wrap: wrap;
+      min-width: max-content;
     }
 
     .apply-filters-btn {
