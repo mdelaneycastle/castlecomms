@@ -3822,6 +3822,7 @@ function closeTicketModal() {
 
 // Open create ticket modal
 function openCreateTicketModal() {
+  console.log('🎫 Opening create ticket modal...');
   document.getElementById('create-ticket-modal').classList.add('show');
   setupModalUserSearch();
   populateTeamDropdown();
@@ -5064,6 +5065,18 @@ async function addSystemMessage(message) {
     console.error('Error adding system message:', error);
   }
 }
+
+// Debug: Check function availability
+console.log('🔍 Tickets.html script loading...');
+window.debugOpenCreateTicketModal = function() {
+  console.log('🔍 Debug function called');
+  console.log('🔍 openCreateTicketModal type:', typeof openCreateTicketModal);
+  if (typeof openCreateTicketModal === 'function') {
+    openCreateTicketModal();
+  } else {
+    console.error('❌ openCreateTicketModal is not a function!');
+  }
+};
 
 // Setup modal events
 document.addEventListener('DOMContentLoaded', function() {
