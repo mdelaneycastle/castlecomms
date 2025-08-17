@@ -266,6 +266,8 @@ async function listUsers() {
       throw new Error("Authentication required. Please sign in first.");
     }
 
+    // All authenticated users can now access user list (with appropriate permissions)
+
     const token = await user.getIdToken(true);
 
     const res = await fetch(

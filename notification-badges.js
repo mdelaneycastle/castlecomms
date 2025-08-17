@@ -135,22 +135,39 @@ class NotificationBadgeManager {
       const db = firebase.firestore();
       let unreadCount = 0;
 
-      // Simplified approach - count all messages since last seen that aren't from the current user
+      // Permission-aware approach: First get chats user participates in, then count messages
       try {
-        const messagesSnapshot = await db.collection('chat-messages')
-          .where('timestamp', '>', this.lastSeen.messages)
+        // Get all chats where user is a participant
+        const chatsSnapshot = await db.collection('chats')
+          .where('participants', 'array-contains', this.currentUser.email)
           .get();
         
-        // Filter client-side for messages not from current user
-        messagesSnapshot.docs.forEach(doc => {
-          const messageData = doc.data();
-          if (messageData.senderEmail !== this.currentUser.email) {
-            unreadCount++;
+        const chatIds = chatsSnapshot.docs.map(doc => doc.id);
+        
+        if (chatIds.length > 0) {
+          // For each chat, count new messages since last seen
+          for (const chatId of chatIds) {
+            try {
+              const messagesSnapshot = await db.collection('chat-messages')
+                .where('chatId', '==', chatId)
+                .where('timestamp', '>', this.lastSeen.messages)
+                .get();
+              
+              // Count messages not from current user
+              messagesSnapshot.docs.forEach(doc => {
+                const messageData = doc.data();
+                if (messageData.senderEmail !== this.currentUser.email) {
+                  unreadCount++;
+                }
+              });
+            } catch (chatError) {
+              console.log(`📧 Could not access messages for chat ${chatId}:`, chatError.message);
+            }
           }
-        });
+        }
       } catch (permissionError) {
-        console.log('📧 Messages access limited, using fallback count');
-        // Fallback - assume some new messages exist if we can't query
+        console.log('📧 Messages access limited, using fallback count:', permissionError.message);
+        // Fallback - assume no new messages if we can't query
         unreadCount = 0;
       }
 
@@ -339,23 +356,43 @@ class NotificationBadgeManager {
 
     const db = firebase.firestore();
     
-    // Listen for new messages in chats where user is a participant
-    const listener = db.collection('chat-messages')
-      .where('timestamp', '>', new Date())
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === 'added') {
-            const messageData = change.doc.data();
-            // Only count if message is not from current user
-            if (messageData.senderId !== this.currentUser.uid) {
-              this.badgeData.messages++;
-              this.updateBadgeDisplay('messages');
-            }
-          }
+    // Set up listener for chats where user is a participant
+    try {
+      const chatsListener = db.collection('chats')
+        .where('participants', 'array-contains', this.currentUser.email)
+        .onSnapshot((chatsSnapshot) => {
+          // For each chat, set up message listeners
+          chatsSnapshot.docs.forEach(chatDoc => {
+            const chatId = chatDoc.id;
+            
+            const messagesListener = db.collection('chat-messages')
+              .where('chatId', '==', chatId)
+              .where('timestamp', '>', new Date())
+              .onSnapshot((messagesSnapshot) => {
+                messagesSnapshot.docChanges().forEach((change) => {
+                  if (change.type === 'added') {
+                    const messageData = change.doc.data();
+                    // Only count if message is not from current user
+                    if (messageData.senderEmail !== this.currentUser.email) {
+                      this.badgeData.messages++;
+                      this.updateBadgeDisplay('messages');
+                    }
+                  }
+                });
+              }, (error) => {
+                console.log(`📧 Real-time message listener error for chat ${chatId}:`, error.message);
+              });
+            
+            this.listeners.push(messagesListener);
+          });
+        }, (error) => {
+          console.log('📧 Real-time chats listener error:', error.message);
         });
-      });
 
-    this.listeners.push(listener);
+      this.listeners.push(chatsListener);
+    } catch (error) {
+      console.log('📧 Could not set up real-time message listeners:', error.message);
+    }
   }
 
   setupTicketsListener() {
@@ -363,18 +400,37 @@ class NotificationBadgeManager {
 
     const db = firebase.firestore();
     
-    // Listen for new tickets assigned to user
-    const listener = db.collection('tickets')
-      .where('assignedTo', '==', this.currentUser.email)
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === 'added' || change.type === 'modified') {
-            this.updateTicketsBadge();
-          }
+    // Listen for all new tickets and filter client-side (since tickets can be assigned to teams)
+    try {
+      const listener = db.collection('tickets')
+        .onSnapshot((snapshot) => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === 'added' || change.type === 'modified') {
+              const ticketData = change.doc.data();
+              const ticketDate = ticketData.createdAt ? ticketData.createdAt.toDate() : new Date();
+              
+              // Only process if ticket is newer than last seen
+              if (ticketDate > this.lastSeen.tickets) {
+                // Check if assigned to current user
+                const isAssignedToUser = 
+                  ticketData.assignedTo?.email === this.currentUser.email ||
+                  ticketData.assignedTo?.teamMembers?.some(member => member.email === this.currentUser.email) ||
+                  (ticketData.assignedTo === this.currentUser.email); // legacy format
+                
+                if (isAssignedToUser) {
+                  this.updateTicketsBadge();
+                }
+              }
+            }
+          });
+        }, (error) => {
+          console.log('🎫 Real-time tickets listener error:', error.message);
         });
-      });
 
-    this.listeners.push(listener);
+      this.listeners.push(listener);
+    } catch (error) {
+      console.log('🎫 Could not set up real-time tickets listener:', error.message);
+    }
   }
 
   setupNewsfeedListener() {
