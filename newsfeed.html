@@ -736,15 +736,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Setup @mention functionality
   function setupMentionFunctionality() {
-    console.log('🔧 Setting up mention functionality...');
     const textarea = document.getElementById('message');
     const suggestionsDiv = document.getElementById('mention-suggestions');
     
-    console.log('📝 Textarea found:', !!textarea);
-    console.log('💬 Suggestions div found:', !!suggestionsDiv);
-    
     if (!textarea || !suggestionsDiv) {
-      console.error('❌ Missing elements for @ mentions:', { textarea: !!textarea, suggestionsDiv: !!suggestionsDiv });
+      console.error('Missing elements for @ mentions:', { textarea: !!textarea, suggestionsDiv: !!suggestionsDiv });
       return;
     }
 
@@ -752,13 +748,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const value = e.target.value;
       const cursorPos = e.target.selectionStart;
       
-      console.log('⌨️ Input detected:', { value, cursorPos });
-      
       // Find the last @ symbol before the cursor
       const textBeforeCursor = value.substring(0, cursorPos);
       const lastAtIndex = textBeforeCursor.lastIndexOf('@');
-      
-      console.log('🔍 @ symbol search:', { textBeforeCursor, lastAtIndex });
       
       if (lastAtIndex === -1) {
         hideMentionSuggestions();
@@ -775,11 +767,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // Get the query after @
       const query = textAfterAt.toLowerCase().trim();
       
-      console.log('📝 @ mention query:', { query, allUsersCount: allUsers.length });
-      
       if (query.length === 0) {
         // Show all users when @ is typed without query
-        console.log('🎯 Showing all users for @');
         showMentionSuggestions(allUsers, lastAtIndex);
       } else {
         // Filter users based on query
@@ -787,7 +776,6 @@ document.addEventListener('DOMContentLoaded', function() {
           user.name.toLowerCase().includes(query) || 
           user.email.toLowerCase().includes(query)
         );
-        console.log('🔍 Filtered users:', filteredUsers.length);
         showMentionSuggestions(filteredUsers, lastAtIndex);
       }
     });
@@ -826,18 +814,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function showMentionSuggestions(users, mentionStart) {
-    console.log('💬 showMentionSuggestions called with:', { usersCount: users.length, mentionStart });
-    
     const suggestionsDiv = document.getElementById('mention-suggestions');
     const textarea = document.getElementById('message');
     
     if (users.length === 0) {
-      console.log('❌ No users to show, hiding suggestions');
       hideMentionSuggestions();
       return;
     }
-    
-    console.log('✅ Showing mention suggestions for users:', users.map(u => u.name));
     
     currentMentionStart = mentionStart;
     mentionSuggestionsVisible = true;
@@ -851,11 +834,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Position the suggestions div relative to the textarea
     const textareaRect = textarea.getBoundingClientRect();
-    const containerRect = textarea.closest('.post-form-container').getBoundingClientRect();
+    const formContainer = textarea.closest('.post-form-container');
     
     suggestionsDiv.style.display = 'block';
+    suggestionsDiv.style.position = 'absolute';
     suggestionsDiv.style.left = '1rem';
-    suggestionsDiv.style.top = (textareaRect.bottom - containerRect.top + 5) + 'px';
+    suggestionsDiv.style.top = (textarea.offsetTop + textarea.offsetHeight + 5) + 'px';
+    suggestionsDiv.style.width = 'calc(100% - 2rem)';
+    suggestionsDiv.style.maxWidth = '300px';
     
     // Add click handlers
     suggestionsDiv.querySelectorAll('.mention-suggestion').forEach(li => {
@@ -906,16 +892,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Wait for authentication before loading users and setting up mentions
   firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
-      console.log('🔐 User authenticated, setting up @ mentions for:', user.email);
-      
       // User is authenticated, now we can load users and setup mentions
       try {
         await loadAllUsers();
-        console.log('👥 Users loaded, setting up mention functionality. Users count:', allUsers.length);
         setupMentionFunctionality();
-        console.log('✅ @ Mention functionality setup complete');
       } catch (error) {
-        console.error('❌ Error setting up @ mentions:', error);
+        console.error('Error setting up @ mentions:', error);
       }
     }
   });
