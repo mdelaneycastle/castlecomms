@@ -546,6 +546,15 @@
       min-width: max-content;
     }
 
+    .filter-actions-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-start;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e1e5e9;
+    }
+
     .apply-filters-btn {
       background: var(--primary-gradient);
       color: white;
@@ -2183,6 +2192,23 @@
             </div>
             
             <div class="filter-group">
+              <label for="department-filter">Department:</label>
+              <select id="department-filter" class="form-select">
+                <option value="">All Departments</option>
+                <option value="Client Order Fulfilment Team/Group">Client Order Fulfilment Team/Group</option>
+                <option value="Manufacturing and QC">Manufacturing and QC</option>
+                <option value="Framing">Framing</option>
+                <option value="Stock Control">Stock Control</option>
+                <option value="Logistics">Logistics</option>
+                <option value="Operations">Operations</option>
+                <option value="Inventory">Inventory</option>
+                <option value="IT Support">IT Support</option>
+                <option value="HR">HR</option>
+                <option value="General">General</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
               <label for="date-range-filter">Date Range:</label>
               <div class="date-range-group">
                 <input type="date" id="date-from-filter" class="form-input date-input" placeholder="From">
@@ -2190,11 +2216,13 @@
                 <input type="date" id="date-to-filter" class="form-input date-input" placeholder="To">
               </div>
             </div>
-            
-            <div class="filter-actions">
-              <button class="apply-filters-btn" onclick="applyAdvancedFilters()">Apply Filters</button>
-              <button class="clear-filters-btn" onclick="clearAdvancedFilters()">Clear All</button>
-            </div>
+          </div>
+          
+          <!-- Filter actions moved to separate row -->
+          <div class="filter-actions-row">
+            <button class="apply-filters-btn" onclick="applyAdvancedFilters()">Apply Filters</button>
+            <button class="clear-filters-btn" onclick="clearAdvancedFilters()">Clear All</button>
+          </div>
           </div>
         </div>
         
@@ -2645,6 +2673,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     currentUser = user;
     console.log('User authenticated:', user.email);
+    
+    // Update user name display
+    updateUserNameDisplay(user);
     
     // Since we go directly to internal tickets now, initialize immediately
     try {
@@ -3249,7 +3280,7 @@ async function loadTickets() {
       return `
         <tr onclick="openTicket('${ticket.id}')" data-ticket-id="${ticket.ticketId}">
           <td><div class="ticket-id">${ticket.ticketId}</div></td>
-          <td><div class="ticket-category">${ticket.category}</div></td>
+          <td><div class="ticket-category">${ticket.category === 'Client Order Fulfilment Team/Group' ? 'Client Order Fulfilment Team' : ticket.category}</div></td>
           <td><div class="ticket-gallery">${coftData.gallery || ticket.createdBy.name}</div></td>
           <td><div class="ticket-coft-member">${coftTeamMember}</div></td>
           <td><div class="ticket-so">${coftData.soNumber || '-'}</div></td>
@@ -3457,11 +3488,30 @@ function showStatus(message, type) {
   }
 }
 
+// Update user name display in header
+async function updateUserNameDisplay(user) {
+  const userNameElement = document.getElementById('user-name-display');
+  if (!userNameElement) return;
+  
+  try {
+    const displayName = await getUserDisplayName(user);
+    userNameElement.textContent = displayName;
+  } catch (error) {
+    console.error('Error updating user name display:', error);
+    userNameElement.textContent = extractNameFromEmail(user.email);
+  }
+}
+
 // Get user display name from Firebase Realtime Database
 async function getUserDisplayName(user) {
   try {
-    if (!user || !window.db) {
-      return extractNameFromEmail(user?.email || '');
+    if (!user) {
+      return 'Guest';
+    }
+
+    // Initialize Firebase Realtime Database if not already done
+    if (!window.db) {
+      window.db = firebase.database();
     }
 
     const userRef = window.db.ref(`users/${user.uid}`);
@@ -4953,6 +5003,7 @@ let advancedFilters = {
   coftTeamMember: '',
   ticketId: '',
   galleryCreated: '',
+  department: '',
   dateFrom: '',
   dateTo: ''
 };
@@ -4992,6 +5043,7 @@ function applyAdvancedFilters() {
   advancedFilters.coftTeamMember = document.getElementById('coft-team-filter').value;
   advancedFilters.ticketId = document.getElementById('ticket-id-filter').value.trim();
   advancedFilters.galleryCreated = document.getElementById('gallery-created-filter').value;
+  advancedFilters.department = document.getElementById('department-filter').value;
   advancedFilters.dateFrom = document.getElementById('date-from-filter').value;
   advancedFilters.dateTo = document.getElementById('date-to-filter').value;
   
@@ -5004,6 +5056,7 @@ function clearAdvancedFilters() {
   document.getElementById('coft-team-filter').value = '';
   document.getElementById('ticket-id-filter').value = '';
   document.getElementById('gallery-created-filter').value = '';
+  document.getElementById('department-filter').value = '';
   document.getElementById('date-from-filter').value = '';
   document.getElementById('date-to-filter').value = '';
   
@@ -5012,6 +5065,7 @@ function clearAdvancedFilters() {
     coftTeamMember: '',
     ticketId: '',
     galleryCreated: '',
+    department: '',
     dateFrom: '',
     dateTo: ''
   };
@@ -5052,6 +5106,13 @@ function matchesAdvancedFilters(ticket) {
   // Created By filter
   if (advancedFilters.galleryCreated) {
     if (ticket.createdBy && ticket.createdBy.email !== advancedFilters.galleryCreated) {
+      return false;
+    }
+  }
+  
+  // Department filter
+  if (advancedFilters.department) {
+    if (!ticket.category || ticket.category !== advancedFilters.department) {
       return false;
     }
   }
