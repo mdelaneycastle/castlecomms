@@ -17,7 +17,21 @@ window.sharedComponents = {
     this.loadSidebar();
     this.setupAuthStateHandler();
     this.setupNotificationBell();
+    this.setupGlobalEventDelegation();
     console.log("✅ Shared components loaded");
+  },
+
+  // Setup global event delegation for dynamically loaded elements
+  setupGlobalEventDelegation() {
+    // Use event delegation to handle hamburger menu clicks regardless of loading order
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#menu-toggle')) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) {
+          sidebar.classList.add('show');
+        }
+      }
+    });
   },
 
   // Load and setup header with user name display
@@ -33,9 +47,42 @@ window.sharedComponents = {
       // Set page title based on current page
       this.setPageTitle();
 
+      // Setup hamburger menu event after header is loaded
+      this.setupHeaderEvents();
+
       console.log("📋 Header loaded successfully");
     } catch (error) {
       console.error("❌ Failed to load header:", error);
+    }
+  },
+
+  // Setup header events (hamburger menu)
+  setupHeaderEvents() {
+    const toggleBtn = document.getElementById("menu-toggle");
+    
+    if (toggleBtn) {
+      toggleBtn.onclick = () => {
+        const sidebarElement = document.getElementById("sidebar");
+        if (sidebarElement) {
+          sidebarElement.classList.add("show");
+        }
+      };
+      console.log("🍔 Hamburger menu event bound successfully");
+    } else {
+      console.warn("⚠️ Hamburger menu button not found - will retry");
+      // Retry after a short delay in case sidebar isn't loaded yet
+      setTimeout(() => {
+        const retryToggleBtn = document.getElementById("menu-toggle");
+        if (retryToggleBtn) {
+          retryToggleBtn.onclick = () => {
+            const sidebarElement = document.getElementById("sidebar");
+            if (sidebarElement) {
+              sidebarElement.classList.add("show");
+            }
+          };
+          console.log("🍔 Hamburger menu event bound on retry");
+        }
+      }, 100);
     }
   },
 
@@ -152,16 +199,11 @@ window.sharedComponents = {
     }
   },
 
-  // Setup sidebar hamburger menu events
+  // Setup sidebar events (close button, signout, etc.)
   setupSidebarEvents() {
-    const toggleBtn = document.getElementById("menu-toggle");
     const closeBtn = document.getElementById("close-btn");
     const sidebar = document.getElementById("sidebar");
     const signoutBtn = document.getElementById("signout-btn");
-    
-    if (toggleBtn && sidebar) {
-      toggleBtn.onclick = () => sidebar.classList.add("show");
-    }
     
     if (closeBtn && sidebar) {
       closeBtn.onclick = () => sidebar.classList.remove("show");
