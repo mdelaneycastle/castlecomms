@@ -3599,55 +3599,55 @@ async function openTicket(ticketId) {
     updateTimerDisplay(ticketData);
     
     // Check if this is a COFT ticket and populate COFT details if so
-    const coftData = extractComprehensiveCOFTData(ticketData);
+    const coftModalData = extractComprehensiveCOFTData(ticketData);
     const coftSection = document.getElementById('coft-details-section');
     
-    if (coftData.isCOFTTicket) {
+    if (coftModalData.isCOFTTicket) {
       // Show COFT section and populate data
       coftSection.style.display = 'block';
       
       // Populate COFT details
-      document.getElementById('coft-detail-so').textContent = coftData.soNumber || '-';
-      document.getElementById('coft-detail-client').textContent = coftData.clientName || '-';
-      document.getElementById('coft-detail-item-code').textContent = coftData.itemCode || '-';
-      document.getElementById('coft-detail-artwork').textContent = coftData.artworkTitle || '-';
-      document.getElementById('coft-detail-edition').textContent = coftData.editionNumber || '-';
-      document.getElementById('coft-detail-order-date').textContent = coftData.orderDate || '-';
-      document.getElementById('coft-detail-delivery').textContent = coftData.deliveryMethod || '-';
+      document.getElementById('coft-detail-so').textContent = coftModalData.soNumber || '-';
+      document.getElementById('coft-detail-client').textContent = coftModalData.clientName || '-';
+      document.getElementById('coft-detail-item-code').textContent = coftModalData.itemCode || '-';
+      document.getElementById('coft-detail-artwork').textContent = coftModalData.artworkTitle || '-';
+      document.getElementById('coft-detail-edition').textContent = coftModalData.editionNumber || '-';
+      document.getElementById('coft-detail-order-date').textContent = coftModalData.orderDate || '-';
+      document.getElementById('coft-detail-delivery').textContent = coftModalData.deliveryMethod || '-';
       
       // Add highlighting for important fields
-      if (coftData.clientAware === 'NO') {
+      if (coftModalData.clientAware === 'NO') {
         document.getElementById('coft-detail-client-aware').innerHTML = '<span class="highlight" style="background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; font-weight: 600;">NO ⚠️</span>';
       } else {
-        document.getElementById('coft-detail-client-aware').textContent = coftData.clientAware || '-';
+        document.getElementById('coft-detail-client-aware').textContent = coftModalData.clientAware || '-';
       }
       
-      if (coftData.etaDiscussed === 'NO') {
+      if (coftModalData.etaDiscussed === 'NO') {
         document.getElementById('coft-detail-eta-discussed').innerHTML = '<span class="highlight" style="background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; font-weight: 600;">NO ⚠️</span>';
       } else {
-        document.getElementById('coft-detail-eta-discussed').textContent = coftData.etaDiscussed || '-';
+        document.getElementById('coft-detail-eta-discussed').textContent = coftModalData.etaDiscussed || '-';
       }
       
-      document.getElementById('coft-detail-reason').textContent = coftData.ticketReason || '-';
+      document.getElementById('coft-detail-reason').textContent = coftModalData.ticketReason || '-';
       
       // Show/hide conditional fields
-      if (coftData.specificDate) {
+      if (coftModalData.specificDate) {
         document.getElementById('coft-specific-date-row').style.display = 'flex';
-        document.getElementById('coft-detail-specific-date').textContent = coftData.specificDate;
+        document.getElementById('coft-detail-specific-date').textContent = coftModalData.specificDate;
       } else {
         document.getElementById('coft-specific-date-row').style.display = 'none';
       }
       
-      if (coftData.photosAttached && coftData.photosAttached !== '0 file(s)') {
+      if (coftModalData.photosAttached && coftModalData.photosAttached !== '0 file(s)') {
         document.getElementById('coft-photos-row').style.display = 'flex';
-        document.getElementById('coft-detail-photos').textContent = coftData.photosAttached;
+        document.getElementById('coft-detail-photos').textContent = coftModalData.photosAttached;
       } else {
         document.getElementById('coft-photos-row').style.display = 'none';
       }
       
-      if (coftData.additionalInfo) {
+      if (coftModalData.additionalInfo) {
         document.getElementById('coft-additional-row').style.display = 'flex';
-        document.getElementById('coft-detail-additional').textContent = coftData.additionalInfo;
+        document.getElementById('coft-detail-additional').textContent = coftModalData.additionalInfo;
       } else {
         document.getElementById('coft-additional-row').style.display = 'none';
       }
