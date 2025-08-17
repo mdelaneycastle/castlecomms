@@ -3214,8 +3214,23 @@ async function loadTickets() {
       // Extract COFT data if this is a COFT ticket
       const coftData = extractCOFTDataFromTicket(ticket);
       
-      // Get COFT team member based on creator's email
-      const coftTeamMember = getCOFTTeamMember(ticket.createdBy.email);
+      // Get COFT team member based on assigned email
+      let coftTeamMember = '-';
+      if (ticket.assignedTo) {
+        if (ticket.assignedTo.teamMembers) {
+          // Check team members for COFT assignment
+          for (const member of ticket.assignedTo.teamMembers) {
+            const memberName = getCOFTTeamMember(member.email);
+            if (memberName !== '-') {
+              coftTeamMember = memberName;
+              break;
+            }
+          }
+        } else if (ticket.assignedTo.email) {
+          // Check individual assignment
+          coftTeamMember = getCOFTTeamMember(ticket.assignedTo.email);
+        }
+      }
       
       return `
         <tr onclick="openTicket('${ticket.id}')" data-ticket-id="${ticket.ticketId}">
