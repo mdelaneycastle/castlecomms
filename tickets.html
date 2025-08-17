@@ -4997,19 +4997,26 @@ function matchesAdvancedFilters(ticket) {
   if (advancedFilters.coftTeamMember) {
     let teamMemberMatch = false;
     
+    console.log(`🔍 Filtering for COFT member: ${advancedFilters.coftTeamMember}`);
+    console.log(`📋 Ticket ${ticket.ticketId} assignedTo:`, ticket.assignedTo);
+    
     // Check if ticket is assigned to COFT team and get the team member
     if (ticket.assignedTo && ticket.assignedTo.teamMembers) {
       // Check team members for COFT assignment
+      console.log(`👥 Checking team members:`, ticket.assignedTo.teamMembers);
       teamMemberMatch = ticket.assignedTo.teamMembers.some(member => {
         const memberName = getCOFTTeamMember(member.email);
+        console.log(`  📧 ${member.email} → ${memberName} (looking for ${advancedFilters.coftTeamMember})`);
         return memberName === advancedFilters.coftTeamMember;
       });
     } else if (ticket.assignedTo && ticket.assignedTo.email) {
       // Check individual assignment
       const memberName = getCOFTTeamMember(ticket.assignedTo.email);
+      console.log(`📧 Individual assignment: ${ticket.assignedTo.email} → ${memberName} (looking for ${advancedFilters.coftTeamMember})`);
       teamMemberMatch = memberName === advancedFilters.coftTeamMember;
     }
     
+    console.log(`✅ Match result for ticket ${ticket.ticketId}: ${teamMemberMatch}`);
     if (!teamMemberMatch) return false;
   }
   
