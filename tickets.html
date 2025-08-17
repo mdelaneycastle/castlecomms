@@ -1596,6 +1596,91 @@
       font-weight: 500;
     }
 
+    /* IT Support Details Section Styles */
+    .it-support-details-section {
+      background: rgba(232, 245, 255, 0.8);
+      border: 2px solid #007bff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+    }
+
+    .it-support-details-section h4 {
+      margin: 0 0 1rem 0;
+      color: #0056b3;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 0.5rem;
+    }
+
+    .it-support-details-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .it-support-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(0, 123, 255, 0.1);
+    }
+
+    .it-support-detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .it-support-label {
+      font-weight: 600;
+      color: #0056b3;
+      margin-right: 1rem;
+      flex-shrink: 0;
+      min-width: 160px;
+    }
+
+    .it-support-value {
+      color: #5a5a5a;
+      text-align: right;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+
+    .it-support-systems-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      flex: 1;
+      margin-left: 1rem;
+    }
+
+    .it-support-system-tag {
+      background: rgba(0, 123, 255, 0.1);
+      color: #0056b3;
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: 1px solid rgba(0, 123, 255, 0.2);
+    }
+
+    .it-support-details-text {
+      background: rgba(248, 249, 250, 0.8);
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 0.5rem;
+      color: #495057;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
     @media (max-width: 768px) {
       .coft-detail-row {
         flex-direction: column;
@@ -1610,6 +1695,26 @@
       
       .coft-value {
         text-align: left;
+      }
+
+      .it-support-detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+      }
+      
+      .it-support-label {
+        min-width: auto;
+        margin-right: 0;
+      }
+      
+      .it-support-value {
+        text-align: left;
+      }
+
+      .it-support-systems-list {
+        justify-content: flex-start;
+        margin-left: 0;
       }
     }
 
@@ -2306,6 +2411,29 @@
         </div>
       </div>
       
+      <!-- IT Support Ticket Details Section -->
+      <div class="it-support-details-section" id="it-support-details-section" style="display: none;">
+        <h4>💻 IT Support Ticket Details</h4>
+        <div class="it-support-details-grid">
+          <div class="it-support-detail-row">
+            <span class="it-support-label">Systems Affected:</span>
+            <div class="it-support-systems-list" id="it-support-detail-systems">
+              <!-- System tags will be populated here -->
+            </div>
+          </div>
+          <div class="it-support-detail-row">
+            <span class="it-support-label">Issue Category:</span>
+            <span class="it-support-value" id="it-support-detail-reason">-</span>
+          </div>
+          <div class="it-support-detail-row">
+            <span class="it-support-label">Detailed Description:</span>
+            <div style="flex: 1; margin-left: 1rem;">
+              <div class="it-support-details-text" id="it-support-detail-description">-</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <div class="ticket-status-section">
         <label for="ticket-status-select">Status:</label>
         <select id="ticket-status-select" onchange="updateTicketStatus()">
@@ -2364,7 +2492,7 @@
     
     <div id="create-ticket-status"></div>
     
-    <form id="create-ticket-form" class="modal-form">
+    <form id="create-ticket-form" class="modal-form" novalidate>
       <!-- Assignment Type Selection -->
       <div class="form-group assignment-selector">
         <label class="form-label">Assign To:</label>
@@ -2949,6 +3077,16 @@ function setupTicketForm() {
   
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Ensure no HTML5 validation occurs by removing any required attributes
+    const allInputs = form.querySelectorAll('input, select, textarea');
+    allInputs.forEach(input => {
+      if (input.name === 'it-systems') {
+        input.removeAttribute('required');
+      }
+    });
+    
     await createTicketFromModal();
   });
 }
@@ -3419,7 +3557,33 @@ async function openTicket(ticketId) {
     document.getElementById('modal-ticket-status').textContent = ticketData.status.replace('-', ' ');
     document.getElementById('modal-ticket-status').className = `ticket-status ${ticketData.status}`;
     document.getElementById('view-ticket-category').textContent = ticketData.category;
-    document.getElementById('view-ticket-description').textContent = ticketData.description;
+    // Populate basic ticket information with smart description handling
+    const descriptionElement = document.getElementById('view-ticket-description');
+    const description = ticketData.description || 'No description provided.';
+    
+    // For long descriptions (especially COFT tickets), make them collapsible if they don't have custom details sections
+    const coftData = extractComprehensiveCOFTData(ticketData);
+    const itSupportData = extractITSupportData(ticketData);
+    const hasCustomSection = coftData.isCOFTTicket || itSupportData.isITSupportTicket;
+    
+    if (description.length > 500 && !hasCustomSection) {
+      const shortDescription = description.substring(0, 500) + '...';
+      descriptionElement.innerHTML = `
+        <div class="description-content">
+          <div class="description-short">${window.sharedComponents.sanitizeHTML(shortDescription)}</div>
+          <div class="description-full" style="display: none;">${window.sharedComponents.sanitizeHTML(description)}</div>
+          <button class="description-toggle" onclick="toggleDescription(this)" style="background: none; border: none; color: #667eea; font-weight: 600; cursor: pointer; padding: 0.5rem 0; text-decoration: underline;">
+            Show Full Description
+          </button>
+        </div>
+      `;
+    } else if (hasCustomSection) {
+      // For tickets with custom sections, show a simplified description or hide if it's redundant
+      const shortSummary = description.split('\n')[0] || description.substring(0, 150);
+      descriptionElement.innerHTML = window.sharedComponents.sanitizeHTML(shortSummary + (shortSummary.length < description.length ? '...' : ''));
+    } else {
+      descriptionElement.innerHTML = window.sharedComponents.sanitizeHTML(description);
+    }
     document.getElementById('modal-ticket-creator').textContent = `Created by: ${ticketData.createdBy.name}`;
     // Display assignment info (individual or team)
     let assignmentDisplayText = 'Assigned to: ';
@@ -3490,6 +3654,37 @@ async function openTicket(ticketId) {
     } else {
       // Hide COFT section for non-COFT tickets
       coftSection.style.display = 'none';
+    }
+
+    // Check if this is an IT Support ticket and populate IT Support details if so
+    const itSupportData = extractITSupportData(ticketData);
+    const itSupportSection = document.getElementById('it-support-details-section');
+    
+    if (itSupportData.isITSupportTicket) {
+      // Show IT Support section and populate data
+      itSupportSection.style.display = 'block';
+      
+      // Populate systems affected
+      const systemsContainer = document.getElementById('it-support-detail-systems');
+      systemsContainer.innerHTML = '';
+      if (itSupportData.systems && itSupportData.systems.length > 0) {
+        itSupportData.systems.forEach(system => {
+          const systemTag = document.createElement('span');
+          systemTag.className = 'it-support-system-tag';
+          systemTag.textContent = system;
+          systemsContainer.appendChild(systemTag);
+        });
+      } else {
+        systemsContainer.innerHTML = '<span class="it-support-value">-</span>';
+      }
+      
+      // Populate other IT Support details
+      document.getElementById('it-support-detail-reason').textContent = itSupportData.reason || '-';
+      document.getElementById('it-support-detail-description').textContent = itSupportData.details || '-';
+      
+    } else {
+      // Hide IT Support section for non-IT Support tickets
+      itSupportSection.style.display = 'none';
     }
     
     // Update status dropdown
@@ -3602,6 +3797,23 @@ function formatTimestamp(timestamp) {
   return date.toLocaleDateString();
 }
 
+// Toggle description visibility for long ticket descriptions
+function toggleDescription(button) {
+  const content = button.closest('.description-content');
+  const shortDiv = content.querySelector('.description-short');
+  const fullDiv = content.querySelector('.description-full');
+  
+  if (fullDiv.style.display === 'none') {
+    shortDiv.style.display = 'none';
+    fullDiv.style.display = 'block';
+    button.textContent = 'Show Less';
+  } else {
+    shortDiv.style.display = 'block';
+    fullDiv.style.display = 'none';
+    button.textContent = 'Show Full Description';
+  }
+}
+
 // Close ticket modal
 function closeTicketModal() {
   document.getElementById('ticket-modal').classList.remove('show');
@@ -3614,6 +3826,12 @@ function openCreateTicketModal() {
   setupModalUserSearch();
   populateTeamDropdown();
   setupAssignmentTypeHandlers();
+  
+  // Clean up any existing required attributes on checkboxes to prevent HTML5 validation issues
+  const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]');
+  systemCheckboxes.forEach(checkbox => {
+    checkbox.removeAttribute('required');
+  });
 }
 
 // Close create ticket modal
@@ -3710,6 +3928,12 @@ function removeModalAssignedUser() {
 // Create ticket from modal
 async function createTicketFromModal() {
   console.log('🎫 Creating ticket from modal...');
+  
+  // Failsafe: Remove any required attributes from IT Support checkboxes before processing
+  const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]');
+  systemCheckboxes.forEach(checkbox => {
+    checkbox.removeAttribute('required');
+  });
   
   // Add debugging for each element
   const titleElement = document.getElementById('modal-ticket-title');
@@ -4219,14 +4443,12 @@ function setITSupportFieldsRequired(required) {
     }
   });
   
-  // Handle checkboxes for systems
+  // Note: We don't set required on checkboxes as HTML5 doesn't handle this well for checkbox groups
+  // Instead, we handle validation manually in collectITSupportFormData()
+  // Remove any existing required attributes from checkboxes
   const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]');
   systemCheckboxes.forEach(checkbox => {
-    if (required) {
-      checkbox.setAttribute('required', '');
-    } else {
-      checkbox.removeAttribute('required');
-    }
+    checkbox.removeAttribute('required');
   });
 }
 
@@ -4445,6 +4667,57 @@ function extractCOFTDataFromTicket(ticket) {
     console.log('Error extracting COFT data:', error);
   }
   
+  return defaultData;
+}
+
+// Extract IT Support data from ticket for modal display
+function extractITSupportData(ticket) {
+  const defaultData = {
+    isITSupportTicket: false,
+    systems: [],
+    reason: null,
+    details: null
+  };
+
+  // Check if this is an IT Support ticket
+  if (!ticket || !ticket.description) {
+    return defaultData;
+  }
+
+  const description = ticket.description;
+  
+  // Check for IT Support ticket marker
+  if (!description.includes('**IT SUPPORT TICKET**')) {
+    return defaultData;
+  }
+
+  defaultData.isITSupportTicket = true;
+
+  try {
+    // Parse systems affected
+    const systemsMatch = description.match(/\*\*Systems Affected:\*\*\n([\s\S]*?)\n\n/);
+    if (systemsMatch) {
+      const systemsText = systemsMatch[1];
+      const systemLines = systemsText.split('\n').filter(line => line.trim().startsWith('•'));
+      defaultData.systems = systemLines.map(line => line.replace('•', '').trim());
+    }
+
+    // Parse issue category
+    const reasonMatch = description.match(/\*\*Issue Category:\*\*\n• (.*?)\n/);
+    if (reasonMatch) {
+      defaultData.reason = reasonMatch[1].trim();
+    }
+
+    // Parse detailed description
+    const detailsMatch = description.match(/\*\*Detailed Description:\*\*\n([\s\S]*?)(?:\n\n|\n---|\n\*\*|$)/);
+    if (detailsMatch) {
+      defaultData.details = detailsMatch[1].trim();
+    }
+
+  } catch (error) {
+    console.warn('Error parsing IT Support ticket data:', error);
+  }
+
   return defaultData;
 }
 
@@ -4818,6 +5091,12 @@ document.addEventListener('DOMContentLoaded', function() {
         closeCreateTicketModal();
       }
     }
+  });
+
+  // Clean up any existing required attributes on IT Support checkboxes to prevent HTML5 validation issues
+  const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]');
+  systemCheckboxes.forEach(checkbox => {
+    checkbox.removeAttribute('required');
   });
 });
 
