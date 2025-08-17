@@ -3959,9 +3959,14 @@ function handleFormToggle() {
                             allTeams.find(team => team.id === selectedTeam && team.name === 'COFT');
   
   // Check if IT Support team is selected
+  console.log('🔍 Debug team selection:', { isTeamAssignment, selectedTeam, allTeamsCount: allTeams.length });
+  console.log('👥 Available teams:', allTeams.map(t => ({ id: t.id, name: t.name })));
+  
   const isITSupportTeamSelected = isTeamAssignment && 
                                  selectedTeam && 
                                  allTeams.find(team => team.id === selectedTeam && team.name === 'IT Support');
+  
+  console.log('🎯 IT Support team selected:', isITSupportTeamSelected);
   
   // Hide category field when COFT or IT Support team is selected
   if (isCOFTTeamSelected) {
