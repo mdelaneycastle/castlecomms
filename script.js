@@ -229,12 +229,10 @@ async function createUser({ email, password, displayName, admin: wantAdmin, comm
       throw new Error("Password must be at least 6 characters long.");
     }
 
-    console.log("👤 Current user:", user.email);
     const token = await user.getIdToken(true);
-    console.log("🎫 Got auth token, length:", token.length);
 
     const requestBody = { email, password, displayName, admin: wantAdmin, communicationsAdmin: wantCommunicationsAdmin };
-    console.log("📤 Sending request to createUserHttp:", requestBody);
+    console.log("📤 Creating user:", email);
 
     const res = await fetch(
       "https://europe-west1-castle-comms.cloudfunctions.net/createUserHttp",
@@ -248,11 +246,8 @@ async function createUser({ email, password, displayName, admin: wantAdmin, comm
       }
     );
     
-    console.log("📥 Response status:", res.status, res.statusText);
-    
     if (!res.ok) {
       const errorText = await res.text();
-      console.error("❌ Error response body:", errorText);
       
       let errorData;
       try {
@@ -261,7 +256,14 @@ async function createUser({ email, password, displayName, admin: wantAdmin, comm
         errorData = { error: errorText || `HTTP ${res.status}: ${res.statusText}` };
       }
       
-      throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+      // Handle specific error cases with better user messages
+      let errorMessage = errorData.error || `HTTP ${res.status}: ${res.statusText}`;
+      
+      if (errorData.message && errorData.message.includes("email address is already in use")) {
+        errorMessage = `The email address ${email} is already registered. Please use a different email address or check if the user already exists.`;
+      }
+      
+      throw new Error(errorMessage);
     }
     
     const payload = await res.json();
