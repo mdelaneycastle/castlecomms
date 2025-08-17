@@ -261,7 +261,7 @@ const deleteFromGallery = onRequest(
 );
 
 /**
- * List all users (admin only)
+ * List all users (authenticated users get basic info, admins get full details)
  */
 const listUsersHttp = onRequest({ region: "europe-west1" }, async (req, res) => {
   corsHandler(req, res, async () => {
@@ -275,7 +275,7 @@ const listUsersHttp = onRequest({ region: "europe-west1" }, async (req, res) => 
     }
 
     try {
-      // Verify admin authentication
+      // Verify authentication (all authenticated users can access)
       const authorization = req.headers.authorization;
       if (!authorization || !authorization.startsWith('Bearer ')) {
         return res.status(401).json({ error: "Authorization token required" });
@@ -285,25 +285,36 @@ const listUsersHttp = onRequest({ region: "europe-west1" }, async (req, res) => 
       const { getAuth } = require("firebase-admin/auth");
       const decodedToken = await getAuth().verifyIdToken(token);
       
-      // Check if user is admin
-      if (!decodedToken.admin) {
-        return res.status(403).json({ error: "Admin access required" });
-      }
+      // Check if user is admin for full details
+      const isAdmin = !!decodedToken.admin;
 
       // List users
       const auth = getAuth();
       const listUsersResult = await auth.listUsers(1000);
       
-      const users = listUsersResult.users.map(user => ({
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        disabled: user.disabled,
-        emailVerified: user.emailVerified,
-        customClaims: user.customClaims
-      }));
+      // Return different data based on user role
+      const users = listUsersResult.users.map(user => {
+        const basicInfo = {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName
+        };
 
-      logger.info(`Listed ${users.length} users for admin ${decodedToken.uid}`);
+        // Admins get additional details
+        if (isAdmin) {
+          return {
+            ...basicInfo,
+            disabled: user.disabled,
+            emailVerified: user.emailVerified,
+            customClaims: user.customClaims
+          };
+        }
+
+        // Regular users only get basic info for app functionality
+        return basicInfo;
+      });
+
+      logger.info(`Listed ${users.length} users for ${isAdmin ? 'admin' : 'user'} ${decodedToken.uid}`);
 
       res.status(200).json({
         success: true,
