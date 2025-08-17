@@ -55,7 +55,6 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      position: relative;
     }
 
     .post-textarea {
@@ -222,9 +221,16 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       max-height: 200px;
       overflow-y: auto;
-      z-index: 1000;
+      z-index: 9999;
       display: none;
       min-width: 200px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .mention-suggestions li {
+      list-style: none;
     }
 
     .mention-suggestions li {
@@ -814,41 +820,58 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  function showMentionSuggestions(users, mentionStart) {
-    const suggestionsDiv = document.getElementById('mention-suggestions');
-    const textarea = document.getElementById('message');
-    
-    if (users.length === 0) {
-      hideMentionSuggestions();
-      return;
+  // Keep one instance of the dropdown in <body>
+  const suggestionsDiv = document.getElementById('mention-suggestions');
+  let suggestionsAppendedToBody = false;
+
+  function ensureSuggestionsInBody(){
+    if (!suggestionsAppendedToBody) {
+      document.body.appendChild(suggestionsDiv);
+      suggestionsAppendedToBody = true;
     }
-    
+  }
+
+  function positionSuggestionsUnderTextarea() {
+    const textarea = document.getElementById('message');
+    if (!textarea || suggestionsDiv.style.display === 'none') return;
+
+    const rect = textarea.getBoundingClientRect();
+    // position using viewport coords + scroll to make it absolute to the page
+    const top = rect.bottom + window.scrollY + 6;
+    const left = rect.left + window.scrollX;
+
+    suggestionsDiv.style.top = `${top}px`;
+    suggestionsDiv.style.left = `${left}px`;
+    suggestionsDiv.style.width = `${rect.width}px`;
+    suggestionsDiv.style.maxWidth = '400px';
+  }
+
+  function showMentionSuggestions(users, mentionStart) {
+    if (!users || users.length === 0) { hideMentionSuggestions(); return; }
+    const textarea = document.getElementById('message');
+    if (!textarea) return;
+
     currentMentionStart = mentionStart;
     mentionSuggestionsVisible = true;
-    
-    suggestionsDiv.innerHTML = users.slice(0, 8).map((user, index) => 
-      `<li class="mention-suggestion ${index === 0 ? 'selected' : ''}" data-name="${user.name}" data-email="${user.email}">
+
+    suggestionsDiv.innerHTML = users.slice(0, 8).map((user, i) => `
+      <li class="mention-suggestion ${i === 0 ? 'selected' : ''}" data-name="${user.name}" data-email="${user.email}">
         <strong>${user.name}</strong><br>
-        <small style="color: #666;">${user.email}</small>
-      </li>`
-    ).join('');
-    
-    // Position the suggestions div directly below the textarea
+        <small style="color:#666">${user.email}</small>
+      </li>
+    `).join('');
+
+    ensureSuggestionsInBody();
     suggestionsDiv.style.display = 'block';
-    suggestionsDiv.style.position = 'absolute';
-    suggestionsDiv.style.left = textarea.offsetLeft + 'px';
-    suggestionsDiv.style.top = (textarea.offsetTop + textarea.offsetHeight + 5) + 'px';
-    suggestionsDiv.style.width = textarea.offsetWidth + 'px';
-    suggestionsDiv.style.maxWidth = '400px';
-    
-    // Add click handlers
+    positionSuggestionsUnderTextarea();
+
+    // clicks
     suggestionsDiv.querySelectorAll('.mention-suggestion').forEach(li => {
       li.addEventListener('click', () => selectMention(li.dataset.name));
     });
   }
 
   function hideMentionSuggestions() {
-    const suggestionsDiv = document.getElementById('mention-suggestions');
     suggestionsDiv.style.display = 'none';
     mentionSuggestionsVisible = false;
     currentMentionStart = -1;
@@ -886,6 +909,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Trigger input event to update character count
     textarea.dispatchEvent(new Event('input'));
   }
+
+  // Keep suggestions positioned correctly during scroll/resize
+  ['scroll','resize'].forEach(evt => window.addEventListener(evt, positionSuggestionsUnderTextarea, { passive: true }));
+  document.getElementById('message')?.addEventListener('scroll', positionSuggestionsUnderTextarea);
 
   // Wait for authentication before loading users and setting up mentions
   firebase.auth().onAuthStateChanged(async (user) => {
