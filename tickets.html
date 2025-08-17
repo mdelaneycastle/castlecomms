@@ -452,6 +452,117 @@
       color: white;
     }
 
+    /* Advanced Filters Section */
+    .advanced-filters-section {
+      background: #f8f9fa;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .advanced-filters-section h4 {
+      margin: 0 0 1rem 0;
+      color: #495057;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .advanced-filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      align-items: end;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-group label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.9rem;
+    }
+
+    .form-select {
+      padding: 0.5rem;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      background: white;
+      font-size: 0.9rem;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(98, 100, 167, 0.1);
+    }
+
+    .date-range-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .date-input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .date-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(98, 100, 167, 0.1);
+    }
+
+    .date-separator {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: end;
+    }
+
+    .apply-filters-btn {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .apply-filters-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .clear-filters-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .clear-filters-btn:hover {
+      background: #5a6268;
+    }
+
     /* Search Section */
     .ticket-search-section {
       margin-bottom: 1.5rem;
@@ -2034,6 +2145,47 @@
           </button>
         </div>
         
+        <!-- Advanced Filters Section -->
+        <div class="advanced-filters-section">
+          <h4>🔍 Advanced Filters</h4>
+          <div class="advanced-filters-grid">
+            <div class="filter-group">
+              <label for="coft-team-filter">COFT Team Member:</label>
+              <select id="coft-team-filter" class="form-select">
+                <option value="">All Team Members</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="ticket-id-filter">Ticket ID:</label>
+              <input type="text" id="ticket-id-filter" class="form-input" placeholder="Enter ticket ID...">
+            </div>
+            
+            <div class="filter-group">
+              <label for="gallery-created-filter">Gallery/Created:</label>
+              <select id="gallery-created-filter" class="form-select">
+                <option value="">All Sources</option>
+                <option value="gallery">Gallery Tickets</option>
+                <option value="created">Manual Tickets</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="date-range-filter">Date Range:</label>
+              <div class="date-range-group">
+                <input type="date" id="date-from-filter" class="form-input date-input" placeholder="From">
+                <span class="date-separator">to</span>
+                <input type="date" id="date-to-filter" class="form-input date-input" placeholder="To">
+              </div>
+            </div>
+            
+            <div class="filter-actions">
+              <button class="apply-filters-btn" onclick="applyAdvancedFilters()">Apply Filters</button>
+              <button class="clear-filters-btn" onclick="clearAdvancedFilters()">Clear All</button>
+            </div>
+          </div>
+        </div>
+        
         <div class="tickets-list" id="tickets-list">
           <div class="loading">Loading tickets...</div>
         </div>
@@ -2461,6 +2613,7 @@ async function initializeInternalSystem() {
   setupTicketForm();
   setupFilters();
   setupSearch();
+  await populateCOFTTeamMembers();
   loadTickets();
   
   // Handle direct ticket links (e.g., #ticket-434592)
@@ -2999,6 +3152,9 @@ async function loadTickets() {
         ticket.category.toLowerCase().includes(searchTerm)
       );
     }
+    
+    // Apply advanced filters
+    tickets = tickets.filter(ticket => matchesAdvancedFilters(ticket));
     
     // Sort by creation date (newest first)
     tickets.sort((a, b) => {
@@ -4750,6 +4906,141 @@ function getTimerDisplayForTicket(ticket) {
   }
   
   return `<span class="timer-display-small ${timerClass}" title="${statusIcon} Timer: ${formatTimerDisplay(displayTime)}">${formatTimerDisplay(displayTime)}</span>`;
+}
+
+// Advanced Filter Functions
+let advancedFilters = {
+  coftTeamMember: '',
+  ticketId: '',
+  galleryCreated: '',
+  dateFrom: '',
+  dateTo: ''
+};
+
+// Populate COFT team member dropdown
+async function populateCOFTTeamMembers() {
+  try {
+    const coftTeamSelect = document.getElementById('coft-team-filter');
+    
+    // Get all tickets to extract unique COFT team members
+    const allTicketsSnapshot = await db.collection('tickets').get();
+    const coftMembers = new Set();
+    
+    allTicketsSnapshot.docs.forEach(doc => {
+      const ticket = doc.data();
+      if (ticket.assignedTo && ticket.assignedTo.email) {
+        // Check if this is a COFT team assignment
+        if (ticket.assignedTo.teamId === 'coft' || 
+            (ticket.assignedTo.teamMembers && ticket.assignedTo.teamMembers.length > 0)) {
+          if (ticket.assignedTo.teamMembers) {
+            ticket.assignedTo.teamMembers.forEach(member => {
+              coftMembers.add(`${member.name} (${member.email})`);
+            });
+          } else if (ticket.assignedTo.teamId === 'coft') {
+            coftMembers.add(`${ticket.assignedTo.name} (${ticket.assignedTo.email})`);
+          }
+        }
+      }
+    });
+    
+    // Populate dropdown
+    coftMembers.forEach(member => {
+      const option = document.createElement('option');
+      option.value = member;
+      option.textContent = member;
+      coftTeamSelect.appendChild(option);
+    });
+    
+  } catch (error) {
+    console.error('Error populating COFT team members:', error);
+  }
+}
+
+// Apply advanced filters
+function applyAdvancedFilters() {
+  // Get filter values
+  advancedFilters.coftTeamMember = document.getElementById('coft-team-filter').value;
+  advancedFilters.ticketId = document.getElementById('ticket-id-filter').value.trim();
+  advancedFilters.galleryCreated = document.getElementById('gallery-created-filter').value;
+  advancedFilters.dateFrom = document.getElementById('date-from-filter').value;
+  advancedFilters.dateTo = document.getElementById('date-to-filter').value;
+  
+  // Reload tickets with filters applied
+  loadTickets();
+}
+
+// Clear advanced filters
+function clearAdvancedFilters() {
+  document.getElementById('coft-team-filter').value = '';
+  document.getElementById('ticket-id-filter').value = '';
+  document.getElementById('gallery-created-filter').value = '';
+  document.getElementById('date-from-filter').value = '';
+  document.getElementById('date-to-filter').value = '';
+  
+  // Reset filter object
+  advancedFilters = {
+    coftTeamMember: '',
+    ticketId: '',
+    galleryCreated: '',
+    dateFrom: '',
+    dateTo: ''
+  };
+  
+  // Reload tickets
+  loadTickets();
+}
+
+// Check if ticket matches advanced filters
+function matchesAdvancedFilters(ticket) {
+  // COFT Team Member filter
+  if (advancedFilters.coftTeamMember) {
+    let teamMemberMatch = false;
+    if (ticket.assignedTo && ticket.assignedTo.teamMembers) {
+      teamMemberMatch = ticket.assignedTo.teamMembers.some(member => 
+        advancedFilters.coftTeamMember.includes(member.email)
+      );
+    } else if (ticket.assignedTo && ticket.assignedTo.email) {
+      teamMemberMatch = advancedFilters.coftTeamMember.includes(ticket.assignedTo.email);
+    }
+    if (!teamMemberMatch) return false;
+  }
+  
+  // Ticket ID filter
+  if (advancedFilters.ticketId) {
+    if (!ticket.ticketId.toLowerCase().includes(advancedFilters.ticketId.toLowerCase())) {
+      return false;
+    }
+  }
+  
+  // Gallery/Created filter
+  if (advancedFilters.galleryCreated) {
+    const coftData = extractCOFTDataFromTicket(ticket);
+    if (advancedFilters.galleryCreated === 'gallery') {
+      // Gallery tickets have gallery numbers/data
+      if (!coftData.gallery) return false;
+    } else if (advancedFilters.galleryCreated === 'created') {
+      // Manual tickets don't have gallery data
+      if (coftData.gallery) return false;
+    }
+  }
+  
+  // Date range filter
+  if (advancedFilters.dateFrom || advancedFilters.dateTo) {
+    const ticketDate = new Date(ticket.createdAt.seconds * 1000);
+    
+    if (advancedFilters.dateFrom) {
+      const fromDate = new Date(advancedFilters.dateFrom);
+      if (ticketDate < fromDate) return false;
+    }
+    
+    if (advancedFilters.dateTo) {
+      const toDate = new Date(advancedFilters.dateTo);
+      toDate.setHours(23, 59, 59, 999); // End of day
+      if (ticketDate > toDate) return false;
+    }
+  }
+  
+  return true;
 }
 </script>
 

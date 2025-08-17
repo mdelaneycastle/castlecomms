@@ -791,6 +791,13 @@
       text-align: center;
       color: #605e5c;
       padding: 40px;
+      position: relative;
+    }
+    
+    .chat-empty .mobile-chat-toggle {
+      position: absolute;
+      top: 20px;
+      left: 20px;
     }
 
     .chat-empty-icon {
@@ -1112,6 +1119,7 @@
     <!-- Main Chat Area -->
     <div class="chat-main" id="chat-main">
       <div class="chat-empty">
+        <button class="mobile-chat-toggle" onclick="openMobileSidebar()">☰</button>
         <div class="chat-empty-icon">💬</div>
         <h3>Welcome to Castle Comms Chat</h3>
         <p>Select a chat from the sidebar or start a new conversation to get started.</p>
