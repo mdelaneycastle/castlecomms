@@ -60,22 +60,25 @@ class NotificationBadgeManager {
     }
   }
 
-  flashMenuButton() {
+  updateMenuButtonFlash() {
     const menuButton = document.getElementById('menu-toggle');
     if (!menuButton) return;
     
-    // Add flash animation class
-    menuButton.classList.add('notification-flash');
+    // Check if there are any notifications
+    const hasNotifications = Object.values(this.badgeData).some(count => count > 0);
     
-    // Remove after animation
-    setTimeout(() => {
-      menuButton.classList.remove('notification-flash');
-    }, 1500);
+    if (hasNotifications) {
+      // Add continuous flash animation
+      menuButton.classList.add('notification-flash-continuous');
+    } else {
+      // Remove flash animation when no notifications
+      menuButton.classList.remove('notification-flash-continuous');
+    }
   }
 
   triggerNotificationAlert() {
     this.playNotificationSound();
-    this.flashMenuButton();
+    this.updateMenuButtonFlash();
   }
 
   async initialize(user) {
@@ -178,6 +181,7 @@ class NotificationBadgeManager {
     // Reset badge count for this page type
     this.badgeData[pageType] = 0;
     this.updateBadgeDisplay(pageType);
+    this.updateMenuButtonFlash();
     
     console.log(`👁️ Updated last seen for ${pageType}`);
   }
@@ -192,6 +196,7 @@ class NotificationBadgeManager {
         this.updateGalleryBadge()
       ]);
       
+      this.updateMenuButtonFlash();
       console.log('🔄 Updated all badge counts:', this.badgeData);
     } catch (error) {
       console.error('❌ Error updating badge counts:', error);
@@ -243,10 +248,12 @@ class NotificationBadgeManager {
 
       this.badgeData.messages = unreadCount;
       this.updateBadgeDisplay('messages');
+      this.updateMenuButtonFlash();
     } catch (error) {
       console.error('❌ Error updating messages badge:', error);
       this.badgeData.messages = 0;
       this.updateBadgeDisplay('messages');
+      this.updateMenuButtonFlash();
     }
   }
 
@@ -284,10 +291,12 @@ class NotificationBadgeManager {
       
       this.badgeData.tickets = unreadCount;
       this.updateBadgeDisplay('tickets');
+      this.updateMenuButtonFlash();
     } catch (error) {
       console.error('❌ Error updating tickets badge:', error);
       this.badgeData.tickets = 0;
       this.updateBadgeDisplay('tickets');
+      this.updateMenuButtonFlash();
     }
   }
 
@@ -318,6 +327,7 @@ class NotificationBadgeManager {
 
       this.badgeData.newsfeed = unreadCount;
       this.updateBadgeDisplay('newsfeed');
+      this.updateMenuButtonFlash();
     } catch (error) {
       console.error('❌ Error updating newsfeed badge:', error);
     }
@@ -336,6 +346,7 @@ class NotificationBadgeManager {
 
       this.badgeData.recognition = notesSnapshot.size;
       this.updateBadgeDisplay('recognition');
+      this.updateMenuButtonFlash();
     } catch (error) {
       console.error('❌ Error updating recognition badge:', error);
     }
@@ -368,6 +379,7 @@ class NotificationBadgeManager {
 
       this.badgeData.gallery = unreadCount;
       this.updateBadgeDisplay('gallery');
+      this.updateMenuButtonFlash();
     } catch (error) {
       console.error('❌ Error updating gallery badge:', error);
     }
