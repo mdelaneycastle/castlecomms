@@ -1215,13 +1215,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     currentUser = user;
     
-    // Update user name display in header
-    const userNameDisplay = document.getElementById('user-name-display');
-    if (userNameDisplay) {
-      const displayName = await getUserDisplayName(user);
-      userNameDisplay.textContent = displayName;
-    }
-    
     // Initialize Firebase Firestore
     if (firebase.apps.length > 0) {
       db = firebase.firestore();
