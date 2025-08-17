@@ -1169,6 +1169,12 @@
       margin-top: 12px;
       flex-wrap: wrap;
     }
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+    }
 
     .radio-container {
       display: flex;
@@ -2558,6 +2564,71 @@
 
         </div> <!-- End COFT Fields Container -->
       </div>
+
+      <!-- IT Support Fields (only shown when "IT Support" is selected) -->
+      <div id="it-support-fields" style="display: none;">
+        <!-- Systems Selection -->
+        <div class="form-group">
+          <label class="form-label">Please select the system you require assistance with: *</label>
+          <p class="form-help-text">Select all that apply. For general IT issues (anything not listed below) please contact Cardonet.</p>
+          <div class="checkbox-group">
+            <label class="checkbox-container">
+              <input type="checkbox" name="it-systems" value="CG Net">
+              <span class="checkmark"></span>
+              CG Net
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" name="it-systems" value="Ops Net">
+              <span class="checkmark"></span>
+              Ops Net
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" name="it-systems" value="Sage 1000">
+              <span class="checkmark"></span>
+              Sage 1000
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" name="it-systems" value="Monday.com">
+              <span class="checkmark"></span>
+              Monday.com
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" name="it-systems" value="ArtTrack (QR Code app)">
+              <span class="checkmark"></span>
+              ArtTrack (QR Code app)
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" name="it-systems" value="Other">
+              <span class="checkmark"></span>
+              Other
+            </label>
+          </div>
+        </div>
+
+        <!-- Reason Selection -->
+        <div class="form-group">
+          <label for="it-reason" class="form-label">Reason: *</label>
+          <p class="form-help-text">Please choose a reason for the ticket</p>
+          <select id="it-reason" class="form-select full-width" required>
+            <option value="">Select a reason...</option>
+            <option value="New Account/Salesperson Set Up">New Account/Salesperson Set Up</option>
+            <option value="Password Issue">Password Issue</option>
+            <option value="Sales Order/Payment Processing Issue">Sales Order/Payment Processing Issue</option>
+            <option value="Feedback/Suggestion">Feedback/Suggestion</option>
+            <option value="Cancellation/Refund Issue">Cancellation/Refund Issue</option>
+            <option value="Software Service Issue (eg. CG Net crashed/not working at all)">Software Service Issue (eg. CG Net crashed/not working at all)</option>
+            <option value="KYC Process Error Message">KYC Process Error Message</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <!-- Details -->
+        <div class="form-group">
+          <label for="it-details" class="form-label">Details: *</label>
+          <p class="form-help-text">Please give as much detail as possible, including any error messages or steps taken so far.</p>
+          <textarea id="it-details" class="form-textarea full-width" placeholder="Please provide detailed information about your IT issue..." rows="6" required></textarea>
+        </div>
+      </div> <!-- End IT Support Fields -->
       
       <div class="form-actions">
         <button type="submit" id="modal-create-ticket-btn" class="create-ticket-button">Create Ticket</button>
@@ -3675,6 +3746,10 @@ async function createTicketFromModal() {
   const coftFields = document.getElementById('coft-form-fields');
   const isCOFTForm = coftFields && coftFields.style.display !== 'none';
   
+  // Check if IT Support form is active
+  const itSupportFields = document.getElementById('it-support-fields');
+  const isITSupportForm = itSupportFields && itSupportFields.style.display !== 'none';
+  
   let title, description, category;
   
   if (isCOFTForm) {
@@ -3688,6 +3763,17 @@ async function createTicketFromModal() {
     title = `COFT Ticket - SO: ${coftData.soNumber} - ${coftData.clientName}`;
     description = buildCOFTDescription(coftData);
     category = categoryElement.value || '';
+  } else if (isITSupportForm) {
+    // Collect IT Support-specific data
+    const itSupportData = collectITSupportFormData();
+    if (!itSupportData) {
+      return; // Error already shown in collectITSupportFormData
+    }
+    
+    // Build title and description from IT Support data
+    title = `IT Support - ${itSupportData.reason}`;
+    description = buildITSupportDescription(itSupportData);
+    category = 'IT Support';
   } else {
     // Standard form data
     title = titleElement.value ? titleElement.value.trim() : '';
@@ -3885,13 +3971,21 @@ function handleFormToggle() {
   // Check if COFT team is selected and should show COFT form
   const isCOFTFormSelected = isCOFTTeamSelected;
   
+  // Check if IT Support category is selected
+  const isITSupportSelected = selectedCategory === 'IT Support';
+  
+  // Handle field visibility
+  const itSupportFields = document.getElementById('it-support-fields');
+  
   if (isCOFTFormSelected) {
     standardFields.style.display = 'none';
     coftFields.style.display = 'block';
+    itSupportFields.style.display = 'none';
     
-    // Remove required from standard fields
+    // Remove required from standard fields and IT fields
     document.getElementById('modal-ticket-title').removeAttribute('required');
     document.getElementById('modal-ticket-description').removeAttribute('required');
+    setITSupportFieldsRequired(false);
     
     // Add required to COFT fields
     setCOFTFieldsRequired(true);
@@ -3908,17 +4002,34 @@ function handleFormToggle() {
         });
       }
     }
+  } else if (isITSupportSelected) {
+    standardFields.style.display = 'none';
+    coftFields.style.display = 'none';
+    itSupportFields.style.display = 'block';
+    
+    // Remove required from standard fields and COFT fields
+    document.getElementById('modal-ticket-title').removeAttribute('required');
+    document.getElementById('modal-ticket-description').removeAttribute('required');
+    setCOFTFieldsRequired(false);
+    resetCOFTForm();
+    resetITSupportForm();
+    
+    // Add required to IT Support fields
+    setITSupportFieldsRequired(true);
   } else {
     standardFields.style.display = 'block';
     coftFields.style.display = 'none';
+    itSupportFields.style.display = 'none';
     
     // Add required back to standard fields
     document.getElementById('modal-ticket-title').setAttribute('required', '');
     document.getElementById('modal-ticket-description').setAttribute('required', '');
     
-    // Remove required from COFT fields
+    // Remove required from COFT and IT fields
     setCOFTFieldsRequired(false);
+    setITSupportFieldsRequired(false);
     resetCOFTForm();
+    resetITSupportForm();
   }
 }
 
@@ -4076,6 +4187,86 @@ function resetCOFTFormFields() {
   document.getElementById('coft-specific-date-section').style.display = 'none';
 }
 
+// IT Support field functions
+function setITSupportFieldsRequired(required) {
+  const itSupportFields = [
+    'it-reason',
+    'it-details'
+  ];
+  
+  itSupportFields.forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (field) {
+      if (required) {
+        field.setAttribute('required', '');
+      } else {
+        field.removeAttribute('required');
+      }
+    }
+  });
+  
+  // Handle checkboxes for systems
+  const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]');
+  systemCheckboxes.forEach(checkbox => {
+    if (required) {
+      checkbox.setAttribute('required', '');
+    } else {
+      checkbox.removeAttribute('required');
+    }
+  });
+}
+
+// Collect IT Support form data and validate
+function collectITSupportFormData() {
+  // Get selected systems
+  const selectedSystems = [];
+  const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]:checked');
+  systemCheckboxes.forEach(checkbox => {
+    selectedSystems.push(checkbox.value);
+  });
+  
+  if (selectedSystems.length === 0) {
+    showModalStatus('Please select at least one system you need assistance with.', 'error');
+    return null;
+  }
+  
+  const reason = document.getElementById('it-reason').value;
+  const details = document.getElementById('it-details').value.trim();
+  
+  if (!reason) {
+    showModalStatus('Please select a reason for the IT Support ticket.', 'error');
+    return null;
+  }
+  
+  if (!details) {
+    showModalStatus('Please provide detailed information about your IT issue.', 'error');
+    return null;
+  }
+  
+  return {
+    systems: selectedSystems,
+    reason: reason,
+    details: details
+  };
+}
+
+// Reset IT Support form
+function resetITSupportForm() {
+  // Reset checkboxes
+  const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]');
+  systemCheckboxes.forEach(checkbox => {
+    checkbox.checked = false;
+  });
+  
+  // Reset select
+  const reasonSelect = document.getElementById('it-reason');
+  if (reasonSelect) reasonSelect.value = '';
+  
+  // Reset textarea
+  const detailsTextarea = document.getElementById('it-details');
+  if (detailsTextarea) detailsTextarea.value = '';
+}
+
 // Collect COFT form data and validate
 function collectCOFTFormData() {
   // Check understanding checkbox
@@ -4174,6 +4365,28 @@ function buildCOFTDescription(coftData) {
   if (coftData.additionalInfo) {
     description += `\n**Additional Information:**\n${coftData.additionalInfo}`;
   }
+  
+  return description;
+}
+
+// Build IT Support ticket description
+function buildITSupportDescription(itData) {
+  let description = `**IT SUPPORT TICKET**\n\n`;
+  
+  description += `**Systems Affected:**\n`;
+  itData.systems.forEach(system => {
+    description += `• ${system}\n`;
+  });
+  description += `\n`;
+  
+  description += `**Issue Category:**\n`;
+  description += `• ${itData.reason}\n\n`;
+  
+  description += `**Detailed Description:**\n`;
+  description += `${itData.details}\n\n`;
+  
+  description += `**Contact Information:**\n`;
+  description += `For general IT issues not listed above, please contact Cardonet directly.`;
   
   return description;
 }
