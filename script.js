@@ -229,7 +229,12 @@ async function createUser({ email, password, displayName, admin: wantAdmin, comm
       throw new Error("Password must be at least 6 characters long.");
     }
 
+    console.log("👤 Current user:", user.email);
     const token = await user.getIdToken(true);
+    console.log("🎫 Got auth token, length:", token.length);
+
+    const requestBody = { email, password, displayName, admin: wantAdmin, communicationsAdmin: wantCommunicationsAdmin };
+    console.log("📤 Sending request to createUserHttp:", requestBody);
 
     const res = await fetch(
       "https://europe-west1-castle-comms.cloudfunctions.net/createUserHttp",
@@ -239,12 +244,23 @@ async function createUser({ email, password, displayName, admin: wantAdmin, comm
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({ email, password, displayName, admin: wantAdmin, communicationsAdmin: wantCommunicationsAdmin })
+        body: JSON.stringify(requestBody)
       }
     );
     
+    console.log("📥 Response status:", res.status, res.statusText);
+    
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
+      const errorText = await res.text();
+      console.error("❌ Error response body:", errorText);
+      
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { error: errorText || `HTTP ${res.status}: ${res.statusText}` };
+      }
+      
       throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
     }
     
