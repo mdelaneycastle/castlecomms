@@ -3657,18 +3657,18 @@ async function openTicket(ticketId) {
     }
 
     // Check if this is an IT Support ticket and populate IT Support details if so
-    const itSupportData = extractITSupportData(ticketData);
+    const itSupportModalData = extractITSupportData(ticketData);
     const itSupportSection = document.getElementById('it-support-details-section');
     
-    if (itSupportData.isITSupportTicket) {
+    if (itSupportModalData.isITSupportTicket) {
       // Show IT Support section and populate data
       itSupportSection.style.display = 'block';
       
       // Populate systems affected
       const systemsContainer = document.getElementById('it-support-detail-systems');
       systemsContainer.innerHTML = '';
-      if (itSupportData.systems && itSupportData.systems.length > 0) {
-        itSupportData.systems.forEach(system => {
+      if (itSupportModalData.systems && itSupportModalData.systems.length > 0) {
+        itSupportModalData.systems.forEach(system => {
           const systemTag = document.createElement('span');
           systemTag.className = 'it-support-system-tag';
           systemTag.textContent = system;
@@ -3679,8 +3679,8 @@ async function openTicket(ticketId) {
       }
       
       // Populate other IT Support details
-      document.getElementById('it-support-detail-reason').textContent = itSupportData.reason || '-';
-      document.getElementById('it-support-detail-description').textContent = itSupportData.details || '-';
+      document.getElementById('it-support-detail-reason').textContent = itSupportModalData.reason || '-';
+      document.getElementById('it-support-detail-description').textContent = itSupportModalData.details || '-';
       
     } else {
       // Hide IT Support section for non-IT Support tickets
