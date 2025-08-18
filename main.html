@@ -10,16 +10,6 @@
   <title>Castle Comms</title>
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="stylesheet" href="style.css?v=20250813_din_font_update" />
-  <style>
-    .dark-mode-toggle {
-      background: none !important;
-      border: none !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      cursor: pointer !important;
-      text-decoration: none !important;
-    }
-  </style>
 </head>
 <body>
 <script>
@@ -41,9 +31,6 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
     <a href="news-mentions.html" class="pill-button">
       <span>📰</span> News and Media mentions
     </a>
-    <button onclick="toggleDarkMode()" class="pill-button dark-mode-toggle">
-      <span>🌙</span> Toggle Dark Mode
-    </button>
   </div>
 
   <!-- Quicklinks Section -->
@@ -528,57 +515,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return `Assigned to: ${ticket.assignedTo.name || ticket.assignedTo.email}`;
       }
     }
-  }
-});
-
-// Dark mode toggle functionality (global scope)
-let isDarkMode = false;
-
-function toggleDarkMode() {
-  isDarkMode = !isDarkMode;
-  
-  if (isDarkMode) {
-    // Apply dark mode filter
-    document.documentElement.style.filter = 'invert(1) hue-rotate(180deg)';
-    
-    // Create style element for images/videos to keep them normal
-    const darkModeStyle = document.createElement('style');
-    darkModeStyle.id = 'dark-mode-style';
-    darkModeStyle.textContent = `
-      img, video, canvas, picture, svg { 
-        filter: invert(1) hue-rotate(180deg) !important; 
-      }
-    `;
-    document.head.appendChild(darkModeStyle);
-    
-    // Update button text
-    const button = document.querySelector('.dark-mode-toggle span');
-    if (button) button.textContent = '☀️';
-    
-    // Store preference
-    localStorage.setItem('darkMode', 'true');
-  } else {
-    // Remove dark mode filter
-    document.documentElement.style.filter = '';
-    
-    // Remove dark mode styles
-    const darkModeStyle = document.getElementById('dark-mode-style');
-    if (darkModeStyle) darkModeStyle.remove();
-    
-    // Update button text
-    const button = document.querySelector('.dark-mode-toggle span');
-    if (button) button.textContent = '🌙';
-    
-    // Store preference
-    localStorage.setItem('darkMode', 'false');
-  }
-}
-
-// Load dark mode preference on page load
-document.addEventListener('DOMContentLoaded', () => {
-  const savedDarkMode = localStorage.getItem('darkMode');
-  if (savedDarkMode === 'true') {
-    toggleDarkMode();
   }
 });
 </script>
