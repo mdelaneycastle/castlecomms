@@ -82,3 +82,82 @@
     </div>
   </div>
 </div>
+
+<!-- Account Settings Modal -->
+<div id="account-settings-modal" class="modal">
+  <div class="modal-content account-settings-modal">
+    <div class="modal-header">
+      <h2>Account Settings</h2>
+      <span class="close" id="account-settings-close">&times;</span>
+    </div>
+    <div class="modal-body">
+      <form id="account-settings-form" class="modal-form">
+        
+        <!-- Profile Picture Section -->
+        <div class="settings-section">
+          <h3>Profile Picture</h3>
+          <div class="profile-picture-options">
+            <div class="current-profile-preview">
+              <div class="profile-preview-circle" id="profile-preview">
+                <span class="preview-initials" id="preview-initials">MD</span>
+                <img class="preview-photo" id="preview-photo" style="display: none;" alt="Profile">
+              </div>
+              <p class="profile-preview-label">Current Profile</p>
+            </div>
+            
+            <div class="profile-options">
+              <!-- Photo Upload Option -->
+              <div class="photo-upload-section">
+                <label class="upload-label">
+                  <input type="file" id="profile-photo-input" accept="image/*" style="display: none;">
+                  <div class="upload-button">
+                    <span class="upload-icon">📷</span>
+                    <span>Upload Photo</span>
+                  </div>
+                </label>
+                <button type="button" id="remove-photo-btn" class="remove-photo-btn" style="display: none;">
+                  Remove Photo
+                </button>
+              </div>
+              
+              <!-- Color Selection -->
+              <div class="color-selection-section">
+                <p class="section-label">Choose Background Color:</p>
+                <div class="color-grid">
+                  <button type="button" class="color-option" data-color="#596066" style="background-color: #596066;"></button>
+                  <button type="button" class="color-option" data-color="#4f46e5" style="background-color: #4f46e5;"></button>
+                  <button type="button" class="color-option" data-color="#059669" style="background-color: #059669;"></button>
+                  <button type="button" class="color-option" data-color="#dc2626" style="background-color: #dc2626;"></button>
+                  <button type="button" class="color-option" data-color="#ea580c" style="background-color: #ea580c;"></button>
+                  <button type="button" class="color-option" data-color="#7c3aed" style="background-color: #7c3aed;"></button>
+                  <button type="button" class="color-option" data-color="#0891b2" style="background-color: #0891b2;"></button>
+                  <button type="button" class="color-option" data-color="#be123c" style="background-color: #be123c;"></button>
+                  <button type="button" class="color-option" data-color="#374151" style="background-color: #374151;"></button>
+                  <button type="button" class="color-option" data-color="#1f2937" style="background-color: #1f2937;"></button>
+                  <button type="button" class="color-option" data-color="#92400e" style="background-color: #92400e;"></button>
+                  <button type="button" class="color-option" data-color="#581c87" style="background-color: #581c87;"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Display Name Section -->
+        <div class="settings-section">
+          <h3>Display Name</h3>
+          <div class="form-group">
+            <label for="display-name-input">Full Name</label>
+            <input type="text" id="display-name-input" name="displayName" 
+                   placeholder="Enter your full name" maxlength="50">
+            <small class="field-help">This name will be shown throughout the application</small>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="account-settings-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
