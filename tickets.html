@@ -262,6 +262,31 @@
       padding: 0.5rem;
     }
 
+    /* Ticket Counter Display */
+    .ticket-counter-display {
+      text-align: center;
+      margin: 1rem 0;
+      padding: 0.75rem;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 8px;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .counter-text {
+      font-size: 1rem;
+      color: #667eea;
+      font-weight: 500;
+    }
+
+    .count-number {
+      font-weight: 600;
+      color: #667eea;
+      background: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin: 0 0.25rem;
+    }
+
     .form-textarea {
       min-height: 200px;
       resize: vertical;
@@ -2317,6 +2342,13 @@
           </div>
         </div>
         
+        <!-- Visible Ticket Counter -->
+        <div class="ticket-counter-display">
+          <span class="counter-text">
+            📊 Showing <span id="visible-ticket-count" class="count-number">0</span> tickets
+          </span>
+        </div>
+        
         <div class="ticket-filters">
           <button class="filter-button active" data-filter="all">
             <span class="filter-count">All <span class="count-badge" id="count-all">0</span></span>
@@ -2326,6 +2358,9 @@
           </button>
           <button class="filter-button" data-filter="in-progress">
             <span class="filter-count">In Progress <span class="count-badge" id="count-in-progress">0</span></span>
+          </button>
+          <button class="filter-button" data-filter="on-hold">
+            <span class="filter-count">On Hold <span class="count-badge" id="count-on-hold">0</span></span>
           </button>
           <button class="filter-button" data-filter="resolved">
             <span class="filter-count">Resolved <span class="count-badge" id="count-resolved">0</span></span>
@@ -3585,6 +3620,9 @@ async function loadTickets() {
     
     ticketsList.innerHTML = tableHeader + ticketRows + tableFooter;
     
+    // Update visible ticket counter
+    updateVisibleTicketCount(tickets);
+    
   } catch (error) {
     console.error('Error loading tickets:', error);
     ticketsList.innerHTML = `
@@ -3596,6 +3634,9 @@ async function loadTickets() {
         </button>
       </div>
     `;
+    
+    // Update visible ticket counter to 0 on error
+    updateVisibleTicketCount([]);
   }
 }
 
@@ -3653,6 +3694,20 @@ function updateFilterCounts(allTickets) {
     
   } catch (error) {
     console.error('Error updating filter counts:', error);
+  }
+}
+
+// Update visible ticket counter
+function updateVisibleTicketCount(visibleTickets) {
+  try {
+    const count = visibleTickets ? visibleTickets.length : 0;
+    const countElement = document.getElementById('visible-ticket-count');
+    if (countElement) {
+      countElement.textContent = count;
+    }
+    console.log('📊 Visible ticket count updated:', count);
+  } catch (error) {
+    console.error('Error updating visible ticket count:', error);
   }
 }
 
