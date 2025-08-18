@@ -216,10 +216,10 @@ window.sharedComponents = {
       });
     }
 
-    // Account settings (placeholder for now)
+    // Account settings functionality
     if (accountSettingsBtn) {
       accountSettingsBtn.addEventListener('click', () => {
-        alert('Account settings feature coming soon!');
+        this.openAccountSettingsModal();
         dropdownMenu.classList.remove('show');
       });
     }
@@ -256,10 +256,34 @@ window.sharedComponents = {
       const displayName = await this.getUserDisplayName(user);
       const initials = this.generateUserInitials(displayName);
 
-      // Update user initials in button
+      // Load profile settings from Firebase
+      const userRef = window.db.ref(`users/${user.uid}/profile`);
+      const snapshot = await userRef.once('value');
+      const profileData = snapshot.val() || {};
+
+      // Update user profile button
+      const userProfileBtn = document.getElementById('user-profile-btn');
       const userInitialsElement = document.getElementById('user-initials');
-      if (userInitialsElement) {
-        userInitialsElement.textContent = initials;
+      
+      if (userProfileBtn && userInitialsElement) {
+        // Clear any existing photo styles
+        userProfileBtn.style.backgroundImage = '';
+        userProfileBtn.style.backgroundSize = '';
+        userProfileBtn.style.backgroundPosition = '';
+        
+        if (profileData.photoURL) {
+          // Use uploaded photo
+          userProfileBtn.style.backgroundImage = `url(${profileData.photoURL})`;
+          userProfileBtn.style.backgroundSize = 'cover';
+          userProfileBtn.style.backgroundPosition = 'center';
+          userInitialsElement.style.display = 'none';
+        } else {
+          // Use initials with custom color
+          const backgroundColor = profileData.backgroundColor || '#596066';
+          userProfileBtn.style.backgroundColor = backgroundColor;
+          userInitialsElement.textContent = initials;
+          userInitialsElement.style.display = 'flex';
+        }
       }
 
       // Update dropdown header with user info
@@ -765,6 +789,395 @@ window.sharedComponents = {
       // Re-enable submit button
       submitBtn.disabled = false;
       submitBtn.textContent = 'Change Password';
+    }
+  },
+
+  // Open account settings modal
+  async openAccountSettingsModal() {
+    const modal = document.getElementById('account-settings-modal');
+    if (!modal) {
+      console.error('Account settings modal not found');
+      return;
+    }
+
+    // Load current user settings
+    await this.loadCurrentAccountSettings();
+
+    // Show modal
+    modal.style.display = 'block';
+
+    // Setup modal events
+    this.setupAccountSettingsModalEvents();
+
+    // Focus on display name input
+    setTimeout(() => {
+      const displayNameInput = modal.querySelector('#display-name-input');
+      if (displayNameInput) {
+        displayNameInput.focus();
+      }
+    }, 100);
+  },
+
+  // Load current account settings into modal
+  async loadCurrentAccountSettings() {
+    try {
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+
+      // Load display name
+      const displayName = await this.getUserDisplayName(user);
+      const displayNameInput = document.getElementById('display-name-input');
+      if (displayNameInput) {
+        displayNameInput.value = displayName;
+      }
+
+      // Load current profile settings from Firebase
+      const userRef = window.db.ref(`users/${user.uid}/profile`);
+      const snapshot = await userRef.once('value');
+      const profileData = snapshot.val() || {};
+
+      // Update preview
+      await this.updateAccountSettingsPreview(displayName, profileData);
+
+      // Set selected color
+      const selectedColor = profileData.backgroundColor || '#596066';
+      const colorOptions = document.querySelectorAll('.color-option');
+      colorOptions.forEach(option => {
+        option.classList.remove('selected');
+        if (option.dataset.color === selectedColor) {
+          option.classList.add('selected');
+        }
+      });
+
+      // Handle photo if exists
+      if (profileData.photoURL) {
+        const previewPhoto = document.getElementById('preview-photo');
+        const removePhotoBtn = document.getElementById('remove-photo-btn');
+        if (previewPhoto && removePhotoBtn) {
+          previewPhoto.src = profileData.photoURL;
+          previewPhoto.style.display = 'block';
+          removePhotoBtn.style.display = 'block';
+        }
+      }
+
+    } catch (error) {
+      console.error('Error loading account settings:', error);
+    }
+  },
+
+  // Update account settings preview
+  async updateAccountSettingsPreview(displayName, profileData = {}) {
+    const previewCircle = document.getElementById('profile-preview');
+    const previewInitials = document.getElementById('preview-initials');
+    const previewPhoto = document.getElementById('preview-photo');
+
+    if (!previewCircle || !previewInitials) return;
+
+    // Update initials
+    const initials = this.generateUserInitials(displayName);
+    previewInitials.textContent = initials;
+
+    // Update background color
+    const backgroundColor = profileData.backgroundColor || '#596066';
+    previewCircle.style.backgroundColor = backgroundColor;
+
+    // Handle photo
+    if (profileData.photoURL && previewPhoto) {
+      previewPhoto.src = profileData.photoURL;
+      previewPhoto.style.display = 'block';
+      previewInitials.style.display = 'none';
+    } else {
+      if (previewPhoto) previewPhoto.style.display = 'none';
+      previewInitials.style.display = 'block';
+    }
+  },
+
+  // Setup account settings modal events
+  setupAccountSettingsModalEvents() {
+    const modal = document.getElementById('account-settings-modal');
+    const closeBtn = document.getElementById('account-settings-close');
+    const cancelBtn = document.getElementById('account-settings-cancel');
+    const form = document.getElementById('account-settings-form');
+    const colorOptions = document.querySelectorAll('.color-option');
+    const photoInput = document.getElementById('profile-photo-input');
+    const removePhotoBtn = document.getElementById('remove-photo-btn');
+    const displayNameInput = document.getElementById('display-name-input');
+
+    // Close modal events
+    const closeModal = () => {
+      modal.style.display = 'none';
+    };
+
+    // Close button
+    if (closeBtn) {
+      closeBtn.onclick = closeModal;
+    }
+
+    // Cancel button
+    if (cancelBtn) {
+      cancelBtn.onclick = closeModal;
+    }
+
+    // Click outside modal to close
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    };
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'block') {
+        closeModal();
+      }
+    });
+
+    // Color selection
+    colorOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        // Remove selected class from all options
+        colorOptions.forEach(opt => opt.classList.remove('selected'));
+        // Add selected class to clicked option
+        option.classList.add('selected');
+        
+        // Update preview
+        const selectedColor = option.dataset.color;
+        const previewCircle = document.getElementById('profile-preview');
+        if (previewCircle) {
+          previewCircle.style.backgroundColor = selectedColor;
+        }
+      });
+    });
+
+    // Photo upload
+    if (photoInput) {
+      photoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          this.handlePhotoUpload(file);
+        }
+      });
+    }
+
+    // Remove photo
+    if (removePhotoBtn) {
+      removePhotoBtn.addEventListener('click', () => {
+        this.removeProfilePhoto();
+      });
+    }
+
+    // Display name input preview update
+    if (displayNameInput) {
+      displayNameInput.addEventListener('input', (e) => {
+        const newDisplayName = e.target.value;
+        const previewInitials = document.getElementById('preview-initials');
+        if (previewInitials) {
+          const initials = this.generateUserInitials(newDisplayName);
+          previewInitials.textContent = initials;
+        }
+      });
+    }
+
+    // Form submission
+    if (form) {
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        this.handleAccountSettingsSave();
+      };
+    }
+  },
+
+  // Handle photo upload
+  async handlePhotoUpload(file) {
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    try {
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const previewPhoto = document.getElementById('preview-photo');
+        const previewInitials = document.getElementById('preview-initials');
+        const removePhotoBtn = document.getElementById('remove-photo-btn');
+
+        if (previewPhoto && previewInitials && removePhotoBtn) {
+          previewPhoto.src = e.target.result;
+          previewPhoto.style.display = 'block';
+          previewInitials.style.display = 'none';
+          removePhotoBtn.style.display = 'block';
+        }
+      };
+      reader.readAsDataURL(file);
+
+      // Store file for later upload
+      this.pendingPhotoFile = file;
+
+    } catch (error) {
+      console.error('Error handling photo upload:', error);
+      alert('Error processing image. Please try again.');
+    }
+  },
+
+  // Remove profile photo
+  removeProfilePhoto() {
+    const previewPhoto = document.getElementById('preview-photo');
+    const previewInitials = document.getElementById('preview-initials');
+    const removePhotoBtn = document.getElementById('remove-photo-btn');
+    const photoInput = document.getElementById('profile-photo-input');
+
+    if (previewPhoto && previewInitials && removePhotoBtn && photoInput) {
+      previewPhoto.style.display = 'none';
+      previewInitials.style.display = 'block';
+      removePhotoBtn.style.display = 'none';
+      photoInput.value = '';
+    }
+
+    // Mark for removal
+    this.removePhoto = true;
+    this.pendingPhotoFile = null;
+  },
+
+  // Handle account settings save
+  async handleAccountSettingsSave() {
+    const displayNameInput = document.getElementById('display-name-input');
+    const submitBtn = document.querySelector('#account-settings-form button[type="submit"]');
+    const selectedColorOption = document.querySelector('.color-option.selected');
+
+    if (!displayNameInput || !submitBtn) return;
+
+    const newDisplayName = displayNameInput.value.trim();
+    
+    // Validation
+    if (!newDisplayName) {
+      alert('Please enter a display name');
+      return;
+    }
+
+    if (newDisplayName.length > 50) {
+      alert('Display name must be 50 characters or less');
+      return;
+    }
+
+    // Disable submit button
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+
+    try {
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        throw new Error('No user is currently signed in');
+      }
+
+      // Prepare profile data
+      const profileData = {
+        backgroundColor: selectedColorOption ? selectedColorOption.dataset.color : '#596066',
+        lastUpdated: Date.now()
+      };
+
+      // Handle photo upload to Firebase Storage if needed
+      if (this.pendingPhotoFile) {
+        const photoURL = await this.uploadProfilePhoto(this.pendingPhotoFile, user.uid);
+        profileData.photoURL = photoURL;
+      } else if (this.removePhoto) {
+        // Remove photo from storage and profile
+        await this.deleteProfilePhoto(user.uid);
+        profileData.photoURL = null;
+      }
+
+      // Update user profile in Firebase Realtime Database
+      const userRef = window.db.ref(`users/${user.uid}`);
+      await userRef.update({
+        name: newDisplayName,
+        profile: profileData
+      });
+
+      // Update Firebase Auth profile
+      await user.updateProfile({
+        displayName: newDisplayName
+      });
+
+      // Success
+      alert('Account settings saved successfully!');
+      
+      // Update UI throughout the app
+      await this.updateUserNameDisplay(user);
+      await this.updateUserProfileDropdown(user);
+
+      // Close modal
+      const modal = document.getElementById('account-settings-modal');
+      modal.style.display = 'none';
+
+      // Reset flags
+      this.pendingPhotoFile = null;
+      this.removePhoto = false;
+
+      console.log('✅ Account settings saved successfully');
+
+    } catch (error) {
+      console.error('❌ Error saving account settings:', error);
+      alert('Failed to save account settings. Please try again.');
+    } finally {
+      // Re-enable submit button
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save Changes';
+    }
+  },
+
+  // Upload profile photo to Firebase Storage
+  async uploadProfilePhoto(file, userId) {
+    try {
+      // Check if Firebase Storage is available
+      if (!window.firebase.storage) {
+        throw new Error('Firebase Storage not available');
+      }
+
+      const storage = firebase.storage();
+      const storageRef = storage.ref();
+      const photoRef = storageRef.child(`profile-photos/${userId}/${Date.now()}_${file.name}`);
+
+      // Upload file
+      const snapshot = await photoRef.put(file);
+      
+      // Get download URL
+      const downloadURL = await snapshot.ref.getDownloadURL();
+      
+      return downloadURL;
+
+    } catch (error) {
+      console.error('Error uploading profile photo:', error);
+      throw new Error('Failed to upload photo. Please try again.');
+    }
+  },
+
+  // Delete profile photo from Firebase Storage
+  async deleteProfilePhoto(userId) {
+    try {
+      const user = firebase.auth().currentUser;
+      if (!user) return;
+
+      // Get current photo URL from database
+      const userRef = window.db.ref(`users/${userId}/profile/photoURL`);
+      const snapshot = await userRef.once('value');
+      const photoURL = snapshot.val();
+
+      if (photoURL && window.firebase.storage) {
+        // Delete from storage
+        const storage = firebase.storage();
+        const photoRef = storage.refFromURL(photoURL);
+        await photoRef.delete();
+      }
+
+    } catch (error) {
+      console.error('Error deleting profile photo:', error);
+      // Don't throw error - just log it since the main update should still work
     }
   }
 };
