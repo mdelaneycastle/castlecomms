@@ -4370,15 +4370,9 @@ async function createTicketFromModal() {
     
     // Check for COFT reprocessing override for team member
     let coftTeamMemberOverride = null;
-    if (isCOFTForm && coftData) {
-      console.log('COFT Type detected:', coftData.coftType);
-      if (coftData.coftType === 'reprocessing') {
-        console.log('Setting Katie Lewis override for reprocessing ticket');
-        // Override COFT team member for reprocessing tickets
-        coftTeamMemberOverride = 'Katie Lewis';
-      } else {
-        console.log('Not reprocessing - using normal assignment');
-      }
+    if (isCOFTForm && coftData && coftData.coftType === 'reprocessing') {
+      // Override COFT team member for reprocessing tickets
+      coftTeamMemberOverride = 'Katie Lewis';
     }
     
     const ticketData = {
@@ -5196,11 +5190,6 @@ function getCOFTTeamMember(email) {
   
   // Gerald's locations
   const geraldLocations = ['usa', 'web'];
-  
-  // Katie Lewis email
-  if (emailLower === 'klewis@castlefineart.com') {
-    return 'Katie Lewis';
-  }
   
   // Check which team member based on email prefix
   for (const location of philippaLocations) {
