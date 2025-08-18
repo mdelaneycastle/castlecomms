@@ -488,6 +488,75 @@ const updateUserHttp = onRequest({ region: "europe-west1" }, async (req, res) =>
 });
 
 /**
+ * Delete user HTTP endpoint (Admin only)
+ */
+const deleteUserHttp = onRequest({ region: "europe-west1" }, async (req, res) => {
+  corsHandler(req, res, async () => {
+    if (req.method === 'OPTIONS') {
+      res.status(204).send('');
+      return;
+    }
+
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed. Use POST." });
+    }
+
+    try {
+      // Verify admin authentication
+      const authorization = req.headers.authorization;
+      if (!authorization || !authorization.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "Authorization token required" });
+      }
+
+      const idToken = authorization.substring(7);
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      
+      // Check if user has admin privileges
+      if (!decodedToken.admin) {
+        return res.status(403).json({ 
+          error: "Admin privileges required",
+          message: "Only users with admin privileges can delete users"
+        });
+      }
+
+      const { uid } = req.body;
+      
+      if (!uid) {
+        return res.status(400).json({ 
+          error: "Missing required field: uid" 
+        });
+      }
+
+      // Don't allow deleting self
+      if (uid === decodedToken.uid) {
+        return res.status(400).json({
+          error: "Cannot delete your own account"
+        });
+      }
+
+      // Delete the user
+      await admin.auth().deleteUser(uid);
+      
+      logger.info(`User deleted successfully by admin ${decodedToken.email}: ${uid}`);
+      
+      res.json({
+        success: true,
+        message: "User deleted successfully",
+        deletedUid: uid
+      });
+
+    } catch (error) {
+      logger.error("Delete user failed:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to delete user",
+        message: error.message
+      });
+    }
+  });
+});
+
+/**
  * Health check endpoint
  */
 const healthCheck = onRequest({ region: "europe-west1" }, (req, res) => {
@@ -504,5 +573,6 @@ module.exports = {
   listUsersHttp,
   createUserHttp,
   updateUserHttp,
+  deleteUserHttp,
   healthCheck
 };

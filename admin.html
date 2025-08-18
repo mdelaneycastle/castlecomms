@@ -108,6 +108,50 @@
       text-align: left;
     }
     th { background: #f0f0f0; }
+    
+    .admin-toggle {
+      background: none;
+      border: 1px solid #007bff;
+      color: #007bff;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .admin-toggle.active {
+      background: #007bff;
+      color: white;
+    }
+    .admin-toggle:hover { background: #0056b3; color: white; }
+    
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .delete-btn:hover { background: #c82333; }
+    
+    .status-message {
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin: 1rem 0;
+      font-weight: 500;
+    }
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .status-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
   </style>
 </head>
 <body>
@@ -168,7 +212,13 @@
   <h2>User Management</h2>
   <table id="user-table">
     <thead>
-      <tr><th>UID</th><th>Email</th><th>Display Name</th></tr>
+      <tr>
+        <th>Email</th>
+        <th>Display Name</th>
+        <th>Admin Status</th>
+        <th>Communications Admin</th>
+        <th>Actions</th>
+      </tr>
     </thead>
     <tbody></tbody>
   </table>
@@ -184,6 +234,9 @@
 
 <!-- Admin page specific logic -->
 <script>
+  let currentUser = null;
+  let allUsers = [];
+
   // Additional admin-specific auth check
   firebase.auth().onAuthStateChanged(async user => {
     if (!user) {
@@ -199,7 +252,253 @@
       return;
     }
 
+    currentUser = user;
+    await loadUsers();
+    setupEventListeners();
   });
+
+  // Load all users
+  async function loadUsers() {
+    try {
+      const token = await currentUser.getIdToken();
+      const response = await fetch('https://listusershttp-ngp3khlsna-ew.a.run.app', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      allUsers = data.users || [];
+      displayUsers();
+      
+      // Add the new users as admins if they're not already
+      await ensureUsersAreAdmins(['pchapman@washingtongreen.co.uk', 'jdurrant@castlefineart.com']);
+      
+    } catch (error) {
+      console.error('Error loading users:', error);
+      showStatus('Failed to load users: ' + error.message, 'error');
+    }
+  }
+
+  // Ensure specific users are admins
+  async function ensureUsersAreAdmins(emails) {
+    for (const email of emails) {
+      const user = allUsers.find(u => u.email === email);
+      if (user && !user.customClaims?.admin) {
+        console.log(`Making ${email} an admin...`);
+        await toggleAdmin(user.uid, user.email, true);
+      }
+    }
+  }
+
+  // Display users in table
+  function displayUsers() {
+    const tbody = document.querySelector('#user-table tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = allUsers.map(user => `
+      <tr data-uid="${user.uid}">
+        <td>${user.email}</td>
+        <td>${user.displayName || 'Not set'}</td>
+        <td>
+          <button class="admin-toggle ${user.customClaims?.admin ? 'active' : ''}" 
+                  onclick="toggleAdmin('${user.uid}', '${user.email}', ${!user.customClaims?.admin})">
+            ${user.customClaims?.admin ? 'Admin' : 'Make Admin'}
+          </button>
+        </td>
+        <td>
+          <button class="admin-toggle ${user.customClaims?.communicationsAdmin ? 'active' : ''}" 
+                  onclick="toggleCommAdmin('${user.uid}', '${user.email}', ${!user.customClaims?.communicationsAdmin})">
+            ${user.customClaims?.communicationsAdmin ? 'Comm Admin' : 'Make Comm Admin'}
+          </button>
+        </td>
+        <td>
+          <button class="delete-btn" onclick="deleteUser('${user.uid}', '${user.email}')">
+            Delete
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Setup event listeners
+  function setupEventListeners() {
+    const createForm = document.getElementById('create-user-form');
+    if (createForm) {
+      createForm.addEventListener('submit', handleCreateUser);
+    }
+  }
+
+  // Handle create user form submission  
+  async function handleCreateUser(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('new-email').value;
+    const password = document.getElementById('new-password').value;
+    const displayName = document.getElementById('new-displayName').value;
+    const admin = document.getElementById('new-admin').checked;
+    const communicationsAdmin = document.getElementById('new-communicationsAdmin').checked;
+
+    try {
+      const token = await currentUser.getIdToken();
+      const response = await fetch('https://createuserhttp-ngp3khlsna-ew.a.run.app', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          displayName,
+          admin,
+          communicationsAdmin
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      showStatus(`User ${email} created successfully!`, 'success');
+      document.getElementById('create-user-form').reset();
+      await loadUsers(); // Refresh the list
+    } catch (error) {
+      console.error('Error creating user:', error);
+      showStatus('Failed to create user: ' + error.message, 'error');
+    }
+  }
+
+  // Toggle admin status
+  async function toggleAdmin(uid, email, makeAdmin) {
+    try {
+      const user = allUsers.find(u => u.uid === uid);
+      const currentClaims = user?.customClaims || {};
+      
+      const token = await currentUser.getIdToken();
+      const response = await fetch('https://updateuserhttp-ngp3khlsna-ew.a.run.app', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          uid,
+          customClaims: { 
+            ...currentClaims, 
+            admin: makeAdmin 
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      showStatus(`${makeAdmin ? 'Granted' : 'Removed'} admin privileges for ${email}`, 'success');
+      await loadUsers(); // Refresh the list
+    } catch (error) {
+      console.error('Error toggling admin:', error);
+      showStatus('Failed to update admin status: ' + error.message, 'error');
+    }
+  }
+
+  // Toggle communications admin status
+  async function toggleCommAdmin(uid, email, makeCommAdmin) {
+    try {
+      const user = allUsers.find(u => u.uid === uid);
+      const currentClaims = user?.customClaims || {};
+      
+      const token = await currentUser.getIdToken();
+      const response = await fetch('https://updateuserhttp-ngp3khlsna-ew.a.run.app', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          uid,
+          customClaims: { 
+            ...currentClaims, 
+            communicationsAdmin: makeCommAdmin 
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      showStatus(`${makeCommAdmin ? 'Granted' : 'Removed'} communications admin privileges for ${email}`, 'success');
+      await loadUsers(); // Refresh the list
+    } catch (error) {
+      console.error('Error toggling communications admin:', error);
+      showStatus('Failed to update communications admin status: ' + error.message, 'error');
+    }
+  }
+
+  // Delete user
+  async function deleteUser(uid, email) {
+    if (!confirm(`Are you sure you want to delete user ${email}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const token = await currentUser.getIdToken();
+      const response = await fetch('https://europe-west1-castle-comms.cloudfunctions.net/deleteUserHttp', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ uid })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      showStatus(`User ${email} deleted successfully!`, 'success');
+      await loadUsers(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      showStatus('Failed to delete user: ' + error.message, 'error');
+    }
+  }
+
+  // Show status message
+  function showStatus(message, type) {
+    // Remove existing status messages
+    const existing = document.querySelector('.status-message');
+    if (existing) existing.remove();
+
+    const statusDiv = document.createElement('div');
+    statusDiv.className = `status-message status-${type}`;
+    statusDiv.textContent = message;
+    
+    const main = document.querySelector('main');
+    main.insertBefore(statusDiv, main.firstChild);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (statusDiv.parentNode) {
+        statusDiv.remove();
+      }
+    }, 5000);
+  }
+
+  // Make functions globally available
+  window.toggleAdmin = toggleAdmin;
+  window.toggleCommAdmin = toggleCommAdmin;
+  window.deleteUser = deleteUser;
 
 </script>
 
