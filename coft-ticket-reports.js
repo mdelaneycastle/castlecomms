@@ -5,53 +5,107 @@
 
 console.log('📊 COFT Ticket Reports module loaded');
 
-// COFT team members configuration
-const COFT_TEAM_MEMBERS = [
-  { email: 'pchapman@washingtongreen.co.uk', name: 'Paul Chapman' },
-  { email: 'jdurrant@castlefineart.com', name: 'Jenny Durrant' },
-  { email: 'amelia@castlefineart.com', name: 'Amelia' },
-  // Add more COFT team members as needed
-];
+// COFT team members based on the same logic used in tickets display
+const COFT_TEAM_MEMBERS = ['Philippa', 'Amelia', 'Tara', 'Gerald', 'Katie Lewis'];
 
 /**
- * Get COFT team member name from email
+ * Get COFT team member based on email address (same logic as tickets.html)
  */
-function getCOFTMemberName(email) {
-  const member = COFT_TEAM_MEMBERS.find(m => m.email.toLowerCase() === email.toLowerCase());
-  return member ? member.name : null;
-}
-
-/**
- * Check if an email belongs to a COFT team member
- */
-function isCOFTMember(email) {
-  return COFT_TEAM_MEMBERS.some(member => 
-    member.email.toLowerCase() === email.toLowerCase()
-  );
+function getCOFTTeamMember(email) {
+  if (!email) return '-';
+  
+  const emailLower = email.toLowerCase();
+  
+  // Extract the prefix before @ symbol
+  const emailPrefix = emailLower.split('@')[0];
+  
+  // Philippa's locations
+  const philippaLocations = [
+    'bluewater', 'brighton', 'chester', 'coventgarden', 'guildford', 
+    'harrogate', 'leamington', 'liverpool', 'manchester', 'oxford', 
+    'reading', 'scp', 'windsor'
+  ];
+  
+  // Amelia's locations
+  const ameliaLocations = [
+    'bristol', 'cheltenham', 'edinburgh', 'exeter', 'glasgow', 
+    'mailbox', 'marlow', 'newcastle', 'norwich', 'nottingham', 
+    'tunbridgewells', 'winchester'
+  ];
+  
+  // Tara's locations
+  const taraLocations = [
+    'bath', 'cambridge', 'canterbury', 'cardiff', 'derby', 'icc', 
+    'leeds', 'meadowhall', 'miltonkeynes', 'sms', 'stamford', 
+    'stratforduponavon', 'york'
+  ];
+  
+  // Gerald's locations
+  const geraldLocations = ['usa', 'web'];
+  
+  // Check which team member based on email prefix
+  for (const location of philippaLocations) {
+    if (emailPrefix.startsWith(location)) {
+      return 'Philippa';
+    }
+  }
+  
+  for (const location of ameliaLocations) {
+    if (emailPrefix.startsWith(location)) {
+      return 'Amelia';
+    }
+  }
+  
+  for (const location of taraLocations) {
+    if (emailPrefix.startsWith(location)) {
+      return 'Tara';
+    }
+  }
+  
+  for (const location of geraldLocations) {
+    if (emailPrefix.startsWith(location)) {
+      return 'Gerald';
+    }
+  }
+  
+  // Default if no match found
+  return '-';
 }
 
 /**
  * Get COFT team member from ticket
  */
 function getCOFTTeamMemberFromTicket(ticket) {
-  // Check assigned-to field first
+  // Check for override first (for reprocessing tickets)
+  if (ticket.coftTeamMemberOverride) {
+    return ticket.coftTeamMemberOverride;
+  }
+  
+  // Check assigned-to field
   if (ticket.assignedTo) {
-    if (ticket.assignedTo.type === 'individual' && ticket.assignedTo.email) {
-      const memberName = getCOFTMemberName(ticket.assignedTo.email);
-      if (memberName) return memberName;
-    } else if (ticket.assignedTo.type === 'team' && ticket.assignedTo.teamMembers) {
-      // Find first COFT member in team
+    if (ticket.assignedTo.type === 'team' && ticket.assignedTo.teamMembers) {
+      // Check team members for COFT assignment
       for (const member of ticket.assignedTo.teamMembers) {
-        const memberName = getCOFTMemberName(member.email);
-        if (memberName) return memberName;
+        const memberName = getCOFTTeamMember(member.email);
+        if (memberName !== '-') {
+          return memberName;
+        }
+      }
+    } else if (ticket.assignedTo.email) {
+      // Check individual assignment
+      const memberName = getCOFTTeamMember(ticket.assignedTo.email);
+      if (memberName !== '-') {
+        return memberName;
       }
     }
   }
   
   // Check created-by field as fallback
   if (ticket.createdBy && ticket.createdBy.email) {
-    const memberName = getCOFTMemberName(ticket.createdBy.email);
-    if (memberName) return memberName;
+    const memberName = getCOFTTeamMember(ticket.createdBy.email);
+    if (memberName !== '-') {
+      return memberName;
+    }
   }
   
   return null;
@@ -100,10 +154,9 @@ function generateCOFTReportData(tickets, year, month) {
   
   // Initialize report data for each COFT member
   const reportData = {};
-  COFT_TEAM_MEMBERS.forEach(member => {
-    reportData[member.name] = {
-      name: member.name,
-      email: member.email,
+  COFT_TEAM_MEMBERS.forEach(memberName => {
+    reportData[memberName] = {
+      name: memberName,
       open: 0,
       'in-progress': 0,
       'on-hold': 0,
@@ -148,7 +201,6 @@ function generateCOFTReportData(tickets, year, month) {
 function generateCSV(reportData) {
   const headers = [
     'COFT Team Member',
-    'Email',
     'Open',
     'In Progress',
     'On Hold',
@@ -162,7 +214,6 @@ function generateCSV(reportData) {
   reportData.data.forEach(member => {
     const row = [
       `"${member.name}"`,
-      `"${member.email}"`,
       member.open,
       member['in-progress'],
       member['on-hold'],
@@ -175,10 +226,10 @@ function generateCSV(reportData) {
   
   // Add summary row
   csv += '\n';
-  csv += '"SUMMARY",,,,,,\n';
-  csv += `"Total Tickets",,,,,${reportData.summary.totalTickets},\n`;
-  csv += `"Total Resolved",,,,,${reportData.summary.totalResolved},\n`;
-  csv += `"Overall Resolution Rate (%)",,,,,${reportData.summary.overallResolutionRate},\n`;
+  csv += '"SUMMARY",,,,,\n';
+  csv += `"Total Tickets",,,,${reportData.summary.totalTickets},\n`;
+  csv += `"Total Resolved",,,,${reportData.summary.totalResolved},\n`;
+  csv += `"Overall Resolution Rate (%)",,,,${reportData.summary.overallResolutionRate},\n`;
   
   return csv;
 }
@@ -196,7 +247,7 @@ function generateHTMLReport(reportData) {
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
         <thead>
           <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Team Member</th>
+            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">COFT Team Member</th>
             <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">Open</th>
             <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">In Progress</th>
             <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">On Hold</th>
