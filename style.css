@@ -2708,7 +2708,7 @@ admin-link {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background-color: #596066;
+  background-color: #45494E;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2873,18 +2873,18 @@ form .color-option {
 }
 
 /* Specific color overrides to ensure colors display */
-form .color-option[data-color="#596066"] { background: #596066 !important; background-color: #596066 !important; }
-form .color-option[data-color="#4f46e5"] { background: #4f46e5 !important; background-color: #4f46e5 !important; }
-form .color-option[data-color="#059669"] { background: #059669 !important; background-color: #059669 !important; }
-form .color-option[data-color="#dc2626"] { background: #dc2626 !important; background-color: #dc2626 !important; }
-form .color-option[data-color="#ea580c"] { background: #ea580c !important; background-color: #ea580c !important; }
-form .color-option[data-color="#7c3aed"] { background: #7c3aed !important; background-color: #7c3aed !important; }
-form .color-option[data-color="#0891b2"] { background: #0891b2 !important; background-color: #0891b2 !important; }
-form .color-option[data-color="#be123c"] { background: #be123c !important; background-color: #be123c !important; }
-form .color-option[data-color="#374151"] { background: #374151 !important; background-color: #374151 !important; }
-form .color-option[data-color="#1f2937"] { background: #1f2937 !important; background-color: #1f2937 !important; }
-form .color-option[data-color="#92400e"] { background: #92400e !important; background-color: #92400e !important; }
-form .color-option[data-color="#581c87"] { background: #581c87 !important; background-color: #581c87 !important; }
+form .color-option[data-color="#DC2626"] { background: #DC2626 !important; background-color: #DC2626 !important; }
+form .color-option[data-color="#F97316"] { background: #F97316 !important; background-color: #F97316 !important; }
+form .color-option[data-color="#F59E0B"] { background: #F59E0B !important; background-color: #F59E0B !important; }
+form .color-option[data-color="#FACC15"] { background: #FACC15 !important; background-color: #FACC15 !important; }
+form .color-option[data-color="#84CC16"] { background: #84CC16 !important; background-color: #84CC16 !important; }
+form .color-option[data-color="#10B981"] { background: #10B981 !important; background-color: #10B981 !important; }
+form .color-option[data-color="#14B8A6"] { background: #14B8A6 !important; background-color: #14B8A6 !important; }
+form .color-option[data-color="#0EA5E9"] { background: #0EA5E9 !important; background-color: #0EA5E9 !important; }
+form .color-option[data-color="#2563EB"] { background: #2563EB !important; background-color: #2563EB !important; }
+form .color-option[data-color="#4F46E5"] { background: #4F46E5 !important; background-color: #4F46E5 !important; }
+form .color-option[data-color="#7C3AED"] { background: #7C3AED !important; background-color: #7C3AED !important; }
+form .color-option[data-color="#45494E"] { background: #45494E !important; background-color: #45494E !important; }
 
 /* Display Name Section */
 .field-help {
