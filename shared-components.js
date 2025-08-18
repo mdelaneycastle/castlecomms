@@ -224,10 +224,10 @@ window.sharedComponents = {
       });
     }
 
-    // Change password (placeholder for now)
+    // Change password functionality
     if (changePasswordBtn) {
       changePasswordBtn.addEventListener('click', () => {
-        alert('Change password feature coming soon!');
+        this.openChangePasswordModal();
         dropdownMenu.classList.remove('show');
       });
     }
@@ -606,6 +606,166 @@ window.sharedComponents = {
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
+  },
+
+  // Open change password modal
+  openChangePasswordModal() {
+    const modal = document.getElementById('change-password-modal');
+    if (!modal) {
+      console.error('Change password modal not found');
+      return;
+    }
+
+    // Show modal
+    modal.style.display = 'block';
+
+    // Setup modal events
+    this.setupChangePasswordModalEvents();
+
+    // Focus on first input
+    setTimeout(() => {
+      const firstInput = modal.querySelector('#current-password');
+      if (firstInput) {
+        firstInput.focus();
+      }
+    }, 100);
+  },
+
+  // Setup change password modal events
+  setupChangePasswordModalEvents() {
+    const modal = document.getElementById('change-password-modal');
+    const closeBtn = document.getElementById('change-password-close');
+    const cancelBtn = document.getElementById('change-password-cancel');
+    const form = document.getElementById('change-password-form');
+
+    // Close modal events
+    const closeModal = () => {
+      modal.style.display = 'none';
+      form.reset();
+    };
+
+    // Close button
+    if (closeBtn) {
+      closeBtn.onclick = closeModal;
+    }
+
+    // Cancel button
+    if (cancelBtn) {
+      cancelBtn.onclick = closeModal;
+    }
+
+    // Click outside modal to close
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    };
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'block') {
+        closeModal();
+      }
+    });
+
+    // Form submission
+    if (form) {
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        this.handlePasswordChange();
+      };
+    }
+  },
+
+  // Handle password change submission
+  async handlePasswordChange() {
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const submitBtn = document.querySelector('#change-password-form button[type="submit"]');
+
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      alert('New password must be at least 6 characters long');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      alert('New passwords do not match');
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      alert('New password must be different from current password');
+      return;
+    }
+
+    // Disable submit button
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Changing Password...';
+
+    try {
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        throw new Error('No user is currently signed in');
+      }
+
+      // Create credential with current password
+      const credential = firebase.auth.EmailAuthProvider.credential(
+        user.email,
+        currentPassword
+      );
+
+      // Re-authenticate user with current password
+      await user.reauthenticateWithCredential(credential);
+
+      // Update password
+      await user.updatePassword(newPassword);
+
+      // Success
+      alert('Password changed successfully!');
+      
+      // Close modal
+      const modal = document.getElementById('change-password-modal');
+      modal.style.display = 'none';
+      document.getElementById('change-password-form').reset();
+
+      console.log('✅ Password changed successfully');
+
+    } catch (error) {
+      console.error('❌ Error changing password:', error);
+      
+      // Handle specific error cases
+      let errorMessage = 'Failed to change password. ';
+      
+      switch (error.code) {
+        case 'auth/wrong-password':
+          errorMessage += 'Current password is incorrect.';
+          break;
+        case 'auth/weak-password':
+          errorMessage += 'New password is too weak.';
+          break;
+        case 'auth/requires-recent-login':
+          errorMessage += 'Please sign out and sign back in, then try again.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage += 'Too many failed attempts. Please try again later.';
+          break;
+        default:
+          errorMessage += error.message || 'Please try again.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      // Re-enable submit button
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Change Password';
+    }
   }
 };
 
