@@ -210,14 +210,6 @@
   </div>
 
   <h2>User Management</h2>
-  
-  <!-- Quick Admin Assignment -->
-  <div style="background: #e7f3ff; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
-    <h4 style="margin: 0 0 0.5rem 0;">Quick Actions</h4>
-    <button onclick="makeSpecificUsersAdmin()" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">
-      Make Paul Chapman & Jenny Durrant Admins
-    </button>
-  </div>
   <table id="user-table">
     <thead>
       <tr>
@@ -244,6 +236,9 @@
 <script>
   let currentUser = null;
   let allUsers = [];
+  
+  // Prevent script.js from loading the old user table
+  window.ADMIN_PAGE_CUSTOM_USER_TABLE = true;
 
   // Additional admin-specific auth check
   firebase.auth().onAuthStateChanged(async user => {
@@ -558,31 +553,10 @@
     }, 5000);
   }
 
-  // Make specific users admin (manual trigger)
-  async function makeSpecificUsersAdmin() {
-    const emails = ['pchapman@washingtongreen.co.uk', 'jdurrant@castlefineart.com'];
-    
-    for (const email of emails) {
-      const user = allUsers.find(u => u.email === email);
-      if (!user) {
-        showStatus(`User not found: ${email}`, 'error');
-        continue;
-      }
-      
-      if (user.customClaims?.admin) {
-        showStatus(`${email} is already an admin`, 'success');
-        continue;
-      }
-      
-      await toggleAdmin(user.uid, user.email, true);
-    }
-  }
-
   // Make functions globally available
   window.toggleAdmin = toggleAdmin;
   window.toggleCommAdmin = toggleCommAdmin;
   window.deleteUser = deleteUser;
-  window.makeSpecificUsersAdmin = makeSpecificUsersAdmin;
 
 </script>
 
