@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recreate Tickets Collection - Castle Comms</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    .status {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover { background: #0056b3; }
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      padding: 15px;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎫 Recreate Tickets Collection</h1>
+    <p>This tool will help you recreate the tickets collection in Firestore with proper structure and sample data.</p>
+    
+    <div class="warning">
+      ⚠️ <strong>Make sure you're logged in as an admin</strong> before running this tool.
+    </div>
+    
+    <div id="status"></div>
+    
+    <button onclick="checkAuthentication()">1. Check Authentication</button>
+    <button onclick="createSampleTickets()" id="createBtn" disabled>2. Create Sample Tickets</button>
+    <button onclick="goToTickets()">3. Go to Tickets Page</button>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  
+  <!-- Firebase config -->
+  <script src="firebase-init.js"></script>
+
+  <script>
+    let currentUser = null;
+    let db = null;
+
+    // Initialize Firebase
+    document.addEventListener('DOMContentLoaded', function() {
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          currentUser = user;
+          db = firebase.firestore();
+          showStatus('Firebase initialized successfully!', 'success');
+        } else {
+          showStatus('Please log in to use this tool', 'error');
+        }
+      });
+    });
+
+    function showStatus(message, type) {
+      const statusDiv = document.getElementById('status');
+      statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+    }
+
+    async function checkAuthentication() {
+      if (!currentUser) {
+        showStatus('❌ Not authenticated. Please log in first.', 'error');
+        return;
+      }
+
+      try {
+        // Check if user is admin
+        const token = await currentUser.getIdToken(true);
+        const claims = await currentUser.getIdTokenResult();
+        
+        if (claims.claims.admin) {
+          showStatus(`✅ Authenticated as admin: ${currentUser.email}`, 'success');
+          document.getElementById('createBtn').disabled = false;
+        } else {
+          showStatus('❌ Admin privileges required to create tickets', 'error');
+        }
+      } catch (error) {
+        showStatus(`❌ Error checking authentication: ${error.message}`, 'error');
+      }
+    }
+
+    async function createSampleTickets() {
+      if (!currentUser || !db) {
+        showStatus('❌ Not authenticated or database not initialized', 'error');
+        return;
+      }
+
+      try {
+        showStatus('🔄 Creating sample tickets...', 'info');
+        
+        // Get user display name
+        const userName = currentUser.displayName || currentUser.email.split('@')[0];
+        
+        // Sample ticket 1 - COFT ticket
+        const ticket1 = {
+          ticketId: 'TKT-' + Date.now(),
+          title: 'Sample COFT Ticket',
+          description: 'This is a sample ticket to test the COFT system functionality.',
+          category: 'Client Order Fulfilment Team/Group',
+          status: 'in-progress',
+          priority: 'medium',
+          createdBy: {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            name: userName
+          },
+          assignedTo: {
+            type: 'team',
+            teamName: 'COFT',
+            teamMembers: [
+              { email: 'pchapman@washingtongreen.co.uk', name: 'Paul Chapman' },
+              { email: 'jdurrant@castlefineart.com', name: 'Jenny Durrant' }
+            ]
+          },
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          messages: [{
+            content: 'Ticket created successfully!',
+            senderEmail: 'system',
+            senderName: 'System',
+            timestamp: new Date()
+          }],
+          timer: {
+            startTime: Date.now(),
+            totalElapsed: 0,
+            lastStartTime: Date.now(),
+            totalPausedTime: 0,
+            isRunning: true
+          }
+        };
+
+        // Sample ticket 2 - IT Support ticket
+        const ticket2 = {
+          ticketId: 'TKT-' + (Date.now() + 1),
+          title: 'Sample IT Support Ticket',
+          description: 'This is a sample IT support ticket.',
+          category: 'IT Support',
+          status: 'in-progress',
+          priority: 'high',
+          createdBy: {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            name: userName
+          },
+          assignedTo: {
+            type: 'individual',
+            email: currentUser.email,
+            name: userName
+          },
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          messages: [{
+            content: 'IT Support ticket created',
+            senderEmail: 'system',
+            senderName: 'System',
+            timestamp: new Date()
+          }],
+          timer: {
+            startTime: Date.now(),
+            totalElapsed: 0,
+            lastStartTime: Date.now(),
+            totalPausedTime: 0,
+            isRunning: true
+          }
+        };
+
+        // Create tickets in Firestore
+        await db.collection('tickets').add(ticket1);
+        await db.collection('tickets').add(ticket2);
+        
+        showStatus('✅ Sample tickets created successfully! Collection has been recreated.', 'success');
+        
+        // Show collection structure
+        setTimeout(() => {
+          showCollectionStructure();
+        }, 1000);
+
+      } catch (error) {
+        console.error('Error creating sample tickets:', error);
+        showStatus(`❌ Error creating tickets: ${error.message}`, 'error');
+      }
+    }
+
+    function showCollectionStructure() {
+      const structure = `
+        <div class="info">
+          <h3>✅ Collection Structure Created:</h3>
+          <ul>
+            <li><strong>Collection:</strong> tickets</li>
+            <li><strong>Document Fields:</strong>
+              <ul>
+                <li>ticketId (string) - Unique ticket identifier</li>
+                <li>title (string) - Ticket title</li>
+                <li>description (string) - Ticket description</li>
+                <li>category (string) - Department/category</li>
+                <li>status (string) - in-progress, on-hold, resolved</li>
+                <li>priority (string) - low, medium, high</li>
+                <li>createdBy (object) - uid, email, name</li>
+                <li>assignedTo (object) - type, email/teamName, name/teamMembers</li>
+                <li>messages (array) - Chat messages</li>
+                <li>timer (object) - Time tracking data</li>
+                <li>createdAt (timestamp)</li>
+                <li>updatedAt (timestamp)</li>
+              </ul>
+            </li>
+          </ul>
+          <p><strong>The tickets collection is now ready for use!</strong></p>
+        </div>
+      `;
+      
+      document.getElementById('status').innerHTML += structure;
+    }
+
+    function goToTickets() {
+      window.location.href = 'tickets.html';
+    }
+  </script>
+</body>
+</html>
