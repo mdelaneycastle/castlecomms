@@ -3749,11 +3749,13 @@ async function loadTickets() {
       // Extract COFT data if this is a COFT ticket
       const coftData = extractCOFTDataFromTicket(ticket);
       
-      // Get COFT team member based on assigned email OR created by email
+      // Get COFT team member based on override, assigned email OR created by email
       let coftTeamMember = '-';
       
-      // First check assigned to field
-      if (ticket.assignedTo) {
+      // First check for override (for reprocessing tickets)
+      if (ticket.coftTeamMemberOverride) {
+        coftTeamMember = ticket.coftTeamMemberOverride;
+      } else if (ticket.assignedTo) {
         if (ticket.assignedTo.teamMembers) {
           // Check team members for COFT assignment
           for (const member of ticket.assignedTo.teamMembers) {
@@ -4354,42 +4356,26 @@ async function createTicketFromModal() {
     // Generate ticket ID
     const ticketId = 'TKT-' + Date.now().toString().slice(-6);
     
-    // Check for COFT reprocessing override
-    let finalAssignedTo;
+    // Use normal assignment logic for all tickets
+    const finalAssignedTo = isTeamAssignment ? {
+      type: 'team',
+      teamId: assignedTeam.id,
+      teamName: assignedTeam.name,
+      teamMembers: assignedTeam.members
+    } : {
+      type: 'individual',
+      email: assignedUser.email,
+      name: assignedUser.name
+    };
+    
+    // Check for COFT reprocessing override for team member
+    let coftTeamMemberOverride = null;
     if (isCOFTForm) {
       const coftData = collectCOFTFormData();
       if (coftData && coftData.coftType === 'reprocessing') {
-        // Override assignment for reprocessing tickets - assign to Katie Lewis
-        finalAssignedTo = {
-          type: 'individual',
-          email: 'klewis@castlefineart.com',
-          name: 'Katie Lewis'
-        };
-      } else {
-        // Use normal assignment logic for order chasing tickets
-        finalAssignedTo = isTeamAssignment ? {
-          type: 'team',
-          teamId: assignedTeam.id,
-          teamName: assignedTeam.name,
-          teamMembers: assignedTeam.members
-        } : {
-          type: 'individual',
-          email: assignedUser.email,
-          name: assignedUser.name
-        };
+        // Override COFT team member for reprocessing tickets
+        coftTeamMemberOverride = 'Katie Lewis';
       }
-    } else {
-      // Use normal assignment logic for non-COFT tickets
-      finalAssignedTo = isTeamAssignment ? {
-        type: 'team',
-        teamId: assignedTeam.id,
-        teamName: assignedTeam.name,
-        teamMembers: assignedTeam.members
-      } : {
-        type: 'individual',
-        email: assignedUser.email,
-        name: assignedUser.name
-      };
     }
     
     const ticketData = {
@@ -4404,6 +4390,7 @@ async function createTicketFromModal() {
         name: creatorName
       },
       assignedTo: finalAssignedTo,
+      coftTeamMemberOverride: coftTeamMemberOverride,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       messages: [],
@@ -5207,6 +5194,11 @@ function getCOFTTeamMember(email) {
   // Gerald's locations
   const geraldLocations = ['usa', 'web'];
   
+  // Katie Lewis email
+  if (emailLower === 'klewis@castlefineart.com') {
+    return 'Katie Lewis';
+  }
+  
   // Check which team member based on email prefix
   for (const location of philippaLocations) {
     if (emailPrefix.startsWith(location)) {
@@ -5920,8 +5912,10 @@ function matchesAdvancedFilters(ticket) {
   if (advancedFilters.coftTeamMember) {
     let teamMemberMatch = false;
     
-    // Check if ticket is assigned to COFT team and get the team member
-    if (ticket.assignedTo && ticket.assignedTo.teamMembers) {
+    // First check for override (for reprocessing tickets)
+    if (ticket.coftTeamMemberOverride) {
+      teamMemberMatch = ticket.coftTeamMemberOverride === advancedFilters.coftTeamMember;
+    } else if (ticket.assignedTo && ticket.assignedTo.teamMembers) {
       // Check team members for COFT assignment
       teamMemberMatch = ticket.assignedTo.teamMembers.some(member => {
         const memberName = getCOFTTeamMember(member.email);
