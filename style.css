@@ -1094,6 +1094,160 @@ admin-link {
   color: var(--secondary-color);
 }
 
+/* User Profile Dropdown Styles */
+.user-profile-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.user-profile-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.user-profile-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.user-profile-btn:active {
+  transform: translateY(0);
+}
+
+.user-initials {
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(216, 209, 197, 0.3);
+  min-width: 220px;
+  z-index: 1001;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.profile-dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-header {
+  padding: 1rem;
+  background: rgba(248, 249, 250, 0.8);
+  border-bottom: 1px solid rgba(216, 209, 197, 0.2);
+}
+
+.dropdown-user-name {
+  display: block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--secondary-color);
+  margin-bottom: 0.25rem;
+}
+
+.dropdown-user-email {
+  display: block;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(216, 209, 197, 0.2);
+  margin: 0.5rem 0;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dropdown-item:hover {
+  background: rgba(248, 249, 250, 0.8);
+}
+
+.dropdown-item.dropdown-signout {
+  color: #dc3545;
+}
+
+.dropdown-item.dropdown-signout:hover {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.dropdown-icon {
+  font-size: 1rem;
+  width: 1.2rem;
+  text-align: center;
+}
+
+/* Mobile responsive styles for user profile dropdown */
+@media (max-width: 768px) {
+  .user-profile-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .user-initials {
+    font-size: 0.9rem;
+  }
+  
+  .profile-dropdown-menu {
+    min-width: 200px;
+    right: -10px;
+  }
+  
+  .dropdown-header {
+    padding: 0.875rem;
+  }
+  
+  .dropdown-user-name {
+    font-size: 0.9rem;
+  }
+  
+  .dropdown-user-email {
+    font-size: 0.75rem;
+  }
+  
+  .dropdown-item {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.85rem;
+  }
+}
+
 /* Modern Main Container */
 .modern-main {
   max-width: 1200px;

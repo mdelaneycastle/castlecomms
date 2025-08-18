@@ -18,7 +18,31 @@
       <div class="user-greeting">Hi <span class="user-name" id="user-name-display">Loading...</span></div>
     </div>
     <div class="header-right">
-      <!-- Empty right section for balance -->
+      <div class="user-profile-dropdown">
+        <button class="user-profile-btn" id="user-profile-btn">
+          <span class="user-initials" id="user-initials">MD</span>
+        </button>
+        <div class="profile-dropdown-menu" id="profile-dropdown-menu">
+          <div class="dropdown-header">
+            <span class="dropdown-user-name" id="dropdown-user-name">Loading...</span>
+            <span class="dropdown-user-email" id="dropdown-user-email">Loading...</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" id="account-settings-btn">
+            <span class="dropdown-icon">⚙️</span>
+            Account Settings
+          </button>
+          <button class="dropdown-item" id="change-password-btn">
+            <span class="dropdown-icon">🔐</span>
+            Change Password
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item dropdown-signout" id="profile-signout-btn">
+            <span class="dropdown-icon">🚪</span>
+            Sign Out
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </header>
