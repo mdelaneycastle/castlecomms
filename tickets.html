@@ -285,23 +285,11 @@
       padding: 0.5rem;
     }
 
-    /* Ticket Counter Display - Full Width Bar */
+    /* Ticket Counter Display - Simple Left Aligned */
     .ticket-counter-display {
-      text-align: center;
+      text-align: left;
       margin: 1rem 0;
-      padding: 0.75rem;
-      background: rgba(102, 126, 234, 0.1);
-      border-radius: 8px;
-      border: 1px solid rgba(102, 126, 234, 0.2);
-      width: 100%;
-      box-sizing: border-box;
-      /* Position relative to break out of container constraints */
-      position: relative;
-      left: 50%;
-      right: 50%;
-      margin-left: -50vw;
-      margin-right: -50vw;
-      width: 100vw;
+      padding: 0.5rem 0;
     }
 
     .counter-text {
@@ -841,6 +829,10 @@
     /* Search Section */
     .ticket-search-section {
       margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
     }
 
     .search-input-group {
@@ -2561,7 +2553,6 @@
         <h3>🎫 Internal System Tickets</h3>
         <div class="header-buttons">
           <button class="raise-ticket-btn" onclick="openCreateTicketModal()">🆕 Raise a Ticket</button>
-          <button class="extract-report-btn" onclick="openCOFTReportModal()">📊 Extract COFT Report</button>
         </div>
       </div>
       
@@ -2576,6 +2567,7 @@
             <input type="text" id="ticket-search" class="ticket-search-input" placeholder="Search tickets by title, ID, or description...">
             <button class="search-clear-btn hidden" id="search-clear-btn" onclick="clearSearch()">×</button>
           </div>
+          <button class="extract-report-btn" onclick="openCOFTReportModal()">📊 Extract COFT Report</button>
         </div>
         
         <!-- Visible Ticket Counter - Full Width Bar -->
@@ -4475,11 +4467,6 @@ function setupAssignmentTypeHandlers() {
 function handleTeamSelection() {
   const teamSelect = document.getElementById('modal-assign-team');
   const categorySelect = document.getElementById('modal-ticket-category');
-  
-    selectedValue: teamSelect.value,
-    selectedText: teamSelect.selectedOptions[0]?.text,
-    allOptions: Array.from(teamSelect.options).map(opt => ({ value: opt.value, text: opt.text }))
-  });
   
   // Reset category when team changes
   categorySelect.value = '';
