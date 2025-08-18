@@ -4265,17 +4265,11 @@ async function createTicketFromModal() {
     checkbox.removeAttribute('required');
   });
   
-  // Add debugging for each element
+  // Get form elements
   const titleElement = document.getElementById('modal-ticket-title');
   const descriptionElement = document.getElementById('modal-ticket-description');
   const categoryElement = document.getElementById('modal-ticket-category');
   const createBtn = document.getElementById('modal-create-ticket-btn');
-  
-    titleElement: !!titleElement,
-    descriptionElement: !!descriptionElement,
-    categoryElement: !!categoryElement,
-    createBtn: !!createBtn
-  });
   
   if (!titleElement) {
     console.error('❌ Title element not found');
