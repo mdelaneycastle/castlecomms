@@ -601,16 +601,7 @@
     .multiview-grid.two-reports {
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr;
-    }
-
-    .multiview-grid.three-reports {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
-    }
-
-    .multiview-grid.four-reports {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
+      gap: 1.5rem;
     }
 
     .multiview-report-container {
@@ -674,21 +665,12 @@
       border: none;
     }
 
-    /* Three reports special layout */
-    .multiview-grid.three-reports .multiview-report-container:first-child {
-      grid-column: span 2;
-    }
 
     @media (max-width: 768px) {
-      .multiview-grid.two-reports,
-      .multiview-grid.three-reports,
-      .multiview-grid.four-reports {
+      .multiview-grid.two-reports {
         grid-template-columns: 1fr;
         grid-template-rows: repeat(auto, 1fr);
-      }
-      
-      .multiview-grid.three-reports .multiview-report-container:first-child {
-        grid-column: span 1;
+        gap: 1rem;
       }
 
       .view-mode-toggle {
@@ -738,7 +720,7 @@
               <input type="radio" name="view-mode" value="single" checked onchange="setViewMode('single')"> Single View
             </label>
             <label>
-              <input type="radio" name="view-mode" value="multi" onchange="setViewMode('multi')"> Multi View
+              <input type="radio" name="view-mode" value="multi" onchange="setViewMode('multi')"> Side-by-Side (2 Reports)
             </label>
           </div>
           <button class="apply-selection-btn" onclick="applyReportSelection()">✅ View Selected Reports</button>
@@ -794,7 +776,7 @@
           </button>
           
           <div class="multiview-info">
-            <h3 id="multiview-title">Multi View</h3>
+            <h3 id="multiview-title">Side-by-Side View</h3>
             <span id="multiview-page-indicator">Page 1 of 1</span>
           </div>
           
@@ -1289,7 +1271,7 @@
     // Multiview functionality
     let currentViewMode = 'single';
     let currentMultiviewPage = 0;
-    let reportsPerPage = 4;
+    let reportsPerPage = 2;
 
     function setViewMode(mode) {
       currentViewMode = mode;
@@ -1341,7 +1323,15 @@
     function setupMultiviewContent() {
       const totalPages = Math.ceil(selectedReports.length / reportsPerPage);
       const pageIndicator = document.getElementById('multiview-page-indicator');
-      pageIndicator.textContent = `Page ${currentMultiviewPage + 1} of ${totalPages}`;
+      
+      const startReport = (currentMultiviewPage * reportsPerPage) + 1;
+      const endReport = Math.min(startReport + reportsPerPage - 1, selectedReports.length);
+      
+      if (totalPages === 1) {
+        pageIndicator.textContent = `Showing ${selectedReports.length} report${selectedReports.length === 1 ? '' : 's'}`;
+      } else {
+        pageIndicator.textContent = `Reports ${startReport}-${endReport} of ${selectedReports.length}`;
+      }
       
       // Update navigation buttons
       const prevBtn = document.querySelector('.multiview-prev-btn');
@@ -1349,6 +1339,10 @@
       
       prevBtn.disabled = currentMultiviewPage === 0;
       nextBtn.disabled = currentMultiviewPage >= totalPages - 1;
+      
+      // Update navigation button tooltips to reflect pair navigation
+      prevBtn.title = 'Previous pair of reports';
+      nextBtn.title = 'Next pair of reports';
     }
 
     function updateMultiviewDisplay() {
@@ -1359,15 +1353,8 @@
       const multiviewGrid = document.getElementById('multiview-grid');
       multiviewGrid.innerHTML = '';
       
-      // Set grid class based on number of reports on this page
-      multiviewGrid.className = 'multiview-grid';
-      if (pageReports.length === 2) {
-        multiviewGrid.classList.add('two-reports');
-      } else if (pageReports.length === 3) {
-        multiviewGrid.classList.add('three-reports');
-      } else if (pageReports.length === 4) {
-        multiviewGrid.classList.add('four-reports');
-      }
+      // Always use two-reports layout for side-by-side display (max 2 reports)
+      multiviewGrid.className = 'multiview-grid two-reports';
       
       // Create report containers
       pageReports.forEach((report, index) => {
