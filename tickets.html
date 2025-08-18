@@ -5658,7 +5658,7 @@ function getTimerDisplayForTicket(ticket) {
   let timerClass = '';
   let statusIcon = '';
   
-  if (ticket.timer.isRunning && ticket.status === 'in-progress') {
+  if (ticket.timer.isRunning && (ticket.status === 'open' || ticket.status === 'in-progress')) {
     displayTime = calculateCurrentElapsed(ticket.timer);
     timerClass = 'running';
     statusIcon = '⏱️';
