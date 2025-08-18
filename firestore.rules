@@ -127,18 +127,23 @@ service cloud.firestore {
         && data.ticketId.size() > 0
         && data.title is string
         && data.title.size() > 0
-        && data.title.size() <= 100
+        && data.title.size() <= 200
         && data.description is string
         && data.description.size() > 0
-        && data.description.size() <= 2000
+        && data.description.size() <= 3000
         && data.category is string
         && data.category.size() > 0
-        && data.status in ['open', 'on-hold', 'resolved']
+        && data.status in ['in-progress', 'on-hold', 'resolved']
         && data.createdBy is map
         && data.createdBy.keys().hasAll(['uid', 'email', 'name'])
         && data.assignedTo is map
         && validateTicketAssignment(data.assignedTo)
-        && data.createdAt is timestamp;
+        && data.createdAt is timestamp
+        // Allow optional fields
+        && (!('messages' in data) || data.messages is list)
+        && (!('timer' in data) || data.timer is map)
+        && (!('priority' in data) || data.priority is string)
+        && (!('updatedAt' in data) || data.updatedAt is timestamp);
     }
     
     // Helper function to validate ticket assignment (individual or team)
@@ -152,8 +157,7 @@ service cloud.firestore {
         ||
         // Team assignment
         (assignedTo.type == 'team'
-         && assignedTo.keys().hasAll(['type', 'teamId', 'teamName', 'teamMembers'])
-         && assignedTo.teamId is string
+         && assignedTo.keys().hasAll(['type', 'teamName', 'teamMembers'])
          && assignedTo.teamName is string
          && assignedTo.teamMembers is list)
         ||
