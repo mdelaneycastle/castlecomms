@@ -761,29 +761,17 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 });
 
-// Extract name from email
-function extractNameFromEmail(email) {
-  if (!email) return 'User';
-  
-  const emailName = email.split('@')[0];
-  return emailName
-    .replace(/[._-]/g, ' ')
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
-
-// Load all users using the same method as tickets/messages pages
+// Load all users using the same method as admin section
 let allUsers = [];
 
 async function loadUsers() {
   try {
-    // Load users from cloud function (same as newsfeed)
+    // Load users from cloud function (same as admin)
     if (typeof listUsers === 'function') {
       const users = await listUsers();
       allUsers = users.map(user => ({
         email: user.email,
-        name: user.displayName || extractNameFromEmail(user.email),
+        name: user.displayName || user.email, // Use displayName directly from user data
         uid: user.uid
       }));
       populateUserDropdown();
