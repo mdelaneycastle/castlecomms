@@ -677,14 +677,6 @@
             maxlength="50"
           />
         </div>
-        
-        <input 
-          type="text" 
-          class="author-input" 
-          id="noteAuthor" 
-          placeholder="Your name (optional)"
-          maxlength="50"
-        />
         <button type="submit" class="submit-btn">📌 Pin to Board</button>
       </form>
       <div id="message-area"></div>
@@ -917,7 +909,6 @@ function createPostItNote(noteData, index, docId = null) {
 function setupNoteForm() {
   const form = document.getElementById('noteForm');
   const contentInput = document.getElementById('noteContent');
-  const authorInput = document.getElementById('noteAuthor');
   const recognizedUserSelect = document.getElementById('recognizedUser');
   const otherUserInput = document.getElementById('otherUser');
   
@@ -939,7 +930,8 @@ function setupNoteForm() {
     e.preventDefault();
     
     const content = contentInput.value.trim();
-    const author = authorInput.value.trim();
+    // Use current user's display name automatically
+    const author = currentUser?.displayName || currentUser?.email || 'Anonymous';
     const selectedUser = recognizedUserSelect.value;
     const otherUser = otherUserInput.value.trim();
     
@@ -965,7 +957,7 @@ function setupNoteForm() {
       // Add to Firebase
       const noteData = {
         content: content,
-        author: author || 'Anonymous',
+        author: author,
         recognizedFor: recognizedFor,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
@@ -974,7 +966,6 @@ function setupNoteForm() {
       
       // Clear form
       contentInput.value = '';
-      authorInput.value = '';
       recognizedUserSelect.value = '';
       otherUserInput.value = '';
       
