@@ -4291,11 +4291,11 @@ async function createTicketFromModal() {
   const itSupportFields = document.getElementById('it-support-fields');
   const isITSupportForm = itSupportFields && itSupportFields.style.display !== 'none';
   
-  let title, description, category;
+  let title, description, category, coftData = null;
   
   if (isCOFTForm) {
     // Collect COFT-specific data
-    const coftData = collectCOFTFormData();
+    coftData = collectCOFTFormData();
     if (!coftData) {
       return; // Error already shown in collectCOFTFormData
     }
@@ -4370,12 +4370,9 @@ async function createTicketFromModal() {
     
     // Check for COFT reprocessing override for team member
     let coftTeamMemberOverride = null;
-    if (isCOFTForm) {
-      const coftData = collectCOFTFormData();
-      if (coftData && coftData.coftType === 'reprocessing') {
-        // Override COFT team member for reprocessing tickets
-        coftTeamMemberOverride = 'Katie Lewis';
-      }
+    if (isCOFTForm && coftData && coftData.coftType === 'reprocessing') {
+      // Override COFT team member for reprocessing tickets
+      coftTeamMemberOverride = 'Katie Lewis';
     }
     
     const ticketData = {
