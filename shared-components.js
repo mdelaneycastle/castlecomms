@@ -56,7 +56,7 @@ window.sharedComponents = {
     }
   },
 
-  // Setup header events (hamburger menu)
+  // Setup header events (hamburger menu and profile dropdown)
   setupHeaderEvents() {
     const toggleBtn = document.getElementById("menu-toggle");
     
@@ -84,6 +84,9 @@ window.sharedComponents = {
         }
       }, 100);
     }
+
+    // Setup user profile dropdown
+    this.setupUserProfileDropdown();
   },
 
   // Set page title based on current page
@@ -172,6 +175,113 @@ window.sharedComponents = {
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
+  },
+
+  // Setup user profile dropdown functionality
+  setupUserProfileDropdown() {
+    const profileBtn = document.getElementById('user-profile-btn');
+    const dropdownMenu = document.getElementById('profile-dropdown-menu');
+    const signoutBtn = document.getElementById('profile-signout-btn');
+    const accountSettingsBtn = document.getElementById('account-settings-btn');
+    const changePasswordBtn = document.getElementById('change-password-btn');
+
+    if (!profileBtn || !dropdownMenu) {
+      console.warn('⚠️ User profile dropdown elements not found');
+      return;
+    }
+
+    // Toggle dropdown on profile button click
+    profileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.user-profile-dropdown')) {
+        dropdownMenu.classList.remove('show');
+      }
+    });
+
+    // Sign out functionality
+    if (signoutBtn) {
+      signoutBtn.addEventListener('click', async () => {
+        try {
+          await firebase.auth().signOut();
+          window.location.href = 'index.html';
+        } catch (error) {
+          console.error('Error signing out:', error);
+          alert('Error signing out. Please try again.');
+        }
+      });
+    }
+
+    // Account settings (placeholder for now)
+    if (accountSettingsBtn) {
+      accountSettingsBtn.addEventListener('click', () => {
+        alert('Account settings feature coming soon!');
+        dropdownMenu.classList.remove('show');
+      });
+    }
+
+    // Change password (placeholder for now)
+    if (changePasswordBtn) {
+      changePasswordBtn.addEventListener('click', () => {
+        alert('Change password feature coming soon!');
+        dropdownMenu.classList.remove('show');
+      });
+    }
+
+    console.log('👤 User profile dropdown setup complete');
+  },
+
+  // Generate user initials from name
+  generateUserInitials(displayName) {
+    if (!displayName) return 'U';
+    
+    const nameParts = displayName.trim().split(' ').filter(part => part.length > 0);
+    
+    if (nameParts.length === 0) return 'U';
+    if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
+    
+    // Take first letter of first name and first letter of last name
+    return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+  },
+
+  // Update user profile dropdown with user information
+  async updateUserProfileDropdown(user) {
+    if (!user) return;
+
+    try {
+      const displayName = await this.getUserDisplayName(user);
+      const initials = this.generateUserInitials(displayName);
+
+      // Update user initials in button
+      const userInitialsElement = document.getElementById('user-initials');
+      if (userInitialsElement) {
+        userInitialsElement.textContent = initials;
+      }
+
+      // Update dropdown header with user info
+      const dropdownUserName = document.getElementById('dropdown-user-name');
+      const dropdownUserEmail = document.getElementById('dropdown-user-email');
+      
+      if (dropdownUserName) {
+        dropdownUserName.textContent = displayName;
+      }
+      
+      if (dropdownUserEmail) {
+        dropdownUserEmail.textContent = user.email || '';
+      }
+
+    } catch (error) {
+      console.error('Error updating user profile dropdown:', error);
+      // Fallback to basic initials
+      const userInitialsElement = document.getElementById('user-initials');
+      if (userInitialsElement) {
+        userInitialsElement.textContent = this.generateUserInitials(this.extractNameFromEmail(user?.email || ''));
+      }
+    }
   },
 
   // Load and setup sidebar with permissions
@@ -282,6 +392,9 @@ window.sharedComponents = {
 
       // Update user name display in header
       await this.updateUserNameDisplay(user);
+
+      // Update user profile dropdown
+      await this.updateUserProfileDropdown(user);
 
       // Update admin permissions
       if (window.authUtils) {
