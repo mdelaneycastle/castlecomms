@@ -1131,33 +1131,52 @@ window.sharedComponents = {
     }
   },
 
-  // Upload profile photo to Firebase Storage
+  // Upload profile photo (fallback to base64 if Storage unavailable)
   async uploadProfilePhoto(file, userId) {
     try {
       // Check if Firebase Storage is available
-      if (!window.firebase.storage) {
-        throw new Error('Firebase Storage not available');
+      if (window.firebase && window.firebase.storage) {
+        console.log('Using Firebase Storage for photo upload');
+        const storage = firebase.storage();
+        const storageRef = storage.ref();
+        const photoRef = storageRef.child(`profile-photos/${userId}/${Date.now()}_${file.name}`);
+
+        // Upload file
+        const snapshot = await photoRef.put(file);
+        
+        // Get download URL
+        const downloadURL = await snapshot.ref.getDownloadURL();
+        
+        return downloadURL;
+      } else {
+        // Fallback to base64 data URL storage in database
+        console.log('Firebase Storage not available, using base64 fallback');
+        return await this.convertFileToBase64(file);
       }
-
-      const storage = firebase.storage();
-      const storageRef = storage.ref();
-      const photoRef = storageRef.child(`profile-photos/${userId}/${Date.now()}_${file.name}`);
-
-      // Upload file
-      const snapshot = await photoRef.put(file);
-      
-      // Get download URL
-      const downloadURL = await snapshot.ref.getDownloadURL();
-      
-      return downloadURL;
 
     } catch (error) {
       console.error('Error uploading profile photo:', error);
-      throw new Error('Failed to upload photo. Please try again.');
+      // If Firebase Storage fails, try base64 fallback
+      console.log('Falling back to base64 storage');
+      return await this.convertFileToBase64(file);
     }
   },
 
-  // Delete profile photo from Firebase Storage
+  // Convert file to base64 data URL
+  async convertFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.onerror = () => {
+        reject(new Error('Failed to convert image to base64'));
+      };
+      reader.readAsDataURL(file);
+    });
+  },
+
+  // Delete profile photo from Firebase Storage or database
   async deleteProfilePhoto(userId) {
     try {
       const user = firebase.auth().currentUser;
@@ -1168,11 +1187,22 @@ window.sharedComponents = {
       const snapshot = await userRef.once('value');
       const photoURL = snapshot.val();
 
-      if (photoURL && window.firebase.storage) {
-        // Delete from storage
-        const storage = firebase.storage();
-        const photoRef = storage.refFromURL(photoURL);
-        await photoRef.delete();
+      if (photoURL) {
+        // Check if it's a Firebase Storage URL or base64
+        if (photoURL.startsWith('https://') && window.firebase && window.firebase.storage) {
+          try {
+            // Delete from Firebase Storage
+            const storage = firebase.storage();
+            const photoRef = storage.refFromURL(photoURL);
+            await photoRef.delete();
+            console.log('Photo deleted from Firebase Storage');
+          } catch (storageError) {
+            console.log('Could not delete from storage (may be base64):', storageError.message);
+          }
+        } else {
+          // Base64 photo - no need to delete from storage, just remove from database
+          console.log('Removing base64 photo from database');
+        }
       }
 
     } catch (error) {
