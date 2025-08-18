@@ -3415,6 +3415,20 @@ async function loadTickets() {
     const allTicketsSnapshot = await db.collection('tickets').get();
     const ticketMap = new Map();
     
+    // Handle empty collection gracefully
+    if (allTicketsSnapshot.empty) {
+      console.log('No tickets found in database - collection may be empty');
+      // Initialize empty counts
+      updateFilterCounts([]);
+      ticketsList.innerHTML = `
+        <div class="no-tickets" style="text-align: center; padding: 40px; color: #6c757d;">
+          <h3>No tickets yet</h3>
+          <p>Create your first ticket to get started!</p>
+        </div>
+      `;
+      return;
+    }
+    
     // Process each ticket to check if user has access
     allTicketsSnapshot.docs.forEach(doc => {
       const ticket = { id: doc.id, ...doc.data() };
@@ -3597,6 +3611,19 @@ function updateFilterCounts(allTickets) {
       transferred: 0
     };
     
+    // Handle empty tickets array gracefully
+    if (!allTickets || allTickets.length === 0) {
+      // Update count badges with zeros
+      document.getElementById('count-all').textContent = '0';
+      document.getElementById('count-on-hold').textContent = '0';
+      document.getElementById('count-in-progress').textContent = '0';
+      document.getElementById('count-resolved').textContent = '0';
+      document.getElementById('count-transferred').textContent = '0';
+      
+      console.log('Filter counts updated (empty):', counts);
+      return;
+    }
+    
     allTickets.forEach(ticket => {
       const isTransferred = checkTicketTransferred(ticket, currentUser);
       
@@ -3606,7 +3633,9 @@ function updateFilterCounts(allTickets) {
       } else {
         // This is an active ticket (assigned to me individually, via team, or created by me and still mine)
         counts.all++;
-        counts[ticket.status]++;
+        if (counts[ticket.status] !== undefined) {
+          counts[ticket.status]++;
+        }
       }
     });
     
