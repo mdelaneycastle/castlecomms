@@ -766,70 +766,21 @@ let allUsers = [];
 
 async function loadUsers() {
   try {
-    // Try to load users from cloud function first (all authenticated users need this for tickets/messages)
+    // Load users from cloud function (same as newsfeed)
     if (typeof listUsers === 'function') {
-      try {
-        const users = await listUsers();
-        allUsers = users.map(user => ({
-          email: user.email,
-          name: user.displayName || extractNameFromEmail(user.email),
-          uid: user.uid
-        }));
-        console.log('Loaded users from cloud function:', allUsers.length);
-        populateUserDropdown();
-        return;
-      } catch (error) {
-        console.log('Cloud function not accessible, trying database fallback');
-      }
+      const users = await listUsers();
+      allUsers = users.map(user => ({
+        email: user.email,
+        name: user.displayName || extractNameFromEmail(user.email),
+        uid: user.uid
+      }));
+      populateUserDropdown();
+    } else {
+      throw new Error('User listing function not available');
     }
-    
-    // Fallback: Try to load from Firebase Realtime Database
-    if (firebase.database && currentUser) {
-      try {
-        const db = firebase.database();
-        const usersSnapshot = await db.ref('users').once('value');
-        const usersData = usersSnapshot.val() || {};
-        
-        const dbUsers = Object.keys(usersData).map(uid => ({
-          email: usersData[uid].email || 'unknown@email.com',
-          name: usersData[uid].name || usersData[uid].displayName || extractNameFromEmail(usersData[uid].email || ''),
-          uid: uid
-        }));
-        
-        if (dbUsers.length > 0) {
-          allUsers = dbUsers;
-          console.log('Loaded users from Realtime Database:', allUsers.length);
-          populateUserDropdown();
-          return;
-        }
-      } catch (dbError) {
-        console.log('Database fallback failed, using static list');
-      }
-    }
-
-    // Fallback: Use static list of accounts
-    allUsers = [
-      { email: 'mdelaney@castlefineart.com', name: 'Marc Delaney' },
-      { email: 'gturpin@washingtongreen.co.uk', name: 'Gary Turpin' },
-      { email: 'icc@castlefineart.com', name: 'ICC' },
-      { email: 'mailbox@castlefineart.com', name: 'Mailbox' },
-      { email: 'cheltenham@castlefineart.com', name: 'Cheltenham' },
-      { email: 'derby@castlefineart.com', name: 'Derby' },
-      { email: 'leamingtonspa@castlefineart.com', name: 'Leamington Spa' },
-      { email: 'miltonkeynes@castlefineart.com', name: 'Milton Keynes' },
-      { email: 'nottingham@castlefineart.com', name: 'Nottingham' },
-      { email: 'stamford@castlefineart.com', name: 'Stamford' },
-      { email: 'tewkesbury@castlefineart.com', name: 'Tewkesbury' },
-      { email: 'worcester@castlefineart.com', name: 'Worcester' },
-      { email: 'warwick@castlefineart.com', name: 'Warwick' },
-      { email: 'stratford@castlefineart.com', name: 'Stratford' },
-      { email: 'admin@castlefineart.com', name: 'Admin' }
-    ];
-    
-    console.log('Using static user list:', allUsers.length);
-    populateUserDropdown();
   } catch (error) {
     console.error('Error loading users:', error);
+    allUsers = [];
     showError('Failed to load users for selection.');
   }
 }
