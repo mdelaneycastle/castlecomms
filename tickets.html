@@ -4815,10 +4815,10 @@ function resetITSupportForm() {
 
 // Collect COFT form data and validate
 function collectCOFTFormData() {
-  // Check understanding checkbox
-  const understanding = document.getElementById('coft-understanding');
-  if (!understanding.checked) {
-    showModalStatus('Please confirm you understand the differences between tickets.', 'error');
+  // Check COFT type selection
+  const coftType = document.querySelector('input[name="coft-type"]:checked');
+  if (!coftType) {
+    showModalStatus('Please select the type of COFT request.', 'error');
     return null;
   }
   
@@ -4864,6 +4864,7 @@ function collectCOFTFormData() {
   const photos = photoUpload.files;
   
   return {
+    coftType: coftType.value,
     soNumber,
     clientName,
     itemCode,
@@ -4882,7 +4883,8 @@ function collectCOFTFormData() {
 
 // Build COFT description from collected data
 function buildCOFTDescription(coftData) {
-  let description = `**COFT TICKET - ORDER CHASING**\n\n`;
+  const typeLabel = coftData.coftType === 'order-chasing' ? 'ORDER CHASING' : 'REPROCESSING/ITEMS SOURCED';
+  let description = `**COFT TICKET - ${typeLabel}**\n\n`;
   
   description += `**Order Details:**\n`;
   description += `• SO Number: ${coftData.soNumber}\n`;
