@@ -903,6 +903,11 @@
       white-space: nowrap;
     }
 
+    .ticket-status.open {
+      background: #d4edda;
+      color: #155724;
+    }
+    
     .ticket-status.on-hold {
       background: #fff3cd;
       color: #856404;
@@ -2322,8 +2327,8 @@
           <button class="filter-button active" data-filter="all">
             <span class="filter-count">All <span class="count-badge" id="count-all">0</span></span>
           </button>
-          <button class="filter-button" data-filter="on-hold">
-            <span class="filter-count">On Hold <span class="count-badge" id="count-on-hold">0</span></span>
+          <button class="filter-button" data-filter="open">
+            <span class="filter-count">Open <span class="count-badge" id="count-open">0</span></span>
           </button>
           <button class="filter-button" data-filter="in-progress">
             <span class="filter-count">In Progress <span class="count-badge" id="count-in-progress">0</span></span>
@@ -2410,7 +2415,7 @@
     <div class="ticket-modal-header">
       <div class="ticket-modal-title">
         <h3 id="modal-ticket-id">TKT-123456</h3>
-        <div id="modal-ticket-status" class="ticket-status in-progress">in progress</div>
+        <div id="modal-ticket-status" class="ticket-status open">open</div>
       </div>
       <div class="ticket-modal-meta">
         <div id="modal-ticket-creator">Created by: User</div>
@@ -2516,6 +2521,7 @@
       <div class="ticket-status-section">
         <label for="ticket-status-select">Status:</label>
         <select id="ticket-status-select" onchange="updateTicketStatus()">
+          <option value="open">Open</option>
           <option value="in-progress">In Progress</option>
           <option value="on-hold">On Hold</option>
           <option value="resolved">Resolved</option>
@@ -3201,7 +3207,7 @@ async function createTicket() {
       title: title,
       description: description,
       category: category,
-      status: 'in-progress',
+      status: 'open',
       createdBy: {
         uid: currentUser.uid,
         email: currentUser.email,
@@ -3605,8 +3611,9 @@ function updateFilterCounts(allTickets) {
     // Calculate counts for each category
     const counts = {
       all: 0,
-      'on-hold': 0,
+      open: 0,
       'in-progress': 0,
+      'on-hold': 0,
       resolved: 0,
       transferred: 0
     };
@@ -3615,8 +3622,9 @@ function updateFilterCounts(allTickets) {
     if (!allTickets || allTickets.length === 0) {
       // Update count badges with zeros
       document.getElementById('count-all').textContent = '0';
-      document.getElementById('count-on-hold').textContent = '0';
+      document.getElementById('count-open').textContent = '0';
       document.getElementById('count-in-progress').textContent = '0';
+      document.getElementById('count-on-hold').textContent = '0';
       document.getElementById('count-resolved').textContent = '0';
       document.getElementById('count-transferred').textContent = '0';
       
@@ -3641,8 +3649,9 @@ function updateFilterCounts(allTickets) {
     
     // Update count badges
     document.getElementById('count-all').textContent = counts.all;
-    document.getElementById('count-on-hold').textContent = counts['on-hold'];
+    document.getElementById('count-open').textContent = counts.open;
     document.getElementById('count-in-progress').textContent = counts['in-progress'];
+    document.getElementById('count-on-hold').textContent = counts['on-hold'];
     document.getElementById('count-resolved').textContent = counts.resolved;
     document.getElementById('count-transferred').textContent = counts.transferred;
     
@@ -4160,7 +4169,7 @@ async function createTicketFromModal() {
       title: title,
       description: description,
       category: category,
-      status: 'in-progress',
+      status: 'open',
       createdBy: {
         uid: currentUser.uid,
         email: currentUser.email,
@@ -4268,6 +4277,12 @@ function setupAssignmentTypeHandlers() {
 function handleTeamSelection() {
   const teamSelect = document.getElementById('modal-assign-team');
   const categorySelect = document.getElementById('modal-ticket-category');
+  
+  console.log('🔄 Team selection changed:', {
+    selectedValue: teamSelect.value,
+    selectedText: teamSelect.selectedOptions[0]?.text,
+    allOptions: Array.from(teamSelect.options).map(opt => ({ value: opt.value, text: opt.text }))
+  });
   
   // Reset category when team changes
   categorySelect.value = '';
@@ -5161,11 +5176,39 @@ async function sendTicketMessage() {
       timestamp: new Date()
     };
     
-    // Add message to ticket's messages array
-    await db.collection('tickets').doc(currentTicket.id).update({
+    // Check if this is the first message and ticket is open
+    const isFirstMessage = (!currentTicket.messages || currentTicket.messages.length === 0);
+    const isOpenTicket = currentTicket.status === 'open';
+    
+    const updateData = {
       messages: firebase.firestore.FieldValue.arrayUnion(newMessage),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    };
+    
+    // Auto-change status from 'open' to 'in-progress' on first message
+    if (isFirstMessage && isOpenTicket) {
+      updateData.status = 'in-progress';
+      
+      // Add system message about status change
+      const statusChangeMessage = {
+        content: 'Status automatically changed to in-progress (first comment added)',
+        senderEmail: 'system',
+        senderName: 'System',
+        timestamp: new Date()
+      };
+      updateData.messages = firebase.firestore.FieldValue.arrayUnion(newMessage, statusChangeMessage);
+    }
+    
+    // Add message to ticket's messages array
+    await db.collection('tickets').doc(currentTicket.id).update(updateData);
+    
+    // Update local ticket object if status changed
+    if (isFirstMessage && isOpenTicket) {
+      currentTicket.status = 'in-progress';
+      document.getElementById('modal-ticket-status').textContent = 'in progress';
+      document.getElementById('modal-ticket-status').className = 'ticket-status in-progress';
+      document.getElementById('ticket-status-select').value = 'in-progress';
+    }
     
     // Clear input
     messageInput.value = '';
