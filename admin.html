@@ -455,10 +455,10 @@
       showStatus(`${makeAdmin ? 'Granted' : 'Removed'} admin privileges for ${email}`, 'success');
       
       // Update the user object in our local array
-      const user = allUsers.find(u => u.uid === uid);
-      if (user) {
-        if (!user.customClaims) user.customClaims = {};
-        user.customClaims.admin = makeAdmin;
+      const targetUser = allUsers.find(u => u.uid === uid);
+      if (targetUser) {
+        if (!targetUser.customClaims) targetUser.customClaims = {};
+        targetUser.customClaims.admin = makeAdmin;
       }
       
       // Update the UI immediately
@@ -504,10 +504,10 @@
       showStatus(`${makeCommAdmin ? 'Granted' : 'Removed'} communications admin privileges for ${email}`, 'success');
       
       // Update the user object in our local array
-      const user = allUsers.find(u => u.uid === uid);
-      if (user) {
-        if (!user.customClaims) user.customClaims = {};
-        user.customClaims.communicationsAdmin = makeCommAdmin;
+      const targetUser = allUsers.find(u => u.uid === uid);
+      if (targetUser) {
+        if (!targetUser.customClaims) targetUser.customClaims = {};
+        targetUser.customClaims.communicationsAdmin = makeCommAdmin;
       }
       
       // Update the UI immediately
