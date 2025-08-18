@@ -279,7 +279,7 @@ window.sharedComponents = {
           userInitialsElement.style.display = 'none';
         } else {
           // Use initials with custom color
-          const backgroundColor = profileData.backgroundColor || '#596066';
+          const backgroundColor = profileData.backgroundColor || '#45494E';
           userProfileBtn.style.backgroundColor = backgroundColor;
           userInitialsElement.textContent = initials;
           userInitialsElement.style.display = 'flex';
@@ -840,7 +840,7 @@ window.sharedComponents = {
       await this.updateAccountSettingsPreview(displayName, profileData);
 
       // Set selected color
-      const selectedColor = profileData.backgroundColor || '#596066';
+      const selectedColor = profileData.backgroundColor || '#45494E';
       const colorOptions = document.querySelectorAll('.color-option');
       colorOptions.forEach(option => {
         option.classList.remove('selected');
@@ -878,7 +878,7 @@ window.sharedComponents = {
     previewInitials.textContent = initials;
 
     // Update background color
-    const backgroundColor = profileData.backgroundColor || '#596066';
+    const backgroundColor = profileData.backgroundColor || '#45494E';
     previewCircle.style.backgroundColor = backgroundColor;
 
     // Handle photo
@@ -1078,7 +1078,7 @@ window.sharedComponents = {
 
       // Prepare profile data
       const profileData = {
-        backgroundColor: selectedColorOption ? selectedColorOption.dataset.color : '#596066',
+        backgroundColor: selectedColorOption ? selectedColorOption.dataset.color : '#45494E',
         lastUpdated: Date.now()
       };
 
