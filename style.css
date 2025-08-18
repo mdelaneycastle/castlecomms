@@ -2870,21 +2870,76 @@ admin-link {
 form .color-option {
   background: none !important;
   background-image: none !important;
+  color: transparent !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+form .color-option::before {
+  display: none !important;
 }
 
 /* Specific color overrides to ensure colors display */
-form .color-option[data-color="#DC2626"] { background: #DC2626 !important; background-color: #DC2626 !important; }
-form .color-option[data-color="#F97316"] { background: #F97316 !important; background-color: #F97316 !important; }
-form .color-option[data-color="#F59E0B"] { background: #F59E0B !important; background-color: #F59E0B !important; }
-form .color-option[data-color="#FACC15"] { background: #FACC15 !important; background-color: #FACC15 !important; }
-form .color-option[data-color="#84CC16"] { background: #84CC16 !important; background-color: #84CC16 !important; }
-form .color-option[data-color="#10B981"] { background: #10B981 !important; background-color: #10B981 !important; }
-form .color-option[data-color="#14B8A6"] { background: #14B8A6 !important; background-color: #14B8A6 !important; }
-form .color-option[data-color="#0EA5E9"] { background: #0EA5E9 !important; background-color: #0EA5E9 !important; }
-form .color-option[data-color="#2563EB"] { background: #2563EB !important; background-color: #2563EB !important; }
-form .color-option[data-color="#4F46E5"] { background: #4F46E5 !important; background-color: #4F46E5 !important; }
-form .color-option[data-color="#7C3AED"] { background: #7C3AED !important; background-color: #7C3AED !important; }
-form .color-option[data-color="#45494E"] { background: #45494E !important; background-color: #45494E !important; }
+#account-settings-modal form .color-option[data-color="#DC2626"] { 
+  background: #DC2626 !important; 
+  background-color: #DC2626 !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#F97316"] { 
+  background: #F97316 !important; 
+  background-color: #F97316 !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#F59E0B"] { 
+  background: #F59E0B !important; 
+  background-color: #F59E0B !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#FACC15"] { 
+  background: #FACC15 !important; 
+  background-color: #FACC15 !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#84CC16"] { 
+  background: #84CC16 !important; 
+  background-color: #84CC16 !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#10B981"] { 
+  background: #10B981 !important; 
+  background-color: #10B981 !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#14B8A6"] { 
+  background: #14B8A6 !important; 
+  background-color: #14B8A6 !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#0EA5E9"] { 
+  background: #0EA5E9 !important; 
+  background-color: #0EA5E9 !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#2563EB"] { 
+  background: #2563EB !important; 
+  background-color: #2563EB !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#4F46E5"] { 
+  background: #4F46E5 !important; 
+  background-color: #4F46E5 !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#7C3AED"] { 
+  background: #7C3AED !important; 
+  background-color: #7C3AED !important; 
+  background-image: none !important;
+}
+#account-settings-modal form .color-option[data-color="#45494E"] { 
+  background: #45494E !important; 
+  background-color: #45494E !important; 
+  background-image: none !important;
+}
 
 /* Display Name Section */
 .field-help {
