@@ -2823,13 +2823,24 @@ admin-link {
 }
 
 .color-option {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 3px solid transparent;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  border: 3px solid transparent !important;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
+  padding: 0 !important;
+  margin: 0 !important;
+  outline: none;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  overflow: hidden;
+  display: block;
 }
 
 .color-option:hover {
@@ -2854,6 +2865,20 @@ admin-link {
   font-size: 0.9rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
+
+/* Specific color overrides to ensure colors display */
+.color-option[data-color="#596066"] { background-color: #596066 !important; }
+.color-option[data-color="#4f46e5"] { background-color: #4f46e5 !important; }
+.color-option[data-color="#059669"] { background-color: #059669 !important; }
+.color-option[data-color="#dc2626"] { background-color: #dc2626 !important; }
+.color-option[data-color="#ea580c"] { background-color: #ea580c !important; }
+.color-option[data-color="#7c3aed"] { background-color: #7c3aed !important; }
+.color-option[data-color="#0891b2"] { background-color: #0891b2 !important; }
+.color-option[data-color="#be123c"] { background-color: #be123c !important; }
+.color-option[data-color="#374151"] { background-color: #374151 !important; }
+.color-option[data-color="#1f2937"] { background-color: #1f2937 !important; }
+.color-option[data-color="#92400e"] { background-color: #92400e !important; }
+.color-option[data-color="#581c87"] { background-color: #581c87 !important; }
 
 /* Display Name Section */
 .field-help {
