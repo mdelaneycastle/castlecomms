@@ -17,6 +17,29 @@
   
   <link rel="stylesheet" href="style.css?v=20250813_din_font_update" />
   <style>
+    :root {
+      /* Color Variables */
+      --color-primary: #667eea;
+      --color-primary-dark: #6264a7;
+      --color-text-muted: #6c757d;
+      --color-background-light: #f8f9fa;
+      --color-border-light: #e9ecef;
+      --color-success: #155724;
+      --color-success-bg: #d4edda;
+      --color-warning: #856404;
+      --color-warning-bg: #fff3cd;
+      --color-danger: #721c24;
+      --color-danger-bg: #f8d7da;
+      --color-info: #0c5460;
+      --color-info-bg: #d1ecf1;
+      --color-white: #ffffff;
+      --color-text-dark: #333333;
+      --color-text-light: #666666;
+      --color-text-lighter: #555555;
+      --color-error: #d13438;
+      --color-loading: #8a8886;
+    }
+
     .tickets-container {
       max-width: 100%;
       width: 100%;
@@ -75,7 +98,7 @@
     .ticket-type-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-      border-color: #667eea;
+      border-color: var(--color-primary);
     }
 
     .ticket-type-icon {
@@ -90,14 +113,14 @@
     }
 
     .ticket-type-card p {
-      color: #6c757d;
+      color: var(--color-text-muted);
       margin-bottom: 1.5rem;
       line-height: 1.5;
     }
 
     .ticket-type-btn {
       background: var(--primary-gradient);
-      color: white;
+      color: var(--color-white);
       border: none;
       padding: 0.75rem 1.5rem;
       border-radius: 8px;
@@ -126,8 +149,8 @@
     }
 
     .back-btn {
-      background: #f8f9fa;
-      color: #6c757d;
+      background: var(--color-background-light);
+      color: var(--color-text-muted);
       border: 1px solid #e1e5e9;
       padding: 0.5rem 1rem;
       border-radius: 8px;
@@ -137,7 +160,7 @@
     }
 
     .back-btn:hover {
-      background: #e9ecef;
+      background: var(--color-border-light);
       color: #495057;
     }
 
@@ -181,7 +204,7 @@
     .view-tickets-btn {
       display: inline-block;
       background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-      color: white;
+      color: var(--color-white);
       text-decoration: none;
       padding: 1rem 2rem;
       border-radius: 10px;
@@ -195,7 +218,7 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 25px rgba(40, 167, 69, 0.4);
       text-decoration: none;
-      color: white;
+      color: var(--color-white);
     }
 
     .tickets-layout {
@@ -251,14 +274,14 @@
 
     .form-input:focus, .form-select:focus, .form-textarea:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--color-primary);
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     /* Ensure dropdown options display properly */
     .form-select option {
       background: white;
-      color: #333;
+      color: var(--color-text-dark);
       padding: 0.5rem;
     }
 
@@ -283,13 +306,13 @@
 
     .counter-text {
       font-size: 1rem;
-      color: #667eea;
+      color: var(--color-primary);
       font-weight: 500;
     }
 
     .count-number {
       font-weight: 600;
-      color: #667eea;
+      color: var(--color-primary);
       background: white;
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
@@ -305,7 +328,7 @@
 
     .extract-report-btn {
       background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-      color: white;
+      color: var(--color-white);
       border: none;
       padding: 0.75rem 1.5rem;
       border-radius: 8px;
@@ -360,7 +383,7 @@
       border: none;
       font-size: 1.5rem;
       cursor: pointer;
-      color: #6c757d;
+      color: var(--color-text-muted);
       width: 30px;
       height: 30px;
       display: flex;
@@ -371,7 +394,7 @@
     }
 
     .coft-report-modal-close:hover {
-      background: #f8f9fa;
+      background: var(--color-background-light);
     }
 
     .coft-report-form {
@@ -397,7 +420,7 @@
 
     .coft-report-btn.excel {
       background: linear-gradient(135deg, #198754 0%, #20c997 100%);
-      color: white;
+      color: var(--color-white);
       box-shadow: 0 2px 10px rgba(25, 135, 84, 0.3);
     }
 
@@ -408,7 +431,7 @@
 
     .coft-report-btn.view {
       background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
-      color: white;
+      color: var(--color-white);
       box-shadow: 0 2px 10px rgba(13, 110, 253, 0.3);
     }
 
@@ -447,11 +470,11 @@
       padding: 0.75rem;
       cursor: pointer;
       transition: background-color 0.2s;
-      border-bottom: 1px solid #f8f9fa;
+      border-bottom: 1px solid var(--color-background-light);
     }
 
     .user-suggestion:hover {
-      background-color: #f8f9fa;
+      background-color: var(--color-background-light);
     }
 
     .user-suggestion:last-child {
@@ -460,7 +483,7 @@
 
     .assigned-user {
       background: var(--primary-gradient);
-      color: white;
+      color: var(--color-white);
       padding: 0.5rem 1rem;
       border-radius: 20px;
       font-size: 0.9rem;
@@ -473,7 +496,7 @@
     .remove-user {
       background: none;
       border: none;
-      color: white;
+      color: var(--color-white);
       cursor: pointer;
       font-size: 1rem;
       padding: 0;
@@ -492,7 +515,7 @@
 
     .create-ticket-button {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      color: var(--color-white);
       border: none;
       padding: 1.25rem 3rem;
       border-radius: 12px;
@@ -554,7 +577,7 @@
 
     .ticket-count {
       background: var(--primary-gradient);
-      color: white;
+      color: var(--color-white);
       padding: 0.3rem 0.8rem;
       border-radius: 15px;
       font-size: 0.9rem;
@@ -568,9 +591,9 @@
     }
 
     .filter-button {
-      background: #f8f9fa;
+      background: var(--color-background-light);
       border: 1px solid #e1e5e9;
-      color: #6c757d;
+      color: var(--color-text-muted);
       padding: 0.5rem 1rem;
       border-radius: 20px;
       font-size: 0.9rem;
@@ -580,12 +603,12 @@
 
     .filter-button.active {
       background: var(--primary-gradient);
-      color: white;
+      color: var(--color-white);
       border-color: transparent;
     }
 
     .filter-button:hover {
-      background: #e9ecef;
+      background: var(--color-border-light);
     }
 
     .filter-button.active:hover {
@@ -612,12 +635,12 @@
 
     .filter-button:not(.active) .count-badge {
       background: #6c757d;
-      color: white;
+      color: var(--color-white);
     }
 
     /* Advanced Filters Section */
     .advanced-filters-section {
-      background: #f8f9fa;
+      background: var(--color-background-light);
       border: 1px solid #e1e5e9;
       border-radius: 8px;
       padding: 1.5rem;
@@ -691,7 +714,7 @@
 
     .date-separator {
       font-size: 0.9rem;
-      color: #6c757d;
+      color: var(--color-text-muted);
       white-space: nowrap;
     }
 
@@ -714,7 +737,7 @@
 
     .apply-filters-btn {
       background: #007bff;
-      color: white;
+      color: var(--color-white);
       border: 1px solid #007bff;
     }
 
@@ -724,8 +747,8 @@
     }
 
     .clear-filters-btn {
-      background: #f8f9fa;
-      color: #6c757d;
+      background: var(--color-background-light);
+      color: var(--color-text-muted);
       border: 1px solid #ced4da;
     }
 
@@ -763,7 +786,7 @@
     }
 
     .date-separator {
-      color: #6c757d;
+      color: var(--color-text-muted);
       font-size: 0.9rem;
     }
 
@@ -786,7 +809,7 @@
 
     .apply-filters-btn {
       background: var(--primary-gradient);
-      color: white;
+      color: var(--color-white);
       border: none;
       padding: 0.6rem 1.2rem;
       border-radius: 4px;
@@ -802,7 +825,7 @@
 
     .clear-filters-btn {
       background: #6c757d;
-      color: white;
+      color: var(--color-white);
       border: none;
       padding: 0.6rem 1.2rem;
       border-radius: 4px;
@@ -831,7 +854,7 @@
       border: 1px solid #e1e5e9;
       border-radius: 8px;
       font-size: 0.95rem;
-      background: #f8f9fa;
+      background: var(--color-background-light);
       transition: all 0.2s;
       box-sizing: border-box;
     }
@@ -844,7 +867,7 @@
     }
 
     .ticket-search-input::placeholder {
-      color: #8a8886;
+      color: var(--color-loading);
     }
 
     .search-input-group::before {
@@ -853,7 +876,7 @@
       left: 0.75rem;
       top: 50%;
       transform: translateY(-50%);
-      color: #8a8886;
+      color: var(--color-loading);
       font-size: 0.9rem;
     }
 
@@ -863,7 +886,7 @@
       top: 50%;
       transform: translateY(-50%);
       background: #8a8886;
-      color: white;
+      color: var(--color-white);
       border: none;
       border-radius: 50%;
       width: 24px;
@@ -897,7 +920,7 @@
     }
 
     .tickets-table th {
-      background: #f8f9fa;
+      background: var(--color-background-light);
       padding: 12px;
       text-align: left;
       font-weight: 600;
@@ -927,7 +950,7 @@
     }
 
     .tickets-table tr:hover {
-      background-color: #f8f9fa;
+      background-color: var(--color-background-light);
       cursor: pointer;
     }
 
@@ -937,7 +960,7 @@
 
     .ticket-id {
       font-weight: 600;
-      color: #667eea;
+      color: var(--color-primary);
       font-size: 0.9rem;
     }
 
@@ -952,7 +975,7 @@
     .timer-display {
       font-weight: 600;
       font-family: 'Courier New', monospace;
-      background: #f8f9fa;
+      background: var(--color-background-light);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.8rem;
@@ -960,12 +983,12 @@
 
     .timer-display.running {
       color: #28a745;
-      background: #d4edda;
+      background: var(--color-success-bg);
     }
 
     .timer-display.paused {
       color: #dc3545;
-      background: #f8d7da;
+      background: var(--color-danger-bg);
     }
 
     .timer-icon {
@@ -980,7 +1003,7 @@
 
     .timer-btn {
       background: #6c757d;
-      color: white;
+      color: var(--color-white);
       border: none;
       padding: 0.5rem 1rem;
       border-radius: 4px;
@@ -1018,23 +1041,23 @@
       font-weight: 600;
       padding: 2px 6px;
       border-radius: 4px;
-      background: #f8f9fa;
-      color: #6c757d;
+      background: var(--color-background-light);
+      color: var(--color-text-muted);
     }
 
     .timer-display-small.running {
       color: #28a745;
-      background: #d4edda;
+      background: var(--color-success-bg);
     }
 
     .timer-display-small.paused {
       color: #dc3545;
-      background: #f8d7da;
+      background: var(--color-danger-bg);
     }
 
     .timer-display-small.stopped {
-      color: #6c757d;
-      background: #e9ecef;
+      color: var(--color-text-muted);
+      background: var(--color-border-light);
     }
 
     .ticket-timer-cell {
@@ -1053,28 +1076,23 @@
     }
 
     .ticket-status.open {
-      background: #d4edda;
-      color: #155724;
+      background: var(--color-success-bg);
+      color: var(--color-success);
     }
     
-    .ticket-status.on-hold {
-      background: #fff3cd;
-      color: #856404;
-    }
-
     .ticket-status.in-progress {
-      background: #fff3cd;
-      color: #856404;
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
     }
 
     .ticket-status.on-hold {
-      background: #f8d7da;
-      color: #721c24;
+      background: var(--color-danger-bg);
+      color: var(--color-danger);
     }
 
     .ticket-status.resolved {
-      background: #d1ecf1;
-      color: #0c5460;
+      background: var(--color-info-bg);
+      color: var(--color-info);
     }
 
     .ticket-status.transferred {
@@ -1093,7 +1111,7 @@
     }
 
     .ticket-category {
-      background: #e9ecef;
+      background: var(--color-border-light);
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.75rem;
@@ -1138,7 +1156,7 @@
     /* Raise Ticket Button */
     .raise-ticket-btn {
       background: var(--primary-gradient);
-      color: white;
+      color: var(--color-white);
       border: none;
       padding: 12px 24px;
       border-radius: 8px;
@@ -1196,7 +1214,7 @@
       border: none;
       font-size: 1.5rem;
       cursor: pointer;
-      color: #6c757d;
+      color: var(--color-text-muted);
       width: 30px;
       height: 30px;
       display: flex;
@@ -1207,7 +1225,7 @@
     }
 
     .create-ticket-modal-close:hover {
-      background: #f8f9fa;
+      background: var(--color-background-light);
     }
 
     .create-ticket-modal h3 {
@@ -1251,7 +1269,7 @@
 
     .form-input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--color-primary);
       background: white;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
@@ -1270,14 +1288,14 @@
 
     .form-textarea:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--color-primary);
       background: white;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     /* Assignment Type Buttons */
     .assignment-selector {
-      background: #f8f9fa;
+      background: var(--color-background-light);
       padding: 1.5rem;
       border-radius: 12px;
       border: 1px solid #e1e5e9;
@@ -1301,7 +1319,7 @@
       cursor: pointer;
       text-align: center;
       font-weight: 600;
-      color: #6c757d;
+      color: var(--color-text-muted);
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
@@ -1310,21 +1328,21 @@
     }
 
     .assignment-btn:hover {
-      border-color: #667eea;
-      color: #667eea;
+      border-color: var(--color-primary);
+      color: var(--color-primary);
       transform: translateY(-1px);
     }
 
     .assignment-type-buttons input[type="radio"]:checked + .assignment-btn {
       background: #667eea;
-      color: white;
-      border-color: #667eea;
+      color: var(--color-white);
+      border-color: var(--color-primary);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     /* COFT Form Specific Styles */
     .coft-warning {
-      background: #fff3cd;
+      background: var(--color-warning-bg);
       border: 1px solid #ffecb5;
       border-radius: 8px;
       padding: 16px;
@@ -1333,7 +1351,7 @@
 
     .coft-warning p {
       margin: 0;
-      color: #856404;
+      color: var(--color-warning);
       font-weight: 500;
     }
 
@@ -1369,13 +1387,13 @@
     }
 
     .checkbox-container:hover .checkmark {
-      border-color: #667eea;
+      border-color: var(--color-primary);
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .checkbox-container input[type="checkbox"]:checked ~ .checkmark {
       background-color: #667eea;
-      border-color: #667eea;
+      border-color: var(--color-primary);
     }
 
     .checkmark:after {
@@ -1438,13 +1456,13 @@
     }
 
     .radio-container:hover .radio-checkmark {
-      border-color: #667eea;
+      border-color: var(--color-primary);
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .radio-container input[type="radio"]:checked ~ .radio-checkmark {
       background-color: #667eea;
-      border-color: #667eea;
+      border-color: var(--color-primary);
     }
 
     .radio-checkmark:after {
@@ -1466,7 +1484,7 @@
     /* Form Help Text */
     .form-help-text {
       font-size: 12px;
-      color: #6c757d;
+      color: var(--color-text-muted);
       margin: 4px 0 0 0;
       font-style: italic;
     }
@@ -1518,7 +1536,7 @@
 
     /* Assignment Field */
     .assignment-field {
-      background: #f8f9fa;
+      background: var(--color-background-light);
       padding: 1.5rem;
       border-radius: 12px;
       border: 1px solid #e1e5e9;
@@ -1534,7 +1552,7 @@
 
     .no-tickets {
       text-align: center;
-      color: #6c757d;
+      color: var(--color-text-muted);
       padding: 3rem;
       font-style: italic;
     }
@@ -1542,7 +1560,7 @@
     .loading {
       text-align: center;
       padding: 3rem;
-      color: #6c757d;
+      color: var(--color-text-muted);
     }
 
     .error, .success {
@@ -1554,13 +1572,13 @@
 
     .error {
       background-color: #f8d7da;
-      color: #721c24;
+      color: var(--color-danger);
       border: 1px solid #f5c6cb;
     }
 
     .success {
       background-color: #d4edda;
-      color: #155724;
+      color: var(--color-success);
       border: 1px solid #c3e6cb;
     }
 
@@ -1602,7 +1620,7 @@
       border: none;
       font-size: 1.5rem;
       cursor: pointer;
-      color: #6c757d;
+      color: var(--color-text-muted);
       width: 30px;
       height: 30px;
       display: flex;
@@ -1613,7 +1631,7 @@
     }
 
     .ticket-modal-close:hover {
-      background: #f8f9fa;
+      background: var(--color-background-light);
     }
 
     .ticket-modal-header {
@@ -1631,7 +1649,7 @@
 
     .ticket-modal-title h3 {
       margin: 0;
-      color: #667eea;
+      color: var(--color-primary);
       font-size: 1.4rem;
     }
 
@@ -1640,7 +1658,7 @@
       justify-content: space-between;
       align-items: center;
       font-size: 0.9rem;
-      color: #6c757d;
+      color: var(--color-text-muted);
     }
 
     .ticket-modal-details {
@@ -1662,7 +1680,7 @@
     }
 
     .ticket-description {
-      background: #f8f9fa;
+      background: var(--color-background-light);
       padding: 1rem;
       border-radius: 8px;
       border-left: 4px solid #667eea;
@@ -1676,7 +1694,7 @@
       align-items: center;
       gap: 1rem;
       padding: 1rem;
-      background: #f8f9fa;
+      background: var(--color-background-light);
       border-radius: 8px;
     }
 
@@ -1695,7 +1713,7 @@
     }
 
     .ticket-status-section select:disabled {
-      background: #e9ecef;
+      background: var(--color-border-light);
       cursor: not-allowed;
     }
 
@@ -1703,7 +1721,7 @@
     .ticket-transfer-section {
       margin-top: 2rem;
       padding: 1.5rem;
-      background: #f8f9fa;
+      background: var(--color-background-light);
       border-radius: 8px;
       border-left: 4px solid #17a2b8;
     }
@@ -1738,7 +1756,7 @@
 
     .transfer-button {
       background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-      color: white;
+      color: var(--color-white);
       border: none;
       padding: 0.75rem 1.5rem;
       border-radius: 8px;
@@ -1966,7 +1984,7 @@
       overflow-y: auto;
       margin-bottom: 1rem;
       padding: 1rem;
-      background: #f8f9fa;
+      background: var(--color-background-light);
       border-radius: 8px;
     }
 
@@ -1992,7 +2010,7 @@
     }
 
     .ticket-message-time {
-      color: #6c757d;
+      color: var(--color-text-muted);
     }
 
     .ticket-message-content {
@@ -2020,13 +2038,13 @@
 
     .ticket-message-form textarea:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--color-primary);
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .ticket-message-form button {
       background: var(--primary-gradient);
-      color: white;
+      color: var(--color-white);
       border: none;
       padding: 0.75rem 1.5rem;
       border-radius: 8px;
@@ -2052,7 +2070,7 @@
 
     .no-messages {
       text-align: center;
-      color: #6c757d;
+      color: var(--color-text-muted);
       font-style: italic;
       padding: 2rem;
     }
@@ -2228,8 +2246,8 @@
       .ticket-id {
         font-size: 0.75rem;
         font-weight: 600;
-        color: #6c757d;
-        background: #f8f9fa;
+        color: var(--color-text-muted);
+        background: var(--color-background-light);
         padding: 0.2rem 0.4rem;
         border-radius: 4px;
         flex-shrink: 0;
@@ -2260,11 +2278,11 @@
         gap: 0.5rem;
         align-items: center;
         font-size: 0.75rem;
-        color: #6c757d;
+        color: var(--color-text-muted);
       }
       
       .ticket-category {
-        background: #e9ecef;
+        background: var(--color-border-light);
         color: #495057;
         padding: 0.2rem 0.4rem;
         border-radius: 4px;
@@ -2273,7 +2291,7 @@
       
       .ticket-assignee {
         background: #667eea;
-        color: white;
+        color: var(--color-white);
         padding: 0.2rem 0.4rem;
         border-radius: 4px;
         font-weight: 500;
@@ -2321,7 +2339,7 @@
         align-items: stretch;
         gap: 0.75rem;
         padding: 1rem;
-        background: #f8f9fa;
+        background: var(--color-background-light);
         border-radius: 8px;
       }
       
@@ -2350,7 +2368,7 @@
         padding: 2rem 1rem;
         text-align: center;
         font-size: 0.9rem;
-        color: #6c757d;
+        color: var(--color-text-muted);
       }
 
       /* Create Ticket Modal Mobile Styles */
@@ -2432,6 +2450,91 @@
         font-size: 0.95rem;
       }
     }
+
+    /* Utility Classes */
+    .hidden {
+      display: none;
+    }
+
+    .error-message {
+      margin: 10px 0; 
+      color: var(--color-text-light);
+    }
+
+    .retry-btn {
+      margin-top: 15px; 
+      padding: 8px 16px; 
+      background: var(--color-primary-dark); 
+      color: var(--color-white); 
+      border: none; 
+      border-radius: 4px; 
+      cursor: pointer;
+    }
+
+    .flex-1-ml {
+      flex: 1; 
+      margin-left: 1rem;
+    }
+
+    .report-section {
+      background: #e3f2fd; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin: 1.5rem 0;
+    }
+
+    .report-header {
+      margin: 0 0 10px 0; 
+      color: var(--color-info);
+    }
+
+    .report-list {
+      margin: 0; 
+      padding-left: 20px; 
+      color: var(--color-text-lighter);
+    }
+
+    .center-title {
+      text-align: center; 
+      color: var(--color-primary); 
+      margin-bottom: 1.5rem;
+    }
+
+    .description-toggle {
+      background: none; 
+      border: none; 
+      color: var(--color-primary); 
+      font-weight: 600; 
+      cursor: pointer; 
+      padding: 0.5rem 0; 
+      text-decoration: underline;
+    }
+
+    .error-display {
+      text-align: center; 
+      padding: 40px; 
+      color: var(--color-error);
+    }
+
+    .loading-display {
+      text-align: center; 
+      padding: 40px; 
+      color: var(--color-loading);
+    }
+
+    .no-tickets-display {
+      text-align: center; 
+      padding: 40px; 
+      color: var(--color-text-muted);
+    }
+
+    .warning-highlight {
+      background: var(--color-danger-bg); 
+      color: var(--color-danger); 
+      padding: 2px 6px; 
+      border-radius: 4px; 
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -2471,7 +2574,7 @@
         <div class="ticket-search-section">
           <div class="search-input-group">
             <input type="text" id="ticket-search" class="ticket-search-input" placeholder="Search tickets by title, ID, or description...">
-            <button class="search-clear-btn" id="search-clear-btn" onclick="clearSearch()" style="display: none;">×</button>
+            <button class="search-clear-btn hidden" id="search-clear-btn" onclick="clearSearch()">×</button>
           </div>
         </div>
         
@@ -2599,7 +2702,7 @@
       </div>
       
       <!-- COFT Ticket Details Section -->
-      <div class="coft-details-section" id="coft-details-section" style="display: none;">
+      <div class="coft-details-section hidden" id="coft-details-section">
         <h4>📋 COFT Order Details</h4>
         <div class="coft-details-grid">
           <div class="coft-detail-row">
@@ -2642,15 +2745,15 @@
             <span class="coft-label">Issue Reason:</span>
             <span class="coft-value" id="coft-detail-reason">-</span>
           </div>
-          <div class="coft-detail-row" id="coft-specific-date-row" style="display: none;">
+          <div class="coft-detail-row hidden" id="coft-specific-date-row">
             <span class="coft-label">Specific Date Needed:</span>
             <span class="coft-value" id="coft-detail-specific-date">-</span>
           </div>
-          <div class="coft-detail-row" id="coft-photos-row" style="display: none;">
+          <div class="coft-detail-row hidden" id="coft-photos-row">
             <span class="coft-label">Photos Attached:</span>
             <span class="coft-value" id="coft-detail-photos">-</span>
           </div>
-          <div class="coft-detail-row" id="coft-additional-row" style="display: none;">
+          <div class="coft-detail-row hidden" id="coft-additional-row">
             <span class="coft-label">Additional Information:</span>
             <span class="coft-value" id="coft-detail-additional">-</span>
           </div>
@@ -2658,7 +2761,7 @@
       </div>
       
       <!-- IT Support Ticket Details Section -->
-      <div class="it-support-details-section" id="it-support-details-section" style="display: none;">
+      <div class="it-support-details-section hidden" id="it-support-details-section">
         <h4>💻 IT Support Ticket Details</h4>
         <div class="it-support-details-grid">
           <div class="it-support-detail-row">
@@ -2673,7 +2776,7 @@
           </div>
           <div class="it-support-detail-row">
             <span class="it-support-label">Detailed Description:</span>
-            <div style="flex: 1; margin-left: 1rem;">
+            <div class="flex-1-ml">
               <div class="it-support-details-text" id="it-support-detail-description">-</div>
             </div>
           </div>
@@ -2761,7 +2864,7 @@
       </div>
       
       <!-- Team Assignment -->
-      <div class="form-group assignment-field" id="team-assignment" style="display: none;">
+      <div class="form-group assignment-field hidden" id="team-assignment">
         <label for="modal-assign-team" class="form-label">Select Team/Group:</label>
         <select id="modal-assign-team" class="form-select full-width" onchange="handleTeamSelection()">
           <option value="">Choose a team...</option>
@@ -2803,7 +2906,7 @@
       </div>
 
       <!-- COFT Specific Form (hidden by default) -->
-      <div id="coft-form-fields" style="display: none;">
+      <div id="coft-form-fields" class="hidden">
         <!-- Warning Message -->
         <div class="coft-warning">
           <p><strong>Please ensure this ticket is for ORDER CHASING and the order in question is not at ITEM SOURCED/ON ORDER WITH SUPPLIER/GROUP STOCK. Raise a ticket with KATIE if these statuses show.</strong></p>
@@ -2918,7 +3021,7 @@
         </div>
 
         <!-- Specific Date Field (shown when "Client needs order by specific date" is selected) -->
-        <div class="form-group" id="coft-specific-date-section" style="display: none;">
+        <div class="form-group hidden" id="coft-specific-date-section">
           <label for="coft-specific-date" class="form-label">Latest date the order is needed by:</label>
           <input type="date" id="coft-specific-date" class="form-input full-width">
         </div>
@@ -2940,7 +3043,7 @@
       </div>
 
       <!-- IT Support Fields (only shown when "IT Support" is selected) -->
-      <div id="it-support-fields" style="display: none;">
+      <div id="it-support-fields" class="hidden">
         <!-- Systems Selection -->
         <div class="form-group">
           <label class="form-label">Please select the system you require assistance with: *</label>
@@ -3084,34 +3187,30 @@ async function initializeInternalSystem() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Tickets page loaded, checking authentication...');
   
   // Check authentication first
   firebase.auth().onAuthStateChanged(async (user) => {
     if (!user) {
-      console.log('User not authenticated, redirecting to login');
       window.location.href = 'index.html';
       return;
     }
 
     currentUser = user;
-    console.log('User authenticated:', user.email);
     
     // User name display is now handled by shared-components.js
     
     // Since we go directly to internal tickets now, initialize immediately
     try {
       await initializeInternalSystem();
-      console.log('Tickets page fully initialized');
     } catch (error) {
       console.error('Error initializing tickets page:', error);
       const ticketsList = document.getElementById('tickets-list');
       if (ticketsList) {
         ticketsList.innerHTML = `
-          <div class="error" style="text-align: center; padding: 40px; color: #d13438;">
+          <div class="error error-display">
             <h4>Initialization Error</h4>
-            <p style="margin: 10px 0; color: #666;">${error.message}</p>
-            <button onclick="window.location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #6264a7; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            <p class="error-message">${error.message}</p>
+            <button onclick="window.location.reload()" class="retry-btn">
               Reload Page
             </button>
           </div>
@@ -3124,90 +3223,21 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load all users for assignment
 async function loadAllUsers() {
   try {
-    // Try to load users from cloud function first (all authenticated users need this for tickets/messages)
+    // Load users from cloud function
     if (typeof listUsers === 'function') {
-      try {
-        const users = await listUsers();
-        allUsers = users.map(user => ({
-          email: user.email,
-          name: user.displayName || extractNameFromEmail(user.email),
-          uid: user.uid
-        }));
-        console.log('Loaded users from cloud function:', allUsers.length);
-        return;
-      } catch (error) {
-        console.log('Cloud function not accessible, trying database fallback');
-      }
+      const users = await listUsers();
+      allUsers = users.map(user => ({
+        email: user.email,
+        name: user.displayName || extractNameFromEmail(user.email),
+        uid: user.uid
+      }));
+    } else {
+      throw new Error('User listing function not available');
     }
-    
-    // Fallback: Try to load from Firebase Realtime Database
-    if (firebase.database && currentUser) {
-      try {
-        const db = firebase.database();
-        const usersSnapshot = await db.ref('users').once('value');
-        const usersData = usersSnapshot.val() || {};
-        
-        const dbUsers = Object.keys(usersData).map(uid => ({
-          email: usersData[uid].email || 'unknown@email.com',
-          name: usersData[uid].name || usersData[uid].displayName || extractNameFromEmail(usersData[uid].email || ''),
-          uid: uid
-        }));
-        
-        if (dbUsers.length > 0) {
-          allUsers = dbUsers;
-          console.log('Loaded users from Realtime Database:', allUsers.length);
-          return;
-        }
-      } catch (dbError) {
-        console.log('Database fallback failed, using static list');
-      }
-    }
-
-    // Fallback: Use static list of accounts
-    allUsers = [
-      { email: 'mdelaney@castlefineart.com', name: 'Marc Delaney' },
-      { email: 'gturpin@washingtongreen.co.uk', name: 'Gary Turpin' },
-      { email: 'icc@castlefineart.com', name: 'ICC' },
-      { email: 'mailbox@castlefineart.com', name: 'Mailbox' },
-      { email: 'cheltenham@castlefineart.com', name: 'Cheltenham' },
-      { email: 'derby@castlefineart.com', name: 'Derby' },
-      { email: 'leamingtonspa@castlefineart.com', name: 'Leamington Spa' },
-      { email: 'miltonkeynes@castlefineart.com', name: 'Milton Keynes' },
-      { email: 'nottingham@castlefineart.com', name: 'Nottingham' },
-      { email: 'stamford@castlefineart.com', name: 'Stamford' },
-      { email: 'stratford@castlefineart.com', name: 'Stratford' },
-      { email: 'chester@castlefineart.com', name: 'Chester' },
-      { email: 'harrogate@castlefineart.com', name: 'Harrogate' },
-      { email: 'leeds@castlefineart.com', name: 'Leeds' },
-      { email: 'liverpool@castlefineart.com', name: 'Liverpool' },
-      { email: 'manchester@castlefineart.com', name: 'Manchester' },
-      { email: 'newcastle@castlefineart.com', name: 'Newcastle' },
-      { email: 'meadowhall@castlefineart.com', name: 'Meadowhall' },
-      { email: 'york@castlefineart.com', name: 'York' },
-      { email: 'cgn@castlefineart.com', name: 'CGN' },
-      { email: 'sms@castlefineart.com', name: 'SMS' },
-      { email: 'scp@castlefineart.com', name: 'SCP' },
-      { email: 'bath@castlefineart.com', name: 'Bath' },
-      { email: 'brighton@castlefineart.com', name: 'Brighton' },
-      { email: 'bristol@castlefineart.com', name: 'Bristol' },
-      { email: 'cambridge@castlefineart.com', name: 'Cambridge' },
-      { email: 'canterbury@castlefineart.com', name: 'Canterbury' },
-      { email: 'exeter@castlefineart.com', name: 'Exeter' },
-      { email: 'guildford@castlefineart.com', name: 'Guildford' },
-      { email: 'bluewater@castlefineart.com', name: 'Bluewater' },
-      { email: 'marlow@castlefineart.com', name: 'Marlow' },
-      { email: 'norwich@castlefineart.com', name: 'Norwich' },
-      { email: 'oxford@castlefineart.com', name: 'Oxford' },
-      { email: 'reading@castlefineart.com', name: 'Reading' },
-      { email: 'tunbridgewells@castlefineart.com', name: 'Tunbridge Wells' },
-      { email: 'winchester@castlefineart.com', name: 'Winchester' },
-      { email: 'windsor@castlefineart.com', name: 'Windsor' },
-      { email: 'edinburgh@castlefineart.com', name: 'Edinburgh' },
-      { email: 'glasgow@castlefineart.com', name: 'Glasgow' },
-      { email: 'cardiff@castlefineart.com', name: 'Cardiff' }
-    ];
   } catch (error) {
     console.error('Error loading users:', error);
+    // Initialize with empty array if loading fails
+    allUsers = [];
   }
 }
 
@@ -3219,23 +3249,29 @@ async function loadAllTeams() {
       id: doc.id,
       ...doc.data()
     }));
-    console.log('Loaded teams:', allTeams.length);
   } catch (error) {
     console.error('Error loading teams:', error);
   }
 }
 
-// Setup user search functionality
-function setupUserSearch() {
-  const searchInput = document.getElementById('assign-to');
-  const suggestionsDiv = document.getElementById('user-suggestions');
+// Generic user search component
+function createUserSearch(config) {
+  const {
+    searchInputId,
+    suggestionsId,
+    containerSelector,
+    onUserSelect,
+    excludeUserEmails = []
+  } = config;
   
-  // Check if elements exist (they don't since we moved to modal)
+  const searchInput = document.getElementById(searchInputId);
+  const suggestionsDiv = document.getElementById(suggestionsId);
+  
   if (!searchInput || !suggestionsDiv) {
-    console.log('User search elements not found - form moved to modal');
     return;
   }
   
+  // Setup input listener
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
     
@@ -3244,10 +3280,11 @@ function setupUserSearch() {
       return;
     }
     
+    const excludeEmails = [currentUser.email, ...excludeUserEmails];
     const filteredUsers = allUsers.filter(user => 
       (user.name.toLowerCase().includes(query) || 
        user.email.toLowerCase().includes(query)) &&
-      user.email !== currentUser.email // Don't show current user
+      !excludeEmails.includes(user.email)
     );
     
     if (filteredUsers.length > 0) {
@@ -3270,7 +3307,7 @@ function setupUserSearch() {
       const email = suggestion.dataset.email;
       const name = suggestion.dataset.name;
       
-      assignUser({ email, name });
+      onUserSelect({ email, name });
       searchInput.value = '';
       suggestionsDiv.style.display = 'none';
     }
@@ -3278,9 +3315,19 @@ function setupUserSearch() {
   
   // Hide suggestions when clicking outside
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.user-search-container')) {
+    if (!e.target.closest(containerSelector)) {
       suggestionsDiv.style.display = 'none';
     }
+  });
+}
+
+// Setup user search functionality
+function setupUserSearch() {
+  createUserSearch({
+    searchInputId: 'assign-to',
+    suggestionsId: 'user-suggestions',
+    containerSelector: '.user-search-container',
+    onUserSelect: assignUser
   });
 }
 
@@ -3317,7 +3364,6 @@ function setupTicketForm() {
   
   // Check if form exists (it's now in the modal)
   if (!form) {
-    console.log('Create ticket form not found - using modal version');
     return;
   }
   
@@ -3467,7 +3513,6 @@ function clearSearch() {
 function handleDirectTicketLink() {
   if (window.location.hash.startsWith('#ticket-')) {
     const ticketId = window.location.hash.replace('#ticket-', '');
-    console.log('Direct ticket link detected:', ticketId);
     
     // Wait a bit for tickets to load, then try to highlight the specific ticket
     setTimeout(() => {
@@ -3494,9 +3539,7 @@ function highlightSpecificTicket(ticketId) {
       ticketElement.style.border = '';
     }, 3000);
     
-    console.log('Highlighted ticket:', ticketId);
   } else {
-    console.log('Ticket not found in current view:', ticketId);
   }
 }
 
@@ -3574,10 +3617,9 @@ async function loadTickets() {
   }
   
   // Show loading state
-  ticketsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #8a8886;">Loading tickets...</div>';
+  ticketsList.innerHTML = '<div class="loading-display">Loading tickets...</div>';
   
   try {
-    console.log('Loading tickets for user:', currentUser.email);
     
     // Get all tickets and filter by relevance to current user
     const allTicketsSnapshot = await db.collection('tickets').get();
@@ -3585,11 +3627,10 @@ async function loadTickets() {
     
     // Handle empty collection gracefully
     if (allTicketsSnapshot.empty) {
-      console.log('No tickets found in database - collection may be empty');
       // Initialize empty counts
       updateFilterCounts([]);
       ticketsList.innerHTML = `
-        <div class="no-tickets" style="text-align: center; padding: 40px; color: #6c757d;">
+        <div class="no-tickets no-tickets-display">
           <h3>No tickets yet</h3>
           <p>Create your first ticket to get started!</p>
         </div>
@@ -3759,10 +3800,10 @@ async function loadTickets() {
   } catch (error) {
     console.error('Error loading tickets:', error);
     ticketsList.innerHTML = `
-      <div class="error" style="text-align: center; padding: 40px; color: #d13438;">
+      <div class="error error-display">
         <h4>Failed to load tickets</h4>
-        <p style="margin: 10px 0; color: #666;">${error.message}</p>
-        <button onclick="loadTickets()" style="margin-top: 15px; padding: 8px 16px; background: #6264a7; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        <p class="error-message">${error.message}</p>
+        <button onclick="loadTickets()" class="retry-btn">
           Try Again
         </button>
       </div>
@@ -3796,7 +3837,6 @@ function updateFilterCounts(allTickets) {
       document.getElementById('count-resolved').textContent = '0';
       document.getElementById('count-transferred').textContent = '0';
       
-      console.log('Filter counts updated (empty):', counts);
       return;
     }
     
@@ -3823,7 +3863,6 @@ function updateFilterCounts(allTickets) {
     document.getElementById('count-resolved').textContent = counts.resolved;
     document.getElementById('count-transferred').textContent = counts.transferred;
     
-    console.log('Filter counts updated:', counts);
     
   } catch (error) {
     console.error('Error updating filter counts:', error);
@@ -3838,7 +3877,6 @@ function updateVisibleTicketCount(visibleTickets) {
     if (countElement) {
       countElement.textContent = count;
     }
-    console.log('📊 Visible ticket count updated:', count);
   } catch (error) {
     console.error('Error updating visible ticket count:', error);
   }
@@ -3876,8 +3914,8 @@ async function openTicket(ticketId) {
       descriptionElement.innerHTML = `
         <div class="description-content">
           <div class="description-short">${window.sharedComponents.sanitizeHTML(shortDescription)}</div>
-          <div class="description-full" style="display: none;">${window.sharedComponents.sanitizeHTML(description)}</div>
-          <button class="description-toggle" onclick="toggleDescription(this)" style="background: none; border: none; color: #667eea; font-weight: 600; cursor: pointer; padding: 0.5rem 0; text-decoration: underline;">
+          <div class="description-full hidden">${window.sharedComponents.sanitizeHTML(description)}</div>
+          <button class="description-toggle" onclick="toggleDescription(this)">
             Show Full Description
           </button>
         </div>
@@ -3922,13 +3960,13 @@ async function openTicket(ticketId) {
       
       // Add highlighting for important fields
       if (coftModalData.clientAware === 'NO') {
-        document.getElementById('coft-detail-client-aware').innerHTML = '<span class="highlight" style="background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; font-weight: 600;">NO ⚠️</span>';
+        document.getElementById('coft-detail-client-aware').innerHTML = '<span class="highlight warning-highlight">NO ⚠️</span>';
       } else {
         document.getElementById('coft-detail-client-aware').textContent = coftModalData.clientAware || '-';
       }
       
       if (coftModalData.etaDiscussed === 'NO') {
-        document.getElementById('coft-detail-eta-discussed').innerHTML = '<span class="highlight" style="background: #f8d7da; color: #721c24; padding: 2px 6px; border-radius: 4px; font-weight: 600;">NO ⚠️</span>';
+        document.getElementById('coft-detail-eta-discussed').innerHTML = '<span class="highlight warning-highlight">NO ⚠️</span>';
       } else {
         document.getElementById('coft-detail-eta-discussed').textContent = coftModalData.etaDiscussed || '-';
       }
@@ -4119,97 +4157,75 @@ function toggleDescription(button) {
   }
 }
 
+// Generic modal management functions
+function openModal(modalId, onOpen = null) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.add('show');
+    if (onOpen) {
+      onOpen();
+    }
+  }
+}
+
+function closeModal(modalId, onClose = null) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('show');
+    if (onClose) {
+      onClose();
+    }
+  }
+}
+
 // Close ticket modal
 function closeTicketModal() {
-  // Clear any running timer interval to prevent memory leaks
-  if (window.timerInterval) {
-    clearInterval(window.timerInterval);
-    window.timerInterval = null;
-  }
-  
-  document.getElementById('ticket-modal').classList.remove('show');
-  currentTicket = null;
-  
-  // Refresh ticket list to show any changes
-  loadTickets();
+  closeModal('ticket-modal', () => {
+    // Clear any running timer interval to prevent memory leaks
+    if (window.timerInterval) {
+      clearInterval(window.timerInterval);
+      window.timerInterval = null;
+    }
+    currentTicket = null;
+    
+    // Refresh ticket list to show any changes
+    loadTickets();
+  });
 }
 
 // Open create ticket modal
 function openCreateTicketModal() {
-  console.log('🎫 Opening create ticket modal...');
-  document.getElementById('create-ticket-modal').classList.add('show');
-  setupModalUserSearch();
-  populateTeamDropdown();
-  setupAssignmentTypeHandlers();
-  
-  // Clean up any existing required attributes on checkboxes to prevent HTML5 validation issues
-  const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]');
-  systemCheckboxes.forEach(checkbox => {
-    checkbox.removeAttribute('required');
+  openModal('create-ticket-modal', () => {
+    setupModalUserSearch();
+    populateTeamDropdown();
+    setupAssignmentTypeHandlers();
+    
+    // Clean up any existing required attributes on checkboxes to prevent HTML5 validation issues
+    const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]');
+    systemCheckboxes.forEach(checkbox => {
+      checkbox.removeAttribute('required');
+    });
   });
 }
 
 // Close create ticket modal
 function closeCreateTicketModal() {
-  document.getElementById('create-ticket-modal').classList.remove('show');
-  
-  // Clear form
-  document.getElementById('create-ticket-form').reset();
-  document.getElementById('modal-assigned-user-display').innerHTML = '';
-  document.getElementById('create-ticket-status').innerHTML = '';
-  assignedUser = null;
+  closeModal('create-ticket-modal', () => {
+    // Clear form
+    document.getElementById('create-ticket-form').reset();
+    document.getElementById('modal-assigned-user-display').innerHTML = '';
+    document.getElementById('create-ticket-status').innerHTML = '';
+    assignedUser = null;
+  });
 }
 
 // Setup user search for modal
 function setupModalUserSearch() {
-  const searchInput = document.getElementById('modal-assign-to');
-  const suggestionsDiv = document.getElementById('modal-user-suggestions');
-  
-  searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase().trim();
-    
-    if (query.length < 1) {
-      suggestionsDiv.style.display = 'none';
-      return;
-    }
-    
-    const filteredUsers = allUsers.filter(user => 
-      (user.name.toLowerCase().includes(query) || 
-       user.email.toLowerCase().includes(query)) &&
-      user.email !== currentUser.email // Don't show current user
-    );
-    
-    if (filteredUsers.length > 0) {
-      suggestionsDiv.innerHTML = filteredUsers.map(user => 
-        `<div class="user-suggestion" data-email="${user.email}" data-name="${user.name}">
-          <strong>${user.name}</strong><br>
-          <small>${user.email}</small>
-        </div>`
-      ).join('');
-      suggestionsDiv.style.display = 'block';
-    } else {
-      suggestionsDiv.style.display = 'none';
-    }
-  });
-  
-  // Handle suggestion clicks
-  suggestionsDiv.addEventListener('click', (e) => {
-    const suggestion = e.target.closest('.user-suggestion');
-    if (suggestion) {
-      const email = suggestion.dataset.email;
-      const name = suggestion.dataset.name;
-      
-      assignModalUser({ email, name });
-      searchInput.value = '';
-      suggestionsDiv.style.display = 'none';
-    }
-  });
-  
-  // Hide suggestions when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#modal-user-suggestions') && !e.target.closest('#modal-assign-to')) {
-      suggestionsDiv.style.display = 'none';
-    }
+  createUserSearch({
+    searchInputId: 'modal-assign-to',
+    suggestionsId: 'modal-user-suggestions',
+    containerSelector: '#modal-user-suggestions, #modal-assign-to',
+    onUserSelect: assignModalUser
   });
 }
 
@@ -4242,7 +4258,6 @@ function removeModalAssignedUser() {
 
 // Create ticket from modal
 async function createTicketFromModal() {
-  console.log('🎫 Creating ticket from modal...');
   
   // Failsafe: Remove any required attributes from IT Support checkboxes before processing
   const systemCheckboxes = document.querySelectorAll('input[name="it-systems"]');
@@ -4256,7 +4271,6 @@ async function createTicketFromModal() {
   const categoryElement = document.getElementById('modal-ticket-category');
   const createBtn = document.getElementById('modal-create-ticket-btn');
   
-  console.log('📋 Form elements found:', {
     titleElement: !!titleElement,
     descriptionElement: !!descriptionElement,
     categoryElement: !!categoryElement,
@@ -4325,7 +4339,6 @@ async function createTicketFromModal() {
     }
   }
   
-  console.log('📝 Form values:', { title, description, category, isCOFTForm });
   
   // Check if either individual or team is assigned
   const isIndividualAssignment = document.getElementById('assign-individual').checked;
@@ -4469,7 +4482,6 @@ function handleTeamSelection() {
   const teamSelect = document.getElementById('modal-assign-team');
   const categorySelect = document.getElementById('modal-ticket-category');
   
-  console.log('🔄 Team selection changed:', {
     selectedValue: teamSelect.value,
     selectedText: teamSelect.selectedOptions[0]?.text,
     allOptions: Array.from(teamSelect.options).map(opt => ({ value: opt.value, text: opt.text }))
@@ -4504,14 +4516,11 @@ function handleFormToggle() {
                             allTeams.find(team => team.id === selectedTeam && team.name === 'COFT');
   
   // Check if IT Support team is selected
-  console.log('🔍 Debug team selection:', { isTeamAssignment, selectedTeam, allTeamsCount: allTeams.length });
-  console.log('👥 Available teams:', allTeams.map(t => ({ id: t.id, name: t.name })));
   
   const isITSupportTeamSelected = isTeamAssignment && 
                                  selectedTeam && 
                                  allTeams.find(team => team.id === selectedTeam && team.name === 'IT Support');
   
-  console.log('🎯 IT Support team selected:', isITSupportTeamSelected);
   
   // Hide category field when COFT or IT Support team is selected
   if (isCOFTTeamSelected) {
@@ -4985,7 +4994,6 @@ function extractCOFTDataFromTicket(ticket) {
     }
     
   } catch (error) {
-    console.log('Error extracting COFT data:', error);
   }
   
   return defaultData;
@@ -5150,7 +5158,6 @@ function extractComprehensiveCOFTData(ticket) {
     }
     
   } catch (error) {
-    console.log('Error extracting comprehensive COFT data:', error);
   }
   
   return defaultData;
@@ -5447,10 +5454,7 @@ async function addSystemMessage(message) {
 }
 
 // Debug: Check function availability
-console.log('🔍 Tickets.html script loading...');
 window.debugOpenCreateTicketModal = function() {
-  console.log('🔍 Debug function called');
-  console.log('🔍 openCreateTicketModal type:', typeof openCreateTicketModal);
   if (typeof openCreateTicketModal === 'function') {
     openCreateTicketModal();
   } else {
@@ -5498,63 +5502,24 @@ let transferSelectedUser = null;
 
 // Setup transfer form
 function setupTransferForm() {
-  const transferInput = document.getElementById('transfer-user-input');
-  const transferSuggestions = document.getElementById('transfer-user-suggestions');
-  
   // Clear previous state
   transferSelectedUser = null;
-  transferInput.value = '';
+  document.getElementById('transfer-user-input').value = '';
   document.getElementById('transfer-selected-user').innerHTML = '';
   document.getElementById('transfer-reason-input').value = '';
-  transferSuggestions.style.display = 'none';
+  document.getElementById('transfer-user-suggestions').style.display = 'none';
   
-  // Setup user search for transfer
-  transferInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase().trim();
+  // Setup user search for transfer - exclude current user and currently assigned user
+  const excludeEmails = currentTicket && currentTicket.assignedTo && currentTicket.assignedTo.email 
+    ? [currentTicket.assignedTo.email] 
+    : [];
     
-    if (query.length < 1) {
-      transferSuggestions.style.display = 'none';
-      return;
-    }
-    
-    const filteredUsers = allUsers.filter(user => 
-      (user.name.toLowerCase().includes(query) || 
-       user.email.toLowerCase().includes(query)) &&
-      user.email !== currentUser.email && // Don't show current user
-      user.email !== currentTicket.assignedTo.email // Don't show currently assigned user
-    );
-    
-    if (filteredUsers.length > 0) {
-      transferSuggestions.innerHTML = filteredUsers.map(user => 
-        `<div class="user-suggestion" data-email="${user.email}" data-name="${user.name}">
-          <strong>${user.name}</strong><br>
-          <small>${user.email}</small>
-        </div>`
-      ).join('');
-      transferSuggestions.style.display = 'block';
-    } else {
-      transferSuggestions.style.display = 'none';
-    }
-  });
-  
-  // Handle transfer suggestion clicks
-  transferSuggestions.addEventListener('click', (e) => {
-    const suggestion = e.target.closest('.user-suggestion');
-    if (suggestion) {
-      const email = suggestion.dataset.email;
-      const name = suggestion.dataset.name;
-      
-      selectTransferUser({ email, name });
-      transferInput.value = '';
-      transferSuggestions.style.display = 'none';
-    }
-  });
-  
-  // Hide suggestions when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.transfer-user-search')) {
-      transferSuggestions.style.display = 'none';
-    }
+  createUserSearch({
+    searchInputId: 'transfer-user-input',
+    suggestionsId: 'transfer-user-suggestions',
+    containerSelector: '.transfer-user-search',
+    onUserSelect: selectTransferUser,
+    excludeUserEmails: excludeEmails
   });
 }
 
@@ -6011,8 +5976,6 @@ let allTicketsForReport = [];
 
 async function openCOFTReportModal() {
   try {
-    console.log('📊 Opening COFT report modal...');
-    
     // Load all tickets first
     const ticketsSnapshot = await db.collection('tickets').get();
     allTicketsForReport = [];
@@ -6023,8 +5986,6 @@ async function openCOFTReportModal() {
         ...ticketData
       });
     });
-    
-    console.log(`Loaded ${allTicketsForReport.length} tickets for report`);
     
     // Get months with tickets
     const monthsWithTickets = window.COFTTicketReports.getMonthsWithTickets(allTicketsForReport);
@@ -6041,7 +6002,7 @@ async function openCOFTReportModal() {
     });
     
     // Show modal
-    document.getElementById('coft-report-modal').classList.add('show');
+    openModal('coft-report-modal');
     
   } catch (error) {
     console.error('Error opening COFT report modal:', error);
@@ -6050,7 +6011,7 @@ async function openCOFTReportModal() {
 }
 
 function closeCOFTReportModal() {
-  document.getElementById('coft-report-modal').classList.remove('show');
+  closeModal('coft-report-modal');
 }
 
 async function generateCOFTReport(format) {
@@ -6067,7 +6028,6 @@ async function generateCOFTReport(format) {
     const selectedYear = parseInt(year);
     const selectedMonth = parseInt(month);
     
-    console.log(`Generating COFT report for ${selectedYear}-${selectedMonth + 1} in ${format} format`);
     
     // Call the COFT report extraction function
     await window.COFTTicketReports.extractCOFTTicketReport(
@@ -6109,7 +6069,7 @@ document.addEventListener('keydown', (e) => {
 <div id="coft-report-modal" class="coft-report-modal">
   <div class="coft-report-modal-content">
     <button class="coft-report-modal-close" onclick="closeCOFTReportModal()">&times;</button>
-    <h3 style="text-align: center; color: #667eea; margin-bottom: 1.5rem;">📊 Extract COFT Team Report</h3>
+    <h3 class="center-title">📊 Extract COFT Team Report</h3>
     
     <div class="coft-report-form">
       <div class="form-group">
@@ -6120,9 +6080,9 @@ document.addEventListener('keydown', (e) => {
         <p class="form-help-text">Only months with tickets are shown</p>
       </div>
       
-      <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 1.5rem 0;">
-        <h4 style="margin: 0 0 10px 0; color: #1976d2;">📋 Report Includes:</h4>
-        <ul style="margin: 0; padding-left: 20px; color: #555;">
+      <div class="report-section">
+        <h4 class="report-header">📋 Report Includes:</h4>
+        <ul class="report-list">
           <li>Ticket counts by status for each COFT team member</li>
           <li>Resolution rates (% resolved vs total raised)</li>
           <li>Summary statistics for the selected month</li>
