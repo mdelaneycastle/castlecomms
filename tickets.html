@@ -5906,23 +5906,27 @@ function matchesAdvancedFilters(ticket) {
     
     // First check for override (for reprocessing tickets)
     if (ticket.coftTeamMemberOverride) {
+      // If there's an override, ONLY use that - don't fall back to normal logic
       teamMemberMatch = ticket.coftTeamMemberOverride === advancedFilters.coftTeamMember;
-    } else if (ticket.assignedTo && ticket.assignedTo.teamMembers) {
-      // Check team members for COFT assignment
-      teamMemberMatch = ticket.assignedTo.teamMembers.some(member => {
-        const memberName = getCOFTTeamMember(member.email);
-        return memberName === advancedFilters.coftTeamMember;
-      });
-    } else if (ticket.assignedTo && ticket.assignedTo.email) {
-      // Check individual assignment
-      const memberName = getCOFTTeamMember(ticket.assignedTo.email);
-      teamMemberMatch = memberName === advancedFilters.coftTeamMember;
-    }
-    
-    // If no match in assigned to, check created by field
-    if (!teamMemberMatch && ticket.createdBy && ticket.createdBy.email) {
-      const memberName = getCOFTTeamMember(ticket.createdBy.email);
-      teamMemberMatch = memberName === advancedFilters.coftTeamMember;
+    } else {
+      // No override, use normal logic
+      if (ticket.assignedTo && ticket.assignedTo.teamMembers) {
+        // Check team members for COFT assignment
+        teamMemberMatch = ticket.assignedTo.teamMembers.some(member => {
+          const memberName = getCOFTTeamMember(member.email);
+          return memberName === advancedFilters.coftTeamMember;
+        });
+      } else if (ticket.assignedTo && ticket.assignedTo.email) {
+        // Check individual assignment
+        const memberName = getCOFTTeamMember(ticket.assignedTo.email);
+        teamMemberMatch = memberName === advancedFilters.coftTeamMember;
+      }
+      
+      // If no match in assigned to, check created by field
+      if (!teamMemberMatch && ticket.createdBy && ticket.createdBy.email) {
+        const memberName = getCOFTTeamMember(ticket.createdBy.email);
+        teamMemberMatch = memberName === advancedFilters.coftTeamMember;
+      }
     }
     
     if (!teamMemberMatch) return false;
