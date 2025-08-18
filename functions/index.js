@@ -445,7 +445,7 @@ const updateUserHttp = onRequest({ region: "europe-west1" }, async (req, res) =>
         return res.status(403).json({ error: "Admin access required" });
       }
 
-      const { uid, displayName, password } = req.body;
+      const { uid, displayName, password, customClaims } = req.body;
 
       if (!uid) {
         return res.status(400).json({ error: "User ID is required" });
@@ -458,6 +458,12 @@ const updateUserHttp = onRequest({ region: "europe-west1" }, async (req, res) =>
       if (password) updateData.password = password;
 
       const userRecord = await auth.updateUser(uid, updateData);
+
+      // Update custom claims if provided
+      if (customClaims !== undefined) {
+        await auth.setCustomUserClaims(uid, customClaims);
+        logger.info(`Custom claims updated for ${uid}:`, customClaims);
+      }
 
       // Update Realtime Database if displayName changed
       if (displayName !== undefined) {
