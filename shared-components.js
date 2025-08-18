@@ -1213,11 +1213,20 @@ window.sharedComponents = {
 };
 
 // Dark mode toggle functionality (global)
-let isDarkMode = false;
+let isDarkMode = localStorage.getItem('darkMode') === 'true';
 
-function toggleDarkMode() {
-  isDarkMode = !isDarkMode;
-  
+function updateDarkModeUI() {
+  const button = document.querySelector('.dark-mode-toggle');
+  if (button) {
+    if (isDarkMode) {
+      button.innerHTML = '<span class="dropdown-icon">☀️</span>Dark Mode: On';
+    } else {
+      button.innerHTML = '<span class="dropdown-icon">🌙</span>Dark Mode: Off';
+    }
+  }
+}
+
+function applyDarkMode() {
   if (isDarkMode) {
     // Apply dark mode filter
     document.documentElement.style.filter = 'invert(1) hue-rotate(180deg)';
@@ -1231,13 +1240,6 @@ function toggleDarkMode() {
       }
     `;
     document.head.appendChild(darkModeStyle);
-    
-    // Update button text in header
-    const button = document.querySelector('.dark-mode-toggle span');
-    if (button) button.textContent = '☀️';
-    
-    // Store preference
-    localStorage.setItem('darkMode', 'true');
   } else {
     // Remove dark mode filter
     document.documentElement.style.filter = '';
@@ -1245,22 +1247,29 @@ function toggleDarkMode() {
     // Remove dark mode styles
     const darkModeStyle = document.getElementById('dark-mode-style');
     if (darkModeStyle) darkModeStyle.remove();
-    
-    // Update button text in header
-    const button = document.querySelector('.dark-mode-toggle span');
-    if (button) button.textContent = '🌙';
-    
-    // Store preference
-    localStorage.setItem('darkMode', 'false');
   }
+}
+
+function toggleDarkMode() {
+  isDarkMode = !isDarkMode;
+  
+  // Apply or remove dark mode
+  applyDarkMode();
+  
+  // Update UI
+  updateDarkModeUI();
+  
+  // Store preference
+  localStorage.setItem('darkMode', isDarkMode.toString());
 }
 
 // Load dark mode preference on page load
 document.addEventListener('DOMContentLoaded', () => {
-  const savedDarkMode = localStorage.getItem('darkMode');
-  if (savedDarkMode === 'true') {
-    toggleDarkMode();
-  }
+  // Apply dark mode if it was previously enabled
+  applyDarkMode();
+  
+  // Update the UI to show correct state
+  updateDarkModeUI();
 });
 
 // Export for use in other scripts
