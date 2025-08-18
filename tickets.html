@@ -837,7 +837,8 @@
 
     .search-input-group {
       position: relative;
-      max-width: 500px;
+      max-width: 700px;
+      flex: 1;
     }
 
     .ticket-search-input {
@@ -1471,6 +1472,13 @@
 
     .radio-container input[type="radio"]:checked ~ .radio-checkmark:after {
       display: block;
+    }
+
+    /* Radio Group */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
     /* Form Help Text */
@@ -2899,22 +2907,25 @@
 
       <!-- COFT Specific Form (hidden by default) -->
       <div id="coft-form-fields" class="hidden">
-        <!-- Warning Message -->
-        <div class="coft-warning">
-          <p><strong>Please ensure this ticket is for ORDER CHASING and the order in question is not at ITEM SOURCED/ON ORDER WITH SUPPLIER/GROUP STOCK. Raise a ticket with KATIE if these statuses show.</strong></p>
-        </div>
-
-        <!-- Understanding Checkbox -->
+        <!-- COFT Type Selection -->
         <div class="form-group">
-          <label class="checkbox-container">
-            <input type="checkbox" id="coft-understanding" required onchange="toggleCOFTFields()">
-            <span class="checkmark"></span>
-            I understand the differences between the tickets and am raising the correct one
-          </label>
+          <label class="form-label">Please select the type of COFT request: *</label>
+          <div class="radio-group">
+            <label class="radio-container">
+              <input type="radio" name="coft-type" value="order-chasing" required onchange="handleCOFTTypeSelection()">
+              <span class="radio-checkmark"></span>
+              Order Chasing
+            </label>
+            <label class="radio-container">
+              <input type="radio" name="coft-type" value="reprocessing" required onchange="handleCOFTTypeSelection()">
+              <span class="radio-checkmark"></span>
+              Status set as Items Sourced/On Order With Supplier/Group Stock or if an order needs reprocessing
+            </label>
+          </div>
         </div>
 
-        <!-- COFT Fields Container (disabled until understanding is checked) -->
-        <div id="coft-fields-container" class="coft-fields-disabled">
+        <!-- COFT Fields Container -->
+        <div id="coft-fields-container" class="hidden">
 
         <!-- SO Number -->
         <div class="form-group">
@@ -4673,31 +4684,30 @@ function handleReasonSelection() {
   }
 }
 
-// Toggle COFT fields based on understanding checkbox
-function toggleCOFTFields() {
-  const understandingCheckbox = document.getElementById('coft-understanding');
+// Handle COFT type selection and assignment
+function handleCOFTTypeSelection() {
+  const coftTypeRadios = document.querySelectorAll('input[name="coft-type"]');
   const coftFieldsContainer = document.getElementById('coft-fields-container');
+  const selectedType = document.querySelector('input[name="coft-type"]:checked')?.value;
   
-  if (understandingCheckbox.checked) {
-    // Enable fields
-    coftFieldsContainer.classList.remove('coft-fields-disabled');
+  if (selectedType) {
+    // Show the COFT fields
+    coftFieldsContainer.classList.remove('hidden');
     
-    // Enable all input fields
-    const inputs = coftFieldsContainer.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
-      input.disabled = false;
-    });
+    // Handle assignment based on selection
+    if (selectedType === 'reprocessing') {
+      // Auto-assign Katie Lewis for reprocessing tickets
+      const katieUser = { email: 'katie.lewis@castlefineart.com', name: 'Katie Lewis' };
+      assignModalUser(katieUser);
+    } else if (selectedType === 'order-chasing') {
+      // For order chasing, let them choose assignment normally
+      // Clear any existing assignment so they can select
+      assignedUser = null;
+      updateModalAssignedUserDisplay();
+    }
   } else {
-    // Disable fields
-    coftFieldsContainer.classList.add('coft-fields-disabled');
-    
-    // Disable all input fields
-    const inputs = coftFieldsContainer.querySelectorAll('input, select, textarea');
-    inputs.forEach(input => {
-      input.disabled = true;
-    });
-    
-    // Clear all field values
+    // Hide fields if no type selected
+    coftFieldsContainer.classList.add('hidden');
     resetCOFTFormFields();
   }
 }
@@ -5823,7 +5833,7 @@ async function populateFilterDropdowns() {
   try {
     // Populate COFT team members with actual COFT team names
     const coftTeamSelect = document.getElementById('coft-team-filter');
-    const coftMembers = ['Philippa', 'Amelia', 'Tara', 'Gerald'];
+    const coftMembers = ['Philippa', 'Amelia', 'Tara', 'Gerald', 'Katie Lewis'];
     
     coftMembers.forEach(memberName => {
       const option = document.createElement('option');
