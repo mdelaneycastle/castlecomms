@@ -3996,6 +3996,9 @@ function closeTicketModal() {
   
   document.getElementById('ticket-modal').classList.remove('show');
   currentTicket = null;
+  
+  // Refresh ticket list to show any changes
+  loadTickets();
 }
 
 // Open create ticket modal
@@ -5268,9 +5271,11 @@ async function sendTicketMessage() {
     // Clear input
     messageInput.value = '';
     
-    // Reload messages
+    // Reload messages and refresh ticket list in background
     setTimeout(() => {
       loadTicketMessages(currentTicket.id);
+      // Refresh ticket list to show status changes and updated timestamps
+      loadTickets();
     }, 500);
     
   } catch (error) {
