@@ -471,26 +471,105 @@
 
     .advanced-filters-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
       align-items: end;
+      max-width: 100%;
     }
 
     @media (max-width: 1200px) {
       .advanced-filters-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
       }
-      
-      .filter-actions {
-        grid-column: 1 / -1;
-        justify-self: start;
-        margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .advanced-filters-grid {
+        grid-template-columns: 1fr;
       }
     }
 
     .filter-group {
       display: flex;
       flex-direction: column;
+      min-width: 0; /* Prevent overflow */
+    }
+
+    .filter-group label {
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #495057;
+      font-size: 0.9rem;
+    }
+
+    .form-select, .form-input {
+      padding: 0.5rem;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background-color: #fff;
+      height: 38px; /* Consistent height */
+      box-sizing: border-box;
+    }
+
+    .form-input {
+      height: 38px; /* Match select box height */
+    }
+
+    .date-range-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .date-input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .date-separator {
+      font-size: 0.9rem;
+      color: #6c757d;
+      white-space: nowrap;
+    }
+
+    .filter-actions-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e1e5e9;
+    }
+
+    .apply-filters-btn, .clear-filters-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .apply-filters-btn {
+      background: #007bff;
+      color: white;
+      border: 1px solid #007bff;
+    }
+
+    .apply-filters-btn:hover {
+      background: #0056b3;
+      border-color: #0056b3;
+    }
+
+    .clear-filters-btn {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 1px solid #ced4da;
+    }
+
+    .clear-filters-btn:hover {
+      background: #e2e6ea;
+      border-color: #adb5bd;
     }
 
     .filter-group label {
@@ -824,9 +903,9 @@
       white-space: nowrap;
     }
 
-    .ticket-status.open {
-      background: #d4edda;
-      color: #155724;
+    .ticket-status.on-hold {
+      background: #fff3cd;
+      color: #856404;
     }
 
     .ticket-status.in-progress {
@@ -2243,8 +2322,8 @@
           <button class="filter-button active" data-filter="all">
             <span class="filter-count">All <span class="count-badge" id="count-all">0</span></span>
           </button>
-          <button class="filter-button" data-filter="open">
-            <span class="filter-count">Open <span class="count-badge" id="count-open">0</span></span>
+          <button class="filter-button" data-filter="on-hold">
+            <span class="filter-count">On Hold <span class="count-badge" id="count-on-hold">0</span></span>
           </button>
           <button class="filter-button" data-filter="in-progress">
             <span class="filter-count">In Progress <span class="count-badge" id="count-in-progress">0</span></span>
@@ -2331,7 +2410,7 @@
     <div class="ticket-modal-header">
       <div class="ticket-modal-title">
         <h3 id="modal-ticket-id">TKT-123456</h3>
-        <div id="modal-ticket-status" class="ticket-status open">open</div>
+        <div id="modal-ticket-status" class="ticket-status in-progress">in progress</div>
       </div>
       <div class="ticket-modal-meta">
         <div id="modal-ticket-creator">Created by: User</div>
@@ -2437,7 +2516,6 @@
       <div class="ticket-status-section">
         <label for="ticket-status-select">Status:</label>
         <select id="ticket-status-select" onchange="updateTicketStatus()">
-          <option value="open">Open</option>
           <option value="in-progress">In Progress</option>
           <option value="on-hold">On Hold</option>
           <option value="resolved">Resolved</option>
@@ -3123,7 +3201,7 @@ async function createTicket() {
       title: title,
       description: description,
       category: category,
-      status: 'open',
+      status: 'in-progress',
       createdBy: {
         uid: currentUser.uid,
         email: currentUser.email,
@@ -3445,8 +3523,10 @@ async function loadTickets() {
       // Extract COFT data if this is a COFT ticket
       const coftData = extractCOFTDataFromTicket(ticket);
       
-      // Get COFT team member based on assigned email
+      // Get COFT team member based on assigned email OR created by email
       let coftTeamMember = '-';
+      
+      // First check assigned to field
       if (ticket.assignedTo) {
         if (ticket.assignedTo.teamMembers) {
           // Check team members for COFT assignment
@@ -3461,6 +3541,11 @@ async function loadTickets() {
           // Check individual assignment
           coftTeamMember = getCOFTTeamMember(ticket.assignedTo.email);
         }
+      }
+      
+      // If no COFT member found in assigned to, check created by field
+      if (coftTeamMember === '-' && ticket.createdBy && ticket.createdBy.email) {
+        coftTeamMember = getCOFTTeamMember(ticket.createdBy.email);
       }
       
       return `
@@ -3506,7 +3591,7 @@ function updateFilterCounts(allTickets) {
     // Calculate counts for each category
     const counts = {
       all: 0,
-      open: 0,
+      'on-hold': 0,
       'in-progress': 0,
       resolved: 0,
       transferred: 0
@@ -3527,7 +3612,7 @@ function updateFilterCounts(allTickets) {
     
     // Update count badges
     document.getElementById('count-all').textContent = counts.all;
-    document.getElementById('count-open').textContent = counts.open;
+    document.getElementById('count-on-hold').textContent = counts['on-hold'];
     document.getElementById('count-in-progress').textContent = counts['in-progress'];
     document.getElementById('count-resolved').textContent = counts.resolved;
     document.getElementById('count-transferred').textContent = counts.transferred;
@@ -4046,7 +4131,7 @@ async function createTicketFromModal() {
       title: title,
       description: description,
       category: category,
-      status: 'open',
+      status: 'in-progress',
       createdBy: {
         uid: currentUser.uid,
         email: currentUser.email,
@@ -4908,6 +4993,27 @@ async function updateTicketStatus() {
   const oldStatus = currentTicket.status;
   
   try {
+    let onHoldReason = '';
+    
+    // If changing to on-hold, ask for reason
+    if (newStatus === 'on-hold') {
+      onHoldReason = prompt('Please provide a reason for putting this ticket on hold:');
+      
+      if (onHoldReason === null) {
+        // User cancelled, reset the dropdown
+        document.getElementById('ticket-status-select').value = oldStatus;
+        return;
+      }
+      
+      if (!onHoldReason.trim()) {
+        alert('A reason is required when putting a ticket on hold.');
+        document.getElementById('ticket-status-select').value = oldStatus;
+        return;
+      }
+      
+      onHoldReason = onHoldReason.trim();
+    }
+    
     // Handle timer operations based on status changes
     const timerUpdates = await handleTimerStatusChange(currentTicket, oldStatus, newStatus);
     
@@ -4930,7 +5036,16 @@ async function updateTicketStatus() {
     updateTimerDisplay(currentTicket);
     
     // Add system message about status change
-    await addSystemMessage(`Status changed to ${newStatus.replace('-', ' ')}`);
+    let statusMessage = `Status changed to ${newStatus.replace('-', ' ')}`;
+    if (onHoldReason) {
+      statusMessage += ` - Reason: ${onHoldReason}`;
+    }
+    await addSystemMessage(statusMessage);
+    
+    // Add the on-hold reason as a separate message if provided
+    if (onHoldReason) {
+      await addMessage(`On-hold reason: ${onHoldReason}`);
+    }
     
     // Reload tickets list
     loadTickets();
@@ -5574,6 +5689,12 @@ function matchesAdvancedFilters(ticket) {
     } else if (ticket.assignedTo && ticket.assignedTo.email) {
       // Check individual assignment
       const memberName = getCOFTTeamMember(ticket.assignedTo.email);
+      teamMemberMatch = memberName === advancedFilters.coftTeamMember;
+    }
+    
+    // If no match in assigned to, check created by field
+    if (!teamMemberMatch && ticket.createdBy && ticket.createdBy.email) {
+      const memberName = getCOFTTeamMember(ticket.createdBy.email);
       teamMemberMatch = memberName === advancedFilters.coftTeamMember;
     }
     
