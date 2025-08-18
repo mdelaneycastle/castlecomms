@@ -761,6 +761,18 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 });
 
+// Extract name from email
+function extractNameFromEmail(email) {
+  if (!email) return 'User';
+  
+  const emailName = email.split('@')[0];
+  return emailName
+    .replace(/[._-]/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
 // Load all users using the same method as tickets/messages pages
 let allUsers = [];
 
