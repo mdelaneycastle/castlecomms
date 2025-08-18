@@ -262,7 +262,7 @@
       padding: 0.5rem;
     }
 
-    /* Ticket Counter Display */
+    /* Ticket Counter Display - Full Width Bar */
     .ticket-counter-display {
       text-align: center;
       margin: 1rem 0;
@@ -270,6 +270,15 @@
       background: rgba(102, 126, 234, 0.1);
       border-radius: 8px;
       border: 1px solid rgba(102, 126, 234, 0.2);
+      width: 100%;
+      box-sizing: border-box;
+      /* Position relative to break out of container constraints */
+      position: relative;
+      left: 50%;
+      right: 50%;
+      margin-left: -50vw;
+      margin-right: -50vw;
+      width: 100vw;
     }
 
     .counter-text {
@@ -285,6 +294,127 @@
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
       margin: 0 0.25rem;
+    }
+
+    /* Header Buttons */
+    .header-buttons {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .extract-report-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+    }
+
+    .extract-report-btn:hover {
+      background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* COFT Report Modal */
+    .coft-report-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .coft-report-modal.show {
+      display: flex;
+    }
+
+    .coft-report-modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .coft-report-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #6c757d;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .coft-report-modal-close:hover {
+      background: #f8f9fa;
+    }
+
+    .coft-report-form {
+      margin-top: 1rem;
+    }
+
+    .coft-report-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .coft-report-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .coft-report-btn.excel {
+      background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+      color: white;
+      box-shadow: 0 2px 10px rgba(25, 135, 84, 0.3);
+    }
+
+    .coft-report-btn.excel:hover {
+      background: linear-gradient(135deg, #157347 0%, #1a9970 100%);
+      transform: translateY(-2px);
+    }
+
+    .coft-report-btn.view {
+      background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+      color: white;
+      box-shadow: 0 2px 10px rgba(13, 110, 253, 0.3);
+    }
+
+    .coft-report-btn.view:hover {
+      background: linear-gradient(135deg, #0b5ed7 0%, #6435c9 100%);
+      transform: translateY(-2px);
     }
 
     .form-textarea {
@@ -2326,7 +2456,10 @@
     <div class="tickets-layout" id="internal-ticket-section">
       <div class="section-header-with-button">
         <h3>🎫 Internal System Tickets</h3>
-        <button class="raise-ticket-btn" onclick="openCreateTicketModal()">🆕 Raise a Ticket</button>
+        <div class="header-buttons">
+          <button class="raise-ticket-btn" onclick="openCreateTicketModal()">🆕 Raise a Ticket</button>
+          <button class="extract-report-btn" onclick="openCOFTReportModal()">📊 Extract COFT Report</button>
+        </div>
       </div>
       
       <!-- Tickets List Section -->
@@ -2342,7 +2475,7 @@
           </div>
         </div>
         
-        <!-- Visible Ticket Counter -->
+        <!-- Visible Ticket Counter - Full Width Bar -->
         <div class="ticket-counter-display">
           <span class="counter-text">
             📊 Showing <span id="visible-ticket-count" class="count-number">0</span> tickets
@@ -5872,10 +6005,148 @@ function matchesAdvancedFilters(ticket) {
   
   return true;
 }
+
+// COFT Report Modal Functions
+let allTicketsForReport = [];
+
+async function openCOFTReportModal() {
+  try {
+    console.log('📊 Opening COFT report modal...');
+    
+    // Load all tickets first
+    const ticketsSnapshot = await db.collection('tickets').get();
+    allTicketsForReport = [];
+    ticketsSnapshot.docs.forEach(doc => {
+      const ticketData = doc.data();
+      allTicketsForReport.push({
+        id: doc.id,
+        ...ticketData
+      });
+    });
+    
+    console.log(`Loaded ${allTicketsForReport.length} tickets for report`);
+    
+    // Get months with tickets
+    const monthsWithTickets = window.COFTTicketReports.getMonthsWithTickets(allTicketsForReport);
+    
+    // Populate month dropdown
+    const monthSelect = document.getElementById('coft-report-month');
+    monthSelect.innerHTML = '<option value="">Choose a month...</option>';
+    
+    monthsWithTickets.forEach(month => {
+      const option = document.createElement('option');
+      option.value = `${month.year}-${month.month}`;
+      option.textContent = month.label;
+      monthSelect.appendChild(option);
+    });
+    
+    // Show modal
+    document.getElementById('coft-report-modal').classList.add('show');
+    
+  } catch (error) {
+    console.error('Error opening COFT report modal:', error);
+    alert('Failed to load report data. Please try again.');
+  }
+}
+
+function closeCOFTReportModal() {
+  document.getElementById('coft-report-modal').classList.remove('show');
+}
+
+async function generateCOFTReport(format) {
+  try {
+    const monthSelect = document.getElementById('coft-report-month');
+    const selectedValue = monthSelect.value;
+    
+    if (!selectedValue) {
+      alert('Please select a month first.');
+      return;
+    }
+    
+    const [year, month] = selectedValue.split('-');
+    const selectedYear = parseInt(year);
+    const selectedMonth = parseInt(month);
+    
+    console.log(`Generating COFT report for ${selectedYear}-${selectedMonth + 1} in ${format} format`);
+    
+    // Call the COFT report extraction function
+    await window.COFTTicketReports.extractCOFTTicketReport(
+      allTicketsForReport, 
+      selectedYear, 
+      selectedMonth, 
+      format
+    );
+    
+    // Close modal after successful generation
+    closeCOFTReportModal();
+    
+  } catch (error) {
+    console.error('Error generating COFT report:', error);
+    alert('Failed to generate report. Please try again.');
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('coft-report-modal');
+  if (e.target === modal) {
+    closeCOFTReportModal();
+  }
+});
+
+// Close modal with ESC key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('coft-report-modal');
+    if (modal.classList.contains('show')) {
+      closeCOFTReportModal();
+    }
+  }
+});
 </script>
+
+<!-- COFT Report Modal -->
+<div id="coft-report-modal" class="coft-report-modal">
+  <div class="coft-report-modal-content">
+    <button class="coft-report-modal-close" onclick="closeCOFTReportModal()">&times;</button>
+    <h3 style="text-align: center; color: #667eea; margin-bottom: 1.5rem;">📊 Extract COFT Team Report</h3>
+    
+    <div class="coft-report-form">
+      <div class="form-group">
+        <label for="coft-report-month" class="form-label">Select Month:</label>
+        <select id="coft-report-month" class="form-select full-width" required>
+          <option value="">Choose a month...</option>
+        </select>
+        <p class="form-help-text">Only months with tickets are shown</p>
+      </div>
+      
+      <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 1.5rem 0;">
+        <h4 style="margin: 0 0 10px 0; color: #1976d2;">📋 Report Includes:</h4>
+        <ul style="margin: 0; padding-left: 20px; color: #555;">
+          <li>Ticket counts by status for each COFT team member</li>
+          <li>Resolution rates (% resolved vs total raised)</li>
+          <li>Summary statistics for the selected month</li>
+          <li>All COFT team members included (even if 0 tickets)</li>
+        </ul>
+      </div>
+      
+      <div class="coft-report-buttons">
+        <button class="coft-report-btn excel" onclick="generateCOFTReport('csv')">
+          📊 Download Excel (CSV)
+        </button>
+        <button class="coft-report-btn view" onclick="generateCOFTReport('html')">
+          👁️ View Report
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Site scripts -->
 <script src="script.js"></script>
+
+<!-- COFT Ticket Reports -->
+<script src="coft-ticket-reports.js"></script>
 
 <!-- Notification Badge System -->
 <script src="notification-badges.js"></script>
