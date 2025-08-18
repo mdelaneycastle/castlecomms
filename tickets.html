@@ -255,6 +255,13 @@
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
+    /* Ensure dropdown options display properly */
+    .form-select option {
+      background: white;
+      color: #333;
+      padding: 0.5rem;
+    }
+
     .form-textarea {
       min-height: 200px;
       resize: vertical;
@@ -579,19 +586,6 @@
       font-size: 0.9rem;
     }
 
-    .form-select {
-      padding: 0.5rem;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      background: white;
-      font-size: 0.9rem;
-    }
-
-    .form-select:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 2px rgba(98, 100, 167, 0.1);
-    }
 
     .date-range-group {
       display: flex;
@@ -2601,7 +2595,7 @@
       <!-- Team Assignment -->
       <div class="form-group assignment-field" id="team-assignment" style="display: none;">
         <label for="modal-assign-team" class="form-label">Select Team/Group:</label>
-        <select id="modal-assign-team" class="form-input full-width" onchange="handleTeamSelection()">
+        <select id="modal-assign-team" class="form-select full-width" onchange="handleTeamSelection()">
           <option value="">Choose a team...</option>
           <!-- Teams will be populated by JavaScript -->
         </select>
@@ -2610,7 +2604,7 @@
       <!-- Category -->
       <div class="form-group" id="category-section">
         <label for="modal-ticket-category" class="form-label">Category:</label>
-        <select id="modal-ticket-category" class="form-input full-width" required onchange="handleCategorySelection()">
+        <select id="modal-ticket-category" class="form-select full-width" required onchange="handleCategorySelection()">
           <option value="">Select a department...</option>
           <option value="Client Order Fulfilment Team/Group">Client Order Fulfilment Team/Group</option>
           <option value="Manufacturing and QC">Manufacturing and QC</option>
@@ -2731,7 +2725,7 @@
         <!-- Delivery Method -->
         <div class="form-group">
           <label for="coft-delivery-method" class="form-label">Delivery Method:</label>
-          <select id="coft-delivery-method" class="form-input full-width" required>
+          <select id="coft-delivery-method" class="form-select full-width" required>
             <option value="">Choose delivery method...</option>
             <option value="Courier to Client">Courier to Client</option>
             <option value="PD/Install to Client">PD/Install to Client</option>
@@ -2743,7 +2737,7 @@
         <div class="form-group">
           <label for="coft-ticket-reason" class="form-label">Reason for Raised ticket:</label>
           <p class="form-help-text">Please select the most appropriate category for the situation.</p>
-          <select id="coft-ticket-reason" class="form-input full-width" required onchange="handleReasonSelection()">
+          <select id="coft-ticket-reason" class="form-select full-width" required onchange="handleReasonSelection()">
             <option value="">Choose reason...</option>
             <option value="Chasing dispatch note">Chasing dispatch note</option>
             <option value="Something has gone wrong with the order and the client has registered a complaint">Something has gone wrong with the order and the client has registered a complaint</option>
