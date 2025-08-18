@@ -277,23 +277,59 @@
       allUsers = data.users || [];
       displayUsers();
       
-      // Add the new users as admins if they're not already
-      await ensureUsersAreAdmins(['pchapman@washingtongreen.co.uk', 'jdurrant@castlefineart.com']);
-      
     } catch (error) {
       console.error('Error loading users:', error);
       showStatus('Failed to load users: ' + error.message, 'error');
     }
   }
 
+  // Track if we've already tried to make users admin to prevent infinite loop
+  let hasTriedMakingUsersAdmin = false;
+
   // Ensure specific users are admins
   async function ensureUsersAreAdmins(emails) {
+    if (hasTriedMakingUsersAdmin) return; // Prevent infinite loop
+    
+    hasTriedMakingUsersAdmin = true;
+    
     for (const email of emails) {
       const user = allUsers.find(u => u.email === email);
       if (user && !user.customClaims?.admin) {
         console.log(`Making ${email} an admin...`);
-        await toggleAdmin(user.uid, user.email, true);
+        await toggleAdminDirect(user.uid, user.email, true);
       }
+    }
+  }
+
+  // Direct admin toggle that doesn't reload users (prevents infinite loop)
+  async function toggleAdminDirect(uid, email, makeAdmin) {
+    try {
+      const user = allUsers.find(u => u.uid === uid);
+      const currentClaims = user?.customClaims || {};
+      
+      const token = await currentUser.getIdToken();
+      const response = await fetch('https://updateuserhttp-ngp3khlsna-ew.a.run.app', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          uid,
+          customClaims: { 
+            ...currentClaims, 
+            admin: makeAdmin 
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      console.log(`${makeAdmin ? 'Granted' : 'Removed'} admin privileges for ${email}`);
+    } catch (error) {
+      console.error('Error toggling admin:', error);
     }
   }
 
