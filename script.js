@@ -734,7 +734,7 @@ if (!window.userCache) {
     }
 
     const tbody = document.querySelector("#user-table tbody");
-    if (tbody) {
+    if (tbody && !window.ADMIN_PAGE_CUSTOM_USER_TABLE) {
       // Only load user management table for full admins on admin pages
       const isFullAdmin = await window.authUtils.isAdmin(user);
       if (!isFullAdmin) {
