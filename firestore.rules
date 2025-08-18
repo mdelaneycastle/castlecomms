@@ -109,10 +109,12 @@ service cloud.firestore {
       allow create: if request.auth != null 
         && validateTicket(request.resource.data);
       
-      // Only ticket creator and assignee can update tickets
+      // Ticket creator, individual assignee, or team members can update tickets
       allow update: if request.auth != null 
         && (request.auth.uid == resource.data.createdBy.uid 
-            || request.auth.token.email == resource.data.assignedTo.email)
+            || request.auth.token.email == resource.data.assignedTo.email
+            || (resource.data.assignedTo.type == 'team' 
+                && userIsTeamMember(request.auth.token.email, resource.data.assignedTo.teamMembers)))
         && validateTicketUpdate(request.resource.data, resource.data);
       
       // Only admins can delete tickets
@@ -167,6 +169,13 @@ service cloud.firestore {
          && assignedTo.email is string
          && assignedTo.name is string)
       );
+    }
+    
+    // Helper function to check if user is a member of a team
+    function userIsTeamMember(userEmail, teamMembers) {
+      // Use hasAny to check if any team member object has matching email
+      return teamMembers.hasAny([{'email': userEmail}]) ||
+             teamMembers.hasAny([userEmail]);
     }
     
     // Helper function to validate ticket updates
