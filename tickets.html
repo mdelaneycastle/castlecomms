@@ -4674,8 +4674,8 @@ function resetCOFTForm() {
   document.getElementById('coft-delivery-method').value = '';
   document.getElementById('coft-ticket-reason').value = '';
   
-  // Reset checkboxes and radios
-  document.getElementById('coft-understanding').checked = false;
+  // Reset radios
+  document.querySelectorAll('input[name="coft-type"]').forEach(radio => radio.checked = false);
   document.querySelectorAll('input[name="coft-client-aware"]').forEach(radio => radio.checked = false);
   document.querySelectorAll('input[name="coft-eta-discussed"]').forEach(radio => radio.checked = false);
   
