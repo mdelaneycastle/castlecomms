@@ -4370,9 +4370,15 @@ async function createTicketFromModal() {
     
     // Check for COFT reprocessing override for team member
     let coftTeamMemberOverride = null;
-    if (isCOFTForm && coftData && coftData.coftType === 'reprocessing') {
-      // Override COFT team member for reprocessing tickets
-      coftTeamMemberOverride = 'Katie Lewis';
+    if (isCOFTForm && coftData) {
+      console.log('COFT Type detected:', coftData.coftType);
+      if (coftData.coftType === 'reprocessing') {
+        console.log('Setting Katie Lewis override for reprocessing ticket');
+        // Override COFT team member for reprocessing tickets
+        coftTeamMemberOverride = 'Katie Lewis';
+      } else {
+        console.log('Not reprocessing - using normal assignment');
+      }
     }
     
     const ticketData = {
