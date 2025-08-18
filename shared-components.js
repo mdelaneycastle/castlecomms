@@ -1217,6 +1217,7 @@ let isDarkMode = localStorage.getItem('darkMode') === 'true';
 
 function updateDarkModeUI() {
   const button = document.querySelector('.dark-mode-toggle');
+  console.log('updateDarkModeUI - button found:', !!button, 'isDarkMode:', isDarkMode);
   if (button) {
     if (isDarkMode) {
       button.innerHTML = '<span class="dropdown-icon">☀️</span>Dark Mode: On';
@@ -1268,8 +1269,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Apply dark mode if it was previously enabled
   applyDarkMode();
   
-  // Update the UI to show correct state
-  updateDarkModeUI();
+  // Wait a bit for header to load, then update UI
+  setTimeout(() => {
+    updateDarkModeUI();
+  }, 100);
+  
+  // Also set up an observer to update UI when header loads
+  const observer = new MutationObserver(() => {
+    if (document.querySelector('.dark-mode-toggle')) {
+      updateDarkModeUI();
+      observer.disconnect();
+    }
+  });
+  
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 
 // Export for use in other scripts
