@@ -236,9 +236,6 @@
 <script>
   let currentUser = null;
   let allUsers = [];
-  
-  // Prevent script.js from loading the old user table
-  window.ADMIN_PAGE_CUSTOM_USER_TABLE = true;
 
   // Additional admin-specific auth check
   firebase.auth().onAuthStateChanged(async user => {
@@ -457,10 +454,20 @@
 
       showStatus(`${makeAdmin ? 'Granted' : 'Removed'} admin privileges for ${email}`, 'success');
       
-      // Wait a moment before reloading to let the changes propagate
+      // Update the user object in our local array
+      const user = allUsers.find(u => u.uid === uid);
+      if (user) {
+        if (!user.customClaims) user.customClaims = {};
+        user.customClaims.admin = makeAdmin;
+      }
+      
+      // Update the UI immediately
+      displayUsers();
+      
+      // Also reload from server after a delay to ensure consistency
       setTimeout(async () => {
         await loadUsers();
-      }, 1000);
+      }, 2000);
       
     } catch (error) {
       console.error('Error toggling admin:', error);
@@ -495,7 +502,21 @@
       }
 
       showStatus(`${makeCommAdmin ? 'Granted' : 'Removed'} communications admin privileges for ${email}`, 'success');
-      await loadUsers(); // Refresh the list
+      
+      // Update the user object in our local array
+      const user = allUsers.find(u => u.uid === uid);
+      if (user) {
+        if (!user.customClaims) user.customClaims = {};
+        user.customClaims.communicationsAdmin = makeCommAdmin;
+      }
+      
+      // Update the UI immediately
+      displayUsers();
+      
+      // Also reload from server after a delay to ensure consistency
+      setTimeout(async () => {
+        await loadUsers();
+      }, 2000);
     } catch (error) {
       console.error('Error toggling communications admin:', error);
       showStatus('Failed to update communications admin status: ' + error.message, 'error');
