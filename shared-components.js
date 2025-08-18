@@ -1212,6 +1212,57 @@ window.sharedComponents = {
   }
 };
 
+// Dark mode toggle functionality (global)
+let isDarkMode = false;
+
+function toggleDarkMode() {
+  isDarkMode = !isDarkMode;
+  
+  if (isDarkMode) {
+    // Apply dark mode filter
+    document.documentElement.style.filter = 'invert(1) hue-rotate(180deg)';
+    
+    // Create style element for images/videos to keep them normal
+    const darkModeStyle = document.createElement('style');
+    darkModeStyle.id = 'dark-mode-style';
+    darkModeStyle.textContent = `
+      img, video, canvas, picture, svg { 
+        filter: invert(1) hue-rotate(180deg) !important; 
+      }
+    `;
+    document.head.appendChild(darkModeStyle);
+    
+    // Update button text in header
+    const button = document.querySelector('.dark-mode-toggle span');
+    if (button) button.textContent = '☀️';
+    
+    // Store preference
+    localStorage.setItem('darkMode', 'true');
+  } else {
+    // Remove dark mode filter
+    document.documentElement.style.filter = '';
+    
+    // Remove dark mode styles
+    const darkModeStyle = document.getElementById('dark-mode-style');
+    if (darkModeStyle) darkModeStyle.remove();
+    
+    // Update button text in header
+    const button = document.querySelector('.dark-mode-toggle span');
+    if (button) button.textContent = '🌙';
+    
+    // Store preference
+    localStorage.setItem('darkMode', 'false');
+  }
+}
+
+// Load dark mode preference on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const savedDarkMode = localStorage.getItem('darkMode');
+  if (savedDarkMode === 'true') {
+    toggleDarkMode();
+  }
+});
+
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = window.sharedComponents;
