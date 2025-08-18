@@ -2866,19 +2866,25 @@ admin-link {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
+/* Override form button styles for color options */
+form .color-option {
+  background: none !important;
+  background-image: none !important;
+}
+
 /* Specific color overrides to ensure colors display */
-.color-option[data-color="#596066"] { background-color: #596066 !important; }
-.color-option[data-color="#4f46e5"] { background-color: #4f46e5 !important; }
-.color-option[data-color="#059669"] { background-color: #059669 !important; }
-.color-option[data-color="#dc2626"] { background-color: #dc2626 !important; }
-.color-option[data-color="#ea580c"] { background-color: #ea580c !important; }
-.color-option[data-color="#7c3aed"] { background-color: #7c3aed !important; }
-.color-option[data-color="#0891b2"] { background-color: #0891b2 !important; }
-.color-option[data-color="#be123c"] { background-color: #be123c !important; }
-.color-option[data-color="#374151"] { background-color: #374151 !important; }
-.color-option[data-color="#1f2937"] { background-color: #1f2937 !important; }
-.color-option[data-color="#92400e"] { background-color: #92400e !important; }
-.color-option[data-color="#581c87"] { background-color: #581c87 !important; }
+form .color-option[data-color="#596066"] { background: #596066 !important; background-color: #596066 !important; }
+form .color-option[data-color="#4f46e5"] { background: #4f46e5 !important; background-color: #4f46e5 !important; }
+form .color-option[data-color="#059669"] { background: #059669 !important; background-color: #059669 !important; }
+form .color-option[data-color="#dc2626"] { background: #dc2626 !important; background-color: #dc2626 !important; }
+form .color-option[data-color="#ea580c"] { background: #ea580c !important; background-color: #ea580c !important; }
+form .color-option[data-color="#7c3aed"] { background: #7c3aed !important; background-color: #7c3aed !important; }
+form .color-option[data-color="#0891b2"] { background: #0891b2 !important; background-color: #0891b2 !important; }
+form .color-option[data-color="#be123c"] { background: #be123c !important; background-color: #be123c !important; }
+form .color-option[data-color="#374151"] { background: #374151 !important; background-color: #374151 !important; }
+form .color-option[data-color="#1f2937"] { background: #1f2937 !important; background-color: #1f2937 !important; }
+form .color-option[data-color="#92400e"] { background: #92400e !important; background-color: #92400e !important; }
+form .color-option[data-color="#581c87"] { background: #581c87 !important; background-color: #581c87 !important; }
 
 /* Display Name Section */
 .field-help {
