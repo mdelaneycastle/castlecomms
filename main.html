@@ -233,6 +233,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Helper function to format message content for preview
+  function formatMessagePreview(message) {
+    if (!message) return 'No message content';
+    
+    // Check if message ends with .gif (case insensitive)
+    if (message.toLowerCase().endsWith('.gif')) {
+      return 'GIF';
+    }
+    
+    return message;
+  }
+
   async function loadLatestMessages() {
     const container = document.getElementById('messages-content');
     try {
@@ -269,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="item">
                   <div class="item-header">${chatLookup[item.chatId] || 'Chat'}</div>
                   <div class="item-meta">${item.senderName || 'Unknown'} • ${formatDate(item.timestamp?.toDate?.() || item.timestamp)}</div>
-                  <div class="item-content">${item.message || 'No message content'}</div>
+                  <div class="item-content">${formatMessagePreview(item.message)}</div>
                 </div>
               `).join('');
               return;
@@ -289,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="item">
                 <div class="item-header">Chat Message</div>
                 <div class="item-meta">${item.senderName || 'Unknown'} • ${formatDate(item.timestamp?.toDate?.() || item.timestamp)}</div>
-                <div class="item-content">${item.message || 'No message content'}</div>
+                <div class="item-content">${formatMessagePreview(item.message)}</div>
               </div>
             `).join('');
             return;
