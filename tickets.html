@@ -3664,9 +3664,6 @@ async function loadTickets() {
     
     let tickets = Array.from(ticketMap.values());
     
-    // Calculate counts for all categories before filtering
-    updateFilterCounts(tickets);
-    
     // Apply filter
     if (currentFilter === 'transferred') {
       // Show tickets originally created by this user but now transferred away
@@ -3697,6 +3694,9 @@ async function loadTickets() {
     
     // Apply advanced filters
     tickets = tickets.filter(ticket => matchesAdvancedFilters(ticket));
+    
+    // Calculate counts for all categories AFTER all filtering is complete
+    updateFilterCounts(tickets);
     
     // Sort by creation date (newest first)
     tickets.sort((a, b) => {
