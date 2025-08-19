@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Address Book - Castle Comms</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
+  <link rel="stylesheet" href="style.css?v=20250813_din_font_update" />
+  <style>
+    :root {
+      --bg: var(--primary-color);
+      --panel: #F0EDE9;
+      --accent: var(--secondary-color);
+      --accent-2: var(--tertiary-color);
+      --text: var(--text-dark);
+      --muted: var(--text-muted);
+      --danger: #dc3545;
+      --card-w: 520px;
+      --card-h: 280px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font-primary);
+      color: var(--text);
+      background: var(--body-background);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+      padding-top: 80px;
+    }
+
+    .page-header {
+      padding: 16px 20px 0;
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between;
+    }
+    .page-header h1 { 
+      margin: 0; 
+      font-size: clamp(18px, 2.4vw, 28px); 
+      letter-spacing: 0.3px; 
+      color: var(--secondary-color);
+      font-family: var(--font-primary);
+    }
+    .credits { 
+      color: var(--muted); 
+      font-size: 12px; 
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 22px;
+      padding: 0 20px 20px;
+      min-height: 0;
+    }
+
+    /* Left panel: form */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow-medium);
+    }
+
+    .panel h2 { 
+      margin: 4px 0 14px; 
+      font-size: 16px; 
+      color: var(--muted); 
+      font-weight: 600; 
+    }
+
+    form { display: grid; gap: 10px; }
+    label { 
+      font-size: 13px; 
+      color: var(--muted); 
+      display: block; 
+      margin-bottom: 6px; 
+    }
+    input[type="text"], input[type="email"], input[type="tel"] {
+      width: 100%;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 12px 12px;
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+    input:focus { 
+      border-color: var(--accent); 
+      box-shadow: 0 0 0 3px rgba(69, 73, 78, 0.15); 
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    button {
+      appearance: none; border: 0; cursor: pointer; border-radius: 10px;
+      padding: 10px 14px; font-weight: 600;
+      background: var(--accent); color: var(--surface-color);
+      box-shadow: var(--shadow-light);
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+    button:hover { 
+      transform: translateY(-1px); 
+      box-shadow: var(--shadow-medium); 
+    }
+    button.secondary { 
+      background: var(--card-background); 
+      color: var(--text); 
+      box-shadow: none; 
+    }
+    button.danger { 
+      background: var(--danger); 
+      color: var(--surface-color); 
+    }
+
+    .tiny { font-size: 12px; color: var(--muted); margin-left: 4px; }
+
+    .search { margin-top: 12px; display: grid; gap: 8px; }
+
+    /* Right: Rolodex */
+    .stage-wrap { position: relative; min-height: 0; }
+    .rolodex {
+      position: relative;
+      height: min(68vh, 560px);
+      min-height: 380px;
+      perspective: 1200px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-heavy);
+    }
+
+    /* Spindle */
+    .spindle {
+      position: absolute; width: 18px; height: 74%; left: 50%; top: 13%; transform: translateX(-50%);
+      background: linear-gradient(90deg, var(--accent-2), var(--accent), var(--accent-2));
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    /* Side knobs */
+    .knob { 
+      position: absolute; width: 120px; height: 120px; border-radius: 50%; 
+      top: 50%; transform: translateY(-50%);
+      background: radial-gradient(circle at 35% 35%, var(--card-background), var(--accent-color));
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-medium);
+      display: grid; place-items: center; color: var(--text); font-weight: 700;
+      user-select: none;
+    }
+    .knob.left { left: -60px; }
+    .knob.right { right: -60px; }
+    .knob button { 
+      background: transparent; 
+      color: var(--text); 
+      box-shadow: none; 
+      padding: 0; 
+      font-size: 22px; 
+    }
+
+    /* Cards ring */
+    .ring {
+      position: relative;
+      width: var(--card-w);
+      height: var(--card-h);
+      transform-style: preserve-3d;
+      transition: transform 500ms cubic-bezier(.2,.7,.2,1);
+    }
+
+    .card {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: var(--card-w);
+      height: var(--card-h);
+      margin: auto;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      box-shadow: var(--shadow-medium);
+      padding: 18px 18px 16px 70px;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      display: grid; grid-template-rows: auto 1fr auto;
+      transition: transform 450ms cubic-bezier(.2,.7,.2,1), opacity 300ms ease; 
+      will-change: transform, opacity;
+    }
+
+    .card.hidden { opacity: 0; pointer-events: none; }
+
+    .card::before {
+      /* Punch holes */
+      content: "";
+      position: absolute; left: 18px; top: 26px; bottom: 26px; width: 28px;
+      background:
+        radial-gradient(circle at 50% 16%, var(--accent-2) 8px, transparent 9px) top center/100% 28% no-repeat,
+        radial-gradient(circle at 50% 84%, var(--accent-2) 8px, transparent 9px) bottom center/100% 28% no-repeat,
+        linear-gradient(90deg, rgba(216, 209, 197, 0.2), rgba(216, 209, 197, 0.05));
+      border-right: 1px dashed var(--border-color);
+      opacity: 0.9;
+    }
+
+    .card .tag {
+      position: absolute; right: 18px; top: 16px; padding: 6px 10px; border-radius: 8px;
+      background: linear-gradient(90deg, var(--tertiary-color), var(--accent-color));
+      color: var(--surface-color); font-weight: 800; font-size: 12px; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .card h3 { margin: 0 0 8px; font-size: 22px; color: var(--secondary-color); }
+    .meta { color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+    .card .footer { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      gap: 10px; 
+    }
+    .badge { font-size: 12px; color: var(--muted); }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; 
+      border-radius: 999px;
+      background: var(--card-background); border: 1px solid var(--border-color);
+      font-size: 12px; color: var(--text);
+    }
+    .pill a { color: var(--accent); text-decoration: none; }
+
+    .empty { color: var(--muted); font-size: 14px; text-align: center; }
+
+    .controls { 
+      position: absolute; bottom: 12px; left: 50%; 
+      transform: translateX(-50%); display: flex; gap: 10px; 
+    }
+    .circle-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--card-background); color: var(--text);
+      display: grid; place-items: center; border: 1px solid var(--border-color);
+      cursor: pointer; user-select: none; font-weight: 800;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+    .circle-btn:hover { 
+      transform: translateY(-1px); 
+      background: var(--accent-color); 
+    }
+
+    .index { 
+      position: absolute; top: 10px; left: 50%; 
+      transform: translateX(-50%); color: var(--muted); 
+      font-size: 12px; letter-spacing: 0.4px; 
+    }
+
+    /* Detail banner below the wheel */
+    .detail {
+      position: absolute;
+      bottom: 58px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(640px, 92%);
+      background: rgba(240, 237, 233, 0.95);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      backdrop-filter: blur(4px);
+      box-shadow: var(--shadow-medium);
+      font-size: 14px;
+    }
+    .detail .name { font-size: 16px; font-weight: 700; color: var(--secondary-color); }
+    .detail a { color: var(--accent); text-decoration: none; }
+    .detail .actions { display: flex; gap: 8px; }
+    .detail .btn { 
+      padding: 6px 10px; border: 1px solid var(--border-color); 
+      border-radius: 999px; background: var(--card-background); 
+      color: var(--text); font-size: 12px; cursor: pointer; 
+    }
+
+    .page-footer { 
+      padding: 4px 20px 16px; 
+      color: var(--muted); 
+      font-size: 12px; 
+    }
+
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .rolodex { height: 68vh; }
+      .knob.left { left: -40px; }
+      .knob.right { right: -40px; }
+      :root { --card-w: 92vw; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header-container"></div>
+<div id="sidebar-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <header class="page-header">
+    <h1>📇 Address Book</h1>
+    <div class="credits">Castle Comms Staff Directory • Use ⬅️ ➡️ keys</div>
+  </header>
+
+  <main class="app">
+    <section class="panel" aria-label="Add Contact">
+      <h2>Add a contact</h2>
+      <form id="contactForm">
+        <div>
+          <label for="name">Full name</label>
+          <input id="name" name="name" type="text" placeholder="John Smith" required />
+        </div>
+        <div>
+          <label for="email">Email <span class="tiny">(optional)</span></label>
+          <input id="email" name="email" type="email" placeholder="john@castlefineart.com" />
+        </div>
+        <div class="row">
+          <div>
+            <label for="phone">Phone <span class="tiny">(optional)</span></label>
+            <input id="phone" name="phone" type="tel" placeholder="01216550060" />
+          </div>
+          <div>
+            <label for="label">Department <span class="tiny">(e.g. COFT)</span></label>
+            <input id="label" name="label" type="text" placeholder="Department" />
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit">Add to Address Book</button>
+          <button class="secondary" id="loadStaff" type="button">Load Castle Staff</button>
+          <button class="danger" id="clearAll" type="button" title="Clear all contacts">Clear All</button>
+        </div>
+      </form>
+
+      <div class="search">
+        <label for="q">Quick find</label>
+        <input id="q" type="text" placeholder="Search by name, email, phone or department... (Esc to clear)" />
+      </div>
+    </section>
+
+    <section class="stage-wrap">
+      <div class="rolodex" aria-live="polite">
+        <div class="index" id="cursorIndex">0 / 0</div>
+        <div class="spindle" aria-hidden="true"></div>
+        <div class="knob left" title="Previous">
+          <button type="button" id="prev" aria-label="Previous card">◀</button>
+        </div>
+        <div class="knob right" title="Next">
+          <button type="button" id="next" aria-label="Next card">▶</button>
+        </div>
+        <div class="ring" id="ring"></div>
+        <div class="detail" id="detail" aria-live="polite"></div>
+        <div class="controls">
+          <div class="circle-btn" id="jumpA" title="Jump to A">A</div>
+          <div class="circle-btn" id="jumpM" title="Jump to M">M</div>
+          <div class="circle-btn" id="jumpZ" title="Jump to Z">Z</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    Tip: Use ← / → keys to navigate cards. Click the side knobs or use mouse wheel to browse contacts.
+  </footer>
+
+  <template id="cardTemplate">
+    <article class="card" role="group" aria-roledescription="Address card">
+      <div class="tag"></div>
+      <header>
+        <h3 class="name"></h3>
+        <div class="meta email"></div>
+        <div class="meta phone"></div>
+      </header>
+      <div></div>
+      <div class="footer">
+        <span class="badge created"></span>
+        <span class="pill">
+          <span class="initials" title="Initials"></span>
+          <a class="mailto" target="_blank" rel="noopener noreferrer">Email</a>
+        </span>
+      </div>
+    </article>
+  </template>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script src="firebase-init.js"></script>
+  <script src="shared-components.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    (function(){
+      const ring = document.getElementById('ring');
+      const form = document.getElementById('contactForm');
+      const q = document.getElementById('q');
+      const prevBtn = document.getElementById('prev');
+      const nextBtn = document.getElementById('next');
+      const cursorIndexLabel = document.getElementById('cursorIndex');
+      const tpl = document.getElementById('cardTemplate');
+      const detail = document.getElementById('detail');
+      const jumpA = document.getElementById('jumpA');
+      const jumpM = document.getElementById('jumpM');
+      const jumpZ = document.getElementById('jumpZ');
+
+      const STORAGE_KEY = 'castleAddressBook_v1';
+      const STATE = { contacts: [], filtered: [], cursor: 0, angle: 0, radius: 360 / Math.max(1, 8) };
+
+      const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE.contacts));
+      const load = () => {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e){ return []; }
+      };
+
+      const fmtDate = ts => new Date(ts).toLocaleString();
+      const initials = name => (name||'').split(/\s+/).filter(Boolean).map(s => s[0]).slice(0,3).join('').toUpperCase();
+
+      // Castle Staff Data
+      const castleStaff = [
+        {name: 'Gary Turpin', email: 'gturpin@washingtongreen.co.uk', label: 'Head of Operations', phone: '01216550060'},
+        {name: 'Martin Harrison', email: 'mharrison@washingtongreen.co.uk', label: 'Head of Manufacturing and QC', phone: '01216550060'},
+        {name: 'Martin Sumner', email: 'msumner@washingtongreen.co.uk', label: 'Head Of Stock Control', phone: '01216550060'},
+        {name: 'Matt King', email: 'mking@washingtongreen.co.uk', label: 'Head Of Inventory', phone: '01216550060'},
+        {name: 'Gary Day', email: 'gday@washingtongreen.co.uk', label: 'Framing Production Manager', phone: '01216550060'},
+        {name: 'Bill Chand', email: 'bchand@washingtongreen.co.uk', label: 'Framing Supervisor', phone: '01216550060'},
+        {name: 'Tom Harrison', email: 'tharrison@washingtongreen.co.uk', label: 'Senior Mounting Operative', phone: '01216550060'},
+        {name: 'Chrissy Hall', email: 'chall@washingtongreen.co.uk', label: 'Quality Control Supervisor', phone: '01216550060'},
+        {name: 'Adam Hercombe', email: 'ahercombe@washingtongreen.co.uk', label: 'Warehouse Stock Manager', phone: '01216550060'},
+        {name: 'Kerry Hinks', email: 'khinks@washingtongreen.co.uk', label: 'Stock Admin Manager', phone: '01216550060'},
+        {name: 'Stuart Whitehouse', email: 'swhitehouse@washingtongreen.co.uk', label: 'Logistics Manager', phone: '01216550060'},
+        {name: 'Nathan Smethurst', email: 'nsmethurst@castlefineart.com', label: 'Shipping Supervisor', phone: '01216550060'},
+        {name: 'Zara Chaudhry', email: 'zchaudhry@washingtongreen.co.uk', label: 'Logistics Admin Assistant', phone: '01216550060'},
+        {name: 'Olly Clark', email: 'oclark@castlefineart.com', label: 'Packing Supervisor', phone: '01216550060'},
+        {name: 'Alexandra Bradley', email: 'abradley@washingtongreen.co.uk', label: 'Originals Admin', phone: '01216550060'},
+        {name: 'Raksha Hercombe', email: 'rhercombe@washingtongreen.co.uk', label: 'Halcyon Support Manager', phone: '01216550060'},
+        {name: 'Adam Hyde', email: 'ahyde@washingtongreen.co.uk', label: 'Framing Supervisor (Cutting Room)', phone: '01216550060'},
+        {name: 'Jenny Evans', email: 'jevans@castlefineart.com', label: 'COFT', phone: '01216550060'},
+        {name: 'Katie Williams', email: 'kwilliams@castlefineart.com', label: 'COFT', phone: '01216550060'},
+        {name: 'Pip Johnson', email: 'pjohnson@castlefineart.com', label: 'COFT', phone: '01216550060'},
+        {name: 'Tara Mitchell', email: 'tmitchell@castlefineart.com', label: 'COFT', phone: '01216550060'},
+        {name: 'Gerald Thompson', email: 'gthompson@castlefineart.com', label: 'COFT', phone: '01216550060'},
+        {name: 'Amelia Davis', email: 'adavis@castlefineart.com', label: 'COFT', phone: '01216550060'},
+        {name: 'Chappie Wilson', email: 'cwilson@castlefineart.com', label: 'COFT', phone: '01216550060'}
+      ];
+
+      function createCard(contact){
+        const node = tpl.content.firstElementChild.cloneNode(true);
+        node.querySelector('.name').textContent = contact.name || 'Unnamed';
+        node.querySelector('.email').textContent = contact.email || '—';
+        node.querySelector('.phone').textContent = contact.phone || '—';
+        node.querySelector('.tag').textContent = (contact.label || tagFor(contact.name));
+        node.querySelector('.created').textContent = 'Added ' + fmtDate(contact.createdAt);
+        node.querySelector('.initials').textContent = initials(contact.name);
+        const mail = node.querySelector('.mailto');
+        if(contact.email){
+          mail.href = 'mailto:' + contact.email;
+        } else {
+          mail.remove();
+        }
+        return node;
+      }
+
+      function tagFor(name){
+        const n = (name||'').trim();
+        if(!n) return 'General';
+        const c = n[0].toUpperCase();
+        if(c < 'A' || c > 'Z') return '#';
+        return c;
+      }
+
+      function sortContacts(list){
+        return list.slice().sort((a,b)=> (a.name||'').localeCompare(b.name||''));
+      }
+
+      function render(){
+        ring.innerHTML = '';
+        const list = STATE.filtered.length ? STATE.filtered : STATE.contacts;
+        if(!list.length){
+          const div = document.createElement('div');
+          div.className = 'empty';
+          div.textContent = 'Your address book is empty. Add a contact or load Castle staff.';
+          ring.appendChild(div);
+          cursorIndexLabel.textContent = '0 / 0';
+          detail.style.display = 'none';
+          return;
+        }
+
+        const N = list.length;
+        const step = 360 / N;
+        ring.style.transform = `rotateX(0deg) rotateY(${STATE.angle}deg)`;
+
+        list.forEach((c, i)=>{
+          const el = createCard(c);
+          const ang = i * step;
+          el.style.transform = `rotateY(${ang}deg) translateZ(380px)`;
+          el.dataset.index = i;
+          ring.appendChild(el);
+        });
+
+        STATE.cursor = Math.max(0, Math.min(STATE.cursor, N-1));
+        STATE.angle = -STATE.cursor * step;
+        ring.style.transform = `rotateX(0deg) rotateY(${STATE.angle}deg)`;
+        cursorIndexLabel.textContent = `${STATE.cursor+1} / ${N}`;
+        applyLine();
+        showDetail();
+      }
+
+      function setCursor(idx){
+        const list = STATE.filtered.length ? STATE.filtered : STATE.contacts;
+        if(!list.length) return;
+        const N = list.length;
+        STATE.cursor = (idx + N) % N;
+        const step = 360 / N;
+        STATE.angle = -STATE.cursor * step;
+        ring.style.transform = `rotateX(0deg) rotateY(${STATE.angle}deg)`;
+        cursorIndexLabel.textContent = `${STATE.cursor+1} / ${N}`;
+        applyLine();
+        showDetail();
+      }
+
+      function next(){ setCursor(STATE.cursor + 1); }
+      function prev(){ setCursor(STATE.cursor - 1); }
+
+      function addContact(data){
+        const contact = {
+          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+          name: (data.name||'').trim(),
+          email: (data.email||'').trim(),
+          phone: (data.phone||'').trim(),
+          label: (data.label||'').trim(),
+          createdAt: Date.now()
+        };
+        STATE.contacts.push(contact);
+        STATE.contacts = sortContacts(STATE.contacts);
+        save();
+        applyFilter(q.value);
+        const idx = (STATE.filtered.length ? STATE.filtered : STATE.contacts).findIndex(c => c.id === contact.id);
+        if(idx >= 0) setCursor(idx);
+      }
+
+      function applyFilter(text){
+        const t = (text||'').toLowerCase().trim();
+        if(!t){ STATE.filtered = []; render(); return; }
+        STATE.filtered = STATE.contacts.filter(c=> [c.name,c.email,c.phone,c.label].join(' ').toLowerCase().includes(t));
+        STATE.cursor = 0;
+        render();
+      }
+
+      function loadCastleStaff(){
+        // Clear existing and load staff
+        STATE.contacts = [];
+        castleStaff.forEach(staff => {
+          const contact = {
+            id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+            name: staff.name,
+            email: staff.email,
+            phone: staff.phone,
+            label: staff.label,
+            createdAt: Date.now()
+          };
+          STATE.contacts.push(contact);
+        });
+        STATE.contacts = sortContacts(STATE.contacts);
+        save();
+        applyFilter(q.value);
+        setCursor(0);
+      }
+
+      // Init
+      STATE.contacts = sortContacts(load());
+      render();
+
+      // Events
+      form.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const fd = new FormData(form);
+        const name = fd.get('name');
+        const email = fd.get('email');
+        const phone = fd.get('phone');
+        const label = fd.get('label');
+        if(!String(name).trim()) { alert('Please enter a name.'); return; }
+        addContact({name, email, phone, label});
+        form.reset();
+        document.getElementById('name').focus();
+      });
+
+      document.getElementById('clearAll').addEventListener('click', ()=>{
+        if(confirm('Clear ALL contacts from this browser?')){
+          STATE.contacts = [];
+          STATE.filtered = [];
+          save();
+          render();
+        }
+      });
+
+      document.getElementById('loadStaff').addEventListener('click', ()=>{
+        if(confirm('Load Castle staff directory? This will replace any existing contacts.')){
+          loadCastleStaff();
+        }
+      });
+
+      prevBtn.addEventListener('click', prev);
+      nextBtn.addEventListener('click', next);
+      q.addEventListener('input', e=> applyFilter(e.target.value));
+      q.addEventListener('keydown', e=>{ if(e.key==='Escape'){ q.value=''; applyFilter(''); }});
+
+      jumpA.addEventListener('click', ()=> jumpToLetter('A'));
+      jumpM.addEventListener('click', ()=> jumpToLetter('M'));
+      jumpZ.addEventListener('click', ()=> jumpToLetter('Z'));
+
+      function jumpToLetter(letter){
+        const list = STATE.filtered.length ? STATE.filtered : STATE.contacts;
+        const idx = list.findIndex(c => (c.name||'').toUpperCase().startsWith(letter));
+        if(idx >= 0) setCursor(idx);
+      }
+
+      function showDetail(){
+        const list = STATE.filtered.length ? STATE.filtered : STATE.contacts;
+        if(!list.length){ detail.style.display = 'none'; detail.innerHTML = ''; return; }
+        const c = list[STATE.cursor] || {};
+        detail.style.display = 'grid';
+        const phoneHref = c.phone ? 'tel:' + String(c.phone).split(' ').join('') : '';
+        detail.innerHTML =
+          '<div>'+
+            '<div class="name">' + (c.name || 'Unnamed') + '</div>'+
+            '<div class="meta">' + (c.email || '—') + ' · ' + (c.phone || '—') + '</div>'+
+          '</div>'+
+          '<div class="actions">' +
+            (c.email ? '<a class="btn" href="mailto:' + c.email + '">Email</a>' : '') +
+            (c.phone ? '<a class="btn" href="' + phoneHref + '">Call</a>' : '') +
+          '</div>';
+      }
+
+      function relIndex(i, c, N){
+        let d = i - c;
+        if(d > N/2) d -= N;
+        if(d < -N/2) d += N;
+        return d;
+      }
+
+      function applyLine(){
+        const list = STATE.filtered.length ? STATE.filtered : STATE.contacts;
+        const cards = Array.from(ring.querySelectorAll('.card'));
+        const N = list.length;
+        if(!N || !cards.length) return;
+        const spread = 110;
+        const maxSide = 4;
+        ring.style.transform = 'translateZ(0)';
+        cards.forEach((el, i)=>{
+          const d = relIndex(i, STATE.cursor, N);
+          const a = Math.abs(d);
+          const tx = d * spread;
+          const tz = -(50 + Math.min(300, a * 60));
+          const ry = d * -10;
+          const sc = 1 - Math.min(0.6, a * 0.06);
+          const hidden = a > maxSide;
+          el.style.transform = 'translateX(' + tx + 'px) translateZ(' + tz + 'px) rotateY(' + ry + 'deg) scale(' + sc + ')';
+          el.style.opacity = hidden ? 0 : (1 - a * 0.05);
+          el.style.pointerEvents = hidden ? 'none' : 'auto';
+          el.style.zIndex = String(100 - a);
+        });
+      }
+
+      // Keyboard navigation
+      window.addEventListener('keydown', (e)=>{
+        if(['ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+        if(e.key === 'ArrowLeft') prev();
+        if(e.key === 'ArrowRight') next();
+      });
+
+      // Wheel navigation
+      let wheelAccum = 0;
+      ring.addEventListener('wheel', (e)=>{
+        wheelAccum += e.deltaY + e.deltaX * 1.2;
+        if(Math.abs(wheelAccum) > 50){
+          if(wheelAccum > 0) next(); else prev();
+          wheelAccum = 0;
+        }
+        e.preventDefault();
+      }, { passive:false });
+
+      // Click a card to focus it
+      ring.addEventListener('click', (e)=>{
+        const card = e.target.closest('.card');
+        if(!card) return;
+        const idx = Number(card.dataset.index || 0);
+        setCursor(idx);
+      });
+    })();
+  </script>
+</body>
+</html>
