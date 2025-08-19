@@ -2974,16 +2974,16 @@
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="coft-eta-discussed-section">
           <label class="form-label">Has the 4 week ETA been discussed with the client at the point of purchase?</label>
           <div class="radio-group">
             <label class="radio-container">
-              <input type="radio" name="coft-eta-discussed" value="yes" required>
+              <input type="radio" name="coft-eta-discussed" value="yes">
               <span class="radio-checkmark"></span>
               Yes
             </label>
             <label class="radio-container">
-              <input type="radio" name="coft-eta-discussed" value="no" required>
+              <input type="radio" name="coft-eta-discussed" value="no">
               <span class="radio-checkmark"></span>
               No
             </label>
@@ -3013,13 +3013,22 @@
           <p class="form-help-text">Please select the most appropriate category for the situation.</p>
           <select id="coft-ticket-reason" class="form-select full-width" required onchange="handleReasonSelection()">
             <option value="">Choose reason...</option>
-            <option value="Chasing dispatch note">Chasing dispatch note</option>
-            <option value="Something has gone wrong with the order and the client has registered a complaint">Something has gone wrong with the order and the client has registered a complaint</option>
-            <option value="Chasing a delayed order">Chasing a delayed order</option>
-            <option value="A collection needs arranging from the client">A collection needs arranging from the client</option>
-            <option value="Client has multiple orders that need collating to arrange a delivery date (Install/PD-TBC)">Client has multiple orders that need collating to arrange a delivery date (Install/PD-TBC)</option>
-            <option value="Client needs the order by a specific date">Client needs the order by a specific date (enter the latest date the order is needed by below)</option>
-            <option value="Other">Other</option>
+            <!-- Order Chasing reasons -->
+            <option value="Chasing dispatch note" class="order-chasing-reason">Chasing dispatch note</option>
+            <option value="Something has gone wrong with the order and the client has registered a complaint" class="order-chasing-reason">Something has gone wrong with the order and the client has registered a complaint</option>
+            <option value="Chasing a delayed order" class="order-chasing-reason">Chasing a delayed order</option>
+            <option value="A collection needs arranging from the client" class="order-chasing-reason">A collection needs arranging from the client</option>
+            <option value="Client has multiple orders that need collating to arrange a delivery date (Install/PD-TBC)" class="order-chasing-reason">Client has multiple orders that need collating to arrange a delivery date (Install/PD-TBC)</option>
+            <option value="Client needs the order by a specific date" class="order-chasing-reason">Client needs the order by a specific date (enter the latest date the order is needed by below)</option>
+            <option value="Other" class="order-chasing-reason">Other</option>
+            <!-- Reprocessing/Item Sourced reasons -->
+            <option value="Processed without an specific edition request but a specific number is needed for this order" class="reprocessing-reason hidden">Processed without an specific edition request but a specific number is needed for this order</option>
+            <option value="Queries regarding this order being ON ORDER WITH SUPPLIER" class="reprocessing-reason hidden">Queries regarding this order being ON ORDER WITH SUPPLIER</option>
+            <option value="Cancel and reprocessing requested" class="reprocessing-reason hidden">Cancel and reprocessing requested</option>
+            <option value="Manufacturing specifications that were missed when originally processing an order" class="reprocessing-reason hidden">Manufacturing specifications that were missed when originally processing an order</option>
+            <option value="DND date enquiries" class="reprocessing-reason hidden">DND date enquiries</option>
+            <option value="PD/Install needing to be added onto the order/paperwork" class="reprocessing-reason hidden">PD/Install needing to be added onto the order/paperwork</option>
+            <option value="Progress order for a Client Viewing in a gallery (Balance Outstanding)" class="reprocessing-reason hidden">Progress order for a Client Viewing in a gallery (Balance Outstanding)</option>
           </select>
         </div>
 
@@ -4691,22 +4700,61 @@ function handleCOFTTypeSelection() {
   const coftTypeRadios = document.querySelectorAll('input[name="coft-type"]');
   const coftFieldsContainer = document.getElementById('coft-fields-container');
   const selectedType = document.querySelector('input[name="coft-type"]:checked')?.value;
+  const etaSection = document.getElementById('coft-eta-discussed-section');
+  const reasonSelect = document.getElementById('coft-ticket-reason');
   
   if (selectedType) {
     // Show the COFT fields
     coftFieldsContainer.classList.remove('hidden');
     
-    // Handle assignment based on selection
+    // Handle ETA section visibility and reason options based on selection
     if (selectedType === 'reprocessing') {
+      // Hide ETA section for reprocessing/item sourced tickets
+      etaSection.classList.add('hidden');
+      // Remove required attribute from ETA radio buttons
+      document.querySelectorAll('input[name="coft-eta-discussed"]').forEach(radio => {
+        radio.removeAttribute('required');
+      });
+      
+      // Show reprocessing reasons and hide order chasing reasons
+      document.querySelectorAll('.order-chasing-reason').forEach(option => {
+        option.classList.add('hidden');
+        option.style.display = 'none';
+      });
+      document.querySelectorAll('.reprocessing-reason').forEach(option => {
+        option.classList.remove('hidden');
+        option.style.display = 'block';
+      });
+      
       // Auto-assign Katie Lewis for reprocessing tickets
       const katieUser = { email: 'klewis@castlefineart.com', name: 'Katie Lewis' };
       assignModalUser(katieUser);
     } else if (selectedType === 'order-chasing') {
+      // Show ETA section for order chasing tickets
+      etaSection.classList.remove('hidden');
+      // Add required attribute back to ETA radio buttons
+      document.querySelectorAll('input[name="coft-eta-discussed"]').forEach(radio => {
+        radio.setAttribute('required', 'required');
+      });
+      
+      // Show order chasing reasons and hide reprocessing reasons
+      document.querySelectorAll('.order-chasing-reason').forEach(option => {
+        option.classList.remove('hidden');
+        option.style.display = 'block';
+      });
+      document.querySelectorAll('.reprocessing-reason').forEach(option => {
+        option.classList.add('hidden');
+        option.style.display = 'none';
+      });
+      
       // For order chasing, let them choose assignment normally
       // Clear any existing assignment so they can select
       assignedUser = null;
       updateModalAssignedUserDisplay();
     }
+    
+    // Reset the reason selection when switching types
+    reasonSelect.value = '';
   } else {
     // Hide fields if no type selected
     coftFieldsContainer.classList.add('hidden');
@@ -4857,8 +4905,15 @@ function collectCOFTFormData() {
   const clientAware = document.querySelector('input[name="coft-client-aware"]:checked');
   const etaDiscussed = document.querySelector('input[name="coft-eta-discussed"]:checked');
   
-  if (!clientAware || !etaDiscussed) {
-    showModalStatus('Please answer all yes/no questions.', 'error');
+  // For order chasing tickets, both clientAware and etaDiscussed are required
+  // For reprocessing tickets, only clientAware is required (etaDiscussed is hidden)
+  if (!clientAware) {
+    showModalStatus('Please answer the client awareness question.', 'error');
+    return null;
+  }
+  
+  if (coftType.value === 'order-chasing' && !etaDiscussed) {
+    showModalStatus('Please answer the ETA discussion question.', 'error');
     return null;
   }
   
@@ -4887,7 +4942,7 @@ function collectCOFTFormData() {
     deliveryMethod,
     ticketReason,
     clientAware: clientAware.value,
-    etaDiscussed: etaDiscussed.value,
+    etaDiscussed: etaDiscussed ? etaDiscussed.value : null,
     specificDate,
     additionalInfo,
     photos: Array.from(photos)
@@ -4910,7 +4965,10 @@ function buildCOFTDescription(coftData) {
   
   description += `**Client Awareness:**\n`;
   description += `• Is client aware of 4 week fulfilment time? ${coftData.clientAware.toUpperCase()}\n`;
-  description += `• Has 4 week ETA been discussed at point of purchase? ${coftData.etaDiscussed.toUpperCase()}\n\n`;
+  if (coftData.etaDiscussed) {
+    description += `• Has 4 week ETA been discussed at point of purchase? ${coftData.etaDiscussed.toUpperCase()}\n`;
+  }
+  description += `\n`;
   
   description += `**Issue Details:**\n`;
   description += `• Reason: ${coftData.ticketReason}\n`;
