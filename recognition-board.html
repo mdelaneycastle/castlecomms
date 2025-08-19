@@ -941,11 +941,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
     
     await loadTeams();
-    await loadNotes();
     await loadUsers();
+    await calculateAndUpdateAllCounts(); // Calculate all counts once on page load
+    await loadNotes();
     setupNoteForm();
     setupTeamTabs();
-    updateLeagueTable();
   } catch (error) {
     console.error('Failed to initialize Recognition Board:', error);
     showError('Failed to connect to database. Please refresh the page.');
@@ -1118,10 +1118,7 @@ async function loadNotes() {
     // Clear previous positions tracking
     placedNotes.length = 0;
     
-    // Calculate team counts from all notes
-    await calculateTeamCounts();
-    updateTabCounts();
-    updateLeagueTable();
+    // Don't recalculate counts here - they should be calculated separately
     
     snapshot.docs.forEach((doc, index) => {
       const noteData = doc.data();
@@ -1233,6 +1230,13 @@ async function calculateTeamCounts() {
   } catch (error) {
     console.error('Error calculating team counts:', error);
   }
+}
+
+// Calculate and update all counts (for initial load and after adding notes)
+async function calculateAndUpdateAllCounts() {
+  await calculateTeamCounts();
+  updateTabCounts();
+  updateLeagueTable();
 }
 
 // Update tab counts
@@ -1364,10 +1368,11 @@ function setupNoteForm() {
       // Show success message
       showSuccess('🎉 Your recognition note has been pinned to the board!');
       
-      // Reload notes to show the new one
-      setTimeout(() => {
-        location.reload();
-      }, 1500);
+      // Update counts and reload notes to show the new one
+      setTimeout(async () => {
+        await calculateAndUpdateAllCounts();
+        await loadNotes();
+      }, 1000);
       
     } catch (error) {
       console.error('Error adding note:', error);
