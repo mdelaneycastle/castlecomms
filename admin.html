@@ -370,6 +370,14 @@
     const admin = document.getElementById('new-admin').checked;
     const communicationsAdmin = document.getElementById('new-communications-admin').checked;
 
+    // Debug logging
+    console.log('Form values:', { email, password, displayName, admin, communicationsAdmin });
+    
+    if (!email || !password) {
+      showStatus('Email and password are required', 'error');
+      return;
+    }
+
     try {
       const token = await currentUser.getIdToken();
       const response = await fetch('https://createuserhttp-ngp3khlsna-ew.a.run.app', {
