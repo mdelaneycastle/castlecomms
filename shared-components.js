@@ -8,7 +8,51 @@ document.addEventListener('DOMContentLoaded', function() {
   if (window.sharedComponents) {
     window.sharedComponents.init();
   }
+  // Initialize dark mode on page load
+  initializeDarkMode();
 });
+
+// Dark Mode Functionality
+function initializeDarkMode() {
+  const root = document.documentElement;
+  const saved = localStorage.getItem('theme');
+  
+  // Set theme based on saved preference or system preference
+  if (saved === 'light' || saved === 'dark') {
+    root.setAttribute('data-theme', saved);
+    updateDarkModeToggleUI(saved);
+  }
+}
+
+function toggleDarkMode() {
+  const root = document.documentElement;
+  const current = root.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  
+  root.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  updateDarkModeToggleUI(next);
+}
+
+function updateDarkModeToggleUI(theme) {
+  const toggleButton = document.querySelector('.dark-mode-toggle');
+  if (toggleButton) {
+    const icon = toggleButton.querySelector('.dropdown-icon');
+    const textSpan = toggleButton.querySelector('.dark-mode-text');
+    
+    if (theme === 'dark') {
+      if (icon) icon.textContent = '☀️'; // Sun emoji
+      if (textSpan) textSpan.textContent = 'Light Mode';
+    } else {
+      if (icon) icon.textContent = '🌙'; // Moon emoji
+      if (textSpan) textSpan.textContent = 'Dark Mode';
+    }
+  }
+}
+
+// Make functions globally available
+window.toggleDarkMode = toggleDarkMode;
+window.initializeDarkMode = initializeDarkMode;
 
 window.sharedComponents = {
   // Initialize all shared components
@@ -18,6 +62,7 @@ window.sharedComponents = {
     this.setupAuthStateHandler();
     this.setupNotificationBell();
     this.setupGlobalEventDelegation();
+    this.setupDarkModeToggle();
     console.log("✅ Shared components loaded");
   },
 
@@ -32,6 +77,15 @@ window.sharedComponents = {
         }
       }
     });
+  },
+
+  // Setup dark mode toggle functionality
+  setupDarkModeToggle() {
+    // Initialize dark mode UI after header is loaded
+    setTimeout(() => {
+      const saved = localStorage.getItem('theme') || 'light';
+      updateDarkModeToggleUI(saved);
+    }, 100);
   },
 
   // Load and setup header with user name display
