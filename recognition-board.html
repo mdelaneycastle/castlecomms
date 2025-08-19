@@ -1106,11 +1106,9 @@ async function loadNotes() {
     const snapshot = await query.get();
     
     const container = document.getElementById('postItContainer');
-    const loadingMessage = document.getElementById('loadingMessage');
     
-    if (loadingMessage) {
-      loadingMessage.remove();
-    }
+    // Clear all existing content (including notes and loading message)
+    container.innerHTML = '';
     
     if (snapshot.empty) {
       container.innerHTML = '<div class="loading">🎉 Be the first to add a recognition note!</div>';
