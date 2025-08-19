@@ -2826,13 +2826,11 @@
       <div class="ticket-transfer-section">
         <h4>🔄 Transfer Ticket</h4>
         <div class="transfer-form">
-          <div class="transfer-user-search">
-            <label for="transfer-user-input">Transfer to:</label>
-            <div class="user-search-container">
-              <input type="text" id="transfer-user-input" class="form-input" placeholder="Start typing a name or email..." autocomplete="off">
-              <div id="transfer-user-suggestions" class="user-suggestions"></div>
-            </div>
-            <div id="transfer-selected-user"></div>
+          <div class="transfer-team-selection">
+            <label for="transfer-team-select">Transfer to Team:</label>
+            <select id="transfer-team-select" class="form-select" onchange="handleTransferTeamSelection()">
+              <option value="">Choose a team...</option>
+            </select>
           </div>
           
           <div class="transfer-reason">
@@ -5623,62 +5621,69 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Transfer functionality
-let transferSelectedUser = null;
+let transferSelectedTeam = null;
 
 // Setup transfer form
 function setupTransferForm() {
   // Clear previous state
-  transferSelectedUser = null;
-  document.getElementById('transfer-user-input').value = '';
-  document.getElementById('transfer-selected-user').innerHTML = '';
+  transferSelectedTeam = null;
+  document.getElementById('transfer-team-select').value = '';
   document.getElementById('transfer-reason-input').value = '';
-  document.getElementById('transfer-user-suggestions').style.display = 'none';
   
-  // Setup user search for transfer - exclude current user and currently assigned user
-  const excludeEmails = currentTicket && currentTicket.assignedTo && currentTicket.assignedTo.email 
-    ? [currentTicket.assignedTo.email] 
-    : [];
+  // Load teams into the transfer dropdown
+  loadTransferTeams();
+}
+
+// Load teams for transfer dropdown
+async function loadTransferTeams() {
+  const transferTeamSelect = document.getElementById('transfer-team-select');
+  if (!transferTeamSelect) return;
+  
+  // Clear existing options except the first one
+  transferTeamSelect.innerHTML = '<option value="">Choose a team...</option>';
+  
+  try {
+    if (allTeams.length === 0) {
+      await loadAllTeams();
+    }
     
-  createUserSearch({
-    searchInputId: 'transfer-user-input',
-    suggestionsId: 'transfer-user-suggestions',
-    containerSelector: '.transfer-user-search',
-    onUserSelect: selectTransferUser,
-    excludeUserEmails: excludeEmails
-  });
-}
-
-// Select user for transfer
-function selectTransferUser(user) {
-  transferSelectedUser = user;
-  updateTransferUserDisplay();
-}
-
-// Update transfer user display
-function updateTransferUserDisplay() {
-  const container = document.getElementById('transfer-selected-user');
-  if (transferSelectedUser) {
-    container.innerHTML = `
-      <div class="assigned-user">
-        ${transferSelectedUser.name}
-        <button type="button" class="remove-user" onclick="removeTransferUser()">&times;</button>
-      </div>
-    `;
-  } else {
-    container.innerHTML = '';
+    // Add team options
+    allTeams.forEach(team => {
+      const option = document.createElement('option');
+      option.value = team.id;
+      option.textContent = team.name;
+      transferTeamSelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Error loading transfer teams:', error);
   }
 }
 
-// Remove transfer user
-function removeTransferUser() {
-  transferSelectedUser = null;
-  updateTransferUserDisplay();
+// Handle team selection for transfer
+function handleTransferTeamSelection() {
+  const transferTeamSelect = document.getElementById('transfer-team-select');
+  const selectedTeamId = transferTeamSelect.value;
+  
+  if (selectedTeamId) {
+    transferSelectedTeam = allTeams.find(team => team.id === selectedTeamId);
+  } else {
+    transferSelectedTeam = null;
+  }
 }
 
 // Transfer ticket
 async function transferTicket() {
-  if (!currentTicket || !transferSelectedUser) {
-    alert('Please select a user to transfer the ticket to.');
+  const transferTeamSelect = document.getElementById('transfer-team-select');
+  const selectedTeamId = transferTeamSelect.value;
+  
+  if (!currentTicket || !selectedTeamId) {
+    alert('Please select a team to transfer the ticket to.');
+    return;
+  }
+  
+  const selectedTeam = allTeams.find(team => team.id === selectedTeamId);
+  if (!selectedTeam) {
+    alert('Selected team not found. Please refresh and try again.');
     return;
   }
   
@@ -5707,15 +5712,16 @@ async function transferTicket() {
     // Create updated ticket data
     const updateData = {
       assignedTo: {
-        type: 'individual',
-        email: transferSelectedUser.email,
-        name: transferSelectedUser.name
+        type: 'team',
+        teamId: selectedTeam.id,
+        teamName: selectedTeam.name
       },
       transferHistory: firebase.firestore.FieldValue.arrayUnion({
         from: currentTicket.assignedTo,
         to: {
-          email: transferSelectedUser.email,
-          name: transferSelectedUser.name
+          type: 'team',
+          teamId: selectedTeam.id,
+          teamName: selectedTeam.name
         },
         transferredBy: {
           email: currentUser.email,
@@ -5743,7 +5749,7 @@ async function transferTicket() {
     }
     
     const transferMessage = {
-      message: `Ticket transferred from ${fromText} to ${transferSelectedUser.name} by ${transferredByName}. Reason: ${reason}`,
+      message: `Ticket transferred from ${fromText} to ${selectedTeam.name} team by ${transferredByName}. Reason: ${reason}`,
       senderEmail: 'system',
       senderName: 'System',
       timestamp: new Date()
@@ -5758,18 +5764,16 @@ async function transferTicket() {
     
     // Update current ticket object
     currentTicket.assignedTo = {
-      type: 'individual',
-      email: transferSelectedUser.email,
-      name: transferSelectedUser.name
+      type: 'team',
+      teamId: selectedTeam.id,
+      teamName: selectedTeam.name
     };
     
     // Update modal display
-    document.getElementById('modal-ticket-assignee').textContent = `Assigned to: ${transferSelectedUser.name}`;
+    document.getElementById('modal-ticket-assignee').textContent = `Assigned to: ${selectedTeam.name} team`;
     
     // Clear transfer form
-    transferSelectedUser = null;
-    document.getElementById('transfer-user-input').value = '';
-    document.getElementById('transfer-selected-user').innerHTML = '';
+    transferTeamSelect.value = '';
     document.getElementById('transfer-reason-input').value = '';
     
     // Reload tickets list and messages
