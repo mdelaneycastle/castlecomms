@@ -184,7 +184,7 @@
 
 <form id="create-user-form" style="margin-bottom:2rem;">
   <input id="new-email"       type="email"    placeholder="Email"        required />
-  <input id="new-password"    type="password" placeholder="Password"     required />
+  <input id="admin-new-password"    type="password" placeholder="Password"     required />
   <input id="new-displayName" type="text"     placeholder="Display Name" />
   <label>
     <input id="new-admin" type="checkbox" />
@@ -365,7 +365,7 @@
     e.preventDefault();
     
     const email = document.getElementById('new-email').value;
-    const password = document.getElementById('new-password').value;
+    const password = document.getElementById('admin-new-password').value;
     const displayName = document.getElementById('new-displayName').value;
     const admin = document.getElementById('new-admin').checked;
     const communicationsAdmin = document.getElementById('new-communications-admin').checked;
