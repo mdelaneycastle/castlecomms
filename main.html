@@ -237,8 +237,8 @@ document.addEventListener('DOMContentLoaded', function() {
   function formatMessagePreview(message) {
     if (!message) return 'No message content';
     
-    // Check if message ends with .gif (case insensitive)
-    if (message.toLowerCase().endsWith('.gif')) {
+    // Check if message contains .gif anywhere in the URL (case insensitive)
+    if (message.toLowerCase().includes('.gif')) {
       return 'GIF';
     }
     
