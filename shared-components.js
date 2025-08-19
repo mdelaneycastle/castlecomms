@@ -425,6 +425,9 @@ window.sharedComponents = {
         await window.authUtils.toggleAdminElements(user);
       }
 
+      // Update user-specific elements visibility
+      this.toggleUserSpecificElements(user);
+
       // Load sidebar if it hasn't been loaded yet
       if (!document.getElementById("sidebar")) {
         this.loadSidebar();
@@ -630,6 +633,20 @@ window.sharedComponents = {
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
+  },
+
+  // Toggle user-specific elements based on email
+  toggleUserSpecificElements(user) {
+    const userOnlyElements = document.querySelectorAll('[data-user-only]');
+    
+    userOnlyElements.forEach(element => {
+      const allowedEmail = element.getAttribute('data-user-only');
+      if (user && user.email === allowedEmail) {
+        element.style.display = '';
+      } else {
+        element.style.display = 'none';
+      }
+    });
   },
 
   // Open change password modal
