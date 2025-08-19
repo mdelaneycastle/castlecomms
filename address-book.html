@@ -193,7 +193,7 @@
       width: var(--card-w);
       height: var(--card-h);
       margin: auto;
-      background: var(--surface-color);
+      background: var(--card-background);
       border: 1px solid var(--border-color);
       border-radius: 14px;
       box-shadow: var(--shadow-medium);
@@ -203,6 +203,7 @@
       display: grid; grid-template-rows: auto 1fr auto;
       transition: transform 450ms cubic-bezier(.2,.7,.2,1), opacity 300ms ease; 
       will-change: transform, opacity;
+      opacity: 1;
     }
 
     .card.hidden { opacity: 0; pointer-events: none; }
@@ -276,7 +277,7 @@
       left: 50%;
       transform: translateX(-50%);
       width: min(640px, 92%);
-      background: rgba(240, 237, 233, 0.95);
+      background: var(--card-background);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 12px 14px;
@@ -284,7 +285,6 @@
       grid-template-columns: 1fr auto;
       gap: 10px;
       align-items: center;
-      backdrop-filter: blur(4px);
       box-shadow: var(--shadow-medium);
       font-size: 14px;
     }
@@ -436,32 +436,30 @@
       const fmtDate = ts => new Date(ts).toLocaleString();
       const initials = name => (name||'').split(/\s+/).filter(Boolean).map(s => s[0]).slice(0,3).join('').toUpperCase();
 
-      // Castle Staff Data
+      // Actual Castle Staff Data from Spitfire Staff Page
       const castleStaff = [
         {name: 'Gary Turpin', email: 'gturpin@washingtongreen.co.uk', label: 'Head of Operations', phone: '01216550060'},
-        {name: 'Martin Harrison', email: 'mharrison@washingtongreen.co.uk', label: 'Head of Manufacturing and QC', phone: '01216550060'},
+        {name: 'Matt King', email: 'mking@castlefineart.com', label: 'Head Of Inventory', phone: '01216550060'},
         {name: 'Martin Sumner', email: 'msumner@washingtongreen.co.uk', label: 'Head Of Stock Control', phone: '01216550060'},
-        {name: 'Matt King', email: 'mking@washingtongreen.co.uk', label: 'Head Of Inventory', phone: '01216550060'},
-        {name: 'Gary Day', email: 'gday@washingtongreen.co.uk', label: 'Framing Production Manager', phone: '01216550060'},
-        {name: 'Bill Chand', email: 'bchand@washingtongreen.co.uk', label: 'Framing Supervisor', phone: '01216550060'},
-        {name: 'Tom Harrison', email: 'tharrison@washingtongreen.co.uk', label: 'Senior Mounting Operative', phone: '01216550060'},
-        {name: 'Chrissy Hall', email: 'chall@washingtongreen.co.uk', label: 'Quality Control Supervisor', phone: '01216550060'},
-        {name: 'Adam Hercombe', email: 'ahercombe@washingtongreen.co.uk', label: 'Warehouse Stock Manager', phone: '01216550060'},
-        {name: 'Kerry Hinks', email: 'khinks@washingtongreen.co.uk', label: 'Stock Admin Manager', phone: '01216550060'},
+        {name: 'Raksha Hercombe', email: 'rhercombe@washingtongreen.co.uk', label: 'Halcyon Support Manager', phone: '01216550060'},
+        {name: 'Alexandra Bradley', email: 'abradley@washingtongreen.co.uk', label: 'Originals Admin', phone: '01216550060'},
+        {name: 'Paul Chapman', email: 'pchapman@washingtongreen.co.uk', label: 'Order Processing', phone: '01216550060'},
+        {name: 'Jackie Durrant', email: 'jdurrant@washingtongreen.co.uk', label: 'Order Processing', phone: '01216550060'},
+        {name: 'Gary Hooper', email: 'ghooper@castlegalleries.com', label: 'Order Processing', phone: '01216550060'},
+        {name: 'Katie Lewis', email: 'klewis@castlefineart.com', label: 'Order Processing', phone: '01216550060'},
+        {name: 'Tom Platts', email: 'tplatts@castlefineart.com', label: 'Order Processing', phone: '01216550060'},
+        {name: 'Poppy Beevor-Reid', email: 'pbeevor-reid@castlefineart.com', label: 'Order Processing', phone: '01216550060'},
+        {name: 'Amy Rush', email: 'arush@castlefineart.com', label: 'Order Processing', phone: '01216550060'},
         {name: 'Stuart Whitehouse', email: 'swhitehouse@washingtongreen.co.uk', label: 'Logistics Manager', phone: '01216550060'},
         {name: 'Nathan Smethurst', email: 'nsmethurst@castlefineart.com', label: 'Shipping Supervisor', phone: '01216550060'},
-        {name: 'Zara Chaudhry', email: 'zchaudhry@washingtongreen.co.uk', label: 'Logistics Admin Assistant', phone: '01216550060'},
-        {name: 'Olly Clark', email: 'oclark@castlefineart.com', label: 'Packing Supervisor', phone: '01216550060'},
-        {name: 'Alexandra Bradley', email: 'abradley@washingtongreen.co.uk', label: 'Originals Admin', phone: '01216550060'},
-        {name: 'Raksha Hercombe', email: 'rhercombe@washingtongreen.co.uk', label: 'Halcyon Support Manager', phone: '01216550060'},
-        {name: 'Adam Hyde', email: 'ahyde@washingtongreen.co.uk', label: 'Framing Supervisor (Cutting Room)', phone: '01216550060'},
-        {name: 'Jenny Evans', email: 'jevans@castlefineart.com', label: 'COFT', phone: '01216550060'},
-        {name: 'Katie Williams', email: 'kwilliams@castlefineart.com', label: 'COFT', phone: '01216550060'},
-        {name: 'Pip Johnson', email: 'pjohnson@castlefineart.com', label: 'COFT', phone: '01216550060'},
-        {name: 'Tara Mitchell', email: 'tmitchell@castlefineart.com', label: 'COFT', phone: '01216550060'},
-        {name: 'Gerald Thompson', email: 'gthompson@castlefineart.com', label: 'COFT', phone: '01216550060'},
-        {name: 'Amelia Davis', email: 'adavis@castlefineart.com', label: 'COFT', phone: '01216550060'},
-        {name: 'Chappie Wilson', email: 'cwilson@castlefineart.com', label: 'COFT', phone: '01216550060'}
+        {name: 'Olly Clark', email: 'oclark@washingtongreen.co.uk', label: 'Packing Supervisor', phone: '01216550060'},
+        {name: 'Zara Chaudhry', email: 'zchaudhry@washingtongren.co.uk', label: 'Logistics Admin Assistant', phone: '01216550060'},
+        {name: 'Martin Harrison', email: 'mharrison@washingtongreen.co.uk', label: 'Head of Manufacturing and QC', phone: '01216550060'},
+        {name: 'Gary Day', email: 'gday@washingtongreen.co.uk', label: 'Framing Production Manager', phone: '01216550060'},
+        {name: 'Tom Harrison', email: 'tharrison@castlefineart.com', label: 'Senior Mounting Operative', phone: '01216550060'},
+        {name: 'Chrissy Hall', email: 'chall@washingtongreen.co.uk', label: 'Quality Control Supervisor', phone: '01216550060'},
+        {name: 'Kerry Hinks', email: 'khinks@washingtongreen.co.uk', label: 'Stock Admin Manager', phone: '01216550060'},
+        {name: 'Adam Hercombe', email: 'ahercombe@washingtongreen.co.uk', label: 'Warehouse Stock Manager', phone: '01216550060'}
       ];
 
       function createCard(contact){
