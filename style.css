@@ -8,7 +8,7 @@
 }
 
 :root {
-  /* Light Theme Colors */
+  /* New Professional Color Scheme */
   --primary-color: #d8d1c5;      /* Warm neutral beige */
   --secondary-color: #45494e;     /* Deep charcoal */
   --tertiary-color: #6a6e73;     /* Lighter version of secondary */
@@ -18,13 +18,6 @@
   --text-muted: #999ea3;
   --background-overlay: rgba(216, 209, 197, 0.95);
   --card-background: #F0EDE9;
-  --body-background: linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%);
-  --surface-color: #ffffff;
-  --border-color: rgba(216, 209, 197, 0.3);
-  --input-background: #ffffff;
-  --button-primary: #007bff;
-  --button-danger: #dc3545;
-  --button-success: #28a745;
   
   /* Professional Shadows & Effects */
   --shadow-subtle: 0 2px 8px rgba(69, 73, 78, 0.08);
@@ -42,142 +35,6 @@
   
   /* Gradients */
   --primary-gradient: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
-}
-
-/* Auto Dark Mode based on system preference */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary-color: #2d3136;      /* Dark neutral */
-    --secondary-color: #e6e9ef;     /* Light text */
-    --tertiary-color: #a0a7b4;     /* Muted light text */
-    --accent-color: #3e434a;       /* Slightly lighter dark */
-    --text-dark: #e6e9ef;          /* Light text */
-    --text-light: #a0a7b4;        /* Muted light text */
-    --text-muted: #6c7786;        /* Darker muted text */
-    --background-overlay: rgba(45, 49, 54, 0.95);
-    --card-background: #1a1d23;
-    --body-background: linear-gradient(135deg, #0b0f14 0%, #1a1d23 100%);
-    --surface-color: #1a1d23;
-    --border-color: rgba(160, 167, 180, 0.2);
-    --input-background: #252930;
-    --button-primary: #4a9eff;
-    --button-danger: #e74c3c;
-    --button-success: #2ecc71;
-    
-    /* Dark mode shadows */
-    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.2);
-    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.25);
-    --shadow-medium: 0 8px 20px rgba(0, 0, 0, 0.3);
-    --shadow-heavy: 0 12px 30px rgba(0, 0, 0, 0.4);
-    
-    /* Dark gradients */
-    --primary-gradient: linear-gradient(135deg, #2d3136 0%, #3e434a 100%);
-  }
-}
-
-/* Manual theme override - Light */
-:root[data-theme="light"] {
-  --primary-color: #d8d1c5;
-  --secondary-color: #45494e;
-  --tertiary-color: #6a6e73;
-  --accent-color: #c5bdb1;
-  --text-dark: #45494e;
-  --text-light: #6a6e73;
-  --text-muted: #999ea3;
-  --background-overlay: rgba(216, 209, 197, 0.95);
-  --card-background: #F0EDE9;
-  --body-background: linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%);
-  --surface-color: #ffffff;
-  --border-color: rgba(216, 209, 197, 0.3);
-  --input-background: #ffffff;
-  --button-primary: #007bff;
-  --button-danger: #dc3545;
-  --button-success: #28a745;
-  --shadow-subtle: 0 2px 8px rgba(69, 73, 78, 0.08);
-  --shadow-light: 0 4px 12px rgba(69, 73, 78, 0.12);
-  --shadow-medium: 0 8px 20px rgba(69, 73, 78, 0.15);
-  --shadow-heavy: 0 12px 30px rgba(69, 73, 78, 0.2);
-  --primary-gradient: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
-}
-
-/* Manual theme override - Dark */
-:root[data-theme="dark"] {
-  --primary-color: #2d3136;
-  --secondary-color: #e6e9ef;
-  --tertiary-color: #a0a7b4;
-  --accent-color: #3e434a;
-  --text-dark: #e6e9ef;
-  --text-light: #a0a7b4;
-  --text-muted: #6c7786;
-  --background-overlay: rgba(45, 49, 54, 0.95);
-  --card-background: #1a1d23;
-  --body-background: linear-gradient(135deg, #0b0f14 0%, #1a1d23 100%);
-  --surface-color: #1a1d23;
-  --border-color: rgba(160, 167, 180, 0.2);
-  --input-background: #252930;
-  --button-primary: #4a9eff;
-  --button-danger: #e74c3c;
-  --button-success: #2ecc71;
-  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.25);
-  --shadow-medium: 0 8px 20px rgba(0, 0, 0, 0.3);
-  --shadow-heavy: 0 12px 30px rgba(0, 0, 0, 0.4);
-  --primary-gradient: linear-gradient(135deg, #2d3136 0%, #3e434a 100%);
-}
-
-/* Smooth transitions for theme changes */
-* {
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* Form inputs and interactive elements */
-input, textarea, select {
-  background-color: var(--input-background);
-  color: var(--text-dark);
-  border: 1px solid var(--border-color);
-}
-
-input:focus, textarea:focus, select:focus {
-  border-color: var(--button-primary);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
-}
-
-/* Buttons */
-.btn-primary, button[type="submit"] {
-  background-color: var(--button-primary);
-  color: var(--surface-color);
-  border: 1px solid var(--button-primary);
-}
-
-.btn-secondary {
-  background-color: var(--surface-color);
-  color: var(--text-dark);
-  border: 1px solid var(--border-color);
-}
-
-.btn-danger {
-  background-color: var(--button-danger);
-  color: var(--surface-color);
-  border: 1px solid var(--button-danger);
-}
-
-/* Modal and surface elements */
-.modal-content {
-  background-color: var(--surface-color);
-  color: var(--text-dark);
-}
-
-.dropdown-menu {
-  background-color: var(--surface-color);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-medium);
-}
-
-/* Cards and containers */
-.card, .container {
-  background-color: var(--surface-color);
-  color: var(--text-dark);
 }
 
 /* Welcome Message */
@@ -213,7 +70,7 @@ body {
   font-size: 16px;
   line-height: 1.6;
   color: var(--text-dark);
-  background: var(--body-background);
+  background: linear-gradient(135deg, var(--primary-color) 0%, #e5ded2 100%);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -297,7 +154,7 @@ header {
   box-shadow: var(--shadow-subtle);
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(216, 209, 197, 0.2);
 }
 
 header h1 {
@@ -319,8 +176,8 @@ header h1 {
 }
 
 .count-badge {
-  background-color: var(--button-danger);
-  color: var(--surface-color);
+  background-color: red;
+  color: white;
   border-radius: 50%;
   padding: 2px 6px;
   font-size: 0.75rem;
@@ -337,15 +194,15 @@ header h1 {
 }
 
 .mention {
-  color: var(--button-primary);
+  color: #007bff;
   font-weight: bold;
   cursor: pointer;
 }
 
 .mention-list {
   position: absolute;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
+  background: white;
+  border: 1px solid #ccc;
   z-index: 10;
   list-style: none;
   padding: 0;
@@ -361,7 +218,7 @@ header h1 {
 }
 
 .mention-list li:hover {
-  background-color: var(--card-background);
+  background-color: #f0f0f0;
 }
 
 .hamburger {
@@ -398,7 +255,7 @@ header h1 {
   left: -280px;
   width: 260px;
   height: 100vh;
-  background: var(--card-background);
+  background: #F0EDE9;
   color: var(--text-dark);
   padding: 0;
   box-shadow: var(--shadow-heavy);
@@ -490,7 +347,7 @@ header h1 {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  background: var(--button-danger);
+  background: #dc3545;
   color: white;
   font-size: 0.7rem;
   font-weight: 600;
@@ -586,7 +443,7 @@ form input,
 form textarea {
   padding: 0.5rem;
   font-size: 1rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid #ccc;
   border-radius: 0.375rem;
   flex: 1;
   min-width: 180px;
@@ -650,12 +507,12 @@ form button:hover::before {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--card-background);
+  background-color: #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  color: var(--text-dark);
+  color: #374151;
   margin-right: 0.75rem;
   font-size: 1rem;
 }
@@ -672,18 +529,18 @@ form button:hover::before {
 
 .post-role {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: #6b7280;
 }
 
 .post-time {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: #9ca3af;
   margin-top: 4px;
 }
 
 .post-message {
   font-size: 1rem;
-  color: var(--text-dark);
+  color: #111827;
   line-height: 1.5;
   margin-bottom: 1rem;
   white-space: pre-wrap;
@@ -693,15 +550,15 @@ form button:hover::before {
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border-color);
+  color: #6b7280;
+  border-top: 1px solid #e5e7eb;
   padding-top: 0.75rem;
 }
 
 .post-footer button {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: #6b7280;
   cursor: pointer;
 }
 
@@ -715,7 +572,7 @@ form button:hover::before {
 .react-btn {
   background: none;
   border: none;
-  color: var(--button-primary);
+  color: #2563eb;
   font-size: 0.9rem;
   cursor: pointer;
 }
@@ -725,8 +582,8 @@ form button:hover::before {
   gap: 0.5rem;
   margin-top: 0.25rem;
   padding: 0.5rem;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
+  background: #fff;
+  border: 1px solid #ddd;
   border-radius: 0.5rem;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   position: absolute;
@@ -745,7 +602,7 @@ form button:hover::before {
 .comment-toggle {
   background: none;
   border: none;
-  color: var(--button-primary);
+  color: #2563eb;
   cursor: pointer;
   font-size: 0.9rem;
   margin-top: 0.75rem;
@@ -753,10 +610,10 @@ form button:hover::before {
 
 .comment-section {
   margin-top: 1rem;
-  background: var(--card-background);
+  background: #f9fafb;
   padding: 1rem;
   border-radius: 0.5rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid #e5e7eb;
 }
 
 .comment {
@@ -777,7 +634,7 @@ form button:hover::before {
 .comment small {
   display: block;
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: #6b7280;
   margin-top: 2px;
 }
 
@@ -793,14 +650,14 @@ form button:hover::before {
   padding: 0.5rem;
   font-size: 0.9rem;
   border-radius: 0.375rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid #ccc;
 }
 
 .comment-form button {
   align-self: flex-start;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
-  background: var(--button-primary);
+  background: #2563eb;
   color: white;
   border: none;
   border-radius: 0.375rem;
@@ -811,7 +668,7 @@ form button:hover::before {
   max-width: 100%;
   width: 100%;
   margin: 2rem auto;
-  border: 1px solid var(--border-color);
+  border: 1px solid #ccc;
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
@@ -821,7 +678,7 @@ form button:hover::before {
 .download-btn {
   display: inline-block;
   margin-top: 1rem;
-  background-color: var(--button-primary);
+  background-color: #2563eb;
   color: white;
   padding: 0.6rem 1.2rem;
   border-radius: 0.375rem;
@@ -831,7 +688,7 @@ form button:hover::before {
 }
 
 .download-btn:hover {
-  background-color: var(--button-primary);
+  background-color: #1e40af;
 }
 
 admin-link {
@@ -1024,7 +881,7 @@ admin-link {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.5rem;
-  background: var(--card-background);
+  background: #F0EDE9;
   border: 1px solid rgba(216, 209, 197, 0.2);
   border-radius: 4px;
   color: var(--text-dark);
@@ -1092,7 +949,7 @@ admin-link {
 
 /* Modern Header Styles */
 .modern-header {
-  background: var(--card-background);
+  background: #F0EDE9;
   border-bottom: 1px solid rgba(216, 209, 197, 0.3);
   padding: 1rem 2rem;
   box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
@@ -1304,7 +1161,7 @@ admin-link {
 .dropdown-header {
   padding: 1rem;
   background: rgba(248, 249, 250, 0.8);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(216, 209, 197, 0.2);
 }
 
 .dropdown-user-name {
@@ -1831,7 +1688,7 @@ admin-link {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(15px);
   border: none;
-  color: var(--text-dark);
+  color: #374151;
   font-size: 2rem;
   font-weight: bold;
   cursor: pointer;
@@ -2422,7 +2279,7 @@ admin-link {
   max-width: 400px;
   margin: 4rem auto;
   padding: 2rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid #ddd;
   border-radius: 8px;
   background-color: #f8f8f8;
 }
@@ -2436,7 +2293,7 @@ admin-link {
   width: 100%;
   padding: 0.75rem;
   margin: 0.5rem 0;
-  border: 1px solid var(--border-color);
+  border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
 }
@@ -2475,7 +2332,7 @@ admin-link {
 }
 
 .dashboard-card {
-  background: var(--card-background);
+  background: #F0EDE9;
   border-radius: var(--border-radius-large);
   box-shadow: var(--shadow-light);
   backdrop-filter: blur(10px);
@@ -2723,7 +2580,7 @@ admin-link {
 }
 
 .modal-form input[type="password"]::placeholder {
-  color: var(--text-muted);
+  color: #9ca3af;
 }
 
 .password-requirements {
@@ -2774,7 +2631,7 @@ admin-link {
 }
 
 .btn-secondary:hover {
-  background-color: var(--card-background);
+  background-color: #e5e7eb;
   border-color: #9ca3af;
 }
 
@@ -3111,7 +2968,7 @@ form .color-option::before {
 }
 
 .modal-form input[type="text"]::placeholder {
-  color: var(--text-muted);
+  color: #9ca3af;
 }
 
 /* Mobile responsiveness for account settings */
