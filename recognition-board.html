@@ -952,16 +952,27 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 });
 
-// Load teams from team_contacts.json
+// Load teams from Firestore teams collection
 async function loadTeams() {
   try {
-    const response = await fetch('team_contacts.json');
-    if (!response.ok) {
-      throw new Error('Failed to load teams');
+    const teamsSnapshot = await db.collection('teams')
+      .orderBy('name', 'asc')
+      .get();
+    
+    if (teamsSnapshot.empty) {
+      teams = [];
+      console.log('📋 No teams found in database');
+      return;
     }
-    teams = await response.json();
-    teams.sort((a, b) => a.team.localeCompare(b.team));
-    console.log('📋 Loaded', teams.length, 'teams');
+    
+    teams = teamsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      name: doc.data().name,
+      description: doc.data().description || '',
+      members: doc.data().members || []
+    }));
+    
+    console.log('📋 Loaded', teams.length, 'teams from database:', teams.map(t => t.name));
   } catch (error) {
     console.error('Error loading teams:', error);
     teams = [];
@@ -985,10 +996,10 @@ function setupTeamTabs() {
   // Add individual team tabs
   teams.forEach(team => {
     const tab = document.createElement('div');
-    tab.className = `team-tab ${currentTeam === team.team ? 'active' : ''}`;
-    tab.dataset.team = team.team;
-    tab.innerHTML = `${team.team} <span class="team-tab-count" id="count-${team.team.replace(/[^a-zA-Z0-9]/g, '-')}"}>0</span>`;
-    tab.addEventListener('click', () => switchTeam(team.team));
+    tab.className = `team-tab ${currentTeam === team.name ? 'active' : ''}`;
+    tab.dataset.team = team.name;
+    tab.innerHTML = `${team.name} <span class="team-tab-count" id="count-${team.name.replace(/[^a-zA-Z0-9]/g, '-')}"}>0</span>`;
+    tab.addEventListener('click', () => switchTeam(team.name));
     tabsContainer.appendChild(tab);
   });
 
@@ -1003,8 +1014,8 @@ function populateTeamDropdown() {
 
   teams.forEach(team => {
     const option = document.createElement('option');
-    option.value = team.team;
-    option.textContent = team.team;
+    option.value = team.name;
+    option.textContent = team.name;
     teamSelect.appendChild(option);
   });
 }
@@ -1046,21 +1057,38 @@ async function loadUsers() {
   }
 }
 
-// Populate the user dropdown with sorted users
-function populateUserDropdown() {
-  // Sort users alphabetically by name
-  const sortedUsers = [...allUsers].sort((a, b) => a.name.localeCompare(b.name));
+// Populate the user dropdown with members of the selected team
+function populateUserDropdown(selectedTeamName = null) {
+  const userSelect = document.getElementById('recognizedUser');
+  if (!userSelect) return;
+  
+  // Clear existing options except the first one
+  while (userSelect.children.length > 1) {
+    userSelect.removeChild(userSelect.lastChild);
+  }
+  
+  let usersToShow = [];
+  
+  if (selectedTeamName) {
+    // Show only members of the selected team
+    const selectedTeam = teams.find(team => team.name === selectedTeamName);
+    if (selectedTeam && selectedTeam.members) {
+      usersToShow = selectedTeam.members.sort((a, b) => a.name.localeCompare(b.name));
+    }
+  } else {
+    // Show all users if no team selected
+    usersToShow = [...allUsers].sort((a, b) => a.name.localeCompare(b.name));
+  }
   
   // Populate the user dropdown
-  const userSelect = document.getElementById('recognizedUser');
-  sortedUsers.forEach(user => {
+  usersToShow.forEach(user => {
     const option = document.createElement('option');
     option.value = user.name;
     option.textContent = `${user.name} (${user.email})`;
     userSelect.appendChild(option);
   });
   
-  console.log('👥 Populated recognition dropdown with', sortedUsers.length, 'users');
+  console.log('👥 Populated recognition dropdown with', usersToShow.length, 'users for team:', selectedTeamName || 'All');
 }
 
 // User name display functions are now handled by shared-components.js
@@ -1191,7 +1219,7 @@ async function calculateTeamCounts() {
     
     // Initialize team counts
     teams.forEach(team => {
-      teamCounts[team.team] = 0;
+      teamCounts[team.name] = 0;
     });
     
     // Count notes by team
@@ -1219,10 +1247,10 @@ function updateTabCounts() {
   
   // Update individual team counts
   teams.forEach(team => {
-    const countId = `count-${team.team.replace(/[^a-zA-Z0-9]/g, '-')}`;
+    const countId = `count-${team.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
     const countElement = document.getElementById(countId);
     if (countElement) {
-      countElement.textContent = teamCounts[team.team] || 0;
+      countElement.textContent = teamCounts[team.name] || 0;
     }
   });
 }
@@ -1234,18 +1262,18 @@ function updateLeagueTable() {
   
   // Sort teams by recognition count
   const sortedTeams = teams.slice().sort((a, b) => {
-    const countA = teamCounts[a.team] || 0;
-    const countB = teamCounts[b.team] || 0;
+    const countA = teamCounts[a.name] || 0;
+    const countB = teamCounts[b.name] || 0;
     return countB - countA;
   });
   
   leagueContent.innerHTML = sortedTeams.map((team, index) => {
-    const count = teamCounts[team.team] || 0;
+    const count = teamCounts[team.name] || 0;
     const rank = index + 1;
     return `
       <div class="league-item">
         <span class="league-rank">#${rank}</span>
-        <span class="league-team-name" title="${team.team}">${team.team.length > 15 ? team.team.substring(0, 12) + '...' : team.team}</span>
+        <span class="league-team-name" title="${team.name}">${team.name.length > 15 ? team.name.substring(0, 12) + '...' : team.name}</span>
         <span class="league-count">${count}</span>
       </div>
     `;
@@ -1256,8 +1284,18 @@ function updateLeagueTable() {
 function setupNoteForm() {
   const form = document.getElementById('noteForm');
   const contentInput = document.getElementById('noteContent');
+  const teamSelect = document.getElementById('teamSelect');
   const recognizedUserSelect = document.getElementById('recognizedUser');
   const otherUserInput = document.getElementById('otherUser');
+  
+  // Update user dropdown when team selection changes
+  teamSelect.addEventListener('change', function() {
+    const selectedTeam = this.value;
+    populateUserDropdown(selectedTeam);
+    // Clear user selections when team changes
+    recognizedUserSelect.value = '';
+    otherUserInput.value = '';
+  });
   
   // Clear other user field when selecting from dropdown
   recognizedUserSelect.addEventListener('change', function() {
