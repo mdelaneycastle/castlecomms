@@ -942,10 +942,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     await loadTeams();
     await loadUsers();
-    await calculateAndUpdateAllCounts(); // Calculate all counts once on page load
+    setupTeamTabs(); // Create tabs first so count elements exist
+    await calculateAndUpdateAllCounts(); // Then calculate counts
     await loadNotes();
     setupNoteForm();
-    setupTeamTabs();
   } catch (error) {
     console.error('Failed to initialize Recognition Board:', error);
     showError('Failed to connect to database. Please refresh the page.');
@@ -1210,23 +1210,32 @@ function createPostItNote(noteData, index, docId = null) {
 async function calculateTeamCounts() {
   try {
     const snapshot = await db.collection('recognition-notes').get();
+    console.log('🔍 Found', snapshot.docs.length, 'recognition notes total');
+    
     teamCounts = { all: 0 };
     
     // Initialize team counts
     teams.forEach(team => {
       teamCounts[team.name] = 0;
     });
+    console.log('📋 Initialized team counts for teams:', teams.map(t => t.name));
     
     // Count notes by team
     snapshot.docs.forEach(doc => {
       const noteData = doc.data();
       const team = noteData.team || 'Unknown';
+      console.log('📝 Note data:', { team, noteData });
+      
       teamCounts.all++;
       if (teamCounts[team] !== undefined) {
         teamCounts[team]++;
+        console.log(`✅ Incremented count for team "${team}" to:`, teamCounts[team]);
+      } else {
+        console.warn(`⚠️ Unknown team found in note: "${team}"`);
       }
     });
     
+    console.log('🎯 Final team counts:', teamCounts);
   } catch (error) {
     console.error('Error calculating team counts:', error);
   }
@@ -1241,18 +1250,28 @@ async function calculateAndUpdateAllCounts() {
 
 // Update tab counts
 function updateTabCounts() {
+  console.log('🔢 Updating tab counts:', teamCounts);
+  
   // Update "All Teams" count
   const allCountElement = document.getElementById('count-all');
   if (allCountElement) {
     allCountElement.textContent = teamCounts.all || 0;
+    console.log('📊 Updated "All Teams" count to:', teamCounts.all || 0);
+  } else {
+    console.warn('❌ "All Teams" count element not found');
   }
   
   // Update individual team counts
   teams.forEach(team => {
     const countId = `count-${team.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
     const countElement = document.getElementById(countId);
+    const count = teamCounts[team.name] || 0;
+    
     if (countElement) {
-      countElement.textContent = teamCounts[team.name] || 0;
+      countElement.textContent = count;
+      console.log(`📊 Updated "${team.name}" count to:`, count);
+    } else {
+      console.warn(`❌ Count element not found for team "${team.name}", looking for ID:`, countId);
     }
   });
 }
