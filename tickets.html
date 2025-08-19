@@ -603,6 +603,35 @@
       background: var(--primary-gradient);
     }
 
+    /* Multi-select visual enhancements */
+    .filter-button.active {
+      position: relative;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .filter-button {
+      transition: all 0.3s ease;
+    }
+
+    /* Add a subtle indicator when multiple filters are active */
+    .filter-button.active:not([data-filter="all"])::before {
+      content: '✓';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: #28a745;
+      color: white;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
     .filter-count {
       display: inline-flex;
       align-items: center;
@@ -3146,7 +3175,7 @@ let allUsers = [];
 let allTeams = [];
 let assignedUser = null;
 let assignedTeam = null;
-let currentFilter = 'all';
+let selectedFilters = new Set(['all']); // Use Set for multiple status selections
 let currentTicket = null;
 
 // Navigation functions
@@ -3471,14 +3500,42 @@ function setupFilters() {
   const filterButtons = document.querySelectorAll('.filter-button');
   filterButtons.forEach(button => {
     button.addEventListener('click', () => {
-      // Update active state
-      filterButtons.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
+      const filterValue = button.dataset.filter;
       
-      // Update current filter
-      currentFilter = button.dataset.filter;
+      if (filterValue === 'all') {
+        // Clicking "All" clears all other selections and selects only "all"
+        selectedFilters.clear();
+        selectedFilters.add('all');
+        
+        // Update visual state - only "all" is active
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+      } else {
+        // Clicking a specific status
+        if (selectedFilters.has(filterValue)) {
+          // Already selected - remove it (toggle off)
+          selectedFilters.delete(filterValue);
+          button.classList.remove('active');
+        } else {
+          // Not selected - add it (toggle on)
+          selectedFilters.add(filterValue);
+          button.classList.add('active');
+          
+          // Remove "all" when selecting specific statuses
+          if (selectedFilters.has('all')) {
+            selectedFilters.delete('all');
+            document.querySelector('[data-filter="all"]').classList.remove('active');
+          }
+        }
+        
+        // If no filters selected, default back to "all"
+        if (selectedFilters.size === 0) {
+          selectedFilters.add('all');
+          document.querySelector('[data-filter="all"]').classList.add('active');
+        }
+      }
       
-      // Reload tickets with filter
+      // Reload tickets with new filter selection
       loadTickets();
     });
   });
@@ -3664,18 +3721,33 @@ async function loadTickets() {
     
     let tickets = Array.from(ticketMap.values());
     
-    // Apply filter
-    if (currentFilter === 'transferred') {
-      // Show tickets originally created by this user but now transferred away
-      tickets = tickets.filter(ticket => checkTicketTransferred(ticket, currentUser));
+    // Apply multiple status filters
+    if (selectedFilters.has('transferred')) {
+      // If "transferred" is one of the selected filters
+      if (selectedFilters.size === 1) {
+        // Only "transferred" selected - show only transferred tickets
+        tickets = tickets.filter(ticket => checkTicketTransferred(ticket, currentUser));
+      } else {
+        // "transferred" plus other statuses - show transferred tickets AND tickets with selected statuses
+        tickets = tickets.filter(ticket => {
+          const isTransferred = checkTicketTransferred(ticket, currentUser);
+          if (isTransferred) return true;
+          
+          // Check if ticket status matches any of the other selected filters (excluding 'transferred' and 'all')
+          const otherStatuses = Array.from(selectedFilters).filter(status => status !== 'transferred' && status !== 'all');
+          return otherStatuses.length > 0 && otherStatuses.includes(ticket.status);
+        });
+      }
     } else {
-      // For all other filters, exclude transferred-away tickets
-      if (currentFilter === 'all') {
+      // No "transferred" filter selected
+      if (selectedFilters.has('all')) {
+        // Show all non-transferred tickets
         tickets = tickets.filter(ticket => !checkTicketTransferred(ticket, currentUser));
       } else {
-        // Apply status filter and exclude transferred-away tickets
+        // Show tickets that match any of the selected statuses (excluding transferred tickets)
+        const statusesToShow = Array.from(selectedFilters);
         tickets = tickets.filter(ticket => 
-          ticket.status === currentFilter && !checkTicketTransferred(ticket, currentUser)
+          statusesToShow.includes(ticket.status) && !checkTicketTransferred(ticket, currentUser)
         );
       }
     }
