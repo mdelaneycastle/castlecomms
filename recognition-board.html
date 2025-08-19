@@ -46,9 +46,125 @@
 
     .recognition-header {
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
       position: relative;
       z-index: 10;
+    }
+
+    /* Team Tabs Styles */
+    .team-tabs-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .team-tab {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid #e1e5e9;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: var(--font-primary);
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--secondary-color);
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .team-tab:hover {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: var(--secondary-color);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .team-tab.active {
+      background: var(--secondary-color);
+      color: white;
+      border-color: var(--secondary-color);
+      box-shadow: 0 4px 15px rgba(69, 73, 78, 0.2);
+    }
+
+    .team-tab-count {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      color: inherit;
+      padding: 0.2rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    .team-tab.active .team-tab-count {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* League Table Styles */
+    .league-table-container {
+      position: fixed;
+      top: 50%;
+      right: 20px;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      max-width: 250px;
+      z-index: 100;
+    }
+
+    .league-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--secondary-color);
+      text-align: center;
+      margin-bottom: 1rem;
+      font-family: var(--font-primary);
+    }
+
+    .league-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      font-size: 0.85rem;
+    }
+
+    .league-item:last-child {
+      border-bottom: none;
+    }
+
+    .league-team-name {
+      font-weight: 500;
+      color: var(--text-dark);
+      flex: 1;
+      margin-right: 0.5rem;
+    }
+
+    .league-count {
+      background: var(--secondary-color);
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      min-width: 25px;
+      text-align: center;
+    }
+
+    .league-rank {
+      font-weight: 600;
+      color: var(--secondary-color);
+      margin-right: 0.5rem;
+      width: 20px;
     }
 
     .recognition-title {
@@ -627,6 +743,63 @@
         color: #6c757d;
         font-style: italic;
       }
+
+      /* Mobile Team Tabs */
+      .team-tabs-container {
+        padding: 0 0.5rem;
+        gap: 0.25rem;
+        justify-content: flex-start;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      .team-tabs-container::-webkit-scrollbar {
+        display: none;
+      }
+
+      .team-tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        min-width: 80px;
+        flex-shrink: 0;
+      }
+
+      .team-tab-count {
+        margin-left: 0.25rem;
+        padding: 0.1rem 0.3rem;
+        font-size: 0.7rem;
+      }
+
+      /* Mobile League Table */
+      .league-table-container {
+        position: static;
+        transform: none;
+        right: auto;
+        margin: 1rem 0;
+        max-width: none;
+        padding: 1rem;
+      }
+
+      .league-title {
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .league-item {
+        font-size: 0.8rem;
+        padding: 0.4rem 0;
+      }
+
+      .league-team-name {
+        font-size: 0.8rem;
+      }
+
+      .league-count {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.4rem;
+      }
     }
   </style>
 </head>
@@ -649,6 +822,11 @@
       <p class="recognition-subtitle">Celebrate achievements, share kudos, and spread positivity!</p>
     </div>
 
+    <!-- Team Tabs -->
+    <div class="team-tabs-container" id="teamTabs">
+      <!-- Team tabs will be populated by JavaScript -->
+    </div>
+
     <div class="add-note-section">
       <h2 class="add-note-title">✨ Add a Recognition Note</h2>
       <form class="note-form" id="noteForm">
@@ -659,6 +837,13 @@
           required
           maxlength="300"
         ></textarea>
+        
+        <div class="form-group">
+          <label for="teamSelect">Select Team Board:</label>
+          <select id="teamSelect" class="author-input" required>
+            <option value="">Select a team...</option>
+          </select>
+        </div>
         
         <div class="form-group">
           <label for="recognizedUser">Who is this recognition for?</label>
@@ -689,6 +874,14 @@
         </div>
       </div>
     </div>
+
+    <!-- League Table -->
+    <div class="league-table-container" id="leagueTable">
+      <h3 class="league-title">🏆 Team Rankings</h3>
+      <div id="leagueContent">
+        <!-- League table will be populated by JavaScript -->
+      </div>
+    </div>
   </div>
 </main>
 
@@ -710,6 +903,9 @@ let db;
 let currentUser = null;
 const colors = ['yellow', 'pink', 'blue', 'green', 'orange', 'purple'];
 const placedNotes = []; // Track placed note positions for collision avoidance
+let teams = []; // Store team data
+let currentTeam = 'all'; // Current selected team
+let teamCounts = {}; // Store recognition counts per team
 
 // Initialize Firebase and load notes
 document.addEventListener('DOMContentLoaded', async function() {
@@ -744,14 +940,87 @@ document.addEventListener('DOMContentLoaded', async function() {
       }
     });
     
+    await loadTeams();
     await loadNotes();
     await loadUsers();
     setupNoteForm();
+    setupTeamTabs();
+    updateLeagueTable();
   } catch (error) {
     console.error('Failed to initialize Recognition Board:', error);
     showError('Failed to connect to database. Please refresh the page.');
   }
 });
+
+// Load teams from team_contacts.json
+async function loadTeams() {
+  try {
+    const response = await fetch('team_contacts.json');
+    if (!response.ok) {
+      throw new Error('Failed to load teams');
+    }
+    teams = await response.json();
+    teams.sort((a, b) => a.team.localeCompare(b.team));
+    console.log('📋 Loaded', teams.length, 'teams');
+  } catch (error) {
+    console.error('Error loading teams:', error);
+    teams = [];
+    showError('Failed to load team data.');
+  }
+}
+
+// Setup team tabs
+function setupTeamTabs() {
+  const tabsContainer = document.getElementById('teamTabs');
+  if (!tabsContainer) return;
+
+  // Add "All Teams" tab
+  const allTab = document.createElement('div');
+  allTab.className = `team-tab ${currentTeam === 'all' ? 'active' : ''}`;
+  allTab.dataset.team = 'all';
+  allTab.innerHTML = `All Teams <span class="team-tab-count" id="count-all">0</span>`;
+  allTab.addEventListener('click', () => switchTeam('all'));
+  tabsContainer.appendChild(allTab);
+
+  // Add individual team tabs
+  teams.forEach(team => {
+    const tab = document.createElement('div');
+    tab.className = `team-tab ${currentTeam === team.team ? 'active' : ''}`;
+    tab.dataset.team = team.team;
+    tab.innerHTML = `${team.team} <span class="team-tab-count" id="count-${team.team.replace(/[^a-zA-Z0-9]/g, '-')}"}>0</span>`;
+    tab.addEventListener('click', () => switchTeam(team.team));
+    tabsContainer.appendChild(tab);
+  });
+
+  // Populate team dropdown in form
+  populateTeamDropdown();
+}
+
+// Populate team dropdown in form
+function populateTeamDropdown() {
+  const teamSelect = document.getElementById('teamSelect');
+  if (!teamSelect) return;
+
+  teams.forEach(team => {
+    const option = document.createElement('option');
+    option.value = team.team;
+    option.textContent = team.team;
+    teamSelect.appendChild(option);
+  });
+}
+
+// Switch team board
+function switchTeam(teamName) {
+  currentTeam = teamName;
+  
+  // Update active tab
+  document.querySelectorAll('.team-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.team === teamName);
+  });
+
+  // Reload notes for the selected team
+  loadNotes();
+}
 
 // Load all users using the same method as admin section
 let allUsers = [];
@@ -799,10 +1068,14 @@ function populateUserDropdown() {
 // Load all recognition notes from Firebase
 async function loadNotes() {
   try {
-    const snapshot = await db.collection('recognition-notes')
-      .orderBy('timestamp', 'desc')
-      .limit(50)
-      .get();
+    let query = db.collection('recognition-notes').orderBy('timestamp', 'desc').limit(100);
+    
+    // Filter by team if not showing all
+    if (currentTeam !== 'all') {
+      query = query.where('team', '==', currentTeam);
+    }
+    
+    const snapshot = await query.get();
     
     const container = document.getElementById('postItContainer');
     const loadingMessage = document.getElementById('loadingMessage');
@@ -818,6 +1091,11 @@ async function loadNotes() {
     
     // Clear previous positions tracking
     placedNotes.length = 0;
+    
+    // Calculate team counts from all notes
+    await calculateTeamCounts();
+    updateTabCounts();
+    updateLeagueTable();
     
     snapshot.docs.forEach((doc, index) => {
       const noteData = doc.data();
@@ -905,6 +1183,75 @@ function createPostItNote(noteData, index, docId = null) {
   `;
 }
 
+// Calculate team counts from all notes
+async function calculateTeamCounts() {
+  try {
+    const snapshot = await db.collection('recognition-notes').get();
+    teamCounts = { all: 0 };
+    
+    // Initialize team counts
+    teams.forEach(team => {
+      teamCounts[team.team] = 0;
+    });
+    
+    // Count notes by team
+    snapshot.docs.forEach(doc => {
+      const noteData = doc.data();
+      const team = noteData.team || 'Unknown';
+      teamCounts.all++;
+      if (teamCounts[team] !== undefined) {
+        teamCounts[team]++;
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error calculating team counts:', error);
+  }
+}
+
+// Update tab counts
+function updateTabCounts() {
+  // Update "All Teams" count
+  const allCountElement = document.getElementById('count-all');
+  if (allCountElement) {
+    allCountElement.textContent = teamCounts.all || 0;
+  }
+  
+  // Update individual team counts
+  teams.forEach(team => {
+    const countId = `count-${team.team.replace(/[^a-zA-Z0-9]/g, '-')}`;
+    const countElement = document.getElementById(countId);
+    if (countElement) {
+      countElement.textContent = teamCounts[team.team] || 0;
+    }
+  });
+}
+
+// Update league table
+function updateLeagueTable() {
+  const leagueContent = document.getElementById('leagueContent');
+  if (!leagueContent) return;
+  
+  // Sort teams by recognition count
+  const sortedTeams = teams.slice().sort((a, b) => {
+    const countA = teamCounts[a.team] || 0;
+    const countB = teamCounts[b.team] || 0;
+    return countB - countA;
+  });
+  
+  leagueContent.innerHTML = sortedTeams.map((team, index) => {
+    const count = teamCounts[team.team] || 0;
+    const rank = index + 1;
+    return `
+      <div class="league-item">
+        <span class="league-rank">#${rank}</span>
+        <span class="league-team-name" title="${team.team}">${team.team.length > 15 ? team.team.substring(0, 12) + '...' : team.team}</span>
+        <span class="league-count">${count}</span>
+      </div>
+    `;
+  }).join('');
+}
+
 // Setup form submission
 function setupNoteForm() {
   const form = document.getElementById('noteForm');
@@ -930,6 +1277,8 @@ function setupNoteForm() {
     e.preventDefault();
     
     const content = contentInput.value.trim();
+    const teamSelect = document.getElementById('teamSelect');
+    const selectedTeam = teamSelect.value;
     // Use current user's display name automatically
     const author = currentUser?.displayName || currentUser?.email || 'Anonymous';
     const selectedUser = recognizedUserSelect.value;
@@ -937,6 +1286,11 @@ function setupNoteForm() {
     
     if (!content) {
       showError('Please write a recognition message!');
+      return;
+    }
+    
+    if (!selectedTeam) {
+      showError('Please select a team board!');
       return;
     }
     
@@ -959,6 +1313,7 @@ function setupNoteForm() {
         content: content,
         author: author,
         recognizedFor: recognizedFor,
+        team: selectedTeam,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
       
@@ -966,6 +1321,7 @@ function setupNoteForm() {
       
       // Clear form
       contentInput.value = '';
+      teamSelect.value = '';
       recognizedUserSelect.value = '';
       otherUserInput.value = '';
       
