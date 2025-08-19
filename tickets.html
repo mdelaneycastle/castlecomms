@@ -2720,6 +2720,17 @@
     </div>
     
     <div class="ticket-modal-details">
+      <!-- Status Change Section -->
+      <div class="ticket-status-section">
+        <label for="ticket-status-select">Status:</label>
+        <select id="ticket-status-select" onchange="updateTicketStatus()">
+          <option value="open">Open</option>
+          <option value="in-progress">In Progress</option>
+          <option value="on-hold">On Hold</option>
+          <option value="resolved">Resolved</option>
+        </select>
+      </div>
+      
       <div class="ticket-detail-section">
         <h4 id="view-ticket-title">Ticket Title</h4>
         <div class="ticket-detail-meta">
@@ -2811,38 +2822,6 @@
           </div>
         </div>
       </div>
-      
-      <div class="ticket-status-section">
-        <label for="ticket-status-select">Status:</label>
-        <select id="ticket-status-select" onchange="updateTicketStatus()">
-          <option value="open">Open</option>
-          <option value="in-progress">In Progress</option>
-          <option value="on-hold">On Hold</option>
-          <option value="resolved">Resolved</option>
-        </select>
-      </div>
-      
-      <!-- Transfer Ticket Section -->
-      <div class="ticket-transfer-section">
-        <h4>🔄 Transfer Ticket</h4>
-        <div class="transfer-form">
-          <div class="transfer-team-selection">
-            <label for="transfer-team-select">Transfer to Team:</label>
-            <select id="transfer-team-select" class="form-select" onchange="handleTransferTeamSelection()">
-              <option value="">Choose a team...</option>
-            </select>
-          </div>
-          
-          <div class="transfer-reason">
-            <label for="transfer-reason-input">Reason for transfer:</label>
-            <textarea id="transfer-reason-input" class="form-textarea" placeholder="Please provide a reason for transferring this ticket..." rows="3"></textarea>
-          </div>
-          
-          <button onclick="transferTicket()" id="transfer-ticket-btn" class="transfer-button">
-            🔄 Transfer Ticket
-          </button>
-        </div>
-      </div>
     </div>
     
     <div class="ticket-messages-section">
@@ -2854,6 +2833,28 @@
       <div class="ticket-message-form">
         <textarea id="ticket-message-input" placeholder="Add a message to this ticket..." rows="3"></textarea>
         <button onclick="sendTicketMessage()" id="send-ticket-message-btn">Send Message</button>
+      </div>
+    </div>
+    
+    <!-- Transfer Ticket Section -->
+    <div class="ticket-transfer-section">
+      <h4>🔄 Transfer Ticket</h4>
+      <div class="transfer-form">
+        <div class="transfer-team-selection">
+          <label for="transfer-team-select">Transfer to Team:</label>
+          <select id="transfer-team-select" class="form-select" onchange="handleTransferTeamSelection()">
+            <option value="">Choose a team...</option>
+          </select>
+        </div>
+        
+        <div class="transfer-reason">
+          <label for="transfer-reason-input">Reason for transfer:</label>
+          <textarea id="transfer-reason-input" class="form-textarea" placeholder="Please provide a reason for transferring this ticket..." rows="3"></textarea>
+        </div>
+        
+        <button onclick="transferTicket()" id="transfer-ticket-btn" class="transfer-button">
+          🔄 Transfer Ticket
+        </button>
       </div>
     </div>
   </div>
@@ -3768,10 +3769,34 @@ async function loadTickets() {
     // Calculate counts for all categories AFTER all filtering is complete
     updateFilterCounts(tickets);
     
-    // Sort by creation date (newest first)
+    // Sort by last activity (newest first) - updatedAt, last message time, or creation date
     tickets.sort((a, b) => {
-      const aTime = a.createdAt?.toDate?.() || new Date(0);
-      const bTime = b.createdAt?.toDate?.() || new Date(0);
+      // Get the most recent activity timestamp for each ticket
+      const getLastActivity = (ticket) => {
+        let lastActivity = ticket.createdAt?.toDate?.() || new Date(0);
+        
+        // Check updatedAt field
+        if (ticket.updatedAt?.toDate) {
+          const updatedTime = ticket.updatedAt.toDate();
+          if (updatedTime > lastActivity) {
+            lastActivity = updatedTime;
+          }
+        }
+        
+        // Check last message time
+        if (ticket.messages && ticket.messages.length > 0) {
+          const lastMessage = ticket.messages[ticket.messages.length - 1];
+          const messageTime = lastMessage.timestamp?.toDate?.() || new Date(lastMessage.timestamp || 0);
+          if (messageTime > lastActivity) {
+            lastActivity = messageTime;
+          }
+        }
+        
+        return lastActivity;
+      };
+      
+      const aTime = getLastActivity(a);
+      const bTime = getLastActivity(b);
       return bTime - aTime;
     });
     
@@ -3794,14 +3819,38 @@ async function loadTickets() {
             <th>Assigned To</th>
             <th>Ticket Status</th>
             <th>Timer</th>
-            <th>Date Created</th>
+            <th>Date Modified</th>
           </tr>
         </thead>
         <tbody>
     `;
     
     const ticketRows = tickets.map(ticket => {
-      const createdDate = ticket.createdAt?.toDate?.() || new Date();
+      // Get the last modified date (last activity)
+      const getLastModified = (ticket) => {
+        let lastModified = ticket.createdAt?.toDate?.() || new Date();
+        
+        // Check updatedAt field
+        if (ticket.updatedAt?.toDate) {
+          const updatedTime = ticket.updatedAt.toDate();
+          if (updatedTime > lastModified) {
+            lastModified = updatedTime;
+          }
+        }
+        
+        // Check last message time
+        if (ticket.messages && ticket.messages.length > 0) {
+          const lastMessage = ticket.messages[ticket.messages.length - 1];
+          const messageTime = lastMessage.timestamp?.toDate?.() || new Date(lastMessage.timestamp || 0);
+          if (messageTime > lastModified) {
+            lastModified = messageTime;
+          }
+        }
+        
+        return lastModified;
+      };
+      
+      const lastModifiedDate = getLastModified(ticket);
       const isCreatedByMe = ticket.createdBy.uid === currentUser.uid;
       const isTransferred = checkTicketTransferred(ticket, currentUser);
       
@@ -3866,7 +3915,7 @@ async function loadTickets() {
           <td><div class="ticket-assignee">${assignmentText}</div></td>
           <td><div class="ticket-status ${displayStatus}">${statusText}</div></td>
           <td><div class="ticket-timer-cell">${getTimerDisplayForTicket(ticket)}</div></td>
-          <td><div class="ticket-created">${formatTimestamp(createdDate)}</div></td>
+          <td><div class="ticket-modified">${formatTimestamp(lastModifiedDate)}</div></td>
         </tr>
       `;
     }).join('');

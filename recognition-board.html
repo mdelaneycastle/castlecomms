@@ -839,6 +839,18 @@
         ></textarea>
         
         <div class="form-group">
+          <label for="fromUser">From (who is sending this recognition):</label>
+          <input 
+            type="text" 
+            class="author-input" 
+            id="fromUser" 
+            placeholder="Enter your name"
+            maxlength="50"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
           <label for="teamSelect">Select Team Board:</label>
           <select id="teamSelect" class="author-input" required>
             <option value="">Select a team...</option>
@@ -1338,8 +1350,9 @@ function setupNoteForm() {
     const content = contentInput.value.trim();
     const teamSelect = document.getElementById('teamSelect');
     const selectedTeam = teamSelect.value;
-    // Use current user's display name automatically
-    const author = currentUser?.displayName || currentUser?.email || 'Anonymous';
+    // Get author from manual input
+    const fromUserInput = document.getElementById('fromUser');
+    const author = fromUserInput.value.trim() || 'Anonymous';
     const selectedUser = recognizedUserSelect.value;
     const otherUser = otherUserInput.value.trim();
     
@@ -1350,6 +1363,11 @@ function setupNoteForm() {
     
     if (!selectedTeam) {
       showError('Please select a team board!');
+      return;
+    }
+    
+    if (!author || author === 'Anonymous') {
+      showError('Please enter who this recognition is from!');
       return;
     }
     
@@ -1380,6 +1398,7 @@ function setupNoteForm() {
       
       // Clear form
       contentInput.value = '';
+      fromUserInput.value = '';
       teamSelect.value = '';
       recognizedUserSelect.value = '';
       otherUserInput.value = '';
