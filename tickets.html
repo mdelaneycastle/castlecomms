@@ -3649,13 +3649,40 @@ function checkUserTicketAccess(ticket, user) {
 
 // Check if ticket was transferred away from user (for transferred filter)
 function checkTicketTransferred(ticket, user) {
-  // A ticket is only considered "transferred" if:
-  // 1. The user created it AND
-  // 2. There is actual transfer history (meaning it was transferred after creation)
+  // A ticket is considered "transferred" if:
+  // 1. There is transfer history AND
+  // 2. The user was previously involved with the ticket (either created it or was assigned to it)
   
-  if (ticket.createdBy.uid === user.uid && ticket.transferHistory && ticket.transferHistory.length > 0) {
-    // Check if the user was involved in any transfer (either as original assignee or in transfer chain)
+  if (!ticket.transferHistory || ticket.transferHistory.length === 0) {
+    return false;
+  }
+  
+  // Check if user created the ticket
+  if (ticket.createdBy.uid === user.uid) {
     return true;
+  }
+  
+  // Check if user was part of any team mentioned in the transfer history
+  for (const transfer of ticket.transferHistory) {
+    // Check 'from' assignment
+    if (transfer.from) {
+      if (transfer.from.type === 'team') {
+        // New format with teamId
+        if (transfer.from.teamId) {
+          const team = allTeams.find(t => t.id === transfer.from.teamId);
+          if (team && team.members && team.members.some(member => member.email === user.email)) {
+            return true;
+          }
+        }
+        // Legacy format with teamMembers
+        else if (transfer.from.teamMembers && transfer.from.teamMembers.some(member => member.email === user.email)) {
+          return true;
+        }
+      } else if (transfer.from.email === user.email) {
+        // Individual assignment
+        return true;
+      }
+    }
   }
   
   return false;
