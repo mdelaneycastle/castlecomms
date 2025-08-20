@@ -641,7 +641,7 @@ window.sharedComponents = {
     
     userOnlyElements.forEach(element => {
       const allowedEmail = element.getAttribute('data-user-only');
-      if (user && user.email === allowedEmail) {
+      if (user && user.email && user.email.toLowerCase() === allowedEmail.toLowerCase()) {
         element.style.display = '';
       } else {
         element.style.display = 'none';
