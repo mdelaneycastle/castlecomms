@@ -193,14 +193,16 @@
       width: var(--card-w);
       height: var(--card-h);
       margin: auto;
-      background: var(--card-background);
+      background: var(--card-background) url('businesstemplate.jpg') center/cover no-repeat;
       border: 1px solid var(--border-color);
       border-radius: 14px;
       box-shadow: var(--shadow-medium);
-      padding: 18px 18px 16px 70px;
+      padding: 40px 40px 60px 40px;
       transform-style: preserve-3d;
       backface-visibility: hidden;
-      display: grid; grid-template-rows: auto 1fr auto;
+      display: grid; 
+      grid-template-rows: 1fr auto auto auto 1fr;
+      gap: 8px;
       transition: transform 450ms cubic-bezier(.2,.7,.2,1), opacity 300ms ease; 
       will-change: transform, opacity;
       opacity: 1;
@@ -209,26 +211,52 @@
     .card.hidden { opacity: 0; pointer-events: none; }
 
     .card::before {
-      /* Punch holes */
+      /* Subtle overlay for text readability */
       content: "";
-      position: absolute; left: 18px; top: 26px; bottom: 26px; width: 28px;
-      background:
-        radial-gradient(circle at 50% 16%, var(--accent-2) 8px, transparent 9px) top center/100% 28% no-repeat,
-        radial-gradient(circle at 50% 84%, var(--accent-2) 8px, transparent 9px) bottom center/100% 28% no-repeat,
-        linear-gradient(90deg, rgba(216, 209, 197, 0.2), rgba(216, 209, 197, 0.05));
-      border-right: 1px dashed var(--border-color);
-      opacity: 0.9;
+      position: absolute; 
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(240, 237, 233, 0.1);
+      border-radius: 14px;
     }
 
     .card .tag {
-      position: absolute; right: 18px; top: 16px; padding: 6px 10px; border-radius: 8px;
-      background: linear-gradient(90deg, var(--tertiary-color), var(--accent-color));
-      color: var(--surface-color); font-weight: 800; font-size: 12px; letter-spacing: 0.5px;
+      position: relative;
+      align-self: start;
+      color: #666;
+      font-weight: 600; 
+      font-size: 14px; 
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 2;
+      background: none;
+      padding: 0;
+      border-radius: 0;
     }
 
-    .card h3 { margin: 0 0 8px; font-size: 22px; color: var(--secondary-color); }
-    .meta { color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .card h3 { 
+      margin: 0; 
+      font-size: 42px; 
+      color: #333; 
+      font-style: italic;
+      font-weight: 300;
+      line-height: 1.1;
+      z-index: 2;
+      position: relative;
+    }
+    .card .company { 
+      color: #666; 
+      font-size: 16px; 
+      font-weight: 500;
+      z-index: 2;
+      position: relative;
+    }
+    .meta { 
+      color: #666; 
+      font-size: 14px; 
+      line-height: 1.4;
+      z-index: 2;
+      position: relative;
+    }
 
     .card .footer { 
       display: flex; 
@@ -385,19 +413,13 @@
 
   <template id="cardTemplate">
     <article class="card" role="group" aria-roledescription="Address card">
-      <div class="tag"></div>
-      <header>
-        <h3 class="name"></h3>
-        <div class="meta email"></div>
-        <div class="meta phone"></div>
-      </header>
       <div></div>
-      <div class="footer">
-        <span class="badge created"></span>
-        <span class="pill">
-          <span class="initials" title="Initials"></span>
-          <a class="mailto" target="_blank" rel="noopener noreferrer">Email</a>
-        </span>
+      <h3 class="name"></h3>
+      <div class="tag"></div>
+      <div class="company">Castle Fine Art</div>
+      <div class="meta contact-info">
+        <div class="phone"></div>
+        <div class="email"></div>
       </div>
     </article>
   </template>
@@ -465,17 +487,9 @@
       function createCard(contact){
         const node = tpl.content.firstElementChild.cloneNode(true);
         node.querySelector('.name').textContent = contact.name || 'Unnamed';
-        node.querySelector('.email').textContent = contact.email || '—';
-        node.querySelector('.phone').textContent = contact.phone || '—';
+        node.querySelector('.email').textContent = contact.email || '';
+        node.querySelector('.phone').textContent = contact.phone || '';
         node.querySelector('.tag').textContent = (contact.label || tagFor(contact.name));
-        node.querySelector('.created').textContent = 'Added ' + fmtDate(contact.createdAt);
-        node.querySelector('.initials').textContent = initials(contact.name);
-        const mail = node.querySelector('.mailto');
-        if(contact.email){
-          mail.href = 'mailto:' + contact.email;
-        } else {
-          mail.remove();
-        }
         return node;
       }
 
