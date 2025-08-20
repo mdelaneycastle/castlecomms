@@ -27,6 +27,7 @@
       --danger: #dc3545;
       --card-w: 520px;
       --card-h: 280px;
+      --card-background: #e5ddcb;
     }
 
     * { box-sizing: border-box; }
@@ -176,13 +177,14 @@
     .search-top input {
       width: 100%;
       background: white;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--border-color);
       border-radius: 10px;
       padding: 12px 16px;
       font-size: 14px;
       color: var(--text);
       outline: none;
       transition: border-color 160ms ease, box-shadow 160ms ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .search-top input:focus {
@@ -492,7 +494,12 @@
         <div class="ring" id="ring"></div>
         <div class="controls">
           <div class="circle-btn" id="jumpA" title="Jump to A">A</div>
+          <div class="circle-btn" id="jumpB" title="Jump to B">B</div>
+          <div class="circle-btn" id="jumpG" title="Jump to G">G</div>
+          <div class="circle-btn" id="jumpL" title="Jump to L">L</div>
           <div class="circle-btn" id="jumpM" title="Jump to M">M</div>
+          <div class="circle-btn" id="jumpS" title="Jump to S">S</div>
+          <div class="circle-btn" id="jumpW" title="Jump to W">W</div>
           <div class="circle-btn" id="jumpZ" title="Jump to Z">Z</div>
         </div>
       </div>
@@ -570,7 +577,12 @@
       const cursorIndexLabel = document.getElementById('cursorIndex');
       const tpl = document.getElementById('cardTemplate');
       const jumpA = document.getElementById('jumpA');
+      const jumpB = document.getElementById('jumpB');
+      const jumpG = document.getElementById('jumpG');
+      const jumpL = document.getElementById('jumpL');
       const jumpM = document.getElementById('jumpM');
+      const jumpS = document.getElementById('jumpS');
+      const jumpW = document.getElementById('jumpW');
       const jumpZ = document.getElementById('jumpZ');
 
       const STORAGE_KEY = 'castleAddressBook_v1';
@@ -784,7 +796,12 @@
       q.addEventListener('keydown', e=>{ if(e.key==='Escape'){ q.value=''; applyFilter(''); }});
 
       jumpA.addEventListener('click', ()=> jumpToLetter('A'));
+      jumpB.addEventListener('click', ()=> jumpToLetter('B'));
+      jumpG.addEventListener('click', ()=> jumpToLetter('G'));
+      jumpL.addEventListener('click', ()=> jumpToLetter('L'));
       jumpM.addEventListener('click', ()=> jumpToLetter('M'));
+      jumpS.addEventListener('click', ()=> jumpToLetter('S'));
+      jumpW.addEventListener('click', ()=> jumpToLetter('W'));
       jumpZ.addEventListener('click', ()=> jumpToLetter('Z'));
 
       function jumpToLetter(letter){
