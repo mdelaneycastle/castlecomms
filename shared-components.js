@@ -338,6 +338,7 @@ window.sharedComponents = {
     const closeBtn = document.getElementById("close-btn");
     const sidebar = document.getElementById("sidebar");
     const signoutBtn = document.getElementById("signout-btn");
+    const toggleBtn = document.getElementById("menu-toggle");
     
     if (closeBtn && sidebar) {
       closeBtn.onclick = () => sidebar.classList.remove("show");
@@ -354,7 +355,7 @@ window.sharedComponents = {
     // Close sidebar when clicking outside
     document.addEventListener('click', (e) => {
       if (sidebar && sidebar.classList.contains('show')) {
-        if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+        if (!sidebar.contains(e.target) && toggleBtn && !toggleBtn.contains(e.target)) {
           sidebar.classList.remove('show');
         }
       }

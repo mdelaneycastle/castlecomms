@@ -156,7 +156,13 @@ service cloud.firestore {
          && assignedTo.email is string
          && assignedTo.name is string)
         ||
-        // Team assignment
+        // Team assignment (new format with teamId)
+        (assignedTo.type == 'team'
+         && assignedTo.keys().hasAll(['type', 'teamName', 'teamId'])
+         && assignedTo.teamName is string
+         && assignedTo.teamId is string)
+        ||
+        // Team assignment (legacy format with teamMembers)
         (assignedTo.type == 'team'
          && assignedTo.keys().hasAll(['type', 'teamName', 'teamMembers'])
          && assignedTo.teamName is string
@@ -185,8 +191,9 @@ service cloud.firestore {
         && newData.description == oldData.description
         && newData.category == oldData.category
         && newData.createdBy == oldData.createdBy
-        && newData.assignedTo == oldData.assignedTo
-        && newData.createdAt == oldData.createdAt;
+        && newData.createdAt == oldData.createdAt
+        // Allow assignedTo to change for transfers, but validate the new assignment
+        && (!('assignedTo' in newData) || validateTicketAssignment(newData.assignedTo));
     }
     
     // Communications rules - all authenticated users can read, only admins can write
