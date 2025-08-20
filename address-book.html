@@ -278,20 +278,34 @@
     .knob { 
       position: absolute; width: 120px; height: 120px; border-radius: 50%; 
       top: 50%; transform: translateY(-50%);
-      background: radial-gradient(circle at 35% 35%, var(--card-background), var(--accent-color));
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-medium);
+      background: var(--surface-color);
+      border: 2px solid var(--border-color);
+      box-shadow: var(--shadow-heavy);
       display: grid; place-items: center; color: var(--text); font-weight: 700;
       user-select: none;
+      cursor: pointer;
+      z-index: 10;
     }
     .knob.left { left: -60px; }
     .knob.right { right: -60px; }
     .knob button { 
       background: transparent; 
       color: var(--text); 
+      border: none;
       box-shadow: none; 
-      padding: 0; 
-      font-size: 22px; 
+      padding: 8px; 
+      font-size: 24px; 
+      cursor: pointer;
+      border-radius: 50%;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .knob:hover {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: var(--shadow-heavy);
     }
 
     /* Cards ring */
@@ -554,7 +568,6 @@
       const nextBtn = document.getElementById('next');
       const cursorIndexLabel = document.getElementById('cursorIndex');
       const tpl = document.getElementById('cardTemplate');
-      const detail = document.getElementById('detail');
       const jumpA = document.getElementById('jumpA');
       const jumpM = document.getElementById('jumpM');
       const jumpZ = document.getElementById('jumpZ');
@@ -626,7 +639,6 @@
           div.textContent = 'Your address book is empty. Add a contact or load Castle staff.';
           ring.appendChild(div);
           cursorIndexLabel.textContent = '0 / 0';
-          detail.style.display = 'none';
           return;
         }
 
@@ -781,20 +793,8 @@
       }
 
       function showDetail(){
-        const list = STATE.filtered.length ? STATE.filtered : STATE.contacts;
-        if(!list.length){ detail.style.display = 'none'; detail.innerHTML = ''; return; }
-        const c = list[STATE.cursor] || {};
-        detail.style.display = 'grid';
-        const phoneHref = c.phone ? 'tel:' + String(c.phone).split(' ').join('') : '';
-        detail.innerHTML =
-          '<div>'+
-            '<div class="name">' + (c.name || 'Unnamed') + '</div>'+
-            '<div class="meta">' + (c.email || '—') + ' · ' + (c.phone || '—') + '</div>'+
-          '</div>'+
-          '<div class="actions">' +
-            (c.email ? '<a class="btn" href="mailto:' + c.email + '">Email</a>' : '') +
-            (c.phone ? '<a class="btn" href="' + phoneHref + '">Call</a>' : '') +
-          '</div>';
+        // Detail functionality removed - this function now does nothing
+        return;
       }
 
       function relIndex(i, c, N){
