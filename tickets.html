@@ -3624,8 +3624,19 @@ function checkUserTicketAccess(ticket, user) {
   }
   
   // Check if assigned to a team that user is a member of
-  if (ticket.assignedTo.type === 'team' && ticket.assignedTo.teamMembers) {
-    return ticket.assignedTo.teamMembers.some(member => member.email === user.email);
+  if (ticket.assignedTo.type === 'team') {
+    // New format with teamId - look up team in allTeams
+    if (ticket.assignedTo.teamId) {
+      const team = allTeams.find(t => t.id === ticket.assignedTo.teamId);
+      if (team && team.members) {
+        return team.members.some(member => member.email === user.email);
+      }
+    }
+    
+    // Legacy format with teamMembers directly in assignedTo
+    if (ticket.assignedTo.teamMembers) {
+      return ticket.assignedTo.teamMembers.some(member => member.email === user.email);
+    }
   }
   
   // Legacy tickets (before team system) - check direct email assignment
@@ -3663,8 +3674,19 @@ function checkUserCanManageTicket(ticket, user) {
   }
   
   // Check if assigned to a team that user is a member of
-  if (ticket.assignedTo.type === 'team' && ticket.assignedTo.teamMembers) {
-    return ticket.assignedTo.teamMembers.some(member => member.email === user.email);
+  if (ticket.assignedTo.type === 'team') {
+    // New format with teamId - look up team in allTeams
+    if (ticket.assignedTo.teamId) {
+      const team = allTeams.find(t => t.id === ticket.assignedTo.teamId);
+      if (team && team.members) {
+        return team.members.some(member => member.email === user.email);
+      }
+    }
+    
+    // Legacy format with teamMembers directly in assignedTo
+    if (ticket.assignedTo.teamMembers) {
+      return ticket.assignedTo.teamMembers.some(member => member.email === user.email);
+    }
   }
   
   // Legacy tickets (before team system) - check direct email assignment
