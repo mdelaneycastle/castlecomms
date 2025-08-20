@@ -262,9 +262,7 @@
       display: grid;
       place-items: center;
       border-radius: 16px;
-      background: var(--panel);
       border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-heavy);
     }
 
     /* Spindle */
@@ -387,6 +385,12 @@
       z-index: 2;
       position: relative;
     }
+    .meta.contact-info {
+      background: none;
+      border-radius: 0;
+      padding: 0;
+      border-left: none;
+    }
     .meta .phone, .meta .email {
       margin-bottom: 2px;
     }
@@ -431,32 +435,6 @@
       font-size: 12px; letter-spacing: 0.4px; 
     }
 
-    /* Detail banner below the wheel */
-    .detail {
-      position: absolute;
-      bottom: 58px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(640px, 92%);
-      background: var(--card-background);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 12px 14px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-      box-shadow: var(--shadow-medium);
-      font-size: 14px;
-    }
-    .detail .name { font-size: 16px; font-weight: 700; color: var(--secondary-color); }
-    .detail a { color: var(--accent); text-decoration: none; }
-    .detail .actions { display: flex; gap: 8px; }
-    .detail .btn { 
-      padding: 6px 10px; border: 1px solid var(--border-color); 
-      border-radius: 999px; background: var(--card-background); 
-      color: var(--text); font-size: 12px; cursor: pointer; 
-    }
 
     .page-footer { 
       padding: 4px 20px 16px; 
@@ -479,7 +457,7 @@
 <div id="sidebar-container"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-  <header class="page-header">
+  <header>
     <h1>📇 Address Book</h1>
     <div class="credits">Castle Comms Staff Directory • Use ⬅️ ➡️ keys</div>
   </header>
