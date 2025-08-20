@@ -61,9 +61,9 @@
     }
 
     .app {
-      display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 0 20px 20px;
       min-height: 0;
     }
@@ -134,8 +134,126 @@
 
     .search { margin-top: 12px; display: grid; gap: 8px; }
 
+    /* Controls and Search */
+    .controls-top {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    
+    .add-contact-btn {
+      background: var(--accent);
+      color: var(--surface-color);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: var(--shadow-light);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    
+    .add-contact-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-medium);
+    }
+    
+    .search-bottom {
+      margin-top: 20px;
+      text-align: center;
+      max-width: 400px;
+    }
+    
+    .search-bottom label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    
+    .search-bottom input {
+      width: 100%;
+      background: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+    
+    .search-bottom input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(69, 73, 78, 0.15);
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+      background: var(--surface-color);
+      margin: 5% auto;
+      padding: 0;
+      border-radius: 16px;
+      width: min(480px, 90%);
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-heavy);
+      position: relative;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .modal-header h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--secondary-color);
+    }
+    
+    .close {
+      color: var(--muted);
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 1;
+    }
+    
+    .close:hover {
+      color: var(--text);
+    }
+    
+    .modal form {
+      padding: 20px 24px 24px;
+    }
+
     /* Right: Rolodex */
-    .stage-wrap { position: relative; min-height: 0; }
+    .stage-wrap { 
+      position: relative; 
+      min-height: 0; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
     .rolodex {
       position: relative;
       height: min(68vh, 560px);
@@ -193,7 +311,7 @@
       width: var(--card-w);
       height: var(--card-h);
       margin: auto;
-      background: url("businesstemplate.jpg") center/contain no-repeat, #BFB5A7;
+      background: url("businesstemplate.jpg") center/contain no-repeat, #c2bcad;
       border: 1px solid #A89B8C;
       border-radius: 8px;
       box-shadow: var(--shadow-medium);
@@ -367,8 +485,43 @@
   </header>
 
   <main class="app">
-    <section class="panel" aria-label="Add Contact">
-      <h2>Add a contact</h2>
+    <section class="stage-wrap">
+      <div class="controls-top">
+        <button id="addContactBtn" class="add-contact-btn">+ Add Contact</button>
+      </div>
+      
+      <div class="rolodex" aria-live="polite">
+        <div class="index" id="cursorIndex">0 / 0</div>
+        <div class="spindle" aria-hidden="true"></div>
+        <div class="knob left" title="Previous">
+          <button type="button" id="prev" aria-label="Previous card">◀</button>
+        </div>
+        <div class="knob right" title="Next">
+          <button type="button" id="next" aria-label="Next card">▶</button>
+        </div>
+        <div class="ring" id="ring"></div>
+        <div class="detail" id="detail" aria-live="polite"></div>
+        <div class="controls">
+          <div class="circle-btn" id="jumpA" title="Jump to A">A</div>
+          <div class="circle-btn" id="jumpM" title="Jump to M">M</div>
+          <div class="circle-btn" id="jumpZ" title="Jump to Z">Z</div>
+        </div>
+      </div>
+      
+      <div class="search-bottom">
+        <label for="q">Quick find</label>
+        <input id="q" type="text" placeholder="Search by name, email, phone or department... (Esc to clear)" />
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div id="contactModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add a contact</h2>
+        <span class="close" id="closeModal">&times;</span>
+      </div>
       <form id="contactForm">
         <div>
           <label for="name">Full name</label>
@@ -394,37 +547,9 @@
           <button class="danger" id="clearAll" type="button" title="Clear all contacts">Clear All</button>
         </div>
       </form>
+    </div>
+  </div>
 
-      <div class="search">
-        <label for="q">Quick find</label>
-        <input id="q" type="text" placeholder="Search by name, email, phone or department... (Esc to clear)" />
-      </div>
-    </section>
-
-    <section class="stage-wrap">
-      <div class="rolodex" aria-live="polite">
-        <div class="index" id="cursorIndex">0 / 0</div>
-        <div class="spindle" aria-hidden="true"></div>
-        <div class="knob left" title="Previous">
-          <button type="button" id="prev" aria-label="Previous card">◀</button>
-        </div>
-        <div class="knob right" title="Next">
-          <button type="button" id="next" aria-label="Next card">▶</button>
-        </div>
-        <div class="ring" id="ring"></div>
-        <div class="detail" id="detail" aria-live="polite"></div>
-        <div class="controls">
-          <div class="circle-btn" id="jumpA" title="Jump to A">A</div>
-          <div class="circle-btn" id="jumpM" title="Jump to M">M</div>
-          <div class="circle-btn" id="jumpZ" title="Jump to Z">Z</div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="page-footer">
-    Tip: Use ← / → keys to navigate cards. Click the side knobs or use mouse wheel to browse contacts.
-  </footer>
 
   <template id="cardTemplate">
     <article class="card" role="group" aria-roledescription="Address card">
@@ -614,6 +739,26 @@
         setCursor(0);
       }
 
+      // Modal functionality
+      const modal = document.getElementById('contactModal');
+      const addContactBtn = document.getElementById('addContactBtn');
+      const closeModal = document.getElementById('closeModal');
+      
+      addContactBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+        document.getElementById('name').focus();
+      });
+      
+      closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+      
+      window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+
       // Init
       STATE.contacts = sortContacts(load());
       render();
@@ -629,7 +774,7 @@
         if(!String(name).trim()) { alert('Please enter a name.'); return; }
         addContact({name, email, phone, label});
         form.reset();
-        document.getElementById('name').focus();
+        modal.style.display = 'none';
       });
 
       document.getElementById('clearAll').addEventListener('click', ()=>{
