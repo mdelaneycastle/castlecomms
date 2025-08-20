@@ -135,15 +135,15 @@
     .search { margin-top: 12px; display: grid; gap: 8px; }
 
     /* Controls and Search */
-    .controls-top {
+    .controls-bottom {
       display: flex;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-top: 20px;
     }
     
     .add-contact-btn {
-      background: var(--accent);
-      color: var(--surface-color);
+      background: #d8d1c5;
+      color: var(--text);
       border: none;
       padding: 12px 24px;
       border-radius: 10px;
@@ -159,13 +159,13 @@
       box-shadow: var(--shadow-medium);
     }
     
-    .search-bottom {
-      margin-top: 20px;
+    .search-top {
+      margin-bottom: 20px;
       text-align: center;
       max-width: 400px;
     }
     
-    .search-bottom label {
+    .search-top label {
       display: block;
       margin-bottom: 8px;
       font-size: 14px;
@@ -173,7 +173,7 @@
       font-weight: 600;
     }
     
-    .search-bottom input {
+    .search-top input {
       width: 100%;
       background: var(--surface-color);
       border: 1px solid var(--border-color);
@@ -185,7 +185,7 @@
       transition: border-color 160ms ease, box-shadow 160ms ease;
     }
     
-    .search-bottom input:focus {
+    .search-top input:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(69, 73, 78, 0.15);
     }
@@ -457,15 +457,12 @@
 <div id="sidebar-container"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-  <header>
-    <h1>📇 Address Book</h1>
-    <div class="credits">Castle Comms Staff Directory • Use ⬅️ ➡️ keys</div>
-  </header>
 
   <main class="app">
     <section class="stage-wrap">
-      <div class="controls-top">
-        <button id="addContactBtn" class="add-contact-btn">+ Add Contact</button>
+      <div class="search-top">
+        <label for="q">Quick find</label>
+        <input id="q" type="text" placeholder="Search by name, email, phone or department... (Esc to clear)" />
       </div>
       
       <div class="rolodex" aria-live="polite">
@@ -478,7 +475,6 @@
           <button type="button" id="next" aria-label="Next card">▶</button>
         </div>
         <div class="ring" id="ring"></div>
-        <div class="detail" id="detail" aria-live="polite"></div>
         <div class="controls">
           <div class="circle-btn" id="jumpA" title="Jump to A">A</div>
           <div class="circle-btn" id="jumpM" title="Jump to M">M</div>
@@ -486,9 +482,8 @@
         </div>
       </div>
       
-      <div class="search-bottom">
-        <label for="q">Quick find</label>
-        <input id="q" type="text" placeholder="Search by name, email, phone or department... (Esc to clear)" />
+      <div class="controls-bottom">
+        <button id="addContactBtn" class="add-contact-btn">+ Add Contact</button>
       </div>
     </section>
   </main>
@@ -521,7 +516,6 @@
         </div>
         <div class="actions">
           <button type="submit">Add to Address Book</button>
-          <button class="secondary" id="loadStaff" type="button">Load Castle Staff</button>
           <button class="danger" id="clearAll" type="button" title="Clear all contacts">Clear All</button>
         </div>
       </form>
@@ -739,7 +733,13 @@
 
       // Init
       STATE.contacts = sortContacts(load());
-      render();
+      
+      // Auto-load castle staff if no contacts exist
+      if (STATE.contacts.length === 0) {
+        loadCastleStaff();
+      } else {
+        render();
+      }
 
       // Events
       form.addEventListener('submit', (e)=>{
@@ -764,11 +764,6 @@
         }
       });
 
-      document.getElementById('loadStaff').addEventListener('click', ()=>{
-        if(confirm('Load Castle staff directory? This will replace any existing contacts.')){
-          loadCastleStaff();
-        }
-      });
 
       prevBtn.addEventListener('click', prev);
       nextBtn.addEventListener('click', next);
