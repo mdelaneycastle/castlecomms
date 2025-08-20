@@ -4086,7 +4086,21 @@ async function openTicket(ticketId) {
     // Display assignment info (individual or team)
     let assignmentDisplayText = 'Assigned to: ';
     if (ticketData.assignedTo.type === 'team') {
-      assignmentDisplayText += `${ticketData.assignedTo.teamName} team (${ticketData.assignedTo.teamMembers.length} members)`;
+      let teamMemberCount = '';
+      
+      // New format with teamId - look up team in allTeams
+      if (ticketData.assignedTo.teamId) {
+        const team = allTeams.find(t => t.id === ticketData.assignedTo.teamId);
+        if (team && team.members) {
+          teamMemberCount = ` (${team.members.length} members)`;
+        }
+      } 
+      // Legacy format with teamMembers directly in assignedTo
+      else if (ticketData.assignedTo.teamMembers) {
+        teamMemberCount = ` (${ticketData.assignedTo.teamMembers.length} members)`;
+      }
+      
+      assignmentDisplayText += `${ticketData.assignedTo.teamName} team${teamMemberCount}`;
     } else {
       assignmentDisplayText += ticketData.assignedTo.name || ticketData.assignedTo.email;
     }
