@@ -3375,9 +3375,11 @@ let allTeams = [];
 
 // Edit Ticket Functionality - Defined early to be available for onclick handlers
 async function editTicket(ticketId) {
+  console.log('🔍 editTicket called with ID:', ticketId);
   try {
     // Check if modal is already open
     if (document.getElementById('edit-ticket-modal')) {
+      console.log('⚠️ Modal already open, returning');
       return; // Don't open multiple modals
     }
     
@@ -3484,6 +3486,9 @@ async function editTicket(ticketId) {
     alert('Failed to load ticket for editing. Please try again.');
   }
 }
+
+// Make function globally available immediately after definition
+window.editTicket = editTicket;
 
 async function saveTicketChanges(ticketId) {
   let originalText = 'Save Changes';
