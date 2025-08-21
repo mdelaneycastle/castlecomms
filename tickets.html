@@ -3627,8 +3627,35 @@ async function saveTicketChanges(ticketId) {
     // Try to update COFT data directly
     if (changes.length > 0) {
       try {
+        // Update the coftData field
         await db.collection('tickets').doc(ticketId).update(updateData);
         console.log('✅ COFT data updated successfully');
+        
+        // Also update title and description to reflect changes
+        const updatedTitle = `COFT Ticket - SO: ${soNumber} - ${client}`;
+        
+        // Ensure all required fields for buildCOFTDescription are present
+        const completeNewCoftData = {
+          ...newCoftData,
+          coftType: currentCoftData.coftType || 'order-chasing',
+          deliveryMethod: currentCoftData.deliveryMethod || 'Unknown',
+          clientAware: currentCoftData.clientAware || 'Unknown',
+          etaDiscussed: currentCoftData.etaDiscussed || '',
+          ticketReason: currentCoftData.ticketReason || 'Data updated via edit',
+          specificDate: currentCoftData.specificDate || '',
+          photos: currentCoftData.photos || [],
+          additionalInfo: currentCoftData.additionalInfo || ''
+        };
+        
+        const updatedDescription = buildCOFTDescription(completeNewCoftData);
+        
+        await db.collection('tickets').doc(ticketId).update({
+          title: updatedTitle,
+          description: updatedDescription,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log('✅ Title and description updated successfully');
         
         // Add system message about the changes
         const editMessage = {
