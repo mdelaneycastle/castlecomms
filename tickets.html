@@ -285,21 +285,28 @@
       padding: 0.5rem;
     }
 
-    /* Make COFT dropdowns taller to show more options */
+    
+
+    #modal-ticket-category,
+    #modal-assign-team,
     #coft-delivery-method,
-    #coft-ticket-reason,
-    #assign-team-select {
-      height: 120px; /* Double the height for better visibility */
-      overflow-y: auto;
+    #coft-ticket-reason {
+      height: auto;             /* let them fit text */
+      min-height: 32px;         /* give a small minimum */
+      font-size: 0.9rem;        /* shrink text if needed */
+      padding: 0.25rem 0.5rem;  /* tighten padding */
+      max-width: 33%;           /* about a third of container width */
+      display: inline-block;    /* stops stretching full width */
     }
 
     /* Make modal dropdowns taller too */
-    #modal-assign-team,
-    #modal-ticket-category {
-      height: 80px; /* Smaller height for better balance */
+    #modal-assign-team {
+      height: 40px; /* Half of previous 80px */
       overflow-y: auto;
       padding: 0.25rem !important; /* Small padding for readability */
     }
+
+    
 
     /* Ticket Counter Display - Simple Left Aligned */
     .ticket-counter-display {
