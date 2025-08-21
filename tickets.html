@@ -3385,27 +3385,19 @@ async function editTicket(ticketId) {
           </div>
           
           <div style="padding: 1.5rem;">
-            <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; margin-bottom: 20px; border-radius: 6px;">
-              <h4 style="color: #856404; margin: 0 0 10px 0;">📝 Note about ticket editing:</h4>
-              <p style="color: #856404; margin: 0; font-size: 14px;">
-                Due to security restrictions, changes to title, description, and category will be recorded as messages in the ticket history. 
-                Only the status can be directly updated on the ticket.
-              </p>
-            </div>
-            
             <form id="edit-ticket-form">
               <div class="form-group">
-                <label for="edit-title">Title: <small>(changes recorded as messages)</small></label>
+                <label for="edit-title">Title:</label>
                 <input type="text" id="edit-title" value="${(ticket.title || '').replace(/"/g, '&quot;')}" required>
               </div>
               
               <div class="form-group">
-                <label for="edit-description">Description: <small>(changes recorded as messages)</small></label>
+                <label for="edit-description">Description:</label>
                 <textarea id="edit-description" rows="8">${(ticket.description || '').replace(/"/g, '&quot;')}</textarea>
               </div>
               
               <div class="form-group">
-                <label for="edit-category">Category: <small>(changes recorded as messages)</small></label>
+                <label for="edit-category">Category:</label>
                 <select id="edit-category" required>
                   <option value="Client Order Fulfilment Team/Group" ${ticket.category === 'Client Order Fulfilment Team/Group' ? 'selected' : ''}>Client Order Fulfilment Team/Group</option>
                   <option value="IT Support" ${ticket.category === 'IT Support' ? 'selected' : ''}>IT Support</option>
@@ -3416,7 +3408,7 @@ async function editTicket(ticketId) {
               </div>
               
               <div class="form-group">
-                <label for="edit-status">Status: <small>(directly updates ticket)</small></label>
+                <label for="edit-status">Status:</label>
                 <select id="edit-status" required>
                   <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
                   <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
@@ -3485,32 +3477,19 @@ async function saveTicketChanges(ticketId) {
       saveBtn.disabled = true;
     }
     
-    // Try updating only fields that are likely allowed by security rules
-    // Based on successful updateTicketStatus, only status and updatedAt might be allowed
+    // Try updating all fields directly first - let's see what specific error we get
     const updateData = {
+      title: title,
+      description: description,
+      category: category,
       status: status,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
-    // Execute the basic ticket update (only status change)
+    // Execute the ticket update with all fields
     await db.collection('tickets').doc(ticketId).update(updateData);
     
-    // Add description update as a message if it's different
-    if (currentTicket && description !== (currentTicket.description || '')) {
-      await addSystemMessage(`Description updated: ${description}`);
-    }
-    
-    // Add title update as a message if it's different  
-    if (currentTicket && title !== (currentTicket.title || '')) {
-      await addSystemMessage(`Title updated: ${title}`);
-    }
-    
-    // Add category update as a message if it's different
-    if (currentTicket && category !== (currentTicket.category || '')) {
-      await addSystemMessage(`Category changed to: ${category}`);
-    }
-    
-    // Add system message about the edit using the same pattern as updateTicketStatus
+    // Add system message about the edit
     const editMessage = `Ticket edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}`;
     await addSystemMessage(editMessage);
     
@@ -4045,8 +4024,14 @@ function checkTicketTransferred(ticket, user) {
   // A ticket is considered "transferred" if:
   // 1. There is transfer history AND
   // 2. The user was previously involved with the ticket AND
-  // 3. For complete transfers: ticket is no longer assigned to user's team
-  // 4. For handoff transfers: user's team has completed status in participatingTeams
+  // 3. The ticket is NOT resolved (resolved tickets should show as resolved, not transferred) AND
+  // 4. For complete transfers: ticket is no longer assigned to user's team
+  // 5. For handoff transfers: user's team has completed status in participatingTeams
+  
+  // If ticket is resolved, it should show as resolved, not transferred
+  if (ticket.status === 'resolved') {
+    return false;
+  }
   
   if (!ticket.transferHistory || ticket.transferHistory.length === 0) {
     return false;
@@ -4054,6 +4039,7 @@ function checkTicketTransferred(ticket, user) {
   
   // Check if user was part of any team mentioned in the transfer history
   let wasUserInvolved = false;
+  let userOriginalTeamId = null;
   
   // Check if user created the ticket
   if (ticket.createdBy.uid === user.uid) {
@@ -4070,6 +4056,10 @@ function checkTicketTransferred(ticket, user) {
           const team = allTeams.find(t => t.id === transfer.from.teamId);
           if (team && team.members && team.members.some(member => member.email === user.email)) {
             wasUserInvolved = true;
+            // Remember the user's original team for transfer-back detection
+            if (!userOriginalTeamId) {
+              userOriginalTeamId = transfer.from.teamId;
+            }
             break;
           }
         }
@@ -4087,6 +4077,13 @@ function checkTicketTransferred(ticket, user) {
   }
   
   if (!wasUserInvolved) {
+    return false;
+  }
+  
+  // Check if ticket was transferred back to user's original team
+  if (userOriginalTeamId && ticket.assignedTo && ticket.assignedTo.type === 'team' && 
+      ticket.assignedTo.teamId === userOriginalTeamId) {
+    // Ticket was transferred back to user's original team - not considered transferred anymore
     return false;
   }
   
