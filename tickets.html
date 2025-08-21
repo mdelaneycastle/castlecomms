@@ -3452,6 +3452,12 @@ async function editTicket(ticketId) {
 async function saveTicketChanges(ticketId) {
   let originalText = 'Save Changes';
   try {
+    // Check if system is properly initialized
+    if (!db || !currentUser) {
+      alert('System not ready. Please wait a moment and try again.');
+      return;
+    }
+    
     const title = document.getElementById('edit-title').value.trim();
     const description = document.getElementById('edit-description').value.trim();
     const category = document.getElementById('edit-category').value;
@@ -3471,7 +3477,7 @@ async function saveTicketChanges(ticketId) {
       saveBtn.disabled = true;
     }
     
-    // Update ticket data using the same pattern as other successful functions
+    // Update only basic ticket data first (following updateTicketStatus pattern)
     const updateData = {
       title: title,
       description: description,
@@ -3480,22 +3486,12 @@ async function saveTicketChanges(ticketId) {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
-    // Add system message about the edit
-    const currentUser = firebase.auth().currentUser;
-    if (currentUser) {
-      const editMessage = {
-        message: `Ticket edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}`,
-        senderEmail: 'system',
-        senderName: 'System',
-        timestamp: new Date()
-      };
-      
-      // Add the message to the update data
-      updateData.messages = firebase.firestore.FieldValue.arrayUnion(editMessage);
-    }
-    
-    // Execute single update (same pattern as sendTicketMessage)
+    // Execute the ticket update
     await db.collection('tickets').doc(ticketId).update(updateData);
+    
+    // Add system message about the edit using the same pattern as updateTicketStatus
+    const editMessage = `Ticket edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}`;
+    await addSystemMessage(editMessage);
     
     // Close modal and refresh tickets
     closeEditTicketModal();
@@ -3512,6 +3508,8 @@ async function saveTicketChanges(ticketId) {
       errorMessage = 'You do not have permission to edit this ticket. Please contact an administrator.';
     } else if (error.code === 'not-found') {
       errorMessage = 'This ticket no longer exists. It may have been deleted.';
+    } else if (error.code === 'unauthenticated') {
+      errorMessage = 'Authentication expired. Please refresh the page and sign in again.';
     }
     alert(errorMessage);
     
