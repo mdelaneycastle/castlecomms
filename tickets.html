@@ -285,6 +285,14 @@
       padding: 0.5rem;
     }
 
+    /* Make COFT dropdowns wider to show full text */
+    #coft-delivery-method,
+    #coft-ticket-reason {
+      min-width: 400px;
+      width: 100%;
+      max-width: none;
+    }
+
     /* Ticket Counter Display - Simple Left Aligned */
     .ticket-counter-display {
       text-align: left;
@@ -3220,7 +3228,6 @@
           <select id="coft-ticket-reason" class="form-select full-width" required onchange="handleReasonSelection()">
             <option value="">Choose reason...</option>
             <!-- Order Chasing reasons -->
-            <option value="Chasing dispatch note" class="order-chasing-reason">Chasing dispatch note</option>
             <option value="Something has gone wrong with the order and the client has registered a complaint" class="order-chasing-reason">Something has gone wrong with the order and the client has registered a complaint</option>
             <option value="Chasing a delayed order" class="order-chasing-reason">Chasing a delayed order</option>
             <option value="A collection needs arranging from the client" class="order-chasing-reason">A collection needs arranging from the client</option>
@@ -3999,8 +4006,9 @@ function checkUserTicketAccess(ticket, user) {
     }
   }
   
-  // Check if user is part of any participating teams (for handoff transfers)
-  if (ticket.participatingTeams && ticket.participatingTeams.length > 0) {
+  // Check if user is part of any participating teams (for handoff transfers only)
+  // For complete transfers, participating teams should NOT grant access
+  if (ticket.participatingTeams && ticket.participatingTeams.length > 0 && ticket.transferType === 'handoff') {
     for (const participatingTeam of ticket.participatingTeams) {
       const team = allTeams.find(t => t.id === participatingTeam.teamId);
       if (team && team.members) {
@@ -6006,11 +6014,11 @@ async function loadTicketMessages(ticketId) {
       return;
     }
     
-    // Sort messages by timestamp
+    // Sort messages by timestamp (newest first)
     messages.sort((a, b) => {
       const aTime = a.timestamp?.toDate?.() || new Date(a.timestamp || 0);
       const bTime = b.timestamp?.toDate?.() || new Date(b.timestamp || 0);
-      return aTime - bTime;
+      return bTime - aTime;
     });
     
     const messageItems = messages.map(message => {
@@ -6027,8 +6035,8 @@ async function loadTicketMessages(ticketId) {
     
     messagesContainer.innerHTML = messageItems;
     
-    // Scroll to bottom
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // Scroll to top to show newest messages
+    messagesContainer.scrollTop = 0;
     
   } catch (error) {
     console.error('Error loading ticket messages:', error);
