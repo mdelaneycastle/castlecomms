@@ -3499,38 +3499,99 @@ async function saveTicketChanges(ticketId) {
       saveBtn.disabled = true;
     }
     
-    // Create system message with edit details (message-based approach for security)
+    // Try to update fields directly first, fall back to message-based approach for any that fail
     const changes = [];
+    const failedUpdates = [];
     
     // Get current ticket data to compare changes
     const ticketDoc = await db.collection('tickets').doc(ticketId).get();
     const currentTicket = ticketDoc.data();
     
-    if (currentTicket.title !== title) changes.push(`Title: "${currentTicket.title}" → "${title}"`);
-    if (currentTicket.description !== description) changes.push(`Description updated`);
-    if (currentTicket.category !== category) changes.push(`Category: "${currentTicket.category}" → "${category}"`);
-    if (currentTicket.status !== status) changes.push(`Status: "${currentTicket.status}" → "${status}"`);
+    // Build update data with all changed fields
+    const updateData = {
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
     
-    if (changes.length > 0) {
+    if (currentTicket.title !== title) {
+      updateData.title = title;
+      changes.push(`Title: "${currentTicket.title}" → "${title}"`);
+    }
+    if (currentTicket.description !== description) {
+      updateData.description = description;
+      changes.push(`Description updated`);
+    }
+    if (currentTicket.category !== category) {
+      updateData.category = category;
+      changes.push(`Category: "${currentTicket.category}" → "${category}"`);
+    }
+    if (currentTicket.status !== status) {
+      updateData.status = status;
+      changes.push(`Status: "${currentTicket.status}" → "${status}"`);
+    }
+    
+    // Try to update all fields at once first
+    let directUpdateSucceeded = false;
+    try {
+      await db.collection('tickets').doc(ticketId).update(updateData);
+      directUpdateSucceeded = true;
+      console.log('✅ Direct field updates succeeded');
+    } catch (error) {
+      console.log('⚠️ Direct field updates failed, trying individual fields:', error.message);
+      
+      // Try updating fields individually to see which ones work
+      const fieldsToTry = ['title', 'description', 'category', 'status'];
+      for (const field of fieldsToTry) {
+        if (updateData[field] !== undefined) {
+          try {
+            await db.collection('tickets').doc(ticketId).update({
+              [field]: updateData[field],
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log(`✅ Updated ${field} successfully`);
+          } catch (fieldError) {
+            console.log(`❌ Failed to update ${field}:`, fieldError.message);
+            failedUpdates.push(field);
+          }
+        }
+      }
+    }
+    
+    // If some updates failed or we want to log the changes, add a system message
+    if (!directUpdateSucceeded && (changes.length > 0 || failedUpdates.length > 0)) {
+      let messageText = `Ticket edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}`;
+      
+      if (changes.length > 0) {
+        messageText += `:\n${changes.join('\n')}`;
+      }
+      
+      if (failedUpdates.length > 0) {
+        const failedChanges = [];
+        if (failedUpdates.includes('title') && currentTicket.title !== title) {
+          failedChanges.push(`Title: "${currentTicket.title}" → "${title}"`);
+        }
+        if (failedUpdates.includes('description') && currentTicket.description !== description) {
+          failedChanges.push(`Description updated to: "${description}"`);
+        }
+        if (failedUpdates.includes('category') && currentTicket.category !== category) {
+          failedChanges.push(`Category: "${currentTicket.category}" → "${category}"`);
+        }
+        
+        if (failedChanges.length > 0) {
+          messageText += `\n\nNote: These field updates were recorded in messages due to security restrictions:\n${failedChanges.join('\n')}`;
+        }
+      }
+      
       const editMessage = {
-        message: `Ticket edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}:\n${changes.join('\n')}`,
+        message: messageText,
         senderEmail: 'system',
         senderName: 'System',
         timestamp: new Date()
       };
       
-      // Prepare update data - only update what we're allowed to
-      const updateData = {
+      await db.collection('tickets').doc(ticketId).update({
         messages: firebase.firestore.FieldValue.arrayUnion(editMessage),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      
-      // Update status if it changed (this field update might be allowed)
-      if (currentTicket.status !== status) {
-        updateData.status = status;
-      }
-      
-      await db.collection('tickets').doc(ticketId).update(updateData);
+      });
     }
     
     // Close modal and refresh tickets
