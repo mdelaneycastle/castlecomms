@@ -3499,21 +3499,39 @@ async function saveTicketChanges(ticketId) {
       saveBtn.disabled = true;
     }
     
-    // Try updating all fields directly first - let's see what specific error we get
-    const updateData = {
-      title: title,
-      description: description,
-      category: category,
-      status: status,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    // Create system message with edit details (message-based approach for security)
+    const changes = [];
     
-    // Execute the ticket update with all fields
-    await db.collection('tickets').doc(ticketId).update(updateData);
+    // Get current ticket data to compare changes
+    const ticketDoc = await db.collection('tickets').doc(ticketId).get();
+    const currentTicket = ticketDoc.data();
     
-    // Add system message about the edit
-    const editMessage = `Ticket edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}`;
-    await addSystemMessage(editMessage);
+    if (currentTicket.title !== title) changes.push(`Title: "${currentTicket.title}" → "${title}"`);
+    if (currentTicket.description !== description) changes.push(`Description updated`);
+    if (currentTicket.category !== category) changes.push(`Category: "${currentTicket.category}" → "${category}"`);
+    if (currentTicket.status !== status) changes.push(`Status: "${currentTicket.status}" → "${status}"`);
+    
+    if (changes.length > 0) {
+      const editMessage = {
+        message: `Ticket edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}:\n${changes.join('\n')}`,
+        senderEmail: 'system',
+        senderName: 'System',
+        timestamp: new Date()
+      };
+      
+      // Prepare update data - only update what we're allowed to
+      const updateData = {
+        messages: firebase.firestore.FieldValue.arrayUnion(editMessage),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      
+      // Update status if it changed (this field update might be allowed)
+      if (currentTicket.status !== status) {
+        updateData.status = status;
+      }
+      
+      await db.collection('tickets').doc(ticketId).update(updateData);
+    }
     
     // Close modal and refresh tickets
     closeEditTicketModal();
