@@ -3354,6 +3354,11 @@ let allTeams = [];
 // Edit Ticket Functionality - Defined early to be available for onclick handlers
 async function editTicket(ticketId) {
   try {
+    // Check if modal is already open
+    if (document.getElementById('edit-ticket-modal')) {
+      return; // Don't open multiple modals
+    }
+    
     // Wait for db to be initialized
     if (!db) {
       console.error('Database not initialized yet');
@@ -3372,50 +3377,52 @@ async function editTicket(ticketId) {
     
     // Create edit modal HTML
     const editModalHTML = `
-      <div id="edit-ticket-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
-          <div class="modal-header">
-            <h2>Edit Ticket: ${ticket.ticketId}</h2>
-            <button class="close-btn" onclick="closeEditTicketModal()">&times;</button>
+      <div id="edit-ticket-modal" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 10000;">
+        <div class="modal-content" style="background: white; border-radius: 8px; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); position: relative; margin: 20px;">
+          <div class="modal-header" style="padding: 1.5rem; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; color: var(--color-primary);">Edit Ticket: ${ticket.ticketId}</h2>
+            <button class="close-btn" onclick="closeEditTicketModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6c757d; padding: 0; width: 30px; height: 30px;">&times;</button>
           </div>
           
-          <form id="edit-ticket-form">
-            <div class="form-group">
-              <label for="edit-title">Title:</label>
-              <input type="text" id="edit-title" value="${ticket.title || ''}" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="edit-description">Description:</label>
-              <textarea id="edit-description" rows="8">${ticket.description || ''}</textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="edit-category">Category:</label>
-              <select id="edit-category" required>
-                <option value="Client Order Fulfilment Team/Group" ${ticket.category === 'Client Order Fulfilment Team/Group' ? 'selected' : ''}>Client Order Fulfilment Team/Group</option>
-                <option value="IT Support" ${ticket.category === 'IT Support' ? 'selected' : ''}>IT Support</option>
-                <option value="Gallery Managers" ${ticket.category === 'Gallery Managers' ? 'selected' : ''}>Gallery Managers</option>
-                <option value="Head Office" ${ticket.category === 'Head Office' ? 'selected' : ''}>Head Office</option>
-                <option value="Gallery Support" ${ticket.category === 'Gallery Support' ? 'selected' : ''}>Gallery Support</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="edit-status">Status:</label>
-              <select id="edit-status" required>
-                <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
-                <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-                <option value="on-hold" ${ticket.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
-                <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
-              </select>
-            </div>
-            
-            <div class="form-actions">
-              <button type="button" class="cancel-btn" onclick="closeEditTicketModal()">Cancel</button>
-              <button type="submit" class="save-btn">Save Changes</button>
-            </div>
-          </form>
+          <div style="padding: 1.5rem;">
+            <form id="edit-ticket-form">
+              <div class="form-group">
+                <label for="edit-title">Title:</label>
+                <input type="text" id="edit-title" value="${(ticket.title || '').replace(/"/g, '&quot;')}" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="edit-description">Description:</label>
+                <textarea id="edit-description" rows="8">${(ticket.description || '').replace(/"/g, '&quot;')}</textarea>
+              </div>
+              
+              <div class="form-group">
+                <label for="edit-category">Category:</label>
+                <select id="edit-category" required>
+                  <option value="Client Order Fulfilment Team/Group" ${ticket.category === 'Client Order Fulfilment Team/Group' ? 'selected' : ''}>Client Order Fulfilment Team/Group</option>
+                  <option value="IT Support" ${ticket.category === 'IT Support' ? 'selected' : ''}>IT Support</option>
+                  <option value="Gallery Managers" ${ticket.category === 'Gallery Managers' ? 'selected' : ''}>Gallery Managers</option>
+                  <option value="Head Office" ${ticket.category === 'Head Office' ? 'selected' : ''}>Head Office</option>
+                  <option value="Gallery Support" ${ticket.category === 'Gallery Support' ? 'selected' : ''}>Gallery Support</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="edit-status">Status:</label>
+                <select id="edit-status" required>
+                  <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
+                  <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                  <option value="on-hold" ${ticket.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
+                  <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+                </select>
+              </div>
+              
+              <div class="form-actions">
+                <button type="button" class="cancel-btn" onclick="closeEditTicketModal()">Cancel</button>
+                <button type="submit" class="save-btn">Save Changes</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     `;
@@ -3429,6 +3436,13 @@ async function editTicket(ticketId) {
       await saveTicketChanges(ticketId);
     });
     
+    // Close modal when clicking outside
+    document.getElementById('edit-ticket-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'edit-ticket-modal') {
+        closeEditTicketModal();
+      }
+    });
+    
   } catch (error) {
     console.error('Error loading ticket for edit:', error);
     alert('Failed to load ticket for editing. Please try again.');
@@ -3436,6 +3450,7 @@ async function editTicket(ticketId) {
 }
 
 async function saveTicketChanges(ticketId) {
+  let originalText = 'Save Changes';
   try {
     const title = document.getElementById('edit-title').value.trim();
     const description = document.getElementById('edit-description').value.trim();
@@ -3450,11 +3465,13 @@ async function saveTicketChanges(ticketId) {
     
     // Show loading state
     const saveBtn = document.querySelector('.save-btn');
-    const originalText = saveBtn.textContent;
-    saveBtn.textContent = 'Saving...';
-    saveBtn.disabled = true;
+    if (saveBtn) {
+      originalText = saveBtn.textContent;
+      saveBtn.textContent = 'Saving...';
+      saveBtn.disabled = true;
+    }
     
-    // Update ticket in Firestore
+    // Update ticket data using the same pattern as other successful functions
     const updateData = {
       title: title,
       description: description,
@@ -3463,24 +3480,22 @@ async function saveTicketChanges(ticketId) {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
-    await db.collection('tickets').doc(ticketId).update(updateData);
-    
     // Add system message about the edit
     const currentUser = firebase.auth().currentUser;
-    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-    const userData = userDoc.exists ? userDoc.data() : {};
-    const userName = userData.name || currentUser.displayName || currentUser.email || 'Unknown User';
+    if (currentUser) {
+      const editMessage = {
+        message: \`Ticket edited by \${currentUser.displayName || currentUser.email || 'Unknown User'}\`,
+        senderEmail: 'system',
+        senderName: 'System',
+        timestamp: new Date()
+      };
+      
+      // Add the message to the update data
+      updateData.messages = firebase.firestore.FieldValue.arrayUnion(editMessage);
+    }
     
-    const editMessage = {
-      message: `Ticket edited by ${userName}`,
-      senderEmail: 'system',
-      senderName: 'System',
-      timestamp: new Date()
-    };
-    
-    await db.collection('tickets').doc(ticketId).update({
-      messages: firebase.firestore.FieldValue.arrayUnion(editMessage)
-    });
+    // Execute single update (same pattern as sendTicketMessage)
+    await db.collection('tickets').doc(ticketId).update(updateData);
     
     // Close modal and refresh tickets
     closeEditTicketModal();
@@ -3490,7 +3505,15 @@ async function saveTicketChanges(ticketId) {
     
   } catch (error) {
     console.error('❌ Error saving ticket changes:', error);
-    alert('Failed to save changes. Please try again.');
+    
+    // Show user-friendly error message
+    let errorMessage = 'Failed to save changes. Please try again.';
+    if (error.code === 'permission-denied') {
+      errorMessage = 'You do not have permission to edit this ticket. Please contact an administrator.';
+    } else if (error.code === 'not-found') {
+      errorMessage = 'This ticket no longer exists. It may have been deleted.';
+    }
+    alert(errorMessage);
     
     // Reset button state
     const saveBtn = document.querySelector('.save-btn');
