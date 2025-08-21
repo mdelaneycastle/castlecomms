@@ -3385,19 +3385,27 @@ async function editTicket(ticketId) {
           </div>
           
           <div style="padding: 1.5rem;">
+            <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; margin-bottom: 20px; border-radius: 6px;">
+              <h4 style="color: #856404; margin: 0 0 10px 0;">📝 Note about ticket editing:</h4>
+              <p style="color: #856404; margin: 0; font-size: 14px;">
+                Due to security restrictions, changes to title, description, and category will be recorded as messages in the ticket history. 
+                Only the status can be directly updated on the ticket.
+              </p>
+            </div>
+            
             <form id="edit-ticket-form">
               <div class="form-group">
-                <label for="edit-title">Title:</label>
+                <label for="edit-title">Title: <small>(changes recorded as messages)</small></label>
                 <input type="text" id="edit-title" value="${(ticket.title || '').replace(/"/g, '&quot;')}" required>
               </div>
               
               <div class="form-group">
-                <label for="edit-description">Description:</label>
+                <label for="edit-description">Description: <small>(changes recorded as messages)</small></label>
                 <textarea id="edit-description" rows="8">${(ticket.description || '').replace(/"/g, '&quot;')}</textarea>
               </div>
               
               <div class="form-group">
-                <label for="edit-category">Category:</label>
+                <label for="edit-category">Category: <small>(changes recorded as messages)</small></label>
                 <select id="edit-category" required>
                   <option value="Client Order Fulfilment Team/Group" ${ticket.category === 'Client Order Fulfilment Team/Group' ? 'selected' : ''}>Client Order Fulfilment Team/Group</option>
                   <option value="IT Support" ${ticket.category === 'IT Support' ? 'selected' : ''}>IT Support</option>
@@ -3408,7 +3416,7 @@ async function editTicket(ticketId) {
               </div>
               
               <div class="form-group">
-                <label for="edit-status">Status:</label>
+                <label for="edit-status">Status: <small>(directly updates ticket)</small></label>
                 <select id="edit-status" required>
                   <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
                   <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
@@ -6343,6 +6351,22 @@ async function transferTicket() {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
+    // Create transfer message first
+    let fromText = '';
+    if (currentTicket.assignedTo.type === 'team') {
+      fromText = `${currentTicket.assignedTo.teamName} team`;
+    } else {
+      fromText = currentTicket.assignedTo.name || currentTicket.assignedTo.email;
+    }
+    
+    const transferTypeText = transferType === 'handoff' ? 'handed off' : 'transferred';
+    const transferMessage = {
+      message: `Ticket ${transferTypeText} from ${fromText} to ${selectedTeam.name} team by ${transferredByName}. Reason: ${reason}`,
+      senderEmail: 'system',
+      senderName: 'System',
+      timestamp: new Date()
+    };
+    
     // Auto-update status to 'in-progress' for any activity on the ticket
     if (currentTicket.status === 'open') {
       updateData.status = 'in-progress';
@@ -6419,23 +6443,7 @@ async function transferTicket() {
     // Update the ticket assignment
     batch.update(ticketRef, updateData);
     
-    // Add transfer confirmation message
-    let fromText = '';
-    if (currentTicket.assignedTo.type === 'team') {
-      fromText = `${currentTicket.assignedTo.teamName} team`;
-    } else {
-      fromText = currentTicket.assignedTo.name || currentTicket.assignedTo.email;
-    }
-    
-    const transferTypeText = transferType === 'handoff' ? 'handed off' : 'transferred';
-    const transferMessage = {
-      message: `Ticket ${transferTypeText} from ${fromText} to ${selectedTeam.name} team by ${transferredByName}. Reason: ${reason}`,
-      senderEmail: 'system',
-      senderName: 'System',
-      timestamp: new Date()
-    };
-    
-    // Transfer message is now handled in the main updateData above
+    // Transfer message is already handled in the main updateData above
     
     // Execute the batch
     await batch.commit();
