@@ -376,7 +376,7 @@ window.sharedComponents = {
 
       // For all other users, check visibility settings from Firestore
       const db = firebase.firestore();
-      const docRef = db.collection('admin').doc('page-visibility');
+      const docRef = db.collection('settings').doc('page-visibility');
       const doc = await docRef.get();
       const settings = doc.exists ? doc.data() : {};
 
