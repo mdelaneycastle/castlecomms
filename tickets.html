@@ -3715,15 +3715,10 @@ function checkUserTicketAccess(ticket, user) {
   
   // Check if user is part of any participating teams (for handoff transfers)
   if (ticket.participatingTeams && ticket.participatingTeams.length > 0) {
-    console.log('Access Debug - Checking participatingTeams:', ticket.participatingTeams);
     for (const participatingTeam of ticket.participatingTeams) {
       const team = allTeams.find(t => t.id === participatingTeam.teamId);
-      console.log('Access Debug - Found team:', team?.name, 'for teamId:', participatingTeam.teamId);
       if (team && team.members) {
-        const userInTeam = team.members.some(member => member.email === user.email);
-        console.log('Access Debug - User in team:', userInTeam, 'user email:', user.email);
-        if (userInTeam) {
-          console.log('Access Debug - GRANTED via participating teams');
+        if (team.members.some(member => member.email === user.email)) {
           return true;
         }
       }
@@ -3896,6 +3891,9 @@ async function loadTickets() {
     
     let tickets = Array.from(ticketMap.values());
     
+    // Calculate counts for all categories BEFORE status filtering (using all accessible tickets)
+    updateFilterCounts(tickets);
+    
     // Apply multiple status filters
     if (selectedFilters.has('transferred')) {
       // If "transferred" is one of the selected filters
@@ -3941,9 +3939,6 @@ async function loadTickets() {
     
     // Apply advanced filters
     tickets = tickets.filter(ticket => matchesAdvancedFilters(ticket));
-    
-    // Calculate counts for all categories AFTER all filtering is complete
-    updateFilterCounts(tickets);
     
     // Sort by last activity (newest first) - updatedAt, last message time, or creation date
     tickets.sort((a, b) => {
@@ -5994,7 +5989,6 @@ async function transferTicket() {
       }
     }
     
-    console.log('Transfer Debug - fromTeamInfo:', fromTeamInfo);
     
     // Build transfer history entry
     const transferHistoryEntry = {
@@ -6029,13 +6023,11 @@ async function transferTicket() {
     if (transferType === 'handoff' && fromTeamInfo) {
       // For handoff transfers, initialize or update participatingTeams
       const currentParticipatingTeams = currentTicket.participatingTeams || [];
-      console.log('Transfer Debug - currentParticipatingTeams:', currentParticipatingTeams);
       
       // Find if the current team is already in participatingTeams
       const existingTeamIndex = currentParticipatingTeams.findIndex(
         team => team.teamId === fromTeamInfo.teamId
       );
-      console.log('Transfer Debug - existingTeamIndex:', existingTeamIndex);
       
       let updatedParticipatingTeams;
       if (existingTeamIndex >= 0) {
@@ -6067,13 +6059,11 @@ async function transferTicket() {
         completedAt: null
       });
       
-      console.log('Transfer Debug - updatedParticipatingTeams:', updatedParticipatingTeams);
       updateData.participatingTeams = updatedParticipatingTeams;
       updateData.transferType = 'handoff';
     } else {
       // For complete transfers, set transfer type but don't maintain participatingTeams
       updateData.transferType = 'complete';
-      console.log('Transfer Debug - Complete transfer or no fromTeamInfo');
     }
     
     // Create a batch write to update both the assignment and add a message
