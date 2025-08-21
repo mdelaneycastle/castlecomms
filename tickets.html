@@ -1769,8 +1769,60 @@
       gap: 1rem;
     }
 
+    /* Transfer Type Selection */
+    .transfer-type-selection {
+      border-bottom: 1px solid var(--color-border-light);
+      padding-bottom: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .transfer-type-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .transfer-type-buttons input[type="radio"] {
+      display: none;
+    }
+
+    .transfer-type-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: var(--color-background-light);
+      border: 2px solid var(--color-border-light);
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .transfer-type-btn:hover {
+      border-color: #17a2b8;
+      background: rgba(23, 162, 184, 0.1);
+    }
+
+    .transfer-type-buttons input[type="radio"]:checked + .transfer-type-btn {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: var(--color-white);
+      border-color: #138496;
+    }
+
+    .transfer-type-help {
+      font-size: 0.85rem;
+      color: #6c757d;
+      line-height: 1.4;
+    }
+
+    .transfer-help-handoff.hidden {
+      display: none;
+    }
+
     .transfer-user-search label,
-    .transfer-reason label {
+    .transfer-reason label,
+    .transfer-team-selection label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
@@ -2840,6 +2892,24 @@
     <div class="ticket-transfer-section">
       <h4>🔄 Transfer Ticket</h4>
       <div class="transfer-form">
+        <div class="transfer-type-selection">
+          <label class="form-label">Transfer Type:</label>
+          <div class="transfer-type-buttons">
+            <input type="radio" id="transfer-complete" name="transfer-type" value="complete" checked>
+            <label for="transfer-complete" class="transfer-type-btn">📤 Complete Transfer</label>
+            <input type="radio" id="transfer-handoff" name="transfer-type" value="handoff">
+            <label for="transfer-handoff" class="transfer-type-btn">🔄 Handoff</label>
+          </div>
+          <div class="transfer-type-help">
+            <div class="transfer-help-complete">
+              <strong>Complete Transfer:</strong> This ticket isn't for your team - transfer it entirely to another team.
+            </div>
+            <div class="transfer-help-handoff hidden">
+              <strong>Handoff:</strong> Your team has completed their part - hand off to the next team while keeping it visible in your completed transfers.
+            </div>
+          </div>
+        </div>
+        
         <div class="transfer-team-selection">
           <label for="transfer-team-select">Transfer to Team:</label>
           <select id="transfer-team-select" class="form-select" onchange="handleTransferTeamSelection()">
@@ -3623,19 +3693,35 @@ function checkUserTicketAccess(ticket, user) {
     return true;
   }
   
-  // Check if assigned to a team that user is a member of
+  // Check if assigned to a team that user is a member of (current assignment)
   if (ticket.assignedTo.type === 'team') {
     // New format with teamId - look up team in allTeams
     if (ticket.assignedTo.teamId) {
       const team = allTeams.find(t => t.id === ticket.assignedTo.teamId);
       if (team && team.members) {
-        return team.members.some(member => member.email === user.email);
+        if (team.members.some(member => member.email === user.email)) {
+          return true;
+        }
       }
     }
     
     // Legacy format with teamMembers directly in assignedTo
     if (ticket.assignedTo.teamMembers) {
-      return ticket.assignedTo.teamMembers.some(member => member.email === user.email);
+      if (ticket.assignedTo.teamMembers.some(member => member.email === user.email)) {
+        return true;
+      }
+    }
+  }
+  
+  // Check if user is part of any participating teams (for handoff transfers)
+  if (ticket.participatingTeams && ticket.participatingTeams.length > 0) {
+    for (const participatingTeam of ticket.participatingTeams) {
+      const team = allTeams.find(t => t.id === participatingTeam.teamId);
+      if (team && team.members) {
+        if (team.members.some(member => member.email === user.email)) {
+          return true;
+        }
+      }
     }
   }
   
@@ -3651,15 +3737,20 @@ function checkUserTicketAccess(ticket, user) {
 function checkTicketTransferred(ticket, user) {
   // A ticket is considered "transferred" if:
   // 1. There is transfer history AND
-  // 2. The user was previously involved with the ticket (either created it or was assigned to it)
+  // 2. The user was previously involved with the ticket AND
+  // 3. For complete transfers: ticket is no longer assigned to user's team
+  // 4. For handoff transfers: user's team has completed status in participatingTeams
   
   if (!ticket.transferHistory || ticket.transferHistory.length === 0) {
     return false;
   }
   
+  // Check if user was part of any team mentioned in the transfer history
+  let wasUserInvolved = false;
+  
   // Check if user created the ticket
   if (ticket.createdBy.uid === user.uid) {
-    return true;
+    wasUserInvolved = true;
   }
   
   // Check if user was part of any team mentioned in the transfer history
@@ -3671,16 +3762,47 @@ function checkTicketTransferred(ticket, user) {
         if (transfer.from.teamId) {
           const team = allTeams.find(t => t.id === transfer.from.teamId);
           if (team && team.members && team.members.some(member => member.email === user.email)) {
-            return true;
+            wasUserInvolved = true;
+            break;
           }
         }
         // Legacy format with teamMembers
         else if (transfer.from.teamMembers && transfer.from.teamMembers.some(member => member.email === user.email)) {
-          return true;
+          wasUserInvolved = true;
+          break;
         }
       } else if (transfer.from.email === user.email) {
         // Individual assignment
-        return true;
+        wasUserInvolved = true;
+        break;
+      }
+    }
+  }
+  
+  if (!wasUserInvolved) {
+    return false;
+  }
+  
+  // For handoff transfers, check if user's team has "completed" status
+  if (ticket.participatingTeams && ticket.participatingTeams.length > 0) {
+    for (const participatingTeam of ticket.participatingTeams) {
+      const team = allTeams.find(t => t.id === participatingTeam.teamId);
+      if (team && team.members && team.members.some(member => member.email === user.email)) {
+        // User is part of this participating team
+        if (participatingTeam.status === 'completed') {
+          return true; // This is a completed handoff for the user's team
+        }
+      }
+    }
+  }
+  
+  // For complete transfers, check if user is no longer assigned to the current ticket
+  if (ticket.assignedTo && ticket.assignedTo.type === 'team' && ticket.assignedTo.teamId) {
+    const currentTeam = allTeams.find(t => t.id === ticket.assignedTo.teamId);
+    if (currentTeam && currentTeam.members) {
+      const userIsCurrentlyAssigned = currentTeam.members.some(member => member.email === user.email);
+      if (!userIsCurrentlyAssigned) {
+        return true; // Complete transfer away from user
       }
     }
   }
@@ -3907,13 +4029,33 @@ async function loadTickets() {
       const displayStatus = isTransferred ? 'transferred' : ticket.status;
       const statusText = isTransferred ? 'transferred' : ticket.status.replace('-', ' ');
       
-      // Determine assignment display text
+      // Determine assignment display text with transfer type info
       let assignmentText = '';
       if (isTransferred) {
+        // Check if this is a handoff transfer for the user's team
+        let isHandoffCompleted = false;
+        let transferTypeText = 'Transferred to';
+        
+        if (ticket.participatingTeams && ticket.participatingTeams.length > 0) {
+          for (const participatingTeam of ticket.participatingTeams) {
+            const team = allTeams.find(t => t.id === participatingTeam.teamId);
+            if (team && team.members && team.members.some(member => member.email === currentUser.email)) {
+              if (participatingTeam.status === 'completed') {
+                isHandoffCompleted = true;
+                transferTypeText = 'Handed off to';
+                break;
+              }
+            }
+          }
+        }
+        
         if (ticket.assignedTo.type === 'team') {
-          assignmentText = `Transferred to: ${ticket.assignedTo.teamName} team`;
+          assignmentText = `${transferTypeText}: ${ticket.assignedTo.teamName} team`;
+          if (isHandoffCompleted) {
+            assignmentText += ' (Your part completed)';
+          }
         } else {
-          assignmentText = `Transferred to: ${ticket.assignedTo.name || ticket.assignedTo.email}`;
+          assignmentText = `${transferTypeText}: ${ticket.assignedTo.name || ticket.assignedTo.email}`;
         }
       } else {
         if (ticket.assignedTo.type === 'team') {
@@ -5783,7 +5925,7 @@ function handleTransferTeamSelection() {
   }
 }
 
-// Transfer ticket
+// Enhanced Transfer ticket with support for handoff and complete transfers
 async function transferTicket() {
   const transferTeamSelect = document.getElementById('transfer-team-select');
   const selectedTeamId = transferTeamSelect.value;
@@ -5805,6 +5947,9 @@ async function transferTicket() {
     return;
   }
   
+  // Get transfer type
+  const transferType = document.querySelector('input[name="transfer-type"]:checked').value;
+  
   // Check permissions - use team-aware permission check
   const canTransfer = checkUserCanManageTicket(currentTicket, currentUser);
   
@@ -5821,29 +5966,90 @@ async function transferTicket() {
     // Get current user's display name
     const transferredByName = await getUserDisplayName(currentUser);
     
-    // Create updated ticket data
+    // Get current team info
+    let fromTeamInfo = null;
+    if (currentTicket.assignedTo && currentTicket.assignedTo.type === 'team') {
+      fromTeamInfo = {
+        teamId: currentTicket.assignedTo.teamId,
+        teamName: currentTicket.assignedTo.teamName
+      };
+    }
+    
+    // Build transfer history entry
+    const transferHistoryEntry = {
+      from: currentTicket.assignedTo,
+      to: {
+        type: 'team',
+        teamId: selectedTeam.id,
+        teamName: selectedTeam.name
+      },
+      transferredBy: {
+        email: currentUser.email,
+        name: transferredByName
+      },
+      reason: reason,
+      timestamp: new Date(),
+      transferType: transferType
+    };
+    
+    // Build base update data
     const updateData = {
       assignedTo: {
         type: 'team',
         teamId: selectedTeam.id,
         teamName: selectedTeam.name
       },
-      transferHistory: firebase.firestore.FieldValue.arrayUnion({
-        from: currentTicket.assignedTo,
-        to: {
-          type: 'team',
-          teamId: selectedTeam.id,
-          teamName: selectedTeam.name
-        },
-        transferredBy: {
-          email: currentUser.email,
-          name: transferredByName
-        },
-        reason: reason,
-        timestamp: new Date()
-      }),
+      currentAssignedTeam: selectedTeam.id,
+      transferHistory: firebase.firestore.FieldValue.arrayUnion(transferHistoryEntry),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+    
+    // Handle participating teams based on transfer type
+    if (transferType === 'handoff' && fromTeamInfo) {
+      // For handoff transfers, initialize or update participatingTeams
+      const currentParticipatingTeams = currentTicket.participatingTeams || [];
+      
+      // Find if the current team is already in participatingTeams
+      const existingTeamIndex = currentParticipatingTeams.findIndex(
+        team => team.teamId === fromTeamInfo.teamId
+      );
+      
+      let updatedParticipatingTeams;
+      if (existingTeamIndex >= 0) {
+        // Update existing team to completed
+        updatedParticipatingTeams = [...currentParticipatingTeams];
+        updatedParticipatingTeams[existingTeamIndex] = {
+          ...updatedParticipatingTeams[existingTeamIndex],
+          status: 'completed',
+          completedAt: new Date()
+        };
+      } else {
+        // Add current team as completed
+        updatedParticipatingTeams = [
+          ...currentParticipatingTeams,
+          {
+            teamId: fromTeamInfo.teamId,
+            teamName: fromTeamInfo.teamName,
+            status: 'completed',
+            completedAt: new Date()
+          }
+        ];
+      }
+      
+      // Add new team as active
+      updatedParticipatingTeams.push({
+        teamId: selectedTeam.id,
+        teamName: selectedTeam.name,
+        status: 'active',
+        completedAt: null
+      });
+      
+      updateData.participatingTeams = updatedParticipatingTeams;
+      updateData.transferType = 'handoff';
+    } else {
+      // For complete transfers, set transfer type but don't maintain participatingTeams
+      updateData.transferType = 'complete';
+    }
     
     // Create a batch write to update both the assignment and add a message
     const batch = db.batch();
@@ -5860,8 +6066,9 @@ async function transferTicket() {
       fromText = currentTicket.assignedTo.name || currentTicket.assignedTo.email;
     }
     
+    const transferTypeText = transferType === 'handoff' ? 'handed off' : 'transferred';
     const transferMessage = {
-      message: `Ticket transferred from ${fromText} to ${selectedTeam.name} team by ${transferredByName}. Reason: ${reason}`,
+      message: `Ticket ${transferTypeText} from ${fromText} to ${selectedTeam.name} team by ${transferredByName}. Reason: ${reason}`,
       senderEmail: 'system',
       senderName: 'System',
       timestamp: new Date()
@@ -5880,6 +6087,7 @@ async function transferTicket() {
       teamId: selectedTeam.id,
       teamName: selectedTeam.name
     };
+    currentTicket.currentAssignedTeam = selectedTeam.id;
     
     // Update modal display
     document.getElementById('modal-ticket-assignee').textContent = `Assigned to: ${selectedTeam.name} team`;
@@ -5888,11 +6096,19 @@ async function transferTicket() {
     transferTeamSelect.value = '';
     document.getElementById('transfer-reason-input').value = '';
     
+    // Reset transfer type to default
+    document.getElementById('transfer-complete').checked = true;
+    document.querySelector('.transfer-help-complete').style.display = 'block';
+    document.querySelector('.transfer-help-handoff').style.display = 'none';
+    
     // Reload tickets list and messages
     loadTickets();
     await loadTicketMessages(currentTicket.id);
     
-    alert('Ticket transferred successfully!');
+    const successMessage = transferType === 'handoff' ? 
+      'Ticket handed off successfully! It will remain visible in your completed transfers.' :
+      'Ticket transferred successfully!';
+    alert(successMessage);
     
   } catch (error) {
     console.error('Error transferring ticket:', error);
@@ -6357,6 +6573,28 @@ document.addEventListener('keydown', (e) => {
 
 <!-- Notification Badge System -->
 <script src="notification-badges.js"></script>
+
+<!-- Transfer Type Selection JavaScript -->
+<script>
+// Handle transfer type selection
+document.addEventListener('DOMContentLoaded', () => {
+  const transferTypeRadios = document.querySelectorAll('input[name="transfer-type"]');
+  const completeHelp = document.querySelector('.transfer-help-complete');
+  const handoffHelp = document.querySelector('.transfer-help-handoff');
+  
+  transferTypeRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'complete') {
+        completeHelp.style.display = 'block';
+        handoffHelp.style.display = 'none';
+      } else if (this.value === 'handoff') {
+        completeHelp.style.display = 'none';
+        handoffHelp.style.display = 'block';
+      }
+    });
+  });
+});
+</script>
 
 <script>
 // Mark tickets as seen when page loads
