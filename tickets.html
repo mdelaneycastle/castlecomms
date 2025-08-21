@@ -3377,10 +3377,11 @@ let allTeams = [];
 async function editTicket(ticketId) {
   console.log('🔍 editTicket called with ID:', ticketId);
   try {
-    // Check if modal is already open
-    if (document.getElementById('edit-ticket-modal')) {
-      console.log('⚠️ Modal already open, returning');
-      return; // Don't open multiple modals
+    // Check if modal is already open and remove any stale modals
+    const existingModal = document.getElementById('edit-ticket-modal');
+    if (existingModal) {
+      console.log('⚠️ Found existing modal, removing it first');
+      existingModal.remove();
     }
     
     // Wait for db to be initialized
@@ -3390,14 +3391,18 @@ async function editTicket(ticketId) {
       return;
     }
     
+    console.log('📊 Database initialized, loading ticket data...');
+    
     // Load ticket data
     const ticketDoc = await db.collection('tickets').doc(ticketId).get();
     if (!ticketDoc.exists) {
+      console.error('❌ Ticket not found:', ticketId);
       alert('Ticket not found!');
       return;
     }
     
     const ticket = { id: ticketDoc.id, ...ticketDoc.data() };
+    console.log('✅ Ticket loaded:', ticket.ticketId);
     
     // Create edit modal HTML - styled like create ticket modal
     const editModalHTML = `
@@ -3466,7 +3471,9 @@ async function editTicket(ticketId) {
     `;
     
     // Add modal to page
+    console.log('🎨 Creating modal HTML and adding to page...');
     document.body.insertAdjacentHTML('beforeend', editModalHTML);
+    console.log('✅ Modal added to DOM');
     
     // Handle form submission
     document.getElementById('edit-ticket-form').addEventListener('submit', async (e) => {
