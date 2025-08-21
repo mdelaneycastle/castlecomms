@@ -2646,6 +2646,84 @@
     .ticket-actions {
       text-align: center;
     }
+
+    /* Edit Modal Styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--color-text-dark);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--color-border-light);
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border-light);
+    }
+    
+    .cancel-btn,
+    .save-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .cancel-btn {
+      background: var(--color-background-light);
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border-light);
+    }
+    
+    .cancel-btn:hover {
+      background: #e2e6ea;
+    }
+    
+    .save-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+    
+    .save-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
+    
+    .save-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -3272,6 +3350,163 @@ let db;
 let currentUser;
 let allUsers = [];
 let allTeams = [];
+
+// Edit Ticket Functionality - Defined early to be available for onclick handlers
+async function editTicket(ticketId) {
+  try {
+    // Wait for db to be initialized
+    if (!db) {
+      console.error('Database not initialized yet');
+      setTimeout(() => editTicket(ticketId), 500);
+      return;
+    }
+    
+    // Load ticket data
+    const ticketDoc = await db.collection('tickets').doc(ticketId).get();
+    if (!ticketDoc.exists) {
+      alert('Ticket not found!');
+      return;
+    }
+    
+    const ticket = { id: ticketDoc.id, ...ticketDoc.data() };
+    
+    // Create edit modal HTML
+    const editModalHTML = `
+      <div id="edit-ticket-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+          <div class="modal-header">
+            <h2>Edit Ticket: ${ticket.ticketId}</h2>
+            <button class="close-btn" onclick="closeEditTicketModal()">&times;</button>
+          </div>
+          
+          <form id="edit-ticket-form">
+            <div class="form-group">
+              <label for="edit-title">Title:</label>
+              <input type="text" id="edit-title" value="${ticket.title || ''}" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="edit-description">Description:</label>
+              <textarea id="edit-description" rows="8">${ticket.description || ''}</textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="edit-category">Category:</label>
+              <select id="edit-category" required>
+                <option value="Client Order Fulfilment Team/Group" ${ticket.category === 'Client Order Fulfilment Team/Group' ? 'selected' : ''}>Client Order Fulfilment Team/Group</option>
+                <option value="IT Support" ${ticket.category === 'IT Support' ? 'selected' : ''}>IT Support</option>
+                <option value="Gallery Managers" ${ticket.category === 'Gallery Managers' ? 'selected' : ''}>Gallery Managers</option>
+                <option value="Head Office" ${ticket.category === 'Head Office' ? 'selected' : ''}>Head Office</option>
+                <option value="Gallery Support" ${ticket.category === 'Gallery Support' ? 'selected' : ''}>Gallery Support</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="edit-status">Status:</label>
+              <select id="edit-status" required>
+                <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
+                <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                <option value="on-hold" ${ticket.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
+                <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+              </select>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="cancel-btn" onclick="closeEditTicketModal()">Cancel</button>
+              <button type="submit" class="save-btn">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', editModalHTML);
+    
+    // Handle form submission
+    document.getElementById('edit-ticket-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await saveTicketChanges(ticketId);
+    });
+    
+  } catch (error) {
+    console.error('Error loading ticket for edit:', error);
+    alert('Failed to load ticket for editing. Please try again.');
+  }
+}
+
+async function saveTicketChanges(ticketId) {
+  try {
+    const title = document.getElementById('edit-title').value.trim();
+    const description = document.getElementById('edit-description').value.trim();
+    const category = document.getElementById('edit-category').value;
+    const status = document.getElementById('edit-status').value;
+    
+    // Validate required fields
+    if (!title || !category || !status) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.save-btn');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = 'Saving...';
+    saveBtn.disabled = true;
+    
+    // Update ticket in Firestore
+    const updateData = {
+      title: title,
+      description: description,
+      category: category,
+      status: status,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    await db.collection('tickets').doc(ticketId).update(updateData);
+    
+    // Add system message about the edit
+    const currentUser = firebase.auth().currentUser;
+    const userDoc = await db.collection('users').doc(currentUser.uid).get();
+    const userData = userDoc.exists ? userDoc.data() : {};
+    const userName = userData.name || currentUser.displayName || currentUser.email || 'Unknown User';
+    
+    const editMessage = {
+      message: `Ticket edited by ${userName}`,
+      senderEmail: 'system',
+      senderName: 'System',
+      timestamp: new Date()
+    };
+    
+    await db.collection('tickets').doc(ticketId).update({
+      messages: firebase.firestore.FieldValue.arrayUnion(editMessage)
+    });
+    
+    // Close modal and refresh tickets
+    closeEditTicketModal();
+    loadTickets(); // Refresh the ticket list
+    
+    console.log('✅ Ticket updated successfully');
+    
+  } catch (error) {
+    console.error('❌ Error saving ticket changes:', error);
+    alert('Failed to save changes. Please try again.');
+    
+    // Reset button state
+    const saveBtn = document.querySelector('.save-btn');
+    if (saveBtn) {
+      saveBtn.textContent = originalText;
+      saveBtn.disabled = false;
+    }
+  }
+}
+
+function closeEditTicketModal() {
+  const modal = document.getElementById('edit-ticket-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
 let assignedUser = null;
 let assignedTeam = null;
 let selectedFilters = new Set(['all']); // Use Set for multiple status selections
@@ -6664,243 +6899,6 @@ document.addEventListener('keydown', (e) => {
 <!-- Notification Badge System -->
 <script src="notification-badges.js"></script>
 
-<!-- Edit Ticket Functionality -->
-<script>
-// Edit Ticket Functionality - Available globally
-async function editTicket(ticketId) {
-  try {
-    // Load ticket data
-    const ticketDoc = await db.collection('tickets').doc(ticketId).get();
-    if (!ticketDoc.exists) {
-      alert('Ticket not found!');
-      return;
-    }
-    
-    const ticket = { id: ticketDoc.id, ...ticketDoc.data() };
-    
-    // Create edit modal HTML
-    const editModalHTML = `
-      <div id="edit-ticket-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
-          <div class="modal-header">
-            <h2>Edit Ticket: ${ticket.ticketId}</h2>
-            <button class="close-btn" onclick="closeEditTicketModal()">&times;</button>
-          </div>
-          
-          <form id="edit-ticket-form">
-            <div class="form-group">
-              <label for="edit-title">Title:</label>
-              <input type="text" id="edit-title" value="${ticket.title || ''}" required>
-            </div>
-            
-            <div class="form-group">
-              <label for="edit-description">Description:</label>
-              <textarea id="edit-description" rows="8">${ticket.description || ''}</textarea>
-            </div>
-            
-            <div class="form-group">
-              <label for="edit-category">Category:</label>
-              <select id="edit-category" required>
-                <option value="Client Order Fulfilment Team/Group" ${ticket.category === 'Client Order Fulfilment Team/Group' ? 'selected' : ''}>Client Order Fulfilment Team/Group</option>
-                <option value="IT Support" ${ticket.category === 'IT Support' ? 'selected' : ''}>IT Support</option>
-                <option value="Gallery Managers" ${ticket.category === 'Gallery Managers' ? 'selected' : ''}>Gallery Managers</option>
-                <option value="Head Office" ${ticket.category === 'Head Office' ? 'selected' : ''}>Head Office</option>
-                <option value="Gallery Support" ${ticket.category === 'Gallery Support' ? 'selected' : ''}>Gallery Support</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="edit-status">Status:</label>
-              <select id="edit-status" required>
-                <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
-                <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-                <option value="on-hold" ${ticket.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
-                <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
-              </select>
-            </div>
-            
-            <div class="form-actions">
-              <button type="button" class="cancel-btn" onclick="closeEditTicketModal()">Cancel</button>
-              <button type="submit" class="save-btn">Save Changes</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    `;
-    
-    // Add modal to page
-    document.body.insertAdjacentHTML('beforeend', editModalHTML);
-    
-    // Handle form submission
-    document.getElementById('edit-ticket-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await saveTicketChanges(ticketId);
-    });
-    
-  } catch (error) {
-    console.error('Error loading ticket for edit:', error);
-    alert('Failed to load ticket for editing. Please try again.');
-  }
-}
-
-async function saveTicketChanges(ticketId) {
-  try {
-    const title = document.getElementById('edit-title').value.trim();
-    const description = document.getElementById('edit-description').value.trim();
-    const category = document.getElementById('edit-category').value;
-    const status = document.getElementById('edit-status').value;
-    
-    // Validate required fields
-    if (!title || !category || !status) {
-      alert('Please fill in all required fields.');
-      return;
-    }
-    
-    // Show loading state
-    const saveBtn = document.querySelector('.save-btn');
-    const originalText = saveBtn.textContent;
-    saveBtn.textContent = 'Saving...';
-    saveBtn.disabled = true;
-    
-    // Update ticket in Firestore
-    const updateData = {
-      title: title,
-      description: description,
-      category: category,
-      status: status,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    
-    await db.collection('tickets').doc(ticketId).update(updateData);
-    
-    // Add system message about the edit
-    const currentUser = firebase.auth().currentUser;
-    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-    const userData = userDoc.exists ? userDoc.data() : {};
-    const userName = userData.name || currentUser.displayName || currentUser.email || 'Unknown User';
-    
-    const editMessage = {
-      message: \`Ticket edited by \${userName}\`,
-      senderEmail: 'system',
-      senderName: 'System',
-      timestamp: new Date()
-    };
-    
-    await db.collection('tickets').doc(ticketId).update({
-      messages: firebase.firestore.FieldValue.arrayUnion(editMessage)
-    });
-    
-    // Close modal and refresh tickets
-    closeEditTicketModal();
-    loadTickets(); // Refresh the ticket list
-    
-    console.log('✅ Ticket updated successfully');
-    
-  } catch (error) {
-    console.error('❌ Error saving ticket changes:', error);
-    alert('Failed to save changes. Please try again.');
-    
-    // Reset button state
-    const saveBtn = document.querySelector('.save-btn');
-    if (saveBtn) {
-      saveBtn.textContent = originalText;
-      saveBtn.disabled = false;
-    }
-  }
-}
-
-function closeEditTicketModal() {
-  const modal = document.getElementById('edit-ticket-modal');
-  if (modal) {
-    modal.remove();
-  }
-}
-
-// CSS for edit modal (add to existing modal styles)
-const editModalCSS = \`
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--color-text-dark);
-  }
-  
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid var(--color-border-light);
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-    box-sizing: border-box;
-  }
-  
-  .form-group input:focus,
-  .form-group select:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--color-border-light);
-  }
-  
-  .cancel-btn,
-  .save-btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .cancel-btn {
-    background: var(--color-background-light);
-    color: var(--color-text-muted);
-    border: 1px solid var(--color-border-light);
-  }
-  
-  .cancel-btn:hover {
-    background: #e2e6ea;
-  }
-  
-  .save-btn {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    color: white;
-  }
-  
-  .save-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-  }
-  
-  .save-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-\`;
-
-// Inject CSS for edit modal
-const editStyleSheet = document.createElement('style');
-editStyleSheet.textContent = editModalCSS;
-document.head.appendChild(editStyleSheet);
-</script>
 
 <!-- Transfer Type Selection JavaScript -->
 <script>
