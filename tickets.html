@@ -3397,54 +3397,68 @@ async function editTicket(ticketId) {
     
     const ticket = { id: ticketDoc.id, ...ticketDoc.data() };
     
-    // Create edit modal HTML
+    // Create edit modal HTML - styled like create ticket modal
     const editModalHTML = `
-      <div id="edit-ticket-modal" class="modal-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 10000;">
-        <div class="modal-content" style="background: white; border-radius: 8px; max-width: 800px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); position: relative; margin: 20px;">
-          <div class="modal-header" style="padding: 1.5rem; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin: 0; color: var(--color-primary);">Edit Ticket: ${ticket.ticketId}</h2>
-            <button class="close-btn" onclick="closeEditTicketModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6c757d; padding: 0; width: 30px; height: 30px;">&times;</button>
-          </div>
+      <div id="edit-ticket-modal" class="create-ticket-modal">
+        <div class="create-ticket-modal-content">
+          <button class="create-ticket-modal-close" onclick="closeEditTicketModal()">&times;</button>
           
-          <div style="padding: 1.5rem;">
-            <form id="edit-ticket-form">
-              <div class="form-group">
-                <label for="edit-title">Title:</label>
-                <input type="text" id="edit-title" value="${(ticket.title || '').replace(/"/g, '&quot;')}" required>
-              </div>
-              
-              <div class="form-group">
-                <label for="edit-description">Description:</label>
-                <textarea id="edit-description" rows="8">${(ticket.description || '').replace(/"/g, '&quot;')}</textarea>
-              </div>
-              
-              <div class="form-group">
-                <label for="edit-category">Category:</label>
-                <select id="edit-category" required>
-                  <option value="Client Order Fulfilment Team/Group" ${ticket.category === 'Client Order Fulfilment Team/Group' ? 'selected' : ''}>Client Order Fulfilment Team/Group</option>
-                  <option value="IT Support" ${ticket.category === 'IT Support' ? 'selected' : ''}>IT Support</option>
-                  <option value="Gallery Managers" ${ticket.category === 'Gallery Managers' ? 'selected' : ''}>Gallery Managers</option>
-                  <option value="Head Office" ${ticket.category === 'Head Office' ? 'selected' : ''}>Head Office</option>
-                  <option value="Gallery Support" ${ticket.category === 'Gallery Support' ? 'selected' : ''}>Gallery Support</option>
-                </select>
-              </div>
-              
-              <div class="form-group">
-                <label for="edit-status">Status:</label>
-                <select id="edit-status" required>
-                  <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
-                  <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-                  <option value="on-hold" ${ticket.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
-                  <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
-                </select>
-              </div>
-              
-              <div class="form-actions">
-                <button type="button" class="cancel-btn" onclick="closeEditTicketModal()">Cancel</button>
-                <button type="submit" class="save-btn">Save Changes</button>
-              </div>
-            </form>
-          </div>
+          <h3>✏️ Edit Ticket: ${ticket.ticketId}</h3>
+          
+          <div id="edit-ticket-status"></div>
+          
+          <form id="edit-ticket-form" class="modal-form" novalidate>
+            <!-- Title Field -->
+            <div class="form-group">
+              <label for="edit-title" class="form-label">Subject/Title: *</label>
+              <input type="text" id="edit-title" class="form-input full-width" 
+                     value="${(ticket.title || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Brief description of the issue..." required>
+            </div>
+            
+            <!-- Category -->
+            <div class="form-group">
+              <label for="edit-category" class="form-label">Category: *</label>
+              <select id="edit-category" class="form-select full-width" required>
+                <option value="">Select a department...</option>
+                <option value="Client Order Fulfilment Team/Group" ${ticket.category === 'Client Order Fulfilment Team/Group' ? 'selected' : ''}>Client Order Fulfilment Team/Group</option>
+                <option value="Manufacturing and QC" ${ticket.category === 'Manufacturing and QC' ? 'selected' : ''}>Manufacturing and QC</option>
+                <option value="Framing" ${ticket.category === 'Framing' ? 'selected' : ''}>Framing</option>
+                <option value="Stock Control" ${ticket.category === 'Stock Control' ? 'selected' : ''}>Stock Control</option>
+                <option value="Logistics" ${ticket.category === 'Logistics' ? 'selected' : ''}>Logistics</option>
+                <option value="Operations" ${ticket.category === 'Operations' ? 'selected' : ''}>Operations</option>
+                <option value="Inventory" ${ticket.category === 'Inventory' ? 'selected' : ''}>Inventory</option>
+                <option value="IT Support" ${ticket.category === 'IT Support' ? 'selected' : ''}>IT Support</option>
+                <option value="HR" ${ticket.category === 'HR' ? 'selected' : ''}>HR</option>
+                <option value="General" ${ticket.category === 'General' ? 'selected' : ''}>General</option>
+              </select>
+            </div>
+            
+            <!-- Status -->
+            <div class="form-group">
+              <label for="edit-status" class="form-label">Status: *</label>
+              <select id="edit-status" class="form-select full-width" required>
+                <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
+                <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                <option value="on-hold" ${ticket.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
+                <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+                <option value="transferred" ${ticket.status === 'transferred' ? 'selected' : ''}>Transferred</option>
+              </select>
+            </div>
+            
+            <!-- Description -->
+            <div class="form-group">
+              <label for="edit-description" class="form-label">Description:</label>
+              <textarea id="edit-description" class="form-textarea full-width" rows="8" 
+                        placeholder="Provide detailed information about the issue...">${(ticket.description || '').replace(/"/g, '&quot;')}</textarea>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="form-actions">
+              <button type="button" class="cancel-btn" onclick="closeEditTicketModal()">Cancel</button>
+              <button type="submit" class="create-ticket-button save-btn">Save Changes</button>
+            </div>
+          </form>
         </div>
       </div>
     `;
@@ -3487,7 +3501,7 @@ async function saveTicketChanges(ticketId) {
     
     // Validate required fields
     if (!title || !category || !status) {
-      alert('Please fill in all required fields.');
+      showEditStatus('Please fill in all required fields.', 'error');
       return;
     }
     
@@ -3594,11 +3608,14 @@ async function saveTicketChanges(ticketId) {
       });
     }
     
-    // Close modal and refresh tickets
-    closeEditTicketModal();
-    loadTickets(); // Refresh the ticket list
-    
     console.log('✅ Ticket updated successfully');
+    showEditStatus('Ticket updated successfully!', 'success');
+    
+    // Close modal and refresh tickets after a short delay to show success message
+    setTimeout(() => {
+      closeEditTicketModal();
+      loadTickets(); // Refresh the ticket list
+    }, 1500);
     
   } catch (error) {
     console.error('❌ Error saving ticket changes:', error);
@@ -3612,7 +3629,7 @@ async function saveTicketChanges(ticketId) {
     } else if (error.code === 'unauthenticated') {
       errorMessage = 'Authentication expired. Please refresh the page and sign in again.';
     }
-    alert(errorMessage);
+    showEditStatus(errorMessage, 'error');
     
     // Reset button state
     const saveBtn = document.querySelector('.save-btn');
@@ -3628,6 +3645,21 @@ function closeEditTicketModal() {
   if (modal) {
     modal.remove();
   }
+}
+
+// Show status message in edit modal
+function showEditStatus(message, type) {
+  const statusDiv = document.getElementById('edit-ticket-status');
+  if (!statusDiv) return;
+  
+  statusDiv.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+  
+  // Auto-clear after 5 seconds
+  setTimeout(() => {
+    if (statusDiv) {
+      statusDiv.innerHTML = '';
+    }
+  }, 5000);
 }
 let assignedUser = null;
 let assignedTeam = null;
