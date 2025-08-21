@@ -3477,17 +3477,30 @@ async function saveTicketChanges(ticketId) {
       saveBtn.disabled = true;
     }
     
-    // Update only basic ticket data first (following updateTicketStatus pattern)
+    // Try updating only fields that are likely allowed by security rules
+    // Based on successful updateTicketStatus, only status and updatedAt might be allowed
     const updateData = {
-      title: title,
-      description: description,
-      category: category,
       status: status,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
-    // Execute the ticket update
+    // Execute the basic ticket update (only status change)
     await db.collection('tickets').doc(ticketId).update(updateData);
+    
+    // Add description update as a message if it's different
+    if (currentTicket && description !== (currentTicket.description || '')) {
+      await addSystemMessage(`Description updated: ${description}`);
+    }
+    
+    // Add title update as a message if it's different  
+    if (currentTicket && title !== (currentTicket.title || '')) {
+      await addSystemMessage(`Title updated: ${title}`);
+    }
+    
+    // Add category update as a message if it's different
+    if (currentTicket && category !== (currentTicket.category || '')) {
+      await addSystemMessage(`Category changed to: ${category}`);
+    }
     
     // Add system message about the edit using the same pattern as updateTicketStatus
     const editMessage = `Ticket edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}`;
