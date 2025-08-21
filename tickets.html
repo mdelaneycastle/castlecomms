@@ -2619,8 +2619,8 @@
 
     /* Edit Ticket Button Styles */
     .edit-ticket-btn {
-      background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-      color: #212529;
+      background: none;
+      color: #333333;
       border: none;
       padding: 0.5rem 1rem;
       border-radius: 6px;
@@ -2631,18 +2631,16 @@
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
-      box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
     }
 
     .edit-ticket-btn:hover {
-      background: linear-gradient(135deg, #e0a800 0%, #dc6d03 100%);
+      background: rgba(0, 0, 0, 0.05);
       transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
     }
 
     .edit-ticket-btn:active {
       transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+      background: rgba(0, 0, 0, 0.1);
     }
 
     .ticket-actions {
@@ -6666,28 +6664,9 @@ document.addEventListener('keydown', (e) => {
 <!-- Notification Badge System -->
 <script src="notification-badges.js"></script>
 
-<!-- Transfer Type Selection JavaScript -->
+<!-- Edit Ticket Functionality -->
 <script>
-// Handle transfer type selection
-document.addEventListener('DOMContentLoaded', () => {
-  const transferTypeRadios = document.querySelectorAll('input[name="transfer-type"]');
-  const completeHelp = document.querySelector('.transfer-help-complete');
-  const handoffHelp = document.querySelector('.transfer-help-handoff');
-  
-  transferTypeRadios.forEach(radio => {
-    radio.addEventListener('change', function() {
-      if (this.value === 'complete') {
-        completeHelp.style.display = 'block';
-        handoffHelp.style.display = 'none';
-      } else if (this.value === 'handoff') {
-        completeHelp.style.display = 'none';
-        handoffHelp.style.display = 'block';
-      }
-    });
-  });
-});
-
-// Edit Ticket Functionality
+// Edit Ticket Functionality - Available globally
 async function editTicket(ticketId) {
   try {
     // Load ticket data
@@ -6921,6 +6900,28 @@ const editModalCSS = \`
 const editStyleSheet = document.createElement('style');
 editStyleSheet.textContent = editModalCSS;
 document.head.appendChild(editStyleSheet);
+</script>
+
+<!-- Transfer Type Selection JavaScript -->
+<script>
+// Handle transfer type selection
+document.addEventListener('DOMContentLoaded', () => {
+  const transferTypeRadios = document.querySelectorAll('input[name="transfer-type"]');
+  const completeHelp = document.querySelector('.transfer-help-complete');
+  const handoffHelp = document.querySelector('.transfer-help-handoff');
+  
+  transferTypeRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'complete') {
+        completeHelp.style.display = 'block';
+        handoffHelp.style.display = 'none';
+      } else if (this.value === 'handoff') {
+        completeHelp.style.display = 'none';
+        handoffHelp.style.display = 'block';
+      }
+    });
+  });
+});
 
 </script>
 
