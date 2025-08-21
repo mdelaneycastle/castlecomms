@@ -285,6 +285,29 @@
       padding: 0.5rem;
     }
 
+    
+
+    #modal-ticket-category,
+    #modal-assign-team,
+    #coft-delivery-method,
+    #coft-ticket-reason {
+      height: auto;             /* let them fit text */
+      min-height: 10px;         /* give a small minimum */
+      font-size: 0.9rem;        /* shrink text if needed */
+      padding: 1rem 1rem;  /* tighten padding */
+      max-width: 33%;           /* about a third of container width */
+      display: inline-block;    /* stops stretching full width */
+    }
+
+    /* Make modal dropdowns taller too */
+    #modal-assign-team {
+      height: 40px; /* Half of previous 80px */
+      overflow-y: auto;
+      padding: 0.25rem !important; /* Small padding for readability */
+    }
+
+    
+
     /* Ticket Counter Display - Simple Left Aligned */
     .ticket-counter-display {
       text-align: left;
@@ -1769,8 +1792,60 @@
       gap: 1rem;
     }
 
+    /* Transfer Type Selection */
+    .transfer-type-selection {
+      border-bottom: 1px solid var(--color-border-light);
+      padding-bottom: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .transfer-type-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .transfer-type-buttons input[type="radio"] {
+      display: none;
+    }
+
+    .transfer-type-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: var(--color-background-light);
+      border: 2px solid var(--color-border-light);
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .transfer-type-btn:hover {
+      border-color: #17a2b8;
+      background: rgba(23, 162, 184, 0.1);
+    }
+
+    .transfer-type-buttons input[type="radio"]:checked + .transfer-type-btn {
+      background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+      color: var(--color-white);
+      border-color: #138496;
+    }
+
+    .transfer-type-help {
+      font-size: 0.85rem;
+      color: #6c757d;
+      line-height: 1.4;
+    }
+
+    .transfer-help-handoff.hidden {
+      display: none;
+    }
+
     .transfer-user-search label,
-    .transfer-reason label {
+    .transfer-reason label,
+    .transfer-team-selection label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
@@ -2564,6 +2639,114 @@
       border-radius: 4px; 
       font-weight: 600;
     }
+
+    /* Edit Ticket Button Styles */
+    .edit-ticket-btn {
+      background: none;
+      color: #333333;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .edit-ticket-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: translateY(-1px);
+    }
+
+    .edit-ticket-btn:active {
+      transform: translateY(0);
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .ticket-actions {
+      text-align: center;
+    }
+
+    /* Edit Modal Styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--color-text-dark);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--color-border-light);
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--color-border-light);
+    }
+    
+    .cancel-btn,
+    .save-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .cancel-btn {
+      background: var(--color-background-light);
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border-light);
+    }
+    
+    .cancel-btn:hover {
+      background: #e2e6ea;
+    }
+    
+    .save-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+    
+    .save-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    }
+    
+    .save-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -2840,6 +3023,24 @@
     <div class="ticket-transfer-section">
       <h4>🔄 Transfer Ticket</h4>
       <div class="transfer-form">
+        <div class="transfer-type-selection">
+          <label class="form-label">Transfer Type:</label>
+          <div class="transfer-type-buttons">
+            <input type="radio" id="transfer-complete" name="transfer-type" value="complete" checked>
+            <label for="transfer-complete" class="transfer-type-btn">📤 Complete Transfer</label>
+            <input type="radio" id="transfer-handoff" name="transfer-type" value="handoff">
+            <label for="transfer-handoff" class="transfer-type-btn">🔄 Handoff</label>
+          </div>
+          <div class="transfer-type-help">
+            <div class="transfer-help-complete">
+              <strong>Complete Transfer:</strong> This ticket isn't for your team - transfer it entirely to another team.
+            </div>
+            <div class="transfer-help-handoff hidden">
+              <strong>Handoff:</strong> Your team has completed their part - hand off to the next team while keeping it visible in your completed transfers.
+            </div>
+          </div>
+        </div>
+        
         <div class="transfer-team-selection">
           <label for="transfer-team-select">Transfer to Team:</label>
           <select id="transfer-team-select" class="form-select" onchange="handleTransferTeamSelection()">
@@ -3042,7 +3243,6 @@
           <select id="coft-ticket-reason" class="form-select full-width" required onchange="handleReasonSelection()">
             <option value="">Choose reason...</option>
             <!-- Order Chasing reasons -->
-            <option value="Chasing dispatch note" class="order-chasing-reason">Chasing dispatch note</option>
             <option value="Something has gone wrong with the order and the client has registered a complaint" class="order-chasing-reason">Something has gone wrong with the order and the client has registered a complaint</option>
             <option value="Chasing a delayed order" class="order-chasing-reason">Chasing a delayed order</option>
             <option value="A collection needs arranging from the client" class="order-chasing-reason">A collection needs arranging from the client</option>
@@ -3172,6 +3372,367 @@ let db;
 let currentUser;
 let allUsers = [];
 let allTeams = [];
+
+// Edit Ticket Functionality - Defined early to be available for onclick handlers
+async function editTicket(ticketId) {
+  console.log('🔍 editTicket called with ID:', ticketId);
+  try {
+    // Check if modal is already open and remove any stale modals
+    const existingModal = document.getElementById('edit-ticket-modal');
+    if (existingModal) {
+      console.log('⚠️ Found existing modal, removing it first');
+      existingModal.remove();
+    }
+    
+    // Wait for db to be initialized
+    if (!db) {
+      console.error('Database not initialized yet');
+      setTimeout(() => editTicket(ticketId), 500);
+      return;
+    }
+    
+    console.log('📊 Database initialized, loading ticket data...');
+    
+    // Load ticket data
+    const ticketDoc = await db.collection('tickets').doc(ticketId).get();
+    if (!ticketDoc.exists) {
+      console.error('❌ Ticket not found:', ticketId);
+      alert('Ticket not found!');
+      return;
+    }
+    
+    const ticket = { id: ticketDoc.id, ...ticketDoc.data() };
+    console.log('✅ Ticket loaded:', ticket.ticketId);
+    console.log('📊 COFT Data:', ticket.coftData);
+    
+    // If no coftData but this looks like a COFT ticket, try to parse from description
+    if (!ticket.coftData && ticket.description && ticket.description.includes('**COFT TICKET')) {
+      console.log('🔍 Parsing COFT data from description...');
+      ticket.coftData = parseCOFTDataFromDescription(ticket.description);
+      console.log('📊 Parsed COFT Data:', ticket.coftData);
+    }
+    
+    // Create edit modal HTML - styled like create ticket modal
+    const editModalHTML = `
+      <div id="edit-ticket-modal" class="create-ticket-modal show">
+        <div class="create-ticket-modal-content">
+          <button class="create-ticket-modal-close" onclick="closeEditTicketModal()">&times;</button>
+          
+          <h3>✏️ Edit Ticket: ${ticket.ticketId}</h3>
+          
+          <div id="edit-ticket-status"></div>
+          
+          <form id="edit-ticket-form" class="modal-form" novalidate>
+            <!-- SO Number -->
+            <div class="form-group">
+              <label for="edit-so-number" class="form-label">SO Number:</label>
+              <input type="text" id="edit-so-number" class="form-input full-width" 
+                     value="${(ticket.coftData?.soNumber || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Sales Order Number">
+            </div>
+            
+            <!-- Client -->
+            <div class="form-group">
+              <label for="edit-client" class="form-label">Client:</label>
+              <input type="text" id="edit-client" class="form-input full-width" 
+                     value="${(ticket.coftData?.clientName || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Client Name">
+            </div>
+            
+            <!-- Item Code -->
+            <div class="form-group">
+              <label for="edit-item-code" class="form-label">Item Code:</label>
+              <input type="text" id="edit-item-code" class="form-input full-width" 
+                     value="${(ticket.coftData?.itemCode || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Item Code">
+            </div>
+            
+            <!-- Artwork Title -->
+            <div class="form-group">
+              <label for="edit-artwork-title" class="form-label">Artwork Title:</label>
+              <input type="text" id="edit-artwork-title" class="form-input full-width" 
+                     value="${(ticket.coftData?.artworkTitle || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Artwork Title">
+            </div>
+            
+            <!-- Edition Number -->
+            <div class="form-group">
+              <label for="edit-edition-number" class="form-label">Edition Number:</label>
+              <input type="text" id="edit-edition-number" class="form-input full-width" 
+                     value="${(ticket.coftData?.editionNumber || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Edition Number">
+            </div>
+            
+            <!-- Order Date -->
+            <div class="form-group">
+              <label for="edit-order-date" class="form-label">Order Date:</label>
+              <input type="date" id="edit-order-date" class="form-input full-width" 
+                     value="${ticket.coftData?.orderDate || ''}">
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="form-actions">
+              <button type="button" class="cancel-btn" onclick="closeEditTicketModal()">Cancel</button>
+              <button type="submit" class="create-ticket-button save-btn">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+    
+    // Add modal to page
+    console.log('🎨 Creating modal HTML and adding to page...');
+    document.body.insertAdjacentHTML('beforeend', editModalHTML);
+    console.log('✅ Modal added to DOM');
+    
+    // Handle form submission
+    document.getElementById('edit-ticket-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await saveTicketChanges(ticketId);
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('edit-ticket-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'edit-ticket-modal') {
+        closeEditTicketModal();
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error loading ticket for edit:', error);
+    alert('Failed to load ticket for editing. Please try again.');
+  }
+}
+
+// Make function globally available immediately after definition
+window.editTicket = editTicket;
+
+// Parse COFT data from ticket description for legacy tickets
+function parseCOFTDataFromDescription(description) {
+  const coftData = {};
+  
+  try {
+    // Extract data using regex patterns
+    const soMatch = description.match(/• SO Number: (.+)/);
+    const clientMatch = description.match(/• Client: (.+)/);
+    const itemCodeMatch = description.match(/• Item Code: (.+)/);
+    const artworkMatch = description.match(/• Artwork Title: (.+)/);
+    const editionMatch = description.match(/• Edition Number: (.+)/);
+    const orderDateMatch = description.match(/• Order Date: (.+)/);
+    
+    coftData.soNumber = soMatch ? soMatch[1].trim() : '';
+    coftData.clientName = clientMatch ? clientMatch[1].trim() : '';
+    coftData.itemCode = itemCodeMatch ? itemCodeMatch[1].trim() : '';
+    coftData.artworkTitle = artworkMatch ? artworkMatch[1].trim() : '';
+    coftData.editionNumber = editionMatch ? editionMatch[1].trim() : '';
+    
+    // Parse order date
+    if (orderDateMatch) {
+      const dateStr = orderDateMatch[1].trim();
+      const date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        coftData.orderDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      } else {
+        coftData.orderDate = '';
+      }
+    } else {
+      coftData.orderDate = '';
+    }
+    
+    console.log('✅ Successfully parsed COFT data from description');
+    return coftData;
+  } catch (error) {
+    console.error('❌ Error parsing COFT data:', error);
+    return {
+      soNumber: '',
+      clientName: '',
+      itemCode: '',
+      artworkTitle: '',
+      editionNumber: '',
+      orderDate: ''
+    };
+  }
+}
+
+async function saveTicketChanges(ticketId) {
+  let originalText = 'Save Changes';
+  try {
+    // Check if system is properly initialized
+    if (!db || !currentUser) {
+      alert('System not ready. Please wait a moment and try again.');
+      return;
+    }
+    
+    const soNumber = document.getElementById('edit-so-number').value.trim();
+    const client = document.getElementById('edit-client').value.trim();
+    const itemCode = document.getElementById('edit-item-code').value.trim();
+    const artworkTitle = document.getElementById('edit-artwork-title').value.trim();
+    const editionNumber = document.getElementById('edit-edition-number').value.trim();
+    const orderDate = document.getElementById('edit-order-date').value;
+    
+    // Show loading state
+    const saveBtn = document.querySelector('.save-btn');
+    if (saveBtn) {
+      originalText = saveBtn.textContent;
+      saveBtn.textContent = 'Saving...';
+      saveBtn.disabled = true;
+    }
+    
+    // Try to update COFT fields directly
+    const changes = [];
+    const failedUpdates = [];
+    
+    // Get current ticket data to compare changes
+    const ticketDoc = await db.collection('tickets').doc(ticketId).get();
+    const currentTicket = ticketDoc.data();
+    const currentCoftData = currentTicket.coftData || {};
+    
+    // Build updated COFT data
+    const newCoftData = {
+      ...currentCoftData,
+      soNumber: soNumber,
+      clientName: client,
+      itemCode: itemCode,
+      artworkTitle: artworkTitle,
+      editionNumber: editionNumber,
+      orderDate: orderDate
+    };
+    
+    // Check for changes - only log fields that actually changed
+    if ((currentCoftData.soNumber || '') !== soNumber) {
+      changes.push(`SO Number: "${currentCoftData.soNumber || ''}" → "${soNumber}"`);
+    }
+    if ((currentCoftData.clientName || '') !== client) {
+      changes.push(`Client: "${currentCoftData.clientName || ''}" → "${client}"`);
+    }
+    if ((currentCoftData.itemCode || '') !== itemCode) {
+      changes.push(`Item Code: "${currentCoftData.itemCode || ''}" → "${itemCode}"`);
+    }
+    if ((currentCoftData.artworkTitle || '') !== artworkTitle) {
+      changes.push(`Artwork Title: "${currentCoftData.artworkTitle || ''}" → "${artworkTitle}"`);
+    }
+    if ((currentCoftData.editionNumber || '') !== editionNumber) {
+      changes.push(`Edition Number: "${currentCoftData.editionNumber || ''}" → "${editionNumber}"`);
+    }
+    if ((currentCoftData.orderDate || '') !== orderDate) {
+      changes.push(`Order Date: "${currentCoftData.orderDate || ''}" → "${orderDate}"`);
+    }
+    
+    // Build update data
+    const updateData = {
+      coftData: newCoftData,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    // Try to update COFT data directly
+    if (changes.length > 0) {
+      try {
+        // Update the coftData field
+        await db.collection('tickets').doc(ticketId).update(updateData);
+        console.log('✅ COFT data updated successfully');
+        
+        // Also update title and description to reflect changes
+        const updatedTitle = `COFT Ticket - SO: ${soNumber} - ${client}`;
+        
+        // Ensure all required fields for buildCOFTDescription are present
+        const completeNewCoftData = {
+          ...newCoftData,
+          coftType: currentCoftData.coftType || 'order-chasing',
+          deliveryMethod: currentCoftData.deliveryMethod || 'Unknown',
+          clientAware: currentCoftData.clientAware || 'Unknown',
+          etaDiscussed: currentCoftData.etaDiscussed || '',
+          ticketReason: currentCoftData.ticketReason || 'Data updated via edit',
+          specificDate: currentCoftData.specificDate || '',
+          photos: currentCoftData.photos || [],
+          additionalInfo: currentCoftData.additionalInfo || ''
+        };
+        
+        const updatedDescription = buildCOFTDescription(completeNewCoftData);
+        
+        await db.collection('tickets').doc(ticketId).update({
+          title: updatedTitle,
+          description: updatedDescription,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log('✅ Title and description updated successfully');
+        
+        // Add system message about the changes
+        const editMessage = {
+          message: `COFT data edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}:\n${changes.join('\n')}`,
+          senderEmail: 'system',
+          senderName: 'System',
+          timestamp: new Date()
+        };
+        
+        await db.collection('tickets').doc(ticketId).update({
+          messages: firebase.firestore.FieldValue.arrayUnion(editMessage),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+      } catch (error) {
+        console.error('❌ Failed to update COFT data:', error.message);
+        throw error;
+      }
+    } else {
+      console.log('ℹ️ No changes detected');
+      showEditStatus('No changes detected.', 'info');
+      return;
+    }
+    
+    console.log('✅ Ticket updated successfully');
+    showEditStatus('Ticket updated successfully!', 'success');
+    
+    // Close modal and refresh tickets after a short delay to show success message
+    setTimeout(() => {
+      closeEditTicketModal();
+      loadTickets(); // Refresh the ticket list
+    }, 1500);
+    
+  } catch (error) {
+    console.error('❌ Error saving ticket changes:', error);
+    
+    // Show user-friendly error message
+    let errorMessage = 'Failed to save changes. Please try again.';
+    if (error.code === 'permission-denied') {
+      errorMessage = 'You do not have permission to edit this ticket. Please contact an administrator.';
+    } else if (error.code === 'not-found') {
+      errorMessage = 'This ticket no longer exists. It may have been deleted.';
+    } else if (error.code === 'unauthenticated') {
+      errorMessage = 'Authentication expired. Please refresh the page and sign in again.';
+    }
+    showEditStatus(errorMessage, 'error');
+    
+    // Reset button state
+    const saveBtn = document.querySelector('.save-btn');
+    if (saveBtn) {
+      saveBtn.textContent = originalText;
+      saveBtn.disabled = false;
+    }
+  }
+}
+
+function closeEditTicketModal() {
+  const modal = document.getElementById('edit-ticket-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Show status message in edit modal
+function showEditStatus(message, type) {
+  const statusDiv = document.getElementById('edit-ticket-status');
+  if (!statusDiv) return;
+  
+  statusDiv.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+  
+  // Auto-clear after 5 seconds
+  setTimeout(() => {
+    if (statusDiv) {
+      statusDiv.innerHTML = '';
+    }
+  }, 5000);
+}
 let assignedUser = null;
 let assignedTeam = null;
 let selectedFilters = new Set(['all']); // Use Set for multiple status selections
@@ -3623,19 +4184,36 @@ function checkUserTicketAccess(ticket, user) {
     return true;
   }
   
-  // Check if assigned to a team that user is a member of
+  // Check if assigned to a team that user is a member of (current assignment)
   if (ticket.assignedTo.type === 'team') {
     // New format with teamId - look up team in allTeams
     if (ticket.assignedTo.teamId) {
       const team = allTeams.find(t => t.id === ticket.assignedTo.teamId);
       if (team && team.members) {
-        return team.members.some(member => member.email === user.email);
+        if (team.members.some(member => member.email === user.email)) {
+          return true;
+        }
       }
     }
     
     // Legacy format with teamMembers directly in assignedTo
     if (ticket.assignedTo.teamMembers) {
-      return ticket.assignedTo.teamMembers.some(member => member.email === user.email);
+      if (ticket.assignedTo.teamMembers.some(member => member.email === user.email)) {
+        return true;
+      }
+    }
+  }
+  
+  // Check if user is part of any participating teams (for handoff transfers only)
+  // For complete transfers, participating teams should NOT grant access
+  if (ticket.participatingTeams && ticket.participatingTeams.length > 0 && ticket.transferType === 'handoff') {
+    for (const participatingTeam of ticket.participatingTeams) {
+      const team = allTeams.find(t => t.id === participatingTeam.teamId);
+      if (team && team.members) {
+        if (team.members.some(member => member.email === user.email)) {
+          return true;
+        }
+      }
     }
   }
   
@@ -3651,15 +4229,27 @@ function checkUserTicketAccess(ticket, user) {
 function checkTicketTransferred(ticket, user) {
   // A ticket is considered "transferred" if:
   // 1. There is transfer history AND
-  // 2. The user was previously involved with the ticket (either created it or was assigned to it)
+  // 2. The user was previously involved with the ticket AND
+  // 3. The ticket is NOT resolved (resolved tickets should show as resolved, not transferred) AND
+  // 4. For complete transfers: ticket is no longer assigned to user's team
+  // 5. For handoff transfers: user's team has completed status in participatingTeams
+  
+  // If ticket is resolved, it should show as resolved, not transferred
+  if (ticket.status === 'resolved') {
+    return false;
+  }
   
   if (!ticket.transferHistory || ticket.transferHistory.length === 0) {
     return false;
   }
   
+  // Check if user was part of any team mentioned in the transfer history
+  let wasUserInvolved = false;
+  let userOriginalTeamId = null;
+  
   // Check if user created the ticket
   if (ticket.createdBy.uid === user.uid) {
-    return true;
+    wasUserInvolved = true;
   }
   
   // Check if user was part of any team mentioned in the transfer history
@@ -3671,16 +4261,58 @@ function checkTicketTransferred(ticket, user) {
         if (transfer.from.teamId) {
           const team = allTeams.find(t => t.id === transfer.from.teamId);
           if (team && team.members && team.members.some(member => member.email === user.email)) {
-            return true;
+            wasUserInvolved = true;
+            // Remember the user's original team for transfer-back detection
+            if (!userOriginalTeamId) {
+              userOriginalTeamId = transfer.from.teamId;
+            }
+            break;
           }
         }
         // Legacy format with teamMembers
         else if (transfer.from.teamMembers && transfer.from.teamMembers.some(member => member.email === user.email)) {
-          return true;
+          wasUserInvolved = true;
+          break;
         }
       } else if (transfer.from.email === user.email) {
         // Individual assignment
-        return true;
+        wasUserInvolved = true;
+        break;
+      }
+    }
+  }
+  
+  if (!wasUserInvolved) {
+    return false;
+  }
+  
+  // Check if ticket was transferred back to user's original team
+  if (userOriginalTeamId && ticket.assignedTo && ticket.assignedTo.type === 'team' && 
+      ticket.assignedTo.teamId === userOriginalTeamId) {
+    // Ticket was transferred back to user's original team - not considered transferred anymore
+    return false;
+  }
+  
+  // For handoff transfers, check if user's team has "completed" status
+  if (ticket.participatingTeams && ticket.participatingTeams.length > 0) {
+    for (const participatingTeam of ticket.participatingTeams) {
+      const team = allTeams.find(t => t.id === participatingTeam.teamId);
+      if (team && team.members && team.members.some(member => member.email === user.email)) {
+        // User is part of this participating team
+        if (participatingTeam.status === 'completed') {
+          return true; // This is a completed handoff for the user's team
+        }
+      }
+    }
+  }
+  
+  // For complete transfers, check if user is no longer assigned to the current ticket
+  if (ticket.assignedTo && ticket.assignedTo.type === 'team' && ticket.assignedTo.teamId) {
+    const currentTeam = allTeams.find(t => t.id === ticket.assignedTo.teamId);
+    if (currentTeam && currentTeam.members) {
+      const userIsCurrentlyAssigned = currentTeam.members.some(member => member.email === user.email);
+      if (!userIsCurrentlyAssigned) {
+        return true; // Complete transfer away from user
       }
     }
   }
@@ -3769,6 +4401,9 @@ async function loadTickets() {
     
     let tickets = Array.from(ticketMap.values());
     
+    // Calculate counts for all categories BEFORE status filtering (using all accessible tickets)
+    updateFilterCounts(tickets);
+    
     // Apply multiple status filters
     if (selectedFilters.has('transferred')) {
       // If "transferred" is one of the selected filters
@@ -3789,8 +4424,8 @@ async function loadTickets() {
     } else {
       // No "transferred" filter selected
       if (selectedFilters.has('all')) {
-        // Show all non-transferred tickets
-        tickets = tickets.filter(ticket => !checkTicketTransferred(ticket, currentUser));
+        // Show all tickets - no filtering needed, all accessible tickets should be shown
+        // (tickets already contains all accessible tickets from the access check above)
       } else {
         // Show tickets that match any of the selected statuses (excluding transferred tickets)
         const statusesToShow = Array.from(selectedFilters);
@@ -3814,9 +4449,6 @@ async function loadTickets() {
     
     // Apply advanced filters
     tickets = tickets.filter(ticket => matchesAdvancedFilters(ticket));
-    
-    // Calculate counts for all categories AFTER all filtering is complete
-    updateFilterCounts(tickets);
     
     // Sort by last activity (newest first) - updatedAt, last message time, or creation date
     tickets.sort((a, b) => {
@@ -3869,6 +4501,7 @@ async function loadTickets() {
             <th>Ticket Status</th>
             <th>Timer</th>
             <th>Date Modified</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -3907,13 +4540,33 @@ async function loadTickets() {
       const displayStatus = isTransferred ? 'transferred' : ticket.status;
       const statusText = isTransferred ? 'transferred' : ticket.status.replace('-', ' ');
       
-      // Determine assignment display text
+      // Determine assignment display text with transfer type info
       let assignmentText = '';
       if (isTransferred) {
+        // Check if this is a handoff transfer for the user's team
+        let isHandoffCompleted = false;
+        let transferTypeText = 'Transferred to';
+        
+        if (ticket.participatingTeams && ticket.participatingTeams.length > 0) {
+          for (const participatingTeam of ticket.participatingTeams) {
+            const team = allTeams.find(t => t.id === participatingTeam.teamId);
+            if (team && team.members && team.members.some(member => member.email === currentUser.email)) {
+              if (participatingTeam.status === 'completed') {
+                isHandoffCompleted = true;
+                transferTypeText = 'Handed off to';
+                break;
+              }
+            }
+          }
+        }
+        
         if (ticket.assignedTo.type === 'team') {
-          assignmentText = `Transferred to: ${ticket.assignedTo.teamName} team`;
+          assignmentText = `${transferTypeText}: ${ticket.assignedTo.teamName} team`;
+          if (isHandoffCompleted) {
+            assignmentText += ' (Your part completed)';
+          }
         } else {
-          assignmentText = `Transferred to: ${ticket.assignedTo.name || ticket.assignedTo.email}`;
+          assignmentText = `${transferTypeText}: ${ticket.assignedTo.name || ticket.assignedTo.email}`;
         }
       } else {
         if (ticket.assignedTo.type === 'team') {
@@ -3965,6 +4618,11 @@ async function loadTickets() {
           <td><div class="ticket-status ${displayStatus}">${statusText}</div></td>
           <td><div class="ticket-timer-cell">${getTimerDisplayForTicket(ticket)}</div></td>
           <td><div class="ticket-modified">${formatTimestamp(lastModifiedDate)}</div></td>
+          <td><div class="ticket-actions">
+            <button class="edit-ticket-btn" onclick="event.stopPropagation(); editTicket('${ticket.id}')" title="Edit Ticket">
+              ✏️ Edit
+            </button>
+          </div></td>
         </tr>
       `;
     }).join('');
@@ -4025,12 +4683,14 @@ function updateFilterCounts(allTickets) {
     allTickets.forEach(ticket => {
       const isTransferred = checkTicketTransferred(ticket, currentUser);
       
+      // Count all tickets in the "all" counter
+      counts.all++;
+      
       if (isTransferred) {
         // This is a transferred ticket
         counts.transferred++;
       } else {
-        // This is an active ticket (assigned to me individually, via team, or created by me and still mine)
-        counts.all++;
+        // This is an active ticket - count by status
         if (counts[ticket.status] !== undefined) {
           counts[ticket.status]++;
         }
@@ -4591,6 +5251,11 @@ async function createTicketFromModal() {
         isRunning: true // Start timer immediately when ticket is created
       }
     };
+
+    // Add COFT data if this is a COFT ticket
+    if (isCOFTForm && coftData) {
+      ticketData.coftData = coftData;
+    }
     
     await db.collection('tickets').add(ticketData);
     
@@ -5206,18 +5871,25 @@ function extractCOFTDataFromTicket(ticket) {
   }
   
   try {
-    const description = ticket.description || '';
-    
-    // Extract SO Number
-    const soMatch = description.match(/SO Number:\s*([^\n\r]+)/i);
-    if (soMatch) {
-      defaultData.soNumber = soMatch[1].trim();
-    }
-    
-    // Extract Client Name
-    const clientMatch = description.match(/Client:\s*([^\n\r]+)/i);
-    if (clientMatch) {
-      defaultData.clientName = clientMatch[1].trim();
+    // First, try to get data from coftData field if available
+    if (ticket.coftData) {
+      defaultData.soNumber = ticket.coftData.soNumber || null;
+      defaultData.clientName = ticket.coftData.clientName || null;
+    } else {
+      // Fallback to parsing from description for legacy tickets
+      const description = ticket.description || '';
+      
+      // Extract SO Number
+      const soMatch = description.match(/SO Number:\s*([^\n\r]+)/i);
+      if (soMatch) {
+        defaultData.soNumber = soMatch[1].trim();
+      }
+      
+      // Extract Client Name
+      const clientMatch = description.match(/Client:\s*([^\n\r]+)/i);
+      if (clientMatch) {
+        defaultData.clientName = clientMatch[1].trim();
+      }
     }
     
     // For Gallery, we'll need to determine this based on business logic
@@ -5552,11 +6224,11 @@ async function loadTicketMessages(ticketId) {
       return;
     }
     
-    // Sort messages by timestamp
+    // Sort messages by timestamp (newest first)
     messages.sort((a, b) => {
       const aTime = a.timestamp?.toDate?.() || new Date(a.timestamp || 0);
       const bTime = b.timestamp?.toDate?.() || new Date(b.timestamp || 0);
-      return aTime - bTime;
+      return bTime - aTime;
     });
     
     const messageItems = messages.map(message => {
@@ -5573,8 +6245,8 @@ async function loadTicketMessages(ticketId) {
     
     messagesContainer.innerHTML = messageItems;
     
-    // Scroll to bottom
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // Scroll to top to show newest messages
+    messagesContainer.scrollTop = 0;
     
   } catch (error) {
     console.error('Error loading ticket messages:', error);
@@ -5674,9 +6346,26 @@ async function addSystemMessage(message) {
       timestamp: new Date()
     };
     
-    await db.collection('tickets').doc(currentTicket.id).update({
+    // Prepare update data
+    const updateData = {
       messages: firebase.firestore.FieldValue.arrayUnion(systemMessage)
-    });
+    };
+    
+    // Auto-update status to 'in-progress' if currently 'open'
+    if (currentTicket.status === 'open') {
+      updateData.status = 'in-progress';
+      
+      const statusChangeMessage = {
+        message: 'Status automatically changed to in-progress (system activity detected)',
+        senderEmail: 'system',
+        senderName: 'System',
+        timestamp: new Date()
+      };
+      
+      updateData.messages = firebase.firestore.FieldValue.arrayUnion(systemMessage, statusChangeMessage);
+    }
+    
+    await db.collection('tickets').doc(currentTicket.id).update(updateData);
     
     // Reload messages
     setTimeout(() => {
@@ -5783,7 +6472,7 @@ function handleTransferTeamSelection() {
   }
 }
 
-// Transfer ticket
+// Enhanced Transfer ticket with support for handoff and complete transfers
 async function transferTicket() {
   const transferTeamSelect = document.getElementById('transfer-team-select');
   const selectedTeamId = transferTeamSelect.value;
@@ -5805,6 +6494,9 @@ async function transferTicket() {
     return;
   }
   
+  // Get transfer type
+  const transferType = document.querySelector('input[name="transfer-type"]:checked').value;
+  
   // Check permissions - use team-aware permission check
   const canTransfer = checkUserCanManageTicket(currentTicket, currentUser);
   
@@ -5821,29 +6513,143 @@ async function transferTicket() {
     // Get current user's display name
     const transferredByName = await getUserDisplayName(currentUser);
     
-    // Create updated ticket data
+    // Get current team info - need to determine which team the user is transferring FROM
+    let fromTeamInfo = null;
+    
+    if (currentTicket.assignedTo && currentTicket.assignedTo.type === 'team') {
+      // Ticket is currently assigned to a team
+      fromTeamInfo = {
+        teamId: currentTicket.assignedTo.teamId,
+        teamName: currentTicket.assignedTo.teamName
+      };
+    } else {
+      // Ticket might be assigned to individual - find user's team
+      // For handoff transfers, we need to identify the team the user belongs to
+      for (const team of allTeams) {
+        if (team.members && team.members.some(member => member.email === currentUser.email)) {
+          fromTeamInfo = {
+            teamId: team.id,
+            teamName: team.name
+          };
+          break; // Use the first team found
+        }
+      }
+    }
+    
+    
+    // Build transfer history entry
+    const transferHistoryEntry = {
+      from: currentTicket.assignedTo,
+      to: {
+        type: 'team',
+        teamId: selectedTeam.id,
+        teamName: selectedTeam.name
+      },
+      transferredBy: {
+        email: currentUser.email,
+        name: transferredByName
+      },
+      reason: reason,
+      timestamp: new Date(),
+      transferType: transferType
+    };
+    
+    // Build base update data
     const updateData = {
       assignedTo: {
         type: 'team',
         teamId: selectedTeam.id,
         teamName: selectedTeam.name
       },
-      transferHistory: firebase.firestore.FieldValue.arrayUnion({
-        from: currentTicket.assignedTo,
-        to: {
-          type: 'team',
-          teamId: selectedTeam.id,
-          teamName: selectedTeam.name
-        },
-        transferredBy: {
-          email: currentUser.email,
-          name: transferredByName
-        },
-        reason: reason,
-        timestamp: new Date()
-      }),
+      currentAssignedTeam: selectedTeam.id,
+      transferHistory: firebase.firestore.FieldValue.arrayUnion(transferHistoryEntry),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+    
+    // Create transfer message first
+    let fromText = '';
+    if (currentTicket.assignedTo.type === 'team') {
+      fromText = `${currentTicket.assignedTo.teamName} team`;
+    } else {
+      fromText = currentTicket.assignedTo.name || currentTicket.assignedTo.email;
+    }
+    
+    const transferTypeText = transferType === 'handoff' ? 'handed off' : 'transferred';
+    const transferMessage = {
+      message: `Ticket ${transferTypeText} from ${fromText} to ${selectedTeam.name} team by ${transferredByName}. Reason: ${reason}`,
+      senderEmail: 'system',
+      senderName: 'System',
+      timestamp: new Date()
+    };
+    
+    // Auto-update status to 'in-progress' for any activity on the ticket
+    if (currentTicket.status === 'open') {
+      updateData.status = 'in-progress';
+      
+      // Add system message about automatic status change
+      const statusChangeMessage = {
+        message: 'Status automatically changed to in-progress (transfer activity detected)',
+        senderEmail: 'system',
+        senderName: 'System',
+        timestamp: new Date()
+      };
+      
+      // Add both transfer message and status change message
+      updateData.messages = firebase.firestore.FieldValue.arrayUnion(
+        transferMessage,
+        statusChangeMessage
+      );
+    } else {
+      // Just add the transfer message if status doesn't need changing
+      updateData.messages = firebase.firestore.FieldValue.arrayUnion(transferMessage);
+    }
+    
+    // Handle participating teams based on transfer type
+    if (transferType === 'handoff' && fromTeamInfo) {
+      // For handoff transfers, initialize or update participatingTeams
+      const currentParticipatingTeams = currentTicket.participatingTeams || [];
+      
+      // Find if the current team is already in participatingTeams
+      const existingTeamIndex = currentParticipatingTeams.findIndex(
+        team => team.teamId === fromTeamInfo.teamId
+      );
+      
+      let updatedParticipatingTeams;
+      if (existingTeamIndex >= 0) {
+        // Update existing team to completed
+        updatedParticipatingTeams = [...currentParticipatingTeams];
+        updatedParticipatingTeams[existingTeamIndex] = {
+          ...updatedParticipatingTeams[existingTeamIndex],
+          status: 'completed',
+          completedAt: new Date()
+        };
+      } else {
+        // Add current team as completed
+        updatedParticipatingTeams = [
+          ...currentParticipatingTeams,
+          {
+            teamId: fromTeamInfo.teamId,
+            teamName: fromTeamInfo.teamName,
+            status: 'completed',
+            completedAt: new Date()
+          }
+        ];
+      }
+      
+      // Add new team as active
+      updatedParticipatingTeams.push({
+        teamId: selectedTeam.id,
+        teamName: selectedTeam.name,
+        status: 'active',
+        completedAt: null
+      });
+      
+      updateData.participatingTeams = updatedParticipatingTeams;
+      updateData.transferType = 'handoff';
+    } else {
+      // For complete transfers, set transfer type but don't maintain participatingTeams
+      updateData.transferType = 'complete';
+    }
     
     // Create a batch write to update both the assignment and add a message
     const batch = db.batch();
@@ -5852,24 +6658,7 @@ async function transferTicket() {
     // Update the ticket assignment
     batch.update(ticketRef, updateData);
     
-    // Add transfer confirmation message
-    let fromText = '';
-    if (currentTicket.assignedTo.type === 'team') {
-      fromText = `${currentTicket.assignedTo.teamName} team`;
-    } else {
-      fromText = currentTicket.assignedTo.name || currentTicket.assignedTo.email;
-    }
-    
-    const transferMessage = {
-      message: `Ticket transferred from ${fromText} to ${selectedTeam.name} team by ${transferredByName}. Reason: ${reason}`,
-      senderEmail: 'system',
-      senderName: 'System',
-      timestamp: new Date()
-    };
-    
-    batch.update(ticketRef, {
-      messages: firebase.firestore.FieldValue.arrayUnion(transferMessage)
-    });
+    // Transfer message is already handled in the main updateData above
     
     // Execute the batch
     await batch.commit();
@@ -5880,6 +6669,7 @@ async function transferTicket() {
       teamId: selectedTeam.id,
       teamName: selectedTeam.name
     };
+    currentTicket.currentAssignedTeam = selectedTeam.id;
     
     // Update modal display
     document.getElementById('modal-ticket-assignee').textContent = `Assigned to: ${selectedTeam.name} team`;
@@ -5888,11 +6678,19 @@ async function transferTicket() {
     transferTeamSelect.value = '';
     document.getElementById('transfer-reason-input').value = '';
     
+    // Reset transfer type to default
+    document.getElementById('transfer-complete').checked = true;
+    document.querySelector('.transfer-help-complete').style.display = 'block';
+    document.querySelector('.transfer-help-handoff').style.display = 'none';
+    
     // Reload tickets list and messages
     loadTickets();
     await loadTicketMessages(currentTicket.id);
     
-    alert('Ticket transferred successfully!');
+    const successMessage = transferType === 'handoff' ? 
+      'Ticket handed off successfully! It will remain visible in your completed transfers.' :
+      'Ticket transferred successfully!';
+    alert(successMessage);
     
   } catch (error) {
     console.error('Error transferring ticket:', error);
@@ -6357,6 +7155,30 @@ document.addEventListener('keydown', (e) => {
 
 <!-- Notification Badge System -->
 <script src="notification-badges.js"></script>
+
+
+<!-- Transfer Type Selection JavaScript -->
+<script>
+// Handle transfer type selection
+document.addEventListener('DOMContentLoaded', () => {
+  const transferTypeRadios = document.querySelectorAll('input[name="transfer-type"]');
+  const completeHelp = document.querySelector('.transfer-help-complete');
+  const handoffHelp = document.querySelector('.transfer-help-handoff');
+  
+  transferTypeRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'complete') {
+        completeHelp.style.display = 'block';
+        handoffHelp.style.display = 'none';
+      } else if (this.value === 'handoff') {
+        completeHelp.style.display = 'none';
+        handoffHelp.style.display = 'block';
+      }
+    });
+  });
+});
+
+</script>
 
 <script>
 // Mark tickets as seen when page loads

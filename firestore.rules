@@ -187,11 +187,14 @@ service cloud.firestore {
     // Helper function to validate ticket updates
     function validateTicketUpdate(newData, oldData) {
       return newData.ticketId == oldData.ticketId
-        && newData.title == oldData.title
-        && newData.description == oldData.description
-        && newData.category == oldData.category
         && newData.createdBy == oldData.createdBy
         && newData.createdAt == oldData.createdAt
+        // Allow title, description, and category to be updated
+        && (!('title' in newData) || (newData.title is string && newData.title.size() > 0 && newData.title.size() <= 200))
+        && (!('description' in newData) || (newData.description is string && newData.description.size() > 0 && newData.description.size() <= 3000))
+        && (!('category' in newData) || (newData.category is string && newData.category.size() > 0))
+        // Allow status updates with validation
+        && (!('status' in newData) || newData.status in ['open', 'in-progress', 'on-hold', 'resolved', 'transferred'])
         // Allow assignedTo to change for transfers, but validate the new assignment
         && (!('assignedTo' in newData) || validateTicketAssignment(newData.assignedTo));
     }
