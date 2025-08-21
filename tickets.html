@@ -285,12 +285,12 @@
       padding: 0.5rem;
     }
 
-    /* Make COFT dropdowns wider to show full text */
+    /* Make COFT dropdowns taller to show more options */
     #coft-delivery-method,
     #coft-ticket-reason {
-      min-width: 400px;
-      width: 100%;
-      max-width: none;
+      height: auto;
+      size: 6; /* Show 6 options at once */
+      overflow-y: auto;
     }
 
     /* Ticket Counter Display - Simple Left Aligned */
