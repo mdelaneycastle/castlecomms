@@ -4167,12 +4167,14 @@ function updateFilterCounts(allTickets) {
     allTickets.forEach(ticket => {
       const isTransferred = checkTicketTransferred(ticket, currentUser);
       
+      // Count all tickets in the "all" counter
+      counts.all++;
+      
       if (isTransferred) {
         // This is a transferred ticket
         counts.transferred++;
       } else {
-        // This is an active ticket (assigned to me individually, via team, or created by me and still mine)
-        counts.all++;
+        // This is an active ticket - count by status
         if (counts[ticket.status] !== undefined) {
           counts[ticket.status]++;
         }
