@@ -328,7 +328,7 @@ window.sharedComponents = {
       }
 
       // Apply page visibility settings (hide pages from non-Marc users)
-      await this.applyPageVisibilitySettings(user);
+      // await this.applyPageVisibilitySettings(user); // Disabled due to permissions issues
 
       console.log("📂 Sidebar loaded successfully");
     } catch (error) {
