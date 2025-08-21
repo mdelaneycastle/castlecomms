@@ -228,6 +228,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script src="firebase-init.js"></script>
 <script src="shared-components.js"></script>
@@ -615,16 +616,17 @@
     }
   }
 
-  // Load current visibility settings from Firebase
+  // Load current visibility settings from Firestore
   async function loadPageVisibilitySettings() {
     try {
       const togglesContainer = document.getElementById('page-toggles');
       if (!togglesContainer) return;
 
-      // Get current visibility settings from database
-      const visibilityRef = firebase.database().ref('page-visibility');
-      const snapshot = await visibilityRef.once('value');
-      const settings = snapshot.val() || {};
+      // Get current visibility settings from Firestore
+      const db = firebase.firestore();
+      const docRef = db.collection('admin').doc('page-visibility');
+      const doc = await docRef.get();
+      const settings = doc.exists ? doc.data() : {};
 
       // Generate toggles for each page
       togglesContainer.innerHTML = pages.map(page => {
@@ -659,9 +661,10 @@
   // Toggle page visibility
   async function togglePageVisibility(pageId, isVisible) {
     try {
-      // Update Firebase
-      const visibilityRef = firebase.database().ref(`page-visibility/${pageId}`);
-      await visibilityRef.set(isVisible);
+      // Update Firestore
+      const db = firebase.firestore();
+      const docRef = db.collection('admin').doc('page-visibility');
+      await docRef.set({ [pageId]: isVisible }, { merge: true });
 
       // Update UI label
       const checkbox = document.getElementById(`toggle-${pageId}`);

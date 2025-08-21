@@ -374,14 +374,11 @@ window.sharedComponents = {
         return;
       }
 
-      // For all other users, check visibility settings from Firebase
-      if (!window.db) {
-        window.db = firebase.database();
-      }
-
-      const visibilityRef = window.db.ref('page-visibility');
-      const snapshot = await visibilityRef.once('value');
-      const settings = snapshot.val() || {};
+      // For all other users, check visibility settings from Firestore
+      const db = firebase.firestore();
+      const docRef = db.collection('admin').doc('page-visibility');
+      const doc = await docRef.get();
+      const settings = doc.exists ? doc.data() : {};
 
       // Map of page IDs to their sidebar link elements
       const pageElementMap = {
