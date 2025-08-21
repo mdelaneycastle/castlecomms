@@ -96,9 +96,102 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
 <main id="main" class="modern-main">
   <!-- Tab Navigation -->
   <div class="tab-navigation">
+    <button class="tab-button active" data-tab="home">Home</button>
     <button class="tab-button" data-tab="tasks">Tasks</button>
     <button class="tab-button" data-tab="forms">Forms</button>
-    <button class="tab-button active" data-tab="communications">Communications</button>
+    <button class="tab-button" data-tab="communications">Communications</button>
+  </div>
+
+  <!-- Home Tab Content (Original home page) -->
+  <div class="tab-content active" id="home-tab">
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <a href="contact-finder.html" class="pill-button">
+        <span>🤔</span> Who should I contact?
+      </a>
+      <a href="news-mentions.html" class="pill-button">
+        <span>📰</span> News and Media mentions
+      </a>
+    </div>
+
+    <!-- Quicklinks Section -->
+    <section class="quicklinks-section">
+      <h2 class="section-title">Quicklinks</h2>
+      <div class="modern-quick-links">
+      <a href="http://192.168.28.246/CGNET2024/rptLeagueTable.aspx" target="_blank" title="Target League Table" class="modern-quicklink">
+        <div class="quicklink-content">
+          <span class="quicklink-label">League Table</span>
+          <span class="quicklink-arrow">→</span>
+        </div>
+      </a>
+      <a href="https://secure.workforceready.eu/ta/6164422.home?rnd=FRX&showAdmin=1&Ext=clock&sft=YLYWTXGNBA&ActiveSessionId=5177576674#home" target="_blank" title="Kronos" class="modern-quicklink">
+        <div class="quicklink-content">
+          <span class="quicklink-label">Kronos</span>
+          <span class="quicklink-arrow">→</span>
+        </div>
+      </a>
+      <a href="http://192.168.28.246/cgnet2024/login.aspx" target="_blank" title="CGNet" class="modern-quicklink">
+        <div class="quicklink-content">
+          <span class="quicklink-label">CGNet</span>
+          <span class="quicklink-arrow">→</span>
+        </div>
+      </a>
+      <a href="http://www.castlefineart.com/" target="_blank" title="CFA Website" class="modern-quicklink">
+        <div class="quicklink-content">
+          <span class="quicklink-label">CFA Website</span>
+          <span class="quicklink-arrow">→</span>
+        </div>
+      </a>
+      <a href="https://castlefineart.storiq.net/files?expandedFolder=%2FCompliance%2F&bucket_key=castlefineart-storiq-net" target="_blank" title="Anti Money Laundering" class="modern-quicklink">
+        <div class="quicklink-content">
+          <span class="quicklink-label">Anti Money Laundering</span>
+          <span class="quicklink-arrow">→</span>
+        </div>
+      </a>
+      <a href="https://washingtongreen.pagetiger.com/bimunif" target="_blank" title="Gallery Technician Manual" class="modern-quicklink">
+        <div class="quicklink-content">
+          <span class="quicklink-label">Technician Manual</span>
+          <span class="quicklink-arrow">→</span>
+        </div>
+      </a>
+      <a href="https://washingtongreen.pagetiger.com/ibmxza" target="_blank" title="Gallery Manual" class="modern-quicklink">
+        <div class="quicklink-content">
+          <span class="quicklink-label">Gallery Manual</span>
+          <span class="quicklink-arrow">→</span>
+        </div>
+      </a>
+      <a href="https://app.powerbi.com/reportEmbed?reportId=5a5e361e-661c-41c9-90ae-821b46de10ae&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a" target="_blank" title="YTD Sales Report 2025" class="modern-quicklink">
+        <div class="quicklink-content">
+          <span class="quicklink-label">Sales YTD</span>
+          <span class="quicklink-arrow">→</span>
+        </div>
+      </a>
+    </div>
+    </section>
+
+    <!-- Dashboard Cards -->
+    <div class="dashboard-cards">
+      <div class="dashboard-card" id="newsfeed-card">
+        <h3>Newsfeed Posts</h3>
+        <div class="card-content" id="newsfeed-content">
+          <div class="loading">Loading recent posts...</div>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="messages-card">
+        <h3>Messages</h3>
+        <div class="card-content" id="messages-content">
+          <div class="loading">Loading latest messages...</div>
+        </div>
+      </div>
+      
+      <div class="dashboard-card" id="tickets-card">
+        <h3>Tickets</h3>
+        <div class="card-content" id="tickets-content">
+          <div class="loading">Loading latest tickets...</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Tasks Tab Content -->
@@ -118,7 +211,7 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
   </div>
 
   <!-- Communications Tab Content -->
-  <div class="tab-content active" id="communications-tab">
+  <div class="tab-content" id="communications-tab">
     <div class="communications-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem; background: rgba(255, 255, 255, 0.95); border-radius: var(--border-radius, 12px); box-shadow: var(--shadow-medium, 0 4px 20px rgba(0,0,0,0.1)); backdrop-filter: blur(10px);">
       <div class="communications-header" style="text-align: center; margin-bottom: 2rem;">
         <h1 style="margin: 0; font-size: 2.5rem; font-weight: 600; background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📢 Communications</h1>
@@ -153,9 +246,6 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
         <div class="loading" style="text-align: center; padding: 3rem; color: #6c757d;">Loading communications...</div>
       </div>
     </div>
-  </div>
-
-
   </div>
 
   <!-- Background Slideshow -->
