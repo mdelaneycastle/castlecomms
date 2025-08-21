@@ -10,6 +10,77 @@
   <title>Castle Comms</title>
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="stylesheet" href="style.css?v=20250813_din_font_update" />
+  <style>
+    /* Tab Navigation Styles */
+    .tab-navigation {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem 0;
+      padding: 0 2rem;
+    }
+
+    .tab-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #333;
+      padding: 1rem 2rem;
+      border-radius: 25px;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      min-width: 140px;
+      text-align: center;
+    }
+
+    .tab-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-button.active {
+      background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .tab-button.active:hover {
+      background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+    }
+
+    /* Tab Content Styles */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Move existing content down */
+    .modern-main {
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .tab-navigation {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0 1rem;
+      }
+
+      .tab-button {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+        min-width: 120px;
+      }
+    }
+  </style>
 </head>
 <body>
 <script>
@@ -23,93 +94,68 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
 <main id="main" class="modern-main">
-  <!-- Action Buttons -->
-  <div class="action-buttons">
-    <a href="contact-finder.html" class="pill-button">
-      <span>🤔</span> Who should I contact?
-    </a>
-    <a href="news-mentions.html" class="pill-button">
-      <span>📰</span> News and Media mentions
-    </a>
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button class="tab-button" data-tab="tasks">Tasks</button>
+    <button class="tab-button" data-tab="forms">Forms</button>
+    <button class="tab-button active" data-tab="communications">Communications</button>
   </div>
 
-  <!-- Quicklinks Section -->
-  <section class="quicklinks-section">
-    <h2 class="section-title">Quicklinks</h2>
-    <div class="modern-quick-links">
-    <a href="http://192.168.28.246/CGNET2024/rptLeagueTable.aspx" target="_blank" title="Target League Table" class="modern-quicklink">
-      <div class="quicklink-content">
-        <span class="quicklink-label">League Table</span>
-        <span class="quicklink-arrow">→</span>
-      </div>
-    </a>
-    <a href="https://secure.workforceready.eu/ta/6164422.home?rnd=FRX&showAdmin=1&Ext=clock&sft=YLYWTXGNBA&ActiveSessionId=5177576674#home" target="_blank" title="Kronos" class="modern-quicklink">
-      <div class="quicklink-content">
-        <span class="quicklink-label">Kronos</span>
-        <span class="quicklink-arrow">→</span>
-      </div>
-    </a>
-    <a href="http://192.168.28.246/cgnet2024/login.aspx" target="_blank" title="CGNet" class="modern-quicklink">
-      <div class="quicklink-content">
-        <span class="quicklink-label">CGNet</span>
-        <span class="quicklink-arrow">→</span>
-      </div>
-    </a>
-    <a href="http://www.castlefineart.com/" target="_blank" title="CFA Website" class="modern-quicklink">
-      <div class="quicklink-content">
-        <span class="quicklink-label">CFA Website</span>
-        <span class="quicklink-arrow">→</span>
-      </div>
-    </a>
-    <a href="https://castlefineart.storiq.net/files?expandedFolder=%2FCompliance%2F&bucket_key=castlefineart-storiq-net" target="_blank" title="Anti Money Laundering" class="modern-quicklink">
-      <div class="quicklink-content">
-        <span class="quicklink-label">Anti Money Laundering</span>
-        <span class="quicklink-arrow">→</span>
-      </div>
-    </a>
-    <a href="https://washingtongreen.pagetiger.com/bimunif" target="_blank" title="Gallery Technician Manual" class="modern-quicklink">
-      <div class="quicklink-content">
-        <span class="quicklink-label">Technician Manual</span>
-        <span class="quicklink-arrow">→</span>
-      </div>
-    </a>
-    <a href="https://washingtongreen.pagetiger.com/ibmxza" target="_blank" title="Gallery Manual" class="modern-quicklink">
-      <div class="quicklink-content">
-        <span class="quicklink-label">Gallery Manual</span>
-        <span class="quicklink-arrow">→</span>
-      </div>
-    </a>
-    <a href="https://app.powerbi.com/reportEmbed?reportId=5a5e361e-661c-41c9-90ae-821b46de10ae&autoAuth=true&ctid=61920045-21d7-47e7-a0c1-3a915893488a" target="_blank" title="YTD Sales Report 2025" class="modern-quicklink">
-      <div class="quicklink-content">
-        <span class="quicklink-label">Sales YTD</span>
-        <span class="quicklink-arrow">→</span>
-      </div>
-    </a>
+  <!-- Tasks Tab Content -->
+  <div class="tab-content" id="tasks-tab">
+    <div style="text-align: center; padding: 4rem 2rem; color: #666;">
+      <h2>Tasks</h2>
+      <p>Task management coming soon...</p>
+    </div>
   </div>
-  </section>
 
-  <!-- Dashboard Cards -->
-  <div class="dashboard-cards">
-    <div class="dashboard-card" id="newsfeed-card">
-      <h3>Newsfeed Posts</h3>
-      <div class="card-content" id="newsfeed-content">
-        <div class="loading">Loading recent posts...</div>
+  <!-- Forms Tab Content -->
+  <div class="tab-content" id="forms-tab">
+    <div style="text-align: center; padding: 4rem 2rem; color: #666;">
+      <h2>Forms</h2>
+      <p>Form management coming soon...</p>
+    </div>
+  </div>
+
+  <!-- Communications Tab Content -->
+  <div class="tab-content active" id="communications-tab">
+    <div class="communications-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem; background: rgba(255, 255, 255, 0.95); border-radius: var(--border-radius, 12px); box-shadow: var(--shadow-medium, 0 4px 20px rgba(0,0,0,0.1)); backdrop-filter: blur(10px);">
+      <div class="communications-header" style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0; font-size: 2.5rem; font-weight: 600; background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📢 Communications</h1>
+      </div>
+      
+      <!-- Communications Admin Section (only visible to admins and communications admins) -->
+      <div class="admin-section" data-communications-admin style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; display: none;">
+        <h3 style="color: #856404; margin: 0 0 1rem 0; font-size: 1.3rem;">📢 Communications Admin</h3>
+        <p style="color: #856404; margin: 0 0 1rem 0; font-size: 0.9rem;">
+          Create and manage company-wide communications, announcements, and updates.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: flex-start; flex-wrap: wrap;">
+          <a href="communications-admin.html" style="background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem;">
+            ✏️ Create New Communication
+          </a>
+          <a href="news-mentions.html" style="background: #28a745; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem;">
+            📰 Manage News & Media
+          </a>
+        </div>
+      </div>
+      
+      <div class="communications-filters" id="comm-filters" style="display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <button class="comm-filter-button active" data-filter="all" style="background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); color: white; border: none; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">All</button>
+        <button class="comm-filter-button" data-filter="unread" style="background: #f8f9fa; border: 1px solid #e1e5e9; color: #6c757d; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">Unread</button>
+        <button class="comm-filter-button" data-filter="urgent" style="background: #f8f9fa; border: 1px solid #e1e5e9; color: #6c757d; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">Urgent</button>
+        <button class="comm-filter-button" data-filter="documents" style="background: #f8f9fa; border: 1px solid #e1e5e9; color: #6c757d; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">With Documents</button>
+        <button class="comm-filter-button" data-filter="powerbi" style="background: #f8f9fa; border: 1px solid #e1e5e9; color: #6c757d; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">With Data</button>
+        <button class="comm-filter-button" data-filter="tasks" style="background: #f8f9fa; border: 1px solid #e1e5e9; color: #6c757d; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">With Tasks</button>
+      </div>
+      
+      <div class="communications-list" id="communications-list">
+        <div class="loading" style="text-align: center; padding: 3rem; color: #6c757d;">Loading communications...</div>
       </div>
     </div>
-    
-    <div class="dashboard-card" id="messages-card">
-      <h3>Messages</h3>
-      <div class="card-content" id="messages-content">
-        <div class="loading">Loading latest messages...</div>
-      </div>
-    </div>
-    
-    <div class="dashboard-card" id="tickets-card">
-      <h3>Tickets</h3>
-      <div class="card-content" id="tickets-content">
-        <div class="loading">Loading latest tickets...</div>
-      </div>
-    </div>
+  </div>
+
+
   </div>
 
   <!-- Background Slideshow -->
@@ -162,8 +208,290 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
 
 <script>
 
+// Tab Functionality
+function initializeTabs() {
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabId = button.getAttribute('data-tab');
+      
+      // Remove active class from all buttons and contents
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('active'));
+      
+      // Add active class to clicked button and corresponding content
+      button.classList.add('active');
+      document.getElementById(`${tabId}-tab`).classList.add('active');
+    });
+  });
+}
+
+// Communications Functionality
+let db;
+let currentUser;
+let currentCommFilter = 'all';
+
+function initializeCommunications() {
+  // Check authentication first
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (!user) {
+      console.log('User not authenticated for communications');
+      return;
+    }
+
+    currentUser = user;
+    
+    // Show/hide admin sections based on permissions
+    if (window.authUtils) {
+      const isCommunicationsAdmin = await window.authUtils.isCommunicationsAdmin(user);
+      const adminSection = document.querySelector('[data-communications-admin]');
+      if (adminSection) {
+        adminSection.style.display = isCommunicationsAdmin ? 'block' : 'none';
+      }
+    }
+    
+    // Initialize Firebase Firestore
+    if (firebase.apps.length > 0) {
+      db = firebase.firestore();
+      setupCommunicationsFilters();
+      loadCommunications();
+    } else {
+      console.error('Firebase not initialized for communications');
+    }
+  });
+}
+
+// Setup communications filter buttons
+function setupCommunicationsFilters() {
+  const filterButtons = document.querySelectorAll('.comm-filter-button');
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Update active state
+      filterButtons.forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.background = '#f8f9fa';
+        btn.style.color = '#6c757d';
+        btn.style.border = '1px solid #e1e5e9';
+      });
+      button.classList.add('active');
+      button.style.background = 'var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%))';
+      button.style.color = 'white';
+      button.style.border = 'none';
+      
+      // Update current filter
+      currentCommFilter = button.dataset.filter;
+      
+      // Reload communications with filter
+      loadCommunications();
+    });
+  });
+}
+
+// Load communications
+async function loadCommunications() {
+  const communicationsList = document.getElementById('communications-list');
+  
+  if (!db || !currentUser) {
+    communicationsList.innerHTML = '<div class="loading">Please log in to view communications.</div>';
+    return;
+  }
+  
+  try {
+    const communications = await db.collection('communications')
+      .orderBy('createdAt', 'desc')
+      .get();
+    
+    if (communications.empty) {
+      communicationsList.innerHTML = '<div style="text-align: center; color: #6c757d; padding: 3rem; font-style: italic;">No communications yet.</div>';
+      return;
+    }
+    
+    let filteredCommunications = communications.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    // Apply filter
+    filteredCommunications = applyCommFilter(filteredCommunications);
+    
+    if (filteredCommunications.length === 0) {
+      communicationsList.innerHTML = '<div style="text-align: center; color: #6c757d; padding: 3rem; font-style: italic;">No communications match the current filter.</div>';
+      return;
+    }
+    
+    const communicationItems = await Promise.all(filteredCommunications.map(async (comm) => {
+      const isRead = await isUserReadComm(comm.id);
+      const documents = comm.documents || [];
+      const powerbiItems = comm.powerbi || [];
+      const tasks = comm.tasks || [];
+      
+      // Create badges
+      const badges = [];
+      if (!isRead) badges.push('<span style="padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500; background: #667eea; color: white;">New</span>');
+      if (comm.urgent) badges.push('<span style="padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500; background: #ffebee; color: #c62828;">Urgent</span>');
+      if (documents.length > 0) badges.push('<span style="padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500; background: #e3f2fd; color: #1565c0;">📎 Documents</span>');
+      if (powerbiItems.length > 0) badges.push('<span style="padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500; background: #fff3e0; color: #ef6c00;">📊 Data</span>');
+      if (tasks.length > 0) badges.push('<span style="padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500; background: #f3e5f5; color: #7b1fa2;">✓ Tasks</span>');
+      
+      return `
+        <div style="background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; transition: all 0.3s; border-left: 4px solid ${!isRead ? '#667eea' : 'transparent'}; ${comm.urgent ? 'border-left-color: #dc3545;' : ''} margin-bottom: 1.5rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.1)'">
+          <div style="padding: 1.5rem; border-bottom: 1px solid #f0f0f0; cursor: pointer;" onclick="toggleCommunication('${comm.id}')">
+            <div style="font-size: 1.3rem; font-weight: 600; color: #2c3e50; margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;">
+              ${comm.title}
+              ${comm.urgent ? '🚨' : ''}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #6c757d; margin-bottom: 0.5rem;">
+              <span>Published: ${formatCommTimestamp(comm.createdAt?.toDate?.() || new Date())}</span>
+              <button style="background: none; border: none; color: #667eea; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;" id="expand-btn-${comm.id}">
+                <span>View Details</span>
+                <span style="transition: transform 0.3s;">▼</span>
+              </button>
+            </div>
+            <div style="color: #495057; line-height: 1.5; margin-bottom: 1rem;">${comm.summary || comm.content.substring(0, 200)}...</div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              ${badges.join('')}
+            </div>
+          </div>
+          
+          <div id="content-${comm.id}" style="display: none; padding: 1.5rem; border-top: 1px solid #f0f0f0;">
+            <div style="line-height: 1.6; margin-bottom: 2rem;">${comm.content}</div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #f0f0f0;">
+              <button onclick="toggleReadStatus('${comm.id}')" style="background: ${isRead ? '#6c757d' : '#28a745'}; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;">
+                ${isRead ? 'Mark as Unread' : 'Mark as Read'}
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }));
+    
+    communicationsList.innerHTML = communicationItems.join('');
+    
+  } catch (error) {
+    console.error('Error loading communications:', error);
+    communicationsList.innerHTML = '<div style="background-color: #f8d7da; color: #721c24; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">Failed to load communications.</div>';
+  }
+}
+
+// Apply current filter
+function applyCommFilter(communications) {
+  if (currentCommFilter === 'all') return communications;
+  
+  return communications.filter(comm => {
+    switch (currentCommFilter) {
+      case 'unread':
+        return !isUserReadSyncComm(comm.id);
+      case 'urgent':
+        return comm.urgent;
+      case 'documents':
+        return comm.documents && comm.documents.length > 0;
+      case 'powerbi':
+        return comm.powerbi && comm.powerbi.length > 0;
+      case 'tasks':
+        return comm.tasks && comm.tasks.length > 0;
+      default:
+        return true;
+    }
+  });
+}
+
+// Toggle communication expanded state
+function toggleCommunication(commId) {
+  const content = document.getElementById(`content-${commId}`);
+  const expandBtn = document.getElementById(`expand-btn-${commId}`);
+  
+  if (content.style.display === 'none' || !content.style.display) {
+    content.style.display = 'block';
+    expandBtn.querySelector('span:last-child').style.transform = 'rotate(180deg)';
+    expandBtn.querySelector('span:first-child').textContent = 'Hide Details';
+  } else {
+    content.style.display = 'none';
+    expandBtn.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+    expandBtn.querySelector('span:first-child').textContent = 'View Details';
+  }
+}
+
+// Check if user has read a communication
+async function isUserReadComm(commId) {
+  try {
+    const readDoc = await db.collection('communication-reads')
+      .where('communicationId', '==', commId)
+      .where('userId', '==', currentUser.uid)
+      .get();
+    
+    return !readDoc.empty;
+  } catch (error) {
+    console.error('Error checking read status:', error);
+    return false;
+  }
+}
+
+// Synchronous version for filtering
+function isUserReadSyncComm(commId) {
+  return false; // Default to unread for filtering
+}
+
+// Toggle read status
+async function toggleReadStatus(commId) {
+  try {
+    const readQuery = db.collection('communication-reads')
+      .where('communicationId', '==', commId)
+      .where('userId', '==', currentUser.uid);
+    
+    const readDocs = await readQuery.get();
+    
+    if (readDocs.empty) {
+      // Mark as read
+      await db.collection('communication-reads').add({
+        communicationId: commId,
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        readAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      // Mark as unread
+      const batch = db.batch();
+      readDocs.docs.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+    }
+    
+    // Reload communications
+    loadCommunications();
+    
+  } catch (error) {
+    console.error('Error toggling read status:', error);
+  }
+}
+
+// Format timestamp
+function formatCommTimestamp(timestamp) {
+  if (!timestamp) return 'Just now';
+  
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  
+  return date.toLocaleDateString();
+}
+
 // Dashboard Cards Functionality
 document.addEventListener('DOMContentLoaded', function() {
+  // Initialize tabs
+  initializeTabs();
+  
+  // Initialize communications functionality
+  initializeCommunications();
+  
   // CSS Debug - Check if new glass morphism styles are loaded
   console.log('✨ GLASS MORPHISM: New design loaded with modern-quick-links!');
   
