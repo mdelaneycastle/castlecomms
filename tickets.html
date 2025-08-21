@@ -3403,6 +3403,14 @@ async function editTicket(ticketId) {
     
     const ticket = { id: ticketDoc.id, ...ticketDoc.data() };
     console.log('✅ Ticket loaded:', ticket.ticketId);
+    console.log('📊 COFT Data:', ticket.coftData);
+    
+    // If no coftData but this looks like a COFT ticket, try to parse from description
+    if (!ticket.coftData && ticket.description && ticket.description.includes('**COFT TICKET')) {
+      console.log('🔍 Parsing COFT data from description...');
+      ticket.coftData = parseCOFTDataFromDescription(ticket.description);
+      console.log('📊 Parsed COFT Data:', ticket.coftData);
+    }
     
     // Create edit modal HTML - styled like create ticket modal
     const editModalHTML = `
@@ -3499,6 +3507,53 @@ async function editTicket(ticketId) {
 // Make function globally available immediately after definition
 window.editTicket = editTicket;
 
+// Parse COFT data from ticket description for legacy tickets
+function parseCOFTDataFromDescription(description) {
+  const coftData = {};
+  
+  try {
+    // Extract data using regex patterns
+    const soMatch = description.match(/• SO Number: (.+)/);
+    const clientMatch = description.match(/• Client: (.+)/);
+    const itemCodeMatch = description.match(/• Item Code: (.+)/);
+    const artworkMatch = description.match(/• Artwork Title: (.+)/);
+    const editionMatch = description.match(/• Edition Number: (.+)/);
+    const orderDateMatch = description.match(/• Order Date: (.+)/);
+    
+    coftData.soNumber = soMatch ? soMatch[1].trim() : '';
+    coftData.clientName = clientMatch ? clientMatch[1].trim() : '';
+    coftData.itemCode = itemCodeMatch ? itemCodeMatch[1].trim() : '';
+    coftData.artworkTitle = artworkMatch ? artworkMatch[1].trim() : '';
+    coftData.editionNumber = editionMatch ? editionMatch[1].trim() : '';
+    
+    // Parse order date
+    if (orderDateMatch) {
+      const dateStr = orderDateMatch[1].trim();
+      const date = new Date(dateStr);
+      if (!isNaN(date.getTime())) {
+        coftData.orderDate = date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      } else {
+        coftData.orderDate = '';
+      }
+    } else {
+      coftData.orderDate = '';
+    }
+    
+    console.log('✅ Successfully parsed COFT data from description');
+    return coftData;
+  } catch (error) {
+    console.error('❌ Error parsing COFT data:', error);
+    return {
+      soNumber: '',
+      clientName: '',
+      itemCode: '',
+      artworkTitle: '',
+      editionNumber: '',
+      orderDate: ''
+    };
+  }
+}
+
 async function saveTicketChanges(ticketId) {
   let originalText = 'Save Changes';
   try {
@@ -3543,23 +3598,23 @@ async function saveTicketChanges(ticketId) {
       orderDate: orderDate
     };
     
-    // Check for changes
-    if (currentCoftData.soNumber !== soNumber) {
+    // Check for changes - only log fields that actually changed
+    if ((currentCoftData.soNumber || '') !== soNumber) {
       changes.push(`SO Number: "${currentCoftData.soNumber || ''}" → "${soNumber}"`);
     }
-    if (currentCoftData.clientName !== client) {
+    if ((currentCoftData.clientName || '') !== client) {
       changes.push(`Client: "${currentCoftData.clientName || ''}" → "${client}"`);
     }
-    if (currentCoftData.itemCode !== itemCode) {
+    if ((currentCoftData.itemCode || '') !== itemCode) {
       changes.push(`Item Code: "${currentCoftData.itemCode || ''}" → "${itemCode}"`);
     }
-    if (currentCoftData.artworkTitle !== artworkTitle) {
+    if ((currentCoftData.artworkTitle || '') !== artworkTitle) {
       changes.push(`Artwork Title: "${currentCoftData.artworkTitle || ''}" → "${artworkTitle}"`);
     }
-    if (currentCoftData.editionNumber !== editionNumber) {
+    if ((currentCoftData.editionNumber || '') !== editionNumber) {
       changes.push(`Edition Number: "${currentCoftData.editionNumber || ''}" → "${editionNumber}"`);
     }
-    if (currentCoftData.orderDate !== orderDate) {
+    if ((currentCoftData.orderDate || '') !== orderDate) {
       changes.push(`Order Date: "${currentCoftData.orderDate || ''}" → "${orderDate}"`);
     }
     
@@ -5169,6 +5224,11 @@ async function createTicketFromModal() {
         isRunning: true // Start timer immediately when ticket is created
       }
     };
+
+    // Add COFT data if this is a COFT ticket
+    if (isCOFTForm && coftData) {
+      ticketData.coftData = coftData;
+    }
     
     await db.collection('tickets').add(ticketData);
     
