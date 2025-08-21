@@ -5844,18 +5844,25 @@ function extractCOFTDataFromTicket(ticket) {
   }
   
   try {
-    const description = ticket.description || '';
-    
-    // Extract SO Number
-    const soMatch = description.match(/SO Number:\s*([^\n\r]+)/i);
-    if (soMatch) {
-      defaultData.soNumber = soMatch[1].trim();
-    }
-    
-    // Extract Client Name
-    const clientMatch = description.match(/Client:\s*([^\n\r]+)/i);
-    if (clientMatch) {
-      defaultData.clientName = clientMatch[1].trim();
+    // First, try to get data from coftData field if available
+    if (ticket.coftData) {
+      defaultData.soNumber = ticket.coftData.soNumber || null;
+      defaultData.clientName = ticket.coftData.clientName || null;
+    } else {
+      // Fallback to parsing from description for legacy tickets
+      const description = ticket.description || '';
+      
+      // Extract SO Number
+      const soMatch = description.match(/SO Number:\s*([^\n\r]+)/i);
+      if (soMatch) {
+        defaultData.soNumber = soMatch[1].trim();
+      }
+      
+      // Extract Client Name
+      const clientMatch = description.match(/Client:\s*([^\n\r]+)/i);
+      if (clientMatch) {
+        defaultData.clientName = clientMatch[1].trim();
+      }
     }
     
     // For Gallery, we'll need to determine this based on business logic
