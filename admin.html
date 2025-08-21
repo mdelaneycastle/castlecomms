@@ -624,7 +624,7 @@
 
       // Get current visibility settings from Firestore
       const db = firebase.firestore();
-      const docRef = db.collection('admin').doc('page-visibility');
+      const docRef = db.collection('settings').doc('page-visibility');
       const doc = await docRef.get();
       const settings = doc.exists ? doc.data() : {};
 
@@ -663,7 +663,7 @@
     try {
       // Update Firestore
       const db = firebase.firestore();
-      const docRef = db.collection('admin').doc('page-visibility');
+      const docRef = db.collection('settings').doc('page-visibility');
       await docRef.set({ [pageId]: isVisible }, { merge: true });
 
       // Update UI label
