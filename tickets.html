@@ -3914,8 +3914,8 @@ async function loadTickets() {
     } else {
       // No "transferred" filter selected
       if (selectedFilters.has('all')) {
-        // Show all non-transferred tickets
-        tickets = tickets.filter(ticket => !checkTicketTransferred(ticket, currentUser));
+        // Show all tickets - no filtering needed, all accessible tickets should be shown
+        // (tickets already contains all accessible tickets from the access check above)
       } else {
         // Show tickets that match any of the selected statuses (excluding transferred tickets)
         const statusesToShow = Array.from(selectedFilters);

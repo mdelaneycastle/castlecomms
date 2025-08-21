@@ -169,7 +169,29 @@ function generateCOFTReportData(tickets, year, month) {
   monthlyTickets.forEach(ticket => {
     const coftMember = getCOFTTeamMemberFromTicket(ticket);
     if (coftMember && reportData[coftMember]) {
-      const status = ticket.status || 'open';
+      // Determine status - treat transferred tickets as resolved for reporting
+      let status = ticket.status || 'open';
+      
+      // Check if this ticket was transferred/handed off by COFT team
+      if (ticket.transferHistory && ticket.transferHistory.length > 0) {
+        // Check if COFT team transferred this ticket (either complete or handoff)
+        const coftTransferred = ticket.transferHistory.some(transfer => {
+          if (transfer.from && transfer.from.type === 'team' && transfer.from.teamName === 'COFT') {
+            return true;
+          }
+          // Also check for individual COFT member transfers
+          if (transfer.from && transfer.from.email) {
+            const transferredByMember = getCOFTTeamMember(transfer.from.email);
+            return transferredByMember !== '-';
+          }
+          return false;
+        });
+        
+        if (coftTransferred) {
+          status = 'resolved'; // Treat transferred tickets as resolved in reports
+        }
+      }
+      
       reportData[coftMember][status] = (reportData[coftMember][status] || 0) + 1;
       reportData[coftMember].total++;
     }
