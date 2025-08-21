@@ -3415,49 +3415,51 @@ async function editTicket(ticketId) {
           <div id="edit-ticket-status"></div>
           
           <form id="edit-ticket-form" class="modal-form" novalidate>
-            <!-- Title Field -->
+            <!-- SO Number -->
             <div class="form-group">
-              <label for="edit-title" class="form-label">Subject/Title: *</label>
-              <input type="text" id="edit-title" class="form-input full-width" 
-                     value="${(ticket.title || '').replace(/"/g, '&quot;')}" 
-                     placeholder="Brief description of the issue..." required>
+              <label for="edit-so-number" class="form-label">SO Number:</label>
+              <input type="text" id="edit-so-number" class="form-input full-width" 
+                     value="${(ticket.coftData?.soNumber || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Sales Order Number">
             </div>
             
-            <!-- Category -->
+            <!-- Client -->
             <div class="form-group">
-              <label for="edit-category" class="form-label">Category: *</label>
-              <select id="edit-category" class="form-select full-width" required>
-                <option value="">Select a department...</option>
-                <option value="Client Order Fulfilment Team/Group" ${ticket.category === 'Client Order Fulfilment Team/Group' ? 'selected' : ''}>Client Order Fulfilment Team/Group</option>
-                <option value="Manufacturing and QC" ${ticket.category === 'Manufacturing and QC' ? 'selected' : ''}>Manufacturing and QC</option>
-                <option value="Framing" ${ticket.category === 'Framing' ? 'selected' : ''}>Framing</option>
-                <option value="Stock Control" ${ticket.category === 'Stock Control' ? 'selected' : ''}>Stock Control</option>
-                <option value="Logistics" ${ticket.category === 'Logistics' ? 'selected' : ''}>Logistics</option>
-                <option value="Operations" ${ticket.category === 'Operations' ? 'selected' : ''}>Operations</option>
-                <option value="Inventory" ${ticket.category === 'Inventory' ? 'selected' : ''}>Inventory</option>
-                <option value="IT Support" ${ticket.category === 'IT Support' ? 'selected' : ''}>IT Support</option>
-                <option value="HR" ${ticket.category === 'HR' ? 'selected' : ''}>HR</option>
-                <option value="General" ${ticket.category === 'General' ? 'selected' : ''}>General</option>
-              </select>
+              <label for="edit-client" class="form-label">Client:</label>
+              <input type="text" id="edit-client" class="form-input full-width" 
+                     value="${(ticket.coftData?.clientName || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Client Name">
             </div>
             
-            <!-- Status -->
+            <!-- Item Code -->
             <div class="form-group">
-              <label for="edit-status" class="form-label">Status: *</label>
-              <select id="edit-status" class="form-select full-width" required>
-                <option value="open" ${ticket.status === 'open' ? 'selected' : ''}>Open</option>
-                <option value="in-progress" ${ticket.status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-                <option value="on-hold" ${ticket.status === 'on-hold' ? 'selected' : ''}>On Hold</option>
-                <option value="resolved" ${ticket.status === 'resolved' ? 'selected' : ''}>Resolved</option>
-                <option value="transferred" ${ticket.status === 'transferred' ? 'selected' : ''}>Transferred</option>
-              </select>
+              <label for="edit-item-code" class="form-label">Item Code:</label>
+              <input type="text" id="edit-item-code" class="form-input full-width" 
+                     value="${(ticket.coftData?.itemCode || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Item Code">
             </div>
             
-            <!-- Description -->
+            <!-- Artwork Title -->
             <div class="form-group">
-              <label for="edit-description" class="form-label">Description:</label>
-              <textarea id="edit-description" class="form-textarea full-width" rows="8" 
-                        placeholder="Provide detailed information about the issue...">${(ticket.description || '').replace(/"/g, '&quot;')}</textarea>
+              <label for="edit-artwork-title" class="form-label">Artwork Title:</label>
+              <input type="text" id="edit-artwork-title" class="form-input full-width" 
+                     value="${(ticket.coftData?.artworkTitle || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Artwork Title">
+            </div>
+            
+            <!-- Edition Number -->
+            <div class="form-group">
+              <label for="edit-edition-number" class="form-label">Edition Number:</label>
+              <input type="text" id="edit-edition-number" class="form-input full-width" 
+                     value="${(ticket.coftData?.editionNumber || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Edition Number">
+            </div>
+            
+            <!-- Order Date -->
+            <div class="form-group">
+              <label for="edit-order-date" class="form-label">Order Date:</label>
+              <input type="date" id="edit-order-date" class="form-input full-width" 
+                     value="${ticket.coftData?.orderDate || ''}">
             </div>
             
             <!-- Action Buttons -->
@@ -3506,16 +3508,12 @@ async function saveTicketChanges(ticketId) {
       return;
     }
     
-    const title = document.getElementById('edit-title').value.trim();
-    const description = document.getElementById('edit-description').value.trim();
-    const category = document.getElementById('edit-category').value;
-    const status = document.getElementById('edit-status').value;
-    
-    // Validate required fields
-    if (!title || !category || !status) {
-      showEditStatus('Please fill in all required fields.', 'error');
-      return;
-    }
+    const soNumber = document.getElementById('edit-so-number').value.trim();
+    const client = document.getElementById('edit-client').value.trim();
+    const itemCode = document.getElementById('edit-item-code').value.trim();
+    const artworkTitle = document.getElementById('edit-artwork-title').value.trim();
+    const editionNumber = document.getElementById('edit-edition-number').value.trim();
+    const orderDate = document.getElementById('edit-order-date').value;
     
     // Show loading state
     const saveBtn = document.querySelector('.save-btn');
@@ -3525,99 +3523,79 @@ async function saveTicketChanges(ticketId) {
       saveBtn.disabled = true;
     }
     
-    // Try to update fields directly first, fall back to message-based approach for any that fail
+    // Try to update COFT fields directly
     const changes = [];
     const failedUpdates = [];
     
     // Get current ticket data to compare changes
     const ticketDoc = await db.collection('tickets').doc(ticketId).get();
     const currentTicket = ticketDoc.data();
+    const currentCoftData = currentTicket.coftData || {};
     
-    // Build update data with all changed fields
+    // Build updated COFT data
+    const newCoftData = {
+      ...currentCoftData,
+      soNumber: soNumber,
+      clientName: client,
+      itemCode: itemCode,
+      artworkTitle: artworkTitle,
+      editionNumber: editionNumber,
+      orderDate: orderDate
+    };
+    
+    // Check for changes
+    if (currentCoftData.soNumber !== soNumber) {
+      changes.push(`SO Number: "${currentCoftData.soNumber || ''}" → "${soNumber}"`);
+    }
+    if (currentCoftData.clientName !== client) {
+      changes.push(`Client: "${currentCoftData.clientName || ''}" → "${client}"`);
+    }
+    if (currentCoftData.itemCode !== itemCode) {
+      changes.push(`Item Code: "${currentCoftData.itemCode || ''}" → "${itemCode}"`);
+    }
+    if (currentCoftData.artworkTitle !== artworkTitle) {
+      changes.push(`Artwork Title: "${currentCoftData.artworkTitle || ''}" → "${artworkTitle}"`);
+    }
+    if (currentCoftData.editionNumber !== editionNumber) {
+      changes.push(`Edition Number: "${currentCoftData.editionNumber || ''}" → "${editionNumber}"`);
+    }
+    if (currentCoftData.orderDate !== orderDate) {
+      changes.push(`Order Date: "${currentCoftData.orderDate || ''}" → "${orderDate}"`);
+    }
+    
+    // Build update data
     const updateData = {
+      coftData: newCoftData,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
-    if (currentTicket.title !== title) {
-      updateData.title = title;
-      changes.push(`Title: "${currentTicket.title}" → "${title}"`);
-    }
-    if (currentTicket.description !== description) {
-      updateData.description = description;
-      changes.push(`Description updated`);
-    }
-    if (currentTicket.category !== category) {
-      updateData.category = category;
-      changes.push(`Category: "${currentTicket.category}" → "${category}"`);
-    }
-    if (currentTicket.status !== status) {
-      updateData.status = status;
-      changes.push(`Status: "${currentTicket.status}" → "${status}"`);
-    }
-    
-    // Try to update all fields at once first
-    let directUpdateSucceeded = false;
-    try {
-      await db.collection('tickets').doc(ticketId).update(updateData);
-      directUpdateSucceeded = true;
-      console.log('✅ Direct field updates succeeded');
-    } catch (error) {
-      console.log('⚠️ Direct field updates failed, trying individual fields:', error.message);
-      
-      // Try updating fields individually to see which ones work
-      const fieldsToTry = ['title', 'description', 'category', 'status'];
-      for (const field of fieldsToTry) {
-        if (updateData[field] !== undefined) {
-          try {
-            await db.collection('tickets').doc(ticketId).update({
-              [field]: updateData[field],
-              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            console.log(`✅ Updated ${field} successfully`);
-          } catch (fieldError) {
-            console.log(`❌ Failed to update ${field}:`, fieldError.message);
-            failedUpdates.push(field);
-          }
-        }
-      }
-    }
-    
-    // If some updates failed or we want to log the changes, add a system message
-    if (!directUpdateSucceeded && (changes.length > 0 || failedUpdates.length > 0)) {
-      let messageText = `Ticket edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}`;
-      
-      if (changes.length > 0) {
-        messageText += `:\n${changes.join('\n')}`;
-      }
-      
-      if (failedUpdates.length > 0) {
-        const failedChanges = [];
-        if (failedUpdates.includes('title') && currentTicket.title !== title) {
-          failedChanges.push(`Title: "${currentTicket.title}" → "${title}"`);
-        }
-        if (failedUpdates.includes('description') && currentTicket.description !== description) {
-          failedChanges.push(`Description updated to: "${description}"`);
-        }
-        if (failedUpdates.includes('category') && currentTicket.category !== category) {
-          failedChanges.push(`Category: "${currentTicket.category}" → "${category}"`);
-        }
+    // Try to update COFT data directly
+    if (changes.length > 0) {
+      try {
+        await db.collection('tickets').doc(ticketId).update(updateData);
+        console.log('✅ COFT data updated successfully');
         
-        if (failedChanges.length > 0) {
-          messageText += `\n\nNote: These field updates were recorded in messages due to security restrictions:\n${failedChanges.join('\n')}`;
-        }
+        // Add system message about the changes
+        const editMessage = {
+          message: `COFT data edited by ${currentUser.displayName || currentUser.email || 'Unknown User'}:\n${changes.join('\n')}`,
+          senderEmail: 'system',
+          senderName: 'System',
+          timestamp: new Date()
+        };
+        
+        await db.collection('tickets').doc(ticketId).update({
+          messages: firebase.firestore.FieldValue.arrayUnion(editMessage),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+      } catch (error) {
+        console.error('❌ Failed to update COFT data:', error.message);
+        throw error;
       }
-      
-      const editMessage = {
-        message: messageText,
-        senderEmail: 'system',
-        senderName: 'System',
-        timestamp: new Date()
-      };
-      
-      await db.collection('tickets').doc(ticketId).update({
-        messages: firebase.firestore.FieldValue.arrayUnion(editMessage),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+    } else {
+      console.log('ℹ️ No changes detected');
+      showEditStatus('No changes detected.', 'info');
+      return;
     }
     
     console.log('✅ Ticket updated successfully');
