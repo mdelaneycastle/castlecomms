@@ -16,36 +16,44 @@
       display: flex;
       justify-content: center;
       gap: 1rem;
-      margin: 2rem 0;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      margin: 0;
       padding: 0 2rem;
     }
 
     .tab-button {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.9);
       border: 1px solid rgba(255, 255, 255, 0.2);
       color: #333;
-      padding: 1rem 2rem;
-      border-radius: 25px;
-      font-size: 1.1rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px 25px 0 0;
+      font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.3s ease;
       backdrop-filter: blur(10px);
-      min-width: 140px;
+      min-width: 120px;
       text-align: center;
+      margin-top: -10px;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .tab-button:hover {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 1);
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
     }
 
     .tab-button.active {
       background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
       color: white;
       border-color: transparent;
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 -4px 20px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
     }
 
     .tab-button.active:hover {
@@ -61,9 +69,10 @@
       display: block;
     }
 
-    /* Move existing content down */
+    /* Move existing content down to account for tabs */
     .modern-main {
-      margin-top: 1rem;
+      margin-top: 3rem;
+      position: relative;
     }
 
     @media (max-width: 768px) {
@@ -72,12 +81,21 @@
         flex-wrap: wrap;
         gap: 0.5rem;
         padding: 0 1rem;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
       }
 
       .tab-button {
-        padding: 0.8rem 1.5rem;
-        font-size: 1rem;
-        min-width: 120px;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        min-width: 100px;
+        margin-top: -8px;
+      }
+
+      .modern-main {
+        margin-top: 4rem;
       }
     }
   </style>
