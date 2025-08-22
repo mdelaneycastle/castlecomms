@@ -181,17 +181,6 @@
       </div>
     </div>
 
-    <!-- Page Visibility Control - Only for Marc -->
-    <div id="page-visibility-section" data-user-only="mdelaney@castlefineart.com" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1rem; margin-bottom: 2rem; display: none;">
-      <h3 style="margin: 0 0 1rem 0; font-size: 1.2rem; color: #856404;">🔒 Page Visibility Control</h3>
-      <p style="margin: 0 0 1rem 0; font-size: 0.9rem; color: #856404;">Control which pages are visible to all users. Hidden pages will only be accessible to you.</p>
-      
-      <div id="page-toggles" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-        <!-- Page toggles will be dynamically generated -->
-      </div>
-      
-      <div id="visibility-status" style="margin-top: 1rem;"></div>
-    </div>
   </div>
 
 <form id="create-user-form" style="margin-bottom:2rem;">
@@ -257,7 +246,6 @@
     currentUser = user;
     await loadUsers();
     setupEventListeners();
-    await initPageVisibilityControls();
   });
 
   // Load all users
@@ -603,118 +591,11 @@
     { id: 'gallery-images', name: 'Gallery Images', file: 'gallery-images.html' }
   ];
 
-  // Initialize page visibility controls
-  async function initPageVisibilityControls() {
-    // Only show for Marc
-    if (currentUser && currentUser.email === 'mdelaney@castlefineart.com') {
-      const section = document.getElementById('page-visibility-section');
-      if (section) {
-        section.style.display = 'block';
-        await loadPageVisibilitySettings();
-      }
-    }
-  }
-
-  // Load current visibility settings from Firestore
-  async function loadPageVisibilitySettings() {
-    try {
-      const togglesContainer = document.getElementById('page-toggles');
-      if (!togglesContainer) return;
-
-      // Get current visibility settings from Firestore
-      const db = firebase.firestore();
-      const docRef = db.collection('settings').doc('page-visibility');
-      const doc = await docRef.get();
-      const settings = doc.exists ? doc.data() : {};
-
-      // Generate toggles for each page
-      togglesContainer.innerHTML = pages.map(page => {
-        const isHidden = settings[page.id] === false;
-        return `
-          <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: white; border: 1px solid #e1e5e9; border-radius: 6px;">
-            <div>
-              <strong>${page.name}</strong>
-              <br>
-              <small style="color: #6c757d;">${page.file}</small>
-            </div>
-            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin: 0;">
-              <input type="checkbox" 
-                     id="toggle-${page.id}" 
-                     ${!isHidden ? 'checked' : ''} 
-                     onchange="togglePageVisibility('${page.id}', this.checked)"
-                     style="transform: scale(1.2);">
-              <span style="font-size: 0.9rem; color: ${!isHidden ? '#155724' : '#721c24'};">
-                ${!isHidden ? 'Visible' : 'Hidden'}
-              </span>
-            </label>
-          </div>
-        `;
-      }).join('');
-
-    } catch (error) {
-      console.error('Error loading page visibility settings:', error);
-      showVisibilityStatus('Failed to load page visibility settings', 'error');
-    }
-  }
-
-  // Toggle page visibility
-  async function togglePageVisibility(pageId, isVisible) {
-    try {
-      // Update Firestore
-      const db = firebase.firestore();
-      const docRef = db.collection('settings').doc('page-visibility');
-      await docRef.set({ [pageId]: isVisible }, { merge: true });
-
-      // Update UI label
-      const checkbox = document.getElementById(`toggle-${pageId}`);
-      if (checkbox) {
-        const label = checkbox.parentElement.querySelector('span');
-        if (label) {
-          label.textContent = isVisible ? 'Visible' : 'Hidden';
-          label.style.color = isVisible ? '#155724' : '#721c24';
-        }
-      }
-
-      const pageName = pages.find(p => p.id === pageId)?.name || pageId;
-      showVisibilityStatus(
-        `${pageName} is now ${isVisible ? 'visible to all users' : 'hidden from other users'}`, 
-        'success'
-      );
-
-    } catch (error) {
-      console.error('Error updating page visibility:', error);
-      showVisibilityStatus('Failed to update page visibility', 'error');
-      
-      // Revert checkbox state
-      const checkbox = document.getElementById(`toggle-${pageId}`);
-      if (checkbox) {
-        checkbox.checked = !checkbox.checked;
-      }
-    }
-  }
-
-  // Show visibility status message
-  function showVisibilityStatus(message, type) {
-    const statusDiv = document.getElementById('visibility-status');
-    if (!statusDiv) return;
-
-    statusDiv.innerHTML = `
-      <div class="status-message status-${type}" style="margin: 0;">
-        ${message}
-      </div>
-    `;
-
-    // Auto-clear after 3 seconds
-    setTimeout(() => {
-      statusDiv.innerHTML = '';
-    }, 3000);
-  }
 
   // Make functions globally available
   window.toggleAdmin = toggleAdmin;
   window.toggleCommAdmin = toggleCommAdmin;
   window.deleteUser = deleteUser;
-  window.togglePageVisibility = togglePageVisibility;
 
 </script>
 
