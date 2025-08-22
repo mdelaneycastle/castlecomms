@@ -2909,8 +2909,35 @@ function mobileShowAll() {
   });
   
   // Address Book Core Functions
-  function modalInit() {
-    modalContacts = JSON.parse(localStorage.getItem('addressBookContacts') || '[]');
+  async function modalInit() {
+    // Load existing contacts from localStorage
+    let existingContacts = JSON.parse(localStorage.getItem('addressBookContacts') || '[]');
+    
+    // If no contacts exist, load from businesscards.json
+    if (existingContacts.length === 0) {
+      try {
+        const response = await fetch('businesscards.json');
+        const businessCards = await response.json();
+        
+        // Convert business cards to address book format
+        const convertedContacts = businessCards.map(card => ({
+          name: card.name || '',
+          phone: card.phone || card.mobile || '',
+          email: card.email || '',
+          label: card.department || card.role || 'Staff',
+          company: 'Castle Fine Art'
+        }));
+        
+        modalContacts = convertedContacts;
+        localStorage.setItem('addressBookContacts', JSON.stringify(modalContacts));
+      } catch (error) {
+        console.error('Error loading business cards:', error);
+        modalContacts = existingContacts;
+      }
+    } else {
+      modalContacts = existingContacts;
+    }
+    
     modalFiltered = [...modalContacts];
     modalCurrentIndex = 0;
     modalRender();
