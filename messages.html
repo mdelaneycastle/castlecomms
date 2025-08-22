@@ -2915,5 +2915,561 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+
+<!-- Contact Chatbot -->
+<style>
+  /* Chatbot styles */
+  .cc-launcher {
+    position: fixed; 
+    right: 20px; 
+    bottom: 20px; 
+    z-index: 999999;
+    border: none; 
+    border-radius: 25px; 
+    cursor: pointer;
+    background: #45494e;
+    color: #ffffff;
+    box-shadow: 0 24px 60px rgba(22,25,28,0.16);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .cc-launcher:hover { 
+    transform: translateY(-2px); 
+    filter: brightness(1.05); 
+  }
+  .cc-launcher-icon {
+    font-size: 20px;
+  }
+
+  /* Widget panel */
+  .cc-widget {
+    position: fixed; 
+    right: 20px; 
+    bottom: 90px; 
+    z-index: 999999; 
+    display: none;
+    width: 380px; 
+    max-height: 74vh; 
+    background: #ffffff;
+    border: 1px solid rgba(69,73,78,0.15); 
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(22,25,28,0.16); 
+    overflow: hidden; 
+    flex-direction: column;
+  }
+  .cc-widget.open { 
+    display: flex; 
+  }
+
+  .cc-header {
+    background: linear-gradient(180deg, #d8d1c5, #ece7de);
+    padding: 12px 16px; 
+    border-bottom: 1px solid rgba(69,73,78,0.12);
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    color: #2b2f33;
+  }
+  .cc-mark {
+    width: 36px; 
+    height: 36px; 
+    border-radius: 10px;
+    background: #45494e;
+    display: grid; 
+    place-items: center; 
+    color: #ffffff; 
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(69,73,78,.25);
+  }
+  .cc-header h3 { 
+    margin: 0; 
+    font-size: 15px; 
+    line-height: 1.2; 
+    font-weight: 700; 
+  }
+  .cc-header small { 
+    display: block; 
+    color: #72777d; 
+    font-weight: 500; 
+  }
+  .cc-close { 
+    margin-left: auto; 
+    border: none; 
+    background: transparent; 
+    color: #363a3f; 
+    cursor: pointer; 
+    width: 34px; 
+    height: 34px; 
+    border-radius: 8px; 
+  }
+  .cc-close:hover { 
+    background: rgba(69,73,78,0.08); 
+  }
+
+  .cc-messages { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 14px 14px 0 14px; 
+    background: linear-gradient(180deg, rgba(216,209,197,0.16), rgba(216,209,197,0));
+  }
+
+  .cc-bubble { 
+    max-width: 82%; 
+    margin: 10px 0; 
+    padding: 10px 12px; 
+    border-radius: 12px; 
+    line-height: 1.45; 
+    font-size: 14px; 
+  }
+  .cc-bubble.user { 
+    margin-left: auto; 
+    color: #ffffff; 
+    background: #45494e; 
+    border-top-right-radius: 6px; 
+  }
+  .cc-bubble.bot { 
+    margin-right: auto; 
+    background: #f6f4f1; 
+    border: 1px solid rgba(69,73,78,0.12); 
+    border-top-left-radius: 6px; 
+  }
+
+  .cc-typing { 
+    display: none; 
+    text-align: center; 
+    padding: 8px 0 4px; 
+  }
+  .cc-dot { 
+    width: 8px; 
+    height: 8px; 
+    display: inline-block; 
+    border-radius: 50%; 
+    background: #c1b9ad; 
+    margin: 0 2px; 
+    animation: ccDot 1.4s infinite; 
+    opacity: .9; 
+  }
+  .cc-dot:nth-child(2) { animation-delay: .2s; }
+  .cc-dot:nth-child(3) { animation-delay: .4s; }
+  @keyframes ccDot { 
+    0%, 60%, 100% { transform: translateY(0); } 
+    30% { transform: translateY(-6px); } 
+  }
+
+  .cc-input-area { 
+    padding: 12px; 
+    border-top: 1px solid rgba(69,73,78,0.12); 
+    background: #faf9f7; 
+  }
+  .cc-row { 
+    display: flex; 
+    gap: 8px; 
+  }
+  .cc-input { 
+    flex: 1; 
+    border: 1px solid rgba(69,73,78,0.25); 
+    background: #fff; 
+    color: #2b2f33; 
+    border-radius: 12px; 
+    padding: 10px 12px; 
+    outline: none; 
+    font-size: 14px; 
+  }
+  .cc-input:focus { 
+    box-shadow: 0 0 0 3px rgba(69,73,78,0.18); 
+    border-color: #45494e; 
+  }
+  .cc-send { 
+    background: #45494e; 
+    color: #fff; 
+    border: none; 
+    padding: 0 14px; 
+    border-radius: 10px; 
+    cursor: pointer; 
+    font-weight: 600; 
+  }
+  .cc-send:hover { 
+    filter: brightness(1.05); 
+  }
+
+  .cc-suggestions { 
+    padding: 8px 0 0; 
+    display: flex; 
+    gap: 6px; 
+    flex-wrap: wrap; 
+  }
+  .cc-chip { 
+    font-size: 12px; 
+    padding: 6px 10px; 
+    background: #f1efeb; 
+    border: 1px solid rgba(69,73,78,0.14); 
+    color: #4a4f54; 
+    border-radius: 999px; 
+    cursor: pointer; 
+  }
+  .cc-chip:hover { 
+    background: #ebe7e0; 
+  }
+
+  /* Contact cards */
+  .cc-card { 
+    background: #fff; 
+    border: 1px solid rgba(69,73,78,0.12); 
+    border-radius: 12px; 
+    padding: 10px; 
+    margin-top: 10px; 
+  }
+  .cc-team { 
+    display: flex; 
+    gap: 8px; 
+    align-items: center; 
+    font-weight: 700; 
+    color: #2b2f33; 
+  }
+  .cc-tag { 
+    margin-left: auto; 
+    font-size: 12px; 
+    padding: 2px 8px; 
+    border-radius: 999px; 
+    background: #f3f2ef; 
+    border: 1px solid rgba(69,73,78,0.12); 
+    color: #4a4f54; 
+  }
+  .cc-emails { 
+    margin-top: 8px; 
+  }
+  .cc-email { 
+    display: inline-block; 
+    font-size: 12px; 
+    margin: 4px 6px 0 0; 
+    padding: 6px 10px; 
+    border-radius: 999px; 
+    background: #f6f4f1; 
+    border: 1px solid rgba(69,73,78,0.12); 
+    text-decoration: none; 
+    color: #2b2f33; 
+  }
+  .cc-email:hover { 
+    background: #d8d1c5; 
+  }
+  .cc-keywords { 
+    margin-top: 8px; 
+    font-size: 12px; 
+    color: #5b6066; 
+  }
+  .cc-k { 
+    background: rgba(216,209,197,.55); 
+    color: #1f2327; 
+    padding: 0 4px; 
+    border-radius: 4px; 
+    font-weight: 700; 
+  }
+  .cc-phone {
+    margin-top: 6px; 
+    font-size: 13px; 
+    color: #4a4f54;
+  }
+  .cc-phone a {
+    color: #2b2f33; 
+    text-decoration: underline;
+  }
+
+  /* Match borders */
+  .match-high { border-left: 4px solid #2f3438; }
+  .match-medium { border-left: 4px solid #7f858b; }
+  .match-low { border-left: 4px solid #c9c3b8; }
+
+  @media (max-width: 480px) {
+    .cc-widget { 
+      right: 10px; 
+      left: 10px; 
+      width: auto; 
+    }
+    .cc-launcher {
+      right: 10px;
+    }
+  }
+</style>
+
+<!-- Launcher Button -->
+<button class="cc-launcher" id="cc-launcher" aria-label="Open contact helper" title="Contact Finder">
+  <span class="cc-launcher-icon">💬</span>
+  <span>Who do I contact?</span>
+</button>
+
+<!-- Chatbot Widget -->
+<section class="cc-widget" id="cc-widget" aria-live="polite" aria-label="Contact Finder chatbot">
+  <header class="cc-header">
+    <div class="cc-mark">CC</div>
+    <div>
+      <h3>Who do I contact?</h3>
+      <small>Describe your issue and I'll route you</small>
+    </div>
+    <button class="cc-close" id="cc-close" title="Close" aria-label="Close">✕</button>
+  </header>
+
+  <div class="cc-messages" id="cc-messages"></div>
+  <div class="cc-typing" id="cc-typing">
+    <span class="cc-dot"></span>
+    <span class="cc-dot"></span>
+    <span class="cc-dot"></span>
+  </div>
+
+  <div class="cc-input-area">
+    <div class="cc-row">
+      <input id="cc-input" class="cc-input" placeholder="e.g. I need to cancel my order" autocomplete="off" />
+      <button id="cc-send" class="cc-send">Send</button>
+    </div>
+    <div class="cc-suggestions" id="cc-suggestions"></div>
+  </div>
+</section>
+
+<script>
+// Contact Chatbot functionality
+(function() {
+  let teamContacts = [];
+
+  // Load team contacts from JSON
+  async function loadTeamContacts() {
+    try {
+      const response = await fetch('team_contacts.json');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      teamContacts = await response.json();
+      console.log('Team contacts loaded:', teamContacts.length, 'teams');
+    } catch (error) {
+      console.error('Failed to load team contacts:', error);
+      addBot('Sorry, I\'m having trouble loading the team directory. Please try again later or contact Client Services directly.');
+    }
+  }
+
+  // Matching utilities
+  function levenshteinDistance(str1, str2) {
+    const len1 = str1.length, len2 = str2.length;
+    const dp = Array.from({ length: len2 + 1 }, (_, i) => [i]);
+    for (let j = 0; j <= len1; j++) dp[0][j] = j;
+    for (let i = 1; i <= len2; i++) {
+      for (let j = 1; j <= len1; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          dp[i][j] = dp[i-1][j-1];
+        } else {
+          dp[i][j] = Math.min(dp[i-1][j-1] + 1, dp[i][j-1] + 1, dp[i-1][j] + 1);
+        }
+      }
+    }
+    return dp[len2][len1];
+  }
+
+  function isFuzzyMatch(a, b, max = 2) {
+    if (a.length < 4 || b.length < 4) return false;
+    if (Math.abs(a.length - b.length) > max) return false;
+    return levenshteinDistance(a.toLowerCase(), b.toLowerCase()) <= max;
+  }
+
+  function findMatchingTeams(query) {
+    if (!query.trim() || teamContacts.length === 0) return [];
+    
+    const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    const matches = [];
+
+    teamContacts.forEach(team => {
+      let score = 0;
+      const matchedKeywords = [];
+      let hasExact = false;
+      let hasFuzzy = false;
+
+      // Exact matches
+      team.keywords.forEach(kw => {
+        const kwWords = kw.toLowerCase().split(/\s+/);
+        queryWords.forEach(qw => {
+          kwWords.forEach(kwd => {
+            if (qw === kwd) {
+              score += 100;
+              hasExact = true;
+              if (!matchedKeywords.includes(kw)) matchedKeywords.push(kw);
+            }
+          });
+        });
+      });
+
+      // Fuzzy matches if no exact matches
+      if (!hasExact) {
+        team.keywords.forEach(kw => {
+          const kwWords = kw.toLowerCase().split(/\s+/);
+          queryWords.forEach(qw => {
+            kwWords.forEach(kwd => {
+              if (isFuzzyMatch(qw, kwd)) {
+                score += 80;
+                hasFuzzy = true;
+                if (!matchedKeywords.includes(kw)) {
+                  matchedKeywords.push(`${kw} (did you mean "${kwd}")`);
+                }
+              }
+            });
+          });
+        });
+      }
+
+      // Partial matches if no exact or fuzzy matches
+      if (!hasExact && !hasFuzzy) {
+        team.keywords.forEach(kw => {
+          const kwLower = kw.toLowerCase();
+          if (query.toLowerCase().includes(kwLower)) {
+            score += 50;
+            if (!matchedKeywords.includes(kw)) matchedKeywords.push(kw);
+            return;
+          }
+          queryWords.forEach(qw => {
+            kwLower.split(/\s+/).forEach(kwd => {
+              if (qw.includes(kwd) || kwd.includes(qw)) {
+                score += 5;
+                if (!matchedKeywords.includes(kw)) matchedKeywords.push(kw);
+              }
+            });
+          });
+        });
+      }
+
+      if (score > 0) {
+        matches.push({ ...team, score, matchedKeywords });
+      }
+    });
+
+    return matches.sort((a, b) => b.score - a.score);
+  }
+
+  // UI elements
+  const widget = document.getElementById('cc-widget');
+  const launcher = document.getElementById('cc-launcher');
+  const closer = document.getElementById('cc-close');
+  const messages = document.getElementById('cc-messages');
+  const typing = document.getElementById('cc-typing');
+  const input = document.getElementById('cc-input');
+  const sendBtn = document.getElementById('cc-send');
+  const suggestions = document.getElementById('cc-suggestions');
+
+  const chips = [
+    'cancel my order', 'damaged artwork', 'order tracking',
+    'artist event', 'stock availability', 'installation help',
+    'lost shipment', 'returns'
+  ];
+
+  function mountChips() {
+    suggestions.innerHTML = chips.map(c => 
+      `<button class="cc-chip" data-q="${c.replace(/"/g, '&quot;')}">${c}</button>`
+    ).join('');
+    
+    suggestions.querySelectorAll('.cc-chip').forEach(el => {
+      el.addEventListener('click', () => {
+        input.value = el.dataset.q;
+        submitQuery();
+      });
+    });
+  }
+
+  function addBot(html) {
+    const b = document.createElement('div');
+    b.className = 'cc-bubble bot';
+    b.innerHTML = html;
+    messages.appendChild(b);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function addUser(text) {
+    const b = document.createElement('div');
+    b.className = 'cc-bubble user';
+    b.textContent = text;
+    messages.appendChild(b);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function renderCards(matches, query) {
+    if (!matches.length) {
+      addBot(`No specific team found for "${escapeHtml(query)}".<br/>Try different keywords or contact <strong>Client Services</strong> for general help.`);
+      return;
+    }
+
+    const html = matches.map((m) => {
+      const level = m.score >= 100 ? 'high' : m.score >= 50 ? 'medium' : 'low';
+      const pct = Math.min(Math.round((m.score / 100) * 100), 100);
+      const emailTags = m.emails.map(e => 
+        `<a class="cc-email" href="mailto:${e}?subject=${encodeURIComponent('Who do I contact? - ' + query)}">${e}</a>`
+      ).join('');
+      const kws = m.matchedKeywords.map(k => `<span class="cc-k">${escapeHtml(k)}</span>`).join(', ');
+      const phone = m.phone ? `<div class="cc-phone">📞 <a href="tel:${m.phone}">${m.phone}</a></div>` : '';
+      
+      return `<div class="cc-card match-${level}">
+        <div class="cc-team">💼 ${escapeHtml(m.team)} <span class="cc-tag">${pct}% match</span></div>
+        ${phone}
+        <div class="cc-emails">${emailTags}</div>
+        <div class="cc-keywords">Matched: ${kws}</div>
+      </div>`;
+    }).join('');
+
+    addBot(html);
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[m]));
+  }
+
+  function submitQuery() {
+    const q = input.value.trim();
+    if (!q) return;
+    
+    addUser(q);
+    input.value = '';
+    typing.style.display = 'block';
+    
+    setTimeout(() => {
+      const matches = findMatchingTeams(q);
+      typing.style.display = 'none';
+      renderCards(matches, q);
+    }, 480);
+  }
+
+  // Event listeners
+  launcher.addEventListener('click', () => {
+    widget.classList.add('open');
+    input.focus();
+    if (!messages.dataset.seeded) {
+      seedIntro();
+      messages.dataset.seeded = '1';
+    }
+  });
+
+  closer.addEventListener('click', () => {
+    widget.classList.remove('open');
+  });
+
+  sendBtn.addEventListener('click', submitQuery);
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitQuery();
+  });
+
+  function seedIntro() {
+    addBot('Hi! 👋 Tell me what you need help with and I\'ll suggest the best team. Try typing something like <em>"I need to cancel my order"</em> or pick a suggestion below.');
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadTeamContacts();
+    mountChips();
+  });
+})();
+</script>
 </body>
 </html>
