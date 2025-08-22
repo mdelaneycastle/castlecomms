@@ -1104,11 +1104,10 @@ admin-link {
 }
 
 .user-profile-btn {
-  margin-top: 2px
   background: #596066;
   border: none;
   border-radius: 50%;
-  width: 60px;   /* bigger */
+  width: 60px;
   height: 60px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1117,6 +1116,7 @@ admin-link {
   align-items: center;
   justify-content: center;
   position: relative;
+  margin-top: 2px;  /* <-- correct */
 }
 
 .user-profile-btn:hover {
