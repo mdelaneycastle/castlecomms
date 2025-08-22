@@ -81,10 +81,7 @@
       position: relative;
     }
 
-    /* Add top margin to action buttons to account for tabs */
-    .action-buttons {
-      margin-top: 30px;
-    }
+    /* Removed action buttons - no longer needed */
 
     @media (max-width: 768px) {
       .tab-navigation {
@@ -171,16 +168,6 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
 
   <!-- Home Tab Content (Original home page) -->
   <div class="tab-content active" id="home-tab">
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <a href="contact-finder.html" class="pill-button">
-        <span>🤔</span> Who should I contact?
-      </a>
-      <a href="news-mentions.html" class="pill-button">
-        <span>📰</span> News and Media mentions
-      </a>
-    </div>
-
     <!-- Quicklinks Section -->
     <section class="quicklinks-section">
       <h2 class="section-title">Quicklinks</h2>
@@ -307,6 +294,17 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
             📰 Manage News & Media
           </a>
         </div>
+      </div>
+      
+      <!-- News and Media Mentions Section -->
+      <div class="news-mentions-section" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+        <h3 style="color: #495057; margin: 0 0 1rem 0; font-size: 1.3rem; display: flex; align-items: center; gap: 0.5rem;">📰 News and Media Mentions</h3>
+        <p style="color: #6c757d; margin: 0 0 1rem 0; font-size: 0.9rem;">
+          View and manage news articles, media mentions, and press coverage.
+        </p>
+        <a href="news-mentions.html" style="background: #45494e; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem;">
+          📰 View News & Media
+        </a>
       </div>
       
       <div class="communications-filters" id="comm-filters" style="display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
