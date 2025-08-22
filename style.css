@@ -951,7 +951,10 @@ admin-link {
 .modern-header {
   background: #F0EDE9;
   border-bottom: 1px solid rgba(216, 209, 197, 0.3);
-  padding: 1rem 2rem;
+  padding: 0 2rem;                /* remove vertical padding */
+  height: 70px;                   /* fixed bar height */
+  display: flex;                  /* flex for vertical centering */
+  align-items: center;            /* centers items inside */
   box-shadow: 0 4px 12px rgba(69, 73, 78, 0.08);
   position: fixed;
   top: 0;
@@ -1104,8 +1107,8 @@ admin-link {
   background: #596066;
   border: none;
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
+  width: 60px;   /* bigger */
+  height: 60px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 3px 8px rgba(89, 96, 102, 0.3);
