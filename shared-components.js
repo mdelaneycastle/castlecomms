@@ -102,12 +102,10 @@ window.sharedComponents = {
       'teams.html': 'TEAMS/GROUPS',
       'tickets.html': 'TICKETS',
       'newsfeed.html': 'NEWSFEED',
-      'gallery-images.html': 'GALLERY',
       'staff.html': 'STAFF',
       'messages.html': 'CHAT',
-      'best-practice.html': 'BEST PRACTICES',
+      'best-practice.html': 'DISPLAY REVIEW',
       'recognition-board.html': 'RECOGNITION BOARD',
-      'contact-finder.html': 'CONTACT FINDER',
       'planner.html': 'PLANNER',
       'news-mentions.html': 'NEWS MENTIONS',
       'manual.html': 'MANUAL',
@@ -383,7 +381,6 @@ window.sharedComponents = {
       // Map of page IDs to their sidebar link elements
       const pageElementMap = {
         'main': 'a[href="main.html"]',
-        'contact-finder': 'a[href="contact-finder.html"]',
         'planner': 'a[href="planner.html"]', 
         'staff': 'a[href="staff.html"]',
         'address-book': '#address-book-link',
@@ -395,8 +392,7 @@ window.sharedComponents = {
         'recognition-board': 'a[href="recognition-board.html"]',
         'reports': 'a[href="reports.html"]',
         'manual': 'a[href="manual.html"]',
-        'best-practice': 'a[href="best-practice.html"]',
-        'gallery-images': '#gallery-images-link'
+        'best-practice': 'a[href="best-practice.html"]'
       };
 
       // Hide pages that are set to false in the visibility settings
