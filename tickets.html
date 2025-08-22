@@ -299,6 +299,16 @@
       display: inline-block;    /* stops stretching full width */
     }
 
+    /* COFT Report dropdown should match main modal dropdowns */
+    #coft-report-month {
+      padding: 1rem !important;
+      height: auto !important;
+      min-height: 48px !important;
+      font-size: 1.1rem !important;
+      max-width: 100% !important;
+      display: block !important;
+    }
+
     /* Make modal dropdowns taller too */
     #modal-assign-team {
       height: 40px; /* Half of previous 80px */
@@ -2961,10 +2971,6 @@
             <span class="coft-value" id="coft-detail-client-aware">-</span>
           </div>
           <div class="coft-detail-row">
-            <span class="coft-label">ETA Discussed at Purchase:</span>
-            <span class="coft-value" id="coft-detail-eta-discussed">-</span>
-          </div>
-          <div class="coft-detail-row">
             <span class="coft-label">Issue Reason:</span>
             <span class="coft-value" id="coft-detail-reason">-</span>
           </div>
@@ -3203,21 +3209,6 @@
           </div>
         </div>
 
-        <div class="form-group" id="coft-eta-discussed-section">
-          <label class="form-label">Has the 4 week ETA been discussed with the client at the point of purchase?</label>
-          <div class="radio-group">
-            <label class="radio-container">
-              <input type="radio" name="coft-eta-discussed" value="yes">
-              <span class="radio-checkmark"></span>
-              Yes
-            </label>
-            <label class="radio-container">
-              <input type="radio" name="coft-eta-discussed" value="no">
-              <span class="radio-checkmark"></span>
-              No
-            </label>
-          </div>
-        </div>
 
         <!-- Date Order Booked -->
         <div class="form-group">
@@ -3640,7 +3631,6 @@ async function saveTicketChanges(ticketId) {
           coftType: currentCoftData.coftType || 'order-chasing',
           deliveryMethod: currentCoftData.deliveryMethod || 'Unknown',
           clientAware: currentCoftData.clientAware || 'Unknown',
-          etaDiscussed: currentCoftData.etaDiscussed || '',
           ticketReason: currentCoftData.ticketReason || 'Data updated via edit',
           specificDate: currentCoftData.specificDate || '',
           photos: currentCoftData.photos || [],
@@ -4499,6 +4489,7 @@ async function loadTickets() {
             <th>Client Name</th>
             <th>Assigned To</th>
             <th>Ticket Status</th>
+            <th>Date Created</th>
             <th>Timer</th>
             <th>Date Modified</th>
             <th>Actions</th>
@@ -4616,6 +4607,7 @@ async function loadTickets() {
           <td><div class="ticket-client">${coftData.clientName || '-'}</div></td>
           <td><div class="ticket-assignee">${assignmentText}</div></td>
           <td><div class="ticket-status ${displayStatus}">${statusText}</div></td>
+          <td><div class="ticket-created">${formatTimestamp(ticket.createdAt?.toDate?.() || new Date())}</div></td>
           <td><div class="ticket-timer-cell">${getTimerDisplayForTicket(ticket)}</div></td>
           <td><div class="ticket-modified">${formatTimestamp(lastModifiedDate)}</div></td>
           <td><div class="ticket-actions">
@@ -4821,11 +4813,6 @@ async function openTicket(ticketId) {
         document.getElementById('coft-detail-client-aware').textContent = coftModalData.clientAware || '-';
       }
       
-      if (coftModalData.etaDiscussed === 'NO') {
-        document.getElementById('coft-detail-eta-discussed').innerHTML = '<span class="highlight warning-highlight">NO ⚠️</span>';
-      } else {
-        document.getElementById('coft-detail-eta-discussed').textContent = coftModalData.etaDiscussed || '-';
-      }
       
       document.getElementById('coft-detail-reason').textContent = coftModalData.ticketReason || '-';
       
@@ -5465,7 +5452,7 @@ function setCOFTFieldsRequired(required) {
     'coft-ticket-reason'
   ];
   
-  const radioGroups = ['coft-client-aware', 'coft-eta-discussed'];
+  const radioGroups = ['coft-client-aware'];
   
   coftFields.forEach(fieldId => {
     const field = document.getElementById(fieldId);
@@ -5517,7 +5504,6 @@ function resetCOFTForm() {
   // Reset radios
   document.querySelectorAll('input[name="coft-type"]').forEach(radio => radio.checked = false);
   document.querySelectorAll('input[name="coft-client-aware"]').forEach(radio => radio.checked = false);
-  document.querySelectorAll('input[name="coft-eta-discussed"]').forEach(radio => radio.checked = false);
   
   // Reset file upload
   document.getElementById('coft-photo-upload').value = '';
@@ -5547,21 +5533,14 @@ function handleCOFTTypeSelection() {
   const coftTypeRadios = document.querySelectorAll('input[name="coft-type"]');
   const coftFieldsContainer = document.getElementById('coft-fields-container');
   const selectedType = document.querySelector('input[name="coft-type"]:checked')?.value;
-  const etaSection = document.getElementById('coft-eta-discussed-section');
   const reasonSelect = document.getElementById('coft-ticket-reason');
   
   if (selectedType) {
     // Show the COFT fields
     coftFieldsContainer.classList.remove('hidden');
     
-    // Handle ETA section visibility and reason options based on selection
+    // Handle reason options based on selection
     if (selectedType === 'reprocessing') {
-      // Hide ETA section for reprocessing/item sourced tickets
-      etaSection.classList.add('hidden');
-      // Remove required attribute from ETA radio buttons
-      document.querySelectorAll('input[name="coft-eta-discussed"]').forEach(radio => {
-        radio.removeAttribute('required');
-      });
       
       // Show reprocessing reasons and hide order chasing reasons
       document.querySelectorAll('.order-chasing-reason').forEach(option => {
@@ -5577,12 +5556,6 @@ function handleCOFTTypeSelection() {
       const katieUser = { email: 'klewis@castlefineart.com', name: 'Katie Lewis' };
       assignModalUser(katieUser);
     } else if (selectedType === 'order-chasing') {
-      // Show ETA section for order chasing tickets
-      etaSection.classList.remove('hidden');
-      // Add required attribute back to ETA radio buttons
-      document.querySelectorAll('input[name="coft-eta-discussed"]').forEach(radio => {
-        radio.setAttribute('required', 'required');
-      });
       
       // Show order chasing reasons and hide reprocessing reasons
       document.querySelectorAll('.order-chasing-reason').forEach(option => {
@@ -5634,7 +5607,6 @@ function resetCOFTFormFields() {
   
   // Reset radio buttons
   document.querySelectorAll('input[name="coft-client-aware"]').forEach(radio => radio.checked = false);
-  document.querySelectorAll('input[name="coft-eta-discussed"]').forEach(radio => radio.checked = false);
   
   // Reset file upload
   document.getElementById('coft-photo-upload').value = '';
@@ -5750,17 +5722,10 @@ function collectCOFTFormData() {
   
   // Get radio button values
   const clientAware = document.querySelector('input[name="coft-client-aware"]:checked');
-  const etaDiscussed = document.querySelector('input[name="coft-eta-discussed"]:checked');
   
-  // For order chasing tickets, both clientAware and etaDiscussed are required
-  // For reprocessing tickets, only clientAware is required (etaDiscussed is hidden)
+  // Client awareness is required for all COFT tickets
   if (!clientAware) {
     showModalStatus('Please answer the client awareness question.', 'error');
-    return null;
-  }
-  
-  if (coftType.value === 'order-chasing' && !etaDiscussed) {
-    showModalStatus('Please answer the ETA discussion question.', 'error');
     return null;
   }
   
@@ -5789,7 +5754,6 @@ function collectCOFTFormData() {
     deliveryMethod,
     ticketReason,
     clientAware: clientAware.value,
-    etaDiscussed: etaDiscussed ? etaDiscussed.value : null,
     specificDate,
     additionalInfo,
     photos: Array.from(photos)
@@ -5812,9 +5776,6 @@ function buildCOFTDescription(coftData) {
   
   description += `**Client Awareness:**\n`;
   description += `• Is client aware of 4 week fulfilment time? ${coftData.clientAware.toUpperCase()}\n`;
-  if (coftData.etaDiscussed) {
-    description += `• Has 4 week ETA been discussed at point of purchase? ${coftData.etaDiscussed.toUpperCase()}\n`;
-  }
   description += `\n`;
   
   description += `**Issue Details:**\n`;
@@ -5969,7 +5930,6 @@ function extractComprehensiveCOFTData(ticket) {
     orderDate: null,
     deliveryMethod: null,
     clientAware: null,
-    etaDiscussed: null,
     ticketReason: null,
     specificDate: null,
     photosAttached: null,
@@ -6034,11 +5994,6 @@ function extractComprehensiveCOFTData(ticket) {
       defaultData.clientAware = clientAwareMatch[1].toUpperCase();
     }
     
-    // Extract ETA Discussion
-    const etaDiscussedMatch = description.match(/Has 4 week ETA been discussed at point of purchase\?\s*(YES|NO)/i);
-    if (etaDiscussedMatch) {
-      defaultData.etaDiscussed = etaDiscussedMatch[1].toUpperCase();
-    }
     
     // Extract Reason
     const reasonMatch = description.match(/Reason:\s*([^\n\r]+)/i);
@@ -7119,7 +7074,7 @@ document.addEventListener('keydown', (e) => {
     <div class="coft-report-form">
       <div class="form-group">
         <label for="coft-report-month" class="form-label">Select Month:</label>
-        <select id="coft-report-month" class="form-select full-width" required>
+        <select id="coft-report-month" class="form-select" required>
           <option value="">Choose a month...</option>
         </select>
         <p class="form-help-text">Only months with tickets are shown</p>
