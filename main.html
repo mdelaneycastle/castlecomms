@@ -109,6 +109,41 @@
         margin-top: 1.5rem;
       }
     }
+
+    /* Card Button Styles */
+    .card-button-container {
+      padding: 1rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      margin-top: auto;
+    }
+
+    .card-button {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .card-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      text-decoration: none;
+      color: white;
+    }
+
+    .card-button:active {
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -205,6 +240,9 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
         <div class="card-content" id="newsfeed-content">
           <div class="loading">Loading recent posts...</div>
         </div>
+        <div class="card-button-container">
+          <a href="newsfeed.html" class="card-button">View Newsfeed</a>
+        </div>
       </div>
       
       <div class="dashboard-card" id="messages-card">
@@ -212,12 +250,18 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
         <div class="card-content" id="messages-content">
           <div class="loading">Loading latest messages...</div>
         </div>
+        <div class="card-button-container">
+          <a href="messages.html" class="card-button">View Messages</a>
+        </div>
       </div>
       
       <div class="dashboard-card" id="tickets-card">
         <h3>Tickets</h3>
         <div class="card-content" id="tickets-content">
           <div class="loading">Loading latest tickets...</div>
+        </div>
+        <div class="card-button-container">
+          <a href="tickets.html" class="card-button">View/Add Tickets</a>
         </div>
       </div>
     </div>
