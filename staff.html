@@ -799,45 +799,51 @@
     }
 
     .address-book-modal-content {
-      background: var(--bg);
-      margin: 2% auto;
+      background-color: #fff;
+      margin: 5% auto;
       padding: 0;
-      border-radius: 20px;
-      width: min(95%, 1200px);
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      position: relative;
-      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      width: 90%;
+      height: 85%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
     }
 
     .address-book-modal-header {
-      padding: 8px 20px 0;
-      display: flex; 
-      align-items: center; 
+      padding: 10px;
+      background-color: #45494e;
+      color: white;
+      display: flex;
       justify-content: space-between;
+      align-items: center;
+      border-radius: 10px 10px 0 0;
     }
 
     .address-book-modal-header h2 { 
       margin: 0; 
-      font-size: clamp(18px, 2.4vw, 28px); 
-      letter-spacing: 0.3px; 
-      color: var(--secondary-color);
-      font-family: var(--font-primary);
+      font-size: 18px;
+      color: white;
     }
 
     .address-book-close { 
-      color: var(--muted); 
-      font-size: 12px; 
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
       cursor: pointer;
     }
 
     .address-book-modal-body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 20px 10px;
-      height: 800px;
+      flex-grow: 1;
+      padding: 0;
+    }
+
+    .address-book-modal-body iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 0 0 10px 10px;
     }
 
     /* Rolodex Styles - adapted for modal */
@@ -2127,94 +2133,11 @@
       <span class="address-book-close" id="closeAddressBook">&times;</span>
     </div>
     <div class="address-book-modal-body">
-      <div class="modal-app">
-        <div class="modal-search-top">
-          <label for="addressBookSearch">Quick find</label>
-          <input id="addressBookSearch" type="text" placeholder="Search by name, email, phone or department... (Esc to clear)" />
-        </div>
-        
-        <div class="modal-stage-wrap">
-          <div class="modal-rolodex" aria-live="polite">
-            <div class="modal-index" id="modalCursorIndex">0 / 0</div>
-            <div class="modal-spindle" aria-hidden="true"></div>
-            <div class="modal-knob left" title="Previous">
-              <button type="button" id="modalPrev" aria-label="Previous card">◀</button>
-            </div>
-            <div class="modal-knob right" title="Next">
-              <button type="button" id="modalNext" aria-label="Next card">▶</button>
-            </div>
-            <div class="modal-ring" id="modalRing"></div>
-          </div>
-          
-          <div class="modal-controls">
-            <button class="modal-circle-btn" id="modalJumpA" title="Jump to A">A</button>
-            <button class="modal-circle-btn" id="modalJumpB" title="Jump to B">B</button>
-            <button class="modal-circle-btn" id="modalJumpG" title="Jump to G">G</button>
-            <button class="modal-circle-btn" id="modalJumpL" title="Jump to L">L</button>
-            <button class="modal-circle-btn" id="modalJumpM" title="Jump to M">M</button>
-            <button class="modal-circle-btn" id="modalJumpS" title="Jump to S">S</button>
-            <button class="modal-circle-btn" id="modalJumpW" title="Jump to W">W</button>
-            <button class="modal-circle-btn" id="modalJumpZ" title="Jump to Z">Z</button>
-          </div>
-          
-          <div class="modal-controls-bottom">
-            <button id="modalAddContactBtn" class="modal-add-contact-btn">+ Add Contact</button>
-          </div>
-        </div>
-      </div>
+      <iframe src="address-book.html" id="addressBookIframe"></iframe>
     </div>
   </div>
 </div>
 
-<!-- Contact Form Modal (inside Address Book) -->
-<div id="contactFormModal" class="contact-form-modal">
-  <div class="contact-form-modal-content">
-    <div class="contact-form-modal-header">
-      <h3>Add a contact</h3>
-      <span class="contact-form-close" id="closeContactForm">&times;</span>
-    </div>
-    <form id="modalContactForm">
-      <div class="contact-form-group">
-        <label for="modalName" class="contact-form-label">Full name</label>
-        <input id="modalName" name="name" type="text" class="contact-form-input" placeholder="John Smith" required />
-      </div>
-      
-      <div class="contact-form-group">
-        <label for="modalEmail" class="contact-form-label">Email <span class="tiny">(optional)</span></label>
-        <input id="modalEmail" name="email" type="email" class="contact-form-input" placeholder="john@castlefineart.com" />
-      </div>
-      
-      <div class="contact-form-group">
-        <label for="modalPhone" class="contact-form-label">Phone <span class="tiny">(optional)</span></label>
-        <input id="modalPhone" name="phone" type="tel" class="contact-form-input" placeholder="01216550060" />
-      </div>
-      
-      <div class="contact-form-group">
-        <label for="modalLabel" class="contact-form-label">Department <span class="tiny">(e.g. COFT)</span></label>
-        <input id="modalLabel" name="label" type="text" class="contact-form-input" placeholder="Department" />
-      </div>
-      
-      <div class="contact-form-actions">
-        <button type="submit">Add to Address Book</button>
-        <button class="danger" id="modalClearAll" type="button" title="Clear all contacts">Clear All</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Card Template for Address Book -->
-<template id="modalCardTemplate">
-  <article class="modal-card" role="group" aria-roledescription="Address card">
-    <div></div>
-    <h3 class="name"></h3>
-    <div class="tag"></div>
-    <div class="company">Castle Fine Art</div>
-    <div class="modal-meta contact-info">
-      <div class="phone"></div>
-      <div class="email"></div>
-    </div>
-  </article>
-</template>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -2852,30 +2775,13 @@ function mobileShowAll() {
 (function() {
   // Address Book Modal Management
   const addressBookModal = document.getElementById('addressBookModal');
-  const contactFormModal = document.getElementById('contactFormModal');
   const openAddressBookBtn = document.getElementById('openAddressBookBtn');
   const closeAddressBook = document.getElementById('closeAddressBook');
-  const closeContactForm = document.getElementById('closeContactForm');
-  
-  // Address Book Variables
-  const modalRing = document.getElementById('modalRing');
-  const modalForm = document.getElementById('modalContactForm');
-  const modalQ = document.getElementById('addressBookSearch');
-  const modalIndex = document.getElementById('modalCursorIndex');
-  const modalPrev = document.getElementById('modalPrev');
-  const modalNext = document.getElementById('modalNext');
-  const modalAddContactBtn = document.getElementById('modalAddContactBtn');
-  const modalClearAll = document.getElementById('modalClearAll');
-  
-  let modalContacts = JSON.parse(localStorage.getItem('addressBookContacts') || '[]');
-  let modalCurrentIndex = 0;
-  let modalFiltered = [];
   
   // Modal open/close handlers
   openAddressBookBtn.addEventListener('click', () => {
     addressBookModal.style.display = 'block';
     document.body.style.overflow = 'hidden';
-    modalInit();
   });
   
   closeAddressBook.addEventListener('click', () => {
@@ -2883,204 +2789,11 @@ function mobileShowAll() {
     document.body.style.overflow = 'auto';
   });
   
-  closeContactForm.addEventListener('click', () => {
-    contactFormModal.style.display = 'none';
-  });
-  
-  // Close modals when clicking outside
+  // Close modal when clicking outside
   window.addEventListener('click', (event) => {
     if (event.target === addressBookModal) {
       addressBookModal.style.display = 'none';
       document.body.style.overflow = 'auto';
-    }
-    if (event.target === contactFormModal) {
-      contactFormModal.style.display = 'none';
-    }
-  });
-  
-  // Address Book Core Functions
-  async function modalInit() {
-    // Always load contacts from businesscards.json
-    try {
-      const response = await fetch('businesscards.json');
-      const businessCards = await response.json();
-      
-      // Convert business cards to address book format
-      modalContacts = businessCards.map(card => ({
-        name: card.Name || '',
-        phone: card['Mobile No'] || card['Telephone No'] || '',
-        email: card['Email Address'] || '',
-        label: card['Job Title'] || card.Team || 'Staff',
-        company: 'Castle Fine Art'
-      }));
-      
-    } catch (error) {
-      console.error('Error loading business cards:', error);
-      modalContacts = [];
-    }
-    
-    modalFiltered = [...modalContacts];
-    modalCurrentIndex = 0;
-    modalRender();
-    modalUpdateIndex();
-  }
-  
-  function modalRender() {
-    modalRing.innerHTML = '';
-    if (modalFiltered.length === 0) {
-      modalRing.innerHTML = '<div class="modal-card"><h3>No contacts found</h3><p>Add some contacts to get started!</p></div>';
-      return;
-    }
-    
-    modalFiltered.forEach((contact, i) => {
-      const template = document.getElementById('modalCardTemplate');
-      const clone = template.content.cloneNode(true);
-      const card = clone.querySelector('.modal-card');
-      
-      clone.querySelector('.name').textContent = contact.name;
-      clone.querySelector('.tag').textContent = contact.label || 'General';
-      clone.querySelector('.phone').textContent = contact.phone || '';
-      clone.querySelector('.email').textContent = contact.email || '';
-      
-      const angle = (i / modalFiltered.length) * 360;
-      card.style.transform = `rotateY(${angle}deg) translateZ(300px)`;
-      card.style.opacity = i === modalCurrentIndex ? '1' : '0.3';
-      
-      modalRing.appendChild(clone);
-    });
-  }
-  
-  function modalUpdateIndex() {
-    modalIndex.textContent = modalFiltered.length ? `${modalCurrentIndex + 1} / ${modalFiltered.length}` : '0 / 0';
-  }
-  
-  function modalRotateToIndex(index) {
-    if (modalFiltered.length === 0) return;
-    
-    modalCurrentIndex = ((index % modalFiltered.length) + modalFiltered.length) % modalFiltered.length;
-    const angle = -(modalCurrentIndex / modalFiltered.length) * 360;
-    modalRing.style.transform = `rotateY(${angle}deg)`;
-    
-    const cards = modalRing.querySelectorAll('.modal-card');
-    cards.forEach((card, i) => {
-      card.style.opacity = i === modalCurrentIndex ? '1' : '0.3';
-    });
-    
-    modalUpdateIndex();
-  }
-  
-  function modalSearch(query) {
-    if (!query.trim()) {
-      modalFiltered = [...modalContacts];
-    } else {
-      const q = query.toLowerCase();
-      modalFiltered = modalContacts.filter(contact =>
-        contact.name.toLowerCase().includes(q) ||
-        (contact.email && contact.email.toLowerCase().includes(q)) ||
-        (contact.phone && contact.phone.includes(q)) ||
-        (contact.label && contact.label.toLowerCase().includes(q))
-      );
-    }
-    modalCurrentIndex = 0;
-    modalRender();
-    modalRotateToIndex(0);
-  }
-  
-  function modalJumpToLetter(letter) {
-    const index = modalFiltered.findIndex(contact => 
-      contact.name.toLowerCase().startsWith(letter.toLowerCase())
-    );
-    if (index !== -1) {
-      modalRotateToIndex(index);
-    }
-  }
-  
-  function modalSaveContacts() {
-    localStorage.setItem('addressBookContacts', JSON.stringify(modalContacts));
-  }
-  
-  // Event Listeners
-  modalPrev?.addEventListener('click', () => modalRotateToIndex(modalCurrentIndex - 1));
-  modalNext?.addEventListener('click', () => modalRotateToIndex(modalCurrentIndex + 1));
-  
-  modalQ?.addEventListener('input', (e) => modalSearch(e.target.value));
-  modalQ?.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      e.target.value = '';
-      modalSearch('');
-    }
-  });
-  
-  // Jump buttons
-  document.getElementById('modalJumpA')?.addEventListener('click', () => modalJumpToLetter('A'));
-  document.getElementById('modalJumpB')?.addEventListener('click', () => modalJumpToLetter('B'));
-  document.getElementById('modalJumpG')?.addEventListener('click', () => modalJumpToLetter('G'));
-  document.getElementById('modalJumpL')?.addEventListener('click', () => modalJumpToLetter('L'));
-  document.getElementById('modalJumpM')?.addEventListener('click', () => modalJumpToLetter('M'));
-  document.getElementById('modalJumpS')?.addEventListener('click', () => modalJumpToLetter('S'));
-  document.getElementById('modalJumpW')?.addEventListener('click', () => modalJumpToLetter('W'));
-  document.getElementById('modalJumpZ')?.addEventListener('click', () => modalJumpToLetter('Z'));
-  
-  // Add contact button
-  modalAddContactBtn?.addEventListener('click', () => {
-    contactFormModal.style.display = 'block';
-  });
-  
-  // Contact form submission
-  modalForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(modalForm);
-    const contact = {
-      name: formData.get('name').trim(),
-      email: formData.get('email').trim(),
-      phone: formData.get('phone').trim(),
-      label: formData.get('label').trim(),
-      id: Date.now().toString()
-    };
-    
-    if (!contact.name) return;
-    
-    modalContacts.push(contact);
-    modalContacts.sort((a, b) => a.name.localeCompare(b.name));
-    modalSaveContacts();
-    
-    modalForm.reset();
-    contactFormModal.style.display = 'none';
-    modalInit();
-  });
-  
-  // Clear all contacts
-  modalClearAll?.addEventListener('click', () => {
-    if (confirm('Are you sure you want to clear all contacts? This cannot be undone.')) {
-      modalContacts = [];
-      modalSaveContacts();
-      modalInit();
-      contactFormModal.style.display = 'none';
-    }
-  });
-  
-  // Keyboard navigation
-  document.addEventListener('keydown', (e) => {
-    if (addressBookModal.style.display !== 'block') return;
-    
-    switch(e.key) {
-      case 'ArrowLeft':
-        e.preventDefault();
-        modalRotateToIndex(modalCurrentIndex - 1);
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        modalRotateToIndex(modalCurrentIndex + 1);
-        break;
-      case 'Escape':
-        if (contactFormModal.style.display === 'block') {
-          contactFormModal.style.display = 'none';
-        } else {
-          addressBookModal.style.display = 'none';
-          document.body.style.overflow = 'auto';
-        }
-        break;
     }
   });
 })();
