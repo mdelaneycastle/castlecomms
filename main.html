@@ -111,34 +111,37 @@
     }
 
     /* Card Button Styles */
+    .dashboard-card {
+      position: relative;
+    }
+
     .card-button-container {
-      padding: 1rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-      margin-top: auto;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
     }
 
     .card-button {
       display: inline-block;
-      width: 100%;
-      text-align: center;
-      padding: 0.75rem 1rem;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+      padding: 0.5rem 0.75rem;
+      background: #F0EDE9;
+      color: #45494e;
       text-decoration: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: 500;
       transition: all 0.3s ease;
-      border: none;
+      border: 1px solid rgba(216, 209, 197, 0.5);
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
+      white-space: nowrap;
     }
 
     .card-button:hover {
+      background: #d8d1c5;
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 2px 8px rgba(69, 73, 78, 0.15);
       text-decoration: none;
-      color: white;
+      color: #45494e;
     }
 
     .card-button:active {
