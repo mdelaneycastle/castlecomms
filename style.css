@@ -1104,6 +1104,7 @@ admin-link {
 }
 
 .user-profile-btn {
+  margin-top: 2px
   background: #596066;
   border: none;
   border-radius: 50%;
