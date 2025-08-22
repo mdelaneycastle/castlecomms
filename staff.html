@@ -799,7 +799,7 @@
     }
 
     .address-book-modal-content {
-      background: #F0EDE9;
+      background: var(--bg);
       margin: 2% auto;
       padding: 0;
       border-radius: 20px;
@@ -808,46 +808,36 @@
       overflow-y: auto;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       position: relative;
-      border: 1px solid rgba(216, 209, 197, 0.3);
+      border: 1px solid var(--border-color);
     }
 
     .address-book-modal-header {
-      display: flex;
+      padding: 8px 20px 0;
+      display: flex; 
+      align-items: center; 
       justify-content: space-between;
-      align-items: center;
-      padding: 2rem 2rem 1rem;
-      border-bottom: 1px solid rgba(216, 209, 197, 0.3);
     }
 
-    .address-book-modal-header h2 {
-      margin: 0;
-      font-size: 2rem;
+    .address-book-modal-header h2 { 
+      margin: 0; 
+      font-size: clamp(18px, 2.4vw, 28px); 
+      letter-spacing: 0.3px; 
       color: var(--secondary-color);
       font-family: var(--font-primary);
     }
 
-    .address-book-close {
-      color: var(--tertiary-color);
-      font-size: 2rem;
-      font-weight: bold;
+    .address-book-close { 
+      color: var(--muted); 
+      font-size: 12px; 
       cursor: pointer;
-      line-height: 1;
-      padding: 0.5rem;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-    }
-
-    .address-book-close:hover {
-      color: var(--secondary-color);
-      background: rgba(216, 209, 197, 0.2);
     }
 
     .address-book-modal-body {
-      padding: 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 700px;
+      padding: 0 20px 10px;
+      height: 800px;
     }
 
     /* Rolodex Styles - adapted for modal */
