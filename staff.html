@@ -761,9 +761,10 @@
 
     /* Address Book Styles */
     .address-book-section {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2rem;
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      z-index: 10;
     }
 
     .address-book-btn {
@@ -778,6 +779,15 @@
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
       font-family: var(--font-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .address-book-btn .button-icon {
+      width: 20px;
+      height: 20px;
+      filter: brightness(0) invert(1);
     }
 
     .address-book-btn:hover {
@@ -1229,15 +1239,16 @@
 <main id="main">
   <div class="staff-container">
     <button class="back-button" id="back-button" onclick="goBack()">← Back</button>
+    
+    <!-- Address Book Button -->
+    <div class="address-book-section">
+      <button id="openAddressBookBtn" class="address-book-btn">
+        <img src="icons/contact.png" alt="Address Book" class="button-icon"> Address Book
+      </button>
+    </div>
+    
     <div class="staff-content">
       <h1 class="staff-title" id="staff-title">Spitfire Staff</h1>
-      
-      <!-- Address Book Button -->
-      <div class="address-book-section">
-        <button id="openAddressBookBtn" class="address-book-btn">
-          📞 Address Book
-        </button>
-      </div>
       
       <!-- Mobile Card-Based Navigation (Only visible on mobile) -->
       <div class="mobile-staff-container" id="mobile-staff-container" style="display: none;">
