@@ -425,7 +425,7 @@
         padding: 1rem;
         max-width: none;
         min-height: calc(100vh - 140px);
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        background: var(--primary-gradient) !important;
         color: white !important;
         border-radius: 12px;
         backdrop-filter: blur(10px);
@@ -646,7 +646,7 @@
         padding: 0.75rem;
         background: rgba(248, 249, 250, 0.8);
         border-radius: 8px;
-        border-left: 4px solid #667eea;
+        border-left: 4px solid var(--secondary-color);
       }
 
       .mobile-section-header:first-of-type {
@@ -674,7 +674,7 @@
         flex: 1;
         max-width: 150px;
         padding: 0.75rem 1rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--primary-gradient);
         color: white;
         border: 2px solid rgba(255, 255, 255, 0.2);
         border-radius: 8px;
@@ -767,7 +767,7 @@
     }
 
     .address-book-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--primary-gradient);
       color: white;
       border: none;
       padding: 1rem 2rem;
@@ -2935,7 +2935,7 @@ function mobileShowAll() {
       clone.querySelector('.email').textContent = contact.email || '';
       
       const angle = (i / modalFiltered.length) * 360;
-      card.style.transform = \`rotateY(\${angle}deg) translateZ(300px)\`;
+      card.style.transform = `rotateY(${angle}deg) translateZ(300px)`;
       card.style.opacity = i === modalCurrentIndex ? '1' : '0.3';
       
       modalRing.appendChild(clone);
@@ -2943,7 +2943,7 @@ function mobileShowAll() {
   }
   
   function modalUpdateIndex() {
-    modalIndex.textContent = modalFiltered.length ? \`\${modalCurrentIndex + 1} / \${modalFiltered.length}\` : '0 / 0';
+    modalIndex.textContent = modalFiltered.length ? `${modalCurrentIndex + 1} / ${modalFiltered.length}` : '0 / 0';
   }
   
   function modalRotateToIndex(index) {
@@ -2951,7 +2951,7 @@ function mobileShowAll() {
     
     modalCurrentIndex = ((index % modalFiltered.length) + modalFiltered.length) % modalFiltered.length;
     const angle = -(modalCurrentIndex / modalFiltered.length) * 360;
-    modalRing.style.transform = \`rotateY(\${angle}deg)\`;
+    modalRing.style.transform = `rotateY(${angle}deg)`;
     
     const cards = modalRing.querySelectorAll('.modal-card');
     cards.forEach((card, i) => {

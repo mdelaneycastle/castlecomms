@@ -325,8 +325,6 @@ window.sharedComponents = {
         await window.authUtils.toggleAdminElements(user);
       }
 
-      // Apply page visibility settings (hide pages from non-Marc users)
-      await this.applyPageVisibilitySettings(user);
 
       console.log("📂 Sidebar loaded successfully");
     } catch (error) {
@@ -363,56 +361,6 @@ window.sharedComponents = {
     });
   },
 
-  // Apply page visibility settings based on Firebase database
-  async applyPageVisibilitySettings(user) {
-    try {
-      // Only hide pages for users who are NOT Marc
-      if (user && user.email === 'mdelaney@castlefineart.com') {
-        // Marc can see everything - no restrictions
-        return;
-      }
-
-      // For all other users, check visibility settings from Firestore
-      const db = firebase.firestore();
-      const docRef = db.collection('settings').doc('page-visibility');
-      const doc = await docRef.get();
-      const settings = doc.exists ? doc.data() : {};
-
-      // Map of page IDs to their sidebar link elements
-      const pageElementMap = {
-        'main': 'a[href="main.html"]',
-        'planner': 'a[href="planner.html"]', 
-        'staff': 'a[href="staff.html"]',
-        'address-book': '#address-book-link',
-        'art-workflow': 'a[href="art-workflow.html"]',
-        'newsfeed': 'a[href="newsfeed.html"]',
-        'messages': 'a[href="messages.html"]',
-        'tickets': 'a[href="tickets.html"]',
-        'communications': 'a[href="communications.html"]',
-        'recognition-board': 'a[href="recognition-board.html"]',
-        'reports': 'a[href="reports.html"]',
-        'manual': 'a[href="manual.html"]',
-        'best-practice': 'a[href="best-practice.html"]'
-      };
-
-      // Hide pages that are set to false in the visibility settings
-      Object.entries(pageElementMap).forEach(([pageId, selector]) => {
-        if (settings[pageId] === false) {
-          const element = document.querySelector(selector);
-          if (element) {
-            // Hide the parent li element
-            const listItem = element.closest('li');
-            if (listItem) {
-              listItem.style.display = 'none';
-            }
-          }
-        }
-      });
-
-    } catch (error) {
-      console.error('Error applying page visibility settings:', error);
-    }
-  },
 
   // Handle user signout
   async handleSignout() {
