@@ -627,7 +627,7 @@
       const jumpW = document.getElementById('jumpW');
       const jumpZ = document.getElementById('jumpZ');
 
-      const STORAGE_KEY = 'castleAddressBook_v1';
+      const STORAGE_KEY = 'castleAddressBook_v2';
       const STATE = { contacts: [], filtered: [], cursor: 0, angle: 0, radius: 360 / Math.max(1, 8) };
 
       const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE.contacts));
