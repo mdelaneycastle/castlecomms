@@ -1116,7 +1116,7 @@ admin-link {
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-top: 2px;  /* <-- correct */
+  margin-top: 6px;  /* <-- correct */
 }
 
 .user-profile-btn:hover {
