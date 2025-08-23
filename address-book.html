@@ -37,9 +37,8 @@
       font-family: var(--font-primary);
       color: var(--text);
       background: #45494e !important;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 8px;
+      min-height: 100vh;
+      overflow-x: hidden;
       padding-top: 0;
     }
 
@@ -71,7 +70,7 @@
       flex-direction: column;
       align-items: center;
       padding: 0 20px 10px;
-      height: 800px;
+      min-height: calc(100vh - 20px);
     }
 
     /* Left panel: form */
@@ -142,15 +141,15 @@
 
     
     .search-top {
-      margin-bottom: 20px;
-      margin-top: 30px;
+      margin-bottom: 10px;
+      margin-top: 15px;
       text-align: center;
       max-width: 400px;
     }
     
     .search-top label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
       font-size: 18px;
       color: white;
       font-weight: 600;
@@ -187,8 +186,8 @@
     }
     .rolodex {
       position: relative;
-      height: min(80vh, 800px);
-      min-height: 380px;
+      height: min(60vh, 600px);
+      min-height: 300px;
       perspective: 1200px;
       display: grid;
       place-items: center;
@@ -447,7 +446,7 @@
 
 
     .index { 
-      position: absolute; top: 10px; left: 50%; 
+      position: absolute; top: 2px; left: 50%; 
       transform: translateX(-50%); color: var(--muted); 
       font-size: 12px; letter-spacing: 0.4px; 
     }
@@ -461,7 +460,7 @@
 
     @media (max-width: 980px) {
       .app { grid-template-columns: 1fr; }
-      .rolodex { height: 68vh; }
+      .rolodex { height: 50vh; }
       .knob.left { left: -40px; }
       .knob.right { right: -40px; }
       :root { --card-w: 92vw; }
