@@ -370,22 +370,54 @@
       width: var(--card-w);
       height: var(--card-h);
       margin: auto;
-      background: url("businesstemplate.jpg") center/contain no-repeat, #e5ddcb;
       border: 1px solid #A89B8C;
       border-radius: 8px;
       box-shadow: var(--shadow-medium);
-      padding: 50px 40px 50px 40px;
       transform-style: preserve-3d;
-      backface-visibility: hidden;
-      display: grid; 
-      grid-template-rows: 1fr auto auto auto auto 1fr;
-      gap: 6px;
       transition: transform 450ms cubic-bezier(.2,.7,.2,1), opacity 300ms ease; 
       will-change: transform, opacity;
       opacity: 1;
     }
 
     .card.hidden { opacity: 0; pointer-events: none; }
+
+    /* Card flip animation styles */
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease-in-out;
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 8px;
+      display: grid;
+      grid-template-rows: 1fr auto auto auto auto 1fr;
+      gap: 6px;
+      padding: 50px 40px 50px 40px;
+    }
+
+    .card-front {
+      background: url("businesstemplate.jpg") center/contain no-repeat, #e5ddcb;
+    }
+
+    .card-back {
+      background: url("businesstemplate.jpg") center/contain no-repeat, #e5ddcb;
+      transform: rotateY(180deg);
+    }
+
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card.flipped {
+      z-index: 100;
+    }
 
     .card::before {
       /* Subtle overlay for text readability */
@@ -590,13 +622,28 @@
 
   <template id="cardTemplate">
     <article class="card" role="group" aria-roledescription="Address card">
-      <div></div>
-      <h3 class="name"></h3>
-      <div class="tag"></div>
-      <div class="company">Castle Fine Art</div>
-      <div class="meta contact-info">
-        <div class="phone"></div>
-        <div class="email"></div>
+      <div class="card-inner">
+        <div class="card-front">
+          <div></div>
+          <h3 class="name"></h3>
+          <div class="tag"></div>
+          <div class="company">Castle Fine Art</div>
+          <div class="meta contact-info">
+            <div class="phone"></div>
+            <div class="email"></div>
+          </div>
+        </div>
+        <div class="card-back">
+          <div class="back-content">
+            <h3 class="back-name"></h3>
+            <div class="back-tag"></div>
+            <div class="back-company">Castle Fine Art</div>
+            <div class="back-contact-info">
+              <div class="back-phone"></div>
+              <div class="back-email"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </article>
   </template>
@@ -655,10 +702,19 @@
 
       function createCard(contact){
         const node = tpl.content.firstElementChild.cloneNode(true);
+        
+        // Populate front side
         node.querySelector('.name').textContent = contact.name || 'Unnamed';
         node.querySelector('.email').textContent = contact.email || '';
         node.querySelector('.phone').textContent = contact.phone || '';
         node.querySelector('.tag').textContent = (contact.label || tagFor(contact.name));
+        
+        // Populate back side (same info for now)
+        node.querySelector('.back-name').textContent = contact.name || 'Unnamed';
+        node.querySelector('.back-email').textContent = contact.email || '';
+        node.querySelector('.back-phone').textContent = contact.phone || '';
+        node.querySelector('.back-tag').textContent = (contact.label || tagFor(contact.name));
+        
         return node;
       }
 
@@ -909,11 +965,21 @@
         e.preventDefault();
       }, { passive:false });
 
-      // Click a card to focus it
+      // Click a card to focus it or flip it
       ring.addEventListener('click', (e)=>{
         const card = e.target.closest('.card');
         if(!card) return;
         const idx = Number(card.dataset.index || 0);
+        
+        // If this card is already focused, flip it
+        if(STATE.cursor === idx) {
+          card.classList.toggle('flipped');
+          return;
+        }
+        
+        // Otherwise, focus the card and remove flip from all cards
+        const allCards = ring.querySelectorAll('.card');
+        allCards.forEach(c => c.classList.remove('flipped'));
         setCursor(idx);
       });
     })();
