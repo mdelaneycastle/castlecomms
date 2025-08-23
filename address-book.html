@@ -15,7 +15,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   
-  <link rel="stylesheet" href="style.css?v=20250822_095956_chatbot_cache_bust" />
+  <link rel="stylesheet" href="style.css?v=20250823_business_card_fix" />
   <style>
     :root {
       --bg: var(--primary-color);
@@ -377,6 +377,7 @@
       transition: transform 450ms cubic-bezier(.2,.7,.2,1), opacity 300ms ease; 
       will-change: transform, opacity;
       opacity: 1;
+      cursor: pointer;
     }
 
     .card.hidden { opacity: 0; pointer-events: none; }
@@ -387,7 +388,11 @@
       width: 100%;
       height: 100%;
       transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
       transition: transform 0.6s ease-in-out;
+      -webkit-transition: -webkit-transform 0.6s ease-in-out;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
     }
 
     .card-front, .card-back {
@@ -395,6 +400,7 @@
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       border-radius: 8px;
       display: grid;
       grid-template-rows: 1fr auto auto auto auto 1fr;
@@ -409,10 +415,12 @@
     .card-back {
       background: url("businesstemplate.jpg") center/contain no-repeat, #e5ddcb;
       transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
     }
 
     .card.flipped .card-inner {
       transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
     }
 
     .card.flipped {
@@ -1025,21 +1033,43 @@
         e.preventDefault();
       }, { passive:false });
 
-      // Click a card to focus it or flip it
+      // Click a card to focus it or flip it - Safari compatible version
       ring.addEventListener('click', (e)=>{
-        const card = e.target.closest('.card');
+        e.preventDefault(); // Prevent default Safari behavior
+        e.stopPropagation(); // Stop event bubbling issues in Safari
+        
+        // More robust card detection for Safari
+        let card = null;
+        let target = e.target;
+        
+        // Traverse up the DOM tree to find the card element
+        while (target && target !== ring) {
+          if (target.classList && target.classList.contains('card')) {
+            card = target;
+            break;
+          }
+          target = target.parentElement;
+        }
+        
         if(!card) return;
+        
         const idx = Number(card.dataset.index || 0);
         
         // If this card is already focused, flip it
         if(STATE.cursor === idx) {
+          // Force Safari to trigger reflow before animation
+          card.offsetHeight;
           card.classList.toggle('flipped');
           return;
         }
         
         // Otherwise, focus the card and remove flip from all cards
         const allCards = ring.querySelectorAll('.card');
-        allCards.forEach(c => c.classList.remove('flipped'));
+        allCards.forEach(c => {
+          // Force Safari reflow for each card
+          c.offsetHeight;
+          c.classList.remove('flipped');
+        });
         setCursor(idx);
       });
     })();
