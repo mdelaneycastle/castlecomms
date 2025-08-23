@@ -36,11 +36,16 @@
       margin: 0;
       font-family: var(--font-primary);
       color: var(--text);
-      background: #45494e;
+      background: #45494e !important;
       display: grid;
       grid-template-rows: auto 1fr auto;
       gap: 8px;
       padding-top: 0;
+    }
+
+    /* Override global background overlay */
+    body::before {
+      display: none !important;
     }
 
     .page-header {
