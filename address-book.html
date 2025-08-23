@@ -716,9 +716,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <script src="firebase-init.js"></script>
-  <script src="script.js?v=20250822_095956_chatbot_cache_bust"></script>
+  <script src="script.js?v=20250823_business_card_fix"></script>
 
   <script>
+    console.log('📖 Address book script starting...');
     (function(){
       const ring = document.getElementById('ring');
       const form = document.getElementById('contactForm');
@@ -943,15 +944,19 @@
       });
 
       // Init
+      console.log('🚀 Initializing address book...');
       STATE.contacts = sortContacts(load());
+      console.log('📦 Loaded from localStorage:', STATE.contacts.length, 'contacts');
       
       // Auto-load castle staff if no contacts exist
       if (STATE.contacts.length === 0) {
+        console.log('📥 No existing contacts - triggering loadCastleStaff()');
         loadCastleStaff().catch(error => {
-          console.error('Failed to load castle staff:', error);
+          console.error('❌ Failed to load castle staff:', error);
           render(); // Still render even if loading fails
         });
       } else {
+        console.log('✅ Using existing contacts from localStorage');
         render();
       }
 
