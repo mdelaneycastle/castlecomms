@@ -36,7 +36,7 @@
       margin: 0;
       font-family: var(--font-primary);
       color: var(--text);
-      background: var(--body-background);
+      background: var(--primary-color);
       display: grid;
       grid-template-rows: auto 1fr auto;
       gap: 8px;
@@ -135,33 +135,10 @@
 
     .search { margin-top: 12px; display: grid; gap: 8px; }
 
-    /* Controls and Search */
-    .controls-bottom {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    
-    .add-contact-btn {
-      background: #d8d1c5;
-      color: var(--text);
-      border: none;
-      padding: 12px 24px;
-      border-radius: 10px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 16px;
-      box-shadow: var(--shadow-light);
-      transition: transform 120ms ease, box-shadow 120ms ease;
-    }
-    
-    .add-contact-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-medium);
-    }
     
     .search-top {
       margin-bottom: 20px;
+      margin-top: 30px;
       text-align: center;
       max-width: 400px;
     }
@@ -169,7 +146,7 @@
     .search-top label {
       display: block;
       margin-bottom: 8px;
-      font-size: 14px;
+      font-size: 18px;
       color: var(--muted);
       font-weight: 600;
     }
@@ -192,105 +169,7 @@
       box-shadow: 0 0 0 3px rgba(69, 73, 78, 0.15);
     }
     
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-    }
-    
-    .modal-content {
-      background: var(--panel);
-      margin: 5% auto;
-      padding: 0;
-      border-radius: 16px;
-      width: min(480px, 90%);
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-heavy);
-      position: relative;
-      border: 1px solid var(--border-color);
-    }
-    
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--border-color);
-    }
-    
-    .modal-header h2 {
-      margin: 0;
-      font-size: 18px;
-      color: var(--secondary-color);
-    }
-    
-    .close {
-      color: var(--muted);
-      font-size: 28px;
-      font-weight: bold;
-      cursor: pointer;
-      line-height: 1;
-    }
-    
-    .close:hover {
-      color: var(--text);
-    }
-    
-    .modal form {
-      padding: 20px 24px 24px;
-    }
 
-    /* Modal Form Styling (matching tickets modal) */
-    .modal-form {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .form-label {
-      display: block;
-      margin-bottom: 0.75rem;
-      color: #2c3e50;
-      font-weight: 600;
-      font-size: 1rem;
-      line-height: 1.4;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.875rem 1rem;
-      border: 2px solid #e1e5e9;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-family: inherit;
-      background: white;
-      color: #2c3e50;
-      transition: border-color 0.3s, box-shadow 0.3s;
-      outline: none;
-    }
-
-    .form-input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    .full-width {
-      width: 100%;
-    }
 
     /* Right: Rolodex */
     .stage-wrap { 
@@ -312,14 +191,6 @@
       border: 1px solid var(--border-color);
     }
 
-    /* Spindle */
-    .spindle {
-      position: absolute; width: 18px; height: 74%; left: 50%; top: 13%; transform: translateX(-50%);
-      background: linear-gradient(90deg, var(--accent-2), var(--accent), var(--accent-2));
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      box-shadow: var(--shadow-subtle);
-    }
 
     /* Side knobs */
     .knob { 
@@ -370,7 +241,6 @@
       width: var(--card-w);
       height: var(--card-h);
       margin: auto;
-      border: 1px solid #A89B8C;
       border-radius: 8px;
       box-shadow: var(--shadow-medium);
       transform-style: preserve-3d;
@@ -570,21 +440,6 @@
 
     .empty { color: var(--muted); font-size: 14px; text-align: center; }
 
-    .controls { 
-      position: absolute; bottom: 12px; left: 50%; 
-      transform: translateX(-50%); display: flex; gap: 10px; 
-    }
-    .circle-btn {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: var(--card-background); color: var(--text);
-      display: grid; place-items: center; border: 1px solid var(--border-color);
-      cursor: pointer; user-select: none; font-weight: 800;
-      transition: transform 120ms ease, background 120ms ease;
-    }
-    .circle-btn:hover { 
-      transform: translateY(-1px); 
-      background: var(--accent-color); 
-    }
 
     .index { 
       position: absolute; top: 10px; left: 50%; 
@@ -621,7 +476,6 @@
       
       <div class="rolodex" aria-live="polite">
         <div class="index" id="cursorIndex">0 / 0</div>
-        <div class="spindle" aria-hidden="true"></div>
         <div class="knob left" title="Previous">
           <button type="button" id="prev" aria-label="Previous card">◀</button>
         </div>
@@ -629,59 +483,11 @@
           <button type="button" id="next" aria-label="Next card">▶</button>
         </div>
         <div class="ring" id="ring"></div>
-        <div class="controls">
-          <div class="circle-btn" id="jumpA" title="Jump to A">A</div>
-          <div class="circle-btn" id="jumpB" title="Jump to B">B</div>
-          <div class="circle-btn" id="jumpG" title="Jump to G">G</div>
-          <div class="circle-btn" id="jumpL" title="Jump to L">L</div>
-          <div class="circle-btn" id="jumpM" title="Jump to M">M</div>
-          <div class="circle-btn" id="jumpS" title="Jump to S">S</div>
-          <div class="circle-btn" id="jumpW" title="Jump to W">W</div>
-          <div class="circle-btn" id="jumpZ" title="Jump to Z">Z</div>
-        </div>
       </div>
       
-      <div class="controls-bottom">
-        <button id="addContactBtn" class="add-contact-btn">+ Add Contact</button>
-      </div>
     </section>
   </main>
 
-  <!-- Modal -->
-  <div id="contactModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Add a contact</h2>
-        <span class="close" id="closeModal">&times;</span>
-      </div>
-      <form id="contactForm" class="modal-form">
-        <div class="form-group">
-          <label for="name" class="form-label">Full name</label>
-          <input id="name" name="name" type="text" class="form-input full-width" placeholder="John Smith" required />
-        </div>
-        
-        <div class="form-group">
-          <label for="email" class="form-label">Email <span class="tiny">(optional)</span></label>
-          <input id="email" name="email" type="email" class="form-input full-width" placeholder="john@castlefineart.com" />
-        </div>
-        
-        <div class="form-group">
-          <label for="phone" class="form-label">Phone <span class="tiny">(optional)</span></label>
-          <input id="phone" name="phone" type="tel" class="form-input full-width" placeholder="01216550060" />
-        </div>
-        
-        <div class="form-group">
-          <label for="label" class="form-label">Department <span class="tiny">(e.g. COFT)</span></label>
-          <input id="label" name="label" type="text" class="form-input full-width" placeholder="Department" />
-        </div>
-        
-        <div class="actions">
-          <button type="submit">Add to Address Book</button>
-          <button class="danger" id="clearAll" type="button" title="Clear all contacts">Clear All</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
 
   <template id="cardTemplate">
@@ -723,20 +529,11 @@
     console.log('📖 Address book script starting...');
     (function(){
       const ring = document.getElementById('ring');
-      const form = document.getElementById('contactForm');
       const q = document.getElementById('q');
       const prevBtn = document.getElementById('prev');
       const nextBtn = document.getElementById('next');
       const cursorIndexLabel = document.getElementById('cursorIndex');
       const tpl = document.getElementById('cardTemplate');
-      const jumpA = document.getElementById('jumpA');
-      const jumpB = document.getElementById('jumpB');
-      const jumpG = document.getElementById('jumpG');
-      const jumpL = document.getElementById('jumpL');
-      const jumpM = document.getElementById('jumpM');
-      const jumpS = document.getElementById('jumpS');
-      const jumpW = document.getElementById('jumpW');
-      const jumpZ = document.getElementById('jumpZ');
 
       const STORAGE_KEY = 'castleAddressBook_v2';
       const STATE = { contacts: [], filtered: [], cursor: 0, angle: 0, radius: 360 / Math.max(1, 8) };
@@ -856,22 +653,6 @@
       function next(){ setCursor(STATE.cursor + 1); }
       function prev(){ setCursor(STATE.cursor - 1); }
 
-      function addContact(data){
-        const contact = {
-          id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
-          name: (data.name||'').trim(),
-          email: (data.email||'').trim(),
-          phone: (data.phone||'').trim(),
-          label: (data.label||'').trim(),
-          createdAt: Date.now()
-        };
-        STATE.contacts.push(contact);
-        STATE.contacts = sortContacts(STATE.contacts);
-        save();
-        applyFilter(q.value);
-        const idx = (STATE.filtered.length ? STATE.filtered : STATE.contacts).findIndex(c => c.id === contact.id);
-        if(idx >= 0) setCursor(idx);
-      }
 
       function applyFilter(text){
         const t = (text||'').toLowerCase().trim();
@@ -930,25 +711,6 @@
         setCursor(0);
       }
 
-      // Modal functionality
-      const modal = document.getElementById('contactModal');
-      const addContactBtn = document.getElementById('addContactBtn');
-      const closeModal = document.getElementById('closeModal');
-      
-      addContactBtn.addEventListener('click', () => {
-        modal.style.display = 'block';
-        document.getElementById('name').focus();
-      });
-      
-      closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
-      });
-      
-      window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.style.display = 'none';
-        }
-      });
 
       // Init
       console.log('🚀 Initializing address book...');
@@ -968,18 +730,6 @@
       }
 
       // Events
-      form.addEventListener('submit', (e)=>{
-        e.preventDefault();
-        const fd = new FormData(form);
-        const name = fd.get('name');
-        const email = fd.get('email');
-        const phone = fd.get('phone');
-        const label = fd.get('label');
-        if(!String(name).trim()) { alert('Please enter a name.'); return; }
-        addContact({name, email, phone, label});
-        form.reset();
-        modal.style.display = 'none';
-      });
 
       document.getElementById('clearAll').addEventListener('click', ()=>{
         if(confirm('Clear ALL contacts from this browser?')){
@@ -996,20 +746,7 @@
       q.addEventListener('input', e=> applyFilter(e.target.value));
       q.addEventListener('keydown', e=>{ if(e.key==='Escape'){ q.value=''; applyFilter(''); }});
 
-      jumpA.addEventListener('click', ()=> jumpToLetter('A'));
-      jumpB.addEventListener('click', ()=> jumpToLetter('B'));
-      jumpG.addEventListener('click', ()=> jumpToLetter('G'));
-      jumpL.addEventListener('click', ()=> jumpToLetter('L'));
-      jumpM.addEventListener('click', ()=> jumpToLetter('M'));
-      jumpS.addEventListener('click', ()=> jumpToLetter('S'));
-      jumpW.addEventListener('click', ()=> jumpToLetter('W'));
-      jumpZ.addEventListener('click', ()=> jumpToLetter('Z'));
 
-      function jumpToLetter(letter){
-        const list = STATE.filtered.length ? STATE.filtered : STATE.contacts;
-        const idx = list.findIndex(c => (c.name||'').toUpperCase().startsWith(letter));
-        if(idx >= 0) setCursor(idx);
-      }
 
       function showDetail(){
         // Detail functionality removed - this function now does nothing
