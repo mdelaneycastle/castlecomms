@@ -731,15 +731,6 @@
 
       // Events
 
-      document.getElementById('clearAll').addEventListener('click', ()=>{
-        if(confirm('Clear ALL contacts from this browser?')){
-          STATE.contacts = [];
-          STATE.filtered = [];
-          save();
-          render();
-        }
-      });
-
 
       prevBtn.addEventListener('click', prev);
       nextBtn.addEventListener('click', next);
