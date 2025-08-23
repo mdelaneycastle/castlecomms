@@ -419,23 +419,51 @@
       z-index: 100;
     }
 
+    /* Front side styling */
+    .job-title {
+      color: #666;
+      font-weight: 600;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .team {
+      color: #888;
+      font-weight: 500;
+      font-size: 16px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .office-phone, .personal-email {
+      font-size: 16px;
+      color: #555;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
     /* Back side styling */
     .back-contact-info {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      font-size: 16px;
+      gap: 8px;
+      font-size: 18px;
       color: #666;
-      font-weight: 500;
+      font-weight: 600;
+      text-align: center;
     }
 
-    .back-office-phone, .back-extension, .back-team-email {
+    .team-email, .mobile-phone {
       line-height: 1.4;
     }
 
-    .back-team-email {
-      font-size: 14px;
+    .team-email {
+      font-size: 16px;
       word-break: break-word;
+    }
+
+    .back-spacer {
+      height: 20px;
     }
 
     .card::before {
@@ -645,22 +673,21 @@
         <div class="card-front">
           <div></div>
           <h3 class="name"></h3>
-          <div class="tag"></div>
-          <div class="company">Castle Fine Art</div>
+          <div class="job-title"></div>
+          <div class="team"></div>
           <div class="meta contact-info">
-            <div class="phone"></div>
-            <div class="email"></div>
+            <div class="office-phone"></div>
+            <div class="personal-email"></div>
           </div>
         </div>
         <div class="card-back">
           <div></div>
-          <h3 class="back-name"></h3>
-          <div class="back-tag"></div>
-          <div class="back-company">Castle Fine Art</div>
+          <div class="back-spacer"></div>
+          <div class="back-spacer"></div>
+          <div class="company">Castle Fine Art</div>
           <div class="back-contact-info">
-            <div class="back-office-phone"></div>
-            <div class="back-extension"></div>
-            <div class="back-team-email"></div>
+            <div class="team-email"></div>
+            <div class="mobile-phone"></div>
           </div>
         </div>
       </div>
@@ -724,22 +751,14 @@
         
         // Populate front side
         node.querySelector('.name').textContent = contact.name || 'Unnamed';
-        node.querySelector('.email').textContent = contact.email || '';
-        node.querySelector('.phone').textContent = contact.phone || '';
-        node.querySelector('.tag').textContent = (contact.label || tagFor(contact.name));
+        node.querySelector('.job-title').textContent = contact.jobTitle || '';
+        node.querySelector('.team').textContent = contact.team || '';
+        node.querySelector('.office-phone').textContent = contact.officePhone || '';
+        node.querySelector('.personal-email').textContent = contact.personalEmail || '';
         
-        // Populate back side with additional details
-        node.querySelector('.back-name').textContent = contact.name || 'Unnamed';
-        node.querySelector('.back-tag').textContent = (contact.label || tagFor(contact.name));
-        
-        // Additional contact details for back side
-        const officePhone = contact.telephoneNo && contact.telephoneNo !== "N/A" ? contact.telephoneNo : "";
-        const extension = contact.extension && contact.extension !== "N/A" ? contact.extension : "";
-        const teamEmail = contact.teamEmail && contact.teamEmail !== "N/A" ? contact.teamEmail : "";
-        
-        node.querySelector('.back-office-phone').textContent = officePhone ? `Office: ${officePhone}` : '';
-        node.querySelector('.back-extension').textContent = extension ? `Ext: ${extension}` : '';
-        node.querySelector('.back-team-email').textContent = teamEmail ? `Team: ${teamEmail}` : '';
+        // Populate back side
+        node.querySelector('.team-email').textContent = contact.teamEmail || '';
+        node.querySelector('.mobile-phone').textContent = contact.mobilePhone || '';
         
         return node;
       }
@@ -835,24 +854,28 @@
         const businessCards = await loadBusinessCardsJSON();
         
         businessCards.forEach(card => {
-          // Map JSON fields to contact object structure
-          const phone = card["Mobile No"] && card["Mobile No"] !== "N/A" 
-            ? card["Mobile No"] 
-            : card["Telephone No"] || "";
-          
-          const label = card["Team"] && card["Team"] !== "N/A" 
-            ? `${card["Job Title"]} - ${card["Team"]}`
-            : card["Job Title"] || "";
+          // Create combined office phone with extension
+          let officePhone = card["Telephone No"] || "";
+          const ext = card["Ext"] || "";
+          if (officePhone && ext && ext !== "N/A") {
+            // Remove "(Internal)" and extract just the number
+            const cleanExt = ext.replace("(Internal)", "").trim();
+            officePhone = `${officePhone} (${cleanExt})`;
+          }
           
           const contact = {
             id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
             name: card["Name"] || "",
+            jobTitle: card["Job Title"] || "",
+            team: card["Team"] || "",
+            officePhone: officePhone,
+            personalEmail: card["Email Address"] || "",
+            mobilePhone: card["Mobile No"] && card["Mobile No"] !== "N/A" ? card["Mobile No"] : "",
+            teamEmail: card["Team Email Address"] && card["Team Email Address"] !== "N/A" ? card["Team Email Address"] : "",
+            // Keep these for search/compatibility
             email: card["Email Address"] || "",
-            phone: phone,
-            label: label,
-            telephoneNo: card["Telephone No"] || "",
-            extension: card["Ext"] || "",
-            teamEmail: card["Team Email Address"] || "",
+            phone: officePhone || card["Mobile No"] || "",
+            label: card["Job Title"] || "",
             createdAt: Date.now()
           };
           STATE.contacts.push(contact);
