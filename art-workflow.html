@@ -10,6 +10,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   
+  <link rel="icon" type="image/png" href="icon.png">
   <link rel="stylesheet" href="style.css?v=20250822_095956_chatbot_cache_bust" />
   <style>
     :root {
@@ -605,7 +606,7 @@
       .panel-right h4 {
         font-size: 1rem;
       }
-    }"}
+    }
 
     /* Back button */
     .back-btn {
@@ -633,6 +634,13 @@
   </style>
 </head>
 <body>
+  <!-- Header Container -->
+  <div id="header-container"></div>
+
+  <!-- Sidebar Container -->
+  <div id="sidebar-container"></div>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
   <button class="back-btn" onclick="window.location.href='main.html'">
     ← Back to Home
   </button>
@@ -2535,5 +2543,18 @@
   });
 })();
 </script>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- Firebase config -->
+<script src="firebase-init.js"></script>
+
+<!-- Shared components -->
+<script src="shared-components.js"></script>
+
 </body>
 </html>
