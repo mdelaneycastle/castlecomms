@@ -419,6 +419,25 @@
       z-index: 100;
     }
 
+    /* Back side styling */
+    .back-contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 16px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .back-office-phone, .back-extension, .back-team-email {
+      line-height: 1.4;
+    }
+
+    .back-team-email {
+      font-size: 14px;
+      word-break: break-word;
+    }
+
     .card::before {
       /* Subtle overlay for text readability */
       content: "";
@@ -634,14 +653,14 @@
           </div>
         </div>
         <div class="card-back">
-          <div class="back-content">
-            <h3 class="back-name"></h3>
-            <div class="back-tag"></div>
-            <div class="back-company">Castle Fine Art</div>
-            <div class="back-contact-info">
-              <div class="back-phone"></div>
-              <div class="back-email"></div>
-            </div>
+          <div></div>
+          <h3 class="back-name"></h3>
+          <div class="back-tag"></div>
+          <div class="back-company">Castle Fine Art</div>
+          <div class="back-contact-info">
+            <div class="back-office-phone"></div>
+            <div class="back-extension"></div>
+            <div class="back-team-email"></div>
           </div>
         </div>
       </div>
@@ -709,11 +728,18 @@
         node.querySelector('.phone').textContent = contact.phone || '';
         node.querySelector('.tag').textContent = (contact.label || tagFor(contact.name));
         
-        // Populate back side (same info for now)
+        // Populate back side with additional details
         node.querySelector('.back-name').textContent = contact.name || 'Unnamed';
-        node.querySelector('.back-email').textContent = contact.email || '';
-        node.querySelector('.back-phone').textContent = contact.phone || '';
         node.querySelector('.back-tag').textContent = (contact.label || tagFor(contact.name));
+        
+        // Additional contact details for back side
+        const officePhone = contact.telephoneNo && contact.telephoneNo !== "N/A" ? contact.telephoneNo : "";
+        const extension = contact.extension && contact.extension !== "N/A" ? contact.extension : "";
+        const teamEmail = contact.teamEmail && contact.teamEmail !== "N/A" ? contact.teamEmail : "";
+        
+        node.querySelector('.back-office-phone').textContent = officePhone ? `Office: ${officePhone}` : '';
+        node.querySelector('.back-extension').textContent = extension ? `Ext: ${extension}` : '';
+        node.querySelector('.back-team-email').textContent = teamEmail ? `Team: ${teamEmail}` : '';
         
         return node;
       }
@@ -824,6 +850,9 @@
             email: card["Email Address"] || "",
             phone: phone,
             label: label,
+            telephoneNo: card["Telephone No"] || "",
+            extension: card["Ext"] || "",
+            teamEmail: card["Team Email Address"] || "",
             createdAt: Date.now()
           };
           STATE.contacts.push(contact);
