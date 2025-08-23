@@ -432,7 +432,7 @@
       color: #666;
       font-weight: 600;
       font-size: 18px;
-      text-align: center;
+      text-align: left;
       z-index: 2;
       position: relative;
     }
@@ -441,7 +441,7 @@
       color: #888;
       font-weight: 500;
       font-size: 16px;
-      text-align: center;
+      text-align: left;
       margin-bottom: 8px;
       z-index: 2;
       position: relative;
@@ -454,6 +454,7 @@
       line-height: 1.4;
       z-index: 2;
       position: relative;
+      text-align: left;
     }
 
     /* Back side styling */
@@ -464,7 +465,7 @@
       font-size: 18px;
       color: #666;
       font-weight: 600;
-      text-align: center;
+      text-align: left;
     }
 
     .team-email, .mobile-phone {
@@ -784,7 +785,13 @@
         
         // Populate back side
         node.querySelector('.team-email').textContent = contact.teamEmail || '';
-        node.querySelector('.mobile-phone').textContent = contact.mobilePhone || '';
+        
+        // Format mobile phone with prefix, handle N/A values
+        let mobileText = '';
+        if (contact.mobilePhone && contact.mobilePhone !== 'N/A' && contact.mobilePhone.trim() !== '') {
+          mobileText = `Mobile No: ${contact.mobilePhone}`;
+        }
+        node.querySelector('.mobile-phone').textContent = mobileText;
         
         return node;
       }
@@ -898,16 +905,16 @@
           const contact = {
             id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
             name: card["Name"] || "",
-            jobTitle: card["Job Title"] || "",
-            team: card["Team"] || "",
+            jobTitle: card["Job Title"] && card["Job Title"] !== "N/A" ? card["Job Title"] : "",
+            team: card["Team"] && card["Team"] !== "N/A" ? card["Team"] : "",
             officePhone: officePhone,
-            personalEmail: card["Email Address"] || "",
+            personalEmail: card["Email Address"] && card["Email Address"] !== "N/A" ? card["Email Address"] : "",
             mobilePhone: card["Mobile No"] && card["Mobile No"] !== "N/A" ? card["Mobile No"] : "",
             teamEmail: card["Team Email Address"] && card["Team Email Address"] !== "N/A" ? card["Team Email Address"] : "",
             // Keep these for search/compatibility
-            email: card["Email Address"] || "",
-            phone: officePhone || card["Mobile No"] || "",
-            label: card["Job Title"] || "",
+            email: card["Email Address"] && card["Email Address"] !== "N/A" ? card["Email Address"] : "",
+            phone: officePhone || (card["Mobile No"] && card["Mobile No"] !== "N/A" ? card["Mobile No"] : ""),
+            label: card["Job Title"] && card["Job Title"] !== "N/A" ? card["Job Title"] : "",
             createdAt: Date.now()
           };
           STATE.contacts.push(contact);
