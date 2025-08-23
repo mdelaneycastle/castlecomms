@@ -749,15 +749,24 @@
 
       // Load business cards from JSON file
       async function loadBusinessCardsJSON() {
+        console.log('🔄 Loading businesscards.json...');
         try {
           const response = await fetch('businesscards.json');
+          console.log('📡 Fetch response status:', response.status, response.statusText);
+          
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
+          
           const businessCards = await response.json();
+          console.log('✅ Successfully loaded businesscards.json');
+          console.log('📊 Number of business cards loaded:', businessCards.length);
+          console.log('📋 First business card sample:', businessCards[0]);
+          console.log('📋 All business card names:', businessCards.map(card => card.Name));
+          
           return businessCards;
         } catch (error) {
-          console.error('Error loading business cards:', error);
+          console.error('❌ Error loading business cards:', error);
           return [];
         }
       }
@@ -865,9 +874,15 @@
       }
 
       async function loadCastleStaff(){
+        console.log('🏢 loadCastleStaff() called - loading staff data...');
         // Clear existing and load staff from JSON
         STATE.contacts = [];
         const businessCards = await loadBusinessCardsJSON();
+        
+        if (businessCards.length === 0) {
+          console.warn('⚠️ No business cards loaded - check if businesscards.json exists and is accessible');
+          return;
+        }
         
         businessCards.forEach(card => {
           // Create combined office phone with extension
@@ -898,6 +913,10 @@
         });
         
         STATE.contacts = sortContacts(STATE.contacts);
+        console.log('📝 Processed contacts count:', STATE.contacts.length);
+        console.log('📋 Sample processed contact:', STATE.contacts[0]);
+        console.log('✅ Staff loading complete - contacts saved to localStorage');
+        
         save();
         applyFilter(q.value);
         setCursor(0);
