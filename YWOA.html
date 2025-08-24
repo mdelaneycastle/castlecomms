@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your World, Our Art - Visualize Art in Your Space</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: flex;
+            min-height: 700px;
+        }
+
+        .controls {
+            width: 350px;
+            background: #f8f9fa;
+            padding: 30px;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .control-group {
+            margin-bottom: 30px;
+        }
+
+        .control-group h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #bdc3c7;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .upload-area.dragover {
+            border-color: #2ecc71;
+            background: #d5f4e6;
+        }
+
+        .upload-area input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-preview {
+            max-width: 100%;
+            max-height: 80px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .measurement-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .measurement-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .measurement-input select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background: #ecf0f1;
+            overflow: hidden;
+        }
+
+        #mainCanvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .instructions {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(52, 73, 94, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .point-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #e74c3c;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .measurement-line {
+            position: absolute;
+            height: 2px;
+            background: #e74c3c;
+            transform-origin: left center;
+            z-index: 9;
+        }
+
+        .measurement-text {
+            position: absolute;
+            background: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            transform: translate(-50%, -50%);
+            z-index: 11;
+        }
+
+        .artwork-container {
+            position: absolute;
+            cursor: move;
+            z-index: 8;
+        }
+
+        .artwork-shadow {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.3);
+            filter: blur(3px);
+            transform: skewX(-5deg) translateX(3px) translateY(3px);
+            z-index: 7;
+        }
+
+        .export-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #b3d7ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Your World, Our Art</h1>
+            <p>Visualize artwork in your space with realistic scaling and positioning</p>
+        </div>
+
+        <div class="main-content">
+            <div class="controls">
+                <div class="control-group">
+                    <h3>1. Upload Room Image</h3>
+                    <div class="upload-area" id="roomUpload">
+                        <input type="file" id="roomFile" accept="image/*">
+                        <p>📸 Drop room image here or click to browse</p>
+                        <img id="roomPreview" class="upload-preview" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>2. Upload Artwork</h3>
+                    <div class="upload-area" id="artworkUpload">
+                        <input type="file" id="artworkFile" accept="image/*">
+                        <p>🎨 Drop artwork image here or click to browse</p>
+                        <img id="artworkPreview" class="upload-preview" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>3. Set Room Scale</h3>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                        Click two points in your room image and enter the real distance between them
+                    </p>
+                    <div class="measurement-input">
+                        <input type="number" id="realDistance" placeholder="Distance" step="0.1" min="0">
+                        <select id="distanceUnit">
+                            <option value="ft">ft</option>
+                            <option value="m">m</option>
+                            <option value="cm">cm</option>
+                            <option value="in">in</option>
+                        </select>
+                    </div>
+                    <button class="btn" id="clearPoints">Clear Points</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>4. Artwork Size</h3>
+                    <div class="measurement-input">
+                        <input type="number" id="artworkWidth" placeholder="Width" step="0.1" min="0">
+                        <select id="artworkUnit">
+                            <option value="ft">ft</option>
+                            <option value="m">m</option>
+                            <option value="cm">cm</option>
+                            <option value="in">in</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="statusMessages"></div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="mainCanvas"></canvas>
+                <div class="instructions">
+                    <strong>Instructions:</strong><br>
+                    1. Upload a room image<br>
+                    2. Upload artwork image<br>
+                    3. Click two points for scale reference<br>
+                    4. Enter real distance between points<br>
+                    5. Set artwork width<br>
+                    6. Drag artwork to position it
+                </div>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <div class="export-options">
+                <button class="btn" id="exportJPG">📸 Export as JPG</button>
+                <button class="btn" id="exportPNG">🖼️ Export as PNG</button>
+                <button class="btn" id="shareImage">📤 Share Image</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class YWOAApp {
+            constructor() {
+                this.canvas = document.getElementById('mainCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.roomImage = null;
+                this.artworkImage = null;
+                this.scalePoints = [];
+                this.realDistance = 0;
+                this.distanceUnit = 'ft';
+                this.artworkWidth = 0;
+                this.artworkUnit = 'ft';
+                this.artworkPosition = { x: 0, y: 0 };
+                this.artworkSize = { width: 0, height: 0 };
+                this.pixelsPerUnit = 1;
+                this.isDragging = false;
+                this.dragOffset = { x: 0, y: 0 };
+
+                this.initializeCanvas();
+                this.bindEvents();
+                this.showStatus('Welcome! Start by uploading a room image.', 'info');
+            }
+
+            initializeCanvas() {
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+            }
+
+            resizeCanvas() {
+                const container = this.canvas.parentElement;
+                this.canvas.width = container.clientWidth;
+                this.canvas.height = container.clientHeight;
+                this.redraw();
+            }
+
+            bindEvents() {
+                // File uploads
+                document.getElementById('roomFile').addEventListener('change', (e) => this.handleRoomUpload(e));
+                document.getElementById('artworkFile').addEventListener('change', (e) => this.handleArtworkUpload(e));
+
+                // Drag and drop
+                this.setupDragDrop('roomUpload', 'roomFile');
+                this.setupDragDrop('artworkUpload', 'artworkFile');
+
+                // Canvas interactions
+                this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+                this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+
+                // Controls
+                document.getElementById('realDistance').addEventListener('input', (e) => this.updateScale());
+                document.getElementById('distanceUnit').addEventListener('change', (e) => this.updateScale());
+                document.getElementById('artworkWidth').addEventListener('input', (e) => this.updateArtworkSize());
+                document.getElementById('artworkUnit').addEventListener('change', (e) => this.updateArtworkSize());
+                document.getElementById('clearPoints').addEventListener('click', () => this.clearScalePoints());
+
+                // Export
+                document.getElementById('exportJPG').addEventListener('click', () => this.exportImage('jpg'));
+                document.getElementById('exportPNG').addEventListener('click', () => this.exportImage('png'));
+                document.getElementById('shareImage').addEventListener('click', () => this.shareImage());
+            }
+
+            setupDragDrop(uploadAreaId, fileInputId) {
+                const uploadArea = document.getElementById(uploadAreaId);
+                const fileInput = document.getElementById(fileInputId);
+
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        fileInput.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+
+            handleRoomUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.roomImage = img;
+                        document.getElementById('roomPreview').src = e.target.result;
+                        document.getElementById('roomPreview').style.display = 'block';
+                        this.scalePoints = [];
+                        this.redraw();
+                        this.showStatus('Room image loaded! Now click two points to set the scale.', 'success');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            handleArtworkUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.artworkImage = img;
+                        document.getElementById('artworkPreview').src = e.target.result;
+                        document.getElementById('artworkPreview').style.display = 'block';
+                        this.updateArtworkSize();
+                        this.redraw();
+                        this.showStatus('Artwork loaded! Set the artwork width to scale it properly.', 'success');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            handleCanvasClick(e) {
+                if (!this.roomImage) {
+                    this.showStatus('Please upload a room image first.', 'error');
+                    return;
+                }
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                if (this.scalePoints.length < 2) {
+                    this.scalePoints.push({ x, y });
+                    this.redraw();
+                    
+                    if (this.scalePoints.length === 2) {
+                        this.showStatus('Two points set! Enter the real distance between them.', 'info');
+                    } else {
+                        this.showStatus('Click a second point to set the scale reference.', 'info');
+                    }
+                }
+            }
+
+            handleMouseDown(e) {
+                if (!this.artworkImage) return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Check if click is on artwork
+                if (x >= this.artworkPosition.x && x <= this.artworkPosition.x + this.artworkSize.width &&
+                    y >= this.artworkPosition.y && y <= this.artworkPosition.y + this.artworkSize.height) {
+                    this.isDragging = true;
+                    this.dragOffset.x = x - this.artworkPosition.x;
+                    this.dragOffset.y = y - this.artworkPosition.y;
+                    this.canvas.style.cursor = 'grabbing';
+                }
+            }
+
+            handleMouseMove(e) {
+                if (!this.isDragging) return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                this.artworkPosition.x = x - this.dragOffset.x;
+                this.artworkPosition.y = y - this.dragOffset.y;
+
+                this.redraw();
+            }
+
+            handleMouseUp(e) {
+                if (this.isDragging) {
+                    this.isDragging = false;
+                    this.canvas.style.cursor = 'default';
+                }
+            }
+
+            updateScale() {
+                this.realDistance = parseFloat(document.getElementById('realDistance').value) || 0;
+                this.distanceUnit = document.getElementById('distanceUnit').value;
+
+                if (this.scalePoints.length === 2 && this.realDistance > 0) {
+                    const pixelDistance = this.calculateDistance(this.scalePoints[0], this.scalePoints[1]);
+                    this.pixelsPerUnit = pixelDistance / this.realDistance;
+                    this.updateArtworkSize();
+                    this.showStatus('Scale updated! Artwork will now be sized correctly.', 'success');
+                }
+            }
+
+            updateArtworkSize() {
+                this.artworkWidth = parseFloat(document.getElementById('artworkWidth').value) || 0;
+                this.artworkUnit = document.getElementById('artworkUnit').value;
+
+                if (this.artworkImage && this.artworkWidth > 0 && this.pixelsPerUnit > 0) {
+                    // Convert artwork width to same unit as scale
+                    const widthInScaleUnits = this.convertUnits(this.artworkWidth, this.artworkUnit, this.distanceUnit);
+                    const pixelWidth = widthInScaleUnits * this.pixelsPerUnit;
+                    const aspectRatio = this.artworkImage.height / this.artworkImage.width;
+                    
+                    this.artworkSize.width = pixelWidth;
+                    this.artworkSize.height = pixelWidth * aspectRatio;
+
+                    // Center artwork initially
+                    if (this.artworkPosition.x === 0 && this.artworkPosition.y === 0) {
+                        this.artworkPosition.x = (this.canvas.width - this.artworkSize.width) / 2;
+                        this.artworkPosition.y = (this.canvas.height - this.artworkSize.height) / 2;
+                    }
+
+                    this.redraw();
+                }
+            }
+
+            convertUnits(value, fromUnit, toUnit) {
+                const toMeters = {
+                    'm': 1,
+                    'ft': 0.3048,
+                    'cm': 0.01,
+                    'in': 0.0254
+                };
+
+                const meters = value * toMeters[fromUnit];
+                return meters / toMeters[toUnit];
+            }
+
+            calculateDistance(point1, point2) {
+                const dx = point2.x - point1.x;
+                const dy = point2.y - point1.y;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            clearScalePoints() {
+                this.scalePoints = [];
+                this.pixelsPerUnit = 1;
+                this.redraw();
+                this.showStatus('Scale points cleared. Click two new points to set scale.', 'info');
+            }
+
+            redraw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw room image
+                if (this.roomImage) {
+                    const scale = Math.min(
+                        this.canvas.width / this.roomImage.width,
+                        this.canvas.height / this.roomImage.height
+                    );
+                    const width = this.roomImage.width * scale;
+                    const height = this.roomImage.height * scale;
+                    const x = (this.canvas.width - width) / 2;
+                    const y = (this.canvas.height - height) / 2;
+
+                    this.ctx.drawImage(this.roomImage, x, y, width, height);
+                }
+
+                // Draw scale points
+                this.scalePoints.forEach((point, index) => {
+                    this.ctx.fillStyle = '#e74c3c';
+                    this.ctx.beginPath();
+                    this.ctx.arc(point.x, point.y, 6, 0, 2 * Math.PI);
+                    this.ctx.fill();
+
+                    this.ctx.fillStyle = 'white';
+                    this.ctx.font = '12px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(index + 1, point.x, point.y + 4);
+                });
+
+                // Draw measurement line
+                if (this.scalePoints.length === 2) {
+                    this.ctx.strokeStyle = '#e74c3c';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(this.scalePoints[0].x, this.scalePoints[0].y);
+                    this.ctx.lineTo(this.scalePoints[1].x, this.scalePoints[1].y);
+                    this.ctx.stroke();
+
+                    if (this.realDistance > 0) {
+                        const midX = (this.scalePoints[0].x + this.scalePoints[1].x) / 2;
+                        const midY = (this.scalePoints[0].y + this.scalePoints[1].y) / 2;
+                        
+                        this.ctx.fillStyle = '#e74c3c';
+                        this.ctx.fillRect(midX - 30, midY - 10, 60, 20);
+                        this.ctx.fillStyle = 'white';
+                        this.ctx.font = '12px Arial';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText(`${this.realDistance} ${this.distanceUnit}`, midX, midY + 4);
+                    }
+                }
+
+                // Draw artwork shadow and artwork
+                if (this.artworkImage && this.artworkSize.width > 0) {
+                    // Shadow
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 0.3;
+                    this.ctx.fillStyle = '#000';
+                    const shadowOffset = Math.max(3, this.artworkSize.width * 0.02);
+                    this.ctx.transform(1, 0, -0.1, 1, shadowOffset, shadowOffset);
+                    this.ctx.fillRect(this.artworkPosition.x, this.artworkPosition.y, this.artworkSize.width, this.artworkSize.height);
+                    this.ctx.restore();
+
+                    // Artwork
+                    this.ctx.drawImage(
+                        this.artworkImage,
+                        this.artworkPosition.x,
+                        this.artworkPosition.y,
+                        this.artworkSize.width,
+                        this.artworkSize.height
+                    );
+                }
+            }
+
+            exportImage(format) {
+                if (!this.roomImage) {
+                    this.showStatus('No room image to export.', 'error');
+                    return;
+                }
+
+                const dataURL = this.canvas.toDataURL(`image/${format}`, 0.9);
+                const link = document.createElement('a');
+                link.download = `your-world-our-art.${format}`;
+                link.href = dataURL;
+                link.click();
+                
+                this.showStatus(`Image exported as ${format.toUpperCase()}!`, 'success');
+            }
+
+            shareImage() {
+                if (!this.roomImage) {
+                    this.showStatus('No room image to share.', 'error');
+                    return;
+                }
+
+                this.canvas.toBlob((blob) => {
+                    if (navigator.share && navigator.canShare({ files: [blob] })) {
+                        const file = new File([blob], 'your-world-our-art.png', { type: 'image/png' });
+                        navigator.share({
+                            title: 'Your World, Our Art',
+                            text: 'Check out how this artwork looks in my space!',
+                            files: [file]
+                        });
+                    } else {
+                        // Fallback: copy to clipboard
+                        navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]).then(() => {
+                            this.showStatus('Image copied to clipboard!', 'success');
+                        }).catch(() => {
+                            this.showStatus('Sharing not supported. Use export instead.', 'error');
+                        });
+                    }
+                });
+            }
+
+            showStatus(message, type) {
+                const statusDiv = document.getElementById('statusMessages');
+                statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+                setTimeout(() => {
+                    if (statusDiv.innerHTML.includes(message)) {
+                        statusDiv.innerHTML = '';
+                    }
+                }, 5000);
+            }
+        }
+
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new YWOAApp();
+        });
+    </script>
+</body>
+</html>
