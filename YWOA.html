@@ -612,25 +612,23 @@
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                // Check if click is on artwork (using 3D projected quad bounds)
-                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
-                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
-                
-                // Get the 3D projected quad
-                const quad = this.projectRotateY(this.artworkSize.width, this.artworkSize.height, centerX, centerY, this.artworkRotation, this.perspective);
-                
-                // Simple bounding box check for the quad
-                const minX = Math.min(quad.tl.x, quad.tr.x, quad.br.x, quad.bl.x);
-                const maxX = Math.max(quad.tl.x, quad.tr.x, quad.br.x, quad.bl.x);
-                const minY = Math.min(quad.tl.y, quad.tr.y, quad.br.y, quad.bl.y);
-                const maxY = Math.max(quad.tl.y, quad.tr.y, quad.br.y, quad.bl.y);
-                
-                // Check if click is within the projected artwork bounds
-                if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
-                    this.isDragging = true;
-                    this.dragOffset.x = x - this.artworkPosition.x;
-                    this.dragOffset.y = y - this.artworkPosition.y;
-                    this.canvas.style.cursor = 'grabbing';
+                // Check if click is on artwork (using cached projected quad)
+                if (this.projectedQuad) {
+                    const quad = this.projectedQuad;
+                    
+                    // Simple bounding box check for the quad
+                    const minX = Math.min(quad.tl.x, quad.tr.x, quad.br.x, quad.bl.x);
+                    const maxX = Math.max(quad.tl.x, quad.tr.x, quad.br.x, quad.bl.x);
+                    const minY = Math.min(quad.tl.y, quad.tr.y, quad.br.y, quad.bl.y);
+                    const maxY = Math.max(quad.tl.y, quad.tr.y, quad.br.y, quad.bl.y);
+                    
+                    // Check if click is within the projected artwork bounds
+                    if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+                        this.isDragging = true;
+                        this.dragOffset.x = x - this.artworkPosition.x;
+                        this.dragOffset.y = y - this.artworkPosition.y;
+                        this.canvas.style.cursor = 'grabbing';
+                    }
                 }
             }
 
@@ -747,6 +745,93 @@
                 return {tl: pts[0], tr: pts[1], br: pts[2], bl: pts[3]};
             }
 
+            // Bilinear interpolation
+            bilerp(tl, tr, br, bl, u, v) {
+                const top = {
+                    x: tl.x + (tr.x - tl.x) * u,
+                    y: tl.y + (tr.y - tl.y) * u
+                };
+                const bottom = {
+                    x: bl.x + (br.x - bl.x) * u,
+                    y: bl.y + (br.y - bl.y) * u
+                };
+                return {
+                    x: top.x + (bottom.x - top.x) * v,
+                    y: top.y + (bottom.y - top.y) * v
+                };
+            }
+
+            // Draw textured triangle using clipping and transform
+            drawTexturedTriangle(img, sx, sy, sw, sh, p0, p1, p2) {
+                this.ctx.save();
+                this.ctx.beginPath();
+                this.ctx.moveTo(p0.x, p0.y);
+                this.ctx.lineTo(p1.x, p1.y);
+                this.ctx.lineTo(p2.x, p2.y);
+                this.ctx.closePath();
+                this.ctx.clip();
+
+                // Build transform that maps (0,0)->p0, (1,0)->p1, (0,1)->p2
+                this.ctx.setTransform(
+                    p1.x - p0.x, p1.y - p0.y, // a, b (x from u; y from u)
+                    p2.x - p0.x, p2.y - p0.y, // c, d (x from v; y from v)
+                    p0.x, p0.y                 // e, f (translation)
+                );
+
+                // Draw the source sub-rect into a 1x1 destination, which then maps via transform
+                this.ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 1, 1);
+                this.ctx.restore();
+            }
+
+            // Mesh warp renderer for true perspective
+            drawImageMesh(img, quad, cols, rows) {
+                const { tl, tr, br, bl } = quad;
+                
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        const u0 = col / cols;
+                        const u1 = (col + 1) / cols;
+                        const v0 = row / rows;
+                        const v1 = (row + 1) / rows;
+
+                        // Four corners of this mesh cell in destination space
+                        const p00 = this.bilerp(tl, tr, br, bl, u0, v0);
+                        const p10 = this.bilerp(tl, tr, br, bl, u1, v0);
+                        const p01 = this.bilerp(tl, tr, br, bl, u0, v1);
+                        const p11 = this.bilerp(tl, tr, br, bl, u1, v1);
+
+                        // Source sub-rect (in image pixels)
+                        const sx = img.width * u0;
+                        const sy = img.height * v0;
+                        const sw = img.width * (u1 - u0);
+                        const sh = img.height * (v1 - v0);
+
+                        // Triangle 1: p00 -> p10 -> p01
+                        this.drawTexturedTriangle(img, sx, sy, sw, sh, p00, p10, p01);
+                        // Triangle 2: p11 -> p10 -> p01
+                        this.drawTexturedTriangle(img, sx, sy, sw, sh, p11, p10, p01);
+                    }
+                }
+            }
+
+            // Optional shadow under the quad
+            drawQuadShadow(quad, strength = 0.25) {
+                const { tl, tr, br, bl } = quad;
+                const off = 10;
+                this.ctx.save();
+                this.ctx.globalAlpha = strength;
+                this.ctx.filter = 'blur(8px)';
+                this.ctx.fillStyle = '#000';
+                this.ctx.beginPath();
+                this.ctx.moveTo(tl.x + off, tl.y + off);
+                this.ctx.lineTo(tr.x + off, tr.y + off);
+                this.ctx.lineTo(br.x + off, br.y + off);
+                this.ctx.lineTo(bl.x + off, bl.y + off);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.restore();
+            }
+
             redraw() {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -806,7 +891,7 @@
                     }
                 }
 
-                // Draw artwork shadow and artwork - proper 3D rotateY projection
+                // Draw artwork shadow and artwork - true perspective using mesh warp
                 if (this.artworkImage && this.artworkSize.width > 0) {
                     // Use the already calculated dimensions that maintain original aspect ratio
                     const displayWidth = this.artworkSize.width;
@@ -817,45 +902,15 @@
                     // Get 3D projected quad points using the demo method
                     const quad = this.projectRotateY(displayWidth, displayHeight, centerX, centerY, this.artworkRotation, this.perspective);
                     
-                    // Shadow calculation based on rotation
-                    const rotationAngle = (this.artworkRotation * Math.PI) / 180;
-                    const sinAngle = Math.sin(rotationAngle);
-                    const shadowOffsetX = sinAngle * 8;
-                    const shadowOffsetY = 4;
-                    const shadowBlur = Math.max(2, displayWidth * 0.008);
-                    const shadowOpacity = 0.15 + Math.abs(sinAngle) * 0.15;
-                    
-                    // Draw shadow quad
-                    this.ctx.save();
-                    this.ctx.globalAlpha = shadowOpacity;
-                    this.ctx.fillStyle = '#000';
-                    this.ctx.filter = `blur(${shadowBlur}px)`;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(quad.tl.x + shadowOffsetX, quad.tl.y + shadowOffsetY);
-                    this.ctx.lineTo(quad.tr.x + shadowOffsetX, quad.tr.y + shadowOffsetY);
-                    this.ctx.lineTo(quad.br.x + shadowOffsetX, quad.br.y + shadowOffsetY);
-                    this.ctx.lineTo(quad.bl.x + shadowOffsetX, quad.bl.y + shadowOffsetY);
-                    this.ctx.closePath();
-                    this.ctx.fill();
-                    this.ctx.restore();
+                    // Shadow that reacts to rotation
+                    const shadowStrength = 0.18 + Math.min(0.32, Math.abs(this.artworkRotation) / 90 * 0.24);
+                    this.drawQuadShadow(quad, shadowStrength);
 
-                    // Draw 3D projected artwork using transform and drawImage
-                    this.ctx.save();
-                    
-                    // Calculate transform matrix from quad points
-                    const dx1 = quad.tr.x - quad.tl.x;
-                    const dy1 = quad.tr.y - quad.tl.y;
-                    const dx2 = quad.bl.x - quad.tl.x;
-                    const dy2 = quad.bl.y - quad.tl.y;
-                    
-                    this.ctx.setTransform(
-                        dx1 / displayWidth, dy1 / displayWidth,
-                        dx2 / displayHeight, dy2 / displayHeight,
-                        quad.tl.x, quad.tl.y
-                    );
-                    
-                    this.ctx.drawImage(this.artworkImage, 0, 0, displayWidth, displayHeight);
-                    this.ctx.restore();
+                    // True perspective texturing via mesh warp (40x40 grid for smooth result)
+                    this.drawImageMesh(this.artworkImage, quad, 40, 40);
+
+                    // Cache for hover/drag hit-testing
+                    this.projectedQuad = quad;
                 }
             }
 
