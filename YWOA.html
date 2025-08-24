@@ -458,7 +458,6 @@
                 this.artworkPosition = { x: 0, y: 0 };
                 this.artworkSize = { width: 0, height: 0 };
                 this.artworkRotation = 0; // Rotation in degrees
-                this.perspective = 600; // 3D perspective distance
                 this.pixelsPerUnit = 1;
                 this.isDragging = false;
                 this.dragOffset = { x: 0, y: 0 };
@@ -612,18 +611,13 @@
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                // Check if click is on artwork (using cached projected quad)
-                if (this.projectedQuad) {
-                    const quad = this.projectedQuad;
+                // Check if click is on artwork (using simple bounds)
+                if (this.artworkBounds) {
+                    const bounds = this.artworkBounds;
                     
-                    // Simple bounding box check for the quad
-                    const minX = Math.min(quad.tl.x, quad.tr.x, quad.br.x, quad.bl.x);
-                    const maxX = Math.max(quad.tl.x, quad.tr.x, quad.br.x, quad.bl.x);
-                    const minY = Math.min(quad.tl.y, quad.tr.y, quad.br.y, quad.bl.y);
-                    const maxY = Math.max(quad.tl.y, quad.tr.y, quad.br.y, quad.bl.y);
-                    
-                    // Check if click is within the projected artwork bounds
-                    if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+                    // Simple bounding box check
+                    if (x >= bounds.x && x <= bounds.x + bounds.width &&
+                        y >= bounds.y && y <= bounds.y + bounds.height) {
                         this.isDragging = true;
                         this.dragOffset.x = x - this.artworkPosition.x;
                         this.dragOffset.y = y - this.artworkPosition.y;
@@ -728,126 +722,6 @@
                 this.redraw();
             }
 
-            // 3D rotateY projection function (from the demo)
-            projectRotateY(w, h, cx, cy, deg, persp) {
-                const a = deg * Math.PI / 180;
-                const pts = [
-                    {x: -w/2, y: -h/2, z: 0},
-                    {x:  w/2, y: -h/2, z: 0},
-                    {x:  w/2, y:  h/2, z: 0},
-                    {x: -w/2, y:  h/2, z: 0},
-                ].map(p => {
-                    const xr = p.x * Math.cos(a) + p.z * Math.sin(a);
-                    const zr = -p.x * Math.sin(a) + p.z * Math.cos(a);
-                    const s = persp / (persp + zr);
-                    return {x: cx + xr * s, y: cy + p.y * s};
-                });
-                return {tl: pts[0], tr: pts[1], br: pts[2], bl: pts[3]};
-            }
-
-            // Bilinear interpolation
-            bilerp(tl, tr, br, bl, u, v) {
-                const top = {
-                    x: tl.x + (tr.x - tl.x) * u,
-                    y: tl.y + (tr.y - tl.y) * u
-                };
-                const bottom = {
-                    x: bl.x + (br.x - bl.x) * u,
-                    y: bl.y + (br.y - bl.y) * u
-                };
-                return {
-                    x: top.x + (bottom.x - top.x) * v,
-                    y: top.y + (bottom.y - top.y) * v
-                };
-            }
-
-            // Draw textured triangle using clipping and transform
-            drawTexturedTriangle(img, sx, sy, sw, sh, p0, p1, p2) {
-                // Skip degenerate triangles
-                const area = Math.abs((p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y));
-                if (area < 0.1) return;
-
-                this.ctx.save();
-                
-                // Enable high quality image smoothing for each triangle
-                this.ctx.imageSmoothingEnabled = true;
-                this.ctx.imageSmoothingQuality = 'high';
-                
-                this.ctx.beginPath();
-                this.ctx.moveTo(Math.round(p0.x), Math.round(p0.y));
-                this.ctx.lineTo(Math.round(p1.x), Math.round(p1.y));
-                this.ctx.lineTo(Math.round(p2.x), Math.round(p2.y));
-                this.ctx.closePath();
-                this.ctx.clip();
-
-                // Build transform that maps (0,0)->p0, (1,0)->p1, (0,1)->p2
-                this.ctx.setTransform(
-                    p1.x - p0.x, p1.y - p0.y, // a, b (x from u; y from u)
-                    p2.x - p0.x, p2.y - p0.y, // c, d (x from v; y from v)
-                    p0.x, p0.y                 // e, f (translation)
-                );
-
-                // Draw the source sub-rect into a 1x1 destination, which then maps via transform
-                this.ctx.drawImage(img, sx, sy, Math.max(1, sw), Math.max(1, sh), 0, 0, 1, 1);
-                this.ctx.restore();
-            }
-
-            // Mesh warp renderer for true perspective
-            drawImageMesh(img, quad, cols, rows) {
-                const { tl, tr, br, bl } = quad;
-                
-                // Use higher quality rendering
-                this.ctx.imageSmoothingEnabled = true;
-                this.ctx.imageSmoothingQuality = 'high';
-                
-                for (let row = 0; row < rows; row++) {
-                    for (let col = 0; col < cols; col++) {
-                        const u0 = col / cols;
-                        const u1 = (col + 1) / cols;
-                        const v0 = row / rows;
-                        const v1 = (row + 1) / rows;
-
-                        // Four corners of this mesh cell in destination space
-                        const p00 = this.bilerp(tl, tr, br, bl, u0, v0);
-                        const p10 = this.bilerp(tl, tr, br, bl, u1, v0);
-                        const p01 = this.bilerp(tl, tr, br, bl, u0, v1);
-                        const p11 = this.bilerp(tl, tr, br, bl, u1, v1);
-
-                        // Source sub-rect (in image pixels) - use exact pixel boundaries
-                        const sx = Math.floor(img.width * u0);
-                        const sy = Math.floor(img.height * v0);
-                        const sw = Math.ceil(img.width * u1) - sx;
-                        const sh = Math.ceil(img.height * v1) - sy;
-
-                        // Only draw if the quad is large enough to avoid degenerate triangles
-                        const area = Math.abs((p10.x - p00.x) * (p01.y - p00.y) - (p01.x - p00.x) * (p10.y - p00.y));
-                        if (area > 0.1) {
-                            // Triangle 1: p00 -> p10 -> p01
-                            this.drawTexturedTriangle(img, sx, sy, sw, sh, p00, p10, p01);
-                            // Triangle 2: p11 -> p01 -> p10
-                            this.drawTexturedTriangle(img, sx, sy, sw, sh, p11, p01, p10);
-                        }
-                    }
-                }
-            }
-
-            // Optional shadow under the quad
-            drawQuadShadow(quad, strength = 0.25) {
-                const { tl, tr, br, bl } = quad;
-                const off = 10;
-                this.ctx.save();
-                this.ctx.globalAlpha = strength;
-                this.ctx.filter = 'blur(8px)';
-                this.ctx.fillStyle = '#000';
-                this.ctx.beginPath();
-                this.ctx.moveTo(tl.x + off, tl.y + off);
-                this.ctx.lineTo(tr.x + off, tr.y + off);
-                this.ctx.lineTo(br.x + off, br.y + off);
-                this.ctx.lineTo(bl.x + off, bl.y + off);
-                this.ctx.closePath();
-                this.ctx.fill();
-                this.ctx.restore();
-            }
 
             redraw() {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -908,7 +782,7 @@
                     }
                 }
 
-                // Draw artwork shadow and artwork - true perspective using mesh warp
+                // Draw artwork shadow and artwork - simple CSS-style perspective transform
                 if (this.artworkImage && this.artworkSize.width > 0) {
                     // Use the already calculated dimensions that maintain original aspect ratio
                     const displayWidth = this.artworkSize.width;
@@ -916,18 +790,47 @@
                     const centerX = this.artworkPosition.x + displayWidth / 2;
                     const centerY = this.artworkPosition.y + displayHeight / 2;
                     
-                    // Get 3D projected quad points using the demo method
-                    const quad = this.projectRotateY(displayWidth, displayHeight, centerX, centerY, this.artworkRotation, this.perspective);
+                    // CSS-style perspective calculation
+                    const rotationRad = (this.artworkRotation * Math.PI) / 180;
+                    const perspectiveFactor = Math.cos(rotationRad);
+                    const scaledWidth = displayWidth * Math.abs(perspectiveFactor);
                     
-                    // Shadow that reacts to rotation
-                    const shadowStrength = 0.18 + Math.min(0.32, Math.abs(this.artworkRotation) / 90 * 0.24);
-                    this.drawQuadShadow(quad, shadowStrength);
+                    // Shadow calculation
+                    const shadowOffsetX = Math.sin(rotationRad) * 8;
+                    const shadowOffsetY = 4;
+                    const shadowOpacity = 0.2 + Math.abs(Math.sin(rotationRad)) * 0.1;
+                    
+                    // Draw shadow
+                    this.ctx.save();
+                    this.ctx.globalAlpha = shadowOpacity;
+                    this.ctx.fillStyle = '#000';
+                    this.ctx.filter = 'blur(6px)';
+                    this.ctx.fillRect(
+                        centerX - scaledWidth / 2 + shadowOffsetX,
+                        centerY - displayHeight / 2 + shadowOffsetY,
+                        scaledWidth,
+                        displayHeight
+                    );
+                    this.ctx.restore();
 
-                    // True perspective texturing via mesh warp (reduce grid size to avoid artifacts)
-                    this.drawImageMesh(this.artworkImage, quad, 20, 20);
+                    // Draw artwork with perspective scaling (like CSS perspective + rotateY)
+                    this.ctx.save();
+                    this.ctx.drawImage(
+                        this.artworkImage,
+                        centerX - scaledWidth / 2,
+                        centerY - displayHeight / 2,
+                        scaledWidth,
+                        displayHeight
+                    );
+                    this.ctx.restore();
 
-                    // Cache for hover/drag hit-testing
-                    this.projectedQuad = quad;
+                    // Cache bounds for hit-testing
+                    this.artworkBounds = {
+                        x: centerX - scaledWidth / 2,
+                        y: centerY - displayHeight / 2,
+                        width: scaledWidth,
+                        height: displayHeight
+                    };
                 }
             }
 
