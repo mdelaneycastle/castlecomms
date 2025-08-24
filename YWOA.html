@@ -314,6 +314,59 @@
             border: 1px solid var(--accent-color);
         }
 
+        .rotation-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .rotation-control input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: var(--accent-color);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .rotation-control input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-light);
+        }
+
+        .rotation-control input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: var(--shadow-light);
+        }
+
+        .rotation-control span {
+            min-width: 35px;
+            text-align: center;
+            font-weight: 500;
+            color: var(--secondary-color);
+            font-family: var(--font-primary);
+        }
+
+        .artwork-element {
+            position: absolute;
+            background-size: cover;
+            background-position: center;
+            cursor: move;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transform-origin: center center;
+        }
+
     </style>
 </head>
 <body>
@@ -373,6 +426,14 @@
                     </div>
                 </div>
 
+                <div class="control-group">
+                    <h3>5. Artwork Angle</h3>
+                    <div class="rotation-control">
+                        <input type="range" id="rotationSlider" min="-80" max="80" value="0" step="1">
+                        <span id="rotationValue">0°</span>
+                    </div>
+                    <button class="btn" id="resetRotation">Reset Angle</button>
+                </div>
 
                 <div id="statusMessages"></div>
             </div>
@@ -406,6 +467,8 @@
                 this.artworkUnit = 'ft';
                 this.artworkPosition = { x: 0, y: 0 };
                 this.artworkSize = { width: 0, height: 0 };
+                this.artworkRotation = 0; // Rotation in degrees
+                this.artworkElement = null; // HTML element for CSS transforms
                 this.pixelsPerUnit = 1;
                 this.isDragging = false;
                 this.dragOffset = { x: 0, y: 0 };
@@ -457,6 +520,8 @@
                 document.getElementById('artworkWidth').addEventListener('input', (e) => this.updateArtworkSize());
                 document.getElementById('artworkUnit').addEventListener('change', (e) => this.updateArtworkSize());
                 document.getElementById('clearPoints').addEventListener('click', () => this.clearScalePoints());
+                document.getElementById('rotationSlider').addEventListener('input', (e) => this.updateRotation(e));
+                document.getElementById('resetRotation').addEventListener('click', () => this.resetRotation());
 
                 // Export
                 document.getElementById('exportJPG').addEventListener('click', () => this.exportImage('jpg'));
@@ -519,6 +584,7 @@
                         this.artworkImage = img;
                         document.getElementById('artworkPreview').src = e.target.result;
                         document.getElementById('artworkPreview').style.display = 'block';
+                        this.createArtworkElement(e.target.result);
                         this.updateArtworkSize();
                         this.redraw();
                         this.showStatus('Artwork loaded! Set the artwork width to scale it properly.', 'success');
@@ -577,6 +643,8 @@
                 this.artworkPosition.x = x - this.dragOffset.x;
                 this.artworkPosition.y = y - this.dragOffset.y;
 
+                // Update HTML element position
+                this.updateArtworkTransform();
                 this.redraw();
             }
 
@@ -584,6 +652,9 @@
                 if (this.isDragging) {
                     this.isDragging = false;
                     this.canvas.style.cursor = 'default';
+                    if (this.artworkElement) {
+                        this.artworkElement.style.cursor = 'move';
+                    }
                 }
             }
 
@@ -621,8 +692,21 @@
                         this.artworkPosition.y = (this.canvas.height - this.artworkSize.height) / 2;
                     }
 
+                    // Update HTML element size and position
+                    this.updateArtworkElement();
                     this.redraw();
                 }
+            }
+
+            updateArtworkElement() {
+                if (!this.artworkElement) return;
+
+                // Set size
+                this.artworkElement.style.width = this.artworkSize.width + 'px';
+                this.artworkElement.style.height = this.artworkSize.height + 'px';
+
+                // Update transform with current position and rotation
+                this.updateArtworkTransform();
             }
 
             convertUnits(value, fromUnit, toUnit) {
@@ -648,6 +732,63 @@
                 this.pixelsPerUnit = 1;
                 this.redraw();
                 this.showStatus('Scale points cleared. Click two new points to set scale.', 'info');
+            }
+
+            createArtworkElement(imageSrc) {
+                // Remove existing artwork element if it exists
+                if (this.artworkElement) {
+                    this.artworkElement.remove();
+                }
+
+                // Create new artwork element
+                this.artworkElement = document.createElement('div');
+                this.artworkElement.className = 'artwork-element';
+                this.artworkElement.style.backgroundImage = `url(${imageSrc})`;
+                
+                // Add to canvas container
+                const canvasContainer = document.querySelector('.canvas-container');
+                canvasContainer.appendChild(this.artworkElement);
+
+                // Add drag functionality
+                this.setupArtworkDragging();
+            }
+
+            setupArtworkDragging() {
+                if (!this.artworkElement) return;
+
+                this.artworkElement.addEventListener('mousedown', (e) => {
+                    this.isDragging = true;
+                    const rect = this.canvas.getBoundingClientRect();
+                    this.dragOffset.x = e.clientX - rect.left - this.artworkPosition.x - this.artworkSize.width / 2;
+                    this.dragOffset.y = e.clientY - rect.top - this.artworkPosition.y - this.artworkSize.height / 2;
+                    this.artworkElement.style.cursor = 'grabbing';
+                    e.preventDefault();
+                });
+
+                // Use the existing mouse move and mouse up handlers
+            }
+
+            updateRotation(e) {
+                this.artworkRotation = parseInt(e.target.value);
+                document.getElementById('rotationValue').textContent = this.artworkRotation + '°';
+                this.updateArtworkTransform();
+            }
+
+            resetRotation() {
+                this.artworkRotation = 0;
+                document.getElementById('rotationSlider').value = 0;
+                document.getElementById('rotationValue').textContent = '0°';
+                this.updateArtworkTransform();
+            }
+
+            updateArtworkTransform() {
+                if (!this.artworkElement) return;
+
+                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
+                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+
+                this.artworkElement.style.transform = 
+                    `translate(${centerX}px, ${centerY}px) translate(-50%, -50%) perspective(500px) rotateY(${this.artworkRotation}deg)`;
             }
 
 
@@ -710,40 +851,8 @@
                     }
                 }
 
-                // Draw artwork shadow and artwork - maintain original aspect ratio
-                if (this.artworkImage && this.artworkSize.width > 0) {
-                    // Use the already calculated dimensions that maintain original aspect ratio
-                    const displayWidth = this.artworkSize.width;
-                    const displayHeight = this.artworkSize.height;
-                    
-                    // Simple box shadow
-                    const shadowOffset = Math.max(3, displayWidth * 0.015);
-                    const shadowBlur = Math.max(2, displayWidth * 0.008);
-                    
-                    // Draw shadow
-                    this.ctx.save();
-                    this.ctx.globalAlpha = 0.25;
-                    this.ctx.fillStyle = '#000';
-                    this.ctx.filter = `blur(${shadowBlur}px)`;
-                    this.ctx.fillRect(
-                        this.artworkPosition.x + shadowOffset,
-                        this.artworkPosition.y + shadowOffset,
-                        displayWidth,
-                        displayHeight
-                    );
-                    this.ctx.restore();
-
-                    // Draw artwork - maintain original aspect ratio
-                    this.ctx.save();
-                    this.ctx.drawImage(
-                        this.artworkImage,
-                        this.artworkPosition.x,
-                        this.artworkPosition.y,
-                        displayWidth,
-                        displayHeight
-                    );
-                    this.ctx.restore();
-                }
+                // Artwork is now rendered as HTML element with CSS transforms
+                // No canvas drawing needed for artwork
             }
 
             exportImage(format) {
