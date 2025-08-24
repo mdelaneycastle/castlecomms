@@ -11,11 +11,46 @@
             box-sizing: border-box;
         }
 
+        /* Import DIN Font */
+        @font-face {
+            font-family: 'DIN Light Alternate';
+            src: url('DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --primary-color: #d8d1c5;
+            --secondary-color: #45494e;
+            --tertiary-color: #6a6e73;
+            --accent-color: #c5bdb1;
+            --text-dark: #45494e;
+            --text-light: #6a6e73;
+            --text-muted: #999ea3;
+            --background-overlay: rgba(216, 209, 197, 0.95);
+            --card-background: #F0EDE9;
+            --shadow-subtle: 0 2px 8px rgba(69, 73, 78, 0.08);
+            --shadow-light: 0 4px 12px rgba(69, 73, 78, 0.12);
+            --shadow-medium: 0 8px 20px rgba(69, 73, 78, 0.15);
+            --shadow-heavy: 0 12px 30px rgba(69, 73, 78, 0.2);
+            --border-radius: 8px;
+            --border-radius-large: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-primary: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            --letter-spacing-headers: 0.025em;
+            --letter-spacing-normal: 0;
+            --primary-gradient: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-primary);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #e5ded2 100%);
             min-height: 100vh;
             padding: 20px;
+            font-weight: 300;
+            color: var(--text-dark);
+            letter-spacing: var(--letter-spacing-normal);
         }
 
         .container {
@@ -28,7 +63,7 @@
         }
 
         .header {
-            background: linear-gradient(45deg, #2c3e50, #34495e);
+            background: var(--primary-gradient);
             color: white;
             padding: 30px;
             text-align: center;
@@ -37,7 +72,9 @@
         .header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            font-weight: 300;
+            font-weight: 500;
+            font-family: var(--font-primary);
+            letter-spacing: var(--letter-spacing-headers);
         }
 
         .header p {
@@ -52,9 +89,9 @@
 
         .controls {
             width: 350px;
-            background: #f8f9fa;
+            background: var(--card-background);
             padding: 30px;
-            border-right: 1px solid #e9ecef;
+            border-right: 1px solid rgba(216, 209, 197, 0.3);
         }
 
         .control-group {
@@ -62,30 +99,35 @@
         }
 
         .control-group h3 {
-            color: #2c3e50;
+            color: var(--secondary-color);
             margin-bottom: 15px;
             font-size: 1.1rem;
+            font-family: var(--font-primary);
+            font-weight: 500;
+            letter-spacing: var(--letter-spacing-headers);
         }
 
         .upload-area {
-            border: 2px dashed #bdc3c7;
-            border-radius: 10px;
+            border: 2px dashed var(--accent-color);
+            border-radius: var(--border-radius);
             padding: 20px;
             text-align: center;
             background: white;
-            transition: all 0.3s ease;
+            transition: var(--transition);
             cursor: pointer;
             position: relative;
+            box-shadow: var(--shadow-subtle);
         }
 
         .upload-area:hover {
-            border-color: #3498db;
-            background: #f8f9fa;
+            border-color: var(--secondary-color);
+            background: var(--card-background);
+            box-shadow: var(--shadow-light);
         }
 
         .upload-area.dragover {
-            border-color: #2ecc71;
-            background: #d5f4e6;
+            border-color: var(--tertiary-color);
+            background: var(--background-overlay);
         }
 
         .upload-area input[type="file"] {
@@ -114,47 +156,53 @@
         .measurement-input input {
             flex: 1;
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
             font-size: 14px;
+            font-family: var(--font-primary);
+            background: white;
         }
 
         .measurement-input select {
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
             background: white;
+            font-family: var(--font-primary);
         }
 
         .btn {
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            background: var(--primary-gradient);
             color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 6px;
+            border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s ease;
+            font-family: var(--font-primary);
+            font-weight: 400;
+            transition: var(--transition);
             width: 100%;
             margin-top: 10px;
+            box-shadow: var(--shadow-light);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+            box-shadow: var(--shadow-medium);
         }
 
         .btn:disabled {
-            background: #95a5a6;
+            background: var(--text-muted);
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
+            box-shadow: var(--shadow-subtle);
         }
 
         .canvas-container {
             flex: 1;
             position: relative;
-            background: #ecf0f1;
+            background: var(--card-background);
             overflow: hidden;
         }
 
@@ -168,43 +216,47 @@
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(52, 73, 94, 0.9);
+            background: rgba(69, 73, 78, 0.9);
             color: white;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: var(--border-radius);
             max-width: 300px;
             font-size: 14px;
             line-height: 1.4;
+            font-family: var(--font-primary);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-light);
         }
 
         .point-marker {
             position: absolute;
             width: 12px;
             height: 12px;
-            background: #e74c3c;
+            background: var(--secondary-color);
             border: 2px solid white;
             border-radius: 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: var(--shadow-light);
         }
 
         .measurement-line {
             position: absolute;
             height: 2px;
-            background: #e74c3c;
+            background: var(--secondary-color);
             transform-origin: left center;
             z-index: 9;
         }
 
         .measurement-text {
             position: absolute;
-            background: #e74c3c;
+            background: var(--secondary-color);
             color: white;
             padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: var(--border-radius);
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 500;
+            font-family: var(--font-primary);
             transform: translate(-50%, -50%);
             z-index: 11;
         }
@@ -225,8 +277,8 @@
 
         .export-section {
             padding: 20px 30px;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
+            background: var(--card-background);
+            border-top: 1px solid rgba(216, 209, 197, 0.3);
         }
 
         .export-options {
@@ -244,21 +296,21 @@
         }
 
         .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: rgba(216, 209, 197, 0.2);
+            color: var(--secondary-color);
+            border: 1px solid var(--accent-color);
         }
 
         .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: rgba(106, 110, 115, 0.1);
+            color: var(--secondary-color);
+            border: 1px solid var(--tertiary-color);
         }
 
         .status.info {
-            background: #cce7ff;
-            color: #004085;
-            border: 1px solid #b3d7ff;
+            background: var(--background-overlay);
+            color: var(--text-dark);
+            border: 1px solid var(--accent-color);
         }
     </style>
 </head>
@@ -352,6 +404,7 @@
                 this.ctx = this.canvas.getContext('2d');
                 this.roomImage = null;
                 this.artworkImage = null;
+                this.roomImageDisplayed = null;
                 this.scalePoints = [];
                 this.realDistance = 0;
                 this.distanceUnit = 'ft';
@@ -551,10 +604,13 @@
                     // Convert artwork width to same unit as scale
                     const widthInScaleUnits = this.convertUnits(this.artworkWidth, this.artworkUnit, this.distanceUnit);
                     const pixelWidth = widthInScaleUnits * this.pixelsPerUnit;
-                    const aspectRatio = this.artworkImage.height / this.artworkImage.width;
+                    
+                    // Calculate height maintaining aspect ratio
+                    const aspectRatio = this.artworkImage.width / this.artworkImage.height;
+                    const pixelHeight = pixelWidth / aspectRatio;
                     
                     this.artworkSize.width = pixelWidth;
-                    this.artworkSize.height = pixelWidth * aspectRatio;
+                    this.artworkSize.height = pixelHeight;
 
                     // Center artwork initially
                     if (this.artworkPosition.x === 0 && this.artworkPosition.y === 0) {
@@ -594,36 +650,43 @@
             redraw() {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-                // Draw room image
+                // Draw room image - maintain aspect ratio and store dimensions
                 if (this.roomImage) {
                     const scale = Math.min(
                         this.canvas.width / this.roomImage.width,
                         this.canvas.height / this.roomImage.height
                     );
-                    const width = this.roomImage.width * scale;
-                    const height = this.roomImage.height * scale;
-                    const x = (this.canvas.width - width) / 2;
-                    const y = (this.canvas.height - height) / 2;
+                    this.roomImageDisplayed = {
+                        width: this.roomImage.width * scale,
+                        height: this.roomImage.height * scale,
+                        x: (this.canvas.width - this.roomImage.width * scale) / 2,
+                        y: (this.canvas.height - this.roomImage.height * scale) / 2,
+                        scale: scale
+                    };
 
-                    this.ctx.drawImage(this.roomImage, x, y, width, height);
+                    this.ctx.drawImage(this.roomImage, 
+                        this.roomImageDisplayed.x, 
+                        this.roomImageDisplayed.y, 
+                        this.roomImageDisplayed.width, 
+                        this.roomImageDisplayed.height);
                 }
 
                 // Draw scale points
                 this.scalePoints.forEach((point, index) => {
-                    this.ctx.fillStyle = '#e74c3c';
+                    this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
                     this.ctx.beginPath();
                     this.ctx.arc(point.x, point.y, 6, 0, 2 * Math.PI);
                     this.ctx.fill();
 
                     this.ctx.fillStyle = 'white';
-                    this.ctx.font = '12px Arial';
+                    this.ctx.font = '12px DIN Light Alternate, Arial';
                     this.ctx.textAlign = 'center';
                     this.ctx.fillText(index + 1, point.x, point.y + 4);
                 });
 
                 // Draw measurement line
                 if (this.scalePoints.length === 2) {
-                    this.ctx.strokeStyle = '#e74c3c';
+                    this.ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
                     this.ctx.lineWidth = 2;
                     this.ctx.beginPath();
                     this.ctx.moveTo(this.scalePoints[0].x, this.scalePoints[0].y);
@@ -634,34 +697,42 @@
                         const midX = (this.scalePoints[0].x + this.scalePoints[1].x) / 2;
                         const midY = (this.scalePoints[0].y + this.scalePoints[1].y) / 2;
                         
-                        this.ctx.fillStyle = '#e74c3c';
+                        this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
                         this.ctx.fillRect(midX - 30, midY - 10, 60, 20);
                         this.ctx.fillStyle = 'white';
-                        this.ctx.font = '12px Arial';
+                        this.ctx.font = '12px DIN Light Alternate, Arial';
                         this.ctx.textAlign = 'center';
                         this.ctx.fillText(`${this.realDistance} ${this.distanceUnit}`, midX, midY + 4);
                     }
                 }
 
-                // Draw artwork shadow and artwork
+                // Draw artwork shadow and artwork - maintain aspect ratio
                 if (this.artworkImage && this.artworkSize.width > 0) {
+                    // Calculate actual artwork dimensions maintaining aspect ratio
+                    const artworkAspectRatio = this.artworkImage.width / this.artworkImage.height;
+                    const displayWidth = this.artworkSize.width;
+                    const displayHeight = this.artworkSize.width / artworkAspectRatio;
+
                     // Shadow
                     this.ctx.save();
                     this.ctx.globalAlpha = 0.3;
                     this.ctx.fillStyle = '#000';
-                    const shadowOffset = Math.max(3, this.artworkSize.width * 0.02);
+                    const shadowOffset = Math.max(3, displayWidth * 0.02);
                     this.ctx.transform(1, 0, -0.1, 1, shadowOffset, shadowOffset);
-                    this.ctx.fillRect(this.artworkPosition.x, this.artworkPosition.y, this.artworkSize.width, this.artworkSize.height);
+                    this.ctx.fillRect(this.artworkPosition.x, this.artworkPosition.y, displayWidth, displayHeight);
                     this.ctx.restore();
 
-                    // Artwork
+                    // Artwork - maintain aspect ratio
                     this.ctx.drawImage(
                         this.artworkImage,
                         this.artworkPosition.x,
                         this.artworkPosition.y,
-                        this.artworkSize.width,
-                        this.artworkSize.height
+                        displayWidth,
+                        displayHeight
                     );
+
+                    // Update artworkSize to match displayed dimensions for click detection
+                    this.artworkSize.height = displayHeight;
                 }
             }
 
