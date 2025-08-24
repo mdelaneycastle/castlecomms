@@ -314,49 +314,6 @@
             border: 1px solid var(--accent-color);
         }
 
-        .rotation-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .rotation-control input[type="range"] {
-            flex: 1;
-            height: 6px;
-            background: var(--accent-color);
-            border-radius: 3px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .rotation-control input[type="range"]::-webkit-slider-thumb {
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--secondary-color);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: var(--shadow-light);
-        }
-
-        .rotation-control input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            background: var(--secondary-color);
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
-            box-shadow: var(--shadow-light);
-        }
-
-        .rotation-control span {
-            min-width: 35px;
-            text-align: center;
-            font-weight: 500;
-            color: var(--secondary-color);
-            font-family: var(--font-primary);
-        }
     </style>
 </head>
 <body>
@@ -416,14 +373,6 @@
                     </div>
                 </div>
 
-                <div class="control-group">
-                    <h3>5. Artwork Angle</h3>
-                    <div class="rotation-control">
-                        <input type="range" id="rotationSlider" min="-80" max="80" value="0" step="1">
-                        <span id="rotationValue">0°</span>
-                    </div>
-                    <button class="btn" id="resetRotation">Reset Angle</button>
-                </div>
 
                 <div id="statusMessages"></div>
             </div>
@@ -457,7 +406,6 @@
                 this.artworkUnit = 'ft';
                 this.artworkPosition = { x: 0, y: 0 };
                 this.artworkSize = { width: 0, height: 0 };
-                this.artworkRotation = 0; // Rotation in degrees
                 this.pixelsPerUnit = 1;
                 this.isDragging = false;
                 this.dragOffset = { x: 0, y: 0 };
@@ -509,8 +457,6 @@
                 document.getElementById('artworkWidth').addEventListener('input', (e) => this.updateArtworkSize());
                 document.getElementById('artworkUnit').addEventListener('change', (e) => this.updateArtworkSize());
                 document.getElementById('clearPoints').addEventListener('click', () => this.clearScalePoints());
-                document.getElementById('rotationSlider').addEventListener('input', (e) => this.updateRotation(e));
-                document.getElementById('resetRotation').addEventListener('click', () => this.resetRotation());
 
                 // Export
                 document.getElementById('exportJPG').addEventListener('click', () => this.exportImage('jpg'));
@@ -611,18 +557,13 @@
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                // Check if click is on artwork (using simple bounds)
-                if (this.artworkBounds) {
-                    const bounds = this.artworkBounds;
-                    
-                    // Simple bounding box check
-                    if (x >= bounds.x && x <= bounds.x + bounds.width &&
-                        y >= bounds.y && y <= bounds.y + bounds.height) {
-                        this.isDragging = true;
-                        this.dragOffset.x = x - this.artworkPosition.x;
-                        this.dragOffset.y = y - this.artworkPosition.y;
-                        this.canvas.style.cursor = 'grabbing';
-                    }
+                // Check if click is on artwork
+                if (this.artworkImage && x >= this.artworkPosition.x && x <= this.artworkPosition.x + this.artworkSize.width &&
+                    y >= this.artworkPosition.y && y <= this.artworkPosition.y + this.artworkSize.height) {
+                    this.isDragging = true;
+                    this.dragOffset.x = x - this.artworkPosition.x;
+                    this.dragOffset.y = y - this.artworkPosition.y;
+                    this.canvas.style.cursor = 'grabbing';
                 }
             }
 
@@ -709,19 +650,6 @@
                 this.showStatus('Scale points cleared. Click two new points to set scale.', 'info');
             }
 
-            updateRotation(e) {
-                this.artworkRotation = parseInt(e.target.value);
-                document.getElementById('rotationValue').textContent = this.artworkRotation + '°';
-                this.redraw();
-            }
-
-            resetRotation() {
-                this.artworkRotation = 0;
-                document.getElementById('rotationSlider').value = 0;
-                document.getElementById('rotationValue').textContent = '0°';
-                this.redraw();
-            }
-
 
             redraw() {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -782,55 +710,39 @@
                     }
                 }
 
-                // Draw artwork shadow and artwork - simple CSS-style perspective transform
+                // Draw artwork shadow and artwork - maintain original aspect ratio
                 if (this.artworkImage && this.artworkSize.width > 0) {
                     // Use the already calculated dimensions that maintain original aspect ratio
                     const displayWidth = this.artworkSize.width;
                     const displayHeight = this.artworkSize.height;
-                    const centerX = this.artworkPosition.x + displayWidth / 2;
-                    const centerY = this.artworkPosition.y + displayHeight / 2;
                     
-                    // CSS-style perspective calculation
-                    const rotationRad = (this.artworkRotation * Math.PI) / 180;
-                    const perspectiveFactor = Math.cos(rotationRad);
-                    const scaledWidth = displayWidth * Math.abs(perspectiveFactor);
-                    
-                    // Shadow calculation
-                    const shadowOffsetX = Math.sin(rotationRad) * 8;
-                    const shadowOffsetY = 4;
-                    const shadowOpacity = 0.2 + Math.abs(Math.sin(rotationRad)) * 0.1;
+                    // Simple box shadow
+                    const shadowOffset = Math.max(3, displayWidth * 0.015);
+                    const shadowBlur = Math.max(2, displayWidth * 0.008);
                     
                     // Draw shadow
                     this.ctx.save();
-                    this.ctx.globalAlpha = shadowOpacity;
+                    this.ctx.globalAlpha = 0.25;
                     this.ctx.fillStyle = '#000';
-                    this.ctx.filter = 'blur(6px)';
+                    this.ctx.filter = `blur(${shadowBlur}px)`;
                     this.ctx.fillRect(
-                        centerX - scaledWidth / 2 + shadowOffsetX,
-                        centerY - displayHeight / 2 + shadowOffsetY,
-                        scaledWidth,
+                        this.artworkPosition.x + shadowOffset,
+                        this.artworkPosition.y + shadowOffset,
+                        displayWidth,
                         displayHeight
                     );
                     this.ctx.restore();
 
-                    // Draw artwork with perspective scaling (like CSS perspective + rotateY)
+                    // Draw artwork - maintain original aspect ratio
                     this.ctx.save();
                     this.ctx.drawImage(
                         this.artworkImage,
-                        centerX - scaledWidth / 2,
-                        centerY - displayHeight / 2,
-                        scaledWidth,
+                        this.artworkPosition.x,
+                        this.artworkPosition.y,
+                        displayWidth,
                         displayHeight
                     );
                     this.ctx.restore();
-
-                    // Cache bounds for hit-testing
-                    this.artworkBounds = {
-                        x: centerX - scaledWidth / 2,
-                        y: centerY - displayHeight / 2,
-                        width: scaledWidth,
-                        height: displayHeight
-                    };
                 }
             }
 
