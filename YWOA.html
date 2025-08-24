@@ -532,8 +532,10 @@
                 }
 
                 const rect = this.canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
 
                 if (this.scalePoints.length < 2) {
                     this.scalePoints.push({ x, y });
@@ -551,8 +553,10 @@
                 if (!this.artworkImage) return;
 
                 const rect = this.canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
 
                 // Check if click is on artwork
                 if (x >= this.artworkPosition.x && x <= this.artworkPosition.x + this.artworkSize.width &&
@@ -568,8 +572,10 @@
                 if (!this.isDragging) return;
 
                 const rect = this.canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
 
                 this.artworkPosition.x = x - this.dragOffset.x;
                 this.artworkPosition.y = y - this.dragOffset.y;
@@ -713,16 +719,37 @@
                     const displayWidth = this.artworkSize.width;
                     const displayHeight = this.artworkSize.width / artworkAspectRatio;
 
-                    // Shadow
+                    // Box shadow - create realistic frame shadow on right and bottom
+                    const shadowOffset = Math.max(4, displayWidth * 0.015);
+                    const shadowBlur = Math.max(2, displayWidth * 0.008);
+                    
+                    // Right shadow
                     this.ctx.save();
-                    this.ctx.globalAlpha = 0.3;
+                    this.ctx.globalAlpha = 0.25;
                     this.ctx.fillStyle = '#000';
-                    const shadowOffset = Math.max(3, displayWidth * 0.02);
-                    this.ctx.transform(1, 0, -0.1, 1, shadowOffset, shadowOffset);
-                    this.ctx.fillRect(this.artworkPosition.x, this.artworkPosition.y, displayWidth, displayHeight);
+                    this.ctx.filter = `blur(${shadowBlur}px)`;
+                    this.ctx.fillRect(
+                        this.artworkPosition.x + displayWidth, 
+                        this.artworkPosition.y + shadowOffset, 
+                        shadowOffset, 
+                        displayHeight
+                    );
                     this.ctx.restore();
 
-                    // Artwork - maintain aspect ratio
+                    // Bottom shadow
+                    this.ctx.save();
+                    this.ctx.globalAlpha = 0.25;
+                    this.ctx.fillStyle = '#000';
+                    this.ctx.filter = `blur(${shadowBlur}px)`;
+                    this.ctx.fillRect(
+                        this.artworkPosition.x + shadowOffset, 
+                        this.artworkPosition.y + displayHeight, 
+                        displayWidth, 
+                        shadowOffset
+                    );
+                    this.ctx.restore();
+
+                    // Artwork - maintain original aspect ratio
                     this.ctx.drawImage(
                         this.artworkImage,
                         this.artworkPosition.x,
