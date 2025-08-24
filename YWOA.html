@@ -763,11 +763,20 @@
 
             // Draw textured triangle using clipping and transform
             drawTexturedTriangle(img, sx, sy, sw, sh, p0, p1, p2) {
+                // Skip degenerate triangles
+                const area = Math.abs((p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y));
+                if (area < 0.1) return;
+
                 this.ctx.save();
+                
+                // Enable high quality image smoothing for each triangle
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
+                
                 this.ctx.beginPath();
-                this.ctx.moveTo(p0.x, p0.y);
-                this.ctx.lineTo(p1.x, p1.y);
-                this.ctx.lineTo(p2.x, p2.y);
+                this.ctx.moveTo(Math.round(p0.x), Math.round(p0.y));
+                this.ctx.lineTo(Math.round(p1.x), Math.round(p1.y));
+                this.ctx.lineTo(Math.round(p2.x), Math.round(p2.y));
                 this.ctx.closePath();
                 this.ctx.clip();
 
@@ -779,13 +788,17 @@
                 );
 
                 // Draw the source sub-rect into a 1x1 destination, which then maps via transform
-                this.ctx.drawImage(img, sx, sy, sw, sh, 0, 0, 1, 1);
+                this.ctx.drawImage(img, sx, sy, Math.max(1, sw), Math.max(1, sh), 0, 0, 1, 1);
                 this.ctx.restore();
             }
 
             // Mesh warp renderer for true perspective
             drawImageMesh(img, quad, cols, rows) {
                 const { tl, tr, br, bl } = quad;
+                
+                // Use higher quality rendering
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
                 
                 for (let row = 0; row < rows; row++) {
                     for (let col = 0; col < cols; col++) {
@@ -800,16 +813,20 @@
                         const p01 = this.bilerp(tl, tr, br, bl, u0, v1);
                         const p11 = this.bilerp(tl, tr, br, bl, u1, v1);
 
-                        // Source sub-rect (in image pixels)
-                        const sx = img.width * u0;
-                        const sy = img.height * v0;
-                        const sw = img.width * (u1 - u0);
-                        const sh = img.height * (v1 - v0);
+                        // Source sub-rect (in image pixels) - use exact pixel boundaries
+                        const sx = Math.floor(img.width * u0);
+                        const sy = Math.floor(img.height * v0);
+                        const sw = Math.ceil(img.width * u1) - sx;
+                        const sh = Math.ceil(img.height * v1) - sy;
 
-                        // Triangle 1: p00 -> p10 -> p01
-                        this.drawTexturedTriangle(img, sx, sy, sw, sh, p00, p10, p01);
-                        // Triangle 2: p11 -> p10 -> p01
-                        this.drawTexturedTriangle(img, sx, sy, sw, sh, p11, p10, p01);
+                        // Only draw if the quad is large enough to avoid degenerate triangles
+                        const area = Math.abs((p10.x - p00.x) * (p01.y - p00.y) - (p01.x - p00.x) * (p10.y - p00.y));
+                        if (area > 0.1) {
+                            // Triangle 1: p00 -> p10 -> p01
+                            this.drawTexturedTriangle(img, sx, sy, sw, sh, p00, p10, p01);
+                            // Triangle 2: p11 -> p01 -> p10
+                            this.drawTexturedTriangle(img, sx, sy, sw, sh, p11, p01, p10);
+                        }
                     }
                 }
             }
@@ -906,8 +923,8 @@
                     const shadowStrength = 0.18 + Math.min(0.32, Math.abs(this.artworkRotation) / 90 * 0.24);
                     this.drawQuadShadow(quad, shadowStrength);
 
-                    // True perspective texturing via mesh warp (40x40 grid for smooth result)
-                    this.drawImageMesh(this.artworkImage, quad, 40, 40);
+                    // True perspective texturing via mesh warp (reduce grid size to avoid artifacts)
+                    this.drawImageMesh(this.artworkImage, quad, 20, 20);
 
                     // Cache for hover/drag hit-testing
                     this.projectedQuad = quad;
