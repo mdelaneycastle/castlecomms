@@ -417,12 +417,12 @@
                 </div>
 
                 <div class="control-group">
-                    <h3>5. Artwork Perspective</h3>
+                    <h3>5. Artwork Angle</h3>
                     <div class="rotation-control">
-                        <input type="range" id="rotationSlider" min="-30" max="30" value="0" step="1">
+                        <input type="range" id="rotationSlider" min="-60" max="60" value="0" step="1">
                         <span id="rotationValue">0°</span>
                     </div>
-                    <button class="btn" id="resetRotation">Reset Perspective</button>
+                    <button class="btn" id="resetRotation">Reset Angle</button>
                 </div>
 
                 <div id="statusMessages"></div>
@@ -611,20 +611,26 @@
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                // Check if click is on artwork (accounting for perspective)
-                const perspectiveAngle = (this.artworkRotation * Math.PI) / 180;
-                const perspectiveFactor = Math.cos(perspectiveAngle);
-                const skewX = Math.sin(perspectiveAngle) * 0.3;
+                // Check if click is on artwork (accounting for 3D Y-axis rotation)
+                const rotationAngle = (this.artworkRotation * Math.PI) / 180;
+                const cosAngle = Math.cos(rotationAngle);
+                const sinAngle = Math.sin(rotationAngle);
+                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
+                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
                 
-                // Transform click point to account for perspective transformation
-                const transformedX = (x - this.artworkPosition.x * skewX) / perspectiveFactor;
-                const transformedY = y;
+                // Transform click coordinates back to 2D space
+                const dx = x - centerX;
+                const dy = y - centerY;
                 
-                // Check if transformed coordinates are within artwork bounds
-                if (transformedX >= this.artworkPosition.x && 
-                    transformedX <= this.artworkPosition.x + this.artworkSize.width &&
-                    transformedY >= this.artworkPosition.y && 
-                    transformedY <= this.artworkPosition.y + this.artworkSize.height) {
+                // Apply inverse 3D transformation
+                const perspective = 600;
+                const perspectiveScale = perspective / (perspective - sinAngle * this.artworkSize.width / 2);
+                const scaleX = cosAngle * perspectiveScale;
+                const skewX = sinAngle * perspectiveScale;
+                
+                // Simplified hit detection - check if within original bounds
+                if (Math.abs(dx) <= this.artworkSize.width / 2 * Math.abs(scaleX) && 
+                    Math.abs(dy) <= this.artworkSize.height / 2) {
                     this.isDragging = true;
                     this.dragOffset.x = x - this.artworkPosition.x;
                     this.dragOffset.y = y - this.artworkPosition.y;
@@ -787,7 +793,7 @@
                     }
                 }
 
-                // Draw artwork shadow and artwork - maintain original aspect ratio with perspective
+                // Draw artwork shadow and artwork - 3D Y-axis rotation with perspective
                 if (this.artworkImage && this.artworkSize.width > 0) {
                     // Use the already calculated dimensions that maintain original aspect ratio
                     const displayWidth = this.artworkSize.width;
@@ -795,41 +801,48 @@
                     const centerX = this.artworkPosition.x + displayWidth / 2;
                     const centerY = this.artworkPosition.y + displayHeight / 2;
                     
-                    // Calculate perspective transformation
-                    const perspectiveAngle = (this.artworkRotation * Math.PI) / 180;
-                    const perspectiveFactor = Math.cos(perspectiveAngle);
-                    const skewX = Math.sin(perspectiveAngle) * 0.3; // Adjust skew intensity
+                    // 3D Y-axis rotation calculation (like rotateY in CSS)
+                    const rotationAngle = (this.artworkRotation * Math.PI) / 180;
+                    const cosAngle = Math.cos(rotationAngle);
+                    const sinAngle = Math.sin(rotationAngle);
                     
-                    // Apply perspective to width and create skew effect
-                    const perspectiveWidth = displayWidth * perspectiveFactor;
-                    const perspectiveHeight = displayHeight;
-
-                    // Box shadow - create realistic perspective shadow
-                    const shadowOffsetX = Math.max(3, displayWidth * 0.01) + (skewX * displayHeight * 0.5);
+                    // Perspective projection (similar to perspective(600px) in CSS)
+                    const perspective = 600;
+                    const perspectiveScale = perspective / (perspective - sinAngle * displayWidth / 2);
+                    
+                    // Calculate 3D transformation matrix for Y-axis rotation
+                    const scaleX = cosAngle * perspectiveScale;
+                    const skewX = sinAngle * perspectiveScale;
+                    
+                    // Shadow calculation based on 3D rotation
+                    const shadowOffsetX = Math.abs(sinAngle) * displayHeight * 0.3;
                     const shadowOffsetY = Math.max(4, displayWidth * 0.015);
                     const shadowBlur = Math.max(2, displayWidth * 0.008);
+                    const shadowOpacity = 0.2 + Math.abs(sinAngle) * 0.1; // More shadow when rotated
                     
-                    // Draw perspective shadow
+                    // Draw 3D shadow
                     this.ctx.save();
-                    this.ctx.globalAlpha = 0.25;
+                    this.ctx.globalAlpha = shadowOpacity;
                     this.ctx.fillStyle = '#000';
                     this.ctx.filter = `blur(${shadowBlur}px)`;
-                    this.ctx.transform(perspectiveFactor, 0, skewX, 1, 0, 0);
+                    
+                    // Apply shadow transformation
+                    this.ctx.setTransform(scaleX, 0, skewX, 1, centerX, centerY);
                     this.ctx.fillRect(
-                        this.artworkPosition.x + shadowOffsetX / perspectiveFactor, 
-                        this.artworkPosition.y + shadowOffsetY, 
-                        displayWidth + Math.abs(shadowOffsetX), 
-                        displayHeight + shadowOffsetY
+                        -displayWidth / 2 + shadowOffsetX, 
+                        -displayHeight / 2 + shadowOffsetY, 
+                        displayWidth, 
+                        displayHeight
                     );
                     this.ctx.restore();
 
-                    // Draw perspective artwork - maintain original aspect ratio
+                    // Draw 3D rotated artwork
                     this.ctx.save();
-                    this.ctx.transform(perspectiveFactor, 0, skewX, 1, 0, 0);
+                    this.ctx.setTransform(scaleX, 0, skewX, 1, centerX, centerY);
                     this.ctx.drawImage(
                         this.artworkImage,
-                        this.artworkPosition.x / perspectiveFactor,
-                        this.artworkPosition.y,
+                        -displayWidth / 2,
+                        -displayHeight / 2,
                         displayWidth,
                         displayHeight
                     );
