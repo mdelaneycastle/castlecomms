@@ -611,9 +611,9 @@
                     const widthInScaleUnits = this.convertUnits(this.artworkWidth, this.artworkUnit, this.distanceUnit);
                     const pixelWidth = widthInScaleUnits * this.pixelsPerUnit;
                     
-                    // Calculate height maintaining aspect ratio
-                    const aspectRatio = this.artworkImage.width / this.artworkImage.height;
-                    const pixelHeight = pixelWidth / aspectRatio;
+                    // Calculate height maintaining original image aspect ratio
+                    const originalAspectRatio = this.artworkImage.width / this.artworkImage.height;
+                    const pixelHeight = pixelWidth / originalAspectRatio;
                     
                     this.artworkSize.width = pixelWidth;
                     this.artworkSize.height = pixelHeight;
@@ -712,12 +712,11 @@
                     }
                 }
 
-                // Draw artwork shadow and artwork - maintain aspect ratio
+                // Draw artwork shadow and artwork - maintain original aspect ratio
                 if (this.artworkImage && this.artworkSize.width > 0) {
-                    // Calculate actual artwork dimensions maintaining aspect ratio
-                    const artworkAspectRatio = this.artworkImage.width / this.artworkImage.height;
+                    // Use the already calculated dimensions that maintain original aspect ratio
                     const displayWidth = this.artworkSize.width;
-                    const displayHeight = this.artworkSize.width / artworkAspectRatio;
+                    const displayHeight = this.artworkSize.height;
 
                     // Box shadow - create realistic frame shadow on right and bottom
                     const shadowOffset = Math.max(4, displayWidth * 0.015);
@@ -749,7 +748,7 @@
                     );
                     this.ctx.restore();
 
-                    // Artwork - maintain original aspect ratio
+                    // Artwork - draw with original aspect ratio preserved
                     this.ctx.drawImage(
                         this.artworkImage,
                         this.artworkPosition.x,
@@ -757,9 +756,6 @@
                         displayWidth,
                         displayHeight
                     );
-
-                    // Update artworkSize to match displayed dimensions for click detection
-                    this.artworkSize.height = displayHeight;
                 }
             }
 
