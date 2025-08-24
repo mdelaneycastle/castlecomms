@@ -419,7 +419,7 @@
                 <div class="control-group">
                     <h3>5. Artwork Angle</h3>
                     <div class="rotation-control">
-                        <input type="range" id="rotationSlider" min="-60" max="60" value="0" step="1">
+                        <input type="range" id="rotationSlider" min="-80" max="80" value="0" step="1">
                         <span id="rotationValue">0°</span>
                     </div>
                     <button class="btn" id="resetRotation">Reset Angle</button>
@@ -458,6 +458,7 @@
                 this.artworkPosition = { x: 0, y: 0 };
                 this.artworkSize = { width: 0, height: 0 };
                 this.artworkRotation = 0; // Rotation in degrees
+                this.perspective = 600; // 3D perspective distance
                 this.pixelsPerUnit = 1;
                 this.isDragging = false;
                 this.dragOffset = { x: 0, y: 0 };
@@ -611,21 +612,21 @@
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                // Check if click is on artwork (accounting for rotateY width compression)
-                const rotationAngle = (this.artworkRotation * Math.PI) / 180;
-                const cosAngle = Math.cos(rotationAngle);
+                // Check if click is on artwork (using 3D projected quad bounds)
                 const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
                 const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
                 
-                // Calculate compressed dimensions from rotateY
-                const rotatedWidth = this.artworkSize.width * Math.abs(cosAngle);
-                const rotatedHeight = this.artworkSize.height;
+                // Get the 3D projected quad
+                const quad = this.projectRotateY(this.artworkSize.width, this.artworkSize.height, centerX, centerY, this.artworkRotation, this.perspective);
                 
-                // Check if click is within the rotated artwork bounds
-                if (x >= centerX - rotatedWidth / 2 && 
-                    x <= centerX + rotatedWidth / 2 &&
-                    y >= centerY - rotatedHeight / 2 && 
-                    y <= centerY + rotatedHeight / 2) {
+                // Simple bounding box check for the quad
+                const minX = Math.min(quad.tl.x, quad.tr.x, quad.br.x, quad.bl.x);
+                const maxX = Math.max(quad.tl.x, quad.tr.x, quad.br.x, quad.bl.x);
+                const minY = Math.min(quad.tl.y, quad.tr.y, quad.br.y, quad.bl.y);
+                const maxY = Math.max(quad.tl.y, quad.tr.y, quad.br.y, quad.bl.y);
+                
+                // Check if click is within the projected artwork bounds
+                if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
                     this.isDragging = true;
                     this.dragOffset.x = x - this.artworkPosition.x;
                     this.dragOffset.y = y - this.artworkPosition.y;
@@ -729,6 +730,23 @@
                 this.redraw();
             }
 
+            // 3D rotateY projection function (from the demo)
+            projectRotateY(w, h, cx, cy, deg, persp) {
+                const a = deg * Math.PI / 180;
+                const pts = [
+                    {x: -w/2, y: -h/2, z: 0},
+                    {x:  w/2, y: -h/2, z: 0},
+                    {x:  w/2, y:  h/2, z: 0},
+                    {x: -w/2, y:  h/2, z: 0},
+                ].map(p => {
+                    const xr = p.x * Math.cos(a) + p.z * Math.sin(a);
+                    const zr = -p.x * Math.sin(a) + p.z * Math.cos(a);
+                    const s = persp / (persp + zr);
+                    return {x: cx + xr * s, y: cy + p.y * s};
+                });
+                return {tl: pts[0], tr: pts[1], br: pts[2], bl: pts[3]};
+            }
+
             redraw() {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -788,7 +806,7 @@
                     }
                 }
 
-                // Draw artwork shadow and artwork - proper rotateY() implementation
+                // Draw artwork shadow and artwork - proper 3D rotateY projection
                 if (this.artworkImage && this.artworkSize.width > 0) {
                     // Use the already calculated dimensions that maintain original aspect ratio
                     const displayWidth = this.artworkSize.width;
@@ -796,44 +814,47 @@
                     const centerX = this.artworkPosition.x + displayWidth / 2;
                     const centerY = this.artworkPosition.y + displayHeight / 2;
                     
-                    // rotateY() transformation: only compresses width based on cos(angle)
+                    // Get 3D projected quad points using the demo method
+                    const quad = this.projectRotateY(displayWidth, displayHeight, centerX, centerY, this.artworkRotation, this.perspective);
+                    
+                    // Shadow calculation based on rotation
                     const rotationAngle = (this.artworkRotation * Math.PI) / 180;
-                    const cosAngle = Math.cos(rotationAngle);
                     const sinAngle = Math.sin(rotationAngle);
-                    
-                    // rotateY() matrix: [cos(a), 0, sin(a), 0, 1, 0, -sin(a), 0, cos(a)]
-                    // In 2D canvas, this translates to width scaling by cos(angle)
-                    const rotatedWidth = displayWidth * Math.abs(cosAngle);
-                    const rotatedHeight = displayHeight; // Height unchanged in rotateY
-                    
-                    // Shadow calculation - side shadow when rotated
-                    const shadowOffsetX = sinAngle > 0 ? Math.abs(sinAngle) * 8 : -Math.abs(sinAngle) * 8;
+                    const shadowOffsetX = sinAngle * 8;
                     const shadowOffsetY = 4;
                     const shadowBlur = Math.max(2, displayWidth * 0.008);
                     const shadowOpacity = 0.15 + Math.abs(sinAngle) * 0.15;
                     
-                    // Draw side shadow
+                    // Draw shadow quad
                     this.ctx.save();
                     this.ctx.globalAlpha = shadowOpacity;
                     this.ctx.fillStyle = '#000';
                     this.ctx.filter = `blur(${shadowBlur}px)`;
-                    this.ctx.fillRect(
-                        centerX - rotatedWidth / 2 + shadowOffsetX,
-                        centerY - rotatedHeight / 2 + shadowOffsetY,
-                        rotatedWidth,
-                        rotatedHeight
-                    );
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(quad.tl.x + shadowOffsetX, quad.tl.y + shadowOffsetY);
+                    this.ctx.lineTo(quad.tr.x + shadowOffsetX, quad.tr.y + shadowOffsetY);
+                    this.ctx.lineTo(quad.br.x + shadowOffsetX, quad.br.y + shadowOffsetY);
+                    this.ctx.lineTo(quad.bl.x + shadowOffsetX, quad.bl.y + shadowOffsetY);
+                    this.ctx.closePath();
+                    this.ctx.fill();
                     this.ctx.restore();
 
-                    // Draw rotateY transformed artwork - just compress width
+                    // Draw 3D projected artwork using transform and drawImage
                     this.ctx.save();
-                    this.ctx.drawImage(
-                        this.artworkImage,
-                        centerX - rotatedWidth / 2,
-                        centerY - rotatedHeight / 2,
-                        rotatedWidth,
-                        rotatedHeight
+                    
+                    // Calculate transform matrix from quad points
+                    const dx1 = quad.tr.x - quad.tl.x;
+                    const dy1 = quad.tr.y - quad.tl.y;
+                    const dx2 = quad.bl.x - quad.tl.x;
+                    const dy2 = quad.bl.y - quad.tl.y;
+                    
+                    this.ctx.setTransform(
+                        dx1 / displayWidth, dy1 / displayWidth,
+                        dx2 / displayHeight, dy2 / displayHeight,
+                        quad.tl.x, quad.tl.y
                     );
+                    
+                    this.ctx.drawImage(this.artworkImage, 0, 0, displayWidth, displayHeight);
                     this.ctx.restore();
                 }
             }
