@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Castle Comms App</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- iOS PWA meta tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Castle Comms">
+  <link rel="apple-touch-icon" href="icon.png">
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .app-header {
+      background: #6264a7;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      z-index: 1000;
+    }
+    
+    .app-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .notification-button {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .notification-button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .notification-button.enabled {
+      background: rgba(46, 204, 113, 0.8);
+      border-color: rgba(46, 204, 113, 1);
+    }
+    
+    .app-content {
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    .app-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    
+    .install-prompt {
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      color: #1976d2;
+      padding: 12px 20px;
+      text-align: center;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .install-prompt button {
+      background: #2196f3;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin: 0 8px;
+      cursor: pointer;
+    }
+    
+    .install-prompt .close {
+      background: transparent;
+      color: #1976d2;
+      text-decoration: underline;
+    }
+    
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4caf50;
+    }
+    
+    .status-dot.offline {
+      background: #f44336;
+    }
+    
+    @media (max-width: 768px) {
+      .app-header {
+        padding: 10px 16px;
+      }
+      
+      .app-title {
+        font-size: 16px;
+      }
+      
+      .notification-button {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="install-prompt" id="install-prompt">
+    📱 Install Castle Comms as an app for a better experience!
+    <button id="install-button">Install</button>
+    <button class="close" id="close-install">Not now</button>
+  </div>
+  
+  <header class="app-header">
+    <h1 class="app-title">Castle Comms</h1>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="status-indicator">
+        <div class="status-dot" id="status-dot"></div>
+        <span id="status-text">Online</span>
+      </div>
+      <button class="notification-button" id="notification-button">
+        Enable Notifications
+      </button>
+    </div>
+  </header>
+  
+  <main class="app-content">
+    <iframe src="messages.html" class="app-iframe" id="main-iframe"></iframe>
+  </main>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+  
+  <!-- App scripts -->
+  <script src="firebase-init.js"></script>
+  <script src="notification-manager.js"></script>
+  
+  <script>
+    let deferredPrompt;
+    let notificationManager;
+    
+    // PWA Install Prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-prompt').style.display = 'block';
+    });
+    
+    document.getElementById('install-button').addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to install prompt: ${outcome}`);
+        deferredPrompt = null;
+        document.getElementById('install-prompt').style.display = 'none';
+      }
+    });
+    
+    document.getElementById('close-install').addEventListener('click', () => {
+      document.getElementById('install-prompt').style.display = 'none';
+    });
+    
+    // Check if app is installed
+    window.addEventListener('appinstalled', () => {
+      console.log('PWA was installed');
+      document.getElementById('install-prompt').style.display = 'none';
+    });
+    
+    // Online/Offline status
+    function updateOnlineStatus() {
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+      
+      if (navigator.onLine) {
+        statusDot.classList.remove('offline');
+        statusText.textContent = 'Online';
+      } else {
+        statusDot.classList.add('offline');
+        statusText.textContent = 'Offline';
+      }
+    }
+    
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+    
+    // Notification button handler
+    document.getElementById('notification-button').addEventListener('click', async () => {
+      const button = document.getElementById('notification-button');
+      
+      if (!window.notificationManager) {
+        console.log('Notification manager not ready yet');
+        return;
+      }
+      
+      const permission = await window.notificationManager.getPermissionStatus();
+      
+      if (permission === 'granted') {
+        // Already granted, show status
+        alert('Notifications are already enabled!');
+      } else if (permission === 'denied') {
+        alert('Notifications are blocked. Please enable them in your browser settings.');
+      } else {
+        // Request permission
+        window.notificationManager.showNotificationSetup();
+      }
+    });
+    
+    // Update notification button based on permission status
+    async function updateNotificationButton() {
+      if (!window.notificationManager) return;
+      
+      const permission = await window.notificationManager.getPermissionStatus();
+      const button = document.getElementById('notification-button');
+      
+      if (permission === 'granted') {
+        button.textContent = '🔔 Notifications On';
+        button.classList.add('enabled');
+      } else if (permission === 'denied') {
+        button.textContent = '🔕 Notifications Blocked';
+      } else {
+        button.textContent = 'Enable Notifications';
+      }
+    }
+    
+    // Initialize when everything is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check notification status periodically
+      setInterval(updateNotificationButton, 2000);
+      
+      // Initial check
+      setTimeout(updateNotificationButton, 1000);
+      
+      // Show notification setup after a delay if not already granted
+      setTimeout(async () => {
+        if (window.notificationManager) {
+          const permission = await window.notificationManager.getPermissionStatus();
+          if (permission === 'default') {
+            // Auto-show setup modal after 5 seconds for new users
+            setTimeout(() => {
+              window.notificationManager.showNotificationSetup();
+            }, 5000);
+          }
+        }
+      }, 2000);
+    });
+    
+    // Handle iframe communication for notifications
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'newMessage') {
+        // A new message was received in the iframe
+        console.log('New message received:', event.data);
+        
+        // You could trigger additional notification logic here
+        // For example, update the page title with unread count
+        if (event.data.unreadCount) {
+          document.title = `(${event.data.unreadCount}) Castle Comms`;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "Castle Comms",
+  "short_name": "Castle Comms",
+  "description": "Castle Communications Internal Website",
+  "start_url": "/messages.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6264a7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["productivity", "communication"],
+  "lang": "en-US",
+  "dir": "ltr"
+}
