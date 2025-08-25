@@ -142,6 +142,18 @@ class NotificationManager {
     try {
       const user = firebase.auth().currentUser;
       if (user && window.firebaseServices.db) {
+        // Debug: Check what we're getting for user
+        console.log('🔍 Firebase user object:', user);
+        console.log('🔍 User email from Firebase:', user.email);
+        console.log('🔍 User UID:', user.uid);
+        
+        // Clean the email if it contains mailto:
+        let cleanEmail = user.email;
+        if (cleanEmail && cleanEmail.startsWith('mailto:')) {
+          cleanEmail = cleanEmail.replace('mailto:', '');
+          console.log('🧹 Cleaned email from mailto:', cleanEmail);
+        }
+        
         // Use a shorter key for the token path to avoid issues
         const tokenKey = token.substring(0, 20);
         await window.firebaseServices.db.ref(`users/${user.uid}/fcmTokens/${tokenKey}`).set({
@@ -149,12 +161,15 @@ class NotificationManager {
           timestamp: firebase.database.ServerValue.TIMESTAMP,
           userAgent: navigator.userAgent,
           platform: navigator.platform,
-          email: user.email
+          email: cleanEmail,
+          originalEmail: user.email
         });
-        console.log('✅ FCM token saved to database for user:', user.email);
+        console.log('✅ FCM token saved to database for user:', cleanEmail);
         console.log('🔑 Token key:', tokenKey, 'Full token length:', token.length);
       } else {
         console.error('❌ Cannot save token: user or database not available');
+        console.log('❌ Debug - User:', user);
+        console.log('❌ Debug - Database:', window.firebaseServices.db);
       }
     } catch (error) {
       console.error('❌ Error saving FCM token:', error);
