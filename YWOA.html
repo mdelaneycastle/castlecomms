@@ -585,7 +585,24 @@
                         document.getElementById('artworkPreview').src = e.target.result;
                         document.getElementById('artworkPreview').style.display = 'block';
                         this.createArtworkElement(e.target.result);
-                        this.updateArtworkSize();
+                        
+                        // Set initial size if no width specified yet
+                        if (this.artworkWidth === 0) {
+                            // Set default size to make artwork visible
+                            const defaultSize = 200;
+                            const aspectRatio = img.width / img.height;
+                            this.artworkSize.width = defaultSize;
+                            this.artworkSize.height = defaultSize / aspectRatio;
+                            
+                            // Center it
+                            this.artworkPosition.x = (this.canvas.width - this.artworkSize.width) / 2;
+                            this.artworkPosition.y = (this.canvas.height - this.artworkSize.height) / 2;
+                            
+                            this.updateArtworkElement();
+                        } else {
+                            this.updateArtworkSize();
+                        }
+                        
                         this.redraw();
                         this.showStatus('Artwork loaded! Set the artwork width to scale it properly.', 'success');
                     };
@@ -686,7 +703,7 @@
                     this.artworkSize.width = pixelWidth;
                     this.artworkSize.height = pixelHeight;
 
-                    // Center artwork initially
+                    // Center artwork initially or when size changes significantly
                     if (this.artworkPosition.x === 0 && this.artworkPosition.y === 0) {
                         this.artworkPosition.x = (this.canvas.width - this.artworkSize.width) / 2;
                         this.artworkPosition.y = (this.canvas.height - this.artworkSize.height) / 2;
@@ -784,11 +801,11 @@
             updateArtworkTransform() {
                 if (!this.artworkElement) return;
 
-                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
-                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
-
+                // Position relative to the canvas container
+                this.artworkElement.style.left = this.artworkPosition.x + 'px';
+                this.artworkElement.style.top = this.artworkPosition.y + 'px';
                 this.artworkElement.style.transform = 
-                    `translate(${centerX}px, ${centerY}px) translate(-50%, -50%) perspective(500px) rotateY(${this.artworkRotation}deg)`;
+                    `perspective(500px) rotateY(${this.artworkRotation}deg)`;
             }
 
 
