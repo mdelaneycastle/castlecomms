@@ -69,14 +69,96 @@
             padding: 20px;
         }
 
-        .header {
+        /* Fix header/sidebar conflicts - YWOA specific overrides */
+        #header-container,
+        #header-container * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            letter-spacing: normal !important;
+        }
+
+        /* Reset conflicting styles for header */
+        #header-container .header {
+            background: none !important;
+            color: initial !important;
+            padding: 0 !important;
+            text-align: initial !important;
+        }
+
+        #header-container h1 {
+            background: initial !important;
+            color: initial !important;
+            font-size: initial !important;
+            margin: initial !important;
+            padding: initial !important;
+        }
+
+        #header-container p {
+            color: initial !important;
+            font-size: initial !important;
+            margin: initial !important;
+        }
+
+        /* Reset button styles for header/sidebar */
+        #header-container button,
+        #sidebar-container button {
+            background: initial !important;
+            border: initial !important;
+            color: initial !important;
+            padding: initial !important;
+            border-radius: initial !important;
+            font-family: inherit !important;
+            cursor: pointer !important;
+        }
+
+        /* Reset input styles for header */
+        #header-container input {
+            background: initial !important;
+            border: initial !important;
+            color: initial !important;
+            padding: initial !important;
+            border-radius: initial !important;
+        }
+
+        /* Reset any conflicting container styles */
+        #header-container .container {
+            max-width: none !important;
+            margin: 0 !important;
+            background: transparent !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+        }
+
+        /* Additional fixes for header/sidebar positioning and display */
+        #header-container {
+            position: relative !important;
+            z-index: 1000 !important;
+        }
+
+        #sidebar-container {
+            position: relative !important;
+            z-index: 999 !important;
+        }
+
+        /* Fix any text overflow or positioning issues */
+        #header-container * {
+            box-sizing: border-box !important;
+        }
+
+        /* Ensure sidebar functionality works */
+        #sidebar-container .sidebar {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        }
+
+        /* YWOA specific header - make it more specific to avoid conflicts */
+        .container .header {
             background: var(--primary-gradient);
             color: white;
             padding: 30px;
             text-align: center;
         }
 
-        .header h1 {
+        .container .header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
             font-weight: 500;
@@ -84,9 +166,14 @@
             letter-spacing: var(--letter-spacing-headers);
         }
 
-        .header p {
+        .container .header p {
             opacity: 0.9;
             font-size: 1.1rem;
+        }
+
+        /* Scope all YWOA styles to prevent conflicts with header/sidebar */
+        main#main .container {
+            /* All YWOA styles are now scoped to main#main .container */
         }
 
         .main-content {
