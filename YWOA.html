@@ -918,44 +918,116 @@
                 }
 
                 try {
-                    const container = document.querySelector('.canvas-container');
+                    this.showStatus('Generating export image...', 'info');
+                    
+                    // Create export canvas with proper 3D rotation rendering
+                    const exportCanvas = document.createElement('canvas');
+                    const exportCtx = exportCanvas.getContext('2d');
+                    const scale = window.devicePixelRatio || 1;
+                    
+                    exportCanvas.width = this.canvas.width * scale;
+                    exportCanvas.height = this.canvas.height * scale;
+                    exportCtx.scale(scale, scale);
 
-                    // Bump scale for sharper exports; capture CSS transforms (incl. rotateX/Y/Z)
-                    const snap = await html2canvas(container, {
-                    backgroundColor: null,    // keep transparent; we'll add white for JPG below
-                    useCORS: true,            // safe for data URLs / same-origin
-                    scale: window.devicePixelRatio || 2
-                    });
-
-                    let outDataURL;
-
+                    // Fill background for JPG format
                     if (format === 'jpg' || format === 'jpeg') {
-                    // Paint onto a white backing for JPEG (no alpha channel)
-                    const whiteCanvas = document.createElement('canvas');
-                    whiteCanvas.width = snap.width;
-                    whiteCanvas.height = snap.height;
-                    const wctx = whiteCanvas.getContext('2d');
-                    wctx.fillStyle = '#ffffff';
-                    wctx.fillRect(0, 0, whiteCanvas.width, whiteCanvas.height);
-                    wctx.drawImage(snap, 0, 0);
-                    outDataURL = whiteCanvas.toDataURL('image/jpeg', 0.92);
-                    } else {
-                    outDataURL = snap.toDataURL('image/png');
+                        exportCtx.fillStyle = '#ffffff';
+                        exportCtx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                     }
 
+                    // Draw the main canvas (room image and measurement lines)
+                    exportCtx.drawImage(this.canvas, 0, 0);
+
+                    // Draw artwork with proper 3D rotation if it exists
+                    if (this.artworkImage) {
+                        this.drawArtworkWith3DRotation(exportCtx);
+                    }
+
+                    const dataURL = exportCanvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
                     const link = document.createElement('a');
                     link.download = `your-world-our-art.${format === 'jpg' ? 'jpg' : 'png'}`;
-                    link.href = outDataURL;
+                    link.href = dataURL;
                     link.click();
-
+                    
                     this.showStatus(`Image exported as ${format.toUpperCase()}!`, 'success');
-                } catch (err) {
-                    console.error(err);
+                } catch (error) {
+                    console.error('Export error:', error);
                     this.showStatus('Export failed. Please try again.', 'error');
                 }
             }
 
+            drawArtworkWith3DRotation(ctx) {
+                if (!this.artworkImage) return;
 
+                ctx.save();
+                
+                // Calculate artwork center
+                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
+                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+                
+                // Move to center point
+                ctx.translate(centerX, centerY);
+                
+                // Convert rotations to radians
+                const xRad = (this.artworkRotation.x * Math.PI) / 180;
+                const yRad = (this.artworkRotation.y * Math.PI) / 180;
+                const zRad = (this.artworkRotation.z * Math.PI) / 180;
+                
+                // Apply 3D rotation matrix calculations
+                // For proper 3D effect, we need to simulate perspective projection
+                const perspective = 500; // Same as CSS perspective value
+                
+                // Calculate 3D rotation matrix components
+                const cosX = Math.cos(xRad);
+                const sinX = Math.sin(xRad);
+                const cosY = Math.cos(yRad);
+                const sinY = Math.sin(yRad);
+                const cosZ = Math.cos(zRad);
+                const sinZ = Math.sin(zRad);
+                
+                // Combined rotation matrix (Z * Y * X order, same as CSS)
+                const m11 = cosY * cosZ;
+                const m12 = -cosY * sinZ;
+                const m13 = sinY;
+                
+                const m21 = cosX * sinZ + sinX * sinY * cosZ;
+                const m22 = cosX * cosZ - sinX * sinY * sinZ;
+                const m23 = -sinX * cosY;
+                
+                const m31 = sinX * sinZ - cosX * sinY * cosZ;
+                const m32 = sinX * cosZ + cosX * sinY * sinZ;
+                const m33 = cosX * cosY;
+                
+                // Apply perspective projection (simplified)
+                const perspectiveScale = perspective / (perspective + m13 * 100);
+                
+                // Apply the 2D projection of 3D rotation
+                ctx.transform(
+                    m11 * perspectiveScale,  // x scale and skew
+                    m21 * perspectiveScale,  // x skew
+                    m12 * perspectiveScale,  // y skew  
+                    m22 * perspectiveScale,  // y scale
+                    0,                       // x translation
+                    0                        // y translation
+                );
+                
+                // Apply additional Y-axis foreshortening for better 3D effect
+                const yForeshorten = Math.abs(cosY);
+                if (yForeshorten < 1) {
+                    ctx.transform(yForeshorten, 0, 0, 1, 0, 0);
+                }
+                
+                // Draw the artwork centered at origin
+                ctx.drawImage(
+                    this.artworkImage,
+                    -this.artworkSize.width / 2,
+                    -this.artworkSize.height / 2,
+                    this.artworkSize.width,
+                    this.artworkSize.height
+                );
+                
+                ctx.restore();
+            }
 
             async shareImage() {
                 if (!this.roomImage) {
@@ -966,19 +1038,22 @@
                 try {
                     this.showStatus('Generating image for sharing...', 'info');
                     
-                    // Use html2canvas to capture the canvas container with proper 3D rotations
-                    const canvasContainer = document.querySelector('.canvas-container');
-                    const canvas = await html2canvas(canvasContainer, {
-                        backgroundColor: null,
-                        scale: 1,
-                        logging: false,
-                        useCORS: true,
-                        allowTaint: true,
-                        width: canvasContainer.offsetWidth,
-                        height: canvasContainer.offsetHeight
-                    });
+                    // Create share canvas with proper 3D rotation rendering
+                    const shareCanvas = document.createElement('canvas');
+                    const shareCtx = shareCanvas.getContext('2d');
+                    
+                    shareCanvas.width = this.canvas.width;
+                    shareCanvas.height = this.canvas.height;
 
-                    canvas.toBlob((blob) => {
+                    // Draw the main canvas (room image and measurement lines)
+                    shareCtx.drawImage(this.canvas, 0, 0);
+
+                    // Draw artwork with proper 3D rotation if it exists
+                    if (this.artworkImage) {
+                        this.drawArtworkWith3DRotation(shareCtx);
+                    }
+
+                    shareCanvas.toBlob((blob) => {
                         if (navigator.share && navigator.canShare({ files: [blob] })) {
                             const file = new File([blob], 'your-world-our-art.png', { type: 'image/png' });
                             navigator.share({
