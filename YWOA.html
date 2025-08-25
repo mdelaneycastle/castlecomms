@@ -879,24 +879,30 @@
                 }
 
                 try {
-                    // Use html2canvas to capture the actual visual display including CSS transforms
-                    const { default: html2canvas } = await import('https://cdn.skypack.dev/html2canvas');
-                    
-                    // Hide the measurement points during capture
-                    const measurementElements = document.querySelectorAll('.point-marker, .measurement-line, .measurement-text');
-                    measurementElements.forEach(el => el.style.display = 'none');
-                    
-                    const canvas = await html2canvas(document.querySelector('.canvas-container'), {
-                        useCORS: true,
-                        backgroundColor: null,
-                        scale: 2, // Higher quality
-                        logging: false
-                    });
-                    
-                    // Restore measurement elements
-                    measurementElements.forEach(el => el.style.display = '');
+                    // Create a composite canvas that manually draws the rotated artwork
+                    const exportCanvas = document.createElement('canvas');
+                    const exportCtx = exportCanvas.getContext('2d');
+                    exportCanvas.width = this.canvas.width;
+                    exportCanvas.height = this.canvas.height;
 
-                    const dataURL = canvas.toDataURL(`image/${format}`, 0.9);
+                    // Draw the main canvas (room image and measurement lines)
+                    exportCtx.drawImage(this.canvas, 0, 0);
+
+                    // Manually draw the rotated artwork if it exists
+                    if (this.artworkImage && this.artworkRotation !== 0) {
+                        this.drawRotatedArtwork(exportCtx);
+                    } else if (this.artworkImage) {
+                        // Draw normal artwork without rotation
+                        exportCtx.drawImage(
+                            this.artworkImage,
+                            this.artworkPosition.x,
+                            this.artworkPosition.y,
+                            this.artworkSize.width,
+                            this.artworkSize.height
+                        );
+                    }
+
+                    const dataURL = exportCanvas.toDataURL(`image/${format}`, 0.9);
                     const link = document.createElement('a');
                     link.download = `your-world-our-art.${format}`;
                     link.href = dataURL;
@@ -909,6 +915,44 @@
                 }
             }
 
+            drawRotatedArtwork(ctx) {
+                if (!this.artworkImage) return;
+
+                ctx.save();
+                
+                // Calculate artwork center
+                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
+                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+                
+                // Move to center point
+                ctx.translate(centerX, centerY);
+                
+                // Apply Y-axis rotation with perspective effect
+                const rotationRad = (this.artworkRotation * Math.PI) / 180;
+                const cosAngle = Math.cos(rotationRad);
+                
+                // Apply 2D transform that simulates 3D rotateY perspective effect
+                ctx.transform(
+                    cosAngle,     // Horizontal scaling (foreshortening)
+                    0,           // Vertical skew
+                    0,           // Horizontal skew
+                    1,           // Vertical scaling (unchanged)
+                    0,           // Horizontal translation
+                    0            // Vertical translation
+                );
+                
+                // Draw the artwork centered at origin
+                ctx.drawImage(
+                    this.artworkImage,
+                    -this.artworkSize.width / 2,
+                    -this.artworkSize.height / 2,
+                    this.artworkSize.width,
+                    this.artworkSize.height
+                );
+                
+                ctx.restore();
+            }
+
             async shareImage() {
                 if (!this.roomImage) {
                     this.showStatus('No room image to share.', 'error');
@@ -916,24 +960,30 @@
                 }
 
                 try {
-                    // Use html2canvas to capture the actual visual display including CSS transforms
-                    const { default: html2canvas } = await import('https://cdn.skypack.dev/html2canvas');
-                    
-                    // Hide the measurement points during capture
-                    const measurementElements = document.querySelectorAll('.point-marker, .measurement-line, .measurement-text');
-                    measurementElements.forEach(el => el.style.display = 'none');
-                    
-                    const canvas = await html2canvas(document.querySelector('.canvas-container'), {
-                        useCORS: true,
-                        backgroundColor: null,
-                        scale: 2, // Higher quality
-                        logging: false
-                    });
-                    
-                    // Restore measurement elements
-                    measurementElements.forEach(el => el.style.display = '');
+                    // Create a composite canvas that manually draws the rotated artwork
+                    const exportCanvas = document.createElement('canvas');
+                    const exportCtx = exportCanvas.getContext('2d');
+                    exportCanvas.width = this.canvas.width;
+                    exportCanvas.height = this.canvas.height;
 
-                    canvas.toBlob((blob) => {
+                    // Draw the main canvas (room image and measurement lines)
+                    exportCtx.drawImage(this.canvas, 0, 0);
+
+                    // Manually draw the rotated artwork if it exists
+                    if (this.artworkImage && this.artworkRotation !== 0) {
+                        this.drawRotatedArtwork(exportCtx);
+                    } else if (this.artworkImage) {
+                        // Draw normal artwork without rotation
+                        exportCtx.drawImage(
+                            this.artworkImage,
+                            this.artworkPosition.x,
+                            this.artworkPosition.y,
+                            this.artworkSize.width,
+                            this.artworkSize.height
+                        );
+                    }
+
+                    exportCanvas.toBlob((blob) => {
                         if (navigator.share && navigator.canShare({ files: [blob] })) {
                             const file = new File([blob], 'your-world-our-art.png', { type: 'image/png' });
                             navigator.share({
