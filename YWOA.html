@@ -872,46 +872,112 @@
                 // No canvas drawing needed for artwork
             }
 
-            exportImage(format) {
+            async exportImage(format) {
                 if (!this.roomImage) {
                     this.showStatus('No room image to export.', 'error');
                     return;
                 }
 
-                const dataURL = this.canvas.toDataURL(`image/${format}`, 0.9);
-                const link = document.createElement('a');
-                link.download = `your-world-our-art.${format}`;
-                link.href = dataURL;
-                link.click();
-                
-                this.showStatus(`Image exported as ${format.toUpperCase()}!`, 'success');
+                try {
+                    // Create a new canvas that combines both the room and artwork
+                    const exportCanvas = document.createElement('canvas');
+                    const exportCtx = exportCanvas.getContext('2d');
+                    exportCanvas.width = this.canvas.width;
+                    exportCanvas.height = this.canvas.height;
+
+                    // Draw the room image and measurement elements from the main canvas
+                    exportCtx.drawImage(this.canvas, 0, 0);
+
+                    // Draw the artwork if it exists
+                    if (this.artworkImage && this.artworkElement) {
+                        // Get the current rotation
+                        const rotationRad = (this.artworkRotation * Math.PI) / 180;
+                        const cosAngle = Math.cos(rotationRad);
+                        
+                        // Calculate the apparent width after rotation (like CSS rotateY)
+                        const apparentWidth = this.artworkSize.width * Math.abs(cosAngle);
+                        
+                        // Draw the artwork with perspective scaling
+                        exportCtx.save();
+                        exportCtx.drawImage(
+                            this.artworkImage,
+                            this.artworkPosition.x + (this.artworkSize.width - apparentWidth) / 2,
+                            this.artworkPosition.y,
+                            apparentWidth,
+                            this.artworkSize.height
+                        );
+                        exportCtx.restore();
+                    }
+
+                    const dataURL = exportCanvas.toDataURL(`image/${format}`, 0.9);
+                    const link = document.createElement('a');
+                    link.download = `your-world-our-art.${format}`;
+                    link.href = dataURL;
+                    link.click();
+                    
+                    this.showStatus(`Image exported as ${format.toUpperCase()}!`, 'success');
+                } catch (error) {
+                    console.error('Export error:', error);
+                    this.showStatus('Export failed. Please try again.', 'error');
+                }
             }
 
-            shareImage() {
+            async shareImage() {
                 if (!this.roomImage) {
                     this.showStatus('No room image to share.', 'error');
                     return;
                 }
 
-                this.canvas.toBlob((blob) => {
-                    if (navigator.share && navigator.canShare({ files: [blob] })) {
-                        const file = new File([blob], 'your-world-our-art.png', { type: 'image/png' });
-                        navigator.share({
-                            title: 'Your World, Our Art',
-                            text: 'Check out how this artwork looks in my space!',
-                            files: [file]
-                        });
-                    } else {
-                        // Fallback: copy to clipboard
-                        navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': blob })
-                        ]).then(() => {
-                            this.showStatus('Image copied to clipboard!', 'success');
-                        }).catch(() => {
-                            this.showStatus('Sharing not supported. Use export instead.', 'error');
-                        });
+                try {
+                    // Create export canvas with artwork included
+                    const exportCanvas = document.createElement('canvas');
+                    const exportCtx = exportCanvas.getContext('2d');
+                    exportCanvas.width = this.canvas.width;
+                    exportCanvas.height = this.canvas.height;
+
+                    // Draw the room image and measurement elements
+                    exportCtx.drawImage(this.canvas, 0, 0);
+
+                    // Draw the artwork if it exists
+                    if (this.artworkImage && this.artworkElement) {
+                        const rotationRad = (this.artworkRotation * Math.PI) / 180;
+                        const cosAngle = Math.cos(rotationRad);
+                        const apparentWidth = this.artworkSize.width * Math.abs(cosAngle);
+                        
+                        exportCtx.save();
+                        exportCtx.drawImage(
+                            this.artworkImage,
+                            this.artworkPosition.x + (this.artworkSize.width - apparentWidth) / 2,
+                            this.artworkPosition.y,
+                            apparentWidth,
+                            this.artworkSize.height
+                        );
+                        exportCtx.restore();
                     }
-                });
+
+                    exportCanvas.toBlob((blob) => {
+                        if (navigator.share && navigator.canShare({ files: [blob] })) {
+                            const file = new File([blob], 'your-world-our-art.png', { type: 'image/png' });
+                            navigator.share({
+                                title: 'Your World, Our Art',
+                                text: 'Check out how this artwork looks in my space!',
+                                files: [file]
+                            });
+                        } else {
+                            // Fallback: copy to clipboard
+                            navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]).then(() => {
+                                this.showStatus('Image copied to clipboard!', 'success');
+                            }).catch(() => {
+                                this.showStatus('Sharing not supported. Use export instead.', 'error');
+                            });
+                        }
+                    });
+                } catch (error) {
+                    console.error('Share error:', error);
+                    this.showStatus('Share failed. Please try again.', 'error');
+                }
             }
 
             showStatus(message, type) {
