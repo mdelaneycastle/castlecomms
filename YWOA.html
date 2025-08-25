@@ -467,6 +467,7 @@
         <div class="export-section">
             <div class="export-options">
                 <button class="btn" id="exportJPG">📸 Export as JPG</button>
+                <button class="btn" id="exportScreenshot">📸 Quick Screenshot (exact)</button>
                 <button class="btn" id="exportPNG">🖼️ Export as PNG</button>
                 <button class="btn" id="shareImage">📤 Share Image</button>
             </div>
@@ -955,6 +956,103 @@
                     this.showStatus('Export failed. Please try again.', 'error');
                 }
             }
+
+            // Helper: download a canvas as PNG/JPG
+function downloadCanvas(canvas, filename, type="image/png", quality=0.92){
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL(type, quality);
+  link.click();
+}
+
+// Exact screenshot export, cropped to .canvas-container
+async function exportExactScreenshot({format="png"} = {}) {
+  const container = document.querySelector('.canvas-container');
+  if (!container) return;
+
+  // 1) Ask user to share the current tab
+  const stream = await navigator.mediaDevices.getDisplayMedia({
+    video: {
+      displaySurface: "browser",
+      preferCurrentTab: true
+    },
+    audio: false
+  });
+
+  try {
+    const track = stream.getVideoTracks()[0];
+    // Create a video element to render the captured tab
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.playsInline = true;
+    await video.play();
+
+    // Wait for the video to have dimensions
+    await new Promise(r => {
+      if (video.readyState >= 2) r();
+      else video.onloadedmetadata = r;
+    });
+
+    // 2) Draw a full-frame of the tab into a canvas
+    const fullW = video.videoWidth;
+    const fullH = video.videoHeight;
+
+    const fullCanvas = document.createElement('canvas');
+    fullCanvas.width = fullW;
+    fullCanvas.height = fullH;
+    const fctx = fullCanvas.getContext('2d');
+
+    // Draw one frame
+    fctx.drawImage(video, 0, 0, fullW, fullH);
+
+    // 3) Compute crop rect for the container in *device pixels*
+    const dpr = window.devicePixelRatio || 1;
+    const rect = container.getBoundingClientRect();
+
+    const cropX = Math.round(rect.left * dpr);
+    const cropY = Math.round(rect.top * dpr);
+    const cropW = Math.round(rect.width * dpr);
+    const cropH = Math.round(rect.height * dpr);
+
+    // 4) Copy cropped region to an output canvas
+    const outCanvas = document.createElement('canvas');
+    outCanvas.width = cropW;
+    outCanvas.height = cropH;
+    const octx = outCanvas.getContext('2d');
+
+    octx.drawImage(
+      fullCanvas,
+      cropX, cropY, cropW, cropH,   // src rect (device pixels)
+      0, 0, cropW, cropH            // dst rect
+    );
+
+    // 5) JPEG needs a white background if you want no transparency
+    if (format.toLowerCase() === 'jpg' || format.toLowerCase() === 'jpeg') {
+      const whiteBG = document.createElement('canvas');
+      whiteBG.width = cropW;
+      whiteBG.height = cropH;
+      const wctx = whiteBG.getContext('2d');
+      wctx.fillStyle = '#fff';
+      wctx.fillRect(0, 0, cropW, cropH);
+      wctx.drawImage(outCanvas, 0, 0);
+      downloadCanvas(whiteBG, `your-world-our-art.jpg`, 'image/jpeg', 0.92);
+    } else {
+      downloadCanvas(outCanvas, `your-world-our-art.png`, 'image/png');
+    }
+  } finally {
+    // Always stop the capture
+    stream.getTracks().forEach(t => t.stop());
+  }
+}
+
+// Wire up the new button
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('exportScreenshot');
+  if (btn) {
+    btn.addEventListener('click', () => exportExactScreenshot({format: 'png'}));
+  }
+});
+
 
             drawArtworkWith3DRotation(ctx) {
                 if (!this.artworkImage) return;
