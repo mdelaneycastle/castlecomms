@@ -622,10 +622,17 @@ const sendMessageNotification = onDocumentCreated(
 
       for (const recipientEmail of recipients) {
         try {
+          // Clean email if it contains mailto:
+          let cleanEmail = recipientEmail;
+          if (cleanEmail && cleanEmail.startsWith('mailto:')) {
+            cleanEmail = cleanEmail.replace('mailto:', '');
+            logger.info(`🧹 Cleaned recipient email from mailto: ${cleanEmail}`);
+          }
+          
           // Find user by email to get their UID
           const { getAuth } = require("firebase-admin/auth");
           const auth = getAuth();
-          const userRecord = await auth.getUserByEmail(recipientEmail);
+          const userRecord = await auth.getUserByEmail(cleanEmail);
           
           // Get their FCM tokens from the database
           const tokensSnapshot = await database.ref(`users/${userRecord.uid}/fcmTokens`).once('value');
