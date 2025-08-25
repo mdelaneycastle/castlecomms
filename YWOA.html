@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your World, Our Art - Visualize Art in Your Space</title>
+    <link rel="stylesheet" href="style.css?v=20250813_din_font_update" />
     <style>
-        * {
+        .ywoa * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -54,14 +55,14 @@
             letter-spacing: var(--letter-spacing-normal);
         }
 
-        .container {
+        .ywoa .ywoa-container {
             max-width: 1400px;
             margin: 20px auto;
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
-            margin-top: 100px;
+            margin-top: 80px;
         }
         
         /* Adjust layout for header/sidebar integration */
@@ -69,96 +70,15 @@
             padding: 20px;
         }
 
-        /* Fix header/sidebar conflicts - YWOA specific overrides */
-        #header-container,
-        #header-container * {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-            letter-spacing: normal !important;
-        }
 
-        /* Reset conflicting styles for header */
-        #header-container .header {
-            background: none !important;
-            color: initial !important;
-            padding: 0 !important;
-            text-align: initial !important;
-        }
-
-        #header-container h1 {
-            background: initial !important;
-            color: initial !important;
-            font-size: initial !important;
-            margin: initial !important;
-            padding: initial !important;
-        }
-
-        #header-container p {
-            color: initial !important;
-            font-size: initial !important;
-            margin: initial !important;
-        }
-
-        /* Reset button styles for header/sidebar */
-        #header-container button,
-        #sidebar-container button {
-            background: initial !important;
-            border: initial !important;
-            color: initial !important;
-            padding: initial !important;
-            border-radius: initial !important;
-            font-family: inherit !important;
-            cursor: pointer !important;
-        }
-
-        /* Reset input styles for header */
-        #header-container input {
-            background: initial !important;
-            border: initial !important;
-            color: initial !important;
-            padding: initial !important;
-            border-radius: initial !important;
-        }
-
-        /* Reset any conflicting container styles */
-        #header-container .container {
-            max-width: none !important;
-            margin: 0 !important;
-            background: transparent !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            overflow: visible !important;
-        }
-
-        /* Additional fixes for header/sidebar positioning and display */
-        #header-container {
-            position: relative !important;
-            z-index: 1000 !important;
-        }
-
-        #sidebar-container {
-            position: relative !important;
-            z-index: 999 !important;
-        }
-
-        /* Fix any text overflow or positioning issues */
-        #header-container * {
-            box-sizing: border-box !important;
-        }
-
-        /* Ensure sidebar functionality works */
-        #sidebar-container .sidebar {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-        }
-
-        /* YWOA specific header - make it more specific to avoid conflicts */
-        .container .header {
+        .ywoa .ywoa-header {
             background: var(--primary-gradient);
             color: white;
             padding: 30px;
             text-align: center;
         }
 
-        .container .header h1 {
+        .ywoa .ywoa-header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
             font-weight: 500;
@@ -166,29 +86,24 @@
             letter-spacing: var(--letter-spacing-headers);
         }
 
-        .container .header p {
+        .ywoa .ywoa-header p {
             opacity: 0.9;
             font-size: 1.1rem;
         }
 
-        /* Scope all YWOA styles to prevent conflicts with header/sidebar */
-        main#main .container {
-            /* All YWOA styles are now scoped to main#main .container */
-        }
-
-        .main-content {
+        .ywoa .main-content {
             display: flex;
             min-height: 700px;
         }
 
-        .controls {
+        .ywoa .controls {
             width: 350px;
             background: var(--card-background);
             padding: 30px;
             border-right: 1px solid rgba(216, 209, 197, 0.3);
         }
 
-        .control-group {
+        .ywoa .control-group {
             margin-bottom: 30px;
         }
 
@@ -201,7 +116,7 @@
             letter-spacing: var(--letter-spacing-headers);
         }
 
-        .upload-area {
+        .ywoa .upload-area {
             border: 2px dashed var(--accent-color);
             border-radius: var(--border-radius);
             padding: 20px;
@@ -234,14 +149,14 @@
             cursor: pointer;
         }
 
-        .upload-preview {
+        .ywoa .upload-preview {
             max-width: 100%;
             max-height: 80px;
             border-radius: 5px;
             margin-top: 10px;
         }
 
-        .measurement-input {
+        .ywoa .measurement-input {
             display: flex;
             gap: 10px;
             margin-top: 15px;
@@ -265,7 +180,7 @@
             font-family: var(--font-primary);
         }
 
-        .btn {
+        .ywoa .btn {
             background: var(--primary-gradient);
             color: white;
             border: none;
@@ -293,7 +208,7 @@
             box-shadow: var(--shadow-subtle);
         }
 
-        .canvas-container {
+        .ywoa .canvas-container {
             flex: 1;
             position: relative;
             background: var(--card-background);
@@ -307,7 +222,7 @@
             object-fit: contain;
         }
 
-        .instructions {
+        .ywoa .instructions {
             position: absolute;
             top: 20px;
             left: 20px;
@@ -323,7 +238,7 @@
             box-shadow: var(--shadow-light);
         }
 
-        .point-marker {
+        .ywoa .point-marker {
             position: absolute;
             width: 12px;
             height: 12px;
@@ -335,7 +250,7 @@
             box-shadow: var(--shadow-light);
         }
 
-        .measurement-line {
+        .ywoa .measurement-line {
             position: absolute;
             height: 2px;
             background: var(--secondary-color);
@@ -343,7 +258,7 @@
             z-index: 9;
         }
 
-        .measurement-text {
+        .ywoa .measurement-text {
             position: absolute;
             background: var(--secondary-color);
             color: white;
@@ -356,13 +271,13 @@
             z-index: 11;
         }
 
-        .artwork-container {
+        .ywoa .artwork-container {
             position: absolute;
             cursor: move;
             z-index: 8;
         }
 
-        .artwork-shadow {
+        .ywoa .artwork-shadow {
             position: absolute;
             background: rgba(0, 0, 0, 0.3);
             filter: blur(3px);
@@ -370,20 +285,20 @@
             z-index: 7;
         }
 
-        .export-section {
+        .ywoa .export-section {
             padding: 20px 30px;
             background: var(--card-background);
             border-top: 1px solid rgba(216, 209, 197, 0.3);
         }
 
-        .export-options {
+        .ywoa .export-options {
             display: flex;
             gap: 15px;
             align-items: center;
             justify-content: center;
         }
 
-        .status {
+        .ywoa .status {
             padding: 10px;
             border-radius: 5px;
             margin-top: 15px;
@@ -408,7 +323,7 @@
             border: 1px solid var(--accent-color);
         }
 
-        .rotation-control {
+        .ywoa .rotation-control {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -460,7 +375,7 @@
             font-size: 14px;
         }
 
-        .artwork-element {
+        .ywoa .artwork-element {
             position: absolute;
             background-size: cover;
             background-position: center;
@@ -480,9 +395,9 @@
 <div id="sidebar-container"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-<main id="main">
-    <div class="container">
-        <div class="header">
+<main id="main" class="ywoa">
+    <div class="ywoa-container">
+        <div class="ywoa-header">
             <h1>Your World, Our Art</h1>
             <p>Visualize artwork in your space with realistic scaling and positioning</p>
         </div>
