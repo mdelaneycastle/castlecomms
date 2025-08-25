@@ -1,10 +1,13 @@
 const { onRequest } = require("firebase-functions/v2/https");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const logger = require("firebase-functions/logger");
 const cors = require("cors");
 const path = require("path");
 const { initializeApp } = require("firebase-admin/app");
 const { getDatabase } = require("firebase-admin/database");
 const { getStorage } = require("firebase-admin/storage");
+const { getFirestore } = require("firebase-admin/firestore");
+const { getMessaging } = require("firebase-admin/messaging");
 
 // Initialize Firebase Admin
 initializeApp();
@@ -573,6 +576,189 @@ const healthCheck = onRequest({ region: "europe-west1" }, (req, res) => {
   });
 });
 
+/**
+ * Automatic push notification sender for new chat messages
+ * Triggers when a new document is created in the chat-messages collection
+ */
+const sendMessageNotification = onDocumentCreated(
+  { 
+    document: "chat-messages/{messageId}",
+    region: "europe-west1" 
+  },
+  async (event) => {
+    try {
+      const messageData = event.data.data();
+      const messageId = event.params.messageId;
+      
+      logger.info(`New message detected: ${messageId}`, messageData);
+
+      // Get the chat details to find participants
+      const firestore = getFirestore();
+      const chatDoc = await firestore.collection('chats').doc(messageData.chatId).get();
+      
+      if (!chatDoc.exists) {
+        logger.error(`Chat not found: ${messageData.chatId}`);
+        return;
+      }
+
+      const chatData = chatDoc.data();
+      const participants = chatData.participants || [];
+      
+      // Find recipients (all participants except the sender)
+      const recipients = participants.filter(email => email !== messageData.senderEmail);
+      
+      if (recipients.length === 0) {
+        logger.info('No recipients to notify');
+        return;
+      }
+
+      logger.info(`Found ${recipients.length} recipients to notify:`, recipients);
+
+      // Get FCM tokens for all recipients from Realtime Database
+      const database = getDatabase();
+      const messaging = getMessaging();
+      const tokens = [];
+
+      for (const recipientEmail of recipients) {
+        try {
+          // Find user by email to get their UID
+          const { getAuth } = require("firebase-admin/auth");
+          const auth = getAuth();
+          const userRecord = await auth.getUserByEmail(recipientEmail);
+          
+          // Get their FCM tokens from the database
+          const tokensSnapshot = await database.ref(`users/${userRecord.uid}/fcmTokens`).once('value');
+          const userTokens = tokensSnapshot.val();
+          
+          if (userTokens) {
+            // Add all valid tokens for this user
+            Object.keys(userTokens).forEach(tokenKey => {
+              if (userTokens[tokenKey].token) {
+                tokens.push({
+                  token: userTokens[tokenKey].token,
+                  recipientEmail: recipientEmail,
+                  recipientUid: userRecord.uid
+                });
+              }
+            });
+          }
+        } catch (error) {
+          logger.warn(`Could not get tokens for ${recipientEmail}:`, error.message);
+        }
+      }
+
+      if (tokens.length === 0) {
+        logger.info('No FCM tokens found for recipients');
+        return;
+      }
+
+      logger.info(`Found ${tokens.length} FCM tokens to send notifications to`);
+
+      // Prepare notification payload
+      const notificationTitle = `New message from ${messageData.senderName}`;
+      const notificationBody = messageData.message.length > 100 
+        ? messageData.message.substring(0, 97) + '...'
+        : messageData.message;
+
+      const payload = {
+        notification: {
+          title: notificationTitle,
+          body: notificationBody,
+          icon: '/icon.png'
+        },
+        data: {
+          chatId: messageData.chatId,
+          chatName: chatData.name || 'Chat',
+          messageId: messageId,
+          senderEmail: messageData.senderEmail,
+          senderName: messageData.senderName,
+          timestamp: messageData.timestamp ? messageData.timestamp.toDate().toISOString() : new Date().toISOString(),
+          url: '/messages.html'
+        },
+        android: {
+          notification: {
+            icon: '/icon.png',
+            color: '#6264a7',
+            sound: 'default',
+            clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+          },
+          priority: 'high'
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: 'default',
+              badge: 1
+            }
+          },
+          headers: {
+            'apns-priority': '10'
+          }
+        },
+        webpush: {
+          headers: {
+            'Urgency': 'high'
+          },
+          notification: {
+            icon: '/icon.png',
+            badge: '/icon.png',
+            requireInteraction: true,
+            tag: `chat-${messageData.chatId}`,
+            actions: [
+              {
+                action: 'open',
+                title: 'Open Chat',
+                icon: '/icon.png'
+              },
+              {
+                action: 'dismiss',
+                title: 'Dismiss'
+              }
+            ]
+          },
+          fcmOptions: {
+            link: '/messages.html'
+          }
+        }
+      };
+
+      // Send notifications to all tokens
+      const messages = tokens.map(tokenData => ({
+        ...payload,
+        token: tokenData.token
+      }));
+
+      const response = await messaging.sendEach(messages);
+      
+      logger.info(`Notification batch sent. Success count: ${response.successCount}, Failure count: ${response.failureCount}`);
+
+      // Log any failed tokens (they might be invalid/expired)
+      if (response.failureCount > 0) {
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            logger.warn(`Failed to send to token ${tokens[idx].recipientEmail}: ${resp.error?.message}`);
+            
+            // Remove invalid tokens from database
+            if (resp.error?.code === 'messaging/registration-token-not-registered' || 
+                resp.error?.code === 'messaging/invalid-registration-token') {
+              
+              database.ref(`users/${tokens[idx].recipientUid}/fcmTokens/${tokens[idx].token}`)
+                .remove()
+                .then(() => logger.info(`Removed invalid token for ${tokens[idx].recipientEmail}`))
+                .catch(err => logger.warn(`Failed to remove invalid token: ${err.message}`));
+            }
+          }
+        });
+      }
+
+      logger.info(`Notification processing completed for message ${messageId}`);
+
+    } catch (error) {
+      logger.error('Error sending message notification:', error);
+    }
+  }
+);
+
 module.exports = {
   uploadToGallery,
   deleteFromGallery,
@@ -580,5 +766,6 @@ module.exports = {
   createUserHttp,
   updateUserHttp,
   deleteUserHttp,
-  healthCheck
+  healthCheck,
+  sendMessageNotification
 };

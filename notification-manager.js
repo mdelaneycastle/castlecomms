@@ -141,6 +141,29 @@ class NotificationManager {
       
       // Show a custom notification when the app is in foreground
       this.showForegroundNotification(payload);
+      
+      // Update page title with notification
+      if (payload.data && payload.data.senderName) {
+        document.title = `💬 ${payload.data.senderName} - Castle Comms`;
+        
+        // Reset title after 5 seconds
+        setTimeout(() => {
+          document.title = 'Chat - Castle Comms';
+        }, 5000);
+      }
+      
+      // Play notification sound (if user hasn't disabled it)
+      if ('Audio' in window) {
+        try {
+          const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvGIeBDqE0fPTfiMFl2+z9seGQQgZZ7zx7Z9rFAw6kdXz0HwqBS12z+/eizcHi2mq88KBPgcYZ7zx4ZVpEwk5kdXzzoEtBSR3z+/igDEHi2uq9MaERQgXZrfyy3soBSt4ze7ciC4GhGe38sh4Kgh4');
+          audio.volume = 0.3;
+          audio.play().catch(() => {
+            // Ignore audio play errors (browser restrictions)
+          });
+        } catch (e) {
+          // Ignore audio errors
+        }
+      }
     });
   }
 
