@@ -110,7 +110,8 @@ window.sharedComponents = {
       'news-mentions.html': 'NEWS MENTIONS',
       'manual.html': 'MANUAL',
       'communications.html': 'COMMUNICATIONS',
-      'admin.html': 'ADMIN'
+      'admin.html': 'ADMIN',
+      'YWOA.html': 'YOUR WORLD, OUR ART'
     };
 
     pageTitleElement.textContent = titles[filename] || 'CASTLE COMMS';
