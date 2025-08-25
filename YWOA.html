@@ -376,6 +376,7 @@
         }
 
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -916,30 +917,22 @@
                 }
 
                 try {
-                    // Create a composite canvas that manually draws the rotated artwork
-                    const exportCanvas = document.createElement('canvas');
-                    const exportCtx = exportCanvas.getContext('2d');
-                    exportCanvas.width = this.canvas.width;
-                    exportCanvas.height = this.canvas.height;
+                    this.showStatus('Generating export image...', 'info');
+                    
+                    // Use html2canvas to capture the canvas container with proper 3D rotations
+                    const canvasContainer = document.querySelector('.canvas-container');
+                    const canvas = await html2canvas(canvasContainer, {
+                        backgroundColor: null,
+                        scale: 1,
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true,
+                        width: canvasContainer.offsetWidth,
+                        height: canvasContainer.offsetHeight
+                    });
 
-                    // Draw the main canvas (room image and measurement lines)
-                    exportCtx.drawImage(this.canvas, 0, 0);
-
-                    // Manually draw the rotated artwork if it exists
-                    if (this.artworkImage && (this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0)) {
-                        this.drawRotatedArtwork(exportCtx);
-                    } else if (this.artworkImage) {
-                        // Draw normal artwork without rotation
-                        exportCtx.drawImage(
-                            this.artworkImage,
-                            this.artworkPosition.x,
-                            this.artworkPosition.y,
-                            this.artworkSize.width,
-                            this.artworkSize.height
-                        );
-                    }
-
-                    const dataURL = exportCanvas.toDataURL(`image/${format}`, 0.9);
+                    // Convert to the requested format
+                    const dataURL = canvas.toDataURL(`image/${format}`, 0.9);
                     const link = document.createElement('a');
                     link.download = `your-world-our-art.${format}`;
                     link.href = dataURL;
@@ -952,52 +945,6 @@
                 }
             }
 
-            drawRotatedArtwork(ctx) {
-                if (!this.artworkImage) return;
-
-                ctx.save();
-                
-                // Calculate artwork center
-                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
-                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
-                
-                // Move to center point
-                ctx.translate(centerX, centerY);
-                
-                // Apply rotations - simplified 2D approximation of 3D transforms
-                // Note: Canvas 2D can't do true 3D, so this is a basic approximation
-                
-                // Z-axis rotation (standard 2D rotation)
-                if (this.artworkRotation.z !== 0) {
-                    const zRotationRad = (this.artworkRotation.z * Math.PI) / 180;
-                    ctx.rotate(zRotationRad);
-                }
-                
-                // Y-axis rotation (perspective foreshortening effect)
-                if (this.artworkRotation.y !== 0) {
-                    const yRotationRad = (this.artworkRotation.y * Math.PI) / 180;
-                    const cosAngle = Math.cos(yRotationRad);
-                    ctx.transform(cosAngle, 0, 0, 1, 0, 0);
-                }
-                
-                // X-axis rotation (vertical foreshortening effect)  
-                if (this.artworkRotation.x !== 0) {
-                    const xRotationRad = (this.artworkRotation.x * Math.PI) / 180;
-                    const cosAngle = Math.cos(xRotationRad);
-                    ctx.transform(1, 0, 0, cosAngle, 0, 0);
-                }
-                
-                // Draw the artwork centered at origin
-                ctx.drawImage(
-                    this.artworkImage,
-                    -this.artworkSize.width / 2,
-                    -this.artworkSize.height / 2,
-                    this.artworkSize.width,
-                    this.artworkSize.height
-                );
-                
-                ctx.restore();
-            }
 
             async shareImage() {
                 if (!this.roomImage) {
@@ -1006,30 +953,21 @@
                 }
 
                 try {
-                    // Create a composite canvas that manually draws the rotated artwork
-                    const exportCanvas = document.createElement('canvas');
-                    const exportCtx = exportCanvas.getContext('2d');
-                    exportCanvas.width = this.canvas.width;
-                    exportCanvas.height = this.canvas.height;
+                    this.showStatus('Generating image for sharing...', 'info');
+                    
+                    // Use html2canvas to capture the canvas container with proper 3D rotations
+                    const canvasContainer = document.querySelector('.canvas-container');
+                    const canvas = await html2canvas(canvasContainer, {
+                        backgroundColor: null,
+                        scale: 1,
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true,
+                        width: canvasContainer.offsetWidth,
+                        height: canvasContainer.offsetHeight
+                    });
 
-                    // Draw the main canvas (room image and measurement lines)
-                    exportCtx.drawImage(this.canvas, 0, 0);
-
-                    // Manually draw the rotated artwork if it exists
-                    if (this.artworkImage && (this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0)) {
-                        this.drawRotatedArtwork(exportCtx);
-                    } else if (this.artworkImage) {
-                        // Draw normal artwork without rotation
-                        exportCtx.drawImage(
-                            this.artworkImage,
-                            this.artworkPosition.x,
-                            this.artworkPosition.y,
-                            this.artworkSize.width,
-                            this.artworkSize.height
-                        );
-                    }
-
-                    exportCanvas.toBlob((blob) => {
+                    canvas.toBlob((blob) => {
                         if (navigator.share && navigator.canShare({ files: [blob] })) {
                             const file = new File([blob], 'your-world-our-art.png', { type: 'image/png' });
                             navigator.share({
