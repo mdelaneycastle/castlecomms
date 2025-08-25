@@ -879,54 +879,24 @@
                 }
 
                 try {
-                    // Create a new canvas that combines both the room and artwork
-                    const exportCanvas = document.createElement('canvas');
-                    const exportCtx = exportCanvas.getContext('2d');
-                    exportCanvas.width = this.canvas.width;
-                    exportCanvas.height = this.canvas.height;
+                    // Use html2canvas to capture the actual visual display including CSS transforms
+                    const { default: html2canvas } = await import('https://cdn.skypack.dev/html2canvas');
+                    
+                    // Hide the measurement points during capture
+                    const measurementElements = document.querySelectorAll('.point-marker, .measurement-line, .measurement-text');
+                    measurementElements.forEach(el => el.style.display = 'none');
+                    
+                    const canvas = await html2canvas(document.querySelector('.canvas-container'), {
+                        useCORS: true,
+                        backgroundColor: null,
+                        scale: 2, // Higher quality
+                        logging: false
+                    });
+                    
+                    // Restore measurement elements
+                    measurementElements.forEach(el => el.style.display = '');
 
-                    // Draw the room image and measurement elements from the main canvas
-                    exportCtx.drawImage(this.canvas, 0, 0);
-
-                    // Draw the artwork if it exists
-                    if (this.artworkImage && this.artworkElement) {
-                        const rotationRad = (this.artworkRotation * Math.PI) / 180;
-                        const cosAngle = Math.cos(rotationRad);
-                        const sinAngle = Math.sin(rotationRad);
-                        
-                        // Apply 3D perspective transform to simulate CSS rotateY
-                        exportCtx.save();
-                        
-                        // Move to artwork center
-                        const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
-                        const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
-                        exportCtx.translate(centerX, centerY);
-                        
-                        // Apply perspective transform matrix (simulating rotateY)
-                        // This creates the foreshortening effect like CSS perspective
-                        const perspectiveScale = 1; // Can be adjusted for stronger/weaker effect
-                        exportCtx.transform(
-                            cosAngle * perspectiveScale,    // horizontal scaling
-                            0,                              // vertical skew
-                            sinAngle * 0.2,                 // slight horizontal skew for 3D effect  
-                            1,                              // vertical scaling (unchanged)
-                            0,                              // horizontal translation
-                            0                               // vertical translation
-                        );
-                        
-                        // Draw artwork centered
-                        exportCtx.drawImage(
-                            this.artworkImage,
-                            -this.artworkSize.width / 2,
-                            -this.artworkSize.height / 2,
-                            this.artworkSize.width,
-                            this.artworkSize.height
-                        );
-                        
-                        exportCtx.restore();
-                    }
-
-                    const dataURL = exportCanvas.toDataURL(`image/${format}`, 0.9);
+                    const dataURL = canvas.toDataURL(`image/${format}`, 0.9);
                     const link = document.createElement('a');
                     link.download = `your-world-our-art.${format}`;
                     link.href = dataURL;
@@ -946,53 +916,24 @@
                 }
 
                 try {
-                    // Create export canvas with artwork included
-                    const exportCanvas = document.createElement('canvas');
-                    const exportCtx = exportCanvas.getContext('2d');
-                    exportCanvas.width = this.canvas.width;
-                    exportCanvas.height = this.canvas.height;
+                    // Use html2canvas to capture the actual visual display including CSS transforms
+                    const { default: html2canvas } = await import('https://cdn.skypack.dev/html2canvas');
+                    
+                    // Hide the measurement points during capture
+                    const measurementElements = document.querySelectorAll('.point-marker, .measurement-line, .measurement-text');
+                    measurementElements.forEach(el => el.style.display = 'none');
+                    
+                    const canvas = await html2canvas(document.querySelector('.canvas-container'), {
+                        useCORS: true,
+                        backgroundColor: null,
+                        scale: 2, // Higher quality
+                        logging: false
+                    });
+                    
+                    // Restore measurement elements
+                    measurementElements.forEach(el => el.style.display = '');
 
-                    // Draw the room image and measurement elements
-                    exportCtx.drawImage(this.canvas, 0, 0);
-
-                    // Draw the artwork if it exists
-                    if (this.artworkImage && this.artworkElement) {
-                        const rotationRad = (this.artworkRotation * Math.PI) / 180;
-                        const cosAngle = Math.cos(rotationRad);
-                        const sinAngle = Math.sin(rotationRad);
-                        
-                        // Apply 3D perspective transform to simulate CSS rotateY
-                        exportCtx.save();
-                        
-                        // Move to artwork center
-                        const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
-                        const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
-                        exportCtx.translate(centerX, centerY);
-                        
-                        // Apply perspective transform matrix (simulating rotateY)
-                        const perspectiveScale = 1;
-                        exportCtx.transform(
-                            cosAngle * perspectiveScale,    // horizontal scaling
-                            0,                              // vertical skew
-                            sinAngle * 0.2,                 // slight horizontal skew for 3D effect  
-                            1,                              // vertical scaling (unchanged)
-                            0,                              // horizontal translation
-                            0                               // vertical translation
-                        );
-                        
-                        // Draw artwork centered
-                        exportCtx.drawImage(
-                            this.artworkImage,
-                            -this.artworkSize.width / 2,
-                            -this.artworkSize.height / 2,
-                            this.artworkSize.width,
-                            this.artworkSize.height
-                        );
-                        
-                        exportCtx.restore();
-                    }
-
-                    exportCanvas.toBlob((blob) => {
+                    canvas.toBlob((blob) => {
                         if (navigator.share && navigator.canShare({ files: [blob] })) {
                             const file = new File([blob], 'your-world-our-art.png', { type: 'image/png' });
                             navigator.share({
