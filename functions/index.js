@@ -671,8 +671,7 @@ const sendMessageNotification = onDocumentCreated(
       const payload = {
         notification: {
           title: notificationTitle,
-          body: notificationBody,
-          icon: '/icon.png'
+          body: notificationBody
         },
         data: {
           chatId: messageData.chatId,
@@ -685,10 +684,8 @@ const sendMessageNotification = onDocumentCreated(
         },
         android: {
           notification: {
-            icon: '/icon.png',
             color: '#6264a7',
-            sound: 'default',
-            clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+            sound: 'default'
           },
           priority: 'high'
         },
