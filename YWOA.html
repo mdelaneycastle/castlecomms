@@ -358,6 +358,14 @@
             font-family: var(--font-primary);
         }
 
+        .rotation-control label {
+            min-width: 60px;
+            font-weight: 500;
+            color: var(--secondary-color);
+            font-family: var(--font-primary);
+            font-size: 14px;
+        }
+
         .artwork-element {
             position: absolute;
             background-size: cover;
@@ -427,12 +435,23 @@
                 </div>
 
                 <div class="control-group">
-                    <h3>5. Artwork Angle</h3>
+                    <h3>5. Artwork Rotation</h3>
                     <div class="rotation-control">
-                        <input type="range" id="rotationSlider" min="-80" max="80" value="0" step="1">
-                        <span id="rotationValue">0°</span>
+                        <label>X-axis:</label>
+                        <input type="range" id="rotationXSlider" min="-90" max="90" value="0" step="1">
+                        <span id="rotationXValue">0°</span>
                     </div>
-                    <button class="btn" id="resetRotation">Reset Angle</button>
+                    <div class="rotation-control">
+                        <label>Y-axis:</label>
+                        <input type="range" id="rotationYSlider" min="-90" max="90" value="0" step="1">
+                        <span id="rotationYValue">0°</span>
+                    </div>
+                    <div class="rotation-control">
+                        <label>Z-axis:</label>
+                        <input type="range" id="rotationZSlider" min="-90" max="90" value="0" step="1">
+                        <span id="rotationZValue">0°</span>
+                    </div>
+                    <button class="btn" id="resetRotation">Reset All Rotation</button>
                 </div>
 
                 <div id="statusMessages"></div>
@@ -467,7 +486,7 @@
                 this.artworkUnit = 'ft';
                 this.artworkPosition = { x: 0, y: 0 };
                 this.artworkSize = { width: 0, height: 0 };
-                this.artworkRotation = 0; // Rotation in degrees
+                this.artworkRotation = { x: 0, y: 0, z: 0 }; // Rotation in degrees for each axis
                 this.artworkElement = null; // HTML element for CSS transforms
                 this.pixelsPerUnit = 1;
                 this.isDragging = false;
@@ -520,7 +539,9 @@
                 document.getElementById('artworkWidth').addEventListener('input', (e) => this.updateArtworkSize());
                 document.getElementById('artworkUnit').addEventListener('change', (e) => this.updateArtworkSize());
                 document.getElementById('clearPoints').addEventListener('click', () => this.clearScalePoints());
-                document.getElementById('rotationSlider').addEventListener('input', (e) => this.updateRotation(e));
+                document.getElementById('rotationXSlider').addEventListener('input', (e) => this.updateRotationX(e));
+                document.getElementById('rotationYSlider').addEventListener('input', (e) => this.updateRotationY(e));
+                document.getElementById('rotationZSlider').addEventListener('input', (e) => this.updateRotationZ(e));
                 document.getElementById('resetRotation').addEventListener('click', () => this.resetRotation());
 
                 // Export
@@ -785,16 +806,32 @@
                 // Use the existing mouse move and mouse up handlers
             }
 
-            updateRotation(e) {
-                this.artworkRotation = parseInt(e.target.value);
-                document.getElementById('rotationValue').textContent = this.artworkRotation + '°';
+            updateRotationX(e) {
+                this.artworkRotation.x = parseInt(e.target.value);
+                document.getElementById('rotationXValue').textContent = this.artworkRotation.x + '°';
+                this.updateArtworkTransform();
+            }
+
+            updateRotationY(e) {
+                this.artworkRotation.y = parseInt(e.target.value);
+                document.getElementById('rotationYValue').textContent = this.artworkRotation.y + '°';
+                this.updateArtworkTransform();
+            }
+
+            updateRotationZ(e) {
+                this.artworkRotation.z = parseInt(e.target.value);
+                document.getElementById('rotationZValue').textContent = this.artworkRotation.z + '°';
                 this.updateArtworkTransform();
             }
 
             resetRotation() {
-                this.artworkRotation = 0;
-                document.getElementById('rotationSlider').value = 0;
-                document.getElementById('rotationValue').textContent = '0°';
+                this.artworkRotation = { x: 0, y: 0, z: 0 };
+                document.getElementById('rotationXSlider').value = 0;
+                document.getElementById('rotationYSlider').value = 0;
+                document.getElementById('rotationZSlider').value = 0;
+                document.getElementById('rotationXValue').textContent = '0°';
+                document.getElementById('rotationYValue').textContent = '0°';
+                document.getElementById('rotationZValue').textContent = '0°';
                 this.updateArtworkTransform();
             }
 
@@ -805,7 +842,7 @@
                 this.artworkElement.style.left = this.artworkPosition.x + 'px';
                 this.artworkElement.style.top = this.artworkPosition.y + 'px';
                 this.artworkElement.style.transform = 
-                    `perspective(500px) rotateX(${this.artworkRotation}deg)`;
+                    `perspective(500px) rotateX(${this.artworkRotation.x}deg) rotateY(${this.artworkRotation.y}deg) rotateZ(${this.artworkRotation.z}deg)`;
             }
 
 
@@ -889,7 +926,7 @@
                     exportCtx.drawImage(this.canvas, 0, 0);
 
                     // Manually draw the rotated artwork if it exists
-                    if (this.artworkImage && this.artworkRotation !== 0) {
+                    if (this.artworkImage && (this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0)) {
                         this.drawRotatedArtwork(exportCtx);
                     } else if (this.artworkImage) {
                         // Draw normal artwork without rotation
@@ -927,19 +964,28 @@
                 // Move to center point
                 ctx.translate(centerX, centerY);
                 
-                // Apply Y-axis rotation with perspective effect
-                const rotationRad = (this.artworkRotation * Math.PI) / 180;
-                const cosAngle = Math.cos(rotationRad);
+                // Apply rotations - simplified 2D approximation of 3D transforms
+                // Note: Canvas 2D can't do true 3D, so this is a basic approximation
                 
-                // Apply 2D transform that simulates 3D rotateY perspective effect
-                ctx.transform(
-                    cosAngle,     // Horizontal scaling (foreshortening)
-                    0,           // Vertical skew
-                    0,           // Horizontal skew
-                    1,           // Vertical scaling (unchanged)
-                    0,           // Horizontal translation
-                    0            // Vertical translation
-                );
+                // Z-axis rotation (standard 2D rotation)
+                if (this.artworkRotation.z !== 0) {
+                    const zRotationRad = (this.artworkRotation.z * Math.PI) / 180;
+                    ctx.rotate(zRotationRad);
+                }
+                
+                // Y-axis rotation (perspective foreshortening effect)
+                if (this.artworkRotation.y !== 0) {
+                    const yRotationRad = (this.artworkRotation.y * Math.PI) / 180;
+                    const cosAngle = Math.cos(yRotationRad);
+                    ctx.transform(cosAngle, 0, 0, 1, 0, 0);
+                }
+                
+                // X-axis rotation (vertical foreshortening effect)  
+                if (this.artworkRotation.x !== 0) {
+                    const xRotationRad = (this.artworkRotation.x * Math.PI) / 180;
+                    const cosAngle = Math.cos(xRotationRad);
+                    ctx.transform(1, 0, 0, cosAngle, 0, 0);
+                }
                 
                 // Draw the artwork centered at origin
                 ctx.drawImage(
@@ -970,7 +1016,7 @@
                     exportCtx.drawImage(this.canvas, 0, 0);
 
                     // Manually draw the rotated artwork if it exists
-                    if (this.artworkImage && this.artworkRotation !== 0) {
+                    if (this.artworkImage && (this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0)) {
                         this.drawRotatedArtwork(exportCtx);
                     } else if (this.artworkImage) {
                         // Draw normal artwork without rotation
