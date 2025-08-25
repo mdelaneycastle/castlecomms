@@ -48,8 +48,35 @@ class NotificationManager {
         const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
         console.log('✅ Service Worker registered:', registration);
         
-        // Note: useServiceWorker is not needed in newer Firebase versions
-        // The service worker is automatically detected
+        // Wait for service worker to be ready
+        await navigator.serviceWorker.ready;
+        console.log('✅ Service Worker ready');
+        
+        // Make sure service worker is active
+        if (registration.active) {
+          console.log('✅ Service Worker is active');
+        } else {
+          console.log('⏳ Waiting for Service Worker to activate...');
+          await new Promise(resolve => {
+            if (registration.installing) {
+              registration.installing.addEventListener('statechange', (e) => {
+                if (e.target.state === 'activated') {
+                  console.log('✅ Service Worker activated');
+                  resolve();
+                }
+              });
+            } else if (registration.waiting) {
+              registration.waiting.addEventListener('statechange', (e) => {
+                if (e.target.state === 'activated') {
+                  console.log('✅ Service Worker activated');
+                  resolve();
+                }
+              });
+            } else {
+              resolve();
+            }
+          });
+        }
       }
     } catch (error) {
       console.error('❌ Service Worker registration failed:', error);
@@ -69,25 +96,37 @@ class NotificationManager {
       console.log('🔔 Notification permission:', permission);
 
       if (permission === 'granted') {
-        // Get FCM token
-        const token = await this.messaging.getToken({ vapidKey: this.vapidKey });
-        if (token) {
-          console.log('✅ FCM Token received:', token);
-          this.currentToken = token;
-          
-          // Save token to Firebase for this user
-          await this.saveTokenToDatabase(token);
-          
-          // Set up token refresh listener
-          this.setupTokenRefresh();
-          
-          // Set up foreground message listener
-          this.setupForegroundMessageListener();
-          
-          return { success: true, token };
-        } else {
-          console.warn('⚠️ No registration token available');
-          return { success: false, error: 'No token available' };
+        // Wait a bit for service worker to be fully ready
+        console.log('⏳ Waiting for service worker to be ready before getting token...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        try {
+          // Get FCM token
+          const token = await this.messaging.getToken({ vapidKey: this.vapidKey });
+          if (token) {
+            console.log('✅ FCM Token received:', token);
+            this.currentToken = token;
+            
+            // Save token to Firebase for this user
+            await this.saveTokenToDatabase(token);
+            
+            // Set up token refresh listener
+            this.setupTokenRefresh();
+            
+            // Set up foreground message listener
+            this.setupForegroundMessageListener();
+            
+            return { success: true, token };
+          } else {
+            console.warn('⚠️ No registration token available');
+            return { success: false, error: 'No token available' };
+          }
+        } catch (tokenError) {
+          console.error('❌ Error getting FCM token:', tokenError);
+          if (tokenError.code === 'messaging/failed-service-worker-registration') {
+            return { success: false, error: 'Service worker not ready. Please try again in a moment.' };
+          }
+          return { success: false, error: tokenError.message };
         }
       } else {
         console.warn('⚠️ Notification permission denied');
