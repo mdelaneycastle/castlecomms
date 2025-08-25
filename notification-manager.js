@@ -48,10 +48,8 @@ class NotificationManager {
         const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
         console.log('✅ Service Worker registered:', registration);
         
-        // Set the service worker for messaging
-        if (this.messaging) {
-          this.messaging.useServiceWorker(registration);
-        }
+        // Note: useServiceWorker is not needed in newer Firebase versions
+        // The service worker is automatically detected
       }
     } catch (error) {
       console.error('❌ Service Worker registration failed:', error);
