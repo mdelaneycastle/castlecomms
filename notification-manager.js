@@ -103,13 +103,19 @@ class NotificationManager {
     try {
       const user = firebase.auth().currentUser;
       if (user && window.firebaseServices.db) {
-        await window.firebaseServices.db.ref(`users/${user.uid}/fcmTokens/${token}`).set({
+        // Use a shorter key for the token path to avoid issues
+        const tokenKey = token.substring(0, 20);
+        await window.firebaseServices.db.ref(`users/${user.uid}/fcmTokens/${tokenKey}`).set({
           token,
           timestamp: firebase.database.ServerValue.TIMESTAMP,
           userAgent: navigator.userAgent,
-          platform: navigator.platform
+          platform: navigator.platform,
+          email: user.email
         });
-        console.log('✅ FCM token saved to database');
+        console.log('✅ FCM token saved to database for user:', user.email);
+        console.log('🔑 Token key:', tokenKey, 'Full token length:', token.length);
+      } else {
+        console.error('❌ Cannot save token: user or database not available');
       }
     } catch (error) {
       console.error('❌ Error saving FCM token:', error);
@@ -274,6 +280,21 @@ class NotificationManager {
 
   async getCurrentToken() {
     return this.currentToken;
+  }
+
+  // Debug function to check token storage
+  async checkTokenStorage() {
+    try {
+      const user = firebase.auth().currentUser;
+      if (user && window.firebaseServices.db) {
+        const tokensSnapshot = await window.firebaseServices.db.ref(`users/${user.uid}/fcmTokens`).once('value');
+        const tokens = tokensSnapshot.val();
+        console.log('🔍 Current stored tokens for', user.email, ':', tokens);
+        return tokens;
+      }
+    } catch (error) {
+      console.error('❌ Error checking token storage:', error);
+    }
   }
 
   // Method to show notification setup UI
