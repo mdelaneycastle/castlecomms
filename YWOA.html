@@ -890,22 +890,39 @@
 
                     // Draw the artwork if it exists
                     if (this.artworkImage && this.artworkElement) {
-                        // Get the current rotation
                         const rotationRad = (this.artworkRotation * Math.PI) / 180;
                         const cosAngle = Math.cos(rotationRad);
+                        const sinAngle = Math.sin(rotationRad);
                         
-                        // Calculate the apparent width after rotation (like CSS rotateY)
-                        const apparentWidth = this.artworkSize.width * Math.abs(cosAngle);
-                        
-                        // Draw the artwork with perspective scaling
+                        // Apply 3D perspective transform to simulate CSS rotateY
                         exportCtx.save();
+                        
+                        // Move to artwork center
+                        const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
+                        const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+                        exportCtx.translate(centerX, centerY);
+                        
+                        // Apply perspective transform matrix (simulating rotateY)
+                        // This creates the foreshortening effect like CSS perspective
+                        const perspectiveScale = 1; // Can be adjusted for stronger/weaker effect
+                        exportCtx.transform(
+                            cosAngle * perspectiveScale,    // horizontal scaling
+                            0,                              // vertical skew
+                            sinAngle * 0.2,                 // slight horizontal skew for 3D effect  
+                            1,                              // vertical scaling (unchanged)
+                            0,                              // horizontal translation
+                            0                               // vertical translation
+                        );
+                        
+                        // Draw artwork centered
                         exportCtx.drawImage(
                             this.artworkImage,
-                            this.artworkPosition.x + (this.artworkSize.width - apparentWidth) / 2,
-                            this.artworkPosition.y,
-                            apparentWidth,
+                            -this.artworkSize.width / 2,
+                            -this.artworkSize.height / 2,
+                            this.artworkSize.width,
                             this.artworkSize.height
                         );
+                        
                         exportCtx.restore();
                     }
 
@@ -942,16 +959,36 @@
                     if (this.artworkImage && this.artworkElement) {
                         const rotationRad = (this.artworkRotation * Math.PI) / 180;
                         const cosAngle = Math.cos(rotationRad);
-                        const apparentWidth = this.artworkSize.width * Math.abs(cosAngle);
+                        const sinAngle = Math.sin(rotationRad);
                         
+                        // Apply 3D perspective transform to simulate CSS rotateY
                         exportCtx.save();
+                        
+                        // Move to artwork center
+                        const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
+                        const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+                        exportCtx.translate(centerX, centerY);
+                        
+                        // Apply perspective transform matrix (simulating rotateY)
+                        const perspectiveScale = 1;
+                        exportCtx.transform(
+                            cosAngle * perspectiveScale,    // horizontal scaling
+                            0,                              // vertical skew
+                            sinAngle * 0.2,                 // slight horizontal skew for 3D effect  
+                            1,                              // vertical scaling (unchanged)
+                            0,                              // horizontal translation
+                            0                               // vertical translation
+                        );
+                        
+                        // Draw artwork centered
                         exportCtx.drawImage(
                             this.artworkImage,
-                            this.artworkPosition.x + (this.artworkSize.width - apparentWidth) / 2,
-                            this.artworkPosition.y,
-                            apparentWidth,
+                            -this.artworkSize.width / 2,
+                            -this.artworkSize.height / 2,
+                            this.artworkSize.width,
                             this.artworkSize.height
                         );
+                        
                         exportCtx.restore();
                     }
 
