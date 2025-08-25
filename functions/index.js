@@ -18,6 +18,7 @@ const bucket = getStorage().bucket();
 const corsOptions = {
   origin: [
     "https://mdelaneycastle.github.io",
+    "https://castle-comms.web.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000"
   ],
