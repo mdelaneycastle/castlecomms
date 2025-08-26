@@ -1083,6 +1083,11 @@
 
             drawTexturedWallBackground() {
                 if (!this.wallTexture || !this.wallColor) return;
+                this.drawTexturedWallBackgroundOnCanvas(this.ctx);
+            }
+
+            drawTexturedWallBackgroundOnCanvas(ctx) {
+                if (!this.wallTexture || !this.wallColor) return;
 
                 // Draw single wall image scaled to cover the canvas (no tiling)
                 const scale = Math.max(
@@ -1096,22 +1101,59 @@
                 const y = (this.canvas.height - scaledHeight) / 2;
                 
                 // Draw the wall texture scaled to cover canvas
-                this.ctx.drawImage(this.wallTexture, x, y, scaledWidth, scaledHeight);
+                ctx.drawImage(this.wallTexture, x, y, scaledWidth, scaledHeight);
                 
                 // Apply stronger color overlay for more prominent color effect
-                this.ctx.globalCompositeOperation = 'multiply';
-                this.ctx.fillStyle = this.wallColor;
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                ctx.globalCompositeOperation = 'multiply';
+                ctx.fillStyle = this.wallColor;
+                ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 
                 // Add additional color layer for stronger effect (subtle overlay)
-                this.ctx.globalCompositeOperation = 'overlay';
-                this.ctx.fillStyle = this.wallColor;
-                this.ctx.globalAlpha = 0.3; // 30% opacity for subtle additional color
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                ctx.globalCompositeOperation = 'overlay';
+                ctx.fillStyle = this.wallColor;
+                ctx.globalAlpha = 0.3; // 30% opacity for subtle additional color
+                ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 
                 // Reset blend mode and opacity
-                this.ctx.globalCompositeOperation = 'source-over';
-                this.ctx.globalAlpha = 1.0;
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1.0;
+            }
+
+            drawScalePointsOnCanvas(ctx) {
+                // Draw scale points
+                this.scalePoints.forEach((point, index) => {
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    ctx.fillStyle = 'white';
+                    ctx.font = '12px DIN Light Alternate, Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(index + 1, point.x, point.y + 4);
+                });
+
+                // Draw measurement line
+                if (this.scalePoints.length === 2) {
+                    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(this.scalePoints[0].x, this.scalePoints[0].y);
+                    ctx.lineTo(this.scalePoints[1].x, this.scalePoints[1].y);
+                    ctx.stroke();
+
+                    if (this.realDistance > 0) {
+                        const midX = (this.scalePoints[0].x + this.scalePoints[1].x) / 2;
+                        const midY = (this.scalePoints[0].y + this.scalePoints[1].y) / 2;
+                        
+                        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
+                        ctx.fillRect(midX - 30, midY - 10, 60, 20);
+                        ctx.fillStyle = 'white';
+                        ctx.font = '12px DIN Light Alternate, Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`${this.realDistance} ${this.distanceUnit}`, midX, midY + 4);
+                    }
+                }
             }
 
 
@@ -1143,40 +1185,8 @@
                     this.drawTexturedWallBackground();
                 }
 
-                // Draw scale points
-                this.scalePoints.forEach((point, index) => {
-                    this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
-                    this.ctx.beginPath();
-                    this.ctx.arc(point.x, point.y, 6, 0, 2 * Math.PI);
-                    this.ctx.fill();
-
-                    this.ctx.fillStyle = 'white';
-                    this.ctx.font = '12px DIN Light Alternate, Arial';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.fillText(index + 1, point.x, point.y + 4);
-                });
-
-                // Draw measurement line
-                if (this.scalePoints.length === 2) {
-                    this.ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
-                    this.ctx.lineWidth = 2;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(this.scalePoints[0].x, this.scalePoints[0].y);
-                    this.ctx.lineTo(this.scalePoints[1].x, this.scalePoints[1].y);
-                    this.ctx.stroke();
-
-                    if (this.realDistance > 0) {
-                        const midX = (this.scalePoints[0].x + this.scalePoints[1].x) / 2;
-                        const midY = (this.scalePoints[0].y + this.scalePoints[1].y) / 2;
-                        
-                        this.ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
-                        this.ctx.fillRect(midX - 30, midY - 10, 60, 20);
-                        this.ctx.fillStyle = 'white';
-                        this.ctx.font = '12px DIN Light Alternate, Arial';
-                        this.ctx.textAlign = 'center';
-                        this.ctx.fillText(`${this.realDistance} ${this.distanceUnit}`, midX, midY + 4);
-                    }
-                }
+                // Draw scale points and measurement lines
+                this.drawScalePointsOnCanvas(this.ctx);
 
                 // Artwork is now rendered as HTML element with CSS transforms
                 // No canvas drawing needed for artwork
@@ -1190,14 +1200,12 @@
                     return;
                 }
 
-                // Check if any rotation, color intensity change, or color background is used - if so, use screenshot method instead
+                // Only use screenshot method for rotation or color intensity changes
+                // Textured wall backgrounds can be rendered directly on canvas
                 const hasRotation = this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0;
                 const hasColorIntensityChange = this.colorIntensity !== 100;
-                if (hasRotation || hasColorIntensityChange || hasColorBackground) {
-                    let reason = '';
-                    if (hasRotation) reason = 'Rotation';
-                    else if (hasColorIntensityChange) reason = 'Color intensity adjustment';
-                    else if (hasColorBackground) reason = 'Textured wall background';
+                if (hasRotation || hasColorIntensityChange) {
+                    let reason = hasRotation ? 'Rotation' : 'Color intensity adjustment';
                     this.showStatus(`${reason} detected - using screenshot method for accurate export...`, 'info');
                     return this.exportScreenshot();
                 }
@@ -1220,8 +1228,23 @@
                         exportCtx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                     }
 
-                    // Draw the main canvas (room image and measurement lines)
-                    exportCtx.drawImage(this.canvas, 0, 0);
+                    // Draw room background (uploaded image or textured wall)
+                    if (this.roomImage) {
+                        // Draw uploaded room image
+                        if (this.roomImageDisplayed) {
+                            exportCtx.drawImage(this.roomImage, 
+                                this.roomImageDisplayed.x, 
+                                this.roomImageDisplayed.y, 
+                                this.roomImageDisplayed.width, 
+                                this.roomImageDisplayed.height);
+                        }
+                    } else if (this.wallColor && this.wallTexture) {
+                        // Draw textured wall background on export canvas
+                        this.drawTexturedWallBackgroundOnCanvas(exportCtx);
+                    }
+
+                    // Draw scale points and measurement lines from main canvas
+                    this.drawScalePointsOnCanvas(exportCtx);
 
                     // Draw artwork with proper 3D rotation if it exists
                     if (this.artworkImage) {
