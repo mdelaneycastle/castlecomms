@@ -41,8 +41,8 @@
     .chat-sidebar {
       width: 320px;
       min-width: 280px;
-      background: #ffffff;
-      border-right: 1px solid #e5e5e5;
+      background: #F0EDE9;
+      border-right: 1px solid #d8d1c5;
       display: flex;
       flex-direction: column;
       height: 100%;
@@ -50,14 +50,14 @@
 
     .chat-sidebar-header {
       padding: 16px 20px;
-      border-bottom: 1px solid #e5e5e5;
-      background: #ffffff;
+      border-bottom: 1px solid #d8d1c5;
+      background: #F0EDE9;
     }
 
     .chat-sidebar-title {
       font-size: 18px;
       font-weight: 600;
-      color: #323130;
+      color: #45494e;
       margin: 0 0 12px 0;
       display: flex;
       align-items: center;
@@ -67,7 +67,7 @@
     .chat-search {
       width: 100%;
       padding: 8px 12px;
-      border: 1px solid #e5e5e5;
+      border: 1px solid #d8d1c5;
       border-radius: 6px;
       font-size: 14px;
       background: #faf9f8;
@@ -76,12 +76,12 @@
 
     .chat-search:focus {
       outline: none;
-      border-color: #6264a7;
+      border-color: #d8d1c5;
       background: #ffffff;
     }
 
     .new-chat-button {
-      background: #6264a7;
+      background: #d8d1c5;
       color: white;
       border: none;
       padding: 8px 16px;
@@ -95,7 +95,7 @@
     }
 
     .new-chat-button:hover {
-      background: #585a96;
+      background: #45494e;
     }
 
     .chat-list {
@@ -119,15 +119,15 @@
     }
 
     .chat-item.active {
-      background: #e6f2ff;
-      border-left-color: #6264a7;
+      background: #F0EDE9;
+      border-left-color: #d8d1c5;
     }
 
     .chat-avatar {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #6264a7;
+      background: #d8d1c5;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -145,7 +145,7 @@
     .chat-item-name {
       font-size: 14px;
       font-weight: 600;
-      color: #323130;
+      color: #45494e;
       margin: 0 0 4px 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -154,7 +154,7 @@
 
     .chat-item-preview {
       font-size: 12px;
-      color: #605e5c;
+      color: #6a6e73;
       margin: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -163,8 +163,31 @@
 
     .chat-item-time {
       font-size: 11px;
-      color: #8a8886;
+      color: #999ea3;
       flex-shrink: 0;
+    }
+
+    .chat-delete-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      margin-left: 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #999ea3;
+      opacity: 0;
+      transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .chat-item:hover .chat-delete-btn {
+      opacity: 1;
+    }
+
+    .chat-delete-btn:hover {
+      background-color: #f3f2f1;
+      color: #d13438;
     }
 
     /* Main Chat Area */
@@ -173,12 +196,12 @@
       display: flex;
       flex-direction: column;
       height: 100%;
-      background: #ffffff;
+      background: #faf9f8;
     }
 
     .chat-header {
       padding: 16px 24px;
-      border-bottom: 1px solid #e5e5e5;
+      border-bottom: 1px solid #d8d1c5;
       background: #ffffff;
       display: flex;
       align-items: center;
@@ -195,7 +218,7 @@
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: #6264a7;
+      background: #d8d1c5;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -207,13 +230,13 @@
     .chat-header-details h2 {
       font-size: 16px;
       font-weight: 600;
-      color: #323130;
+      color: #45494e;
       margin: 0 0 2px 0;
     }
 
     .chat-header-details p {
       font-size: 12px;
-      color: #605e5c;
+      color: #6a6e73;
       margin: 0;
     }
 
@@ -224,13 +247,13 @@
 
     .chat-action-btn {
       background: none;
-      border: 1px solid #e5e5e5;
+      border: 1px solid #d8d1c5;
       padding: 6px 12px;
       border-radius: 6px;
       font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
-      color: #323130;
+      color: #45494e;
     }
 
     .chat-action-btn:hover {
@@ -273,7 +296,7 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      background: #6264a7;
+      background: #d8d1c5;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -286,12 +309,12 @@
     .message-sender {
       font-size: 12px;
       font-weight: 600;
-      color: #323130;
+      color: #45494e;
     }
 
     .message-time {
       font-size: 11px;
-      color: #8a8886;
+      color: #999ea3;
     }
 
     .message-bubble {
@@ -299,7 +322,7 @@
       padding: 8px 12px;
       border-radius: 8px;
       background: #f8f9fa;
-      color: #323130;
+      color: #45494e;
       font-size: 14px;
       line-height: 1.4;
       word-wrap: break-word;
@@ -336,7 +359,7 @@
     }
 
     .message-group.own .message-bubble {
-      background: #6264a7;
+      background: #d8d1c5;
       color: white;
       margin-left: 0;
       margin-right: 36px;
@@ -345,7 +368,7 @@
     /* Chat Input Area */
     .chat-input-area {
       padding: 16px 24px;
-      border-top: 1px solid #e5e5e5;
+      border-top: 1px solid #d8d1c5;
       background: #ffffff;
     }
 
@@ -361,7 +384,7 @@
       min-height: 40px;
       max-height: 120px;
       padding: 8px 12px;
-      border: 1px solid #e5e5e5;
+      border: 1px solid #d8d1c5;
       border-radius: 6px;
       font-size: 14px;
       font-family: inherit;
@@ -372,12 +395,12 @@
 
     .chat-input:focus {
       outline: none;
-      border-color: #6264a7;
+      border-color: #d8d1c5;
       background: #ffffff;
     }
 
     .send-button {
-      background: #6264a7;
+      background: #d8d1c5;
       color: white;
       border: none;
       padding: 8px 16px;
@@ -389,7 +412,7 @@
     }
 
     .send-button:hover:not(:disabled) {
-      background: #585a96;
+      background: #45494e;
     }
 
     .send-button:disabled {
@@ -399,8 +422,8 @@
 
     .attach-button {
       background: #f8f9fa;
-      color: #6264a7;
-      border: 1px solid #e5e5e5;
+      color: #d8d1c5;
+      border: 1px solid #d8d1c5;
       padding: 8px 12px;
       border-radius: 6px;
       font-size: 18px;
@@ -411,8 +434,8 @@
     }
 
     .attach-button:hover {
-      background: #e3f2fd;
-      border-color: #6264a7;
+      background: #F0EDE9;
+      border-color: #d8d1c5;
     }
 
     .selected-files {
@@ -424,7 +447,7 @@
 
     .selected-file {
       background: #f8f9fa;
-      border: 1px solid #e5e5e5;
+      border: 1px solid #d8d1c5;
       border-radius: 6px;
       padding: 8px 12px;
       display: flex;
@@ -544,7 +567,7 @@
     .typing-indicators {
       padding: 8px 16px;
       font-size: 12px;
-      color: #8a8886;
+      color: #999ea3;
       font-style: italic;
       min-height: 20px;
       display: flex;
@@ -566,7 +589,7 @@
       width: 4px;
       height: 4px;
       border-radius: 50%;
-      background: #8a8886;
+      background: #999ea3;
       animation: typingPulse 1.5s infinite;
     }
 
@@ -581,7 +604,7 @@
 
     /* Ticket Links */
     .ticket-link {
-      color: #6264a7;
+      color: #d8d1c5;
       text-decoration: none;
       font-weight: 600;
       padding: 2px 6px;
@@ -653,7 +676,7 @@
 
     .ticket-preview-id {
       font-weight: 600;
-      color: #6264a7;
+      color: #d8d1c5;
       font-size: 12px;
     }
 
@@ -666,7 +689,7 @@
     }
 
     .ticket-preview-status.open {
-      background: #e3f2fd;
+      background: #F0EDE9;
       color: #1976d2;
     }
 
@@ -682,7 +705,7 @@
 
     .ticket-preview-title {
       font-weight: 600;
-      color: #323130;
+      color: #45494e;
       margin-bottom: 6px;
       line-height: 1.3;
     }
@@ -693,13 +716,13 @@
       padding: 6px 8px;
       margin-bottom: 8px;
       font-size: 11px;
-      color: #323130;
+      color: #45494e;
       font-weight: 500;
       border-left: 3px solid #0078d4;
     }
 
     .ticket-preview-description {
-      color: #605e5c;
+      color: #6a6e73;
       line-height: 1.4;
       margin-bottom: 8px;
       display: -webkit-box;
@@ -712,7 +735,7 @@
       display: flex;
       justify-content: space-between;
       font-size: 11px;
-      color: #8a8886;
+      color: #999ea3;
     }
 
     .ticket-preview-loading {
@@ -720,7 +743,7 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
-      color: #8a8886;
+      color: #999ea3;
       font-size: 12px;
     }
 
@@ -737,7 +760,7 @@
       align-items: center;
       gap: 4px;
       font-size: 10px;
-      color: #8a8886;
+      color: #999ea3;
       margin-top: 4px;
     }
 
@@ -752,11 +775,11 @@
     }
 
     .read-receipt.delivered {
-      color: #8a8886;
+      color: #999ea3;
     }
 
     .read-receipt.read {
-      color: #6264a7;
+      color: #d8d1c5;
     }
 
     .read-receipt-icon {
@@ -799,7 +822,7 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      color: #605e5c;
+      color: #6a6e73;
       padding: 40px;
       position: relative;
     }
@@ -819,7 +842,7 @@
     .chat-empty h3 {
       font-size: 18px;
       margin: 0 0 8px 0;
-      color: #323130;
+      color: #45494e;
     }
 
     .chat-empty p {
@@ -862,13 +885,13 @@
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 16px;
-      border-bottom: 1px solid #e5e5e5;
+      border-bottom: 1px solid #d8d1c5;
     }
 
     .modal-title {
       font-size: 18px;
       font-weight: 600;
-      color: #323130;
+      color: #45494e;
       margin: 0;
     }
 
@@ -877,7 +900,7 @@
       border: none;
       font-size: 20px;
       cursor: pointer;
-      color: #605e5c;
+      color: #6a6e73;
       padding: 4px;
     }
 
@@ -889,14 +912,14 @@
       display: block;
       font-size: 14px;
       font-weight: 500;
-      color: #323130;
+      color: #45494e;
       margin-bottom: 6px;
     }
 
     .form-input {
       width: 100%;
       padding: 8px 12px;
-      border: 1px solid #e5e5e5;
+      border: 1px solid #d8d1c5;
       border-radius: 6px;
       font-size: 14px;
       background: #faf9f8;
@@ -905,7 +928,7 @@
 
     .form-input:focus {
       outline: none;
-      border-color: #6264a7;
+      border-color: #d8d1c5;
       background: #ffffff;
     }
 
@@ -915,7 +938,7 @@
       left: 0;
       right: 0;
       background: white;
-      border: 1px solid #e5e5e5;
+      border: 1px solid #d8d1c5;
       border-top: none;
       border-radius: 0 0 6px 6px;
       max-height: 200px;
@@ -944,8 +967,8 @@
     }
 
     .selected-user-tag {
-      background: #e6f2ff;
-      color: #6264a7;
+      background: #F0EDE9;
+      color: #d8d1c5;
       padding: 4px 8px;
       border-radius: 16px;
       font-size: 12px;
@@ -957,7 +980,7 @@
     .remove-user {
       background: none;
       border: none;
-      color: #6264a7;
+      color: #d8d1c5;
       cursor: pointer;
       font-size: 14px;
       padding: 0;
@@ -974,7 +997,7 @@
       justify-content: flex-end;
       margin-top: 24px;
       padding-top: 16px;
-      border-top: 1px solid #e5e5e5;
+      border-top: 1px solid #d8d1c5;
     }
 
     .btn {
@@ -983,20 +1006,20 @@
       font-size: 14px;
       cursor: pointer;
       transition: all 0.2s;
-      border: 1px solid #e5e5e5;
+      border: 1px solid #d8d1c5;
       background: white;
-      color: #323130;
+      color: #45494e;
     }
 
     .btn-primary {
-      background: #6264a7;
+      background: #d8d1c5;
       color: white;
-      border-color: #6264a7;
+      border-color: #d8d1c5;
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: #585a96;
-      border-color: #585a96;
+      background: #45494e;
+      border-color: #45494e;
     }
 
     .btn:hover {
@@ -1062,7 +1085,7 @@
         background: none;
         border: none;
         font-size: 16px;
-        color: #323130;
+        color: #45494e;
         cursor: pointer;
         padding: 8px;
         margin-right: 8px;
@@ -1495,7 +1518,7 @@ function setupUserSearch() {
       suggestionsDiv.innerHTML = filteredUsers.map(user => 
         `<div class="user-suggestion" data-email="${user.email}" data-name="${user.name}">
           <strong>${user.name}</strong><br>
-          <small style="color: #8a8886;">${user.email}</small>
+          <small style="color: #999ea3;">${user.email}</small>
         </div>`
       ).join('');
       suggestionsDiv.style.display = 'block';
@@ -1687,6 +1710,7 @@ function displayChats(chatDocs) {
           <div class="chat-item-preview">${data.lastMessage || 'No messages yet'}</div>
         </div>
         <div class="chat-item-time">${formatTimestamp(data.lastMessageAt)}</div>
+        <button class="chat-delete-btn" onclick="event.stopPropagation(); deleteChatGroup('${doc.id}', '${data.name}')" title="Delete chat group">🗑️</button>
       </div>
     `;
   }).join('');
@@ -1765,7 +1789,7 @@ function displayChatInterface() {
     </div>
     
     <div class="chat-messages" id="chat-messages">
-      <div style="text-align: center; padding: 20px; color: #8a8886;">
+      <div style="text-align: center; padding: 20px; color: #999ea3;">
         Loading messages...
       </div>
     </div>
@@ -1947,7 +1971,7 @@ function displayMessages(messageDocs) {
   
   if (messageDocs.length === 0) {
     messagesContainer.innerHTML = `
-      <div style="text-align: center; padding: 40px; color: #8a8886;">
+      <div style="text-align: center; padding: 40px; color: #999ea3;">
         <div style="font-size: 24px; margin-bottom: 8px;">👋</div>
         <p>No messages yet. Start the conversation!</p>
       </div>
@@ -2004,7 +2028,7 @@ function displayMessages(messageDocs) {
     
     if (group.isSystem) {
       return `
-        <div style="text-align: center; margin: 16px 0; color: #8a8886; font-size: 12px;">
+        <div style="text-align: center; margin: 16px 0; color: #999ea3; font-size: 12px;">
           ${enhanceMessageWithTickets(group.messages[0].message)}
         </div>
       `;
@@ -2245,6 +2269,48 @@ function renameChatPrompt() {
   }
 }
 
+// Delete chat group
+async function deleteChatGroup(chatId, chatName) {
+  if (!confirm(`Are you sure you want to delete the chat group "${chatName}"? This action cannot be undone.`)) {
+    return;
+  }
+  
+  try {
+    // Delete all messages in the chat
+    const messagesQuery = db.collection('chat-messages').where('chatId', '==', chatId);
+    const messagesSnapshot = await messagesQuery.get();
+    
+    const deletePromises = [];
+    messagesSnapshot.forEach(doc => {
+      deletePromises.push(doc.ref.delete());
+    });
+    
+    // Delete all messages first
+    await Promise.all(deletePromises);
+    
+    // Delete the chat document
+    await db.collection('chats').doc(chatId).delete();
+    
+    // If this was the currently selected chat, clear the interface
+    if (currentChat && currentChat.id === chatId) {
+      currentChat = null;
+      document.getElementById('chat-main').innerHTML = `
+        <div class="no-chat-selected">
+          <div class="no-chat-icon">💬</div>
+          <h3>Select a chat to get started</h3>
+          <p>Choose a conversation from the sidebar to begin messaging</p>
+        </div>
+      `;
+    }
+    
+    console.log('Chat group deleted successfully');
+    
+  } catch (error) {
+    console.error('Error deleting chat group:', error);
+    alert('Failed to delete chat group. Please try again.');
+  }
+}
+
 // Rename chat
 async function renameChat(newName) {
   try {
@@ -2413,7 +2479,7 @@ function enhanceMessageWithTickets(messageText, attachments = null) {
           match.includes('youtube.com') || match.includes('youtu.be')) {
         return match;
       }
-      return `<a href="${match}" target="_blank" style="color: #6264a7; text-decoration: underline;">${match}</a>`;
+      return `<a href="${match}" target="_blank" style="color: #d8d1c5; text-decoration: underline;">${match}</a>`;
     });
     
     // Handle ticket patterns
