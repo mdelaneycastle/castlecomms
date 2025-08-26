@@ -1084,20 +1084,34 @@
             drawTexturedWallBackground() {
                 if (!this.wallTexture || !this.wallColor) return;
 
-                // Create a pattern from the wall texture that tiles across the canvas
-                const pattern = this.ctx.createPattern(this.wallTexture, 'repeat');
+                // Draw single wall image scaled to cover the canvas (no tiling)
+                const scale = Math.max(
+                    this.canvas.width / this.wallTexture.width,
+                    this.canvas.height / this.wallTexture.height
+                );
                 
-                // Fill the entire canvas with the wall texture
-                this.ctx.fillStyle = pattern;
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                const scaledWidth = this.wallTexture.width * scale;
+                const scaledHeight = this.wallTexture.height * scale;
+                const x = (this.canvas.width - scaledWidth) / 2;
+                const y = (this.canvas.height - scaledHeight) / 2;
                 
-                // Apply color overlay using multiply blend mode for realistic painted wall effect
+                // Draw the wall texture scaled to cover canvas
+                this.ctx.drawImage(this.wallTexture, x, y, scaledWidth, scaledHeight);
+                
+                // Apply stronger color overlay for more prominent color effect
                 this.ctx.globalCompositeOperation = 'multiply';
                 this.ctx.fillStyle = this.wallColor;
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                 
-                // Reset blend mode
+                // Add additional color layer for stronger effect (subtle overlay)
+                this.ctx.globalCompositeOperation = 'overlay';
+                this.ctx.fillStyle = this.wallColor;
+                this.ctx.globalAlpha = 0.3; // 30% opacity for subtle additional color
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Reset blend mode and opacity
                 this.ctx.globalCompositeOperation = 'source-over';
+                this.ctx.globalAlpha = 1.0;
             }
 
 
