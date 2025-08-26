@@ -412,6 +412,75 @@
             transform-origin: center center;
         }
 
+        /* Screenshot Modal Styles */
+        .screenshot-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .screenshot-modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-heavy);
+            width: 90%;
+            max-width: 500px;
+            font-family: var(--font-primary);
+        }
+
+        .screenshot-modal h3 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: var(--letter-spacing-headers);
+        }
+
+        .screenshot-instructions {
+            margin-bottom: 25px;
+        }
+
+        .screenshot-instructions p {
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .screenshot-instructions ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .screenshot-instructions li {
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .screenshot-instructions em {
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .screenshot-modal-buttons {
+            text-align: center;
+        }
+
+        .screenshot-modal.show {
+            display: block;
+        }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
@@ -519,6 +588,25 @@
     </div>
 </main>
 
+<!-- Screenshot Instructions Modal -->
+<div class="screenshot-modal" id="screenshotModal">
+    <div class="screenshot-modal-content">
+        <h3>Screenshot Export Instructions</h3>
+        <div class="screenshot-instructions">
+            <p><strong>Please follow these steps:</strong></p>
+            <ol>
+                <li>Click "Select Window" at the top of the screen sharing dialog</li>
+                <li>Select the window titled <strong>"Your World, Our Art"</strong></li>
+                <li>Click "Share" to capture the current view</li>
+            </ol>
+            <p><em>This ensures the highest quality export of your angled artwork.</em></p>
+        </div>
+        <div class="screenshot-modal-buttons">
+            <button class="btn btn-primary" id="screenshotModalOk">OK, Continue</button>
+        </div>
+    </div>
+</div>
+
     <script>
         class YWOAApp {
             constructor() {
@@ -600,6 +688,9 @@
 
                 // Export
                 document.getElementById('exportJPG').addEventListener('click', () => this.exportImage('jpg'));
+                
+                // Screenshot Modal
+                document.getElementById('screenshotModalOk').addEventListener('click', () => this.closeScreenshotModal());
             }
 
             setupDragDrop(uploadAreaId, fileInputId) {
@@ -917,6 +1008,18 @@
                 this.updateArtworkTransform();
             }
 
+            showScreenshotModal() {
+                const modal = document.getElementById('screenshotModal');
+                modal.classList.add('show');
+            }
+
+            closeScreenshotModal() {
+                const modal = document.getElementById('screenshotModal');
+                modal.classList.remove('show');
+                // Continue with the screenshot process after modal is closed
+                this.performScreenshot();
+            }
+
             updateArtworkTransform() {
                 if (!this.artworkElement) return;
 
@@ -1055,6 +1158,11 @@
                     return;
                 }
 
+                // Show instructions modal first
+                this.showScreenshotModal();
+            }
+
+            async performScreenshot() {
                 try {
                     // Hide header and other UI elements during screenshot
                     const headerContainer = document.getElementById('header-container');
