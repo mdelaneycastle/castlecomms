@@ -390,7 +390,7 @@
             background-size: cover;
             background-position: center;
             cursor: move;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.3);
             transform-origin: center center;
         }
 
@@ -562,6 +562,11 @@
                 this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
                 this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
                 this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                
+                // Global mouse events to ensure reliable drag release
+                document.addEventListener('mousemove', (e) => this.handleGlobalMouseMove(e));
+                document.addEventListener('mouseup', (e) => this.handleGlobalMouseUp(e));
+                document.addEventListener('mouseleave', (e) => this.handleGlobalMouseUp(e));
 
                 // Controls
                 document.getElementById('realDistance').addEventListener('input', (e) => this.updateScale());
@@ -727,6 +732,33 @@
                 }
             }
 
+            handleGlobalMouseMove(e) {
+                // Only handle if we're dragging
+                if (!this.isDragging) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                this.artworkPosition.x = x - this.dragOffset.x;
+                this.artworkPosition.y = y - this.dragOffset.y;
+
+                // Update HTML element position
+                this.updateArtworkTransform();
+                this.redraw();
+            }
+
+            handleGlobalMouseUp(e) {
+                // Always stop dragging on any global mouse up or leave
+                if (this.isDragging) {
+                    this.isDragging = false;
+                    this.canvas.style.cursor = 'default';
+                    if (this.artworkElement) {
+                        this.artworkElement.style.cursor = 'move';
+                    }
+                }
+            }
+
             updateScale() {
                 this.realDistance = parseFloat(document.getElementById('realDistance').value) || 0;
                 this.distanceUnit = document.getElementById('distanceUnit').value;
@@ -828,13 +860,19 @@
                 this.artworkElement.addEventListener('mousedown', (e) => {
                     this.isDragging = true;
                     const rect = this.canvas.getBoundingClientRect();
-                    this.dragOffset.x = e.clientX - rect.left - this.artworkPosition.x - this.artworkSize.width / 2;
-                    this.dragOffset.y = e.clientY - rect.top - this.artworkPosition.y - this.artworkSize.height / 2;
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Use consistent offset calculation (same as canvas dragging)
+                    this.dragOffset.x = x - this.artworkPosition.x;
+                    this.dragOffset.y = y - this.artworkPosition.y;
+                    
+                    this.canvas.style.cursor = 'grabbing';
                     this.artworkElement.style.cursor = 'grabbing';
+                    
                     e.preventDefault();
+                    e.stopPropagation(); // Prevent canvas mousedown from also firing
                 });
-
-                // Use the existing mouse move and mouse up handlers
             }
 
             updateRotationX(e) {
@@ -1102,8 +1140,44 @@
                 }
             }
 
+            drawArtworkShadow(ctx) {
+                if (!this.artworkImage) return;
+
+                ctx.save();
+                
+                // Calculate artwork center
+                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
+                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+                
+                // Shadow offset and blur
+                const shadowOffsetX = 15;
+                const shadowOffsetY = 20;
+                const shadowBlur = 15;
+                
+                // Draw multiple shadow layers for depth
+                ctx.globalAlpha = 0.4;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowBlur = shadowBlur;
+                ctx.shadowOffsetX = shadowOffsetX;
+                ctx.shadowOffsetY = shadowOffsetY;
+                
+                // Create a temporary rectangle to generate shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillRect(
+                    this.artworkPosition.x,
+                    this.artworkPosition.y,
+                    this.artworkSize.width,
+                    this.artworkSize.height
+                );
+                
+                ctx.restore();
+            }
+
             drawArtworkWith3DRotation(ctx) {
                 if (!this.artworkImage) return;
+
+                // Draw shadow first
+                this.drawArtworkShadow(ctx);
 
                 ctx.save();
                 
