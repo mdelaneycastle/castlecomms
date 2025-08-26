@@ -218,6 +218,22 @@
             box-shadow: var(--shadow-subtle);
         }
 
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        #roomColorPicker {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: var(--shadow-subtle);
+        }
+
         .ywoa .center-canvas {
             flex: 1;
             position: relative;
@@ -502,11 +518,21 @@
         <div class="main-content">
             <div class="left-controls">
                 <div class="control-group">
-                    <h3>1. Upload Room Image</h3>
+                    <h3>1. Room Background</h3>
                     <div class="upload-area" id="roomUpload">
                         <input type="file" id="roomFile" accept="image/*">
                         <p>📸 Drop room image here or click to browse</p>
                         <img id="roomPreview" class="upload-preview" style="display: none;">
+                    </div>
+                    <div class="room-color-option">
+                        <p style="font-size: 12px; color: #666; margin: 10px 0 5px 0; text-align: center;">
+                            OR choose a solid color
+                        </p>
+                        <div class="color-picker-container">
+                            <input type="color" id="roomColorPicker" value="#f5f5f5">
+                            <input type="text" id="roomColorHex" placeholder="#f5f5f5" maxlength="7" style="width: 80px; margin-left: 10px; padding: 5px; border: 1px solid var(--accent-color); border-radius: 4px; font-size: 12px;">
+                            <button class="btn" id="clearRoomColor" style="padding: 5px 10px; margin-left: 10px; font-size: 12px;">Clear</button>
+                        </div>
                     </div>
                 </div>
 
@@ -691,6 +717,11 @@
                 
                 // Screenshot Modal
                 document.getElementById('screenshotModalOk').addEventListener('click', () => this.closeScreenshotModal());
+                
+                // Color picker
+                document.getElementById('roomColorPicker').addEventListener('input', (e) => this.updateRoomColor(e));
+                document.getElementById('roomColorHex').addEventListener('input', (e) => this.updateRoomColorFromHex(e));
+                document.getElementById('clearRoomColor').addEventListener('click', () => this.clearRoomColor());
             }
 
             setupDragDrop(uploadAreaId, fileInputId) {
@@ -1099,16 +1130,21 @@
             }
 
             async exportImage(format) {
-                if (!this.roomImage) {
-                    this.showStatus('No room image to export.', 'error');
+                // Check if we have a room image OR solid color background
+                const hasSolidBackground = !this.roomImage && this.canvas.style.backgroundColor;
+                if (!this.roomImage && !hasSolidBackground) {
+                    this.showStatus('No room background set. Upload an image or choose a color.', 'error');
                     return;
                 }
 
-                // Check if any rotation or color intensity change is applied - if so, use screenshot method instead
+                // Check if any rotation, color intensity change, or solid color is used - if so, use screenshot method instead
                 const hasRotation = this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0;
                 const hasColorIntensityChange = this.colorIntensity !== 100;
-                if (hasRotation || hasColorIntensityChange) {
-                    const reason = hasRotation ? 'Rotation' : 'Color intensity adjustment';
+                if (hasRotation || hasColorIntensityChange || hasSolidBackground) {
+                    let reason = '';
+                    if (hasRotation) reason = 'Rotation';
+                    else if (hasColorIntensityChange) reason = 'Color intensity adjustment';
+                    else if (hasSolidBackground) reason = 'Solid color background';
                     this.showStatus(`${reason} detected - using screenshot method for accurate export...`, 'info');
                     return this.exportScreenshot();
                 }
@@ -1153,8 +1189,10 @@
             }
 
             async exportScreenshot() {
-                if (!this.roomImage) {
-                    this.showStatus('No room image to export.', 'error');
+                // Check if we have a room image OR solid color background
+                const hasSolidBackground = !this.roomImage && this.canvas.style.backgroundColor;
+                if (!this.roomImage && !hasSolidBackground) {
+                    this.showStatus('No room background set. Upload an image or choose a color.', 'error');
                     return;
                 }
 
@@ -1433,6 +1471,49 @@
                         statusDiv.innerHTML = '';
                     }
                 }, 5000);
+            }
+
+            updateRoomColor(e) {
+                const color = e.target.value;
+                document.getElementById('roomColorHex').value = color;
+                this.canvas.style.backgroundColor = color;
+                // Clear room image when using solid color
+                this.roomImage = null;
+                document.getElementById('roomPreview').style.display = 'none';
+                this.redraw();
+            }
+
+            updateRoomColorFromHex(e) {
+                const hex = e.target.value;
+                if (hex.match(/^#[0-9A-F]{6}$/i)) {
+                    document.getElementById('roomColorPicker').value = hex;
+                    this.canvas.style.backgroundColor = hex;
+                    // Clear room image when using solid color
+                    this.roomImage = null;
+                    document.getElementById('roomPreview').style.display = 'none';
+                    this.redraw();
+                }
+            }
+
+            clearRoomColor() {
+                document.getElementById('roomColorPicker').value = '#f5f5f5';
+                document.getElementById('roomColorHex').value = '#f5f5f5';
+                this.canvas.style.backgroundColor = '#f5f5f5';
+                this.redraw();
+            }
+
+            showScreenshotModal() {
+                const modal = document.getElementById('screenshotModal');
+                modal.style.display = 'flex';
+            }
+
+            closeScreenshotModal() {
+                const modal = document.getElementById('screenshotModal');
+                modal.style.display = 'none';
+                // Add delay before starting screenshot to ensure share dialog closes
+                setTimeout(() => {
+                    this.performScreenshot();
+                }, 500);
             }
         }
 
