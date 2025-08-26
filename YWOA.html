@@ -482,6 +482,19 @@
                     <button class="btn" id="resetRotation">Reset All Rotation</button>
                 </div>
 
+                <div class="control-group">
+                    <h3>6. Color Intensity</h3>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                        Adjust artwork saturation to match room lighting conditions
+                    </p>
+                    <div class="rotation-control">
+                        <label>Intensity:</label>
+                        <input type="range" id="colorIntensitySlider" min="0" max="200" value="100" step="5">
+                        <span id="colorIntensityValue">100%</span>
+                    </div>
+                    <button class="btn" id="resetColorIntensity">Reset Color Intensity</button>
+                </div>
+
                 <div id="statusMessages"></div>
             </div>
 
@@ -518,6 +531,7 @@
                 this.artworkSize = { width: 0, height: 0 };
                 this.artworkRotation = { x: 0, y: 0, z: 0 }; // Rotation in degrees for each axis
                 this.artworkElement = null; // HTML element for CSS transforms
+                this.colorIntensity = 100; // Color intensity percentage (100% = normal, 0% = grayscale, 200% = oversaturated)
                 this.pixelsPerUnit = 1;
                 this.isDragging = false;
                 this.dragOffset = { x: 0, y: 0 };
@@ -578,6 +592,8 @@
                 document.getElementById('rotationYSlider').addEventListener('input', (e) => this.updateRotationY(e));
                 document.getElementById('rotationZSlider').addEventListener('input', (e) => this.updateRotationZ(e));
                 document.getElementById('resetRotation').addEventListener('click', () => this.resetRotation());
+                document.getElementById('colorIntensitySlider').addEventListener('input', (e) => this.updateColorIntensity(e));
+                document.getElementById('resetColorIntensity').addEventListener('click', () => this.resetColorIntensity());
 
                 // Export
                 document.getElementById('exportJPG').addEventListener('click', () => this.exportImage('jpg'));
@@ -904,6 +920,19 @@
                 this.updateArtworkTransform();
             }
 
+            updateColorIntensity(e) {
+                this.colorIntensity = parseInt(e.target.value);
+                document.getElementById('colorIntensityValue').textContent = this.colorIntensity + '%';
+                this.updateArtworkTransform();
+            }
+
+            resetColorIntensity() {
+                this.colorIntensity = 100;
+                document.getElementById('colorIntensitySlider').value = 100;
+                document.getElementById('colorIntensityValue').textContent = '100%';
+                this.updateArtworkTransform();
+            }
+
             updateArtworkTransform() {
                 if (!this.artworkElement) return;
 
@@ -912,6 +941,10 @@
                 this.artworkElement.style.top = this.artworkPosition.y + 'px';
                 this.artworkElement.style.transform = 
                     `perspective(500px) rotateX(${this.artworkRotation.x}deg) rotateY(${this.artworkRotation.y}deg) rotateZ(${this.artworkRotation.z}deg)`;
+                
+                // Apply color intensity filter (saturation)
+                const saturation = this.colorIntensity / 100; // Convert percentage to decimal
+                this.artworkElement.style.filter = `saturate(${saturation})`;
             }
 
 
@@ -984,10 +1017,12 @@
                     return;
                 }
 
-                // Check if any rotation is applied - if so, use screenshot method instead
+                // Check if any rotation or color intensity change is applied - if so, use screenshot method instead
                 const hasRotation = this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0;
-                if (hasRotation) {
-                    this.showStatus('Rotation detected - using screenshot method for accurate export...', 'info');
+                const hasColorIntensityChange = this.colorIntensity !== 100;
+                if (hasRotation || hasColorIntensityChange) {
+                    const reason = hasRotation ? 'Rotation' : 'Color intensity adjustment';
+                    this.showStatus(`${reason} detected - using screenshot method for accurate export...`, 'info');
                     return this.exportScreenshot();
                 }
 
