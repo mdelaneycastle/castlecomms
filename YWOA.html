@@ -408,7 +408,7 @@
             background-size: cover;
             background-position: center;
             cursor: move;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.3);
             transform-origin: center center;
         }
 
@@ -1168,20 +1168,20 @@
                 const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
                 const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
                 
-                // Shadow offset and blur
-                const shadowOffsetX = 15;
-                const shadowOffsetY = 20;
-                const shadowBlur = 15;
+                // Shadow offset and blur - closer and less blurry
+                const shadowOffsetX = 8;
+                const shadowOffsetY = 12;
+                const shadowBlur = 8;
                 
-                // Draw multiple shadow layers for depth
-                ctx.globalAlpha = 0.4;
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                // Draw shadow layers for depth
+                ctx.globalAlpha = 0.3;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
                 ctx.shadowBlur = shadowBlur;
                 ctx.shadowOffsetX = shadowOffsetX;
                 ctx.shadowOffsetY = shadowOffsetY;
                 
                 // Create a temporary rectangle to generate shadow
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.fillRect(
                     this.artworkPosition.x,
                     this.artworkPosition.y,
