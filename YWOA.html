@@ -484,6 +484,7 @@
             <div class="export-options">
                 <button class="btn" id="exportJPG">📸 Export as JPG</button>
                 <button class="btn" id="exportScreenshot">📸 Quick Screenshot (exact)</button>
+                <button class="btn" id="exportCleanScreenshot">🎯 Clean Screenshot (no header)</button>
                 <button class="btn" id="exportPNG">🖼️ Export as PNG</button>
                 <button class="btn" id="shareImage">📤 Share Image</button>
             </div>
@@ -568,6 +569,7 @@
                 document.getElementById('exportJPG').addEventListener('click', () => this.exportImage('jpg'));
                 document.getElementById('exportPNG').addEventListener('click', () => this.exportImage('png'));
                 document.getElementById('exportScreenshot').addEventListener('click', () => this.exportScreenshot());
+                document.getElementById('exportCleanScreenshot').addEventListener('click', () => this.exportCleanScreenshot());
                 document.getElementById('shareImage').addEventListener('click', () => this.shareImage());
             }
 
@@ -982,6 +984,29 @@
                 }
 
                 try {
+                    // Hide header and other UI elements during screenshot
+                    const headerContainer = document.getElementById('header-container');
+                    const sidebarContainer = document.getElementById('sidebar-container');
+                    const launcher = document.getElementById('cc-launcher');
+                    const widget = document.getElementById('cc-widget');
+                    
+                    const hiddenElements = [];
+                    
+                    // Store original visibility and hide elements
+                    [headerContainer, sidebarContainer, launcher, widget].forEach(el => {
+                        if (el) {
+                            hiddenElements.push({
+                                element: el,
+                                originalDisplay: el.style.display,
+                                originalVisibility: el.style.visibility
+                            });
+                            el.style.display = 'none';
+                        }
+                    });
+                    
+                    // Small delay to ensure elements are hidden before screenshot
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
                     this.showStatus('Click to share your screen, then select this browser tab.', 'info');
                     
                     // Request screen capture
@@ -1042,10 +1067,104 @@
                     link.href = dataURL;
                     link.click();
                     
+                    // Restore original visibility of hidden elements
+                    hiddenElements.forEach(({ element, originalDisplay, originalVisibility }) => {
+                        element.style.display = originalDisplay || '';
+                        element.style.visibility = originalVisibility || '';
+                    });
+                    
                     this.showStatus('Screenshot exported successfully!', 'success');
                 } catch (error) {
                     console.error('Screenshot error:', error);
+                    
+                    // Ensure elements are restored even on error
+                    hiddenElements.forEach(({ element, originalDisplay, originalVisibility }) => {
+                        element.style.display = originalDisplay || '';
+                        element.style.visibility = originalVisibility || '';
+                    });
+                    
                     this.showStatus('Screenshot failed. Screen sharing may not be supported.', 'error');
+                }
+            }
+
+            async exportCleanScreenshot() {
+                if (!this.roomImage) {
+                    this.showStatus('No room image to export.', 'error');
+                    return;
+                }
+
+                try {
+                    this.showStatus('Generating clean screenshot without header...', 'info');
+                    
+                    // Hide header and UI elements
+                    const headerContainer = document.getElementById('header-container');
+                    const sidebarContainer = document.getElementById('sidebar-container');
+                    const launcher = document.getElementById('cc-launcher');
+                    const widget = document.getElementById('cc-widget');
+                    const exportSection = document.querySelector('.export-section');
+                    
+                    const hiddenElements = [];
+                    
+                    // Store original visibility and hide elements
+                    [headerContainer, sidebarContainer, launcher, widget, exportSection].forEach(el => {
+                        if (el) {
+                            hiddenElements.push({
+                                element: el,
+                                originalDisplay: el.style.display,
+                                originalVisibility: el.style.visibility
+                            });
+                            el.style.display = 'none';
+                        }
+                    });
+                    
+                    // Small delay to ensure elements are hidden
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    
+                    // Use html2canvas to capture just the canvas container
+                    const canvasContainer = document.querySelector('.canvas-container');
+                    const canvas = await html2canvas(canvasContainer, {
+                        backgroundColor: null,
+                        allowTaint: true,
+                        useCORS: true,
+                        scale: window.devicePixelRatio || 1,
+                        width: canvasContainer.offsetWidth,
+                        height: canvasContainer.offsetHeight
+                    });
+                    
+                    // Restore visibility
+                    hiddenElements.forEach(({ element, originalDisplay, originalVisibility }) => {
+                        element.style.display = originalDisplay || '';
+                        element.style.visibility = originalVisibility || '';
+                    });
+                    
+                    // Download the result
+                    const dataURL = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = 'your-world-our-art-clean.png';
+                    link.href = dataURL;
+                    link.click();
+                    
+                    this.showStatus('Clean screenshot exported successfully!', 'success');
+                } catch (error) {
+                    console.error('Clean screenshot error:', error);
+                    
+                    // Ensure elements are restored even on error
+                    const elementsToRestore = [
+                        document.getElementById('header-container'),
+                        document.getElementById('sidebar-container'), 
+                        document.getElementById('cc-launcher'),
+                        document.getElementById('cc-widget'),
+                        document.querySelector('.export-section')
+                    ];
+                    
+                    elementsToRestore.forEach(el => {
+                        if (el) {
+                            el.style.display = '';
+                            el.style.visibility = '';
+                        }
+                    });
+                    
+                    this.showStatus('Clean screenshot failed. Please try the regular screenshot instead.', 'error');
                 }
             }
 
