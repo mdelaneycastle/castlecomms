@@ -1227,7 +1227,7 @@
                     });
                     
                     // Small delay to ensure elements are hidden before screenshot
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await new Promise(resolve => setTimeout(resolve, 500));
                     
                     this.showStatus('Click to share your screen, then select this browser tab.', 'info');
                     
@@ -1517,7 +1517,7 @@
                 // Add delay before starting screenshot to ensure share dialog closes
                 setTimeout(() => {
                     this.performScreenshot();
-                }, 500);
+                }, 1200);
             }
         }
 
