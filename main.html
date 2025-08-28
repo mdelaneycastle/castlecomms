@@ -167,6 +167,7 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
     <button class="tab-button" data-tab="tasks">Tasks</button>
     <button class="tab-button" data-tab="forms">Forms</button>
     <button class="tab-button" data-tab="communications">Communications</button>
+    <button class="tab-button" data-tab="checklists">Checklists</button>
   </div>
 
   <!-- Home Tab Content (Original home page) -->
@@ -321,6 +322,46 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
       
       <div class="communications-list" id="communications-list">
         <div class="loading" style="text-align: center; padding: 3rem; color: #6c757d;">Loading communications...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checklists Tab Content -->
+  <div class="tab-content" id="checklists-tab">
+    <div class="checklists-container" style="max-width: 1200px; margin: 0 auto; padding: 2rem; background: rgba(255, 255, 255, 0.95); border-radius: var(--border-radius, 12px); box-shadow: var(--shadow-medium, 0 4px 20px rgba(0,0,0,0.1)); backdrop-filter: blur(10px);">
+      <div class="checklists-header" style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0; font-size: 2.5rem; font-weight: 600; background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📋 Checklists</h1>
+      </div>
+      
+      <div class="checklist-navigation" style="display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center; flex-wrap: wrap;">
+        <button class="checklist-nav-button active" data-checklist="gallery" style="background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: all 0.3s;">Gallery Checklist</button>
+      </div>
+      
+      <!-- Gallery Checklist -->
+      <div class="checklist-content active" id="gallery-checklist">
+        <div class="checklist-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px;">
+          <div>
+            <h2 style="margin: 0; font-size: 1.8rem; color: #2c3e50;">WEEKLY GALLERY CHECKLIST</h2>
+          </div>
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="checklist-score" id="gallery-score" style="background: #28a745; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1.1rem;">0/11 (0%)</div>
+            <button class="pdf-export-btn" onclick="exportToPDF('gallery')" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">PDF</button>
+          </div>
+        </div>
+        
+        <div class="checklist-items" id="gallery-items">
+          <!-- Items will be populated by JavaScript -->
+        </div>
+        
+        <div class="signature-section" style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px;">
+          <h3 style="margin: 0 0 1rem 0; color: #2c3e50;">Reviewer signature</h3>
+          <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <input type="text" id="signature-name" placeholder="Enter your name" style="padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; min-width: 200px;">
+            <button onclick="addSignature()" style="background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">Add Signature</button>
+            <button onclick="clearSignature()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">Clear</button>
+          </div>
+          <div id="signature-display" style="margin-top: 1rem; padding: 1rem; background: #e9ecef; border-radius: 8px; min-height: 60px; display: flex; align-items: center; font-size: 1.2rem; font-style: italic; color: #495057;"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1024,6 +1065,264 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 });
+
+// Checklist functionality
+const galleryChecklistItems = [
+  { id: 'windows-photos', text: 'Please take overview photos of your windows', hasPhoto: false },
+  { id: 'viewing-room-photos', text: 'Please take overview photos of your viewing room', hasPhoto: false },
+  { id: 'stockroom-photos', text: 'Please take overview photos of your stockroom', hasPhoto: false },
+  { id: 'gallery-photos', text: 'Please take overview photos of the entire gallery (please upload 4-6 photos)', hasPhoto: true },
+  { id: 'fire-exits', text: 'Please ensure all fire exits are clear', hasPhoto: false },
+  { id: 'maintenance-requests', text: 'Please send any Maintenance requests through the Maintenance team', hasPhoto: false },
+  { id: 'kronos-updated', text: 'Please ensure Kronos is updated and submitted by EOD.', hasPhoto: false },
+  { id: 'comms-read', text: 'Ensure all teams have read through comms and ticked to say they have', hasPhoto: false },
+  { id: 'halcyon-photos', text: 'Please add pictures of your Halcyon artwork Halcyon rooms', hasPhoto: false },
+  { id: 'originals-count', text: 'Please state how many originals you have on the wall', hasValue: true, placeholder: 'e.g. ORI 21, SCU 19' },
+  { id: 'sles-count', text: 'Please state how many SLE\'s you have on the wall', hasValue: true, placeholder: 'e.g. SLE 98' }
+];
+
+let checklistState = {
+  gallery: {
+    items: {},
+    signature: '',
+    photos: {},
+    comments: {}
+  }
+};
+
+function initializeChecklists() {
+  renderGalleryChecklist();
+  updateScore();
+}
+
+function renderGalleryChecklist() {
+  const container = document.getElementById('gallery-items');
+  
+  const itemsHTML = galleryChecklistItems.map((item, index) => {
+    const isCompleted = checklistState.gallery.items[item.id] || false;
+    const comment = checklistState.gallery.comments[item.id] || '';
+    const value = checklistState.gallery.items[item.id + '_value'] || '';
+    
+    return `
+      <div class="checklist-item" style="display: flex; align-items: flex-start; padding: 1rem; margin-bottom: 1rem; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
+        <div style="flex: 1; margin-right: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+            <span style="color: #6c757d; font-weight: 500; min-width: 20px;">${index + 1}.</span>
+            <span style="flex: 1; color: #2c3e50;">${item.text}</span>
+          </div>
+          
+          ${item.hasValue ? `
+            <div style="margin-left: 30px; margin-bottom: 0.5rem;">
+              <input type="text" 
+                     id="value-${item.id}" 
+                     placeholder="${item.placeholder}"
+                     value="${value}"
+                     onchange="updateItemValue('${item.id}', this.value)"
+                     style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
+            </div>
+          ` : ''}
+          
+          ${item.hasPhoto ? `
+            <div style="margin-left: 30px; margin-bottom: 0.5rem;">
+              <input type="file" 
+                     id="photo-${item.id}" 
+                     accept="image/*" 
+                     multiple
+                     onchange="handlePhotoUpload('${item.id}', this.files)"
+                     style="margin-bottom: 0.5rem;">
+              <div id="photos-${item.id}" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+            </div>
+          ` : ''}
+          
+          <div style="margin-left: 30px;">
+            <textarea 
+              id="comment-${item.id}"
+              placeholder="Add a comment..."
+              onchange="updateComment('${item.id}', this.value)"
+              style="width: 100%; max-width: 400px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; min-height: 60px;">${comment}</textarea>
+          </div>
+        </div>
+        
+        <div style="background: ${isCompleted ? '#28a745' : '#f8f9fa'}; color: ${isCompleted ? 'white' : '#666'}; width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; font-weight: 600; user-select: none;" 
+             onclick="toggleItem('${item.id}')">
+          ${isCompleted ? '1' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = itemsHTML;
+}
+
+function toggleItem(itemId) {
+  checklistState.gallery.items[itemId] = !checklistState.gallery.items[itemId];
+  renderGalleryChecklist();
+  updateScore();
+  saveToLocalStorage();
+}
+
+function updateComment(itemId, comment) {
+  checklistState.gallery.comments[itemId] = comment;
+  saveToLocalStorage();
+}
+
+function updateItemValue(itemId, value) {
+  checklistState.gallery.items[itemId + '_value'] = value;
+  saveToLocalStorage();
+}
+
+function handlePhotoUpload(itemId, files) {
+  if (!checklistState.gallery.photos[itemId]) {
+    checklistState.gallery.photos[itemId] = [];
+  }
+  
+  Array.from(files).forEach(file => {
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        checklistState.gallery.photos[itemId].push({
+          name: file.name,
+          data: e.target.result
+        });
+        displayPhotos(itemId);
+        saveToLocalStorage();
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+function displayPhotos(itemId) {
+  const container = document.getElementById(`photos-${itemId}`);
+  const photos = checklistState.gallery.photos[itemId] || [];
+  
+  container.innerHTML = photos.map((photo, index) => `
+    <div style="position: relative; display: inline-block;">
+      <img src="${photo.data}" 
+           style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 2px solid #28a745;">
+      <button onclick="removePhoto('${itemId}', ${index})" 
+              style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer;">×</button>
+    </div>
+  `).join('');
+}
+
+function removePhoto(itemId, photoIndex) {
+  checklistState.gallery.photos[itemId].splice(photoIndex, 1);
+  displayPhotos(itemId);
+  saveToLocalStorage();
+}
+
+function updateScore() {
+  const completed = Object.values(checklistState.gallery.items).filter(Boolean).length;
+  const total = galleryChecklistItems.length;
+  const percentage = Math.round((completed / total) * 100);
+  
+  const scoreElement = document.getElementById('gallery-score');
+  scoreElement.textContent = `${completed}/${total} (${percentage}%)`;
+  scoreElement.style.background = percentage === 100 ? '#28a745' : percentage >= 50 ? '#ffc107' : '#6c757d';
+  scoreElement.style.color = percentage >= 50 ? (percentage === 100 ? 'white' : 'black') : 'white';
+}
+
+function addSignature() {
+  const name = document.getElementById('signature-name').value.trim();
+  if (!name) {
+    alert('Please enter your name');
+    return;
+  }
+  
+  checklistState.gallery.signature = name;
+  const display = document.getElementById('signature-display');
+  display.innerHTML = `<strong>${name}</strong> - ${new Date().toLocaleDateString()}`;
+  document.getElementById('signature-name').value = '';
+  saveToLocalStorage();
+}
+
+function clearSignature() {
+  checklistState.gallery.signature = '';
+  document.getElementById('signature-display').innerHTML = '';
+  saveToLocalStorage();
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem('castlecomms-checklists', JSON.stringify(checklistState));
+}
+
+function loadFromLocalStorage() {
+  const saved = localStorage.getItem('castlecomms-checklists');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      checklistState = { ...checklistState, ...parsed };
+      
+      // Restore signature
+      if (checklistState.gallery.signature) {
+        const display = document.getElementById('signature-display');
+        display.innerHTML = `<strong>${checklistState.gallery.signature}</strong> - ${new Date().toLocaleDateString()}`;
+      }
+      
+      // Restore photos
+      Object.keys(checklistState.gallery.photos || {}).forEach(itemId => {
+        displayPhotos(itemId);
+      });
+      
+    } catch (e) {
+      console.error('Error loading checklist data:', e);
+    }
+  }
+}
+
+async function exportToPDF(checklistType) {
+  // Create a simple text-based PDF export using jsPDF (would need to be loaded)
+  // For now, create a detailed summary
+  let exportText = `WEEKLY GALLERY CHECKLIST\n`;
+  exportText += `Generated: ${new Date().toLocaleString()}\n`;
+  exportText += `Completed: ${Object.values(checklistState.gallery.items).filter(Boolean).length}/${galleryChecklistItems.length}\n\n`;
+  
+  galleryChecklistItems.forEach((item, index) => {
+    const isCompleted = checklistState.gallery.items[item.id] ? '✓' : '✗';
+    const comment = checklistState.gallery.comments[item.id] || 'No comment';
+    const value = checklistState.gallery.items[item.id + '_value'] || '';
+    
+    exportText += `${index + 1}. ${item.text} ${isCompleted}\n`;
+    if (value) exportText += `   Value: ${value}\n`;
+    exportText += `   Comment: ${comment}\n`;
+    if (checklistState.gallery.photos[item.id]?.length) {
+      exportText += `   Photos: ${checklistState.gallery.photos[item.id].length} attached\n`;
+    }
+    exportText += `\n`;
+  });
+  
+  if (checklistState.gallery.signature) {
+    exportText += `\nReviewer Signature: ${checklistState.gallery.signature}\n`;
+  }
+  
+  // Create downloadable text file (PDF would require jsPDF library)
+  const blob = new Blob([exportText], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `gallery-checklist-${new Date().toISOString().split('T')[0]}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Initialize checklists when tab is accessed
+document.addEventListener('DOMContentLoaded', function() {
+  // Add checklists tab to existing tab functionality
+  const checklistTab = document.querySelector('[data-tab="checklists"]');
+  if (checklistTab) {
+    checklistTab.addEventListener('click', function() {
+      // Delay initialization to ensure tab content is visible
+      setTimeout(() => {
+        if (document.getElementById('gallery-items') && !document.getElementById('gallery-items').innerHTML.trim()) {
+          initializeChecklists();
+          loadFromLocalStorage();
+        }
+      }, 100);
+    });
+  }
+});
+
 </script>
 
 <!-- Notification Badge System -->

@@ -179,16 +179,8 @@ class NotificationManager {
   setupTokenRefresh() {
     if (!this.messaging) return;
     
-    this.messaging.onTokenRefresh(() => {
-      console.log('🔄 FCM token refreshed');
-      this.messaging.getToken({ vapidKey: this.vapidKey }).then((refreshedToken) => {
-        console.log('✅ New FCM token:', refreshedToken);
-        this.currentToken = refreshedToken;
-        this.saveTokenToDatabase(refreshedToken);
-      }).catch((err) => {
-        console.error('❌ Unable to retrieve refreshed token:', err);
-      });
-    });
+    // onTokenRefresh is deprecated, token refresh is handled automatically
+    console.log('🔄 Token refresh will be handled automatically by Firebase');
   }
 
   setupForegroundMessageListener() {
