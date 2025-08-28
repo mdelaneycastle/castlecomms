@@ -2172,67 +2172,80 @@ async function renderTasksList(filter = 'all') {
     const statusText = isOverdue ? 'OVERDUE' : task.status.toUpperCase().replace('-', ' ');
     
     return `
-      <div class="task-card" style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e9ecef; ${isOverdue ? 'border-left: 4px solid #dc3545;' : ''}">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-          <div style="flex: 1;">
-            <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50; font-size: 1.1rem;">${(task.title || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</h4>
-            <p style="margin: 0 0 1rem 0; color: #6c757d; font-size: 0.9rem;">${(task.description || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</p>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-              <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">${statusText}</span>
-              <span style="background: #f8f9fa; color: #6c757d; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">Due: ${new Date(task.dueDate).toLocaleDateString()}</span>
-              ${task.requiresPhotos ? '<span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">📸 Photos Required</span>' : ''}
-              <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">From: ${task.source.type === 'communication' ? task.source.communicationTitle : task.source.checklistName}</span>
-            </div>
-            
-            <div style="font-size: 0.8rem; color: #6c757d;">
-              <div>${task.source.type === 'communication' ? `Original task: "${(task.source.originalTaskText || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;').replace(/"/g, '&quot;')}"` : `Original item: "${(task.source.itemText || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;').replace(/"/g, '&quot;')}"`}</div>
-              <div>Created: ${new Date(task.createdAt).toLocaleDateString()}</div>
-              ${task.completedAt ? `<div>Completed: ${new Date(task.completedAt).toLocaleDateString()}</div>` : ''}
+      <div class="task-card" style="background: white; border-radius: 12px; padding: 1rem; border: 1px solid #e9ecef; ${isOverdue ? 'border-left: 4px solid #dc3545;' : ''} cursor: pointer; transition: all 0.2s ease;" onclick="toggleTaskDetails('${task.id}')">
+        <!-- Task Header (Always Visible) -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="flex: 1; min-width: 0;">
+            <h4 style="margin: 0; color: #2c3e50; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${(task.title || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+              <span style="background: ${statusColor}; color: white; padding: 0.2rem 0.4rem; border-radius: 10px; font-size: 0.75rem; font-weight: 600;">${statusText}</span>
+              <span style="background: #f8f9fa; color: #6c757d; padding: 0.2rem 0.4rem; border-radius: 10px; font-size: 0.75rem;">Due: ${new Date(task.dueDate).toLocaleDateString()}</span>
+              ${task.requiresPhotos ? '<span style="background: #28a745; color: white; padding: 0.2rem 0.4rem; border-radius: 10px; font-size: 0.75rem;">📸</span>' : ''}
             </div>
           </div>
-          
-          <div style="display: flex; gap: 0.5rem; margin-left: 1rem;">
-            ${task.status === 'pending' ? `<button onclick="updateTaskStatus('${task.id}', 'in-progress')" style="background: #ffc107; color: black; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Start</button>` : ''}
-            ${task.status === 'in-progress' ? `<button onclick="updateTaskStatus('${task.id}', 'completed')" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Complete</button>` : ''}
-            ${task.status === 'completed' ? `<button onclick="updateTaskStatus('${task.id}', 'pending')" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Reopen</button>` : ''}
-            ${isCurrentUserAdmin ? `<button onclick="deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Delete</button>` : ''}
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-left: 1rem;">
+            <button onclick="event.stopPropagation(); toggleTaskDetails('${task.id}')" style="background: #f8f9fa; border: 1px solid #e9ecef; padding: 0.25rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; color: #6c757d;">
+              <span id="expand-icon-${task.id}">▼</span>
+            </button>
           </div>
         </div>
         
-        <!-- Photo upload section for photo-required tasks -->
-        ${task.requiresPhotos ? `
-          <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <div style="font-size: 0.9rem; font-weight: 500; color: #2c3e50;">📸 Photos Required</div>
-              <input type="file" id="task-photo-${task.id}" multiple accept="image/*" style="display: none;" onchange="handleTaskPhotoUpload('${task.id}', this.files)">
-              <button onclick="document.getElementById('task-photo-${task.id}').click()" style="background: #28a745; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Add Photos</button>
-            </div>
-            
-            ${task.photos && task.photos.length > 0 ? `
-              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
-                ${task.photos.map((photo, index) => `
-                  <div style="position: relative;">
-                    <img src="${photo.dataUrl}" alt="${photo.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
-                    <button onclick="removeTaskPhoto('${task.id}', ${index})" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer;">×</button>
-                  </div>
-                `).join('')}
-              </div>
-              <div style="font-size: 0.8rem; color: #6c757d;">${task.photos.length} photo(s) uploaded</div>
-            ` : `
-              <div style="font-size: 0.8rem; color: #dc3545;">No photos uploaded yet</div>
-            `}
+        <!-- Task Details (Collapsible) -->
+        <div id="task-details-${task.id}" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e9ecef;">
+          <p style="margin: 0 0 1rem 0; color: #6c757d; font-size: 0.9rem;">${(task.description || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</p>
+          
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+            <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">From: ${task.source.type === 'communication' ? task.source.communicationTitle : task.source.checklistName}</span>
           </div>
-        ` : ''}
-        
-        <!-- Notes section for all tasks -->
-        <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
-          <div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 0.5rem; color: #2c3e50;">📝 Notes</div>
-          <textarea 
-            id="task-notes-${task.id}" 
-            placeholder="Add notes, updates, or comments about this task..."
-            onchange="updateTaskNotes('${task.id}', this.value)"
-            style="width: 100%; min-height: 60px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-size: 0.9rem;">${(task.notes || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</textarea>
+          
+          <div style="font-size: 0.8rem; color: #6c757d; margin-bottom: 1rem;">
+            <div>${task.source.type === 'communication' ? `Original task: "${(task.source.originalTaskText || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;').replace(/"/g, '&quot;')}"` : `Original item: "${(task.source.itemText || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;').replace(/"/g, '&quot;')}"`}</div>
+            <div>Created: ${new Date(task.createdAt).toLocaleDateString()}</div>
+            ${task.completedAt ? `<div>Completed: ${new Date(task.completedAt).toLocaleDateString()}</div>` : ''}
+          </div>
+          
+          <!-- Action Buttons -->
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            ${task.status === 'pending' ? `<button onclick="event.stopPropagation(); updateTaskStatus('${task.id}', 'in-progress')" style="background: #ffc107; color: black; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Start</button>` : ''}
+            ${task.status === 'in-progress' ? `<button onclick="event.stopPropagation(); updateTaskStatus('${task.id}', 'completed')" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Complete</button>` : ''}
+            ${task.status === 'completed' ? `<button onclick="event.stopPropagation(); updateTaskStatus('${task.id}', 'pending')" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Reopen</button>` : ''}
+            ${isCurrentUserAdmin ? `<button onclick="event.stopPropagation(); deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Delete</button>` : ''}
+          </div>
+          
+          <!-- Photo upload section for photo-required tasks -->
+          ${task.requiresPhotos ? `
+            <div style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;" onclick="event.stopPropagation();">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <div style="font-size: 0.9rem; font-weight: 500; color: #2c3e50;">📸 Photos Required</div>
+                <input type="file" id="task-photo-${task.id}" multiple accept="image/*" style="display: none;" onchange="handleTaskPhotoUpload('${task.id}', this.files)">
+                <button onclick="document.getElementById('task-photo-${task.id}').click()" style="background: #28a745; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Add Photos</button>
+              </div>
+              
+              ${task.photos && task.photos.length > 0 ? `
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                  ${task.photos.map((photo, index) => `
+                    <div style="position: relative;">
+                      <img src="${photo.dataUrl}" alt="${photo.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
+                      <button onclick="removeTaskPhoto('${task.id}', ${index})" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer;">×</button>
+                    </div>
+                  `).join('')}
+                </div>
+                <div style="font-size: 0.8rem; color: #6c757d;">${task.photos.length} photo(s) uploaded</div>
+              ` : `
+                <div style="font-size: 0.8rem; color: #dc3545;">No photos uploaded yet</div>
+              `}
+            </div>
+          ` : ''}
+          
+          <!-- Notes section for all tasks -->
+          <div style="padding: 1rem; background: #f8f9fa; border-radius: 8px;" onclick="event.stopPropagation();">
+            <div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 0.5rem; color: #2c3e50;">📝 Notes</div>
+            <textarea 
+              id="task-notes-${task.id}" 
+              placeholder="Add notes, updates, or comments about this task..."
+              onchange="updateTaskNotes('${task.id}', this.value)"
+              style="width: 100%; min-height: 60px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-size: 0.9rem;">${(task.notes || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</textarea>
+          </div>
         </div>
       </div>
     `;
@@ -2250,6 +2263,22 @@ function getTaskStatusColor(status, isOverdue) {
     'completed': '#28a745'
   };
   return colors[status] || '#6c757d';
+}
+
+// Toggle task details visibility
+function toggleTaskDetails(taskId) {
+  const detailsElement = document.getElementById(`task-details-${taskId}`);
+  const expandIcon = document.getElementById(`expand-icon-${taskId}`);
+  
+  if (detailsElement && expandIcon) {
+    if (detailsElement.style.display === 'none') {
+      detailsElement.style.display = 'block';
+      expandIcon.textContent = '▲';
+    } else {
+      detailsElement.style.display = 'none';
+      expandIcon.textContent = '▼';
+    }
+  }
 }
 
 // Update task status
