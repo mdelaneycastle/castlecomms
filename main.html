@@ -341,15 +341,14 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
       <div class="checklist-content active" id="checklist-overview">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
           <h2 style="margin: 0; font-size: 1.8rem; color: #2c3e50;">Available Checklists</h2>
-          <button onclick="showChecklistHistory()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">View History</button>
+          <div style="display: flex; gap: 1rem;">
+            <button onclick="showCreateChecklist()" style="background: #28a745; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">+ Create Checklist</button>
+            <button onclick="showChecklistHistory()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">View History</button>
+          </div>
         </div>
         
-        <div class="checklist-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-          <div class="checklist-card" onclick="startGalleryChecklist()" style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-            <h3 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.4rem;">📋 Gallery Weekly Checklist</h3>
-            <p style="margin: 0 0 1rem 0; color: #6c757d;">Complete the weekly gallery inspection checklist including photos, fire exits, maintenance, and documentation.</p>
-            <div style="color: #667eea; font-weight: 500;">11 items • Photos required</div>
-          </div>
+        <div class="checklist-cards" id="checklist-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+          <!-- Checklists will be populated by JavaScript -->
         </div>
       </div>
 
@@ -364,6 +363,66 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
           <h3 style="color: #2c3e50; margin-bottom: 1rem;">Gallery Weekly Checklist</h3>
           <div id="gallery-history-list" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
             <!-- History items will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Checklist Page -->
+      <div class="checklist-content" id="create-checklist" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h2 style="margin: 0; font-size: 1.8rem; color: #2c3e50;">Create New Checklist</h2>
+          <button onclick="showChecklistOverview()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">← Back to Checklists</button>
+        </div>
+        
+        <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+          <!-- Basic Info -->
+          <div style="margin-bottom: 2rem;">
+            <h3 style="margin: 0 0 1rem 0; color: #2c3e50;">Checklist Information</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2c3e50;">Checklist Name</label>
+                <input type="text" id="new-checklist-name" placeholder="e.g. Monthly Safety Checklist" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+              </div>
+              <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2c3e50;">Category</label>
+                <select id="new-checklist-category" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem;">
+                  <option value="gallery">Gallery</option>
+                  <option value="maintenance">Maintenance</option>
+                  <option value="safety">Safety</option>
+                  <option value="security">Security</option>
+                  <option value="admin">Administrative</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2c3e50;">Description</label>
+              <textarea id="new-checklist-description" placeholder="Brief description of what this checklist covers..." style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; min-height: 80px; resize: vertical;"></textarea>
+            </div>
+          </div>
+          
+          <!-- Checklist Items -->
+          <div style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="margin: 0; color: #2c3e50;">Checklist Items</h3>
+              <div style="display: flex; gap: 0.5rem;">
+                <button onclick="addChecklistItem('text')" style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">+ Text Item</button>
+                <button onclick="addChecklistItem('photo')" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">+ Photo Item</button>
+                <button onclick="addChecklistItem('number')" style="background: #ffc107; color: black; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">+ Number Item</button>
+                <button onclick="addChecklistItem('comment')" style="background: #6f42c1; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">+ Comment Item</button>
+              </div>
+            </div>
+            
+            <div id="checklist-items-builder" style="background: #f8f9fa; border-radius: 8px; padding: 1rem; min-height: 200px;">
+              <div style="text-align: center; color: #6c757d; padding: 2rem;">
+                Click the buttons above to add items to your checklist
+              </div>
+            </div>
+          </div>
+          
+          <!-- Save Button -->
+          <div style="text-align: right;">
+            <button onclick="saveNewChecklist()" style="background: #28a745; color: white; border: none; padding: 1rem 2rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 1.1rem;">Save Checklist</button>
           </div>
         </div>
       </div>
@@ -1150,11 +1209,16 @@ let savedChecklists = {
   gallery: [] // Array of completed checklists with timestamps
 };
 
+let customChecklists = []; // Array of custom checklist definitions
+let currentChecklistBuilder = []; // Items being built in create mode
+let currentChecklistId = null; // ID of checklist being filled out
+
 console.log('Checklist variables loaded successfully:', galleryChecklistItems.length, 'items');
 
 function initializeChecklists() {
   console.log('Initializing checklist system...');
   loadSavedChecklists();
+  loadCustomChecklists();
   showChecklistOverview();
   console.log('Checklist initialization complete');
 }
@@ -1163,6 +1227,61 @@ function initializeChecklists() {
 function showChecklistOverview() {
   hideAllChecklistContent();
   document.getElementById('checklist-overview').style.display = 'block';
+  renderChecklistOverview();
+}
+
+function showCreateChecklist() {
+  hideAllChecklistContent();
+  document.getElementById('create-checklist').style.display = 'block';
+  clearChecklistBuilder();
+}
+
+function renderChecklistOverview() {
+  const container = document.getElementById('checklist-cards');
+  if (!container) return;
+  
+  let checklistsHTML = '';
+  
+  // Built-in Gallery checklist
+  checklistsHTML += `
+    <div class="checklist-card" onclick="startGalleryChecklist()" style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
+      <h3 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.4rem;">📋 Gallery Weekly Checklist</h3>
+      <p style="margin: 0 0 1rem 0; color: #6c757d;">Complete the weekly gallery inspection checklist including photos, fire exits, maintenance, and documentation.</p>
+      <div style="color: #667eea; font-weight: 500;">11 items • Photos required</div>
+    </div>
+  `;
+  
+  // Custom checklists
+  customChecklists.forEach(checklist => {
+    const itemCount = checklist.items.length;
+    const hasPhotos = checklist.items.some(item => item.type === 'photo');
+    const categoryEmoji = getCategoryEmoji(checklist.category);
+    
+    checklistsHTML += `
+      <div class="checklist-card" onclick="startCustomChecklist('${checklist.id}')" style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
+        <h3 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.4rem;">${categoryEmoji} ${checklist.name}</h3>
+        <p style="margin: 0 0 1rem 0; color: #6c757d;">${checklist.description}</p>
+        <div style="color: #667eea; font-weight: 500;">${itemCount} items${hasPhotos ? ' • Photos required' : ''}</div>
+        <div style="position: absolute; top: 1rem; right: 1rem;">
+          <button onclick="event.stopPropagation(); deleteCustomChecklist('${checklist.id}')" style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Delete</button>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = checklistsHTML;
+}
+
+function getCategoryEmoji(category) {
+  const emojis = {
+    gallery: '📋',
+    maintenance: '🔧',
+    safety: '⚠️',
+    security: '🔒',
+    admin: '📊',
+    other: '📝'
+  };
+  return emojis[category] || '📝';
 }
 
 function showChecklistHistory() {
@@ -1172,6 +1291,7 @@ function showChecklistHistory() {
 }
 
 function startGalleryChecklist() {
+  currentChecklistId = null; // Reset to built-in checklist
   hideAllChecklistContent();
   document.getElementById('gallery-checklist-form').style.display = 'block';
   clearCurrentChecklist();
@@ -1194,6 +1314,289 @@ function clearCurrentChecklist() {
   };
 }
 
+// Checklist Builder Functions
+function clearChecklistBuilder() {
+  currentChecklistBuilder = [];
+  document.getElementById('new-checklist-name').value = '';
+  document.getElementById('new-checklist-description').value = '';
+  document.getElementById('new-checklist-category').value = 'gallery';
+  renderChecklistBuilder();
+}
+
+function addChecklistItem(type) {
+  const itemId = Date.now();
+  const item = {
+    id: itemId,
+    type: type,
+    text: '',
+    placeholder: ''
+  };
+  
+  currentChecklistBuilder.push(item);
+  renderChecklistBuilder();
+}
+
+function renderChecklistBuilder() {
+  const container = document.getElementById('checklist-items-builder');
+  if (!container) return;
+  
+  if (currentChecklistBuilder.length === 0) {
+    container.innerHTML = '<div style="text-align: center; color: #6c757d; padding: 2rem;">Click the buttons above to add items to your checklist</div>';
+    return;
+  }
+  
+  const itemsHTML = currentChecklistBuilder.map((item, index) => {
+    const typeInfo = getItemTypeInfo(item.type);
+    
+    return `
+      <div class="builder-item" style="background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #e9ecef;">
+        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="background: ${typeInfo.color}; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+              ${typeInfo.label}
+            </div>
+            <span style="color: #6c757d; font-size: 0.9rem;">Item ${index + 1}</span>
+          </div>
+          <button onclick="removeBuilderItem(${item.id})" style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Remove</button>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div>
+            <label style="display: block; margin-bottom: 0.25rem; font-weight: 500; color: #2c3e50; font-size: 0.9rem;">Item Text</label>
+            <input type="text" 
+                   value="${item.text}" 
+                   onchange="updateBuilderItem(${item.id}, 'text', this.value)"
+                   placeholder="${typeInfo.textPlaceholder}"
+                   style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+          </div>
+          ${item.type === 'number' || item.type === 'comment' ? `
+            <div>
+              <label style="display: block; margin-bottom: 0.25rem; font-weight: 500; color: #2c3e50; font-size: 0.9rem;">Placeholder Text</label>
+              <input type="text" 
+                     value="${item.placeholder}" 
+                     onchange="updateBuilderItem(${item.id}, 'placeholder', this.value)"
+                     placeholder="${typeInfo.placeholderExample}"
+                     style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem;">
+            </div>
+          ` : '<div></div>'}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = itemsHTML;
+}
+
+function getItemTypeInfo(type) {
+  const typeInfo = {
+    text: {
+      label: 'Text Item',
+      color: '#667eea',
+      textPlaceholder: 'e.g. Check fire exits are clear',
+      placeholderExample: ''
+    },
+    photo: {
+      label: 'Photo Item', 
+      color: '#28a745',
+      textPlaceholder: 'e.g. Take photos of all gallery windows',
+      placeholderExample: ''
+    },
+    number: {
+      label: 'Number Item',
+      color: '#ffc107',
+      textPlaceholder: 'e.g. Count number of artworks displayed',
+      placeholderExample: 'e.g. Enter number of items'
+    },
+    comment: {
+      label: 'Comment Item',
+      color: '#6f42c1', 
+      textPlaceholder: 'e.g. Additional notes about gallery condition',
+      placeholderExample: 'e.g. Enter your observations...'
+    }
+  };
+  
+  return typeInfo[type] || typeInfo.text;
+}
+
+function updateBuilderItem(itemId, field, value) {
+  const item = currentChecklistBuilder.find(i => i.id === itemId);
+  if (item) {
+    item[field] = value;
+  }
+}
+
+function removeBuilderItem(itemId) {
+  currentChecklistBuilder = currentChecklistBuilder.filter(i => i.id !== itemId);
+  renderChecklistBuilder();
+}
+
+function saveNewChecklist() {
+  const name = document.getElementById('new-checklist-name').value.trim();
+  const description = document.getElementById('new-checklist-description').value.trim();
+  const category = document.getElementById('new-checklist-category').value;
+  
+  if (!name) {
+    alert('Please enter a checklist name');
+    return;
+  }
+  
+  if (!description) {
+    alert('Please enter a description');
+    return;
+  }
+  
+  if (currentChecklistBuilder.length === 0) {
+    alert('Please add at least one item to the checklist');
+    return;
+  }
+  
+  // Validate all items have text
+  const emptyItems = currentChecklistBuilder.filter(item => !item.text.trim());
+  if (emptyItems.length > 0) {
+    alert('Please fill in text for all checklist items');
+    return;
+  }
+  
+  const newChecklist = {
+    id: Date.now().toString(),
+    name: name,
+    description: description,
+    category: category,
+    items: currentChecklistBuilder.map(item => ({
+      id: item.id.toString(),
+      type: item.type,
+      text: item.text.trim(),
+      placeholder: item.placeholder ? item.placeholder.trim() : ''
+    })),
+    createdAt: new Date().toISOString()
+  };
+  
+  customChecklists.push(newChecklist);
+  saveCustomChecklists();
+  
+  alert(`Checklist "${name}" created successfully!`);
+  showChecklistOverview();
+}
+
+function deleteCustomChecklist(checklistId) {
+  if (!confirm('Are you sure you want to delete this checklist? This action cannot be undone.')) {
+    return;
+  }
+  
+  customChecklists = customChecklists.filter(c => c.id !== checklistId);
+  saveCustomChecklists();
+  renderChecklistOverview();
+}
+
+function startCustomChecklist(checklistId) {
+  const checklist = customChecklists.find(c => c.id === checklistId);
+  if (!checklist) return;
+  
+  currentChecklistId = checklistId;
+  hideAllChecklistContent();
+  document.getElementById('gallery-checklist-form').style.display = 'block';
+  
+  // Clear current state
+  clearCurrentChecklist();
+  
+  // Render the custom checklist
+  renderCustomChecklist(checklist);
+  updateScore();
+}
+
+function saveCustomChecklists() {
+  localStorage.setItem('castlecomms-custom-checklists', JSON.stringify(customChecklists));
+}
+
+function loadCustomChecklists() {
+  const saved = localStorage.getItem('castlecomms-custom-checklists');
+  if (saved) {
+    try {
+      customChecklists = JSON.parse(saved);
+    } catch (e) {
+      console.error('Error loading custom checklists:', e);
+      customChecklists = [];
+    }
+  }
+}
+
+function renderCustomChecklist(checklist) {
+  const container = document.getElementById('gallery-items');
+  if (!container) return;
+  
+  // Update the header title
+  const headerTitle = document.querySelector('#gallery-checklist-form h2');
+  if (headerTitle) {
+    headerTitle.textContent = checklist.name.toUpperCase();
+  }
+  
+  const itemsHTML = checklist.items.map((item, index) => {
+    const status = checklistState.gallery.items[item.id]; // 'pass', 'fail', or undefined
+    const comment = checklistState.gallery.comments[item.id] || '';
+    
+    let extraInputHTML = '';
+    if (item.type === 'number' || item.type === 'comment') {
+      const value = checklistState.gallery.items[item.id + '_value'] || '';
+      const inputType = item.type === 'number' ? 'number' : 'text';
+      const placeholder = item.placeholder || (item.type === 'number' ? 'Enter number' : 'Enter value');
+      
+      extraInputHTML = `
+        <div style="margin-left: 30px; margin-bottom: 0.5rem;">
+          <input type="${inputType}" 
+                 id="value-${item.id}" 
+                 placeholder="${placeholder}"
+                 value="${value}"
+                 onchange="updateItemValue('${item.id}', this.value)"
+                 style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
+        </div>
+      `;
+    }
+    
+    return `
+      <div class="checklist-item" style="display: flex; align-items: flex-start; padding: 1rem; margin-bottom: 1rem; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
+        <div style="flex: 1; margin-right: 1rem;">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+            <span style="color: #6c757d; font-weight: 500; min-width: 20px;">${index + 1}.</span>
+            <span style="flex: 1; color: #2c3e50;">${item.text}</span>
+            ${item.type !== 'text' ? `<span style="background: ${getItemTypeInfo(item.type).color}; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.7rem; font-weight: 600;">${getItemTypeInfo(item.type).label}</span>` : ''}
+          </div>
+          
+          ${extraInputHTML}
+          
+          <div style="margin-left: 30px;">
+            <textarea 
+              id="comment-${item.id}"
+              placeholder="Add a comment about this item..."
+              onchange="updateComment('${item.id}', this.value)"
+              style="width: 100%; max-width: 400px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; min-height: 60px;">${comment}</textarea>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+          <div style="background: ${status === 'pass' ? '#28a745' : '#f8f9fa'}; color: ${status === 'pass' ? 'white' : '#666'}; width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; font-weight: 600; user-select: none; border: 2px solid ${status === 'pass' ? '#28a745' : '#ddd'};" 
+               onclick="setItemStatus('${item.id}', 'pass')">
+            PASS
+          </div>
+          <div style="background: ${status === 'fail' ? '#dc3545' : '#f8f9fa'}; color: ${status === 'fail' ? 'white' : '#666'}; width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; font-weight: 600; user-select: none; border: 2px solid ${status === 'fail' ? '#dc3545' : '#ddd'};" 
+               onclick="setItemStatus('${item.id}', 'fail')">
+            FAIL
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = itemsHTML;
+  
+  // Setup photo upload for photo items
+  setupPhotoUpload();
+}
+
+function updateItemValue(itemId, value) {
+  checklistState.gallery.items[itemId + '_value'] = value;
+  saveToLocalStorage();
+}
+
 function renderGalleryChecklist() {
   const container = document.getElementById('gallery-items');
   console.log('Rendering checklist to container:', container);
@@ -1201,6 +1604,12 @@ function renderGalleryChecklist() {
   if (!container) {
     console.error('Gallery items container not found!');
     return;
+  }
+  
+  // Update the header title
+  const headerTitle = document.querySelector('#gallery-checklist-form h2');
+  if (headerTitle) {
+    headerTitle.textContent = 'WEEKLY GALLERY CHECKLIST';
   }
   
   const itemsHTML = galleryChecklistItems.map((item, index) => {
@@ -1249,7 +1658,17 @@ function renderGalleryChecklist() {
 
 function setItemStatus(itemId, status) {
   checklistState.gallery.items[itemId] = status;
-  renderGalleryChecklist();
+  
+  // Re-render the appropriate checklist type
+  if (currentChecklistId) {
+    const checklist = customChecklists.find(c => c.id === currentChecklistId);
+    if (checklist) {
+      renderCustomChecklist(checklist);
+    }
+  } else {
+    renderGalleryChecklist();
+  }
+  
   updateScore();
   saveToLocalStorage();
 }
@@ -1316,23 +1735,34 @@ function updateScore() {
   const items = checklistState.gallery.items;
   const passed = Object.values(items).filter(status => status === 'pass').length;
   const failed = Object.values(items).filter(status => status === 'fail').length;
-  const total = galleryChecklistItems.length;
+  
+  // Get total items count based on current checklist type
+  let total;
+  if (currentChecklistId) {
+    const checklist = customChecklists.find(c => c.id === currentChecklistId);
+    total = checklist ? checklist.items.length : 0;
+  } else {
+    total = galleryChecklistItems.length;
+  }
+  
   const completed = passed + failed;
   const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
   
   const scoreElement = document.getElementById('gallery-score');
-  scoreElement.textContent = `${passed}/${total} Pass (${passRate}%)`;
-  
-  // Color based on pass rate
-  if (passRate === 100) {
-    scoreElement.style.background = '#28a745'; // Green for 100%
-    scoreElement.style.color = 'white';
-  } else if (passRate >= 80) {
-    scoreElement.style.background = '#ffc107'; // Yellow for 80%+
-    scoreElement.style.color = 'black';
-  } else {
-    scoreElement.style.background = '#dc3545'; // Red for less than 80%
-    scoreElement.style.color = 'white';
+  if (scoreElement) {
+    scoreElement.textContent = `${passed}/${total} Pass (${passRate}%)`;
+    
+    // Color based on pass rate
+    if (passRate === 100) {
+      scoreElement.style.background = '#28a745'; // Green for 100%
+      scoreElement.style.color = 'white';
+    } else if (passRate >= 80) {
+      scoreElement.style.background = '#ffc107'; // Yellow for 80%+
+      scoreElement.style.color = 'black';
+    } else {
+      scoreElement.style.background = '#dc3545'; // Red for less than 80%
+      scoreElement.style.color = 'white';
+    }
   }
 }
 
