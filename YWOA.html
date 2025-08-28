@@ -1293,14 +1293,30 @@
                         scale: Math.max(2, dpr),   // nice crisp export
                         useCORS: true,
                         allowTaint: true,
-                        logging: true, // Enable to debug what's happening
+                        logging: false, // Disable verbose logging
                         removeContainer: true,
-                        foreignObjectRendering: true, // Try to handle CSS 3D transforms better
+                        foreignObjectRendering: false, // Disable - it causes blank images with 3D transforms
                         onclone: (clonedDoc, element) => {
-                            // Ensure 3D transforms are preserved in the clone
+                            // Flatten the 3D transform to 2D approximation for better capture
                             const artworkElement = element.querySelector('.artwork-element');
                             if (artworkElement) {
                                 console.log('Original artwork transform:', artworkElement.style.transform);
+                                
+                                // Convert 3D transform to 2D approximation
+                                if (artworkElement.style.transform.includes('rotateY')) {
+                                    const match = artworkElement.style.transform.match(/rotateY\(([^)]+)\)/);
+                                    if (match) {
+                                        const angle = parseFloat(match[1]);
+                                        const radians = (angle * Math.PI) / 180;
+                                        const scaleX = Math.abs(Math.cos(radians));
+                                        
+                                        console.log(`Converting rotateY(${angle}deg) to scaleX(${scaleX.toFixed(3)})`);
+                                        
+                                        // Apply 2D transform that approximates the 3D effect
+                                        artworkElement.style.transform = `scaleX(${scaleX})`;
+                                        artworkElement.style.transformOrigin = 'center center';
+                                    }
+                                }
                             }
                         }
                     });
