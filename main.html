@@ -349,6 +349,14 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
           </div>
         </div>
         
+        <!-- Photo Upload Section -->
+        <div class="photo-upload-section" style="margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px;">
+          <h3 style="margin: 0 0 1rem 0; color: #2c3e50;">📸 Upload All Photos</h3>
+          <p style="margin: 0 0 1rem 0; color: #6c757d;">Upload all photos for this checklist (overview photos of windows, viewing room, stockroom, gallery, etc.)</p>
+          <input type="file" id="all-photos-upload" accept="image/*" multiple style="margin-bottom: 1rem;">
+          <div id="all-photos-display" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;"></div>
+        </div>
+
         <div class="checklist-items" id="gallery-items">
           <!-- Items will be populated by JavaScript -->
         </div>
@@ -1080,24 +1088,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Checklist functionality
 const galleryChecklistItems = [
-  { id: 'windows-photos', text: 'Please take overview photos of your windows', hasPhoto: false },
-  { id: 'viewing-room-photos', text: 'Please take overview photos of your viewing room', hasPhoto: false },
-  { id: 'stockroom-photos', text: 'Please take overview photos of your stockroom', hasPhoto: false },
-  { id: 'gallery-photos', text: 'Please take overview photos of the entire gallery (please upload 4-6 photos)', hasPhoto: true },
-  { id: 'fire-exits', text: 'Please ensure all fire exits are clear', hasPhoto: false },
-  { id: 'maintenance-requests', text: 'Please send any Maintenance requests through the Maintenance team', hasPhoto: false },
-  { id: 'kronos-updated', text: 'Please ensure Kronos is updated and submitted by EOD.', hasPhoto: false },
-  { id: 'comms-read', text: 'Ensure all teams have read through comms and ticked to say they have', hasPhoto: false },
-  { id: 'halcyon-photos', text: 'Please add pictures of your Halcyon artwork Halcyon rooms', hasPhoto: false },
-  { id: 'originals-count', text: 'Please state how many originals you have on the wall', hasValue: true, placeholder: 'e.g. ORI 21, SCU 19' },
-  { id: 'sles-count', text: 'Please state how many SLEs you have on the wall', hasValue: true, placeholder: 'e.g. SLE 98' }
+  { id: 'windows-photos', text: 'Overview photos of your windows taken' },
+  { id: 'viewing-room-photos', text: 'Overview photos of your viewing room taken' },
+  { id: 'stockroom-photos', text: 'Overview photos of your stockroom taken' },
+  { id: 'gallery-photos', text: 'Overview photos of the entire gallery taken (4-6 photos)' },
+  { id: 'fire-exits', text: 'All fire exits are clear' },
+  { id: 'maintenance-requests', text: 'Maintenance requests sent through Maintenance team' },
+  { id: 'kronos-updated', text: 'Kronos updated and submitted by EOD' },
+  { id: 'comms-read', text: 'All teams have read through comms and confirmed' },
+  { id: 'halcyon-photos', text: 'Pictures of Halcyon artwork/rooms added' },
+  { id: 'originals-count', text: 'Number of originals on wall documented' },
+  { id: 'sles-count', text: 'Number of SLEs on wall documented' }
 ];
 
 let checklistState = {
   gallery: {
-    items: {},
+    items: {}, // pass/fail status for each item
     signature: '',
-    photos: {},
+    allPhotos: [], // all uploaded photos
     comments: {}
   }
 };
@@ -1123,9 +1131,8 @@ function renderGalleryChecklist() {
   }
   
   const itemsHTML = galleryChecklistItems.map((item, index) => {
-    const isCompleted = checklistState.gallery.items[item.id] || false;
+    const status = checklistState.gallery.items[item.id]; // 'pass', 'fail', or undefined
     const comment = checklistState.gallery.comments[item.id] || '';
-    const value = checklistState.gallery.items[item.id + '_value'] || '';
     
     return `
       <div class="checklist-item" style="display: flex; align-items: flex-start; padding: 1rem; margin-bottom: 1rem; background: white; border-radius: 8px; border: 1px solid #e9ecef;">
@@ -1135,41 +1142,24 @@ function renderGalleryChecklist() {
             <span style="flex: 1; color: #2c3e50;">${item.text}</span>
           </div>
           
-          ${item.hasValue ? `
-            <div style="margin-left: 30px; margin-bottom: 0.5rem;">
-              <input type="text" 
-                     id="value-${item.id}" 
-                     placeholder="${item.placeholder}"
-                     value="${value}"
-                     onchange="updateItemValue('${item.id}', this.value)"
-                     style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
-            </div>
-          ` : ''}
-          
-          ${item.hasPhoto ? `
-            <div style="margin-left: 30px; margin-bottom: 0.5rem;">
-              <input type="file" 
-                     id="photo-${item.id}" 
-                     accept="image/*" 
-                     multiple
-                     onchange="handlePhotoUpload('${item.id}', this.files)"
-                     style="margin-bottom: 0.5rem;">
-              <div id="photos-${item.id}" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
-            </div>
-          ` : ''}
-          
           <div style="margin-left: 30px;">
             <textarea 
               id="comment-${item.id}"
-              placeholder="Add a comment..."
+              placeholder="Add a comment about this item..."
               onchange="updateComment('${item.id}', this.value)"
               style="width: 100%; max-width: 400px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; min-height: 60px;">${comment}</textarea>
           </div>
         </div>
         
-        <div style="background: ${isCompleted ? '#28a745' : '#f8f9fa'}; color: ${isCompleted ? 'white' : '#666'}; width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; font-weight: 600; user-select: none;" 
-             onclick="toggleItem('${item.id}')">
-          ${isCompleted ? '1' : ''}
+        <div style="display: flex; gap: 0.5rem;">
+          <div style="background: ${status === 'pass' ? '#28a745' : '#f8f9fa'}; color: ${status === 'pass' ? 'white' : '#666'}; width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; font-weight: 600; user-select: none; border: 2px solid ${status === 'pass' ? '#28a745' : '#ddd'};" 
+               onclick="setItemStatus('${item.id}', 'pass')">
+            PASS
+          </div>
+          <div style="background: ${status === 'fail' ? '#dc3545' : '#f8f9fa'}; color: ${status === 'fail' ? 'white' : '#666'}; width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; font-weight: 600; user-select: none; border: 2px solid ${status === 'fail' ? '#dc3545' : '#ddd'};" 
+               onclick="setItemStatus('${item.id}', 'fail')">
+            FAIL
+          </div>
         </div>
       </div>
     `;
@@ -1179,10 +1169,13 @@ function renderGalleryChecklist() {
   console.log('Setting innerHTML...');
   container.innerHTML = itemsHTML;
   console.log('Checklist rendered successfully, container now has:', container.children.length, 'items');
+  
+  // Initialize photo upload
+  setupPhotoUpload();
 }
 
-function toggleItem(itemId) {
-  checklistState.gallery.items[itemId] = !checklistState.gallery.items[itemId];
+function setItemStatus(itemId, status) {
+  checklistState.gallery.items[itemId] = status;
   renderGalleryChecklist();
   updateScore();
   saveToLocalStorage();
@@ -1193,25 +1186,27 @@ function updateComment(itemId, comment) {
   saveToLocalStorage();
 }
 
-function updateItemValue(itemId, value) {
-  checklistState.gallery.items[itemId + '_value'] = value;
-  saveToLocalStorage();
+function setupPhotoUpload() {
+  const fileInput = document.getElementById('all-photos-upload');
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      handleAllPhotosUpload(e.target.files);
+    });
+  }
+  displayAllPhotos();
 }
 
-function handlePhotoUpload(itemId, files) {
-  if (!checklistState.gallery.photos[itemId]) {
-    checklistState.gallery.photos[itemId] = [];
-  }
-  
+function handleAllPhotosUpload(files) {
   Array.from(files).forEach(file => {
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = function(e) {
-        checklistState.gallery.photos[itemId].push({
+        checklistState.gallery.allPhotos.push({
           name: file.name,
-          data: e.target.result
+          data: e.target.result,
+          uploadDate: new Date().toISOString()
         });
-        displayPhotos(itemId);
+        displayAllPhotos();
         saveToLocalStorage();
       };
       reader.readAsDataURL(file);
@@ -1219,35 +1214,53 @@ function handlePhotoUpload(itemId, files) {
   });
 }
 
-function displayPhotos(itemId) {
-  const container = document.getElementById(`photos-${itemId}`);
-  const photos = checklistState.gallery.photos[itemId] || [];
+function displayAllPhotos() {
+  const container = document.getElementById('all-photos-display');
+  if (!container) return;
+  
+  const photos = checklistState.gallery.allPhotos || [];
   
   container.innerHTML = photos.map((photo, index) => `
-    <div style="position: relative; display: inline-block;">
+    <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
       <img src="${photo.data}" 
-           style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 2px solid #28a745;">
-      <button onclick="removePhoto('${itemId}', ${index})" 
-              style="position: absolute; top: -8px; right: -8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer;">×</button>
+           style="width: 100%; height: 150px; object-fit: cover;">
+      <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 0.5rem; font-size: 0.8rem;">
+        ${photo.name}
+      </div>
+      <button onclick="removeAllPhoto(${index})" 
+              style="position: absolute; top: 8px; right: 8px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; cursor: pointer; font-weight: bold;">×</button>
     </div>
   `).join('');
 }
 
-function removePhoto(itemId, photoIndex) {
-  checklistState.gallery.photos[itemId].splice(photoIndex, 1);
-  displayPhotos(itemId);
+function removeAllPhoto(photoIndex) {
+  checklistState.gallery.allPhotos.splice(photoIndex, 1);
+  displayAllPhotos();
   saveToLocalStorage();
 }
 
 function updateScore() {
-  const completed = Object.values(checklistState.gallery.items).filter(Boolean).length;
+  const items = checklistState.gallery.items;
+  const passed = Object.values(items).filter(status => status === 'pass').length;
+  const failed = Object.values(items).filter(status => status === 'fail').length;
   const total = galleryChecklistItems.length;
-  const percentage = Math.round((completed / total) * 100);
+  const completed = passed + failed;
+  const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
   
   const scoreElement = document.getElementById('gallery-score');
-  scoreElement.textContent = `${completed}/${total} (${percentage}%)`;
-  scoreElement.style.background = percentage === 100 ? '#28a745' : percentage >= 50 ? '#ffc107' : '#6c757d';
-  scoreElement.style.color = percentage >= 50 ? (percentage === 100 ? 'white' : 'black') : 'white';
+  scoreElement.textContent = `${passed}/${total} Pass (${passRate}%)`;
+  
+  // Color based on pass rate
+  if (passRate === 100) {
+    scoreElement.style.background = '#28a745'; // Green for 100%
+    scoreElement.style.color = 'white';
+  } else if (passRate >= 80) {
+    scoreElement.style.background = '#ffc107'; // Yellow for 80%+
+    scoreElement.style.color = 'black';
+  } else {
+    scoreElement.style.background = '#dc3545'; // Red for less than 80%
+    scoreElement.style.color = 'white';
+  }
 }
 
 function addSignature() {
@@ -1284,13 +1297,13 @@ function loadFromLocalStorage() {
       // Restore signature
       if (checklistState.gallery.signature) {
         const display = document.getElementById('signature-display');
-        display.innerHTML = `<strong>${checklistState.gallery.signature}</strong> - ${new Date().toLocaleDateString()}`;
+        if (display) {
+          display.innerHTML = `<strong>${checklistState.gallery.signature}</strong> - ${new Date().toLocaleDateString()}`;
+        }
       }
       
-      // Restore photos
-      Object.keys(checklistState.gallery.photos || {}).forEach(itemId => {
-        displayPhotos(itemId);
-      });
+      // Restore all photos display
+      displayAllPhotos();
       
     } catch (e) {
       console.error('Error loading checklist data:', e);
@@ -1299,28 +1312,51 @@ function loadFromLocalStorage() {
 }
 
 async function exportToPDF(checklistType) {
-  // Create a simple text-based PDF export using jsPDF (would need to be loaded)
-  // For now, create a detailed summary
-  let exportText = `WEEKLY GALLERY CHECKLIST\n`;
+  const items = checklistState.gallery.items;
+  const passed = Object.values(items).filter(status => status === 'pass').length;
+  const failed = Object.values(items).filter(status => status === 'fail').length;
+  const total = galleryChecklistItems.length;
+  const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+  
+  let exportText = `WEEKLY GALLERY CHECKLIST REPORT\n`;
+  exportText += `${'='.repeat(50)}\n`;
   exportText += `Generated: ${new Date().toLocaleString()}\n`;
-  exportText += `Completed: ${Object.values(checklistState.gallery.items).filter(Boolean).length}/${galleryChecklistItems.length}\n\n`;
+  exportText += `Pass Rate: ${passed}/${total} (${passRate}%)\n`;
+  exportText += `Status: ${passRate >= 80 ? 'ACCEPTABLE' : 'NEEDS ATTENTION'}\n\n`;
+  
+  exportText += `SUMMARY:\n`;
+  exportText += `- Passed: ${passed} items\n`;
+  exportText += `- Failed: ${failed} items\n`;
+  exportText += `- Not assessed: ${total - passed - failed} items\n`;
+  exportText += `- Photos uploaded: ${checklistState.gallery.allPhotos.length}\n\n`;
+  
+  exportText += `DETAILED RESULTS:\n`;
+  exportText += `${'='.repeat(30)}\n\n`;
   
   galleryChecklistItems.forEach((item, index) => {
-    const isCompleted = checklistState.gallery.items[item.id] ? '✓' : '✗';
-    const comment = checklistState.gallery.comments[item.id] || 'No comment';
-    const value = checklistState.gallery.items[item.id + '_value'] || '';
+    const status = checklistState.gallery.items[item.id];
+    const statusText = status === 'pass' ? '✓ PASS' : status === 'fail' ? '✗ FAIL' : '? NOT ASSESSED';
+    const comment = checklistState.gallery.comments[item.id] || 'No comment provided';
     
-    exportText += `${index + 1}. ${item.text} ${isCompleted}\n`;
-    if (value) exportText += `   Value: ${value}\n`;
-    exportText += `   Comment: ${comment}\n`;
-    if (checklistState.gallery.photos[item.id]?.length) {
-      exportText += `   Photos: ${checklistState.gallery.photos[item.id].length} attached\n`;
-    }
-    exportText += `\n`;
+    exportText += `${index + 1}. ${item.text}\n`;
+    exportText += `   Status: ${statusText}\n`;
+    exportText += `   Comment: ${comment}\n\n`;
   });
   
+  if (checklistState.gallery.allPhotos.length > 0) {
+    exportText += `PHOTOS ATTACHED:\n`;
+    exportText += `${'='.repeat(20)}\n`;
+    checklistState.gallery.allPhotos.forEach((photo, index) => {
+      exportText += `${index + 1}. ${photo.name} (uploaded: ${new Date(photo.uploadDate).toLocaleString()})\n`;
+    });
+    exportText += `\n`;
+  }
+  
   if (checklistState.gallery.signature) {
-    exportText += `\nReviewer Signature: ${checklistState.gallery.signature}\n`;
+    exportText += `REVIEWER SIGNATURE:\n`;
+    exportText += `${'='.repeat(20)}\n`;
+    exportText += `${checklistState.gallery.signature}\n`;
+    exportText += `Date: ${new Date().toLocaleDateString()}\n`;
   }
   
   // Create downloadable text file (PDF would require jsPDF library)
@@ -1328,7 +1364,7 @@ async function exportToPDF(checklistType) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `gallery-checklist-${new Date().toISOString().split('T')[0]}.txt`;
+  a.download = `gallery-checklist-report-${new Date().toISOString().split('T')[0]}.txt`;
   a.click();
   URL.revokeObjectURL(url);
 }
