@@ -1040,6 +1040,59 @@
                 this.updateArtworkTransform();
             }
 
+            calculateContentBounds() {
+                let bounds = null;
+                
+                // Get canvas bounds as base
+                const canvas = this.canvas;
+                const canvasRect = canvas.getBoundingClientRect();
+                
+                // Start with room image bounds if available
+                if (this.roomImageDisplayed) {
+                    bounds = {
+                        left: canvasRect.left + this.roomImageDisplayed.x,
+                        top: canvasRect.top + this.roomImageDisplayed.y,
+                        right: canvasRect.left + this.roomImageDisplayed.x + this.roomImageDisplayed.width,
+                        bottom: canvasRect.top + this.roomImageDisplayed.y + this.roomImageDisplayed.height
+                    };
+                }
+                
+                // Expand bounds to include artwork if present
+                if (this.artworkElement) {
+                    const artworkRect = this.artworkElement.getBoundingClientRect();
+                    
+                    if (!bounds) {
+                        bounds = {
+                            left: artworkRect.left,
+                            top: artworkRect.top,
+                            right: artworkRect.right,
+                            bottom: artworkRect.bottom
+                        };
+                    } else {
+                        bounds.left = Math.min(bounds.left, artworkRect.left);
+                        bounds.top = Math.min(bounds.top, artworkRect.top);
+                        bounds.right = Math.max(bounds.right, artworkRect.right);
+                        bounds.bottom = Math.max(bounds.bottom, artworkRect.bottom);
+                    }
+                }
+                
+                // If we have scale points, include them in bounds
+                if (this.scalePoints && this.scalePoints.length > 0) {
+                    this.scalePoints.forEach(point => {
+                        if (bounds) {
+                            const pointX = canvasRect.left + point.x;
+                            const pointY = canvasRect.top + point.y;
+                            bounds.left = Math.min(bounds.left, pointX - 20);
+                            bounds.top = Math.min(bounds.top, pointY - 20);
+                            bounds.right = Math.max(bounds.right, pointX + 20);
+                            bounds.bottom = Math.max(bounds.bottom, pointY + 20);
+                        }
+                    });
+                }
+                
+                return bounds;
+            }
+
             showScreenshotModal() {
                 const modal = document.getElementById('screenshotModal');
                 modal.classList.add('show');
@@ -1284,19 +1337,36 @@
                     // Stop the capture
                     stream.getTracks().forEach(track => track.stop());
 
-                    // Crop to canvas container area with improved calculations
-                    const container = document.querySelector('.center-canvas');
-                    const rect = container.getBoundingClientRect();
-                    const dpr = window.devicePixelRatio || 1;
+                    // Calculate crop area around actual content (room image + artwork)
+                    let cropBounds = this.calculateContentBounds();
+                    
+                    if (!cropBounds) {
+                        // Fallback to canvas container if no content bounds available
+                        const container = document.querySelector('.center-canvas');
+                        const rect = container.getBoundingClientRect();
+                        cropBounds = {
+                            left: rect.left,
+                            top: rect.top,
+                            right: rect.right,
+                            bottom: rect.bottom
+                        };
+                    }
+                    
+                    // Add some padding around the content
+                    const padding = 50;
+                    cropBounds.left = Math.max(0, cropBounds.left - padding);
+                    cropBounds.top = Math.max(0, cropBounds.top - padding);
+                    cropBounds.right = Math.min(window.innerWidth, cropBounds.right + padding);
+                    cropBounds.bottom = Math.min(window.innerHeight, cropBounds.bottom + padding);
                     
                     // Scale factors from display to video resolution
                     const scaleX = canvas.width / window.screen.width;
                     const scaleY = canvas.height / window.screen.height;
                     
-                    const cropX = Math.round(rect.left * scaleX);
-                    const cropY = Math.round(rect.top * scaleY);
-                    const cropW = Math.round(rect.width * scaleX);
-                    const cropH = Math.round(rect.height * scaleY);
+                    const cropX = Math.round(cropBounds.left * scaleX);
+                    const cropY = Math.round(cropBounds.top * scaleY);
+                    const cropW = Math.round((cropBounds.right - cropBounds.left) * scaleX);
+                    const cropH = Math.round((cropBounds.bottom - cropBounds.top) * scaleY);
 
                     const croppedCanvas = document.createElement('canvas');
                     const croppedCtx = croppedCanvas.getContext('2d');
