@@ -2233,7 +2233,7 @@ async function renderTasksList(filter = 'all') {
             placeholder="Add notes, updates, or comments about this task..."
             onchange="updateTaskNotes('${task.id}', this.value)"
             style="width: 100%; min-height: 60px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-size: 0.9rem;">${(task.notes || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</textarea>
-        </div>`
+        </div>
       </div>
     `;
   }).join('');
