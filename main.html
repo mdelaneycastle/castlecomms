@@ -2182,11 +2182,11 @@ async function renderTasksList(filter = 'all') {
               <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">${statusText}</span>
               <span style="background: #f8f9fa; color: #6c757d; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">Due: ${new Date(task.dueDate).toLocaleDateString()}</span>
               ${task.requiresPhotos ? '<span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">📸 Photos Required</span>' : ''}
-              <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">From: ${task.source.checklistName}</span>
+              <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">From: ${task.source.type === 'communication' ? task.source.communicationTitle : task.source.checklistName}</span>
             </div>
             
             <div style="font-size: 0.8rem; color: #6c757d;">
-              <div>Original item: "${(task.source.itemText || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;').replace(/"/g, '&quot;')}"</div>
+              <div>${task.source.type === 'communication' ? `Original task: "${(task.source.originalTaskText || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;').replace(/"/g, '&quot;')}"` : `Original item: "${(task.source.itemText || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;').replace(/"/g, '&quot;')}"`}</div>
               <div>Created: ${new Date(task.createdAt).toLocaleDateString()}</div>
               ${task.completedAt ? `<div>Completed: ${new Date(task.completedAt).toLocaleDateString()}</div>` : ''}
             </div>

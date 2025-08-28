@@ -1803,10 +1803,14 @@ function addTask() {
   
   const dueDate = prompt('Enter due date (YYYY-MM-DD) or leave empty:');
   
+  // Ask if this task should be created in the main tasks list
+  const createMainTask = confirm('Do you want to create this as a task in the main Tasks tab?\n\nClick OK to create a main task that will appear in the Tasks tab on the home page.\nClick Cancel to just add it as a communication task.');
+  
   const task = {
     id: Date.now().toString(),
     text: text,
-    dueDate: dueDate || null
+    dueDate: dueDate || null,
+    createMainTask: createMainTask
   };
   
   tasks.push(task);
@@ -1824,9 +1828,10 @@ function updateTasksList() {
   
   container.innerHTML = tasks.map(task => `
     <div class="task-item">
-      <h4>Task</h4>
+      <h4>Task ${task.createMainTask ? '<span style="background: #28a745; color: white; font-size: 0.8rem; padding: 0.2rem 0.5rem; border-radius: 12px; margin-left: 0.5rem;">Main Task</span>' : ''}</h4>
       <p><strong>Description:</strong> ${task.text}</p>
       ${task.dueDate ? `<p><strong>Due Date:</strong> ${task.dueDate}</p>` : ''}
+      ${task.createMainTask ? `<p style="color: #28a745; font-size: 0.9rem; font-style: italic;"><strong>✓</strong> Will be created as a main task in the Tasks tab</p>` : ''}
       <button type="button" class="remove-button" onclick="removeTask('${task.id}')">
         Remove
       </button>
@@ -2084,6 +2089,11 @@ async function saveCommunication(status) {
     }
     
     showStatus(`Communication ${status} successfully!`, 'success');
+    
+    // Create main tasks if published and tasks are marked for creation
+    if (status === 'published') {
+      await createMainTasksFromCommunication(docRef.id, title);
+    }
     
     // Send email notification if published and checkbox is checked
     if (status === 'published') {
@@ -2520,6 +2530,67 @@ function showStatus(message, type) {
 }
 
 // User name display functions are now handled by shared-components.js
+
+// Create main tasks from communication tasks
+async function createMainTasksFromCommunication(communicationId, communicationTitle) {
+  try {
+    const mainTasksToCreate = tasks.filter(task => task.createMainTask);
+    
+    if (mainTasksToCreate.length === 0) {
+      return; // No main tasks to create
+    }
+    
+    const batch = db.batch();
+    let createdTasksCount = 0;
+    
+    for (const task of mainTasksToCreate) {
+      // Set default due date to 1 week from now if not specified
+      let dueDate = task.dueDate;
+      if (!dueDate) {
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        dueDate = nextWeek.toISOString().split('T')[0];
+      }
+      
+      const mainTask = {
+        title: task.text,
+        description: `Task created from communication: "${communicationTitle}"`,
+        status: 'pending',
+        priority: 'medium',
+        dueDate: dueDate,
+        requiresPhotos: false,
+        photos: [],
+        notes: '',
+        completedAt: null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        source: {
+          type: 'communication',
+          communicationId: communicationId,
+          communicationTitle: communicationTitle,
+          originalTaskText: task.text
+        },
+        userId: currentUser.uid,
+        userEmail: currentUser.email
+      };
+      
+      // Add task to batch
+      const taskRef = db.collection('tasks').doc();
+      batch.set(taskRef, mainTask);
+      createdTasksCount++;
+    }
+    
+    // Commit all tasks at once
+    await batch.commit();
+    
+    if (createdTasksCount > 0) {
+      showStatus(`${createdTasksCount} main task(s) created successfully! They will appear in the Tasks tab on the home page.`, 'success');
+    }
+    
+  } catch (error) {
+    console.error('Error creating main tasks:', error);
+    showStatus('Failed to create some main tasks. Please check the console for details.', 'error');
+  }
+}
 </script>
 
 <!-- Site scripts -->
