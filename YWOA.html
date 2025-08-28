@@ -1277,78 +1277,59 @@
                 }
 
                 try {
-                    this.showStatus('Generating export image...', 'info');
+                    this.showStatus('Capturing selected area...', 'info');
                     
-                    // Get selection bounds
+                    // Use html2canvas to capture the stage with all CSS transforms
+                    const options = {
+                        backgroundColor: format === 'jpg' ? '#ffffff' : null,
+                        scale: window.devicePixelRatio || 1,
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false
+                    };
+
+                    const canvas = await html2canvas(this.stage, options);
+                    
+                    // Get selection bounds relative to the stage
                     const selectionRect = this.selection.getBoundingClientRect();
                     const stageRect = this.stage.getBoundingClientRect();
                     
-                    // Create export canvas
-                    const canvas = document.createElement('canvas');
-                    canvas.width = selectionRect.width;
-                    canvas.height = selectionRect.height;
-                    const ctx = canvas.getContext('2d');
+                    // Calculate selection area relative to stage
+                    const selectionX = selectionRect.left - stageRect.left;
+                    const selectionY = selectionRect.top - stageRect.top;
+                    const selectionWidth = selectionRect.width;
+                    const selectionHeight = selectionRect.height;
                     
-                    // Get the background image from bg-holder if available
-                    const bgImg = this.bgContent ? this.bgContent.querySelector('img') : null;
+                    // Scale factors for high DPI displays
+                    const scale = canvas.width / stageRect.width;
                     
-                    if (bgImg) {
-                        // Calculate relative position within the image
-                        const bgRect = bgImg.getBoundingClientRect();
-                        const relativeX = selectionRect.left - bgRect.left;
-                        const relativeY = selectionRect.top - bgRect.top;
-                        
-                        // Scale factors to map from displayed image to original image dimensions
-                        const scaleX = bgImg.naturalWidth / bgRect.width;
-                        const scaleY = bgImg.naturalHeight / bgRect.height;
-                        
-                        // Calculate source rectangle in original image coordinates
-                        const sourceX = Math.max(0, relativeX * scaleX);
-                        const sourceY = Math.max(0, relativeY * scaleY);
-                        const sourceWidth = Math.min(bgImg.naturalWidth - sourceX, selectionRect.width * scaleX);
-                        const sourceHeight = Math.min(bgImg.naturalHeight - sourceY, selectionRect.height * scaleY);
-                        
-                        // Draw the cropped portion of the background image
-                        ctx.drawImage(
-                            bgImg,
-                            sourceX, sourceY, sourceWidth, sourceHeight,
-                            0, 0, canvas.width, canvas.height
-                        );
-                    } else if (hasSolidBackground) {
-                        // Fill with solid background color
-                        ctx.fillStyle = this.canvas.style.backgroundColor || '#f5f5f5';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    }
+                    // Create crop canvas
+                    const cropCanvas = document.createElement('canvas');
+                    const cropCtx = cropCanvas.getContext('2d');
+                    cropCanvas.width = selectionWidth * scale;
+                    cropCanvas.height = selectionHeight * scale;
                     
-                    // If artwork is within selection bounds, draw it
-                    if (this.artworkElement) {
-                        const artworkRect = this.artworkElement.getBoundingClientRect();
-                        
-                        // Check if artwork overlaps with selection
-                        if (artworkRect.right > selectionRect.left && 
-                            artworkRect.left < selectionRect.right &&
-                            artworkRect.bottom > selectionRect.top &&
-                            artworkRect.top < selectionRect.bottom) {
-                            
-                            // Calculate artwork position relative to selection
-                            const artworkX = artworkRect.left - selectionRect.left;
-                            const artworkY = artworkRect.top - selectionRect.top;
-                            
-                            // Create a temporary canvas to render the artwork with transforms
-                            const artworkCanvas = document.createElement('canvas');
-                            artworkCanvas.width = artworkRect.width;
-                            artworkCanvas.height = artworkRect.height;
-                            const artworkCtx = artworkCanvas.getContext('2d');
-                            
-                            if (this.artworkImage) {
-                                artworkCtx.drawImage(this.artworkImage, 0, 0, artworkRect.width, artworkRect.height);
-                            }
-                            
-                            ctx.drawImage(artworkCanvas, artworkX, artworkY);
-                        }
-                    }
+                    // Draw the selected portion from the html2canvas result
+                    cropCtx.drawImage(
+                        canvas,
+                        selectionX * scale, // source x
+                        selectionY * scale, // source y
+                        selectionWidth * scale, // source width
+                        selectionHeight * scale, // source height
+                        0, 0, // destination x, y
+                        selectionWidth * scale, // destination width
+                        selectionHeight * scale // destination height
+                    );
+                    
+                    // Scale down to actual selection size for final output
+                    const finalCanvas = document.createElement('canvas');
+                    const finalCtx = finalCanvas.getContext('2d');
+                    finalCanvas.width = selectionWidth;
+                    finalCanvas.height = selectionHeight;
+                    
+                    finalCtx.drawImage(cropCanvas, 0, 0, selectionWidth, selectionHeight);
 
-                    const dataURL = canvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
+                    const dataURL = finalCanvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
                     const link = document.createElement('a');
                     link.download = `your-world-our-art-crop.${format === 'jpg' ? 'jpg' : 'png'}`;
                     link.href = dataURL;
