@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your World, Our Art - Visualize Art in Your Space</title>
+    <link rel="stylesheet" href="style.css?v=20250813_din_font_update" />
+    <style>
+        .ywoa * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Import DIN Font */
+        @font-face {
+            font-family: 'DIN Light Alternate';
+            src: url('DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --primary-color: #d8d1c5;
+            --secondary-color: #45494e;
+            --tertiary-color: #6a6e73;
+            --accent-color: #c5bdb1;
+            --text-dark: #45494e;
+            --text-light: #6a6e73;
+            --text-muted: #999ea3;
+            --background-overlay: rgba(216, 209, 197, 0.95);
+            --card-background: #F0EDE9;
+            --shadow-subtle: 0 2px 8px rgba(69, 73, 78, 0.08);
+            --shadow-light: 0 4px 12px rgba(69, 73, 78, 0.12);
+            --shadow-medium: 0 8px 20px rgba(69, 73, 78, 0.15);
+            --shadow-heavy: 0 12px 30px rgba(69, 73, 78, 0.2);
+            --border-radius: 8px;
+            --border-radius-large: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-primary: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            --letter-spacing-headers: 0.025em;
+            --letter-spacing-normal: 0;
+            --primary-gradient: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #e5ded2 100%);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            font-weight: 300;
+            color: var(--text-dark);
+            letter-spacing: var(--letter-spacing-normal);
+        }
+
+        .ywoa .ywoa-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-top: 80px;
+        }
+        
+        /* Adjust layout for header/sidebar integration */
+        main {
+            padding: 20px;
+        }
+
+
+        .ywoa .ywoa-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .ywoa .ywoa-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+            font-family: var(--font-primary);
+            letter-spacing: var(--letter-spacing-headers);
+            color: white;
+        }
+
+        .ywoa .ywoa-header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .ywoa .main-content {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .ywoa .left-controls {
+            width: 280px;
+            background: var(--card-background);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+
+        .ywoa .right-controls {
+            width: 280px;
+            background: var(--card-background);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+
+        .ywoa .control-group {
+            margin-bottom: 30px;
+        }
+
+        .control-group h3 {
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-family: var(--font-primary);
+            font-weight: 500;
+            letter-spacing: var(--letter-spacing-headers);
+        }
+
+        .ywoa .upload-area {
+            border: 2px dashed var(--accent-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            background: white;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .upload-area:hover {
+            border-color: var(--secondary-color);
+            background: var(--card-background);
+            box-shadow: var(--shadow-light);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--tertiary-color);
+            background: var(--background-overlay);
+        }
+
+        .upload-area input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .ywoa .upload-preview {
+            max-width: 100%;
+            max-height: 80px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .ywoa .measurement-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .measurement-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            font-family: var(--font-primary);
+            background: white;
+        }
+
+        .measurement-input select {
+            padding: 10px;
+            border: 1px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            background: white;
+            font-family: var(--font-primary);
+        }
+
+        .ywoa .btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            font-family: var(--font-primary);
+            font-weight: 400;
+            transition: var(--transition);
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        #roomColorPicker {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .ywoa .center-canvas {
+            flex: 1;
+            position: relative;
+            background: var(--card-background);
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            width: 600px;
+            height: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #mainCanvas {
+            cursor: crosshair;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .ywoa .instructions {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(69, 73, 78, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            max-width: 300px;
+            font-size: 14px;
+            line-height: 1.4;
+            font-family: var(--font-primary);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .ywoa .point-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--secondary-color);
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            box-shadow: var(--shadow-light);
+        }
+
+        .ywoa .measurement-line {
+            position: absolute;
+            height: 2px;
+            background: var(--secondary-color);
+            transform-origin: left center;
+            z-index: 9;
+        }
+
+        .ywoa .measurement-text {
+            position: absolute;
+            background: var(--secondary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: var(--border-radius);
+            font-size: 12px;
+            font-weight: 500;
+            font-family: var(--font-primary);
+            transform: translate(-50%, -50%);
+            z-index: 11;
+        }
+
+        .ywoa .artwork-container {
+            position: absolute;
+            cursor: move;
+            z-index: 8;
+        }
+
+        .ywoa .artwork-shadow {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.3);
+            filter: blur(3px);
+            transform: skewX(-5deg) translateX(3px) translateY(3px);
+            z-index: 7;
+        }
+
+        .ywoa .export-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(216, 209, 197, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient) !important;
+            color: white !important;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 15px 25px;
+        }
+
+        .ywoa .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .status.success {
+            background: rgba(216, 209, 197, 0.2);
+            color: var(--secondary-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .status.error {
+            background: rgba(106, 110, 115, 0.1);
+            color: var(--secondary-color);
+            border: 1px solid var(--tertiary-color);
+        }
+
+        .status.info {
+            background: var(--background-overlay);
+            color: var(--text-dark);
+            border: 1px solid var(--accent-color);
+        }
+
+        .ywoa .rotation-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .rotation-control input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: var(--accent-color);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .rotation-control input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-light);
+        }
+
+        .rotation-control input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: var(--shadow-light);
+        }
+
+        .rotation-control span {
+            min-width: 35px;
+            text-align: center;
+            font-weight: 500;
+            color: var(--secondary-color);
+            font-family: var(--font-primary);
+        }
+
+        .rotation-control label {
+            min-width: 60px;
+            font-weight: 500;
+            color: var(--secondary-color);
+            font-family: var(--font-primary);
+            font-size: 14px;
+        }
+
+        .rotation-control.primary-rotation label {
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .rotation-control.primary-rotation span {
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .ywoa .artwork-element {
+            position: absolute;
+            background-size: cover;
+            background-position: center;
+            cursor: move;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.3);
+            transform-origin: center center;
+        }
+
+        /* Screenshot Modal Styles */
+        .screenshot-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .screenshot-modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-heavy);
+            width: 90%;
+            max-width: 500px;
+            font-family: var(--font-primary);
+        }
+
+        .screenshot-modal h3 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: var(--letter-spacing-headers);
+        }
+
+        .screenshot-instructions {
+            margin-bottom: 25px;
+        }
+
+        .screenshot-instructions p {
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .screenshot-instructions ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .screenshot-instructions li {
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .screenshot-instructions em {
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .screenshot-modal-buttons {
+            text-align: center;
+        }
+
+        .screenshot-modal.show {
+            display: block;
+        }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+</head>
+<body>
+
+<div id="header-container"></div>
+
+<div id="sidebar-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<main id="main" class="ywoa">
+    <div class="ywoa-container">
+        <div class="ywoa-header">
+            <h1>Your World, Our Art</h1>
+            <p>Visualize artwork in your space with realistic scaling and positioning</p>
+        </div>
+
+        <div class="main-content">
+            <div class="left-controls">
+                <div class="control-group">
+                    <h3>1. Room Background</h3>
+                    <div class="upload-area" id="roomUpload">
+                        <input type="file" id="roomFile" accept="image/*">
+                        <p>📸 Drop room image here or click to browse</p>
+                        <img id="roomPreview" class="upload-preview" style="display: none;">
+                    </div>
+                    <div class="room-color-option">
+                        <p style="font-size: 12px; color: #666; margin: 10px 0 5px 0; text-align: center;">
+                            OR choose a solid color
+                        </p>
+                        <div class="color-picker-container">
+                            <input type="color" id="roomColorPicker" value="#f5f5f5">
+                            <input type="text" id="roomColorHex" placeholder="#f5f5f5" maxlength="7" style="width: 80px; margin-left: 10px; padding: 5px; border: 1px solid var(--accent-color); border-radius: 4px; font-size: 12px;">
+                            <button class="btn" id="clearRoomColor" style="padding: 5px 10px; margin-left: 10px; font-size: 12px;">Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>2. Upload Artwork</h3>
+                    <div class="upload-area" id="artworkUpload">
+                        <input type="file" id="artworkFile" accept="image/*">
+                        <p>🎨 Drop artwork image here or click to browse</p>
+                        <img id="artworkPreview" class="upload-preview" style="display: none;">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>3. Set Room Scale</h3>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                        Click two points lengthwise across your room (not height) and enter the real distance between them
+                    </p>
+                    <div class="measurement-input">
+                        <input type="number" id="realDistance" placeholder="Distance" step="0.1" min="0">
+                        <select id="distanceUnit">
+                            <option value="ft">ft</option>
+                            <option value="m">m</option>
+                            <option value="cm">cm</option>
+                            <option value="in">in</option>
+                        </select>
+                    </div>
+                    <button class="btn" id="clearPoints">Clear Points</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>4. Artwork Width</h3>
+                    <div class="measurement-input">
+                        <input type="number" id="artworkWidth" placeholder="Enter artwork width" step="0.1" min="0">
+                        <select id="artworkUnit">
+                            <option value="ft">ft</option>
+                            <option value="m">m</option>
+                            <option value="cm">cm</option>
+                            <option value="in">in</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="statusMessages"></div>
+            </div>
+
+            <div class="center-canvas">
+                <canvas id="mainCanvas"></canvas>
+            </div>
+
+            <div class="right-controls">
+                <div class="control-group">
+                    <h3>5. Artwork Angle</h3>
+                    <div class="rotation-control primary-rotation">
+                        <label>Angle:</label>
+                        <input type="range" id="rotationYSlider" min="-90" max="90" value="0" step="1">
+                        <span id="rotationYValue">0°</span>
+                    </div>
+                    <button class="btn" id="resetRotation">Reset Angle</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>6. Color Intensity</h3>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                        Adjust artwork saturation to match room lighting conditions
+                    </p>
+                    <div class="rotation-control">
+                        <label>Intensity:</label>
+                        <input type="range" id="colorIntensitySlider" min="0" max="200" value="100" step="5">
+                        <span id="colorIntensityValue">100%</span>
+                    </div>
+                    <button class="btn" id="resetColorIntensity">Reset Color Intensity</button>
+                </div>
+
+                <div class="export-section">
+                    <button class="btn btn-primary" id="exportJPG">📸 Export as JPG</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Screenshot Instructions Modal -->
+<div class="screenshot-modal" id="screenshotModal">
+    <div class="screenshot-modal-content">
+        <h3>Screenshot Export Instructions</h3>
+        <div class="screenshot-instructions">
+            <p><strong>Please follow these steps:</strong></p>
+            <ol>
+                <li>Click "Window" at the top of the screen sharing dialog</li>
+                <li>Select the window titled <strong>"Your World, Our Art"</strong></li>
+                <li>Click "Share" to capture the current view</li>
+            </ol>
+            <p><em>This ensures the highest quality export of your angled artwork.</em></p>
+        </div>
+        <div class="screenshot-modal-buttons">
+            <button class="btn btn-primary" id="screenshotModalOk">OK, Continue</button>
+        </div>
+    </div>
+</div>
+
+    <script>
+        class YWOAApp {
+            constructor() {
+                this.canvas = document.getElementById('mainCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.roomImage = null;
+                this.artworkImage = null;
+                this.roomImageDisplayed = null;
+                this.scalePoints = [];
+                this.realDistance = 0;
+                this.distanceUnit = 'ft';
+                this.artworkWidth = 0;
+                this.artworkUnit = 'ft';
+                this.artworkPosition = { x: 0, y: 0 };
+                this.artworkSize = { width: 0, height: 0 };
+                this.artworkRotation = { x: 0, y: 0, z: 0 }; // Rotation in degrees for each axis
+                this.artworkElement = null; // HTML element for CSS transforms
+                this.colorIntensity = 100; // Color intensity percentage (100% = normal, 0% = grayscale, 200% = oversaturated)
+                this.pixelsPerUnit = 1;
+                this.isDragging = false;
+                this.dragOffset = { x: 0, y: 0 };
+
+                this.initializeCanvas();
+                this.bindEvents();
+                this.showStatus('Welcome! Start by uploading a room image.', 'info');
+            }
+
+            initializeCanvas() {
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+            }
+
+            resizeCanvas() {
+                const container = this.canvas.parentElement;
+                const containerWidth = container.clientWidth;
+                const containerHeight = container.clientHeight;
+                
+                // Set canvas internal resolution
+                this.canvas.width = containerWidth;
+                this.canvas.height = containerHeight;
+                
+                // Set canvas display size to match internal resolution
+                this.canvas.style.width = containerWidth + 'px';
+                this.canvas.style.height = containerHeight + 'px';
+                
+                this.redraw();
+            }
+
+            bindEvents() {
+                // File uploads
+                document.getElementById('roomFile').addEventListener('change', (e) => this.handleRoomUpload(e));
+                document.getElementById('artworkFile').addEventListener('change', (e) => this.handleArtworkUpload(e));
+
+                // Drag and drop
+                this.setupDragDrop('roomUpload', 'roomFile');
+                this.setupDragDrop('artworkUpload', 'artworkFile');
+
+                // Canvas interactions
+                this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+                this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                
+                // Global mouse events to ensure reliable drag release
+                document.addEventListener('mousemove', (e) => this.handleGlobalMouseMove(e));
+                document.addEventListener('mouseup', (e) => this.handleGlobalMouseUp(e));
+                document.addEventListener('mouseleave', (e) => this.handleGlobalMouseUp(e));
+
+                // Controls
+                document.getElementById('realDistance').addEventListener('input', (e) => this.updateScale());
+                document.getElementById('distanceUnit').addEventListener('change', (e) => this.updateScale());
+                document.getElementById('artworkWidth').addEventListener('input', (e) => this.updateArtworkSize());
+                document.getElementById('artworkUnit').addEventListener('change', (e) => this.updateArtworkSize());
+                document.getElementById('clearPoints').addEventListener('click', () => this.clearScalePoints());
+                document.getElementById('rotationYSlider').addEventListener('input', (e) => this.updateRotationY(e));
+                document.getElementById('resetRotation').addEventListener('click', () => this.resetRotation());
+                document.getElementById('colorIntensitySlider').addEventListener('input', (e) => this.updateColorIntensity(e));
+                document.getElementById('resetColorIntensity').addEventListener('click', () => this.resetColorIntensity());
+
+                // Export
+                document.getElementById('exportJPG').addEventListener('click', () => this.exportImage('jpg'));
+                
+                // Screenshot Modal
+                document.getElementById('screenshotModalOk').addEventListener('click', () => this.closeScreenshotModal());
+                
+                // Color picker
+                document.getElementById('roomColorPicker').addEventListener('input', (e) => this.updateRoomColor(e));
+                document.getElementById('roomColorHex').addEventListener('input', (e) => this.updateRoomColorFromHex(e));
+                document.getElementById('clearRoomColor').addEventListener('click', () => this.clearRoomColor());
+            }
+
+            setupDragDrop(uploadAreaId, fileInputId) {
+                const uploadArea = document.getElementById(uploadAreaId);
+                const fileInput = document.getElementById(fileInputId);
+
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        fileInput.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+
+            handleRoomUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.roomImage = img;
+                        document.getElementById('roomPreview').src = e.target.result;
+                        document.getElementById('roomPreview').style.display = 'block';
+                        this.scalePoints = [];
+                        this.redraw();
+                        this.showStatus('Room image loaded! Now click two points to set the scale.', 'success');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            handleArtworkUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        this.artworkImage = img;
+                        document.getElementById('artworkPreview').src = e.target.result;
+                        document.getElementById('artworkPreview').style.display = 'block';
+                        this.createArtworkElement(e.target.result);
+                        
+                        // Set initial size if no width specified yet
+                        if (this.artworkWidth === 0) {
+                            // Set default size to make artwork visible
+                            const defaultSize = 200;
+                            const aspectRatio = img.width / img.height;
+                            this.artworkSize.width = defaultSize;
+                            this.artworkSize.height = defaultSize / aspectRatio;
+                            
+                            // Center it
+                            this.artworkPosition.x = (this.canvas.width - this.artworkSize.width) / 2;
+                            this.artworkPosition.y = (this.canvas.height - this.artworkSize.height) / 2;
+                            
+                            this.updateArtworkElement();
+                        } else {
+                            this.updateArtworkSize();
+                        }
+                        
+                        this.redraw();
+                        this.showStatus('Artwork loaded! Set the artwork width to scale it properly.', 'success');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            handleCanvasClick(e) {
+                if (!this.roomImage) {
+                    this.showStatus('Please upload a room image first.', 'error');
+                    return;
+                }
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                if (this.scalePoints.length < 2) {
+                    this.scalePoints.push({ x, y });
+                    this.redraw();
+                    
+                    if (this.scalePoints.length === 2) {
+                        this.showStatus('Two points set! Enter the real distance between them.', 'info');
+                    } else {
+                        this.showStatus('Click a second point to set the scale reference.', 'info');
+                    }
+                }
+            }
+
+            handleMouseDown(e) {
+                if (!this.artworkImage) return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Check if click is on artwork
+                if (this.artworkImage && x >= this.artworkPosition.x && x <= this.artworkPosition.x + this.artworkSize.width &&
+                    y >= this.artworkPosition.y && y <= this.artworkPosition.y + this.artworkSize.height) {
+                    this.isDragging = true;
+                    this.dragOffset.x = x - this.artworkPosition.x;
+                    this.dragOffset.y = y - this.artworkPosition.y;
+                    this.canvas.style.cursor = 'grabbing';
+                }
+            }
+
+            handleMouseMove(e) {
+                if (!this.isDragging) return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                this.artworkPosition.x = x - this.dragOffset.x;
+                this.artworkPosition.y = y - this.dragOffset.y;
+
+                // Update HTML element position
+                this.updateArtworkTransform();
+                this.redraw();
+            }
+
+            handleMouseUp(e) {
+                if (this.isDragging) {
+                    this.isDragging = false;
+                    this.canvas.style.cursor = 'default';
+                    if (this.artworkElement) {
+                        this.artworkElement.style.cursor = 'move';
+                    }
+                }
+            }
+
+            handleGlobalMouseMove(e) {
+                // Only handle if we're dragging
+                if (!this.isDragging) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                this.artworkPosition.x = x - this.dragOffset.x;
+                this.artworkPosition.y = y - this.dragOffset.y;
+
+                // Update HTML element position
+                this.updateArtworkTransform();
+                this.redraw();
+            }
+
+            handleGlobalMouseUp(e) {
+                // Always stop dragging on any global mouse up or leave
+                if (this.isDragging) {
+                    this.isDragging = false;
+                    this.canvas.style.cursor = 'default';
+                    if (this.artworkElement) {
+                        this.artworkElement.style.cursor = 'move';
+                    }
+                }
+            }
+
+            updateScale() {
+                this.realDistance = parseFloat(document.getElementById('realDistance').value) || 0;
+                this.distanceUnit = document.getElementById('distanceUnit').value;
+
+                if (this.scalePoints.length === 2 && this.realDistance > 0) {
+                    const pixelDistance = this.calculateDistance(this.scalePoints[0], this.scalePoints[1]);
+                    this.pixelsPerUnit = pixelDistance / this.realDistance;
+                    this.updateArtworkSize();
+                    this.showStatus('Scale updated! Artwork will now be sized correctly.', 'success');
+                }
+            }
+
+            updateArtworkSize() {
+                this.artworkWidth = parseFloat(document.getElementById('artworkWidth').value) || 0;
+                this.artworkUnit = document.getElementById('artworkUnit').value;
+
+                if (this.artworkImage && this.artworkWidth > 0 && this.pixelsPerUnit > 0) {
+                    // Convert artwork width to same unit as scale
+                    const widthInScaleUnits = this.convertUnits(this.artworkWidth, this.artworkUnit, this.distanceUnit);
+                    const pixelWidth = widthInScaleUnits * this.pixelsPerUnit;
+                    
+                    // Calculate height maintaining original image aspect ratio
+                    const originalAspectRatio = this.artworkImage.width / this.artworkImage.height;
+                    const pixelHeight = pixelWidth / originalAspectRatio;
+                    
+                    this.artworkSize.width = pixelWidth;
+                    this.artworkSize.height = pixelHeight;
+
+                    // Center artwork initially or when size changes significantly
+                    if (this.artworkPosition.x === 0 && this.artworkPosition.y === 0) {
+                        this.artworkPosition.x = (this.canvas.width - this.artworkSize.width) / 2;
+                        this.artworkPosition.y = (this.canvas.height - this.artworkSize.height) / 2;
+                    }
+
+                    // Update HTML element size and position
+                    this.updateArtworkElement();
+                    this.redraw();
+                }
+            }
+
+            updateArtworkElement() {
+                if (!this.artworkElement) return;
+
+                // Set size
+                this.artworkElement.style.width = this.artworkSize.width + 'px';
+                this.artworkElement.style.height = this.artworkSize.height + 'px';
+
+                // Update transform with current position and rotation
+                this.updateArtworkTransform();
+            }
+
+            convertUnits(value, fromUnit, toUnit) {
+                const toMeters = {
+                    'm': 1,
+                    'ft': 0.3048,
+                    'cm': 0.01,
+                    'in': 0.0254
+                };
+
+                const meters = value * toMeters[fromUnit];
+                return meters / toMeters[toUnit];
+            }
+
+            calculateDistance(point1, point2) {
+                const dx = point2.x - point1.x;
+                const dy = point2.y - point1.y;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            clearScalePoints() {
+                this.scalePoints = [];
+                this.pixelsPerUnit = 1;
+                this.redraw();
+                this.showStatus('Scale points cleared. Click two new points to set scale.', 'info');
+            }
+
+            createArtworkElement(imageSrc) {
+                // Remove existing artwork element if it exists
+                if (this.artworkElement) {
+                    this.artworkElement.remove();
+                }
+
+                // Create new artwork element
+                this.artworkElement = document.createElement('div');
+                this.artworkElement.className = 'artwork-element';
+                this.artworkElement.style.backgroundImage = `url(${imageSrc})`;
+                
+                // Add to canvas container
+                const canvasContainer = document.querySelector('.center-canvas');
+                canvasContainer.appendChild(this.artworkElement);
+
+                // Add drag functionality
+                this.setupArtworkDragging();
+            }
+
+            setupArtworkDragging() {
+                if (!this.artworkElement) return;
+
+                this.artworkElement.addEventListener('mousedown', (e) => {
+                    this.isDragging = true;
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Use consistent offset calculation (same as canvas dragging)
+                    this.dragOffset.x = x - this.artworkPosition.x;
+                    this.dragOffset.y = y - this.artworkPosition.y;
+                    
+                    this.canvas.style.cursor = 'grabbing';
+                    this.artworkElement.style.cursor = 'grabbing';
+                    
+                    e.preventDefault();
+                    e.stopPropagation(); // Prevent canvas mousedown from also firing
+                });
+            }
+
+            updateRotationY(e) {
+                this.artworkRotation.y = parseInt(e.target.value);
+                document.getElementById('rotationYValue').textContent = this.artworkRotation.y + '°';
+                this.updateArtworkTransform();
+            }
+
+            resetRotation() {
+                this.artworkRotation = { x: 0, y: 0, z: 0 };
+                document.getElementById('rotationYSlider').value = 0;
+                document.getElementById('rotationYValue').textContent = '0°';
+                this.updateArtworkTransform();
+            }
+
+            updateColorIntensity(e) {
+                this.colorIntensity = parseInt(e.target.value);
+                document.getElementById('colorIntensityValue').textContent = this.colorIntensity + '%';
+                this.updateArtworkTransform();
+            }
+
+            resetColorIntensity() {
+                this.colorIntensity = 100;
+                document.getElementById('colorIntensitySlider').value = 100;
+                document.getElementById('colorIntensityValue').textContent = '100%';
+                this.updateArtworkTransform();
+            }
+
+            showScreenshotModal() {
+                const modal = document.getElementById('screenshotModal');
+                modal.classList.add('show');
+            }
+
+            closeScreenshotModal() {
+                const modal = document.getElementById('screenshotModal');
+                modal.classList.remove('show');
+                // Continue with the screenshot process after modal is closed
+                this.performScreenshot();
+            }
+
+            updateArtworkTransform() {
+                if (!this.artworkElement) return;
+
+                // Position relative to the canvas container
+                this.artworkElement.style.left = this.artworkPosition.x + 'px';
+                this.artworkElement.style.top = this.artworkPosition.y + 'px';
+                this.artworkElement.style.transform = 
+                    `perspective(500px) rotateX(${this.artworkRotation.x}deg) rotateY(${this.artworkRotation.y}deg) rotateZ(${this.artworkRotation.z}deg)`;
+                
+                // Apply color intensity filter (saturation)
+                const saturation = this.colorIntensity / 100; // Convert percentage to decimal
+                this.artworkElement.style.filter = `saturate(${saturation})`;
+            }
+
+
+            drawScalePointsOnCanvas(ctx) {
+                // Draw scale points
+                this.scalePoints.forEach((point, index) => {
+                    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    ctx.fillStyle = 'white';
+                    ctx.font = '12px DIN Light Alternate, Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(index + 1, point.x, point.y + 4);
+                });
+
+                // Draw measurement line
+                if (this.scalePoints.length === 2) {
+                    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(this.scalePoints[0].x, this.scalePoints[0].y);
+                    ctx.lineTo(this.scalePoints[1].x, this.scalePoints[1].y);
+                    ctx.stroke();
+
+                    if (this.realDistance > 0) {
+                        const midX = (this.scalePoints[0].x + this.scalePoints[1].x) / 2;
+                        const midY = (this.scalePoints[0].y + this.scalePoints[1].y) / 2;
+                        
+                        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
+                        ctx.fillRect(midX - 30, midY - 10, 60, 20);
+                        ctx.fillStyle = 'white';
+                        ctx.font = '12px DIN Light Alternate, Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`${this.realDistance} ${this.distanceUnit}`, midX, midY + 4);
+                    }
+                }
+            }
+
+
+            redraw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw room image - maintain aspect ratio and store dimensions
+                if (this.roomImage) {
+                    const scale = Math.min(
+                        this.canvas.width / this.roomImage.width,
+                        this.canvas.height / this.roomImage.height
+                    );
+                    this.roomImageDisplayed = {
+                        width: this.roomImage.width * scale,
+                        height: this.roomImage.height * scale,
+                        x: (this.canvas.width - this.roomImage.width * scale) / 2,
+                        y: (this.canvas.height - this.roomImage.height * scale) / 2,
+                        scale: scale
+                    };
+
+                    this.ctx.drawImage(this.roomImage, 
+                        this.roomImageDisplayed.x, 
+                        this.roomImageDisplayed.y, 
+                        this.roomImageDisplayed.width, 
+                        this.roomImageDisplayed.height);
+                }
+
+                // Draw scale points and measurement lines
+                this.drawScalePointsOnCanvas(this.ctx);
+
+                // Artwork is now rendered as HTML element with CSS transforms
+                // No canvas drawing needed for artwork
+            }
+
+            async exportImage(format) {
+                // Check if we have a room image OR solid color background
+                const hasSolidBackground = !this.roomImage && this.canvas.style.backgroundColor;
+                if (!this.roomImage && !hasSolidBackground) {
+                    this.showStatus('No room background set. Upload an image or choose a color.', 'error');
+                    return;
+                }
+
+                // Only use screenshot method for rotation or color intensity changes
+                const hasRotation = this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0;
+                const hasColorIntensityChange = this.colorIntensity !== 100;
+                if (hasRotation || hasColorIntensityChange) {
+                    let reason = hasRotation ? 'Rotation' : 'Color intensity adjustment';
+                    this.showStatus(`${reason} detected - using screenshot method for accurate export...`, 'info');
+                    return this.exportScreenshot();
+                }
+
+                try {
+                    this.showStatus('Generating export image...', 'info');
+                    
+                    // Create export canvas with proper 3D rotation rendering
+                    const exportCanvas = document.createElement('canvas');
+                    const exportCtx = exportCanvas.getContext('2d');
+                    const scale = window.devicePixelRatio || 1;
+                    
+                    exportCanvas.width = this.canvas.width * scale;
+                    exportCanvas.height = this.canvas.height * scale;
+                    exportCtx.scale(scale, scale);
+
+                    // Fill background for JPG format
+                    if (format === 'jpg' || format === 'jpeg') {
+                        exportCtx.fillStyle = '#ffffff';
+                        exportCtx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    }
+
+                    // Draw the main canvas (room image and measurement lines)
+                    exportCtx.drawImage(this.canvas, 0, 0);
+
+                    // Draw artwork with proper 3D rotation if it exists
+                    if (this.artworkImage) {
+                        this.drawArtworkWith3DRotation(exportCtx);
+                    }
+
+                    const dataURL = exportCanvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
+                    const link = document.createElement('a');
+                    link.download = `your-world-our-art.${format === 'jpg' ? 'jpg' : 'png'}`;
+                    link.href = dataURL;
+                    link.click();
+                    
+                    this.showStatus(`Image exported as ${format.toUpperCase()}!`, 'success');
+                } catch (error) {
+                    console.error('Export error:', error);
+                    this.showStatus('Export failed. Please try again.', 'error');
+                }
+            }
+
+            async exportScreenshot() {
+                // Check if we have a room image OR solid color background
+                const hasSolidBackground = !this.roomImage && this.canvas.style.backgroundColor;
+                if (!this.roomImage && !hasSolidBackground) {
+                    this.showStatus('No room background set. Upload an image or choose a color.', 'error');
+                    return;
+                }
+
+                // Show instructions modal first
+                this.showScreenshotModal();
+            }
+
+            async performScreenshot() {
+                try {
+                    // Hide header and other UI elements during screenshot
+                    const headerContainer = document.getElementById('header-container');
+                    const sidebarContainer = document.getElementById('sidebar-container');
+                    const launcher = document.getElementById('cc-launcher');
+                    const widget = document.getElementById('cc-widget');
+                    
+                    const hiddenElements = [];
+                    
+                    // Store original visibility and hide elements
+                    [headerContainer, sidebarContainer, launcher, widget].forEach(el => {
+                        if (el) {
+                            hiddenElements.push({
+                                element: el,
+                                originalDisplay: el.style.display,
+                                originalVisibility: el.style.visibility
+                            });
+                            el.style.display = 'none';
+                        }
+                    });
+                    
+                    // Small delay to ensure elements are hidden before screenshot
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    this.showStatus('Click to share your screen, then select this browser tab.', 'info');
+                    
+                    // Request screen capture
+                    const stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: {
+                            displaySurface: "browser",
+                            preferCurrentTab: true
+                        },
+                        audio: false
+                    });
+
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.playsInline = true;
+                    await video.play();
+
+                    // Wait for video to be ready
+                    await new Promise(resolve => {
+                        if (video.readyState >= 2) resolve();
+                        else video.onloadedmetadata = resolve;
+                    });
+
+                    // Capture one frame
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0);
+
+                    // Stop the capture
+                    stream.getTracks().forEach(track => track.stop());
+
+                    // Crop to canvas container area
+                    const container = document.querySelector('.center-canvas');
+                    const rect = container.getBoundingClientRect();
+                    const dpr = window.devicePixelRatio || 1;
+                    
+                    const cropX = Math.round(rect.left * dpr);
+                    const cropY = Math.round(rect.top * dpr);
+                    const cropW = Math.round(rect.width * dpr);
+                    const cropH = Math.round(rect.height * dpr);
+
+                    const croppedCanvas = document.createElement('canvas');
+                    const croppedCtx = croppedCanvas.getContext('2d');
+                    croppedCanvas.width = cropW;
+                    croppedCanvas.height = cropH;
+                    
+                    croppedCtx.drawImage(
+                        canvas,
+                        cropX, cropY, cropW, cropH,
+                        0, 0, cropW, cropH
+                    );
+
+                    // Download the result
+                    const dataURL = croppedCanvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = 'your-world-our-art-screenshot.png';
+                    link.href = dataURL;
+                    link.click();
+                    
+                    // Restore original visibility of hidden elements
+                    hiddenElements.forEach(({ element, originalDisplay, originalVisibility }) => {
+                        element.style.display = originalDisplay || '';
+                        element.style.visibility = originalVisibility || '';
+                    });
+                    
+                    this.showStatus('Screenshot exported successfully!', 'success');
+                } catch (error) {
+                    console.error('Screenshot error:', error);
+                    
+                    // Ensure elements are restored even on error
+                    hiddenElements.forEach(({ element, originalDisplay, originalVisibility }) => {
+                        element.style.display = originalDisplay || '';
+                        element.style.visibility = originalVisibility || '';
+                    });
+                    
+                    this.showStatus('Screenshot failed. Screen sharing may not be supported.', 'error');
+                }
+            }
+
+            drawArtworkShadow(ctx) {
+                if (!this.artworkImage) return;
+
+                ctx.save();
+                
+                // Calculate artwork center
+                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
+                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+                
+                // Shadow offset and blur - closer and less blurry
+                const shadowOffsetX = 8;
+                const shadowOffsetY = 12;
+                const shadowBlur = 8;
+                
+                // Draw shadow layers for depth
+                ctx.globalAlpha = 0.3;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                ctx.shadowBlur = shadowBlur;
+                ctx.shadowOffsetX = shadowOffsetX;
+                ctx.shadowOffsetY = shadowOffsetY;
+                
+                // Create a temporary rectangle to generate shadow
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(
+                    this.artworkPosition.x,
+                    this.artworkPosition.y,
+                    this.artworkSize.width,
+                    this.artworkSize.height
+                );
+                
+                ctx.restore();
+            }
+
+            drawArtworkWith3DRotation(ctx) {
+                if (!this.artworkImage) return;
+
+                // Draw shadow first
+                this.drawArtworkShadow(ctx);
+
+                ctx.save();
+                
+                // Calculate artwork center
+                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
+                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+                
+                // Move to center point
+                ctx.translate(centerX, centerY);
+                
+                // Convert rotations to radians
+                const xRad = (this.artworkRotation.x * Math.PI) / 180;
+                const yRad = (this.artworkRotation.y * Math.PI) / 180;
+                const zRad = (this.artworkRotation.z * Math.PI) / 180;
+                
+                // Apply 3D rotation matrix calculations
+                // For proper 3D effect, we need to simulate perspective projection
+                const perspective = 500; // Same as CSS perspective value
+                
+                // Calculate 3D rotation matrix components
+                const cosX = Math.cos(xRad);
+                const sinX = Math.sin(xRad);
+                const cosY = Math.cos(yRad);
+                const sinY = Math.sin(yRad);
+                const cosZ = Math.cos(zRad);
+                const sinZ = Math.sin(zRad);
+                
+                // Combined rotation matrix (Z * Y * X order, same as CSS)
+                const m11 = cosY * cosZ;
+                const m12 = -cosY * sinZ;
+                const m13 = sinY;
+                
+                const m21 = cosX * sinZ + sinX * sinY * cosZ;
+                const m22 = cosX * cosZ - sinX * sinY * sinZ;
+                const m23 = -sinX * cosY;
+                
+                const m31 = sinX * sinZ - cosX * sinY * cosZ;
+                const m32 = sinX * cosZ + cosX * sinY * sinZ;
+                const m33 = cosX * cosY;
+                
+                // Apply perspective projection (simplified)
+                const perspectiveScale = perspective / (perspective + m13 * 100);
+                
+                // Apply the 2D projection of 3D rotation
+                ctx.transform(
+                    m11 * perspectiveScale,  // x scale and skew
+                    m21 * perspectiveScale,  // x skew
+                    m12 * perspectiveScale,  // y skew  
+                    m22 * perspectiveScale,  // y scale
+                    0,                       // x translation
+                    0                        // y translation
+                );
+                
+                // Apply additional Y-axis foreshortening for better 3D effect
+                const yForeshorten = Math.abs(cosY);
+                if (yForeshorten < 1) {
+                    ctx.transform(yForeshorten, 0, 0, 1, 0, 0);
+                }
+                
+                // Draw the artwork centered at origin
+                ctx.drawImage(
+                    this.artworkImage,
+                    -this.artworkSize.width / 2,
+                    -this.artworkSize.height / 2,
+                    this.artworkSize.width,
+                    this.artworkSize.height
+                );
+                
+                ctx.restore();
+            }
+
+            async shareImage() {
+                if (!this.roomImage) {
+                    this.showStatus('No room image to share.', 'error');
+                    return;
+                }
+
+                try {
+                    this.showStatus('Generating image for sharing...', 'info');
+                    
+                    // Create share canvas with proper 3D rotation rendering
+                    const shareCanvas = document.createElement('canvas');
+                    const shareCtx = shareCanvas.getContext('2d');
+                    
+                    shareCanvas.width = this.canvas.width;
+                    shareCanvas.height = this.canvas.height;
+
+                    // Draw the main canvas (room image and measurement lines)
+                    shareCtx.drawImage(this.canvas, 0, 0);
+
+                    // Draw artwork with proper 3D rotation if it exists
+                    if (this.artworkImage) {
+                        this.drawArtworkWith3DRotation(shareCtx);
+                    }
+
+                    shareCanvas.toBlob((blob) => {
+                        if (navigator.share && navigator.canShare({ files: [blob] })) {
+                            const file = new File([blob], 'your-world-our-art.png', { type: 'image/png' });
+                            navigator.share({
+                                title: 'Your World, Our Art',
+                                text: 'Check out how this artwork looks in my space!',
+                                files: [file]
+                            });
+                        } else {
+                            // Fallback: copy to clipboard
+                            navigator.clipboard.write([
+                                new ClipboardItem({ 'image/png': blob })
+                            ]).then(() => {
+                                this.showStatus('Image copied to clipboard!', 'success');
+                            }).catch(() => {
+                                this.showStatus('Sharing not supported. Use export instead.', 'error');
+                            });
+                        }
+                    });
+                } catch (error) {
+                    console.error('Share error:', error);
+                    this.showStatus('Share failed. Please try again.', 'error');
+                }
+            }
+
+            showStatus(message, type) {
+                const statusDiv = document.getElementById('statusMessages');
+                statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+                setTimeout(() => {
+                    if (statusDiv.innerHTML.includes(message)) {
+                        statusDiv.innerHTML = '';
+                    }
+                }, 5000);
+            }
+
+            updateRoomColor(e) {
+                const color = e.target.value;
+                document.getElementById('roomColorHex').value = color;
+                this.canvas.style.backgroundColor = color;
+                // Clear room image when using solid color
+                this.roomImage = null;
+                document.getElementById('roomPreview').style.display = 'none';
+                this.redraw();
+            }
+
+            updateRoomColorFromHex(e) {
+                const hex = e.target.value;
+                if (hex.match(/^#[0-9A-F]{6}$/i)) {
+                    document.getElementById('roomColorPicker').value = hex;
+                    this.canvas.style.backgroundColor = hex;
+                    // Clear room image when using solid color
+                    this.roomImage = null;
+                    document.getElementById('roomPreview').style.display = 'none';
+                    this.redraw();
+                }
+            }
+
+            clearRoomColor() {
+                document.getElementById('roomColorPicker').value = '#f5f5f5';
+                document.getElementById('roomColorHex').value = '#f5f5f5';
+                this.canvas.style.backgroundColor = '#f5f5f5';
+                this.redraw();
+            }
+
+            showScreenshotModal() {
+                const modal = document.getElementById('screenshotModal');
+                modal.style.display = 'flex';
+            }
+
+            closeScreenshotModal() {
+                const modal = document.getElementById('screenshotModal');
+                modal.style.display = 'none';
+                // Add delay before starting screenshot to ensure share dialog closes
+                setTimeout(() => {
+                    this.performScreenshot();
+                }, 1200);
+            }
+        }
+
+        // Initialize app when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new YWOAApp();
+        });
+    </script>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+    <!-- Firebase config -->
+    <script src="firebase-init.js"></script>
+
+    <!-- Shared components -->
+    <script src="shared-components.js"></script>
+
+    <!-- Contact Chatbot -->
+    <style>
+      /* Chatbot styles */
+      .cc-launcher {
+        position: fixed; 
+        right: 20px; 
+        bottom: 20px; 
+        z-index: 999999;
+        border: none; 
+        border-radius: 25px; 
+        cursor: pointer;
+        background: #45494e;
+        color: #ffffff;
+        box-shadow: 0 24px 60px rgba(22,25,28,0.16);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+      }
+      .cc-launcher:hover { 
+        transform: translateY(-2px); 
+        filter: brightness(1.05); 
+      }
+      .cc-launcher-icon {
+        font-size: 20px;
+      }
+
+      /* Widget panel */
+      .cc-widget {
+        position: fixed; 
+        right: 20px; 
+        bottom: 90px; 
+        z-index: 999999; 
+        display: none;
+        width: 380px; 
+        max-height: 74vh; 
+        background: #ffffff;
+        border: 1px solid rgba(69,73,78,0.15); 
+        border-radius: 16px;
+        box-shadow: 0 24px 60px rgba(22,25,28,0.16); 
+        overflow: hidden; 
+        flex-direction: column;
+      }
+      .cc-widget.open { 
+        display: flex; 
+      }
+
+      .cc-header {
+        background: linear-gradient(180deg, #d8d1c5, #ece7de);
+        padding: 12px 16px; 
+        border-bottom: 1px solid rgba(69,73,78,0.12);
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        color: #2b2f33;
+      }
+      .cc-mark {
+        width: 36px; 
+        height: 36px; 
+        border-radius: 10px;
+        background: #45494e;
+        display: grid; 
+        place-items: center; 
+        color: #ffffff; 
+        font-weight: 700;
+        box-shadow: 0 4px 14px rgba(69,73,78,.25);
+      }
+      .cc-header h3 { 
+        margin: 0; 
+        font-size: 15px; 
+        line-height: 1.2; 
+        font-weight: 700; 
+      }
+      .cc-header small { 
+        display: block; 
+        color: #72777d; 
+        font-weight: 500; 
+      }
+      .cc-close { 
+        margin-left: auto; 
+        border: none; 
+        background: transparent; 
+        color: #363a3f; 
+        cursor: pointer; 
+        width: 34px; 
+        height: 34px; 
+        border-radius: 8px; 
+      }
+      .cc-close:hover { 
+        background: rgba(69,73,78,0.08); 
+      }
+
+      .cc-messages { 
+        flex: 1; 
+        overflow-y: auto; 
+        padding: 14px 14px 0 14px; 
+        background: linear-gradient(180deg, rgba(216,209,197,0.16), rgba(216,209,197,0));
+      }
+
+      .cc-bubble { 
+        max-width: 82%; 
+        margin: 10px 0; 
+        padding: 10px 12px; 
+        border-radius: 12px; 
+        line-height: 1.45; 
+        font-size: 14px; 
+      }
+      .cc-bubble.user { 
+        margin-left: auto; 
+        color: #ffffff; 
+        background: #45494e; 
+        border-top-right-radius: 6px; 
+      }
+      .cc-bubble.bot { 
+        margin-right: auto; 
+        background: #f6f4f1; 
+        border: 1px solid rgba(69,73,78,0.12); 
+        border-top-left-radius: 6px; 
+      }
+
+      .cc-typing { 
+        display: none; 
+        text-align: center; 
+        padding: 8px 0 4px; 
+      }
+      .cc-dot { 
+        width: 8px; 
+        height: 8px; 
+        display: inline-block; 
+        border-radius: 50%; 
+        background: #c1b9ad; 
+        margin: 0 2px; 
+        animation: ccDot 1.4s infinite; 
+        opacity: .9; 
+      }
+      .cc-dot:nth-child(2) { animation-delay: .2s; }
+      .cc-dot:nth-child(3) { animation-delay: .4s; }
+      @keyframes ccDot { 
+        0%, 60%, 100% { transform: translateY(0); } 
+        30% { transform: translateY(-6px); } 
+      }
+
+      .cc-input-area { 
+        padding: 12px; 
+        border-top: 1px solid rgba(69,73,78,0.12); 
+        background: #faf9f7; 
+      }
+      .cc-row { 
+        display: flex; 
+        gap: 8px; 
+      }
+      .cc-input { 
+        flex: 1; 
+        border: 1px solid rgba(69,73,78,0.25); 
+        background: #fff; 
+        color: #2b2f33; 
+        border-radius: 12px; 
+        padding: 10px 12px; 
+        outline: none; 
+        font-size: 14px; 
+      }
+      .cc-input:focus { 
+        box-shadow: 0 0 0 3px rgba(69,73,78,0.18); 
+        border-color: #45494e; 
+      }
+      .cc-send { 
+        background: #45494e; 
+        color: #fff; 
+        border: none; 
+        padding: 0 14px; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        font-weight: 600; 
+      }
+      .cc-send:hover { 
+        filter: brightness(1.05); 
+      }
+
+      .cc-suggestions { 
+        padding: 8px 0 0; 
+        display: flex; 
+        gap: 6px; 
+        flex-wrap: wrap; 
+      }
+      .cc-chip { 
+        font-size: 12px; 
+        padding: 6px 10px; 
+        background: #f1efeb; 
+        border: 1px solid rgba(69,73,78,0.14); 
+        color: #4a4f54; 
+        border-radius: 999px; 
+        cursor: pointer; 
+      }
+      .cc-chip:hover { 
+        background: #ebe7e0; 
+      }
+
+      /* Contact cards */
+      .cc-card { 
+        background: #fff; 
+        border: 1px solid rgba(69,73,78,0.12); 
+        border-radius: 12px; 
+        padding: 10px; 
+        margin-top: 10px; 
+      }
+      .cc-team { 
+        display: flex; 
+        gap: 8px; 
+        align-items: center; 
+        font-weight: 700; 
+        color: #2b2f33; 
+      }
+      .cc-tag { 
+        margin-left: auto; 
+        font-size: 12px; 
+        padding: 2px 8px; 
+        border-radius: 999px; 
+        background: #f3f2ef; 
+        border: 1px solid rgba(69,73,78,0.12); 
+        color: #4a4f54; 
+      }
+      .cc-emails { 
+        margin-top: 8px; 
+      }
+      .cc-email { 
+        display: inline-block; 
+        font-size: 12px; 
+        margin: 4px 6px 0 0; 
+        padding: 6px 10px; 
+        border-radius: 999px; 
+        background: #f6f4f1; 
+        border: 1px solid rgba(69,73,78,0.12); 
+        text-decoration: none; 
+        color: #2b2f33; 
+      }
+      .cc-email:hover { 
+        background: #d8d1c5; 
+      }
+      .cc-keywords { 
+        margin-top: 8px; 
+        font-size: 12px; 
+        color: #5b6066; 
+      }
+      .cc-k { 
+        background: rgba(216,209,197,.55); 
+        color: #1f2327; 
+        padding: 0 4px; 
+        border-radius: 4px; 
+        font-weight: 700; 
+      }
+      .cc-phone {
+        margin-top: 6px; 
+        font-size: 13px; 
+        color: #4a4f54;
+      }
+      .cc-phone a {
+        color: #2b2f33; 
+        text-decoration: underline;
+      }
+
+      /* Match borders */
+      .match-high { border-left: 4px solid #2f3438; }
+      .match-medium { border-left: 4px solid #7f858b; }
+      .match-low { border-left: 4px solid #c9c3b8; }
+
+      @media (max-width: 480px) {
+        .cc-widget { 
+          right: 10px; 
+          left: 10px; 
+          width: auto; 
+        }
+        .cc-launcher {
+          right: 10px;
+        }
+      }
+    </style>
+
+    <!-- Launcher Button -->
+    <button class="cc-launcher" id="cc-launcher" aria-label="Open contact helper" title="Contact Finder">
+      <span class="cc-launcher-icon">💬</span>
+      <span>Who do I contact?</span>
+    </button>
+
+    <!-- Chatbot Widget -->
+    <section class="cc-widget" id="cc-widget" aria-live="polite" aria-label="Contact Finder chatbot">
+      <header class="cc-header">
+        <div class="cc-mark">CC</div>
+        <div>
+          <h3>Who do I contact?</h3>
+          <small>Describe your issue and I'll route you</small>
+        </div>
+        <button class="cc-close" id="cc-close" title="Close" aria-label="Close">✕</button>
+      </header>
+
+      <div class="cc-messages" id="cc-messages"></div>
+      <div class="cc-typing" id="cc-typing">
+        <span class="cc-dot"></span>
+        <span class="cc-dot"></span>
+        <span class="cc-dot"></span>
+      </div>
+
+      <div class="cc-input-area">
+        <div class="cc-row">
+          <input id="cc-input" class="cc-input" placeholder="e.g. I need to cancel my order" autocomplete="off" />
+          <button id="cc-send" class="cc-send">Send</button>
+        </div>
+        <div class="cc-suggestions" id="cc-suggestions"></div>
+      </div>
+    </section>
+
+    <script>
+    // Contact Chatbot functionality
+    (function() {
+      let teamContacts = [];
+
+      // Load team contacts from JSON
+      async function loadTeamContacts() {
+        try {
+          const response = await fetch('team_contacts.json');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          teamContacts = await response.json();
+          console.log('Team contacts loaded:', teamContacts.length, 'teams');
+        } catch (error) {
+          console.error('Failed to load team contacts:', error);
+          addBot('Sorry, I\'m having trouble loading the team directory. Please try again later or contact Client Services directly.');
+        }
+      }
+
+      // Matching utilities
+      function levenshteinDistance(str1, str2) {
+        const len1 = str1.length, len2 = str2.length;
+        const dp = Array.from({ length: len2 + 1 }, (_, i) => [i]);
+        for (let j = 0; j <= len1; j++) dp[0][j] = j;
+        for (let i = 1; i <= len2; i++) {
+          for (let j = 1; j <= len1; j++) {
+            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+              dp[i][j] = dp[i-1][j-1];
+            } else {
+              dp[i][j] = Math.min(dp[i-1][j-1] + 1, dp[i][j-1] + 1, dp[i-1][j] + 1);
+            }
+          }
+        }
+        return dp[len2][len1];
+      }
+
+      function isFuzzyMatch(a, b, max = 2) {
+        if (a.length < 4 || b.length < 4) return false;
+        if (Math.abs(a.length - b.length) > max) return false;
+        return levenshteinDistance(a.toLowerCase(), b.toLowerCase()) <= max;
+      }
+
+      function findMatchingTeams(query) {
+        if (!query.trim() || teamContacts.length === 0) return [];
+        
+        const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+        const matches = [];
+
+        teamContacts.forEach(team => {
+          let score = 0;
+          const matchedKeywords = [];
+          let hasExact = false;
+          let hasFuzzy = false;
+
+          // Exact matches
+          team.keywords.forEach(kw => {
+            const kwWords = kw.toLowerCase().split(/\s+/);
+            queryWords.forEach(qw => {
+              kwWords.forEach(kwd => {
+                if (qw === kwd) {
+                  score += 100;
+                  hasExact = true;
+                  if (!matchedKeywords.includes(kw)) matchedKeywords.push(kw);
+                }
+              });
+            });
+          });
+
+          // Fuzzy matches if no exact matches
+          if (!hasExact) {
+            team.keywords.forEach(kw => {
+              const kwWords = kw.toLowerCase().split(/\s+/);
+              queryWords.forEach(qw => {
+                kwWords.forEach(kwd => {
+                  if (isFuzzyMatch(qw, kwd)) {
+                    score += 80;
+                    hasFuzzy = true;
+                    if (!matchedKeywords.includes(kw)) {
+                      matchedKeywords.push(`${kw} (did you mean "${kwd}")`);
+                    }
+                  }
+                });
+              });
+            });
+          }
+
+          // Partial matches if no exact or fuzzy matches
+          if (!hasExact && !hasFuzzy) {
+            team.keywords.forEach(kw => {
+              const kwLower = kw.toLowerCase();
+              if (query.toLowerCase().includes(kwLower)) {
+                score += 50;
+                if (!matchedKeywords.includes(kw)) matchedKeywords.push(kw);
+                return;
+              }
+              queryWords.forEach(qw => {
+                kwLower.split(/\s+/).forEach(kwd => {
+                  if (qw.includes(kwd) || kwd.includes(qw)) {
+                    score += 5;
+                    if (!matchedKeywords.includes(kw)) matchedKeywords.push(kw);
+                  }
+                });
+              });
+            });
+          }
+
+          if (score > 0) {
+            matches.push({ ...team, score, matchedKeywords });
+          }
+        });
+
+        return matches.sort((a, b) => b.score - a.score);
+      }
+
+      // UI elements
+      const widget = document.getElementById('cc-widget');
+      const launcher = document.getElementById('cc-launcher');
+      const closer = document.getElementById('cc-close');
+      const messages = document.getElementById('cc-messages');
+      const typing = document.getElementById('cc-typing');
+      const input = document.getElementById('cc-input');
+      const sendBtn = document.getElementById('cc-send');
+      const suggestions = document.getElementById('cc-suggestions');
+
+      const chips = [
+        'cancel my order', 'damaged artwork', 'order tracking',
+        'artist event', 'stock availability', 'installation help',
+        'lost shipment', 'returns'
+      ];
+
+      function mountChips() {
+        suggestions.innerHTML = chips.map(c => 
+          `<button class="cc-chip" data-q="${c.replace(/"/g, '&quot;')}">${c}</button>`
+        ).join('');
+        
+        suggestions.querySelectorAll('.cc-chip').forEach(el => {
+          el.addEventListener('click', () => {
+            input.value = el.dataset.q;
+            submitQuery();
+          });
+        });
+      }
+
+      function addBot(html) {
+        const b = document.createElement('div');
+        b.className = 'cc-bubble bot';
+        b.innerHTML = html;
+        messages.appendChild(b);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function addUser(text) {
+        const b = document.createElement('div');
+        b.className = 'cc-bubble user';
+        b.textContent = text;
+        messages.appendChild(b);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      function renderCards(matches, query) {
+        if (!matches.length) {
+          addBot(`No specific team found for "${escapeHtml(query)}".<br/>Try different keywords or contact <strong>Client Services</strong> for general help.`);
+          return;
+        }
+
+        const html = matches.map((m) => {
+          const level = m.score >= 100 ? 'high' : m.score >= 50 ? 'medium' : 'low';
+          const pct = Math.min(Math.round((m.score / 100) * 100), 100);
+          const emailTags = m.emails.map(e => 
+            `<a class="cc-email" href="mailto:${e}?subject=${encodeURIComponent('Who do I contact? - ' + query)}">${e}</a>`
+          ).join('');
+          const kws = m.matchedKeywords.map(k => `<span class="cc-k">${escapeHtml(k)}</span>`).join(', ');
+          const phone = m.phone ? `<div class="cc-phone">📞 <a href="tel:${m.phone}">${m.phone}</a></div>` : '';
+          
+          return `<div class="cc-card match-${level}">
+            <div class="cc-team">💼 ${escapeHtml(m.team)} <span class="cc-tag">${pct}% match</span></div>
+            ${phone}
+            <div class="cc-emails">${emailTags}</div>
+            <div class="cc-keywords">Matched: ${kws}</div>
+          </div>`;
+        }).join('');
+
+        addBot(html);
+      }
+
+      function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, m => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        }[m]));
+      }
+
+      function submitQuery() {
+        const q = input.value.trim();
+        if (!q) return;
+        
+        addUser(q);
+        input.value = '';
+        typing.style.display = 'block';
+        
+        setTimeout(() => {
+          const matches = findMatchingTeams(q);
+          typing.style.display = 'none';
+          renderCards(matches, q);
+        }, 480);
+      }
+
+      // Event listeners
+      launcher.addEventListener('click', () => {
+        widget.classList.add('open');
+        input.focus();
+        if (!messages.dataset.seeded) {
+          seedIntro();
+          messages.dataset.seeded = '1';
+        }
+      });
+
+      closer.addEventListener('click', () => {
+        widget.classList.remove('open');
+      });
+
+      sendBtn.addEventListener('click', submitQuery);
+
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') submitQuery();
+      });
+
+      function seedIntro() {
+        addBot('Hi! 👋 Tell me what you need help with and I\'ll suggest the best team. Try typing something like <em>"I need to cancel my order"</em> or pick a suggestion below.');
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', async () => {
+        await loadTeamContacts();
+        mountChips();
+      });
+    })();
+    </script>
+</body>
+</html>
