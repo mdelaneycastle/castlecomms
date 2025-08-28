@@ -1274,6 +1274,17 @@
                     const selPrevDisplay = this.selection.style.display;
                     this.selection.style.display = 'none';
 
+                    // Also store and temporarily modify artwork transform for better capture
+                    let artworkOriginalTransform = null;
+                    if (this.artworkElement) {
+                        artworkOriginalTransform = this.artworkElement.style.transform;
+                        console.log('Temporarily preserving artwork transform for capture:', artworkOriginalTransform);
+                        
+                        // Force immediate style update
+                        this.artworkElement.style.transform = artworkOriginalTransform;
+                        this.artworkElement.offsetHeight; // Force reflow
+                    }
+
                     // 3) Rasterize the whole stage exactly as rendered (CSS 3D included)
                     const stageNode = this.stage; // .center-canvas
                     const dpr = window.devicePixelRatio || 1;
@@ -1282,12 +1293,24 @@
                         scale: Math.max(2, dpr),   // nice crisp export
                         useCORS: true,
                         allowTaint: true,
-                        logging: false,
-                        removeContainer: true
+                        logging: true, // Enable to debug what's happening
+                        removeContainer: true,
+                        foreignObjectRendering: true, // Try to handle CSS 3D transforms better
+                        onclone: (clonedDoc, element) => {
+                            // Ensure 3D transforms are preserved in the clone
+                            const artworkElement = element.querySelector('.artwork-element');
+                            if (artworkElement) {
+                                console.log('Original artwork transform:', artworkElement.style.transform);
+                            }
+                        }
                     });
 
-                    // 4) Restore selection visibility so user still sees it
+                    // 4) Restore selection visibility and artwork transform
                     this.selection.style.display = selPrevDisplay || '';
+                    if (this.artworkElement && artworkOriginalTransform !== null) {
+                        this.artworkElement.style.transform = artworkOriginalTransform;
+                        console.log('Restored artwork transform:', artworkOriginalTransform);
+                    }
 
                     // 5) Compute crop (selection is in CSS pixels; html2canvas canvas is scaled)
                     const stageRect = stageNode.getBoundingClientRect();
