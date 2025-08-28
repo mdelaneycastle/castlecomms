@@ -2062,7 +2062,18 @@ async function renderTasksList(filter = 'all') {
   const container = document.getElementById('tasks-list');
   const noTasksMessage = document.getElementById('no-tasks-message');
   
-  if (!container) return;
+  // Only render if the tasks tab is active and container exists
+  if (!container) {
+    console.log('Tasks list container not found - probably not on Tasks tab');
+    return;
+  }
+  
+  // Check if tasks tab is currently active
+  const tasksTab = document.getElementById('tasks-tab');
+  if (!tasksTab || !tasksTab.classList.contains('active')) {
+    console.log('Tasks tab not active - skipping render');
+    return;
+  }
   
   let filteredTasks = tasks;
   
@@ -2089,13 +2100,19 @@ async function renderTasksList(filter = 'all') {
   }
   
   if (filteredTasks.length === 0) {
-    noTasksMessage.style.display = 'block';
-    container.innerHTML = '';
-    container.appendChild(noTasksMessage);
+    if (noTasksMessage) {
+      noTasksMessage.style.display = 'block';
+      container.innerHTML = '';
+      container.appendChild(noTasksMessage);
+    } else {
+      container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #6c757d; background: white; border-radius: 12px; border: 1px solid #e9ecef;"><div style="font-size: 3rem; margin-bottom: 1rem;">✅</div><h3 style="margin: 0 0 0.5rem 0; color: #495057;">No Tasks</h3><p style="margin: 0; color: #6c757d;">No tasks match the current filter.</p></div>';
+    }
     return;
   }
   
-  noTasksMessage.style.display = 'none';
+  if (noTasksMessage) {
+    noTasksMessage.style.display = 'none';
+  }
   
   // Sort tasks by due date and status
   filteredTasks.sort((a, b) => {
@@ -2183,7 +2200,14 @@ async function updateTaskStatus(taskId, newStatus) {
   
   try {
     await saveTask(task);
-    await renderTasksList();
+    
+    // Only re-render if the tasks tab is currently active
+    const tasksTab = document.getElementById('tasks-tab');
+    if (tasksTab && tasksTab.classList.contains('active')) {
+      await renderTasksList();
+    } else {
+      console.log('Task updated successfully - not re-rendering (tasks tab not active)');
+    }
   } catch (error) {
     alert('Error updating task: ' + error.message);
     console.error('Task update failed:', error);
@@ -2203,7 +2227,14 @@ async function deleteTask(taskId) {
     
     await db.collection('tasks').doc(taskId).delete();
     tasks = tasks.filter(t => t.id !== taskId);
-    await renderTasksList();
+    
+    // Only re-render if the tasks tab is currently active
+    const tasksTab = document.getElementById('tasks-tab');
+    if (tasksTab && tasksTab.classList.contains('active')) {
+      await renderTasksList();
+    } else {
+      console.log('Task deleted successfully - not re-rendering (tasks tab not active)');
+    }
     
     console.log('Task deleted from Firebase:', taskId);
   } catch (error) {
