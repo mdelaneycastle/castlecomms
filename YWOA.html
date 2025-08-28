@@ -1474,30 +1474,8 @@
 
                 ctx.save();
                 
-                // Calculate artwork center
-                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
-                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
-                
-                // Shadow offset and blur - closer and less blurry
-                const shadowOffsetX = 8;
-                const shadowOffsetY = 12;
-                const shadowBlur = 8;
-                
-                // Draw shadow layers for depth
-                ctx.globalAlpha = 0.3;
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-                ctx.shadowBlur = shadowBlur;
-                ctx.shadowOffsetX = shadowOffsetX;
-                ctx.shadowOffsetY = shadowOffsetY;
-                
-                // Create a temporary rectangle to generate shadow
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                ctx.fillRect(
-                    this.artworkPosition.x,
-                    this.artworkPosition.y,
-                    this.artworkSize.width,
-                    this.artworkSize.height
-                );
+                // Skip shadow for export - it's causing the grey box
+                // We can add proper shadow later if needed
                 
                 ctx.restore();
             }
@@ -1505,10 +1483,13 @@
             drawArtworkWith3DRotation(ctx) {
                 if (!this.artworkImage) return;
 
-                // Draw shadow first
+                // Draw shadow first (currently disabled)
                 this.drawArtworkShadow(ctx);
 
                 ctx.save();
+                
+                // Debug: log the rotation angle
+                console.log('Export rotation angle:', this.artworkRotation.y);
                 
                 // Get rotation angle in radians
                 const yRotationRad = (this.artworkRotation.y * Math.PI) / 180;
@@ -1521,21 +1502,26 @@
                 // Move to center point
                 ctx.translate(centerX, centerY);
                 
-                // Calculate 3D perspective projection for Y rotation
-                const cosY = Math.cos(yRotationRad);
-                const sinY = Math.sin(yRotationRad);
-                
-                // Perspective foreshortening - objects farther away appear smaller
-                const z = sinY * (this.artworkSize.width / 2); // Approximate Z displacement
-                const perspectiveScale = perspective / (perspective + z);
-                
-                // Create perspective transform matrix
-                // For Y rotation: [cosY, 0, 0, 1, 0, 0] with perspective scaling
-                const scaleX = cosY * perspectiveScale;
-                const scaleY = perspectiveScale;
-                
-                // Apply the perspective transform
-                ctx.transform(scaleX, 0, 0, scaleY, 0, 0);
+                // Apply Y-axis rotation with perspective
+                if (Math.abs(this.artworkRotation.y) > 0.1) { // Only apply if there's actual rotation
+                    // Calculate 3D perspective projection for Y rotation
+                    const cosY = Math.cos(yRotationRad);
+                    const sinY = Math.sin(yRotationRad);
+                    
+                    // Perspective foreshortening - objects farther away appear smaller
+                    const z = Math.abs(sinY) * (this.artworkSize.width / 4); // Z displacement
+                    const perspectiveScale = perspective / (perspective + z);
+                    
+                    // Apply perspective transform
+                    // X scaling: combine rotation and perspective
+                    const scaleX = Math.abs(cosY) * perspectiveScale;
+                    const scaleY = perspectiveScale;
+                    
+                    console.log('Transform values:', { cosY, sinY, scaleX, scaleY, z, perspectiveScale });
+                    
+                    // Apply the perspective transform
+                    ctx.transform(scaleX, 0, 0, scaleY, 0, 0);
+                }
                 
                 // Apply color intensity filter by adjusting canvas
                 if (this.colorIntensity !== 100) {
