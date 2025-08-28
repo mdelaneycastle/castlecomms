@@ -249,6 +249,34 @@
             align-items: center;
         }
 
+        /* Selection rectangle styles */
+        .selection {
+            position: absolute;
+            border: 2px dashed var(--secondary-color);
+            background: rgba(69, 73, 78, 0.2);
+            z-index: 5;
+        }
+        
+        .selection.hidden {
+            display: none;
+        }
+
+        .bg-holder {
+            position: relative;
+            perspective: 800px;
+        }
+
+        .bg-content {
+            display: inline-block;
+            transform-origin: center center;
+        }
+
+        .bg-content img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
         #mainCanvas {
             cursor: crosshair;
             max-width: 100%;
@@ -579,8 +607,10 @@
                 <div id="statusMessages"></div>
             </div>
 
-            <div class="center-canvas">
+            <div class="center-canvas" id="stage">
+                <div class="bg-holder" id="bgHolder"></div>
                 <canvas id="mainCanvas"></canvas>
+                <div id="selection" class="selection hidden"></div>
             </div>
 
             <div class="right-controls">
@@ -605,6 +635,15 @@
                         <span id="colorIntensityValue">100%</span>
                     </div>
                     <button class="btn" id="resetColorIntensity">Reset Color Intensity</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>7. Export Area</h3>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                        Draw a rectangle around the area you want to export
+                    </p>
+                    <button class="btn" id="startSelection">Start Selection</button>
+                    <button class="btn" id="clearSelection">Clear Selection</button>
                 </div>
 
                 <div class="export-section">
@@ -639,6 +678,11 @@
             constructor() {
                 this.canvas = document.getElementById('mainCanvas');
                 this.ctx = this.canvas.getContext('2d');
+                this.stage = document.getElementById('stage');
+                this.selection = document.getElementById('selection');
+                this.bgHolder = document.getElementById('bgHolder');
+                this.bgContent = null;
+                
                 this.roomImage = null;
                 this.artworkImage = null;
                 this.roomImageDisplayed = null;
@@ -655,6 +699,12 @@
                 this.pixelsPerUnit = 1;
                 this.isDragging = false;
                 this.dragOffset = { x: 0, y: 0 };
+                
+                // Selection rectangle variables
+                this.isSelecting = false;
+                this.startX = 0;
+                this.startY = 0;
+                this.rect = { x: 0, y: 0, w: 0, h: 0 };
 
                 this.initializeCanvas();
                 this.bindEvents();
@@ -713,6 +763,10 @@
                 document.getElementById('colorIntensitySlider').addEventListener('input', (e) => this.updateColorIntensity(e));
                 document.getElementById('resetColorIntensity').addEventListener('click', () => this.resetColorIntensity());
 
+                // Selection controls
+                document.getElementById('startSelection').addEventListener('click', () => this.startSelection());
+                document.getElementById('clearSelection').addEventListener('click', () => this.clearSelection());
+
                 // Export
                 document.getElementById('exportJPG').addEventListener('click', () => this.exportImage('jpg'));
                 
@@ -723,6 +777,10 @@
                 document.getElementById('roomColorPicker').addEventListener('input', (e) => this.updateRoomColor(e));
                 document.getElementById('roomColorHex').addEventListener('input', (e) => this.updateRoomColorFromHex(e));
                 document.getElementById('clearRoomColor').addEventListener('click', () => this.clearRoomColor());
+
+                // Stage mouse events for selection
+                this.stage.addEventListener('mousemove', (e) => this.onSelectionMove(e));
+                this.stage.addEventListener('mouseup', (e) => this.endSelection());
             }
 
             setupDragDrop(uploadAreaId, fileInputId) {
@@ -761,10 +819,29 @@
                         document.getElementById('roomPreview').src = e.target.result;
                         document.getElementById('roomPreview').style.display = 'block';
                         this.scalePoints = [];
+                        this.loadImageToBgHolder(file);
                         this.redraw();
                         this.showStatus('Room image loaded! Now click two points to set the scale.', 'success');
                     };
                     img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            loadImageToBgHolder(file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'bg-content';
+                        wrapper.appendChild(img);
+                        this.bgHolder.innerHTML = '';
+                        this.bgHolder.appendChild(wrapper);
+                        this.bgContent = wrapper;
+                        this.updateTransforms();
+                    };
+                    img.src = reader.result;
                 };
                 reader.readAsDataURL(file);
             }
@@ -1040,6 +1117,55 @@
                 this.updateArtworkTransform();
             }
 
+            // Selection rectangle methods
+            startSelection() {
+                this.stage.addEventListener('mousedown', this.beginSelection.bind(this), {once: true});
+                this.showStatus('Click and drag to select export area', 'info');
+            }
+
+            beginSelection(e) {
+                this.isSelecting = true;
+                const rect = this.stage.getBoundingClientRect();
+                this.startX = e.clientX - rect.left;
+                this.startY = e.clientY - rect.top;
+                this.rect = {x: this.startX, y: this.startY, w: 0, h: 0};
+                this.selection.classList.remove('hidden');
+                this.drawSelection();
+            }
+
+            onSelectionMove(e) {
+                if (!this.isSelecting) return;
+                const rect = this.stage.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                this.rect.w = x - this.startX;
+                this.rect.h = y - this.startY;
+                this.drawSelection();
+            }
+
+            endSelection() {
+                this.isSelecting = false;
+            }
+
+            drawSelection() {
+                this.selection.style.left = Math.min(this.startX, this.startX + this.rect.w) + 'px';
+                this.selection.style.top = Math.min(this.startY, this.startY + this.rect.h) + 'px';
+                this.selection.style.width = Math.abs(this.rect.w) + 'px';
+                this.selection.style.height = Math.abs(this.rect.h) + 'px';
+            }
+
+            clearSelection() {
+                this.selection.classList.add('hidden');
+                this.showStatus('Selection cleared', 'info');
+            }
+
+            updateTransforms() {
+                if (this.bgContent) {
+                    this.bgHolder.style.perspective = '800px';
+                    this.bgContent.style.transform = `rotateY(0deg)`;
+                }
+            }
+
             showScreenshotModal() {
                 const modal = document.getElementById('screenshotModal');
                 modal.classList.add('show');
@@ -1137,55 +1263,98 @@
             }
 
             async exportImage(format) {
-                // Check if we have a room image OR solid color background
+                // Check if we have a selection rectangle
+                if (this.selection.classList.contains('hidden')) {
+                    this.showStatus('Please draw a selection rectangle first using "Start Selection"', 'error');
+                    return;
+                }
+
+                // Check if we have content to export
                 const hasSolidBackground = !this.roomImage && this.canvas.style.backgroundColor;
                 if (!this.roomImage && !hasSolidBackground) {
                     this.showStatus('No room background set. Upload an image or choose a color.', 'error');
                     return;
                 }
 
-                // Only use screenshot method for rotation or color intensity changes
-                const hasRotation = this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0;
-                const hasColorIntensityChange = this.colorIntensity !== 100;
-                if (hasRotation || hasColorIntensityChange) {
-                    let reason = hasRotation ? 'Rotation' : 'Color intensity adjustment';
-                    this.showStatus(`${reason} detected - using screenshot method for accurate export...`, 'info');
-                    return this.exportScreenshot();
-                }
-
                 try {
                     this.showStatus('Generating export image...', 'info');
                     
-                    // Create export canvas with proper 3D rotation rendering
-                    const exportCanvas = document.createElement('canvas');
-                    const exportCtx = exportCanvas.getContext('2d');
-                    const scale = window.devicePixelRatio || 1;
+                    // Get selection bounds
+                    const selectionRect = this.selection.getBoundingClientRect();
+                    const stageRect = this.stage.getBoundingClientRect();
                     
-                    exportCanvas.width = this.canvas.width * scale;
-                    exportCanvas.height = this.canvas.height * scale;
-                    exportCtx.scale(scale, scale);
-
-                    // Fill background for JPG format
-                    if (format === 'jpg' || format === 'jpeg') {
-                        exportCtx.fillStyle = '#ffffff';
-                        exportCtx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    // Create export canvas
+                    const canvas = document.createElement('canvas');
+                    canvas.width = selectionRect.width;
+                    canvas.height = selectionRect.height;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Get the background image from bg-holder if available
+                    const bgImg = this.bgContent ? this.bgContent.querySelector('img') : null;
+                    
+                    if (bgImg) {
+                        // Calculate relative position within the image
+                        const bgRect = bgImg.getBoundingClientRect();
+                        const relativeX = selectionRect.left - bgRect.left;
+                        const relativeY = selectionRect.top - bgRect.top;
+                        
+                        // Scale factors to map from displayed image to original image dimensions
+                        const scaleX = bgImg.naturalWidth / bgRect.width;
+                        const scaleY = bgImg.naturalHeight / bgRect.height;
+                        
+                        // Calculate source rectangle in original image coordinates
+                        const sourceX = Math.max(0, relativeX * scaleX);
+                        const sourceY = Math.max(0, relativeY * scaleY);
+                        const sourceWidth = Math.min(bgImg.naturalWidth - sourceX, selectionRect.width * scaleX);
+                        const sourceHeight = Math.min(bgImg.naturalHeight - sourceY, selectionRect.height * scaleY);
+                        
+                        // Draw the cropped portion of the background image
+                        ctx.drawImage(
+                            bgImg,
+                            sourceX, sourceY, sourceWidth, sourceHeight,
+                            0, 0, canvas.width, canvas.height
+                        );
+                    } else if (hasSolidBackground) {
+                        // Fill with solid background color
+                        ctx.fillStyle = this.canvas.style.backgroundColor || '#f5f5f5';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                    
+                    // If artwork is within selection bounds, draw it
+                    if (this.artworkElement) {
+                        const artworkRect = this.artworkElement.getBoundingClientRect();
+                        
+                        // Check if artwork overlaps with selection
+                        if (artworkRect.right > selectionRect.left && 
+                            artworkRect.left < selectionRect.right &&
+                            artworkRect.bottom > selectionRect.top &&
+                            artworkRect.top < selectionRect.bottom) {
+                            
+                            // Calculate artwork position relative to selection
+                            const artworkX = artworkRect.left - selectionRect.left;
+                            const artworkY = artworkRect.top - selectionRect.top;
+                            
+                            // Create a temporary canvas to render the artwork with transforms
+                            const artworkCanvas = document.createElement('canvas');
+                            artworkCanvas.width = artworkRect.width;
+                            artworkCanvas.height = artworkRect.height;
+                            const artworkCtx = artworkCanvas.getContext('2d');
+                            
+                            if (this.artworkImage) {
+                                artworkCtx.drawImage(this.artworkImage, 0, 0, artworkRect.width, artworkRect.height);
+                            }
+                            
+                            ctx.drawImage(artworkCanvas, artworkX, artworkY);
+                        }
                     }
 
-                    // Draw the main canvas (room image and measurement lines)
-                    exportCtx.drawImage(this.canvas, 0, 0);
-
-                    // Draw artwork with proper 3D rotation if it exists
-                    if (this.artworkImage) {
-                        this.drawArtworkWith3DRotation(exportCtx);
-                    }
-
-                    const dataURL = exportCanvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
+                    const dataURL = canvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
                     const link = document.createElement('a');
-                    link.download = `your-world-our-art.${format === 'jpg' ? 'jpg' : 'png'}`;
+                    link.download = `your-world-our-art-crop.${format === 'jpg' ? 'jpg' : 'png'}`;
                     link.href = dataURL;
                     link.click();
                     
-                    this.showStatus(`Image exported as ${format.toUpperCase()}!`, 'success');
+                    this.showStatus(`Selected area exported as ${format.toUpperCase()}!`, 'success');
                 } catch (error) {
                     console.error('Export error:', error);
                     this.showStatus('Export failed. Please try again.', 'error');
