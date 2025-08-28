@@ -405,6 +405,9 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
   -->
 </main>
 
+<!-- jsPDF Library for PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -1312,61 +1315,152 @@ function loadFromLocalStorage() {
 }
 
 async function exportToPDF(checklistType) {
-  const items = checklistState.gallery.items;
-  const passed = Object.values(items).filter(status => status === 'pass').length;
-  const failed = Object.values(items).filter(status => status === 'fail').length;
-  const total = galleryChecklistItems.length;
-  const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
-  
-  let exportText = `WEEKLY GALLERY CHECKLIST REPORT\n`;
-  exportText += `${'='.repeat(50)}\n`;
-  exportText += `Generated: ${new Date().toLocaleString()}\n`;
-  exportText += `Pass Rate: ${passed}/${total} (${passRate}%)\n`;
-  exportText += `Status: ${passRate >= 80 ? 'ACCEPTABLE' : 'NEEDS ATTENTION'}\n\n`;
-  
-  exportText += `SUMMARY:\n`;
-  exportText += `- Passed: ${passed} items\n`;
-  exportText += `- Failed: ${failed} items\n`;
-  exportText += `- Not assessed: ${total - passed - failed} items\n`;
-  exportText += `- Photos uploaded: ${checklistState.gallery.allPhotos.length}\n\n`;
-  
-  exportText += `DETAILED RESULTS:\n`;
-  exportText += `${'='.repeat(30)}\n\n`;
-  
-  galleryChecklistItems.forEach((item, index) => {
-    const status = checklistState.gallery.items[item.id];
-    const statusText = status === 'pass' ? '✓ PASS' : status === 'fail' ? '✗ FAIL' : '? NOT ASSESSED';
-    const comment = checklistState.gallery.comments[item.id] || 'No comment provided';
+  try {
+    // Initialize jsPDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
     
-    exportText += `${index + 1}. ${item.text}\n`;
-    exportText += `   Status: ${statusText}\n`;
-    exportText += `   Comment: ${comment}\n\n`;
-  });
-  
-  if (checklistState.gallery.allPhotos.length > 0) {
-    exportText += `PHOTOS ATTACHED:\n`;
-    exportText += `${'='.repeat(20)}\n`;
-    checklistState.gallery.allPhotos.forEach((photo, index) => {
-      exportText += `${index + 1}. ${photo.name} (uploaded: ${new Date(photo.uploadDate).toLocaleString()})\n`;
+    // Calculate statistics
+    const items = checklistState.gallery.items;
+    const passed = Object.values(items).filter(status => status === 'pass').length;
+    const failed = Object.values(items).filter(status => status === 'fail').length;
+    const total = galleryChecklistItems.length;
+    const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+    
+    let y = 20; // Current Y position
+    
+    // Header
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('WEEKLY GALLERY CHECKLIST REPORT', 20, y);
+    y += 10;
+    
+    // Date and basic info
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, y);
+    y += 8;
+    doc.text(`Pass Rate: ${passed}/${total} (${passRate}%)`, 20, y);
+    y += 8;
+    
+    // Status with color
+    doc.setFont('helvetica', 'bold');
+    if (passRate >= 80) {
+      doc.setTextColor(0, 128, 0); // Green
+      doc.text('Status: ACCEPTABLE', 20, y);
+    } else {
+      doc.setTextColor(220, 53, 69); // Red
+      doc.text('Status: NEEDS ATTENTION', 20, y);
+    }
+    doc.setTextColor(0, 0, 0); // Reset to black
+    y += 15;
+    
+    // Summary section
+    doc.setFont('helvetica', 'bold');
+    doc.text('SUMMARY:', 20, y);
+    y += 8;
+    doc.setFont('helvetica', 'normal');
+    doc.text(`• Passed: ${passed} items`, 25, y);
+    y += 6;
+    doc.text(`• Failed: ${failed} items`, 25, y);
+    y += 6;
+    doc.text(`• Not assessed: ${total - passed - failed} items`, 25, y);
+    y += 6;
+    doc.text(`• Photos uploaded: ${checklistState.gallery.allPhotos.length}`, 25, y);
+    y += 15;
+    
+    // Detailed results section
+    doc.setFont('helvetica', 'bold');
+    doc.text('DETAILED RESULTS:', 20, y);
+    y += 10;
+    
+    galleryChecklistItems.forEach((item, index) => {
+      // Check if we need a new page
+      if (y > 250) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      const status = checklistState.gallery.items[item.id];
+      const comment = checklistState.gallery.comments[item.id] || 'No comment provided';
+      
+      // Item number and text
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${index + 1}. ${item.text}`, 20, y);
+      y += 6;
+      
+      // Status with color
+      doc.setFont('helvetica', 'bold');
+      if (status === 'pass') {
+        doc.setTextColor(0, 128, 0); // Green
+        doc.text('   Status: ✓ PASS', 20, y);
+      } else if (status === 'fail') {
+        doc.setTextColor(220, 53, 69); // Red
+        doc.text('   Status: ✗ FAIL', 20, y);
+      } else {
+        doc.setTextColor(108, 117, 125); // Gray
+        doc.text('   Status: ? NOT ASSESSED', 20, y);
+      }
+      doc.setTextColor(0, 0, 0); // Reset to black
+      y += 6;
+      
+      // Comment
+      doc.setFont('helvetica', 'normal');
+      doc.text('   Comment: ' + comment, 20, y);
+      y += 10;
     });
-    exportText += `\n`;
+    
+    // Photos section
+    if (checklistState.gallery.allPhotos.length > 0) {
+      if (y > 200) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('PHOTOS ATTACHED:', 20, y);
+      y += 8;
+      
+      checklistState.gallery.allPhotos.forEach((photo, index) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${index + 1}. ${photo.name}`, 25, y);
+        y += 6;
+        doc.text(`   Uploaded: ${new Date(photo.uploadDate).toLocaleString()}`, 25, y);
+        y += 8;
+      });
+    }
+    
+    // Signature section
+    if (checklistState.gallery.signature) {
+      if (y > 240) {
+        doc.addPage();
+        y = 20;
+      }
+      
+      y += 10;
+      doc.setFont('helvetica', 'bold');
+      doc.text('REVIEWER SIGNATURE:', 20, y);
+      y += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Reviewer: ${checklistState.gallery.signature}`, 20, y);
+      y += 6;
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, y);
+    }
+    
+    // Save the PDF
+    const filename = `gallery-checklist-report-${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(filename);
+    
+    console.log('PDF exported successfully:', filename);
+    
+  } catch (error) {
+    console.error('Error creating PDF:', error);
+    alert('Error creating PDF. Please try again.');
   }
-  
-  if (checklistState.gallery.signature) {
-    exportText += `REVIEWER SIGNATURE:\n`;
-    exportText += `${'='.repeat(20)}\n`;
-    exportText += `${checklistState.gallery.signature}\n`;
-    exportText += `Date: ${new Date().toLocaleDateString()}\n`;
-  }
-  
-  // Create downloadable text file (PDF would require jsPDF library)
-  const blob = new Blob([exportText], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `gallery-checklist-report-${new Date().toISOString().split('T')[0]}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 // Test function to manually initialize checklists (can be called from browser console)
