@@ -1262,6 +1262,7 @@ async function showChecklistOverview() {
   }
   
   // Ensure data is loaded before rendering
+  await checkUserAdminStatus(); // Check admin status for UI rendering
   await loadSavedChecklists();
   await loadCustomChecklists();
   
@@ -1300,9 +1301,11 @@ function renderChecklistOverview() {
         <h3 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.4rem;">${categoryEmoji} ${checklist.name}</h3>
         <p style="margin: 0 0 1rem 0; color: #6c757d;">${checklist.description}</p>
         <div style="color: #667eea; font-weight: 500;">${itemCount} items${hasPhotos ? ' • Photos required' : ''}</div>
+        ${isCurrentUserAdmin ? `
         <div style="position: absolute; top: 1rem; right: 1rem;">
           <button onclick="event.stopPropagation(); deleteCustomChecklist('${checklist.id}')" style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Delete</button>
         </div>
+        ` : ''}
       </div>
     `;
   });
@@ -1535,6 +1538,25 @@ async function saveNewChecklist() {
 }
 
 async function deleteCustomChecklist(checklistId) {
+  // Check if user is admin
+  try {
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser) {
+      alert('Please log in to delete checklists.');
+      return;
+    }
+    
+    const isAdmin = window.authUtils ? await window.authUtils.isAdmin(currentUser) : false;
+    if (!isAdmin) {
+      alert('Only administrators can delete checklists. Please contact an admin if you need this checklist removed.');
+      return;
+    }
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    alert('Unable to verify admin permissions. Only administrators can delete checklists.');
+    return;
+  }
+  
   if (!confirm('Are you sure you want to delete this checklist? This action cannot be undone.')) {
     return;
   }
@@ -1886,6 +1908,26 @@ function updateScore() {
 
 let tasks = []; // Array to store all tasks
 let currentTaskModal = null; // Store current task creation context
+let isCurrentUserAdmin = false; // Cache admin status for UI rendering
+
+// Helper function to check if current user is admin
+async function checkUserAdminStatus() {
+  try {
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser) {
+      isCurrentUserAdmin = false;
+      return false;
+    }
+    
+    const adminStatus = window.authUtils ? await window.authUtils.isAdmin(currentUser) : false;
+    isCurrentUserAdmin = adminStatus;
+    return adminStatus;
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    isCurrentUserAdmin = false;
+    return false;
+  }
+}
 
 // Load tasks from Firebase Firestore
 async function loadTasks() {
@@ -2052,6 +2094,7 @@ async function createTaskFromModal() {
 
 // Initialize tasks tab when clicked
 async function initializeTasksTab() {
+  await checkUserAdminStatus(); // Check admin status for UI rendering
   await loadTasks();
   renderTasksList();
   setupTaskFilters();
@@ -2153,7 +2196,7 @@ async function renderTasksList(filter = 'all') {
             ${task.status === 'pending' ? `<button onclick="updateTaskStatus('${task.id}', 'in-progress')" style="background: #ffc107; color: black; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Start</button>` : ''}
             ${task.status === 'in-progress' ? `<button onclick="updateTaskStatus('${task.id}', 'completed')" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Complete</button>` : ''}
             ${task.status === 'completed' ? `<button onclick="updateTaskStatus('${task.id}', 'pending')" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Reopen</button>` : ''}
-            <button onclick="deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Delete</button>
+            ${isCurrentUserAdmin ? `<button onclick="deleteTask('${task.id}')" style="background: #dc3545; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500;">Delete</button>` : ''}
           </div>
         </div>
         
@@ -2190,6 +2233,14 @@ async function updateTaskStatus(taskId, newStatus) {
   const task = tasks.find(t => t.id === taskId);
   if (!task) return;
   
+  // Validate completion requirements
+  if (newStatus === 'completed') {
+    if (task.requiresPhotos && (!task.photos || task.photos.length === 0)) {
+      alert('This task requires photos to be uploaded before it can be marked as completed. Please upload the required photos first.');
+      return;
+    }
+  }
+  
   task.status = newStatus;
   
   if (newStatus === 'completed') {
@@ -2214,9 +2265,28 @@ async function updateTaskStatus(taskId, newStatus) {
   }
 }
 
-// Delete task
+// Delete task (admin only)
 async function deleteTask(taskId) {
-  if (!confirm('Are you sure you want to delete this task?')) {
+  // Check if user is admin
+  try {
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser) {
+      alert('Please log in to delete tasks.');
+      return;
+    }
+    
+    const isAdmin = window.authUtils ? await window.authUtils.isAdmin(currentUser) : false;
+    if (!isAdmin) {
+      alert('Only administrators can delete tasks. Please contact an admin if you need this task removed.');
+      return;
+    }
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    alert('Unable to verify admin permissions. Only administrators can delete tasks.');
+    return;
+  }
+  
+  if (!confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
     return;
   }
   
