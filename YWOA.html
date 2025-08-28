@@ -1276,26 +1276,7 @@
                 }
 
                 try {
-                    this.showStatus('Capturing selected area...', 'info');
-                    
-                    // Ensure artwork element is visible and within stage
-                    if (this.artworkElement && this.artworkElement.parentElement !== this.stage) {
-                        this.stage.appendChild(this.artworkElement);
-                    }
-                    
-                    // Use html2canvas to capture the stage with all CSS transforms
-                    const options = {
-                        backgroundColor: format === 'jpg' ? '#ffffff' : null,
-                        scale: window.devicePixelRatio || 1,
-                        useCORS: true,
-                        allowTaint: true,
-                        logging: false, // Disable logging after debugging
-                        foreignObjectRendering: false, // Disable ForeignObject to handle 3D transforms
-                        imageTimeout: 0,
-                        removeContainer: true
-                    };
-
-                    const canvas = await html2canvas(this.stage, options);
+                    this.showStatus('Generating export image...', 'info');
                     
                     // Get selection bounds relative to the stage
                     const selectionRect = this.selection.getBoundingClientRect();
@@ -1307,36 +1288,58 @@
                     const selectionWidth = selectionRect.width;
                     const selectionHeight = selectionRect.height;
                     
-                    // Scale factors for high DPI displays
-                    const scale = canvas.width / stageRect.width;
+                    // Create full-size canvas to render everything
+                    const fullCanvas = document.createElement('canvas');
+                    const fullCtx = fullCanvas.getContext('2d');
+                    fullCanvas.width = this.stage.clientWidth;
+                    fullCanvas.height = this.stage.clientHeight;
                     
-                    // Create crop canvas
+                    // Fill background for JPG format
+                    if (format === 'jpg' || format === 'jpeg') {
+                        fullCtx.fillStyle = '#ffffff';
+                        fullCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
+                    }
+                    
+                    // Draw room background from main canvas
+                    if (this.roomImage && this.roomImageDisplayed) {
+                        fullCtx.drawImage(
+                            this.roomImage,
+                            this.roomImageDisplayed.x,
+                            this.roomImageDisplayed.y,
+                            this.roomImageDisplayed.width,
+                            this.roomImageDisplayed.height
+                        );
+                    } else if (hasSolidBackground) {
+                        fullCtx.fillStyle = this.canvas.style.backgroundColor;
+                        fullCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
+                    }
+                    
+                    // Draw scale points if they exist
+                    this.drawScalePointsOnCanvas(fullCtx);
+                    
+                    // Draw artwork with 3D rotation if it exists
+                    if (this.artworkImage) {
+                        this.drawArtworkWith3DRotation(fullCtx);
+                    }
+                    
+                    // Now crop to selection area
                     const cropCanvas = document.createElement('canvas');
                     const cropCtx = cropCanvas.getContext('2d');
-                    cropCanvas.width = selectionWidth * scale;
-                    cropCanvas.height = selectionHeight * scale;
+                    cropCanvas.width = selectionWidth;
+                    cropCanvas.height = selectionHeight;
                     
-                    // Draw the selected portion from the html2canvas result
+                    // Draw the selected portion from the full canvas
                     cropCtx.drawImage(
-                        canvas,
-                        selectionX * scale, // source x
-                        selectionY * scale, // source y
-                        selectionWidth * scale, // source width
-                        selectionHeight * scale, // source height
+                        fullCanvas,
+                        selectionX, // source x
+                        selectionY, // source y
+                        selectionWidth, // source width
+                        selectionHeight, // source height
                         0, 0, // destination x, y
-                        selectionWidth * scale, // destination width
-                        selectionHeight * scale // destination height
+                        selectionWidth, selectionHeight // destination width, height
                     );
-                    
-                    // Scale down to actual selection size for final output
-                    const finalCanvas = document.createElement('canvas');
-                    const finalCtx = finalCanvas.getContext('2d');
-                    finalCanvas.width = selectionWidth;
-                    finalCanvas.height = selectionHeight;
-                    
-                    finalCtx.drawImage(cropCanvas, 0, 0, selectionWidth, selectionHeight);
 
-                    const dataURL = finalCanvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
+                    const dataURL = cropCanvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
                     const link = document.createElement('a');
                     link.download = `your-world-our-art-crop.${format === 'jpg' ? 'jpg' : 'png'}`;
                     link.href = dataURL;
@@ -1507,6 +1510,10 @@
 
                 ctx.save();
                 
+                // Get rotation angle in radians
+                const yRotationRad = (this.artworkRotation.y * Math.PI) / 180;
+                const perspective = 500; // Match CSS perspective value
+                
                 // Calculate artwork center
                 const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
                 const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
@@ -1514,53 +1521,25 @@
                 // Move to center point
                 ctx.translate(centerX, centerY);
                 
-                // Convert rotations to radians
-                const xRad = (this.artworkRotation.x * Math.PI) / 180;
-                const yRad = (this.artworkRotation.y * Math.PI) / 180;
-                const zRad = (this.artworkRotation.z * Math.PI) / 180;
+                // Calculate 3D perspective projection for Y rotation
+                const cosY = Math.cos(yRotationRad);
+                const sinY = Math.sin(yRotationRad);
                 
-                // Apply 3D rotation matrix calculations
-                // For proper 3D effect, we need to simulate perspective projection
-                const perspective = 500; // Same as CSS perspective value
+                // Perspective foreshortening - objects farther away appear smaller
+                const z = sinY * (this.artworkSize.width / 2); // Approximate Z displacement
+                const perspectiveScale = perspective / (perspective + z);
                 
-                // Calculate 3D rotation matrix components
-                const cosX = Math.cos(xRad);
-                const sinX = Math.sin(xRad);
-                const cosY = Math.cos(yRad);
-                const sinY = Math.sin(yRad);
-                const cosZ = Math.cos(zRad);
-                const sinZ = Math.sin(zRad);
+                // Create perspective transform matrix
+                // For Y rotation: [cosY, 0, 0, 1, 0, 0] with perspective scaling
+                const scaleX = cosY * perspectiveScale;
+                const scaleY = perspectiveScale;
                 
-                // Combined rotation matrix (Z * Y * X order, same as CSS)
-                const m11 = cosY * cosZ;
-                const m12 = -cosY * sinZ;
-                const m13 = sinY;
+                // Apply the perspective transform
+                ctx.transform(scaleX, 0, 0, scaleY, 0, 0);
                 
-                const m21 = cosX * sinZ + sinX * sinY * cosZ;
-                const m22 = cosX * cosZ - sinX * sinY * sinZ;
-                const m23 = -sinX * cosY;
-                
-                const m31 = sinX * sinZ - cosX * sinY * cosZ;
-                const m32 = sinX * cosZ + cosX * sinY * sinZ;
-                const m33 = cosX * cosY;
-                
-                // Apply perspective projection (simplified)
-                const perspectiveScale = perspective / (perspective + m13 * 100);
-                
-                // Apply the 2D projection of 3D rotation
-                ctx.transform(
-                    m11 * perspectiveScale,  // x scale and skew
-                    m21 * perspectiveScale,  // x skew
-                    m12 * perspectiveScale,  // y skew  
-                    m22 * perspectiveScale,  // y scale
-                    0,                       // x translation
-                    0                        // y translation
-                );
-                
-                // Apply additional Y-axis foreshortening for better 3D effect
-                const yForeshorten = Math.abs(cosY);
-                if (yForeshorten < 1) {
-                    ctx.transform(yForeshorten, 0, 0, 1, 0, 0);
+                // Apply color intensity filter by adjusting canvas
+                if (this.colorIntensity !== 100) {
+                    ctx.filter = `saturate(${this.colorIntensity}%)`;
                 }
                 
                 // Draw the artwork centered at origin
