@@ -432,6 +432,18 @@ function initializeTabs() {
       // Add active class to clicked button and corresponding content
       button.classList.add('active');
       document.getElementById(`${tabId}-tab`).classList.add('active');
+      
+      // Initialize checklists when checklists tab is clicked
+      if (tabId === 'checklists') {
+        setTimeout(() => {
+          const galleryItemsContainer = document.getElementById('gallery-items');
+          if (galleryItemsContainer && !galleryItemsContainer.innerHTML.trim()) {
+            console.log('Initializing checklists...');
+            initializeChecklists();
+            loadFromLocalStorage();
+          }
+        }, 100);
+      }
     });
   });
 }
@@ -1091,12 +1103,22 @@ let checklistState = {
 };
 
 function initializeChecklists() {
+  console.log('Initializing checklist system...');
+  console.log('Gallery items container:', document.getElementById('gallery-items'));
+  console.log('Checklist items data:', galleryChecklistItems);
   renderGalleryChecklist();
   updateScore();
+  console.log('Checklist initialization complete');
 }
 
 function renderGalleryChecklist() {
   const container = document.getElementById('gallery-items');
+  console.log('Rendering checklist to container:', container);
+  
+  if (!container) {
+    console.error('Gallery items container not found!');
+    return;
+  }
   
   const itemsHTML = galleryChecklistItems.map((item, index) => {
     const isCompleted = checklistState.gallery.items[item.id] || false;
@@ -1151,7 +1173,10 @@ function renderGalleryChecklist() {
     `;
   }).join('');
   
+  console.log('Generated HTML length:', itemsHTML.length);
+  console.log('Setting innerHTML...');
   container.innerHTML = itemsHTML;
+  console.log('Checklist rendered successfully, container now has:', container.children.length, 'items');
 }
 
 function toggleItem(itemId) {
@@ -1306,22 +1331,7 @@ async function exportToPDF(checklistType) {
   URL.revokeObjectURL(url);
 }
 
-// Initialize checklists when tab is accessed
-document.addEventListener('DOMContentLoaded', function() {
-  // Add checklists tab to existing tab functionality
-  const checklistTab = document.querySelector('[data-tab="checklists"]');
-  if (checklistTab) {
-    checklistTab.addEventListener('click', function() {
-      // Delay initialization to ensure tab content is visible
-      setTimeout(() => {
-        if (document.getElementById('gallery-items') && !document.getElementById('gallery-items').innerHTML.trim()) {
-          initializeChecklists();
-          loadFromLocalStorage();
-        }
-      }, 100);
-    });
-  }
-});
+// Checklist initialization is now handled in the main initializeTabs() function above
 
 </script>
 
