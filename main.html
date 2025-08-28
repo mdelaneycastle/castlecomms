@@ -1090,7 +1090,7 @@ const galleryChecklistItems = [
   { id: 'comms-read', text: 'Ensure all teams have read through comms and ticked to say they have', hasPhoto: false },
   { id: 'halcyon-photos', text: 'Please add pictures of your Halcyon artwork Halcyon rooms', hasPhoto: false },
   { id: 'originals-count', text: 'Please state how many originals you have on the wall', hasValue: true, placeholder: 'e.g. ORI 21, SCU 19' },
-  { id: 'sles-count', text: 'Please state how many SLE\'s you have on the wall', hasValue: true, placeholder: 'e.g. SLE 98' }
+  { id: 'sles-count', text: 'Please state how many SLEs you have on the wall', hasValue: true, placeholder: 'e.g. SLE 98' }
 ];
 
 let checklistState = {
@@ -1101,6 +1101,8 @@ let checklistState = {
     comments: {}
   }
 };
+
+console.log('Checklist variables loaded successfully:', galleryChecklistItems.length, 'items');
 
 function initializeChecklists() {
   console.log('Initializing checklist system...');
@@ -1331,7 +1333,30 @@ async function exportToPDF(checklistType) {
   URL.revokeObjectURL(url);
 }
 
-// Checklist initialization is now handled in the main initializeTabs() function above
+// Test function to manually initialize checklists (can be called from browser console)
+function testChecklistInit() {
+  console.log('Manual checklist test triggered');
+  const container = document.getElementById('gallery-items');
+  console.log('Container found:', !!container);
+  if (container) {
+    container.innerHTML = '<div>Manual test - container found!</div>';
+    initializeChecklists();
+  } else {
+    console.error('Container not found - check if checklists tab is active');
+  }
+}
+
+// Also try to initialize on window load as backup
+window.addEventListener('load', function() {
+  console.log('Window loaded - checking for active checklists tab');
+  setTimeout(() => {
+    const checklistTab = document.getElementById('checklists-tab');
+    if (checklistTab && checklistTab.classList.contains('active')) {
+      console.log('Checklists tab is active on load - initializing');
+      initializeChecklists();
+    }
+  }, 500);
+});
 
 </script>
 
