@@ -558,13 +558,9 @@ function initializeTabs() {
       
       // Initialize checklists when checklists tab is clicked
       if (tabId === 'checklists') {
-        setTimeout(() => {
-          const galleryItemsContainer = document.getElementById('gallery-items');
-          if (galleryItemsContainer && !galleryItemsContainer.innerHTML.trim()) {
-            console.log('Initializing checklists...');
-            initializeChecklists();
-            loadFromLocalStorage();
-          }
+        setTimeout(async () => {
+          console.log('Checklists tab clicked - initializing...');
+          await initializeChecklists();
         }, 100);
       }
     });
@@ -1237,16 +1233,38 @@ console.log('Checklist variables loaded successfully:', galleryChecklistItems.le
 
 async function initializeChecklists() {
   console.log('Initializing checklist system...');
+  
+  // Wait for Firebase to be ready
+  if (!db || !firebase.auth().currentUser) {
+    console.log('Firebase not ready - waiting for authentication...');
+    // Wait a bit and try again
+    setTimeout(async () => {
+      await initializeChecklists();
+    }, 1000);
+    return;
+  }
+  
   await loadSavedChecklists();
   await loadCustomChecklists();
-  showChecklistOverview();
+  await showChecklistOverview();
   console.log('Checklist initialization complete');
 }
 
 // Navigation functions
-function showChecklistOverview() {
+async function showChecklistOverview() {
   hideAllChecklistContent();
   document.getElementById('checklist-overview').style.display = 'block';
+  
+  // Show loading state
+  const container = document.getElementById('checklist-cards');
+  if (container) {
+    container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #6c757d;">Loading checklists...</div>';
+  }
+  
+  // Ensure data is loaded before rendering
+  await loadSavedChecklists();
+  await loadCustomChecklists();
+  
   renderChecklistOverview();
 }
 
@@ -1304,9 +1322,20 @@ function getCategoryEmoji(category) {
   return emojis[category] || '📝';
 }
 
-function showChecklistHistory() {
+async function showChecklistHistory() {
   hideAllChecklistContent();
   document.getElementById('checklist-history').style.display = 'block';
+  
+  // Show loading state
+  const container = document.getElementById('gallery-history-list');
+  if (container) {
+    container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #6c757d;">Loading checklist history...</div>';
+  }
+  
+  // Ensure data is loaded before rendering
+  await loadSavedChecklists();
+  await loadCustomChecklists();
+  
   renderChecklistHistory();
 }
 
