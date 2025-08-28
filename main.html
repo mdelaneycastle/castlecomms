@@ -2200,16 +2200,40 @@ async function renderTasksList(filter = 'all') {
           </div>
         </div>
         
-        ${task.requiresPhotos && task.photos.length > 0 ? `
-          <div style="margin-top: 1rem;">
-            <div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 0.5rem; color: #2c3e50;">Task Photos:</div>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-              ${task.photos.map(photo => `
-                <img src="${photo.dataUrl}" alt="${photo.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
-              `).join('')}
+        <!-- Photo upload section for photo-required tasks -->
+        ${task.requiresPhotos ? `
+          <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <div style="font-size: 0.9rem; font-weight: 500; color: #2c3e50;">📸 Photos Required</div>
+              <input type="file" id="task-photo-${task.id}" multiple accept="image/*" style="display: none;" onchange="handleTaskPhotoUpload('${task.id}', this.files)">
+              <button onclick="document.getElementById('task-photo-${task.id}').click()" style="background: #28a745; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">Add Photos</button>
             </div>
+            
+            ${task.photos && task.photos.length > 0 ? `
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                ${task.photos.map((photo, index) => `
+                  <div style="position: relative;">
+                    <img src="${photo.dataUrl}" alt="${photo.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;">
+                    <button onclick="removeTaskPhoto('${task.id}', ${index})" style="position: absolute; top: -5px; right: -5px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; cursor: pointer;">×</button>
+                  </div>
+                `).join('')}
+              </div>
+              <div style="font-size: 0.8rem; color: #6c757d;">${task.photos.length} photo(s) uploaded</div>
+            ` : `
+              <div style="font-size: 0.8rem; color: #dc3545;">No photos uploaded yet</div>
+            `}
           </div>
         ` : ''}
+        
+        <!-- Notes section for all tasks -->
+        <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+          <div style="font-size: 0.9rem; font-weight: 500; margin-bottom: 0.5rem; color: #2c3e50;">📝 Notes</div>
+          <textarea 
+            id="task-notes-${task.id}" 
+            placeholder="Add notes, updates, or comments about this task..."
+            onchange="updateTaskNotes('${task.id}', this.value)"
+            style="width: 100%; min-height: 60px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-size: 0.9rem;">${task.notes || ''}</textarea>
+        </div>`
       </div>
     `;
   }).join('');
@@ -2683,6 +2707,91 @@ async function clearChecklistProgress() {
     console.log('Checklist progress cleared from Firebase');
   } catch (error) {
     console.error('Error clearing checklist progress:', error);
+  }
+}
+
+// Task photo upload functionality
+async function handleTaskPhotoUpload(taskId, files) {
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) return;
+  
+  if (!task.photos) {
+    task.photos = [];
+  }
+  
+  // Convert files to base64 for storage
+  const photoPromises = Array.from(files).map(file => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        resolve({
+          name: file.name,
+          dataUrl: e.target.result,
+          uploadDate: new Date().toISOString(),
+          size: file.size
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+  
+  try {
+    const newPhotos = await Promise.all(photoPromises);
+    task.photos.push(...newPhotos);
+    
+    // Save to Firebase
+    await saveTask(task);
+    
+    // Re-render if on tasks tab
+    const tasksTab = document.getElementById('tasks-tab');
+    if (tasksTab && tasksTab.classList.contains('active')) {
+      await renderTasksList();
+    }
+    
+    console.log(`${newPhotos.length} photos added to task ${taskId}`);
+  } catch (error) {
+    console.error('Error uploading task photos:', error);
+    alert('Error uploading photos. Please try again.');
+  }
+}
+
+// Remove task photo
+async function removeTaskPhoto(taskId, photoIndex) {
+  const task = tasks.find(t => t.id === taskId);
+  if (!task || !task.photos) return;
+  
+  task.photos.splice(photoIndex, 1);
+  
+  try {
+    // Save to Firebase
+    await saveTask(task);
+    
+    // Re-render if on tasks tab
+    const tasksTab = document.getElementById('tasks-tab');
+    if (tasksTab && tasksTab.classList.contains('active')) {
+      await renderTasksList();
+    }
+    
+    console.log(`Photo removed from task ${taskId}`);
+  } catch (error) {
+    console.error('Error removing task photo:', error);
+    alert('Error removing photo. Please try again.');
+  }
+}
+
+// Update task notes
+async function updateTaskNotes(taskId, notes) {
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) return;
+  
+  task.notes = notes;
+  
+  try {
+    // Save to Firebase
+    await saveTask(task);
+    console.log(`Notes updated for task ${taskId}`);
+  } catch (error) {
+    console.error('Error updating task notes:', error);
   }
 }
 
