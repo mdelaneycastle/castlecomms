@@ -296,12 +296,15 @@ service cloud.firestore {
       
       // Users can create their own typing indicators
       allow create: if request.auth != null 
-        && request.auth.token.email == request.resource.data.userEmail
+        && (request.auth.token.email == request.resource.data.userEmail 
+            || request.auth.uid == request.resource.data.userId)
         && chatParticipantCheck(request.resource.data.chatId);
       
-      // Users can update/delete their own typing indicators
+      // Users can update/delete their own typing indicators  
       allow update, delete: if request.auth != null 
-        && request.auth.token.email == resource.data.userEmail
+        && (request.auth.token.email == resource.data.userEmail 
+            || request.auth.uid == resource.data.userId 
+            || typingId.matches('.*' + request.auth.token.email + '.*'))
         && chatParticipantCheck(resource.data.chatId);
     }
     
