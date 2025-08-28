@@ -399,6 +399,113 @@ service cloud.firestore {
         && newData.createdBy == oldData.createdBy;
     }
 
+    // Tasks rules - users can manage their own tasks
+    match /tasks/{taskId} {
+      // Users can only read their own tasks
+      allow read: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // Users can create their own tasks with proper validation
+      allow create: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId
+        && validateTask(request.resource.data);
+      
+      // Users can update their own tasks
+      allow update: if request.auth != null 
+        && request.auth.uid == resource.data.userId
+        && validateTaskUpdate(request.resource.data, resource.data);
+      
+      // Users can delete their own tasks
+      allow delete: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+    }
+
+    // Custom checklists rules - users can manage their own custom checklists
+    match /custom-checklists/{checklistId} {
+      // Users can only read their own custom checklists
+      allow read: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // Users can create their own custom checklists with proper validation
+      allow create: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId
+        && validateCustomChecklist(request.resource.data);
+      
+      // Users can update their own custom checklists
+      allow update: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // Users can delete their own custom checklists
+      allow delete: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+    }
+
+    // Completed checklists rules - users can manage their own completed checklists
+    match /completed-checklists/{completedChecklistId} {
+      // Users can only read their own completed checklists
+      allow read: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // Users can create their own completed checklists with proper validation
+      allow create: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId
+        && validateCompletedChecklist(request.resource.data);
+      
+      // Users can update their own completed checklists (for additional notes, etc.)
+      allow update: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // Users can delete their own completed checklists
+      allow delete: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+    }
+
+    // Helper function to validate task data
+    function validateTask(data) {
+      return data.keys().hasAll(['title', 'status', 'userId', 'userEmail'])
+        && data.title is string
+        && data.title.size() > 0
+        && data.title.size() <= 200
+        && data.status in ['pending', 'in-progress', 'completed']
+        && data.userId is string
+        && data.userEmail is string
+        && (!('description' in data) || (data.description is string && data.description.size() <= 1000))
+        && (!('dueDate' in data) || data.dueDate is string)
+        && (!('requiresPhotos' in data) || data.requiresPhotos is bool)
+        && (!('priority' in data) || data.priority in ['low', 'medium', 'high']);
+    }
+
+    // Helper function to validate task updates
+    function validateTaskUpdate(newData, oldData) {
+      return newData.userId == oldData.userId
+        && newData.userEmail == oldData.userEmail
+        && (!('createdAt' in newData) || newData.createdAt == oldData.createdAt);
+    }
+
+    // Helper function to validate custom checklist data
+    function validateCustomChecklist(data) {
+      return data.keys().hasAll(['name', 'userId', 'userEmail', 'items'])
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 100
+        && data.userId is string
+        && data.userEmail is string
+        && data.items is list
+        && data.items.size() > 0
+        && (!('description' in data) || (data.description is string && data.description.size() <= 500))
+        && (!('category' in data) || data.category is string);
+    }
+
+    // Helper function to validate completed checklist data
+    function validateCompletedChecklist(data) {
+      return data.keys().hasAll(['checklistType', 'userId', 'userEmail'])
+        && data.checklistType is string
+        && data.userId is string
+        && data.userEmail is string
+        && (!('signature' in data) || data.signature is string)
+        && (!('passRate' in data) || data.passRate is number);
+    }
+
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
