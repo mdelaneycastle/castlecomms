@@ -337,15 +337,48 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
         <button class="checklist-nav-button active" data-checklist="gallery" style="background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%)); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: all 0.3s;">Gallery Checklist</button>
       </div>
       
-      <!-- Gallery Checklist -->
-      <div class="checklist-content active" id="gallery-checklist">
+      <!-- Checklist Overview Page -->
+      <div class="checklist-content active" id="checklist-overview">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h2 style="margin: 0; font-size: 1.8rem; color: #2c3e50;">Available Checklists</h2>
+          <button onclick="showChecklistHistory()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">View History</button>
+        </div>
+        
+        <div class="checklist-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+          <div class="checklist-card" onclick="startGalleryChecklist()" style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: pointer; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
+            <h3 style="margin: 0 0 1rem 0; color: #2c3e50; font-size: 1.4rem;">📋 Gallery Weekly Checklist</h3>
+            <p style="margin: 0 0 1rem 0; color: #6c757d;">Complete the weekly gallery inspection checklist including photos, fire exits, maintenance, and documentation.</p>
+            <div style="color: #667eea; font-weight: 500;">11 items • Photos required</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Checklist History Page -->
+      <div class="checklist-content" id="checklist-history" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h2 style="margin: 0; font-size: 1.8rem; color: #2c3e50;">Checklist History</h2>
+          <button onclick="showChecklistOverview()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">← Back to Checklists</button>
+        </div>
+        
+        <div class="history-section">
+          <h3 style="color: #2c3e50; margin-bottom: 1rem;">Gallery Weekly Checklist</h3>
+          <div id="gallery-history-list" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <!-- History items will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Gallery Checklist Form -->
+      <div class="checklist-content" id="gallery-checklist-form" style="display: none;">
         <div class="checklist-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 12px;">
-          <div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button onclick="showChecklistOverview()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">← Back</button>
             <h2 style="margin: 0; font-size: 1.8rem; color: #2c3e50;">WEEKLY GALLERY CHECKLIST</h2>
           </div>
           <div style="display: flex; gap: 1rem; align-items: center;">
-            <div class="checklist-score" id="gallery-score" style="background: #28a745; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1.1rem;">0/11 (0%)</div>
-            <button class="pdf-export-btn" onclick="exportToPDF('gallery')" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">PDF</button>
+            <div class="checklist-score" id="gallery-score" style="background: #6c757d; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 1.1rem;">0/11 Pass (0%)</div>
+            <button onclick="saveChecklist()" style="background: #28a745; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">Save Checklist</button>
+            <button onclick="exportToPDF('gallery')" style="background: #dc3545; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 500;">PDF</button>
           </div>
         </div>
         
@@ -1113,15 +1146,52 @@ let checklistState = {
   }
 };
 
+let savedChecklists = {
+  gallery: [] // Array of completed checklists with timestamps
+};
+
 console.log('Checklist variables loaded successfully:', galleryChecklistItems.length, 'items');
 
 function initializeChecklists() {
   console.log('Initializing checklist system...');
-  console.log('Gallery items container:', document.getElementById('gallery-items'));
-  console.log('Checklist items data:', galleryChecklistItems);
+  loadSavedChecklists();
+  showChecklistOverview();
+  console.log('Checklist initialization complete');
+}
+
+// Navigation functions
+function showChecklistOverview() {
+  hideAllChecklistContent();
+  document.getElementById('checklist-overview').style.display = 'block';
+}
+
+function showChecklistHistory() {
+  hideAllChecklistContent();
+  document.getElementById('checklist-history').style.display = 'block';
+  renderChecklistHistory();
+}
+
+function startGalleryChecklist() {
+  hideAllChecklistContent();
+  document.getElementById('gallery-checklist-form').style.display = 'block';
+  clearCurrentChecklist();
   renderGalleryChecklist();
   updateScore();
-  console.log('Checklist initialization complete');
+}
+
+function hideAllChecklistContent() {
+  document.querySelectorAll('.checklist-content').forEach(el => {
+    el.style.display = 'none';
+  });
+}
+
+function clearCurrentChecklist() {
+  checklistState.gallery = {
+    items: {},
+    signature: '',
+    allPhotos: [],
+    comments: {}
+  };
 }
 
 function renderGalleryChecklist() {
@@ -1286,7 +1356,159 @@ function clearSignature() {
   saveToLocalStorage();
 }
 
+function saveChecklist() {
+  if (!checklistState.gallery.signature) {
+    alert('Please add a signature before saving the checklist.');
+    return;
+  }
+  
+  const items = checklistState.gallery.items;
+  const passed = Object.values(items).filter(status => status === 'pass').length;
+  const failed = Object.values(items).filter(status => status === 'fail').length;
+  const total = galleryChecklistItems.length;
+  const completed = passed + failed;
+  
+  if (completed === 0) {
+    alert('Please complete at least one checklist item before saving.');
+    return;
+  }
+  
+  const savedChecklist = {
+    id: Date.now(),
+    date: new Date().toISOString(),
+    dateDisplay: new Date().toLocaleDateString(),
+    items: { ...checklistState.gallery.items },
+    signature: checklistState.gallery.signature,
+    allPhotos: [...checklistState.gallery.allPhotos],
+    comments: { ...checklistState.gallery.comments },
+    passed: passed,
+    failed: failed,
+    total: total,
+    passRate: Math.round((passed / total) * 100)
+  };
+  
+  savedChecklists.gallery.push(savedChecklist);
+  saveSavedChecklists();
+  
+  alert(`Checklist saved successfully! Pass rate: ${savedChecklist.passRate}%`);
+  showChecklistHistory();
+}
+
+function saveSavedChecklists() {
+  localStorage.setItem('castlecomms-saved-checklists', JSON.stringify(savedChecklists));
+}
+
+function loadSavedChecklists() {
+  const saved = localStorage.getItem('castlecomms-saved-checklists');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      savedChecklists = { ...savedChecklists, ...parsed };
+    } catch (e) {
+      console.error('Error loading saved checklists:', e);
+    }
+  }
+}
+
+function renderChecklistHistory() {
+  const container = document.getElementById('gallery-history-list');
+  if (!container) return;
+  
+  const history = savedChecklists.gallery || [];
+  
+  if (history.length === 0) {
+    container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #6c757d;">No completed checklists yet.</div>';
+    return;
+  }
+  
+  // Sort by date (newest first)
+  const sortedHistory = history.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  container.innerHTML = sortedHistory.map(checklist => {
+    const statusColor = checklist.passRate >= 80 ? '#28a745' : '#dc3545';
+    const statusText = checklist.passRate >= 80 ? 'PASS' : 'FAIL';
+    
+    return `
+      <div class="history-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #e9ecef; cursor: pointer; transition: background-color 0.2s;" 
+           onclick="viewSavedChecklist(${checklist.id})"
+           onmouseover="this.style.backgroundColor='#f8f9fa'" 
+           onmouseout="this.style.backgroundColor='white'">
+        <div>
+          <div style="font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">${checklist.dateDisplay}</div>
+          <div style="font-size: 0.9rem; color: #6c757d;">Completed by ${checklist.signature}</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          <div style="text-align: right;">
+            <div style="font-weight: 600; color: ${statusColor};">${checklist.passed}/${checklist.total} Pass (${checklist.passRate}%)</div>
+            <div style="font-size: 0.9rem; color: #6c757d;">${checklist.allPhotos.length} photos</div>
+          </div>
+          <div style="background: ${statusColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+            ${statusText}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function viewSavedChecklist(checklistId) {
+  const checklist = savedChecklists.gallery.find(c => c.id === checklistId);
+  if (!checklist) return;
+  
+  // Load the saved checklist data
+  checklistState.gallery = {
+    items: { ...checklist.items },
+    signature: checklist.signature,
+    allPhotos: [...checklist.allPhotos],
+    comments: { ...checklist.comments }
+  };
+  
+  // Show the form in read-only mode
+  hideAllChecklistContent();
+  document.getElementById('gallery-checklist-form').style.display = 'block';
+  renderGalleryChecklist();
+  updateScore();
+  
+  // Update signature display
+  const signatureDisplay = document.getElementById('signature-display');
+  if (signatureDisplay && checklist.signature) {
+    signatureDisplay.innerHTML = `<strong>${checklist.signature}</strong> - ${checklist.dateDisplay}`;
+  }
+  
+  // Make form read-only by disabling buttons and inputs
+  makeFormReadOnly();
+}
+
+function makeFormReadOnly() {
+  // Disable all pass/fail buttons
+  document.querySelectorAll('.checklist-item').forEach(item => {
+    const buttons = item.querySelectorAll('[onclick*="setItemStatus"]');
+    buttons.forEach(btn => {
+      btn.style.pointerEvents = 'none';
+      btn.style.opacity = '0.7';
+    });
+  });
+  
+  // Disable photo upload
+  const photoInput = document.getElementById('all-photos-upload');
+  if (photoInput) {
+    photoInput.disabled = true;
+  }
+  
+  // Disable comment inputs
+  document.querySelectorAll('textarea[id^="comment-"]').forEach(textarea => {
+    textarea.disabled = true;
+  });
+  
+  // Disable signature inputs
+  const signatureInput = document.getElementById('signature-name');
+  if (signatureInput) {
+    signatureInput.disabled = true;
+  }
+}
+
 function saveToLocalStorage() {
+  // This function is now mainly for temporary state
   localStorage.setItem('castlecomms-checklists', JSON.stringify(checklistState));
 }
 
