@@ -1262,92 +1262,66 @@
             }
 
             async exportImage(format) {
-                // Check if we have a selection rectangle
+                // 1) Require a selection
                 if (this.selection.classList.contains('hidden')) {
                     this.showStatus('Please draw a selection rectangle first using "Start Selection"', 'error');
                     return;
                 }
-
-                // Check if we have content to export
-                const hasSolidBackground = !this.roomImage && this.canvas.style.backgroundColor;
-                if (!this.roomImage && !hasSolidBackground) {
-                    this.showStatus('No room background set. Upload an image or choose a color.', 'error');
-                    return;
-                }
-
                 try {
                     this.showStatus('Generating export image...', 'info');
-                    
-                    // Get selection bounds relative to the stage
-                    const selectionRect = this.selection.getBoundingClientRect();
-                    const stageRect = this.stage.getBoundingClientRect();
-                    
-                    // Calculate selection area relative to stage
-                    const selectionX = selectionRect.left - stageRect.left;
-                    const selectionY = selectionRect.top - stageRect.top;
-                    const selectionWidth = selectionRect.width;
-                    const selectionHeight = selectionRect.height;
-                    
-                    // Create full-size canvas to render everything
-                    const fullCanvas = document.createElement('canvas');
-                    const fullCtx = fullCanvas.getContext('2d');
-                    fullCanvas.width = this.stage.clientWidth;
-                    fullCanvas.height = this.stage.clientHeight;
-                    
-                    // Fill background for JPG format
-                    if (format === 'jpg' || format === 'jpeg') {
-                        fullCtx.fillStyle = '#ffffff';
-                        fullCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
-                    }
-                    
-                    // Draw room background from main canvas
-                    if (this.roomImage && this.roomImageDisplayed) {
-                        fullCtx.drawImage(
-                            this.roomImage,
-                            this.roomImageDisplayed.x,
-                            this.roomImageDisplayed.y,
-                            this.roomImageDisplayed.width,
-                            this.roomImageDisplayed.height
-                        );
-                    } else if (hasSolidBackground) {
-                        fullCtx.fillStyle = this.canvas.style.backgroundColor;
-                        fullCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
-                    }
-                    
-                    // Draw scale points if they exist
-                    this.drawScalePointsOnCanvas(fullCtx);
-                    
-                    // Draw artwork with 3D rotation if it exists
-                    if (this.artworkImage) {
-                        this.drawArtworkWith3DRotation(fullCtx);
-                    }
-                    
-                    // Now crop to selection area
-                    const cropCanvas = document.createElement('canvas');
-                    const cropCtx = cropCanvas.getContext('2d');
-                    cropCanvas.width = selectionWidth;
-                    cropCanvas.height = selectionHeight;
-                    
-                    // Draw the selected portion from the full canvas
-                    cropCtx.drawImage(
-                        fullCanvas,
-                        selectionX, // source x
-                        selectionY, // source y
-                        selectionWidth, // source width
-                        selectionHeight, // source height
-                        0, 0, // destination x, y
-                        selectionWidth, selectionHeight // destination width, height
-                    );
 
-                    const dataURL = cropCanvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
-                    const link = document.createElement('a');
-                    link.download = `your-world-our-art-crop.${format === 'jpg' ? 'jpg' : 'png'}`;
-                    link.href = dataURL;
-                    link.click();
-                    
+                    // 2) Hide the selection box itself during render
+                    const selPrevDisplay = this.selection.style.display;
+                    this.selection.style.display = 'none';
+
+                    // 3) Rasterize the whole stage exactly as rendered (CSS 3D included)
+                    const stageNode = this.stage; // .center-canvas
+                    const dpr = window.devicePixelRatio || 1;
+                    const hc = await html2canvas(stageNode, {
+                        backgroundColor: format === 'jpg' ? '#ffffff' : null,
+                        scale: Math.max(2, dpr),   // nice crisp export
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false,
+                        removeContainer: true
+                    });
+
+                    // 4) Restore selection visibility so user still sees it
+                    this.selection.style.display = selPrevDisplay || '';
+
+                    // 5) Compute crop (selection is in CSS pixels; html2canvas canvas is scaled)
+                    const stageRect = stageNode.getBoundingClientRect();
+                    const selRect = this.selection.getBoundingClientRect();
+
+                    const scale = hc.width / stageRect.width; // same as html2canvas scale we asked for
+                    const sx = Math.round((selRect.left - stageRect.left) * scale);
+                    const sy = Math.round((selRect.top  - stageRect.top ) * scale);
+                    const sw = Math.round(selRect.width * scale);
+                    const sh = Math.round(selRect.height * scale);
+
+                    // 6) Crop to a new canvas
+                    const out = document.createElement('canvas');
+                    out.width = sw;
+                    out.height = sh;
+                    const octx = out.getContext('2d');
+                    // fill white for jpg
+                    if (format === 'jpg' || format === 'jpeg') {
+                        octx.fillStyle = '#ffffff';
+                        octx.fillRect(0, 0, sw, sh);
+                    }
+                    octx.drawImage(hc, sx, sy, sw, sh, 0, 0, sw, sh);
+
+                    // 7) Download
+                    const mime = (format === 'jpg' || format === 'jpeg') ? 'image/jpeg' : 'image/png';
+                    const dataURL = out.toDataURL(mime, 0.92);
+                    const a = document.createElement('a');
+                    a.download = `your-world-our-art.${format === 'jpg' ? 'jpg' : 'png'}`;
+                    a.href = dataURL;
+                    a.click();
+
                     this.showStatus(`Selected area exported as ${format.toUpperCase()}!`, 'success');
-                } catch (error) {
-                    console.error('Export error:', error);
+                } catch (err) {
+                    console.error(err);
                     this.showStatus('Export failed. Please try again.', 'error');
                 }
             }
@@ -1365,14 +1339,13 @@
             }
 
             async performScreenshot() {
+                const hiddenElements = []; // Move outside try block
                 try {
                     // Hide header and other UI elements during screenshot
                     const headerContainer = document.getElementById('header-container');
                     const sidebarContainer = document.getElementById('sidebar-container');
                     const launcher = document.getElementById('cc-launcher');
                     const widget = document.getElementById('cc-widget');
-                    
-                    const hiddenElements = [];
                     
                     // Store original visibility and hide elements
                     [headerContainer, sidebarContainer, launcher, widget].forEach(el => {
