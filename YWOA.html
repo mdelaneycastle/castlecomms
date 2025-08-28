@@ -1515,15 +1515,20 @@
                     });
                     
                     // Create perspective transformation matrix for Y-axis rotation
-                    // Y-axis rotation creates a shear effect, not just scaling
-                    // Matrix: [cosY, 0, skew, 1, 0, 0] where skew simulates perspective
+                    // Fix direction and reduce skew for more realistic 3D effect
                     
-                    const scaleX = cosY; // Positive/negative cosY for left/right tilt
+                    const scaleX = Math.abs(cosY); // Always positive - just compress width
                     const skewY = 0; // No vertical skew for Y rotation
-                    const skewX = sinY * 0.3; // Horizontal skew based on rotation - reduced factor
+                    const skewX = -sinY * 0.15; // Reverse direction, reduce skew factor
                     const scaleY = 1; // No vertical scaling
                     
-                    console.log('Applying matrix transform:', { scaleX, skewX, skewY, scaleY });
+                    console.log('Applying matrix transform:', { 
+                        originalRotation: this.artworkRotation.y,
+                        scaleX, 
+                        skewX, 
+                        skewY, 
+                        scaleY 
+                    });
                     
                     // Apply the transformation matrix
                     ctx.transform(scaleX, skewY, skewX, scaleY, 0, 0);
