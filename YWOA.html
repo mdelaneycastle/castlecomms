@@ -1508,19 +1508,21 @@
                     const cosY = Math.cos(yRotationRad);
                     const sinY = Math.sin(yRotationRad);
                     
-                    // Perspective foreshortening - objects farther away appear smaller
-                    const z = Math.abs(sinY) * (this.artworkSize.width / 4); // Z displacement
-                    const perspectiveScale = perspective / (perspective + z);
+                    console.log('Transform values:', { 
+                        rotationDegrees: this.artworkRotation.y,
+                        cosY, 
+                        sinY, 
+                        yRotationRad 
+                    });
                     
-                    // Apply perspective transform
-                    // X scaling: combine rotation and perspective
-                    const scaleX = Math.abs(cosY) * perspectiveScale;
-                    const scaleY = perspectiveScale;
+                    // Simple and direct approach: scale X by cosine of rotation
+                    // This creates the perspective effect by making the artwork narrower
+                    const scaleX = Math.abs(cosY);
                     
-                    console.log('Transform values:', { cosY, sinY, scaleX, scaleY, z, perspectiveScale });
+                    console.log('Applying scaleX:', scaleX);
                     
-                    // Apply the perspective transform
-                    ctx.transform(scaleX, 0, 0, scaleY, 0, 0);
+                    // Apply the horizontal scaling for perspective effect
+                    ctx.scale(scaleX, 1);
                 }
                 
                 // Apply color intensity filter by adjusting canvas
