@@ -2175,8 +2175,8 @@ async function renderTasksList(filter = 'all') {
       <div class="task-card" style="background: white; border-radius: 12px; padding: 1.5rem; border: 1px solid #e9ecef; ${isOverdue ? 'border-left: 4px solid #dc3545;' : ''}">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
           <div style="flex: 1;">
-            <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50; font-size: 1.1rem;">${task.title}</h4>
-            <p style="margin: 0 0 1rem 0; color: #6c757d; font-size: 0.9rem;">${task.description}</p>
+            <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50; font-size: 1.1rem;">${(task.title || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</h4>
+            <p style="margin: 0 0 1rem 0; color: #6c757d; font-size: 0.9rem;">${(task.description || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</p>
             
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
               <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">${statusText}</span>
@@ -2186,7 +2186,7 @@ async function renderTasksList(filter = 'all') {
             </div>
             
             <div style="font-size: 0.8rem; color: #6c757d;">
-              <div>Original item: "${task.source.itemText}"</div>
+              <div>Original item: "${(task.source.itemText || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;').replace(/"/g, '&quot;')}"</div>
               <div>Created: ${new Date(task.createdAt).toLocaleDateString()}</div>
               ${task.completedAt ? `<div>Completed: ${new Date(task.completedAt).toLocaleDateString()}</div>` : ''}
             </div>
@@ -2232,7 +2232,7 @@ async function renderTasksList(filter = 'all') {
             id="task-notes-${task.id}" 
             placeholder="Add notes, updates, or comments about this task..."
             onchange="updateTaskNotes('${task.id}', this.value)"
-            style="width: 100%; min-height: 60px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-size: 0.9rem;">${task.notes || ''}</textarea>
+            style="width: 100%; min-height: 60px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-size: 0.9rem;">${(task.notes || '').replace(/`/g, '&#96;').replace(/\$/g, '&#36;')}</textarea>
         </div>`
       </div>
     `;
