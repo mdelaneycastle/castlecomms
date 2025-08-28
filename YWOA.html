@@ -1278,16 +1278,8 @@
                 try {
                     this.showStatus('Capturing selected area...', 'info');
                     
-                    // Debug: Check if artwork element exists and has transforms
-                    if (this.artworkElement) {
-                        console.log('Artwork element found:', this.artworkElement);
-                        console.log('Transform:', this.artworkElement.style.transform);
-                        console.log('Parent:', this.artworkElement.parentElement);
-                    }
-                    
                     // Ensure artwork element is visible and within stage
                     if (this.artworkElement && this.artworkElement.parentElement !== this.stage) {
-                        console.log('Moving artwork element to stage');
                         this.stage.appendChild(this.artworkElement);
                     }
                     
@@ -1297,8 +1289,8 @@
                         scale: window.devicePixelRatio || 1,
                         useCORS: true,
                         allowTaint: true,
-                        logging: true, // Enable logging for debugging
-                        foreignObjectRendering: true,
+                        logging: false, // Disable logging after debugging
+                        foreignObjectRendering: false, // Disable ForeignObject to handle 3D transforms
                         imageTimeout: 0,
                         removeContainer: true
                     };
