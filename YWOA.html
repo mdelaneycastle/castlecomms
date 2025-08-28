@@ -1262,57 +1262,40 @@
             async performScreenshot() {
                 const hiddenElements = [];
                 try {
-                    // Hide ALL UI elements except the canvas and artwork during screenshot
+                    // Simply hide UI control elements, keep the natural layout
                     const elementsToHide = [
                         document.getElementById('header-container'),
-                        document.getElementById('sidebar-container'),
+                        document.getElementById('sidebar-container'), 
                         document.getElementById('cc-launcher'),
                         document.getElementById('cc-widget'),
                         document.querySelector('.ywoa-header'), // Main title
                         document.querySelector('.left-controls'), // Left control panel
                         document.querySelector('.right-controls'), // Right control panel
                         document.querySelector('#statusMessages'), // Status messages
-                        document.querySelector('body'), // Hide body background
                     ];
                     
-                    // Store original styles and hide elements
+                    // Store original styles and hide UI elements
                     elementsToHide.forEach(el => {
                         if (el) {
                             hiddenElements.push({
                                 element: el,
                                 originalDisplay: el.style.display,
-                                originalVisibility: el.style.visibility,
-                                originalBackground: el.style.background
+                                originalVisibility: el.style.visibility
                             });
                             el.style.display = 'none';
                         }
                     });
                     
-                    // Make the canvas container fill the screen and center the content
-                    const canvasContainer = document.querySelector('.center-canvas');
-                    if (canvasContainer) {
-                        hiddenElements.push({
-                            element: canvasContainer,
-                            originalPosition: canvasContainer.style.position,
-                            originalTop: canvasContainer.style.top,
-                            originalLeft: canvasContainer.style.left,
-                            originalWidth: canvasContainer.style.width,
-                            originalHeight: canvasContainer.style.height,
-                            originalZIndex: canvasContainer.style.zIndex,
-                            originalBackground: canvasContainer.style.background
-                        });
-                        
-                        canvasContainer.style.position = 'fixed';
-                        canvasContainer.style.top = '0';
-                        canvasContainer.style.left = '0';
-                        canvasContainer.style.width = '100vw';
-                        canvasContainer.style.height = '100vh';
-                        canvasContainer.style.zIndex = '999999';
-                        canvasContainer.style.background = 'white';
-                        canvasContainer.style.display = 'flex';
-                        canvasContainer.style.justifyContent = 'center';
-                        canvasContainer.style.alignItems = 'center';
-                    }
+                    // Clean up the body background for a cleaner screenshot
+                    const body = document.body;
+                    hiddenElements.push({
+                        element: body,
+                        originalBackground: body.style.background,
+                        originalBackgroundImage: body.style.backgroundImage,
+                        originalBackgroundColor: body.style.backgroundColor
+                    });
+                    body.style.background = 'linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%)';
+                    body.style.backgroundImage = 'none';
                     
                     // Longer delay to ensure elements are fully hidden and layout stabilized
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -1371,20 +1354,40 @@
                     // Stop the capture
                     stream.getTracks().forEach(track => track.stop());
 
-                    // Since we made canvas container fullscreen, use the whole captured screen
+                    // Find the actual content area in the screenshot
+                    const canvasContainer = document.querySelector('.center-canvas');
+                    let cropRect = { x: 0, y: 0, width: canvas.width, height: canvas.height };
+                    
+                    if (canvasContainer) {
+                        const containerRect = canvasContainer.getBoundingClientRect();
+                        const canvasRect = this.canvas.getBoundingClientRect();
+                        
+                        // Calculate the crop area based on canvas position with some padding
+                        const padding = 50;
+                        cropRect = {
+                            x: Math.max(0, canvasRect.left - padding),
+                            y: Math.max(0, canvasRect.top - padding), 
+                            width: Math.min(canvas.width, canvasRect.width + (padding * 2)),
+                            height: Math.min(canvas.height, canvasRect.height + (padding * 2))
+                        };
+                    }
+                    
+                    // Create cropped canvas
                     const croppedCanvas = document.createElement('canvas');
                     const croppedCtx = croppedCanvas.getContext('2d');
+                    croppedCanvas.width = cropRect.width;
+                    croppedCanvas.height = cropRect.height;
                     
-                    // Use the full canvas size (it's now the whole screen)
-                    croppedCanvas.width = canvas.width;
-                    croppedCanvas.height = canvas.height;
+                    // Add clean background
+                    croppedCtx.fillStyle = '#f5f2ee';
+                    croppedCtx.fillRect(0, 0, croppedCanvas.width, croppedCanvas.height);
                     
-                    // Add white background
-                    croppedCtx.fillStyle = '#ffffff';
-                    croppedCtx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Draw the entire captured screen
-                    croppedCtx.drawImage(canvas, 0, 0);
+                    // Draw the cropped portion
+                    croppedCtx.drawImage(
+                        canvas,
+                        cropRect.x, cropRect.y, cropRect.width, cropRect.height,
+                        0, 0, cropRect.width, cropRect.height
+                    );
 
                     // Download the result
                     const dataURL = croppedCanvas.toDataURL('image/png');
@@ -1393,42 +1396,17 @@
                     link.href = dataURL;
                     link.click();
                     
-                    // Restore original visibility of hidden elements
+                    // Restore original styles of all modified elements
                     hiddenElements.forEach((item) => {
                         const { element } = item;
-                        if (item.originalDisplay !== undefined) {
-                            element.style.display = item.originalDisplay || '';
-                        }
-                        if (item.originalVisibility !== undefined) {
-                            element.style.visibility = item.originalVisibility || '';
-                        }
-                        if (item.originalBackground !== undefined) {
-                            element.style.background = item.originalBackground || '';
-                        }
-                        if (item.originalPosition !== undefined) {
-                            element.style.position = item.originalPosition || '';
-                        }
-                        if (item.originalTop !== undefined) {
-                            element.style.top = item.originalTop || '';
-                        }
-                        if (item.originalLeft !== undefined) {
-                            element.style.left = item.originalLeft || '';
-                        }
-                        if (item.originalWidth !== undefined) {
-                            element.style.width = item.originalWidth || '';
-                        }
-                        if (item.originalHeight !== undefined) {
-                            element.style.height = item.originalHeight || '';
-                        }
-                        if (item.originalZIndex !== undefined) {
-                            element.style.zIndex = item.originalZIndex || '';
-                        }
-                        if (item.originalJustifyContent !== undefined) {
-                            element.style.justifyContent = item.originalJustifyContent || '';
-                        }
-                        if (item.originalAlignItems !== undefined) {
-                            element.style.alignItems = item.originalAlignItems || '';
-                        }
+                        // Restore all original properties
+                        Object.keys(item).forEach(key => {
+                            if (key !== 'element' && key.startsWith('original')) {
+                                const styleProp = key.replace('original', '');
+                                const cssProp = styleProp.charAt(0).toLowerCase() + styleProp.slice(1);
+                                element.style[cssProp] = item[key] || '';
+                            }
+                        });
                     });
                     
                     this.showStatus('Screenshot exported successfully!', 'success');
@@ -1438,33 +1416,14 @@
                     // Ensure elements are restored even on error
                     hiddenElements.forEach((item) => {
                         const { element } = item;
-                        if (item.originalDisplay !== undefined) {
-                            element.style.display = item.originalDisplay || '';
-                        }
-                        if (item.originalVisibility !== undefined) {
-                            element.style.visibility = item.originalVisibility || '';
-                        }
-                        if (item.originalBackground !== undefined) {
-                            element.style.background = item.originalBackground || '';
-                        }
-                        if (item.originalPosition !== undefined) {
-                            element.style.position = item.originalPosition || '';
-                        }
-                        if (item.originalTop !== undefined) {
-                            element.style.top = item.originalTop || '';
-                        }
-                        if (item.originalLeft !== undefined) {
-                            element.style.left = item.originalLeft || '';
-                        }
-                        if (item.originalWidth !== undefined) {
-                            element.style.width = item.originalWidth || '';
-                        }
-                        if (item.originalHeight !== undefined) {
-                            element.style.height = item.originalHeight || '';
-                        }
-                        if (item.originalZIndex !== undefined) {
-                            element.style.zIndex = item.originalZIndex || '';
-                        }
+                        // Restore all original properties
+                        Object.keys(item).forEach(key => {
+                            if (key !== 'element' && key.startsWith('original')) {
+                                const styleProp = key.replace('original', '');
+                                const cssProp = styleProp.charAt(0).toLowerCase() + styleProp.slice(1);
+                                element.style[cssProp] = item[key] || '';
+                            }
+                        });
                     });
                     
                     this.showStatus('Screenshot failed. Screen sharing may not be supported.', 'error');
