@@ -1310,11 +1310,15 @@ function showChecklistHistory() {
   renderChecklistHistory();
 }
 
-function startGalleryChecklist() {
+async function startGalleryChecklist() {
   currentChecklistId = null; // Reset to built-in checklist
   hideAllChecklistContent();
   document.getElementById('gallery-checklist-form').style.display = 'block';
   clearCurrentChecklist();
+  
+  // Load any saved progress for this checklist
+  await loadFromFirebase();
+  
   renderGalleryChecklist();
   updateScore();
 }
@@ -1522,7 +1526,7 @@ async function deleteCustomChecklist(checklistId) {
   }
 }
 
-function startCustomChecklist(checklistId) {
+async function startCustomChecklist(checklistId) {
   const checklist = customChecklists.find(c => c.id === checklistId);
   if (!checklist) return;
   
@@ -1532,6 +1536,9 @@ function startCustomChecklist(checklistId) {
   
   // Clear current state
   clearCurrentChecklist();
+  
+  // Load any saved progress for this checklist
+  await loadFromFirebase();
   
   // Render the custom checklist
   renderCustomChecklist(checklist);
@@ -2269,6 +2276,9 @@ async function saveChecklist() {
     await saveCompletedChecklist('gallery', savedChecklist);
     savedChecklists.gallery.push(savedChecklist);
     
+    // Clear the saved progress since checklist is now completed
+    await clearChecklistProgress();
+    
     alert(`Checklist saved successfully! Pass rate: ${savedChecklist.passRate}%`);
     showChecklistHistory();
   } catch (error) {
@@ -2433,18 +2443,117 @@ function makeFormReadOnly() {
   }
 }
 
-// Note: Current checklist state is kept in memory only during active session
-// Completed checklists are saved to Firebase via saveCompletedChecklist()
+// Auto-save current checklist state to Firebase for persistence across sessions
+async function saveToFirebase() {
+  try {
+    if (!db || !firebase.auth().currentUser) {
+      console.log('Firebase not ready or user not authenticated - skipping save');
+      return;
+    }
+    
+    const userId = firebase.auth().currentUser.uid;
+    const checklistType = currentChecklistId ? 'custom' : 'gallery';
+    const checklistId = currentChecklistId || 'gallery-weekly';
+    
+    const stateData = {
+      ...checklistState,
+      userId: userId,
+      userEmail: firebase.auth().currentUser.email,
+      checklistType: checklistType,
+      checklistId: checklistId,
+      lastSaved: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    // Use a consistent document ID based on user and checklist
+    const docId = `${userId}_${checklistId}`;
+    
+    await db.collection('checklist-progress').doc(docId).set(stateData);
+    console.log('Checklist progress auto-saved to Firebase');
+  } catch (error) {
+    console.error('Error auto-saving checklist progress:', error);
+  }
+}
+
+async function loadFromFirebase() {
+  try {
+    if (!db || !firebase.auth().currentUser) {
+      console.log('Firebase not ready or user not authenticated - using default state');
+      return;
+    }
+    
+    const userId = firebase.auth().currentUser.uid;
+    const checklistType = currentChecklistId ? 'custom' : 'gallery';
+    const checklistId = currentChecklistId || 'gallery-weekly';
+    const docId = `${userId}_${checklistId}`;
+    
+    const doc = await db.collection('checklist-progress').doc(docId).get();
+    
+    if (doc.exists) {
+      const savedState = doc.data();
+      
+      // Merge saved state with current state, excluding Firebase-specific fields
+      const { userId: _, userEmail: __, lastSaved: ___, updatedAt: ____, ...cleanState } = savedState;
+      checklistState = { ...checklistState, ...cleanState };
+      
+      // Restore UI elements
+      if (checklistState.gallery.signature) {
+        const display = document.getElementById('signature-display');
+        if (display) {
+          display.innerHTML = `<strong>${checklistState.gallery.signature}</strong> - ${new Date().toLocaleDateString()}`;
+        }
+      }
+      
+      // Restore photos
+      displayAllPhotos();
+      
+      // Re-render the current checklist to show restored state
+      if (currentChecklistId) {
+        const checklist = customChecklists.find(c => c.id === currentChecklistId);
+        if (checklist) {
+          renderCustomChecklist(checklist);
+        }
+      } else {
+        renderGalleryChecklist();
+      }
+      
+      updateScore();
+      
+      console.log('Checklist progress restored from Firebase');
+    } else {
+      console.log('No saved progress found for this checklist');
+    }
+  } catch (error) {
+    console.error('Error loading checklist progress from Firebase:', error);
+  }
+}
+
+// Replace the old localStorage function calls
 function saveToLocalStorage() {
-  // This function is kept for backward compatibility but no longer uses localStorage
-  // Current checklist state is maintained in memory during the session
-  console.log('Checklist state updated in memory');
+  saveToFirebase();
 }
 
 function loadFromLocalStorage() {
-  // This function is kept for backward compatibility but no longer uses localStorage  
-  // Completed checklists are loaded from Firebase via loadSavedChecklists()
-  console.log('Checklist state initialized in memory');
+  loadFromFirebase();
+}
+
+// Clear saved checklist progress when checklist is completed
+async function clearChecklistProgress() {
+  try {
+    if (!db || !firebase.auth().currentUser) {
+      return;
+    }
+    
+    const userId = firebase.auth().currentUser.uid;
+    const checklistType = currentChecklistId ? 'custom' : 'gallery';
+    const checklistId = currentChecklistId || 'gallery-weekly';
+    const docId = `${userId}_${checklistId}`;
+    
+    await db.collection('checklist-progress').doc(docId).delete();
+    console.log('Checklist progress cleared from Firebase');
+  } catch (error) {
+    console.error('Error clearing checklist progress:', error);
+  }
 }
 
 async function exportToPDF(checklistType) {

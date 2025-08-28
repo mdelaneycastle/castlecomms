@@ -506,6 +506,35 @@ service cloud.firestore {
         && (!('passRate' in data) || data.passRate is number);
     }
 
+    // Checklist progress rules - users can manage their own in-progress checklists
+    match /checklist-progress/{progressId} {
+      // Users can only read their own checklist progress
+      allow read: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // Users can create their own checklist progress with proper validation
+      allow create: if request.auth != null 
+        && request.auth.uid == request.resource.data.userId
+        && validateChecklistProgress(request.resource.data);
+      
+      // Users can update their own checklist progress
+      allow update: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+      
+      // Users can delete their own checklist progress
+      allow delete: if request.auth != null 
+        && request.auth.uid == resource.data.userId;
+    }
+
+    // Helper function to validate checklist progress data
+    function validateChecklistProgress(data) {
+      return data.keys().hasAll(['userId', 'userEmail', 'checklistType', 'checklistId'])
+        && data.userId is string
+        && data.userEmail is string
+        && data.checklistType is string
+        && data.checklistId is string;
+    }
+
     // Default deny for all other documents
     match /{document=**} {
       allow read, write: if false;
