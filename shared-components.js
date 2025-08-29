@@ -255,18 +255,16 @@ window.sharedComponents = {
       const displayName = await this.getUserDisplayName(user);
       const initials = this.generateUserInitials(displayName);
 
-      // Load profile settings from Firestore
+      // Load profile settings from Firebase Realtime Database
       let profileData = {};
       try {
-        if (window.db) {
-          const profileDoc = await window.db.collection('user-preferences').doc(user.uid).get();
-          if (profileDoc.exists) {
-            const userData = profileDoc.data();
-            profileData = userData.profile || {};
-          }
+        if (window.db && window.db.ref) {
+          const userRef = window.db.ref(`users/${user.uid}/profile`);
+          const snapshot = await userRef.once('value');
+          profileData = snapshot.val() || {};
         }
       } catch (profileError) {
-        console.log('Could not load profile data from Firestore, using defaults');
+        console.log('Could not load profile data from Firebase Realtime Database, using defaults');
         profileData = {};
       }
 
