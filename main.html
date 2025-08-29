@@ -2517,14 +2517,31 @@ async function saveCompletedChecklist(checklistType, checklistData) {
       throw new Error('Firebase not ready or user not authenticated');
     }
     
-    const completedChecklistData = {
+    // Serialize the checklist data properly for Firestore
+    const serializedChecklistData = {
       ...checklistData,
+      // Serialize allPhotos array properly
+      allPhotos: (checklistData.allPhotos || []).map(photo => {
+        const serializedPhoto = {};
+        if (photo.name !== undefined) serializedPhoto.name = photo.name;
+        if (photo.dataUrl !== undefined) serializedPhoto.dataUrl = photo.dataUrl;
+        if (photo.size !== undefined) serializedPhoto.size = photo.size;
+        if (photo.type !== undefined) serializedPhoto.type = photo.type;
+        return serializedPhoto;
+      }).filter(photo => Object.keys(photo).length > 0)
+    };
+    
+    const cleanCompletedChecklistData = {
+      ...serializedChecklistData,
       checklistType: checklistType,
       userId: firebase.auth().currentUser.uid,
       userEmail: firebase.auth().currentUser.email,
       completedAt: firebase.firestore.FieldValue.serverTimestamp(),
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+    
+    // Remove any undefined values
+    const completedChecklistData = removeUndefinedValues(cleanCompletedChecklistData);
     
     const docRef = await db.collection('completed-checklists').add(completedChecklistData);
     
@@ -2666,6 +2683,23 @@ function makeFormReadOnly() {
   }
 }
 
+// Helper function to remove undefined values from objects recursively
+function removeUndefinedValues(obj) {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(removeUndefinedValues).filter(item => item !== undefined);
+  }
+  
+  const cleaned = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      cleaned[key] = removeUndefinedValues(value);
+    }
+  }
+  return cleaned;
+}
+
 // Auto-save current checklist state to Firebase for persistence across sessions
 async function saveToFirebase() {
   try {
@@ -2684,17 +2718,20 @@ async function saveToFirebase() {
         items: checklistState.gallery.items || {},
         signature: checklistState.gallery.signature || '',
         comments: checklistState.gallery.comments || {},
-        // Convert photo objects to serializable data
-        allPhotos: (checklistState.gallery.allPhotos || []).map(photo => ({
-          name: photo.name,
-          dataUrl: photo.dataUrl,
-          size: photo.size,
-          type: photo.type
-        }))
+        // Convert photo objects to serializable data, filtering out undefined values
+        allPhotos: (checklistState.gallery.allPhotos || []).map(photo => {
+          const serializedPhoto = {};
+          if (photo.name !== undefined) serializedPhoto.name = photo.name;
+          if (photo.dataUrl !== undefined) serializedPhoto.dataUrl = photo.dataUrl;
+          if (photo.size !== undefined) serializedPhoto.size = photo.size;
+          if (photo.type !== undefined) serializedPhoto.type = photo.type;
+          return serializedPhoto;
+        }).filter(photo => Object.keys(photo).length > 0)
       }
     };
     
-    const stateData = {
+    // Clean any undefined values from the state data
+    const cleanStateData = {
       ...serializedState,
       userId: userId,
       userEmail: firebase.auth().currentUser.email,
@@ -2703,6 +2740,9 @@ async function saveToFirebase() {
       lastSaved: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+    
+    // Remove any undefined values recursively
+    const stateData = removeUndefinedValues(cleanStateData);
     
     // Use a consistent document ID based on user and checklist
     const docId = `${userId}_${checklistId}`;
