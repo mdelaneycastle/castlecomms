@@ -2524,6 +2524,15 @@
         }
       }
       
+      // Test connection first
+      console.log('Testing Firestore connection...');
+      try {
+        await window.db.collection('communications').limit(1).get();
+        console.log('✅ Firestore connection working');
+      } catch (testError) {
+        console.error('❌ Firestore connection test failed:', testError);
+      }
+      
       // Load tasks data
       console.log('Fetching tasks...');
       const tasksSnapshot = await window.db.collection('tasks').get();
