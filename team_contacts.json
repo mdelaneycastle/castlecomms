@@ -177,5 +177,23 @@
       "Biography",
       "Biographies"
     ]
+  },
+  {
+    "team": "Human Resources",
+    "emails": [
+      "humanresources@washingtongreen.co.uk"
+    ],
+    "keywords": [
+      "HR",
+      "Payroll",
+      "Pensions",
+      "Contract",
+      "Kronos",
+      "Clocking",
+      "Complaints",
+      "Grievances",
+      "Recruitment",
+      "Jobs"
+    ]
   }
 ]
