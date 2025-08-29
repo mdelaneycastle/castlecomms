@@ -255,8 +255,20 @@ window.sharedComponents = {
       const displayName = await this.getUserDisplayName(user);
       const initials = this.generateUserInitials(displayName);
 
-      // For now, use default profile data since we don't have user profiles in Firestore
-      const profileData = {};
+      // Load profile settings from Firestore
+      let profileData = {};
+      try {
+        if (window.db) {
+          const profileDoc = await window.db.collection('user-preferences').doc(user.uid).get();
+          if (profileDoc.exists) {
+            const userData = profileDoc.data();
+            profileData = userData.profile || {};
+          }
+        }
+      } catch (profileError) {
+        console.log('Could not load profile data from Firestore, using defaults');
+        profileData = {};
+      }
 
       // Update user profile button
       const userProfileBtn = document.getElementById('user-profile-btn');
