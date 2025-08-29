@@ -884,7 +884,7 @@
     }
 
     .multiview-info span {
-      color: var(--tertiary-color);
+      color: #6c757d;
       font-size: 0.9rem;
     }
 
@@ -962,7 +962,6 @@
       height: calc(100% - 40px);
       border: none;
     }
-
 
     @media (max-width: 768px) {
       .multiview-grid.two-reports {
@@ -1046,9 +1045,7 @@
           
           <div class="report-info">
             <h3 id="current-report-title">Report</h3>
-            <div class="report-indicators" id="report-indicators">
-              <!-- Indicators will be populated here -->
-            </div>
+            <div class="report-indicators" id="report-indicators"></div>
           </div>
           
           <button class="nav-btn next-btn" onclick="switchReport('next')" title="Next Report">
@@ -1093,9 +1090,7 @@
           </button>
         </div>
         
-        <div class="multiview-grid" id="multiview-grid">
-          <!-- Reports will be populated here dynamically -->
-        </div>
+        <div class="multiview-grid" id="multiview-grid"></div>
       </div>
 
       <!-- Task/Checklist Reports Tab -->
@@ -1338,7 +1333,7 @@
     let userReports = [];
     let currentReportIndex = 0;
     let selectedReports = [];
-    let db;
+    let db; // will also set window.db once initialized
     let userPreferences = null;
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1355,6 +1350,9 @@
         // Initialize Firebase Firestore
         if (firebase.apps.length > 0) {
           db = firebase.firestore();
+          // expose db to window so the IIFE task loader can check readiness
+          window.db = db;
+
           await loadUserReports();
           await loadUserPreferences();
         } else {
@@ -1452,7 +1450,8 @@
 
       // Set the view mode
       currentViewMode = userPreferences.viewMode || 'single';
-      document.querySelector(`input[name="view-mode"][value="${currentViewMode}"]`).checked = true;
+      const vm = document.querySelector(`input[name="view-mode"][value="${currentViewMode}"]`);
+      if (vm) vm.checked = true;
 
       // Auto-apply the selection
       selectedReports = savedReports;
@@ -1481,7 +1480,7 @@
       document.getElementById('clear-saved-view-btn').style.display = 'inline-block';
     }
 
-    // Tab switching functionality
+    // Tab switching functionality (guarded call to task loader)
     function switchTab(tabName) {
       // Remove active class from all tab buttons
       document.querySelectorAll('.tab-button').forEach(btn => {
@@ -1510,8 +1509,12 @@
         // Show task reports tab
         document.getElementById('tasks').classList.add('active');
         
-        // Load task/checklist data
-        loadTaskReportsData();
+        // Load task/checklist data (guarded)
+        if (typeof window.loadTaskReportsData === 'function') {
+          window.loadTaskReportsData();
+        } else {
+          console.warn('Task module not ready yet.');
+        }
       }
     }
 
@@ -1712,14 +1715,6 @@
       });
     }
 
-    // Apply report selection - moved to multiview section
-
-    // Back to selector function
-    function backToSelector() {
-      document.getElementById('reports-content').style.display = 'none';
-      document.getElementById('report-selector-section').style.display = 'block';
-    }
-
     // Setup report navigation
     function setupReportNavigation() {
       const indicatorsContainer = document.getElementById('report-indicators');
@@ -1828,7 +1823,6 @@
       document.getElementById('multiview-content').style.display = 'flex';
       
       currentMultiviewPage = 0;
-      setupMultiviewContent();
       updateMultiviewDisplay();
     }
 
@@ -1908,7 +1902,8 @@
     function maximizeReport(reportIndex) {
       // Switch to single view mode and show the specific report
       currentViewMode = 'single';
-      document.querySelector('input[name="view-mode"][value="single"]').checked = true;
+      const radio = document.querySelector('input[name="view-mode"][value="single"]');
+      if (radio) radio.checked = true;
       
       currentReportIndex = reportIndex;
       showSingleView();
@@ -1929,7 +1924,8 @@
       // Don't automatically clear selections - let user modify their saved view
       // Reset view mode to single for the selector
       currentViewMode = 'single';
-      document.querySelector('input[name="view-mode"][value="single"]').checked = true;
+      const radio = document.querySelector('input[name="view-mode"][value="single"]');
+      if (radio) radio.checked = true;
     }
 
   </script>
@@ -2253,7 +2249,7 @@
 </section>
 
 <script>
-// Contact Chatbot functionality
+// Contact Chatbot + Task Reports functionality (IIFE)
 (function() {
   let teamContacts = [];
 
@@ -2463,7 +2459,7 @@
     }, 480);
   }
 
-  // Event listeners
+  // Event listeners (not scroll/touch — no need for passive here)
   launcher.addEventListener('click', () => {
     widget.classList.add('open');
     input.focus();
@@ -2487,17 +2483,26 @@
     addBot('Hi! 👋 Tell me what you need help with and I\'ll suggest the best team. Try typing something like <em>"I need to cancel my order"</em> or pick a suggestion below.');
   }
 
-  // Initialize
+  // Initialize chatbot UI
   document.addEventListener('DOMContentLoaded', async () => {
     await loadTeamContacts();
     mountChips();
   });
 
+  // -------------------------
   // Task Reports functionality
+  // -------------------------
   let taskReportsData = [];
   let filteredTaskReportsData = [];
   
   async function loadTaskReportsData() {
+    // Firestore readiness guard
+    if (!window.db) {
+      console.warn('Firestore not ready yet; retrying shortly...');
+      setTimeout(loadTaskReportsData, 300);
+      return;
+    }
+
     try {
       // Show loading state
       document.getElementById('total-tasks').textContent = '-';
@@ -2506,8 +2511,8 @@
       document.getElementById('pass-rate').textContent = '-%';
       
       // Load tasks data
-      const tasksSnapshot = await db.collection('tasks').get();
-      const checklistsSnapshot = await db.collection('completed-checklists').get();
+      const tasksSnapshot = await window.db.collection('tasks').get();
+      const checklistsSnapshot = await window.db.collection('completed-checklists').get();
       
       let tasks = [];
       let checklists = [];
@@ -2634,7 +2639,7 @@
         return false;
       }
       
-      // Gallery filter
+      // Gallery filter (NOTE: you may want a different field than userEmail here)
       if (galleryFilter && item.userEmail !== galleryFilter) {
         return false;
       }
@@ -2719,6 +2724,12 @@
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   }
+
+  // ---- Export IIFE-scoped functions so inline handlers can call them ----
+  window.loadTaskReportsData = loadTaskReportsData;
+  window.applyTaskFilters    = applyTaskFilters;
+  window.clearTaskFilters    = clearTaskFilters;
+  window.exportTaskReports   = exportTaskReports;
 })();
 </script>
 </body>
