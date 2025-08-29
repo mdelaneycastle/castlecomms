@@ -404,6 +404,7 @@ service cloud.firestore {
       // Users can read their own tasks, admins can read all tasks for reporting
       allow read: if request.auth != null 
         && (request.auth.uid == resource.data.userId 
+            || request.auth.token.email == resource.data.userEmail
             || request.auth.token.admin == true);
       
       // Users can create their own tasks with proper validation
@@ -446,6 +447,7 @@ service cloud.firestore {
       // Users can read their own completed checklists, admins can read all for reporting
       allow read: if request.auth != null 
         && (request.auth.uid == resource.data.userId 
+            || request.auth.token.email == resource.data.userEmail
             || request.auth.token.admin == true);
       
       // Users can create their own completed checklists with proper validation
