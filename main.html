@@ -1228,6 +1228,10 @@ let customChecklists = []; // Array of custom checklist definitions
 let currentChecklistBuilder = []; // Items being built in create mode
 let currentChecklistId = null; // ID of checklist being filled out
 
+// Loading state tracking
+let checklistsLoaded = false;
+let loadingChecklists = false;
+
 console.log('Checklist variables loaded successfully:', galleryChecklistItems.length, 'items');
 
 async function initializeChecklists() {
@@ -1243,8 +1247,15 @@ async function initializeChecklists() {
     return;
   }
   
-  await loadSavedChecklists();
-  await loadCustomChecklists();
+  // Only load if not already loaded or loading
+  if (!checklistsLoaded && !loadingChecklists) {
+    loadingChecklists = true;
+    await loadSavedChecklists();
+    await loadCustomChecklists();
+    checklistsLoaded = true;
+    loadingChecklists = false;
+  }
+  
   await showChecklistOverview();
   console.log('Checklist initialization complete');
 }
@@ -1260,10 +1271,15 @@ async function showChecklistOverview() {
     container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #6c757d;">Loading checklists...</div>';
   }
   
-  // Ensure data is loaded before rendering
+  // Ensure data is loaded before rendering - only load if not already loaded
   await checkUserAdminStatus(); // Check admin status for UI rendering
-  await loadSavedChecklists();
-  await loadCustomChecklists();
+  if (!checklistsLoaded && !loadingChecklists) {
+    loadingChecklists = true;
+    await loadSavedChecklists();
+    await loadCustomChecklists();
+    checklistsLoaded = true;
+    loadingChecklists = false;
+  }
   
   renderChecklistOverview();
 }
@@ -1334,9 +1350,14 @@ async function showChecklistHistory() {
     container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #6c757d;">Loading checklist history...</div>';
   }
   
-  // Ensure data is loaded before rendering
-  await loadSavedChecklists();
-  await loadCustomChecklists();
+  // Ensure data is loaded before rendering - only load if not already loaded
+  if (!checklistsLoaded && !loadingChecklists) {
+    loadingChecklists = true;
+    await loadSavedChecklists();
+    await loadCustomChecklists();
+    checklistsLoaded = true;
+    loadingChecklists = false;
+  }
   
   renderChecklistHistory();
 }
@@ -2657,8 +2678,24 @@ async function saveToFirebase() {
     const checklistType = currentChecklistId ? 'custom' : 'gallery';
     const checklistId = currentChecklistId || 'gallery-weekly';
     
+    // Serialize the checklist state properly for Firestore
+    const serializedState = {
+      gallery: {
+        items: checklistState.gallery.items || {},
+        signature: checklistState.gallery.signature || '',
+        comments: checklistState.gallery.comments || {},
+        // Convert photo objects to serializable data
+        allPhotos: (checklistState.gallery.allPhotos || []).map(photo => ({
+          name: photo.name,
+          dataUrl: photo.dataUrl,
+          size: photo.size,
+          type: photo.type
+        }))
+      }
+    };
+    
     const stateData = {
-      ...checklistState,
+      ...serializedState,
       userId: userId,
       userEmail: firebase.auth().currentUser.email,
       checklistType: checklistType,
@@ -2670,7 +2707,8 @@ async function saveToFirebase() {
     // Use a consistent document ID based on user and checklist
     const docId = `${userId}_${checklistId}`;
     
-    await db.collection('checklist-progress').doc(docId).set(stateData);
+    // Use set with merge to handle both create and update cases
+    await db.collection('checklist-progress').doc(docId).set(stateData, { merge: true });
     console.log('Checklist progress auto-saved to Firebase');
   } catch (error) {
     console.error('Error auto-saving checklist progress:', error);
