@@ -2547,13 +2547,29 @@
       
       tasksSnapshot.forEach(doc => {
         const data = doc.data();
-        console.log('Task document:', doc.id, data);
+        const belongsToUser = (data.userId === currentUser.uid) || 
+                              (currentUser.email && data.userEmail === currentUser.email);
+        console.log('Task document:', doc.id, {
+          userId: data.userId,
+          userEmail: data.userEmail,
+          currentUserId: currentUser.uid,
+          currentUserEmail: currentUser.email,
+          belongsToUser: belongsToUser
+        });
         tasks.push({ id: doc.id, type: 'task', ...data });
       });
       
       checklistsSnapshot.forEach(doc => {
         const data = doc.data();
-        console.log('Checklist document:', doc.id, data);
+        const belongsToUser = (data.userId === currentUser.uid) || 
+                              (currentUser.email && data.userEmail === currentUser.email);
+        console.log('Checklist document:', doc.id, {
+          userId: data.userId,
+          userEmail: data.userEmail,
+          currentUserId: currentUser.uid,
+          currentUserEmail: currentUser.email,
+          belongsToUser: belongsToUser
+        });
         checklists.push({ id: doc.id, type: 'checklist', ...data });
       });
       
