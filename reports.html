@@ -26,6 +26,61 @@
       box-sizing: border-box;
     }
 
+    /* Tab Navigation Styles */
+    .tab-navigation {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1rem 2rem 0 2rem;
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .tab-button {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #333;
+      padding: 1rem 1.5rem;
+      border-radius: 0 0 10px 10px;
+      font-size: 1rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      min-width: 180px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .tab-button:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: translateY(-2px);
+      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .tab-button.active {
+      background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 -4px 20px rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .tab-button.active:hover {
+      background: var(--primary-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+    }
+
+    /* Tab Content Styles */
+    .tab-content {
+      display: none;
+      flex: 1;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+    }
+
     .reports-header {
       background: var(--primary-gradient);
       color: white;
@@ -166,6 +221,249 @@
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Task/Checklist Reports Styles */
+    .task-reports-section {
+      padding: 2rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .filters-section {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .filters-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .filters-header h3 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.9rem;
+    }
+
+    .filter-select, .filter-input {
+      padding: 0.75rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+      transition: all 0.3s;
+    }
+
+    .filter-select:focus, .filter-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-btn.primary {
+      background: var(--primary-gradient);
+      color: white;
+    }
+
+    .filter-btn.secondary {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 2px solid #e1e5e9;
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .statistics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card h4 {
+      margin: 0 0 1rem 0;
+      color: #2c3e50;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #f1f3f4;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary-gradient);
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 0.8rem;
+      color: #6c757d;
+      text-align: right;
+    }
+
+    .results-section {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .results-header h3 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 1.4rem;
+    }
+
+    .export-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .export-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .results-table th,
+    .results-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #e1e5e9;
+    }
+
+    .results-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .results-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .status-badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-in-progress {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .pass-rate {
+      font-weight: bold;
+    }
+
+    .pass-rate.high {
+      color: #28a745;
+    }
+
+    .pass-rate.medium {
+      color: #ffc107;
+    }
+
+    .pass-rate.low {
+      color: #dc3545;
     }
 
     /* Report Selector Styles */
@@ -693,10 +991,16 @@
     <div class="reports-container">
       <div class="reports-header">
         <h1 class="reports-title">📊 Reports Dashboard</h1>
-        <p class="reports-subtitle">Power BI Analytics & Insights</p>
+        <p class="reports-subtitle">Analytics & Insights</p>
       </div>
-      
-      <!-- My Reports Section -->
+
+      <!-- Tab Navigation -->
+      <div class="tab-navigation">
+        <button class="tab-button active" data-tab="powerbi" onclick="switchTab('powerbi')">📊 Power BI Reports</button>
+        <button class="tab-button" data-tab="tasks" onclick="switchTab('tasks')">📋 Task/Checklist Reports</button>
+      </div>
+
+      <!-- Power BI Reports Tab -->
       <div class="report-selector-section" id="report-selector-section">
         <div class="selector-header">
           <h3>📊 My Public Power BI Reports</h3>
@@ -791,6 +1095,132 @@
         
         <div class="multiview-grid" id="multiview-grid">
           <!-- Reports will be populated here dynamically -->
+        </div>
+      </div>
+
+      <!-- Task/Checklist Reports Tab -->
+      <div class="tab-content" id="tasks">
+        <div class="task-reports-section">
+          <!-- Filters Section -->
+          <div class="filters-section">
+            <div class="filters-header">
+              <h3>📋 Task & Checklist Reports</h3>
+            </div>
+            
+            <div class="filters-grid">
+              <div class="filter-group">
+                <label for="gallery-filter">Gallery/Team</label>
+                <select id="gallery-filter" class="filter-select">
+                  <option value="">All Galleries</option>
+                  <option value="appleone@example.com">Apple One (Test User)</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
+                <label for="status-filter">Status</label>
+                <select id="status-filter" class="filter-select">
+                  <option value="">All Statuses</option>
+                  <option value="completed">Completed</option>
+                  <option value="in-progress">In Progress</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
+                <label for="type-filter">Type</label>
+                <select id="type-filter" class="filter-select">
+                  <option value="">All Types</option>
+                  <option value="task">Tasks</option>
+                  <option value="checklist">Checklists</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
+                <label for="date-from">Date From</label>
+                <input type="date" id="date-from" class="filter-input">
+              </div>
+              
+              <div class="filter-group">
+                <label for="date-to">Date To</label>
+                <input type="date" id="date-to" class="filter-input">
+              </div>
+            </div>
+            
+            <div class="filter-buttons">
+              <button type="button" class="filter-btn secondary" onclick="clearTaskFilters()">Clear Filters</button>
+              <button type="button" class="filter-btn primary" onclick="applyTaskFilters()">Apply Filters</button>
+            </div>
+          </div>
+          
+          <!-- Statistics Grid -->
+          <div class="statistics-grid" id="statistics-grid">
+            <div class="stat-card">
+              <h4>📋 Total Tasks</h4>
+              <div class="stat-number" id="total-tasks">-</div>
+              <div class="stat-label">All time</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="tasks-progress" style="width: 0%"></div>
+              </div>
+              <div class="progress-text" id="tasks-progress-text">Loading...</div>
+            </div>
+            
+            <div class="stat-card">
+              <h4>✅ Total Checklists</h4>
+              <div class="stat-number" id="total-checklists">-</div>
+              <div class="stat-label">All time</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="checklists-progress" style="width: 0%"></div>
+              </div>
+              <div class="progress-text" id="checklists-progress-text">Loading...</div>
+            </div>
+            
+            <div class="stat-card">
+              <h4>📊 Completion Rate</h4>
+              <div class="stat-number" id="completion-rate">-%</div>
+              <div class="stat-label">Overall performance</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="completion-progress" style="width: 0%"></div>
+              </div>
+              <div class="progress-text" id="completion-progress-text">Loading...</div>
+            </div>
+            
+            <div class="stat-card">
+              <h4>🎯 Pass Rate</h4>
+              <div class="stat-number" id="pass-rate">-%</div>
+              <div class="stat-label">Quality score</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="pass-progress" style="width: 0%"></div>
+              </div>
+              <div class="progress-text" id="pass-progress-text">Loading...</div>
+            </div>
+          </div>
+          
+          <!-- Results Section -->
+          <div class="results-section">
+            <div class="results-header">
+              <h3>📊 Detailed Results</h3>
+              <button class="export-btn" onclick="exportTaskReports()">📥 Export CSV</button>
+            </div>
+            
+            <table class="results-table" id="results-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>User</th>
+                  <th>Type</th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Pass Rate</th>
+                </tr>
+              </thead>
+              <tbody id="results-table-body">
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 2rem; color: #6c757d;">
+                    Loading data...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1001,6 +1431,40 @@
       // Show saved view indicator and clear button when user has a saved view
       document.getElementById('saved-view-indicator').style.display = 'block';
       document.getElementById('clear-saved-view-btn').style.display = 'inline-block';
+    }
+
+    // Tab switching functionality
+    function switchTab(tabName) {
+      // Remove active class from all tab buttons
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Hide all tab content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      
+      // Add active class to clicked tab button
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      
+      // Show the corresponding tab content
+      if (tabName === 'powerbi') {
+        document.getElementById('report-selector-section').style.display = 'block';
+        document.getElementById('reports-content').style.display = 'none';
+        document.getElementById('multiview-content').style.display = 'none';
+      } else if (tabName === 'tasks') {
+        // Hide Power BI content
+        document.getElementById('report-selector-section').style.display = 'none';
+        document.getElementById('reports-content').style.display = 'none';
+        document.getElementById('multiview-content').style.display = 'none';
+        
+        // Show task reports tab
+        document.getElementById('tasks').classList.add('active');
+        
+        // Load task/checklist data
+        loadTaskReportsData();
+      }
     }
 
     // Clear saved view
@@ -1980,6 +2444,226 @@
     await loadTeamContacts();
     mountChips();
   });
+
+  // Task Reports functionality
+  let taskReportsData = [];
+  let filteredTaskReportsData = [];
+  
+  async function loadTaskReportsData() {
+    try {
+      // Show loading state
+      document.getElementById('total-tasks').textContent = '-';
+      document.getElementById('total-checklists').textContent = '-';
+      document.getElementById('completion-rate').textContent = '-%';
+      document.getElementById('pass-rate').textContent = '-%';
+      
+      // Load tasks data
+      const tasksSnapshot = await db.collection('tasks').get();
+      const checklistsSnapshot = await db.collection('completed-checklists').get();
+      
+      let tasks = [];
+      let checklists = [];
+      
+      tasksSnapshot.forEach(doc => {
+        tasks.push({ id: doc.id, type: 'task', ...doc.data() });
+      });
+      
+      checklistsSnapshot.forEach(doc => {
+        checklists.push({ id: doc.id, type: 'checklist', ...doc.data() });
+      });
+      
+      // Combine and sort data
+      taskReportsData = [...tasks, ...checklists].sort((a, b) => {
+        const aDate = new Date(a.completedAt || a.createdAt || 0);
+        const bDate = new Date(b.completedAt || b.createdAt || 0);
+        return bDate - aDate;
+      });
+      
+      filteredTaskReportsData = [...taskReportsData];
+      
+      // Update statistics
+      updateTaskStatistics();
+      updateTaskResultsTable();
+      
+    } catch (error) {
+      console.error('Error loading task reports data:', error);
+      document.getElementById('results-table-body').innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 2rem; color: #dc3545;">
+            Error loading data. Please try again.
+          </td>
+        </tr>
+      `;
+    }
+  }
+  
+  function updateTaskStatistics() {
+    const tasks = filteredTaskReportsData.filter(item => item.type === 'task');
+    const checklists = filteredTaskReportsData.filter(item => item.type === 'checklist');
+    const completed = filteredTaskReportsData.filter(item => item.status === 'completed' || item.passRate !== undefined);
+    
+    // Update counters
+    document.getElementById('total-tasks').textContent = tasks.length;
+    document.getElementById('total-checklists').textContent = checklists.length;
+    
+    // Calculate completion rate
+    const completionRate = filteredTaskReportsData.length > 0 ? Math.round((completed.length / filteredTaskReportsData.length) * 100) : 0;
+    document.getElementById('completion-rate').textContent = completionRate + '%';
+    
+    // Calculate pass rate (for checklists with passRate)
+    const checklistsWithPassRate = checklists.filter(item => item.passRate !== undefined);
+    const avgPassRate = checklistsWithPassRate.length > 0 
+      ? Math.round(checklistsWithPassRate.reduce((sum, item) => sum + (item.passRate || 0), 0) / checklistsWithPassRate.length)
+      : 0;
+    document.getElementById('pass-rate').textContent = avgPassRate + '%';
+    
+    // Update progress bars
+    document.getElementById('tasks-progress').style.width = tasks.length > 0 ? '100%' : '0%';
+    document.getElementById('checklists-progress').style.width = checklists.length > 0 ? '100%' : '0%';
+    document.getElementById('completion-progress').style.width = completionRate + '%';
+    document.getElementById('pass-progress').style.width = avgPassRate + '%';
+    
+    // Update progress text
+    document.getElementById('tasks-progress-text').textContent = `${tasks.length} tasks`;
+    document.getElementById('checklists-progress-text').textContent = `${checklists.length} checklists`;
+    document.getElementById('completion-progress-text').textContent = `${completed.length}/${filteredTaskReportsData.length} completed`;
+    document.getElementById('pass-progress-text').textContent = checklistsWithPassRate.length > 0 ? `Avg: ${avgPassRate}%` : 'No pass rates';
+  }
+  
+  function updateTaskResultsTable() {
+    const tbody = document.getElementById('results-table-body');
+    
+    if (filteredTaskReportsData.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 2rem; color: #6c757d;">
+            No data found for the selected filters.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+    
+    const rows = filteredTaskReportsData.map(item => {
+      const date = new Date(item.completedAt || item.createdAt).toLocaleDateString();
+      const user = item.userEmail || 'Unknown';
+      const type = item.type === 'task' ? 'Task' : 'Checklist';
+      const title = item.title || item.checklistType || 'Untitled';
+      const status = item.status === 'completed' || item.passRate !== undefined ? 'completed' : 'in-progress';
+      const passRate = item.passRate !== undefined ? `${Math.round(item.passRate)}%` : 'N/A';
+      
+      const statusClass = status === 'completed' ? 'status-completed' : 'status-in-progress';
+      const passRateClass = item.passRate !== undefined 
+        ? (item.passRate >= 80 ? 'high' : item.passRate >= 60 ? 'medium' : 'low') 
+        : '';
+      
+      return `
+        <tr>
+          <td>${date}</td>
+          <td>${user}</td>
+          <td>${type}</td>
+          <td>${title}</td>
+          <td><span class="status-badge ${statusClass}">${status}</span></td>
+          <td><span class="pass-rate ${passRateClass}">${passRate}</span></td>
+        </tr>
+      `;
+    }).join('');
+    
+    tbody.innerHTML = rows;
+  }
+  
+  function applyTaskFilters() {
+    const galleryFilter = document.getElementById('gallery-filter').value;
+    const statusFilter = document.getElementById('status-filter').value;
+    const typeFilter = document.getElementById('type-filter').value;
+    const dateFromFilter = document.getElementById('date-from').value;
+    const dateToFilter = document.getElementById('date-to').value;
+    
+    filteredTaskReportsData = taskReportsData.filter(item => {
+      // Gallery filter
+      if (galleryFilter && item.userEmail !== galleryFilter) {
+        return false;
+      }
+      
+      // Status filter
+      if (statusFilter) {
+        const itemStatus = item.status === 'completed' || item.passRate !== undefined ? 'completed' : 'in-progress';
+        if (itemStatus !== statusFilter) {
+          return false;
+        }
+      }
+      
+      // Type filter
+      if (typeFilter && item.type !== typeFilter) {
+        return false;
+      }
+      
+      // Date filters
+      const itemDate = new Date(item.completedAt || item.createdAt);
+      if (dateFromFilter) {
+        const fromDate = new Date(dateFromFilter);
+        if (itemDate < fromDate) {
+          return false;
+        }
+      }
+      if (dateToFilter) {
+        const toDate = new Date(dateToFilter + 'T23:59:59');
+        if (itemDate > toDate) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+    
+    updateTaskStatistics();
+    updateTaskResultsTable();
+  }
+  
+  function clearTaskFilters() {
+    document.getElementById('gallery-filter').value = '';
+    document.getElementById('status-filter').value = '';
+    document.getElementById('type-filter').value = '';
+    document.getElementById('date-from').value = '';
+    document.getElementById('date-to').value = '';
+    
+    filteredTaskReportsData = [...taskReportsData];
+    updateTaskStatistics();
+    updateTaskResultsTable();
+  }
+  
+  function exportTaskReports() {
+    if (filteredTaskReportsData.length === 0) {
+      alert('No data to export.');
+      return;
+    }
+    
+    const headers = ['Date', 'User', 'Type', 'Title', 'Status', 'Pass Rate'];
+    const csvData = [headers];
+    
+    filteredTaskReportsData.forEach(item => {
+      const date = new Date(item.completedAt || item.createdAt).toLocaleDateString();
+      const user = item.userEmail || 'Unknown';
+      const type = item.type === 'task' ? 'Task' : 'Checklist';
+      const title = item.title || item.checklistType || 'Untitled';
+      const status = item.status === 'completed' || item.passRate !== undefined ? 'completed' : 'in-progress';
+      const passRate = item.passRate !== undefined ? `${Math.round(item.passRate)}%` : 'N/A';
+      
+      csvData.push([date, user, type, title, status, passRate]);
+    });
+    
+    const csvContent = csvData.map(row => row.map(field => `"${field}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `task-reports-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
 })();
 </script>
 </body>
