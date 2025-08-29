@@ -1109,10 +1109,58 @@
             
             <div class="filters-grid">
               <div class="filter-group">
-                <label for="gallery-filter">Gallery/Team</label>
+                <label for="user-filter">User</label>
+                <select id="user-filter" class="filter-select">
+                  <option value="">All Users</option>
+                  <option value="mdelaney@castlefineart.com">Marc Delaney</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
+                <label for="gallery-filter">Gallery</label>
                 <select id="gallery-filter" class="filter-select">
                   <option value="">All Galleries</option>
-                  <option value="appleone@example.com">Apple One (Test User)</option>
+                  <option value="bath@castlefineart.com">Bath</option>
+                  <option value="bluewater@castlefineart.com">Bluewater</option>
+                  <option value="brighton@castlefineart.com">Brighton</option>
+                  <option value="bristol@castlefineart.com">Bristol</option>
+                  <option value="cambridge@castlefineart.com">Cambridge</option>
+                  <option value="canterbury@castlefineart.com">Canterbury</option>
+                  <option value="cardiff@castlefineart.com">Cardiff</option>
+                  <option value="cheltenham@castlefineart.com">Cheltenham</option>
+                  <option value="chester@castlefineart.com">Chester</option>
+                  <option value="coventgarden@castlefineart.com">Covent Garden</option>
+                  <option value="derby@castlefineart.com">Derby</option>
+                  <option value="edinburgh@castlefineart.com">Edinburgh</option>
+                  <option value="exeter@castlefineart.com">Exeter</option>
+                  <option value="glasgow@castlefineart.com">Glasgow</option>
+                  <option value="guildford@castlefineart.com">Guildford</option>
+                  <option value="harrogate@castlefineart.com">Harrogate</option>
+                  <option value="icc@castlefineart.com">ICC</option>
+                  <option value="leamington@castlefineart.com">Leamington</option>
+                  <option value="leeds@castlefineart.com">Leeds</option>
+                  <option value="liverpool@castlefineart.com">Liverpool</option>
+                  <option value="mailbox@castlefineart.com">Mailbox</option>
+                  <option value="manchester@castlefineart.com">Manchester</option>
+                  <option value="marlow@castlefineart.com">Marlow</option>
+                  <option value="meadowhall@castlefineart.com">Meadowhall</option>
+                  <option value="miltonkeynes@castlefineart.com">Milton Keynes</option>
+                  <option value="newcastle@castlefineart.com">Newcastle</option>
+                  <option value="norwich@castlefineart.com">Norwich</option>
+                  <option value="nottingham@castlefineart.com">Nottingham</option>
+                  <option value="oxford@castlefineart.com">Oxford</option>
+                  <option value="reading@castlefineart.com">Reading</option>
+                  <option value="scp@castlefineart.com">SCP</option>
+                  <option value="sms@castlefineart.com">SMS</option>
+                  <option value="stamford@castlefineart.com">Stamford</option>
+                  <option value="stratforduponavon@castlefineart.com">Stratford upon Avon</option>
+                  <option value="tunbridgewells@castlefineart.com">Tunbridge Wells</option>
+                  <option value="usa@castlefineart.com">USA</option>
+                  <option value="web@castlefineart.com">Web</option>
+                  <option value="winchester@castlefineart.com">Winchester</option>
+                  <option value="windsor@castlefineart.com">Windsor</option>
+                  <option value="york@castlefineart.com">York</option>
+                  <option value="ahercombe@halcyongallery.com">Halcyon Gallery</option>
                 </select>
               </div>
               
@@ -2573,6 +2621,7 @@
   }
   
   function applyTaskFilters() {
+    const userFilter = document.getElementById('user-filter').value;
     const galleryFilter = document.getElementById('gallery-filter').value;
     const statusFilter = document.getElementById('status-filter').value;
     const typeFilter = document.getElementById('type-filter').value;
@@ -2580,6 +2629,11 @@
     const dateToFilter = document.getElementById('date-to').value;
     
     filteredTaskReportsData = taskReportsData.filter(item => {
+      // User filter
+      if (userFilter && item.userEmail !== userFilter) {
+        return false;
+      }
+      
       // Gallery filter
       if (galleryFilter && item.userEmail !== galleryFilter) {
         return false;
@@ -2621,6 +2675,7 @@
   }
   
   function clearTaskFilters() {
+    document.getElementById('user-filter').value = '';
     document.getElementById('gallery-filter').value = '';
     document.getElementById('status-filter').value = '';
     document.getElementById('type-filter').value = '';
