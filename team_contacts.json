@@ -154,5 +154,28 @@
       "prosecco",
       "sundries"
     ]
+  },
+  {
+    "team": "Marketing",
+    "emails": [
+      "marketingdepartment@castlefineart.com"
+    ],
+    "keywords": [
+      "marketing",
+      "social media",
+      "social media posts",
+      "POS",
+      "Point of Sale",
+      "Social Media",
+      "Videos",
+      "Videography",
+      "Photography",
+      "Photos",
+      "Business Cards",
+      "Name Plates",
+      "Bios",
+      "Biography",
+      "Biographies",
+    ]
   }
 ]
