@@ -2510,9 +2510,28 @@
       document.getElementById('completion-rate').textContent = '-%';
       document.getElementById('pass-rate').textContent = '-%';
       
+      console.log('Loading task reports data...');
+      console.log('Current user:', currentUser);
+      
+      // Check if user is admin
+      if (currentUser) {
+        try {
+          const tokenResult = await currentUser.getIdTokenResult();
+          console.log('User token claims:', tokenResult.claims);
+          console.log('Is admin:', tokenResult.claims.admin);
+        } catch (tokenError) {
+          console.error('Error getting token:', tokenError);
+        }
+      }
+      
       // Load tasks data
+      console.log('Fetching tasks...');
       const tasksSnapshot = await window.db.collection('tasks').get();
+      console.log('Tasks fetched:', tasksSnapshot.size);
+      
+      console.log('Fetching checklists...');
       const checklistsSnapshot = await window.db.collection('completed-checklists').get();
+      console.log('Checklists fetched:', checklistsSnapshot.size);
       
       let tasks = [];
       let checklists = [];
