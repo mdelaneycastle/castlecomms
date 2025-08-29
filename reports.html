@@ -2546,35 +2546,35 @@
       let checklists = [];
       
       tasksSnapshot.forEach(doc => {
-        const data = doc.data();
-        const belongsToUser = (data.userId === currentUser.uid) || 
-                              (currentUser.email && data.userEmail === currentUser.email);
-        console.log('Task document:', doc.id, {
-          userId: data.userId,
-          userEmail: data.userEmail,
-          currentUserId: currentUser.uid,
-          currentUserEmail: currentUser.email,
-          belongsToUser: belongsToUser
-        });
-        tasks.push({ id: doc.id, type: 'task', ...data });
+        tasks.push({ id: doc.id, type: 'task', ...doc.data() });
       });
       
       checklistsSnapshot.forEach(doc => {
-        const data = doc.data();
-        const belongsToUser = (data.userId === currentUser.uid) || 
-                              (currentUser.email && data.userEmail === currentUser.email);
-        console.log('Checklist document:', doc.id, {
-          userId: data.userId,
-          userEmail: data.userEmail,
-          currentUserId: currentUser.uid,
-          currentUserEmail: currentUser.email,
-          belongsToUser: belongsToUser
-        });
-        checklists.push({ id: doc.id, type: 'checklist', ...data });
+        checklists.push({ id: doc.id, type: 'checklist', ...doc.data() });
       });
       
-      // Combine and sort data
-      taskReportsData = [...tasks, ...checklists].sort((a, b) => {
+      // Combine all data
+      let allData = [...tasks, ...checklists];
+      
+      // Filter data based on user permissions
+      if (currentUser) {
+        const tokenResult = await currentUser.getIdTokenResult();
+        const isAdmin = tokenResult.claims.admin === true;
+        
+        if (!isAdmin) {
+          // Non-admin users only see their own data
+          allData = allData.filter(item => {
+            return (item.userId === currentUser.uid) || 
+                   (currentUser.email && item.userEmail === currentUser.email);
+          });
+          console.log(`Non-admin user: filtered to ${allData.length} items belonging to user`);
+        } else {
+          console.log(`Admin user: showing all ${allData.length} items`);
+        }
+      }
+      
+      // Sort data by date
+      taskReportsData = allData.sort((a, b) => {
         const aDate = new Date(a.completedAt || a.createdAt || 0);
         const bDate = new Date(b.completedAt || b.createdAt || 0);
         return bDate - aDate;
