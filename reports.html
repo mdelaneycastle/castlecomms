@@ -2546,11 +2546,15 @@
       let checklists = [];
       
       tasksSnapshot.forEach(doc => {
-        tasks.push({ id: doc.id, type: 'task', ...doc.data() });
+        const data = doc.data();
+        console.log('Task document:', doc.id, data);
+        tasks.push({ id: doc.id, type: 'task', ...data });
       });
       
       checklistsSnapshot.forEach(doc => {
-        checklists.push({ id: doc.id, type: 'checklist', ...doc.data() });
+        const data = doc.data();
+        console.log('Checklist document:', doc.id, data);
+        checklists.push({ id: doc.id, type: 'checklist', ...data });
       });
       
       // Combine and sort data
