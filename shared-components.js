@@ -255,10 +255,8 @@ window.sharedComponents = {
       const displayName = await this.getUserDisplayName(user);
       const initials = this.generateUserInitials(displayName);
 
-      // Load profile settings from Firebase
-      const userRef = window.db.ref(`users/${user.uid}/profile`);
-      const snapshot = await userRef.once('value');
-      const profileData = snapshot.val() || {};
+      // For now, use default profile data since we don't have user profiles in Firestore
+      const profileData = {};
 
       // Update user profile button
       const userProfileBtn = document.getElementById('user-profile-btn');
@@ -597,24 +595,28 @@ window.sharedComponents = {
     };
   },
 
-  // Get user display name from Firebase Realtime Database
+  // Get user display name from Firebase Auth or email
   async getUserDisplayName(user) {
     try {
-      if (!user || !window.db) {
-        return this.extractNameFromEmail(user?.email || '');
+      if (!user) {
+        return 'Unknown User';
       }
 
-      const userRef = window.db.ref(`users/${user.uid}`);
-      const snapshot = await userRef.once('value');
-      const userData = snapshot.val();
-
-      if (userData && userData.name) {
-        return userData.name;
-      }
-
-      // Fallback to Firebase Auth displayName
+      // Use Firebase Auth displayName if available
       if (user.displayName) {
         return user.displayName;
+      }
+
+      // Try to get name from auth token claims
+      if (user.getIdTokenResult) {
+        try {
+          const tokenResult = await user.getIdTokenResult();
+          if (tokenResult.claims.name) {
+            return tokenResult.claims.name;
+          }
+        } catch (tokenError) {
+          console.log('Could not get token claims, using email fallback');
+        }
       }
 
       // Final fallback to email extraction
