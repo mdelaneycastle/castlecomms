@@ -401,9 +401,10 @@ service cloud.firestore {
 
     // Tasks rules - users can manage their own tasks
     match /tasks/{taskId} {
-      // Users can only read their own tasks
+      // Users can read their own tasks, admins can read all tasks for reporting
       allow read: if request.auth != null 
-        && request.auth.uid == resource.data.userId;
+        && (request.auth.uid == resource.data.userId 
+            || request.auth.token.admin == true);
       
       // Users can create their own tasks with proper validation
       allow create: if request.auth != null 
@@ -442,9 +443,10 @@ service cloud.firestore {
 
     // Completed checklists rules - users can manage their own completed checklists
     match /completed-checklists/{completedChecklistId} {
-      // Users can only read their own completed checklists
+      // Users can read their own completed checklists, admins can read all for reporting
       allow read: if request.auth != null 
-        && request.auth.uid == resource.data.userId;
+        && (request.auth.uid == resource.data.userId 
+            || request.auth.token.admin == true);
       
       // Users can create their own completed checklists with proper validation
       allow create: if request.auth != null 
