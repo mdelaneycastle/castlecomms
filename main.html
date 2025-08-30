@@ -513,13 +513,14 @@
       
       .mobile-header-content {
         display: grid !important;
-        grid-template-columns: 48px 1fr 48px !important;
+        grid-template-columns: 60px 1fr 60px !important;
         align-items: center !important;
-        padding: 0 1rem !important;
+        padding: 0 .5rem !important;
         height: 100% !important;
-        max-width: 820px !important;
+        max-width: 100% !important;
         margin: 0 auto !important;
-        gap: 1rem !important;
+        gap: .5rem !important;
+        box-sizing: border-box !important;
       }
       
       .mobile-header-left {
@@ -542,8 +543,8 @@
       
       /* Hamburger Menu Button */
       .mobile-hamburger-btn {
-        width: 40px !important;
-        height: 40px !important;
+        width: 44px !important;
+        height: 44px !important;
         border: none !important;
         background: transparent !important;
         cursor: pointer !important;
@@ -552,9 +553,10 @@
         align-items: center !important;
         justify-content: center !important;
         gap: 4px !important;
-        padding: 8px !important;
+        padding: 10px !important;
         border-radius: 8px !important;
         transition: all 0.3s ease !important;
+        box-sizing: border-box !important;
       }
       
       .mobile-hamburger-btn:hover {
@@ -591,8 +593,8 @@
       
       /* Mobile User Profile Button */
       .mobile-user-profile-btn {
-        width: 40px !important;
-        height: 40px !important;
+        width: 44px !important;
+        height: 44px !important;
         border-radius: 50% !important;
         border: 2px solid rgba(0,0,0,.08) !important;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
@@ -607,6 +609,7 @@
         box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2) !important;
         overflow: hidden !important;
         position: relative !important;
+        box-sizing: border-box !important;
       }
       
       .mobile-user-profile-btn:hover {
@@ -772,14 +775,22 @@
         padding-top: 60px !important;
       }
 
-      /* Hide sidebar and desktop elements on mobile */
-      .sidebar-overlay,
-      #sidebar-container {
+      /* Hide desktop header on mobile but allow sidebar to show when opened */
+      #header-container {
         display: none !important;
       }
 
-      #header-container {
+      /* Allow sidebar to show on mobile when activated */
+      .sidebar-overlay {
         display: none !important;
+      }
+
+      .sidebar-overlay.active {
+        display: block !important;
+      }
+
+      #sidebar-container {
+        display: block !important;
       }
     }
 
@@ -4477,14 +4488,57 @@ if (window.innerWidth <= 768) {
   
   if (mobileHamburgerBtn) {
     mobileHamburgerBtn.addEventListener('click', function(e) {
+      e.preventDefault();
       e.stopPropagation();
+      
       // Toggle hamburger animation
       mobileHamburgerBtn.classList.toggle('active');
       
-      // Trigger the existing desktop hamburger menu functionality
-      const desktopMenuToggle = document.getElementById('menu-toggle');
-      if (desktopMenuToggle) {
-        desktopMenuToggle.click();
+      // Try multiple ways to open the sidebar
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebar-overlay');
+      
+      if (sidebar && sidebarOverlay) {
+        // Direct sidebar control
+        if (sidebar.classList.contains('open') || sidebar.style.transform === 'translateX(0px)') {
+          // Close sidebar
+          sidebar.classList.remove('open');
+          sidebar.style.transform = 'translateX(-100%)';
+          sidebarOverlay.classList.remove('active');
+          sidebarOverlay.style.display = 'none';
+        } else {
+          // Open sidebar
+          sidebar.classList.add('open');
+          sidebar.style.transform = 'translateX(0px)';
+          sidebarOverlay.classList.add('active');
+          sidebarOverlay.style.display = 'block';
+        }
+      } else {
+        // Fallback: try desktop hamburger menu
+        const desktopMenuToggle = document.getElementById('menu-toggle');
+        if (desktopMenuToggle) {
+          desktopMenuToggle.click();
+        }
+      }
+    });
+  }
+  
+  // Close sidebar when overlay is clicked
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', function() {
+      const mobileHamburgerBtn = document.getElementById('mobile-hamburger-btn');
+      const sidebar = document.getElementById('sidebar');
+      
+      if (sidebar) {
+        sidebar.classList.remove('open');
+        sidebar.style.transform = 'translateX(-100%)';
+        sidebarOverlay.classList.remove('active');
+        sidebarOverlay.style.display = 'none';
+      }
+      
+      if (mobileHamburgerBtn) {
+        mobileHamburgerBtn.classList.remove('active');
       }
     });
   }
