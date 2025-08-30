@@ -512,32 +512,32 @@
       }
       
       .mobile-header-content {
-        display: flex !important;
+        display: grid !important;
+        grid-template-columns: 48px 1fr 48px !important;
         align-items: center !important;
-        justify-content: space-between !important;
         padding: 0 1rem !important;
         height: 100% !important;
         max-width: 820px !important;
         margin: 0 auto !important;
-        position: relative !important;
+        gap: 1rem !important;
       }
       
-      .mobile-header-left,
-      .mobile-header-right {
+      .mobile-header-left {
         display: flex !important;
         align-items: center !important;
-        width: 48px !important;
-        justify-content: center !important;
+        justify-content: flex-start !important;
       }
       
       .mobile-header-center {
-        position: absolute !important;
-        left: 50% !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+      }
+      
+      .mobile-header-right {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
       }
       
       /* Hamburger Menu Button */
