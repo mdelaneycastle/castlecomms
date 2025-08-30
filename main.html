@@ -514,38 +514,27 @@
       .mobile-header-content {
         display: flex !important;
         align-items: center !important;
-        justify-content: space-between !important;
-        padding: 0 1rem !important;
         height: 100% !important;
-        position: relative !important;
+        padding: 0 1rem !important;
         box-sizing: border-box !important;
       }
       
       .mobile-header-left {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        width: 44px !important;
-        flex-shrink: 0 !important;
+        flex: 0 0 auto !important;
+        margin-right: auto !important;
       }
       
       .mobile-header-center {
-        position: absolute !important;
-        left: 50% !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) !important;
+        flex: 1 1 auto !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        pointer-events: none !important;
+        margin: 0 1rem !important;
       }
       
       .mobile-header-right {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-end !important;
-        width: 44px !important;
-        flex-shrink: 0 !important;
+        flex: 0 0 auto !important;
+        margin-left: auto !important;
       }
       
       /* Hamburger Menu Button */
@@ -782,51 +771,15 @@
         padding-top: 60px !important;
       }
 
-      /* Hide desktop header on mobile but allow sidebar to show when opened */
+      /* Hide desktop header on mobile but allow sidebar to show */
       #header-container {
         display: none !important;
       }
 
-      /* Allow sidebar to show on mobile when activated */
+      /* Allow sidebar and overlay to work on mobile */
+      #sidebar-container,
       .sidebar-overlay {
-        display: none !important;
-      }
-
-      .sidebar-overlay.active {
         display: block !important;
-      }
-
-      #sidebar-container {
-        display: block !important;
-      }
-
-      /* Ensure sidebar works properly on mobile */
-      #sidebar {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 280px !important;
-        height: 100vh !important;
-        background: white !important;
-        z-index: 1000 !important;
-        transform: translateX(-100%) !important;
-        transition: transform 0.3s ease !important;
-        overflow-y: auto !important;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.1) !important;
-      }
-
-      #sidebar.open {
-        transform: translateX(0) !important;
-      }
-
-      .sidebar-overlay {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background: rgba(0,0,0,0.5) !important;
-        z-index: 999 !important;
       }
     }
 
@@ -4532,41 +4485,45 @@ if (window.innerWidth <= 768) {
       // Toggle hamburger animation
       mobileHamburgerBtn.classList.toggle('active');
       
-      // First, try the desktop hamburger menu approach
-      const desktopMenuToggle = document.getElementById('menu-toggle');
-      console.log('Desktop menu toggle found:', desktopMenuToggle); // Debug log
-      
-      if (desktopMenuToggle) {
-        desktopMenuToggle.click();
-        return;
-      }
-      
-      // Fallback: Direct sidebar control
-      const sidebar = document.getElementById('sidebar');
-      const sidebarContainer = document.getElementById('sidebar-container');
-      const sidebarOverlay = document.getElementById('sidebar-overlay');
-      
-      console.log('Sidebar elements found:', { sidebar, sidebarContainer, sidebarOverlay }); // Debug log
-      
-      if (sidebarOverlay) {
-        if (sidebarOverlay.style.display === 'block' || sidebarOverlay.classList.contains('active')) {
-          // Close sidebar
-          sidebarOverlay.style.display = 'none';
-          sidebarOverlay.classList.remove('active');
-          if (sidebar) {
-            sidebar.classList.remove('open');
-            sidebar.style.transform = 'translateX(-100%)';
-          }
+      // Wait for header to load, then try desktop hamburger menu
+      setTimeout(() => {
+        const desktopMenuToggle = document.getElementById('menu-toggle');
+        console.log('Desktop menu toggle found:', desktopMenuToggle); // Debug log
+        
+        if (desktopMenuToggle) {
+          // Make sure sidebar shows on mobile
+          const sidebarContainer = document.getElementById('sidebar-container');
+          const sidebarOverlay = document.getElementById('sidebar-overlay');
+          
+          if (sidebarContainer) sidebarContainer.style.display = 'block';
+          if (sidebarOverlay) sidebarOverlay.style.display = 'block';
+          
+          desktopMenuToggle.click();
         } else {
-          // Open sidebar
-          sidebarOverlay.style.display = 'block';
-          sidebarOverlay.classList.add('active');
-          if (sidebar) {
-            sidebar.classList.add('open');
-            sidebar.style.transform = 'translateX(0px)';
+          // Manual sidebar control if desktop menu not found
+          console.log('Desktop menu not found, trying manual control');
+          
+          const sidebar = document.getElementById('sidebar');
+          const sidebarOverlay = document.getElementById('sidebar-overlay');
+          
+          console.log('Manual sidebar elements:', { sidebar, sidebarOverlay });
+          
+          if (sidebarOverlay) {
+            const isOpen = sidebarOverlay.style.display === 'block';
+            console.log('Sidebar is currently open:', isOpen);
+            
+            if (isOpen) {
+              // Close sidebar
+              sidebarOverlay.style.display = 'none';
+              if (sidebar) sidebar.style.transform = 'translateX(-100%)';
+            } else {
+              // Open sidebar  
+              sidebarOverlay.style.display = 'block';
+              if (sidebar) sidebar.style.transform = 'translateX(0)';
+            }
           }
         }
-      }
+      }, 100); // Small delay to ensure DOM is ready
     });
   }
   
