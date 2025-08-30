@@ -519,30 +519,66 @@
         height: 100% !important;
         max-width: 820px !important;
         margin: 0 auto !important;
+        position: relative !important;
       }
       
-      .mobile-header-left {
+      .mobile-header-left,
+      .mobile-header-right {
         display: flex !important;
         align-items: center !important;
-        gap: .75rem !important;
+        width: 48px !important;
+        justify-content: center !important;
       }
       
-      .mobile-brand-logo {
-        width: 32px !important;
-        height: 32px !important;
-        border-radius: 8px !important;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      .mobile-header-center {
+        position: absolute !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
       }
       
-      .mobile-brand-initials {
-        color: white !important;
-        font-weight: 700 !important;
-        font-size: .9rem !important;
-        letter-spacing: .5px !important;
+      /* Hamburger Menu Button */
+      .mobile-hamburger-btn {
+        width: 40px !important;
+        height: 40px !important;
+        border: none !important;
+        background: transparent !important;
+        cursor: pointer !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 4px !important;
+        padding: 8px !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      .mobile-hamburger-btn:hover {
+        background: rgba(0,0,0,.05) !important;
+      }
+      
+      .hamburger-line {
+        width: 20px !important;
+        height: 2px !important;
+        background: #45494e !important;
+        border-radius: 1px !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      .mobile-hamburger-btn.active .hamburger-line:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px) !important;
+      }
+      
+      .mobile-hamburger-btn.active .hamburger-line:nth-child(2) {
+        opacity: 0 !important;
+      }
+      
+      .mobile-hamburger-btn.active .hamburger-line:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -6px) !important;
       }
       
       .mobile-brand-text {
@@ -550,6 +586,7 @@
         font-size: 1.1rem !important;
         color: #45494e !important;
         letter-spacing: .3px !important;
+        white-space: nowrap !important;
       }
       
       /* Mobile User Profile Button */
@@ -568,11 +605,28 @@
         font-size: .9rem !important;
         transition: all 0.3s ease !important;
         box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2) !important;
+        overflow: hidden !important;
+        position: relative !important;
       }
       
       .mobile-user-profile-btn:hover {
         transform: translateY(-1px) !important;
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+      }
+      
+      .mobile-profile-image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 50% !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+      }
+      
+      .mobile-user-initials {
+        position: relative !important;
+        z-index: 1 !important;
       }
       
       /* Mobile Dropdown Menu */
@@ -626,6 +680,23 @@
         font-weight: 600 !important;
         font-size: 1.1rem !important;
         flex-shrink: 0 !important;
+        overflow: hidden !important;
+        position: relative !important;
+      }
+      
+      .mobile-dropdown-user-image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 50% !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+      }
+      
+      .mobile-dropdown-user-initials {
+        position: relative !important;
+        z-index: 1 !important;
       }
       
       .mobile-dropdown-user-info {
@@ -665,33 +736,6 @@
         margin: .5rem 0 !important;
       }
       
-      /* Mobile Navigation Items */
-      .mobile-dropdown-nav-item {
-        display: flex !important;
-        align-items: center !important;
-        gap: .75rem !important;
-        padding: .75rem 1rem !important;
-        color: #334155 !important;
-        text-decoration: none !important;
-        font-weight: 500 !important;
-        transition: all 0.2s ease !important;
-      }
-      
-      .mobile-dropdown-nav-item:hover {
-        background: rgba(102, 126, 234, 0.08) !important;
-        color: #667eea !important;
-      }
-      
-      .mobile-nav-icon {
-        width: 20px !important;
-        height: 20px !important;
-        opacity: 0.7 !important;
-        transition: opacity 0.2s ease !important;
-      }
-      
-      .mobile-dropdown-nav-item:hover .mobile-nav-icon {
-        opacity: 1 !important;
-      }
       
       /* Mobile Dropdown Items */
       .mobile-dropdown-item {
@@ -775,20 +819,26 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
 <header class="mobile-header">
   <div class="mobile-header-content">
     <div class="mobile-header-left">
-      <div class="mobile-brand-logo">
-        <span class="mobile-brand-initials">CC</span>
-      </div>
+      <button class="mobile-hamburger-btn" id="mobile-hamburger-btn" aria-label="Open menu">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+    <div class="mobile-header-center">
       <div class="mobile-brand-text">Castle Comms</div>
     </div>
     <div class="mobile-header-right">
       <div class="mobile-user-profile-dropdown">
         <button class="mobile-user-profile-btn" id="mobile-user-profile-btn">
+          <img class="mobile-profile-image" id="mobile-profile-image" style="display: none;" alt="Profile">
           <span class="mobile-user-initials" id="mobile-user-initials">MD</span>
         </button>
         <div class="mobile-profile-dropdown-menu" id="mobile-profile-dropdown-menu">
           <!-- User Info Section -->
           <div class="mobile-dropdown-header">
             <div class="mobile-dropdown-user-avatar">
+              <img class="mobile-dropdown-user-image" id="mobile-dropdown-user-image" style="display: none;" alt="Profile">
               <span class="mobile-dropdown-user-initials" id="mobile-dropdown-user-initials">MD</span>
             </div>
             <div class="mobile-dropdown-user-info">
@@ -797,68 +847,9 @@ console.log('🎨 If you still see old styling, try hard refresh (Ctrl+F5 or Cmd
             </div>
           </div>
           
-          <!-- Navigation Section -->
-          <div class="mobile-dropdown-divider"></div>
-          <div class="mobile-dropdown-section">
-            <div class="mobile-dropdown-section-title">Navigation</div>
-            <a href="main.html" class="mobile-dropdown-nav-item">
-              <img src="icons/home.png" alt="Home" class="mobile-nav-icon"> 
-              <span>Home</span>
-            </a>
-            <a href="planner.html" class="mobile-dropdown-nav-item">
-              <img src="icons/planner.png" alt="Planner" class="mobile-nav-icon"> 
-              <span>Planner</span>
-            </a>
-            <a href="staff.html" class="mobile-dropdown-nav-item">
-              <img src="icons/staff.png" alt="Staff" class="mobile-nav-icon"> 
-              <span>Spitfire Staff</span>
-            </a>
-            <a href="art-workflow.html" class="mobile-dropdown-nav-item">
-              <img src="icons/workflow.png" alt="Workflow" class="mobile-nav-icon"> 
-              <span>Art Production Workflow</span>
-            </a>
-            <a href="YWOA.html" class="mobile-dropdown-nav-item">
-              <img src="icons/YWOA.png" alt="YWOA" class="mobile-nav-icon"> 
-              <span>Your World, Our Art</span>
-            </a>
-            <a href="newsfeed.html" class="mobile-dropdown-nav-item">
-              <img src="icons/newsfeed.png" alt="Newsfeed" class="mobile-nav-icon"> 
-              <span>Newsfeed</span>
-            </a>
-            <a href="messages.html" class="mobile-dropdown-nav-item">
-              <img src="icons/messages.png" alt="Messages" class="mobile-nav-icon"> 
-              <span>Messages</span>
-            </a>
-            <a href="tickets.html" class="mobile-dropdown-nav-item">
-              <img src="icons/tickets.png" alt="Tickets" class="mobile-nav-icon"> 
-              <span>Support Tickets</span>
-            </a>
-            <a href="recognition-board.html" class="mobile-dropdown-nav-item">
-              <img src="icons/recognition.png" alt="Recognition" class="mobile-nav-icon"> 
-              <span>Recognition Board</span>
-            </a>
-            <a href="reports.html" class="mobile-dropdown-nav-item">
-              <img src="icons/reports.png" alt="Reports" class="mobile-nav-icon"> 
-              <span>Reports</span>
-            </a>
-            <a href="manual.html" class="mobile-dropdown-nav-item">
-              <img src="icons/manual.png" alt="Manual" class="mobile-nav-icon"> 
-              <span>Gallery Manual</span>
-            </a>
-            <a href="best-practice.html" class="mobile-dropdown-nav-item">
-              <img src="icons/displayreview.png" alt="Display Review" class="mobile-nav-icon"> 
-              <span>Display Review</span>
-            </a>
-            <a href="admin.html" class="mobile-dropdown-nav-item" id="mobile-admin-link" data-admin-only>
-              <img src="icons/admin.png" alt="Admin" class="mobile-nav-icon"> 
-              <span>Admin</span>
-            </a>
-          </div>
-          
           <!-- Account Section -->
           <div class="mobile-dropdown-divider"></div>
           <div class="mobile-dropdown-section">
-            <div class="mobile-dropdown-section-title">Account</div>
             <button class="mobile-dropdown-item" id="mobile-account-settings-btn">
               <span>Account Settings</span>
             </button>
@@ -4481,7 +4472,24 @@ if (window.innerWidth <= 768) {
     lastTouchEnd = now;
   }, false);
 
-  // Mobile Header Dropdown Functionality
+  // Mobile Hamburger Menu Functionality
+  const mobileHamburgerBtn = document.getElementById('mobile-hamburger-btn');
+  
+  if (mobileHamburgerBtn) {
+    mobileHamburgerBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      // Toggle hamburger animation
+      mobileHamburgerBtn.classList.toggle('active');
+      
+      // Trigger the existing desktop hamburger menu functionality
+      const desktopMenuToggle = document.getElementById('menu-toggle');
+      if (desktopMenuToggle) {
+        desktopMenuToggle.click();
+      }
+    });
+  }
+
+  // Mobile Header Profile Dropdown Functionality
   const mobileProfileBtn = document.getElementById('mobile-user-profile-btn');
   const mobileDropdownMenu = document.getElementById('mobile-profile-dropdown-menu');
   
@@ -4497,14 +4505,6 @@ if (window.innerWidth <= 768) {
       if (!mobileDropdownMenu.contains(e.target) && !mobileProfileBtn.contains(e.target)) {
         mobileDropdownMenu.classList.remove('active');
       }
-    });
-    
-    // Close dropdown when clicking navigation links
-    const navLinks = mobileDropdownMenu.querySelectorAll('.mobile-dropdown-nav-item');
-    navLinks.forEach(link => {
-      link.addEventListener('click', function() {
-        mobileDropdownMenu.classList.remove('active');
-      });
     });
     
     // Connect mobile dropdown items to existing desktop functionality
@@ -4573,6 +4573,56 @@ if (window.innerWidth <= 768) {
           mobileDropdownInitials.textContent = desktopUserInitials.textContent;
         }
       }
+      
+      // Sync profile images
+      const desktopProfileBtn = document.getElementById('user-profile-btn');
+      const mobileProfileImage = document.getElementById('mobile-profile-image');
+      const mobileDropdownImage = document.getElementById('mobile-dropdown-user-image');
+      const mobileUserInitialsEl = document.getElementById('mobile-user-initials');
+      const mobileDropdownInitialsEl = document.getElementById('mobile-dropdown-user-initials');
+      
+      if (desktopProfileBtn) {
+        const desktopImg = desktopProfileBtn.querySelector('img') || desktopProfileBtn.querySelector('.profile-photo');
+        
+        if (desktopImg && desktopImg.src && desktopImg.style.display !== 'none') {
+          // Show profile images
+          if (mobileProfileImage) {
+            mobileProfileImage.src = desktopImg.src;
+            mobileProfileImage.style.display = 'block';
+            if (mobileUserInitialsEl) mobileUserInitialsEl.style.display = 'none';
+          }
+          if (mobileDropdownImage) {
+            mobileDropdownImage.src = desktopImg.src;
+            mobileDropdownImage.style.display = 'block';
+            if (mobileDropdownInitialsEl) mobileDropdownInitialsEl.style.display = 'none';
+          }
+        } else {
+          // Show initials instead
+          if (mobileProfileImage) {
+            mobileProfileImage.style.display = 'none';
+            if (mobileUserInitialsEl) mobileUserInitialsEl.style.display = 'block';
+          }
+          if (mobileDropdownImage) {
+            mobileDropdownImage.style.display = 'none';
+            if (mobileDropdownInitialsEl) mobileDropdownInitialsEl.style.display = 'block';
+          }
+        }
+      }
+      
+      // Also sync from preview elements (when user changes profile in settings)
+      const previewPhoto = document.getElementById('preview-photo');
+      if (previewPhoto && previewPhoto.style.display !== 'none' && previewPhoto.src) {
+        if (mobileProfileImage) {
+          mobileProfileImage.src = previewPhoto.src;
+          mobileProfileImage.style.display = 'block';
+          if (mobileUserInitialsEl) mobileUserInitialsEl.style.display = 'none';
+        }
+        if (mobileDropdownImage) {
+          mobileDropdownImage.src = previewPhoto.src;
+          mobileDropdownImage.style.display = 'block';
+          if (mobileDropdownInitialsEl) mobileDropdownInitialsEl.style.display = 'none';
+        }
+      }
     }
     
     // Initial sync when page loads
@@ -4583,42 +4633,15 @@ if (window.innerWidth <= 768) {
     const desktopUserName = document.getElementById('dropdown-user-name') || document.getElementById('user-name-display');
     const desktopUserEmail = document.getElementById('dropdown-user-email');
     const desktopUserInitials = document.getElementById('user-initials');
+    const desktopProfileBtn = document.getElementById('user-profile-btn');
+    const previewPhoto = document.getElementById('preview-photo');
     
     if (desktopUserName) observer.observe(desktopUserName, { childList: true, subtree: true });
     if (desktopUserEmail) observer.observe(desktopUserEmail, { childList: true, subtree: true });
     if (desktopUserInitials) observer.observe(desktopUserInitials, { childList: true, subtree: true });
+    if (desktopProfileBtn) observer.observe(desktopProfileBtn, { childList: true, subtree: true, attributes: true });
+    if (previewPhoto) observer.observe(previewPhoto, { attributes: true, attributeFilter: ['src', 'style'] });
     
-    // Handle admin link visibility
-    function syncAdminVisibility() {
-      const desktopAdminLink = document.getElementById('admin-link');
-      const mobileAdminLink = document.getElementById('mobile-admin-link');
-      
-      if (desktopAdminLink && mobileAdminLink) {
-        const isVisible = desktopAdminLink.style.display !== 'none' && 
-                         !desktopAdminLink.hasAttribute('hidden');
-        
-        if (isVisible) {
-          mobileAdminLink.style.display = 'flex';
-          mobileAdminLink.removeAttribute('hidden');
-        } else {
-          mobileAdminLink.style.display = 'none';
-          mobileAdminLink.setAttribute('hidden', '');
-        }
-      }
-    }
-    
-    // Initial admin sync
-    setTimeout(syncAdminVisibility, 1000);
-    
-    // Observe admin link changes
-    const desktopAdminLink = document.getElementById('admin-link');
-    if (desktopAdminLink) {
-      const adminObserver = new MutationObserver(syncAdminVisibility);
-      adminObserver.observe(desktopAdminLink, { 
-        attributes: true, 
-        attributeFilter: ['style', 'hidden'] 
-      });
-    }
   }
 }
 </script>
