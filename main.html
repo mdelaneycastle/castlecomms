@@ -491,6 +491,84 @@
         min-height: 44px !important;
       }
 
+      /* Mobile Checklist Layout Modifications */
+      .checklist-item {
+        display: block !important; /* Override flex to stack items vertically */
+      }
+
+      .checklist-item > div:first-child {
+        margin-bottom: 1rem !important; /* Space between question and pass/fail buttons */
+      }
+
+      /* Move pass/fail buttons to bottom and make them wider */
+      .checklist-item > div:last-child {
+        order: 2 !important;
+        display: flex !important;
+        gap: 0.75rem !important;
+        margin-top: 1rem !important;
+        width: 100% !important;
+      }
+
+      .checklist-item > div:last-child > div {
+        flex: 1 !important; /* Make buttons equal width */
+        width: auto !important;
+        min-height: 50px !important; /* Taller buttons for better touch */
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+      }
+
+      /* Make header elements stack vertically and take full width */
+      .checklist-header {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: stretch !important;
+      }
+
+      .checklist-header > div:first-child {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: center !important;
+      }
+
+      .checklist-header > div:first-child h2 {
+        text-align: center !important;
+        font-size: 1.5rem !important;
+      }
+
+      .checklist-header > div:last-child {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+        align-items: stretch !important;
+      }
+
+      .checklist-header > div:last-child > * {
+        width: 100% !important;
+        padding: 1rem !important;
+        font-size: 1rem !important;
+        text-align: center !important;
+        min-height: 50px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      /* Make the pass percentage display wider */
+      #gallery-score {
+        padding: 1rem 1.5rem !important;
+        font-size: 1.2rem !important;
+        min-height: 60px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      /* Make back button wider */
+      .checklist-header button[onclick*="showChecklistOverview"] {
+        width: 100% !important;
+        min-height: 50px !important;
+        font-size: 1rem !important;
+      }
+
       /* Mobile Header Styles */
       /* Hide desktop header on mobile */
       .desktop-header,
