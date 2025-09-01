@@ -481,15 +481,21 @@
       /* Show mobile container and hide desktop */
       .mobile-address-container {
         display: block !important;
-        position: relative;
-        z-index: 10;
-        min-height: 100vh;
-        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
+        width: 100vw;
+        height: 100vh;
         padding: 1rem;
-        padding-top: 70px; /* Account for mobile header */
+        padding-top: 1rem; /* No mobile header needed */
         color: white;
+        overflow-y: auto;
         overflow-x: hidden;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
       }
 
       /* Ensure desktop app is hidden on mobile */
@@ -500,8 +506,8 @@
       /* Mobile Header */
       .mobile-address-header {
         text-align: center;
-        margin-bottom: 2rem;
-        padding-top: 1rem;
+        margin-bottom: 1.5rem;
+        padding-top: 0.5rem;
       }
 
       .mobile-address-title {
@@ -559,7 +565,8 @@
       .mobile-contact-list {
         display: grid;
         gap: 0.75rem;
-        margin-bottom: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem; /* Extra space for scrolling */
       }
 
       .mobile-contact-item {
@@ -754,8 +761,6 @@
 
   <!-- Mobile Address Book Interface -->
   <div class="mobile-address-container">
-    <div id="header-container"></div>
-    
     <div class="mobile-address-header">
       <h1 class="mobile-address-title">Address Book</h1>
       <p class="mobile-address-subtitle">Find contact details for Castle Comms team members</p>
