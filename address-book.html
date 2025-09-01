@@ -478,12 +478,23 @@
         display: none; /* Hide desktop rolodex */
       }
 
-      /* Mobile Container */
+      /* Show mobile container and hide desktop */
       .mobile-address-container {
         display: block !important;
+        position: relative;
+        z-index: 10;
         min-height: 100vh;
+        width: 100%;
         padding: 1rem;
+        padding-top: 70px; /* Account for mobile header */
         color: white;
+        overflow-x: hidden;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      }
+
+      /* Ensure desktop app is hidden on mobile */
+      .app {
+        display: none !important;
       }
 
       /* Mobile Header */
@@ -742,7 +753,7 @@
   </main>
 
   <!-- Mobile Address Book Interface -->
-  <div class="mobile-address-container" style="display: none;">
+  <div class="mobile-address-container">
     <div id="header-container"></div>
     
     <div class="mobile-address-header">
@@ -809,6 +820,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
   <script src="firebase-init.js"></script>
+  <script src="shared-components.js"></script>
   <script src="script.js?v=20250823_business_card_fix"></script>
 
   <script>
@@ -1121,10 +1133,19 @@
 
     // Mobile Address Book Functionality
     (function() {
+      console.log('📱 Checking mobile interface... Screen width:', window.innerWidth);
+      
       // Only run mobile code on mobile devices
-      if (window.innerWidth > 768) return;
+      if (window.innerWidth > 768) {
+        console.log('📱 Desktop detected - hiding mobile interface');
+        const mobileContainer = document.querySelector('.mobile-address-container');
+        if (mobileContainer) {
+          mobileContainer.style.display = 'none';
+        }
+        return;
+      }
 
-      console.log('📱 Initializing mobile address book interface...');
+      console.log('📱 Mobile detected - initializing mobile address book interface...');
 
       const mobileContainer = document.querySelector('.mobile-address-container');
       const mobileContactList = document.getElementById('mobile-contact-list');
@@ -1136,9 +1157,19 @@
       let filteredContacts = [];
       let activeContactId = null;
 
-      // Show mobile interface
+      // Show mobile interface and hide desktop
       if (mobileContainer) {
         mobileContainer.style.display = 'block';
+        console.log('📱 Mobile container made visible');
+      } else {
+        console.error('❌ Mobile container not found!');
+      }
+
+      // Hide desktop app
+      const desktopApp = document.querySelector('.app');
+      if (desktopApp) {
+        desktopApp.style.display = 'none';
+        console.log('📱 Desktop app hidden');
       }
 
       // Load mobile contacts from the same business cards JSON
@@ -1183,13 +1214,20 @@
 
       // Render mobile contact list
       function renderMobileContacts() {
-        if (!mobileContactList) return;
+        console.log('📱 Rendering mobile contacts...', filteredContacts.length, 'contacts');
+        
+        if (!mobileContactList) {
+          console.error('❌ Mobile contact list element not found!');
+          return;
+        }
 
         if (filteredContacts.length === 0) {
+          console.log('📱 No contacts to show - displaying empty state');
           showEmptyState();
           return;
         }
 
+        console.log('📱 Rendering', filteredContacts.length, 'contacts');
         hideEmptyState();
 
         const contactsHTML = filteredContacts.map(contact => `
@@ -1211,6 +1249,7 @@
         `).join('');
 
         mobileContactList.innerHTML = contactsHTML;
+        console.log('📱 Contact list HTML updated with', filteredContacts.length, 'items');
 
         // Add click handlers
         mobileContactList.querySelectorAll('.mobile-contact-item').forEach(item => {
