@@ -465,6 +465,255 @@
       .knob.right { right: -40px; }
       :root { --card-w: 92vw; }
     }
+
+    /* Mobile-First Address Book Design */
+    @media (max-width: 768px) {
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        padding: 0;
+        margin: 0;
+      }
+
+      .app {
+        display: none; /* Hide desktop rolodex */
+      }
+
+      /* Mobile Container */
+      .mobile-address-container {
+        display: block !important;
+        min-height: 100vh;
+        padding: 1rem;
+        color: white;
+      }
+
+      /* Mobile Header */
+      .mobile-address-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-top: 1rem;
+      }
+
+      .mobile-address-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      }
+
+      .mobile-address-subtitle {
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.8);
+        margin-bottom: 1.5rem;
+      }
+
+      /* Mobile Search */
+      .mobile-search-container {
+        margin-bottom: 1.5rem;
+        position: relative;
+      }
+
+      .mobile-search-input {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.15);
+        color: white;
+        font-size: 1rem;
+        backdrop-filter: blur(10px);
+        box-sizing: border-box;
+      }
+
+      .mobile-search-input::placeholder {
+        color: rgba(255,255,255,0.7);
+      }
+
+      .mobile-search-input:focus {
+        outline: none;
+        border-color: rgba(255,255,255,0.5);
+        background: rgba(255,255,255,0.2);
+      }
+
+      .mobile-search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,0.7);
+        font-size: 1.1rem;
+      }
+
+      /* Mobile Contact List */
+      .mobile-contact-list {
+        display: grid;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .mobile-contact-item {
+        background: rgba(255,255,255,0.15);
+        border: 2px solid rgba(255,255,255,0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .mobile-contact-item:hover,
+      .mobile-contact-item.active {
+        background: rgba(255,255,255,0.25);
+        border-color: rgba(255,255,255,0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      }
+
+      .mobile-contact-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .mobile-contact-title {
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.8);
+        margin-bottom: 0.25rem;
+        line-height: 1.3;
+      }
+
+      .mobile-contact-team {
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.1);
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        display: inline-block;
+        margin-top: 0.25rem;
+      }
+
+      .mobile-contact-chevron {
+        color: rgba(255,255,255,0.6);
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+      }
+
+      .mobile-contact-item.active .mobile-contact-chevron {
+        transform: rotate(90deg);
+      }
+
+      /* Mobile Contact Details (Expandable) */
+      .mobile-contact-details {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        display: none;
+      }
+
+      .mobile-contact-item.active .mobile-contact-details {
+        display: block;
+        animation: slideDown 0.3s ease;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .mobile-detail-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+      }
+
+      .mobile-detail-row:last-child {
+        margin-bottom: 0;
+      }
+
+      .mobile-detail-icon {
+        color: rgba(255,255,255,0.8);
+        font-size: 1rem;
+        width: 20px;
+        text-align: center;
+      }
+
+      .mobile-detail-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .mobile-detail-label {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.2rem;
+        font-weight: 600;
+      }
+
+      .mobile-detail-value {
+        font-size: 0.9rem;
+        color: white;
+        word-break: break-word;
+      }
+
+      .mobile-detail-action {
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .mobile-detail-action:hover {
+        background: rgba(255,255,255,0.3);
+        border-color: rgba(255,255,255,0.5);
+      }
+
+      /* Mobile Empty State */
+      .mobile-empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: rgba(255,255,255,0.7);
+      }
+
+      .mobile-empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+      }
+
+      .mobile-empty-text {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      /* Mobile Results Counter */
+      .mobile-results-counter {
+        text-align: center;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.7);
+        padding: 0.5rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -492,7 +741,40 @@
     </section>
   </main>
 
+  <!-- Mobile Address Book Interface -->
+  <div class="mobile-address-container" style="display: none;">
+    <div id="header-container"></div>
+    
+    <div class="mobile-address-header">
+      <h1 class="mobile-address-title">Address Book</h1>
+      <p class="mobile-address-subtitle">Find contact details for Castle Comms team members</p>
+    </div>
 
+    <div class="mobile-search-container">
+      <div class="mobile-search-icon">🔍</div>
+      <input 
+        type="text" 
+        class="mobile-search-input" 
+        id="mobile-search"
+        placeholder="Search by name, department, or role..."
+        autocomplete="off"
+      >
+    </div>
+
+    <div class="mobile-results-counter" id="mobile-results-counter"></div>
+
+    <div class="mobile-contact-list" id="mobile-contact-list">
+      <!-- Contacts will be populated by JavaScript -->
+    </div>
+
+    <div class="mobile-empty-state" id="mobile-empty-state" style="display: none;">
+      <div class="mobile-empty-icon">📭</div>
+      <div class="mobile-empty-text">
+        No contacts found matching your search.<br>
+        Try different keywords or clear the search.
+      </div>
+    </div>
+  </div>
 
   <template id="cardTemplate">
     <article class="card" role="group" aria-roledescription="Address card">
@@ -835,6 +1117,215 @@
         });
         setCursor(idx);
       });
+    })();
+
+    // Mobile Address Book Functionality
+    (function() {
+      // Only run mobile code on mobile devices
+      if (window.innerWidth > 768) return;
+
+      console.log('📱 Initializing mobile address book interface...');
+
+      const mobileContainer = document.querySelector('.mobile-address-container');
+      const mobileContactList = document.getElementById('mobile-contact-list');
+      const mobileSearchInput = document.getElementById('mobile-search');
+      const mobileResultsCounter = document.getElementById('mobile-results-counter');
+      const mobileEmptyState = document.getElementById('mobile-empty-state');
+
+      let mobileContacts = [];
+      let filteredContacts = [];
+      let activeContactId = null;
+
+      // Show mobile interface
+      if (mobileContainer) {
+        mobileContainer.style.display = 'block';
+      }
+
+      // Load mobile contacts from the same business cards JSON
+      async function loadMobileContacts() {
+        try {
+          const response = await fetch('businesscards.json');
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          
+          const businessCards = await response.json();
+          console.log('📱 Mobile: Loaded', businessCards.length, 'business cards');
+
+          mobileContacts = businessCards.map(card => {
+            // Create combined office phone with extension
+            let officePhone = card["Telephone No"] || "";
+            const ext = card["Ext"] || "";
+            if (officePhone && ext && ext !== "N/A") {
+              const cleanExt = ext.replace("(Internal)", "").trim();
+              officePhone = `${officePhone} (${cleanExt})`;
+            }
+
+            return {
+              id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()),
+              name: card["Name"] || "",
+              jobTitle: card["Job Title"] && card["Job Title"] !== "N/A" ? card["Job Title"] : "",
+              team: card["Team"] && card["Team"] !== "N/A" ? card["Team"] : "",
+              officePhone: officePhone,
+              personalEmail: card["Email Address"] && card["Email Address"] !== "N/A" ? card["Email Address"] : "",
+              mobilePhone: card["Mobile No"] && card["Mobile No"] !== "N/A" ? card["Mobile No"] : "",
+              teamEmail: card["Team Email Address"] && card["Team Email Address"] !== "N/A" ? card["Team Email Address"] : ""
+            };
+          }).filter(contact => contact.name); // Remove any contacts without names
+
+          filteredContacts = [...mobileContacts];
+          renderMobileContacts();
+          updateResultsCounter();
+          
+        } catch (error) {
+          console.error('❌ Mobile: Error loading business cards:', error);
+          showEmptyState('Unable to load contacts');
+        }
+      }
+
+      // Render mobile contact list
+      function renderMobileContacts() {
+        if (!mobileContactList) return;
+
+        if (filteredContacts.length === 0) {
+          showEmptyState();
+          return;
+        }
+
+        hideEmptyState();
+
+        const contactsHTML = filteredContacts.map(contact => `
+          <div class="mobile-contact-item" data-contact-id="${contact.id}">
+            <div class="mobile-contact-name">
+              <span>${contact.name}</span>
+              <span class="mobile-contact-chevron">›</span>
+            </div>
+            ${contact.jobTitle ? `<div class="mobile-contact-title">${contact.jobTitle}</div>` : ''}
+            ${contact.team ? `<div class="mobile-contact-team">${contact.team}</div>` : ''}
+            
+            <div class="mobile-contact-details">
+              ${createMobileDetailRow('📞', 'Office Phone', contact.officePhone, 'tel')}
+              ${createMobileDetailRow('📱', 'Mobile Phone', contact.mobilePhone, 'tel')}
+              ${createMobileDetailRow('📧', 'Personal Email', contact.personalEmail, 'email')}
+              ${createMobileDetailRow('👥', 'Team Email', contact.teamEmail, 'email')}
+            </div>
+          </div>
+        `).join('');
+
+        mobileContactList.innerHTML = contactsHTML;
+
+        // Add click handlers
+        mobileContactList.querySelectorAll('.mobile-contact-item').forEach(item => {
+          item.addEventListener('click', function() {
+            const contactId = this.dataset.contactId;
+            
+            // If clicking the same contact, collapse it
+            if (activeContactId === contactId) {
+              this.classList.remove('active');
+              activeContactId = null;
+              return;
+            }
+
+            // Collapse all other contacts
+            mobileContactList.querySelectorAll('.mobile-contact-item.active').forEach(activeItem => {
+              activeItem.classList.remove('active');
+            });
+
+            // Expand this contact
+            this.classList.add('active');
+            activeContactId = contactId;
+          });
+        });
+      }
+
+      // Create mobile detail row HTML
+      function createMobileDetailRow(icon, label, value, type = '') {
+        if (!value) return '';
+
+        const actionButton = type === 'tel' ? `<button class="mobile-detail-action" onclick="window.location.href='tel:${value.replace(/[^0-9+]/g, '')'">Call</button>` :
+                           type === 'email' ? `<button class="mobile-detail-action" onclick="window.location.href='mailto:${value}'">Email</button>` : '';
+
+        return `
+          <div class="mobile-detail-row">
+            <div class="mobile-detail-icon">${icon}</div>
+            <div class="mobile-detail-info">
+              <div class="mobile-detail-label">${label}</div>
+              <div class="mobile-detail-value">${value}</div>
+            </div>
+            ${actionButton}
+          </div>
+        `;
+      }
+
+      // Search functionality
+      function filterContacts(query) {
+        if (!query.trim()) {
+          filteredContacts = [...mobileContacts];
+        } else {
+          const searchTerm = query.toLowerCase().trim();
+          filteredContacts = mobileContacts.filter(contact => {
+            return contact.name.toLowerCase().includes(searchTerm) ||
+                   contact.jobTitle.toLowerCase().includes(searchTerm) ||
+                   contact.team.toLowerCase().includes(searchTerm) ||
+                   contact.personalEmail.toLowerCase().includes(searchTerm) ||
+                   contact.teamEmail.toLowerCase().includes(searchTerm);
+          });
+        }
+
+        activeContactId = null; // Reset active contact on search
+        renderMobileContacts();
+        updateResultsCounter();
+      }
+
+      // Update results counter
+      function updateResultsCounter() {
+        if (!mobileResultsCounter) return;
+
+        const totalCount = mobileContacts.length;
+        const filteredCount = filteredContacts.length;
+        
+        if (mobileSearchInput && mobileSearchInput.value.trim()) {
+          mobileResultsCounter.textContent = `Showing ${filteredCount} of ${totalCount} contacts`;
+        } else {
+          mobileResultsCounter.textContent = `${totalCount} contacts total`;
+        }
+      }
+
+      // Show empty state
+      function showEmptyState(message = null) {
+        if (mobileContactList) mobileContactList.style.display = 'none';
+        if (mobileEmptyState) {
+          mobileEmptyState.style.display = 'block';
+          if (message) {
+            const textElement = mobileEmptyState.querySelector('.mobile-empty-text');
+            if (textElement) textElement.textContent = message;
+          }
+        }
+      }
+
+      // Hide empty state
+      function hideEmptyState() {
+        if (mobileContactList) mobileContactList.style.display = 'grid';
+        if (mobileEmptyState) mobileEmptyState.style.display = 'none';
+      }
+
+      // Search input handler
+      if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('input', function() {
+          filterContacts(this.value);
+        });
+
+        // Clear search on Escape key
+        mobileSearchInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') {
+            this.value = '';
+            filterContacts('');
+            this.blur();
+          }
+        });
+      }
+
+      // Initialize mobile interface
+      loadMobileContacts();
+      console.log('📱 Mobile address book interface initialized');
     })();
   </script>
 
