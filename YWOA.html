@@ -755,14 +755,13 @@
                     </button>
                     
                     <div id="collectionSizeInputs" style="display: none;">
-                        <h5>Collection Size (applies to all artworks)</h5>
-                        <div class="artwork-size-inputs">
-                            <input type="number" id="collectionWidth" placeholder="Width" step="0.1" min="0">
-                            <input type="number" id="collectionHeight" placeholder="Height" step="0.1" min="0">
-                            <select id="collectionUnit">
+                        <h5>Collection Width (applies to all artworks)</h5>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="collectionWidth" placeholder="Width" step="0.1" min="0" style="flex: 1;">
+                            <select id="collectionUnit" style="min-width: 70px;">
+                                <option value="cm">cm</option>
                                 <option value="ft">ft</option>
                                 <option value="m">m</option>
-                                <option value="cm">cm</option>
                                 <option value="in">in</option>
                             </select>
                         </div>
@@ -777,9 +776,9 @@
                     <div class="measurement-input">
                         <input type="number" id="realDistance" placeholder="Distance" step="0.1" min="0">
                         <select id="distanceUnit">
+                            <option value="cm">cm</option>
                             <option value="ft">ft</option>
                             <option value="m">m</option>
-                            <option value="cm">cm</option>
                             <option value="in">in</option>
                         </select>
                     </div>
@@ -793,7 +792,7 @@
                     </div>
                     <div id="collectionSizeSection" style="display: none;">
                         <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
-                            All artworks will use the same size when Collection Mode is enabled
+                            Collection Mode: All artworks use the same width (height calculated automatically). Individual angles still available below.
                         </p>
                     </div>
                 </div>
@@ -863,7 +862,7 @@
                 this.roomImageDisplayed = null;
                 this.scalePoints = [];
                 this.realDistance = 0;
-                this.distanceUnit = 'ft';
+                this.distanceUnit = 'cm';
                 this.pixelsPerUnit = 1;
                 this.isDragging = false;
                 this.dragOffset = { x: 0, y: 0 };
@@ -1013,7 +1012,7 @@
                             rotation: { x: 0, y: 0, z: 0 },
                             element: null,
                             width: 0,
-                            unit: 'ft'
+                            unit: 'cm'
                         };
                         
                         // Update preview
@@ -1058,16 +1057,15 @@
             toggleCollectionMode(e) {
                 this.collectionMode = e.target.checked;
                 const collectionInputs = document.getElementById('collectionSizeInputs');
-                const individualInputs = document.getElementById('individualArtworkSizes');
                 
                 if (this.collectionMode) {
                     collectionInputs.style.display = 'block';
-                    individualInputs.innerHTML = '<p style="font-size: 12px; color: #666;">Collection mode active - all artworks use the same size</p>';
                 } else {
                     collectionInputs.style.display = 'none';
-                    this.updateArtworkSizeInputs();
                 }
                 
+                // Always update the artwork size inputs (will show appropriate controls based on mode)
+                this.updateArtworkSizeInputs();
                 this.updateAllArtworkSizes();
             }
             
@@ -1121,53 +1119,74 @@
             }
             
             updateArtworkSizeInputs() {
-                if (this.collectionMode) return;
-                
                 const container = document.getElementById('individualArtworkSizes');
                 container.innerHTML = '';
                 
-                Object.keys(this.artworks).forEach(id => {
-                    const artwork = this.artworks[id];
-                    const div = document.createElement('div');
-                    div.style.marginBottom = '15px';
-                    div.innerHTML = `
-                        <h5 style="margin: 0 0 8px 0; font-size: 13px; color: var(--secondary-color);">Artwork #${id} Size</h5>
-                        <div class="artwork-size-inputs">
-                            <input type="number" id="artworkWidth${id}" placeholder="Width" step="0.1" min="0" value="${artwork.width || ''}">
-                            <input type="number" id="artworkHeight${id}" placeholder="Height" step="0.1" min="0" value="">
-                            <select id="artworkUnit${id}">
-                                <option value="ft" ${artwork.unit === 'ft' ? 'selected' : ''}>ft</option>
-                                <option value="m" ${artwork.unit === 'm' ? 'selected' : ''}>m</option>
-                                <option value="cm" ${artwork.unit === 'cm' ? 'selected' : ''}>cm</option>
-                                <option value="in" ${artwork.unit === 'in' ? 'selected' : ''}>in</option>
-                            </select>
-                        </div>
-                        <div class="artwork-angle-control">
-                            <h6>Individual Angle</h6>
-                            <div class="individual-rotation-control">
-                                <label>Angle:</label>
-                                <input type="range" id="artworkAngle${id}" min="-90" max="90" value="0" step="1">
-                                <span id="artworkAngleValue${id}">0°</span>
+                if (this.collectionMode) {
+                    // In collection mode, only show individual angle controls
+                    Object.keys(this.artworks).forEach(id => {
+                        const div = document.createElement('div');
+                        div.style.marginBottom = '15px';
+                        div.innerHTML = `
+                            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: var(--secondary-color);">Artwork #${id} Angle</h5>
+                            <div class="artwork-angle-control">
+                                <h6>Individual Angle</h6>
+                                <div class="individual-rotation-control">
+                                    <label>Angle:</label>
+                                    <input type="range" id="artworkAngle${id}" min="-90" max="90" value="${this.artworks[id].rotation.y || 0}" step="1">
+                                    <span id="artworkAngleValue${id}">${this.artworks[id].rotation.y || 0}°</span>
+                                </div>
                             </div>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                    
-                    // Add event listeners
-                    document.getElementById(`artworkWidth${id}`).addEventListener('input', () => this.updateArtworkSize(id));
-                    document.getElementById(`artworkUnit${id}`).addEventListener('change', () => this.updateArtworkSize(id));
-                    document.getElementById(`artworkAngle${id}`).addEventListener('input', (e) => this.updateIndividualRotation(id, e));
-                });
+                        `;
+                        container.appendChild(div);
+                        
+                        // Add event listener for angle control
+                        document.getElementById(`artworkAngle${id}`).addEventListener('input', (e) => this.updateIndividualRotation(id, e));
+                    });
+                } else {
+                    // In individual mode, show full size and angle controls
+                    Object.keys(this.artworks).forEach(id => {
+                        const artwork = this.artworks[id];
+                        const div = document.createElement('div');
+                        div.style.marginBottom = '15px';
+                        div.innerHTML = `
+                            <h5 style="margin: 0 0 8px 0; font-size: 13px; color: var(--secondary-color);">Artwork #${id} Size</h5>
+                            <div class="artwork-size-inputs">
+                                <input type="number" id="artworkWidth${id}" placeholder="Width" step="0.1" min="0" value="${artwork.width || ''}">
+                                <input type="number" id="artworkHeight${id}" placeholder="Height" step="0.1" min="0" value="">
+                                <select id="artworkUnit${id}">
+                                    <option value="cm" ${artwork.unit === 'cm' ? 'selected' : ''}>cm</option>
+                                    <option value="ft" ${artwork.unit === 'ft' ? 'selected' : ''}>ft</option>
+                                    <option value="m" ${artwork.unit === 'm' ? 'selected' : ''}>m</option>
+                                    <option value="in" ${artwork.unit === 'in' ? 'selected' : ''}>in</option>
+                                </select>
+                            </div>
+                            <div class="artwork-angle-control">
+                                <h6>Individual Angle</h6>
+                                <div class="individual-rotation-control">
+                                    <label>Angle:</label>
+                                    <input type="range" id="artworkAngle${id}" min="-90" max="90" value="${artwork.rotation.y || 0}" step="1">
+                                    <span id="artworkAngleValue${id}">${artwork.rotation.y || 0}°</span>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                        
+                        // Add event listeners
+                        document.getElementById(`artworkWidth${id}`).addEventListener('input', () => this.updateArtworkSize(id));
+                        document.getElementById(`artworkUnit${id}`).addEventListener('change', () => this.updateArtworkSize(id));
+                        document.getElementById(`artworkAngle${id}`).addEventListener('input', (e) => this.updateIndividualRotation(id, e));
+                    });
+                }
             }
             
             updateCollectionSize() {
                 if (!this.collectionMode) return;
                 
                 const width = parseFloat(document.getElementById('collectionWidth').value) || 0;
-                const height = parseFloat(document.getElementById('collectionHeight').value) || 0;
                 const unit = document.getElementById('collectionUnit').value;
                 
-                // Apply to all artworks
+                // Apply width to all artworks (height will be calculated from aspect ratio)
                 Object.keys(this.artworks).forEach(id => {
                     this.artworks[id].width = width;
                     this.artworks[id].unit = unit;
