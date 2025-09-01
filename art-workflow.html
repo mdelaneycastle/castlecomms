@@ -521,8 +521,10 @@
 
       .workflow-container {
         padding: 1rem;
-        padding-top: 70px; /* Account for mobile header */
+        padding-top: 80px; /* Account for mobile header */
         max-width: none;
+        position: relative;
+        z-index: 1;
       }
 
       .workflow-header {
@@ -552,31 +554,36 @@
         padding: 0;
         position: relative;
         border-radius: 16px;
-        overflow: hidden;
-        background: rgba(255,255,255,0.1);
+        overflow: visible;
+        background: rgba(0,0,0,0.2);
         backdrop-filter: blur(10px);
         border: 2px solid rgba(255,255,255,0.2);
+        margin-top: 1rem;
       }
 
       .step-card {
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.5rem;
         max-height: none;
         padding: 1rem;
+        padding-top: 4rem; /* Space for step indicator */
+        padding-bottom: 4rem; /* Space for navigation and progress */
         align-items: stretch;
+        position: relative;
       }
 
       .panel {
         padding: 1.25rem;
         margin: 0;
-        background: rgba(255,255,255,0.15);
+        background: rgba(0,0,0,0.4);
         backdrop-filter: blur(15px);
-        border: 2px solid rgba(255,255,255,0.2);
+        border: 2px solid rgba(255,255,255,0.3);
         border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         min-width: unset;
         flex: unset;
         color: white;
+        position: relative;
       }
 
       .panel h3,
@@ -650,41 +657,41 @@
 
       .nav-arrow.prev {
         left: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
+        bottom: 1rem;
       }
 
       .nav-arrow.next {
         right: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
+        bottom: 1rem;
       }
 
       .step-indicator {
-        top: 1rem;
+        top: -3rem;
         left: 50%;
         transform: translateX(-50%);
         font-size: 0.9rem;
         font-weight: 600;
         padding: 0.5rem 1rem;
-        background: rgba(255,255,255,0.2);
+        background: rgba(0,0,0,0.6);
         color: white;
         border: 2px solid rgba(255,255,255,0.3);
         border-radius: 20px;
         backdrop-filter: blur(10px);
         z-index: 15;
+        position: relative;
       }
 
       .progress-bar {
-        bottom: 1rem;
+        bottom: -2.5rem;
         left: 50%;
         transform: translateX(-50%);
         width: 200px;
         height: 6px;
-        background: rgba(255,255,255,0.2);
+        background: rgba(0,0,0,0.4);
         border-radius: 3px;
         overflow: hidden;
         border: 1px solid rgba(255,255,255,0.3);
+        position: relative;
       }
 
       .progress-fill {
