@@ -1015,6 +1015,8 @@
                             unit: 'cm'
                         };
                         
+                        console.log(`Created artwork ${artworkId} with rotation:`, this.artworks[artworkId].rotation);
+                        
                         // Update preview
                         document.getElementById(`artworkPreview${artworkId}`).src = e.target.result;
                         document.getElementById(`artworkPreview${artworkId}`).style.display = 'block';
@@ -1453,6 +1455,7 @@
                 const artwork = this.artworks[artworkId];
                 if (artwork) {
                     artwork.rotation.y = rotation;
+                    console.log(`Updated artwork ${artworkId} rotation to:`, artwork.rotation);
                     this.updateArtworkTransform(artworkId);
                 }
             }
@@ -1655,19 +1658,37 @@
                     return;
                 }
 
+                // Check if we have any artworks
+                if (Object.keys(this.artworks).length === 0) {
+                    this.showStatus('No artworks uploaded yet.', 'error');
+                    return;
+                }
+
                 // Only use screenshot method for rotation or color intensity changes
-                const hasRotation = Object.values(this.artworks).some(artwork => 
-                    artwork.rotation && (artwork.rotation.x !== 0 || artwork.rotation.y !== 0 || artwork.rotation.z !== 0)
-                );
+                const hasRotation = Object.values(this.artworks).some(artwork => {
+                    return artwork && artwork.rotation && (
+                        artwork.rotation.x !== 0 || 
+                        artwork.rotation.y !== 0 || 
+                        artwork.rotation.z !== 0
+                    );
+                });
                 const hasColorIntensityChange = this.colorIntensity !== 100;
+                
+                console.log('Export check:', {
+                    hasRotation,
+                    hasColorIntensityChange,
+                    artworkCount: Object.keys(this.artworks).length,
+                    artworkRotations: Object.values(this.artworks).map(a => a.rotation)
+                });
+                
                 if (hasRotation || hasColorIntensityChange) {
-                    let reason = hasRotation ? 'Rotation' : 'Color intensity adjustment';
+                    let reason = hasRotation ? 'Angled artwork' : 'Color intensity adjustment';
                     this.showStatus(`${reason} detected - using screenshot method for accurate export...`, 'info');
                     return this.exportScreenshot();
                 }
 
                 try {
-                    this.showStatus('Generating export image...', 'info');
+                    this.showStatus('All artworks are straight - using direct canvas export...', 'info');
                     
                     // Create export canvas with proper 3D rotation rendering
                     const exportCanvas = document.createElement('canvas');
@@ -1687,9 +1708,29 @@
                     // Draw the main canvas (room image and measurement lines)
                     exportCtx.drawImage(this.canvas, 0, 0);
 
-                    // Draw all artworks with proper 3D rotation if they exist
+                    // Draw all artworks (no rotation needed since all are straight)
                     Object.keys(this.artworks).forEach(id => {
-                        this.drawArtworkWith3DRotation(exportCtx, id);
+                        const artwork = this.artworks[id];
+                        if (artwork && artwork.image) {
+                            // Apply color intensity if changed
+                            if (this.colorIntensity !== 100) {
+                                const saturation = this.colorIntensity / 100;
+                                exportCtx.filter = `saturate(${saturation})`;
+                            } else {
+                                exportCtx.filter = 'none';
+                            }
+                            
+                            exportCtx.drawImage(
+                                artwork.image,
+                                artwork.position.x,
+                                artwork.position.y,
+                                artwork.size.width,
+                                artwork.size.height
+                            );
+                            
+                            // Reset filter
+                            exportCtx.filter = 'none';
+                        }
                     });
 
                     const dataURL = exportCanvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
