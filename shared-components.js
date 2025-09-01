@@ -85,6 +85,9 @@ window.sharedComponents = {
       }, 100);
     }
 
+    // Setup mobile hamburger menu
+    this.setupMobileHamburger();
+    
     // Setup user profile dropdown
     this.setupUserProfileDropdown();
   },
@@ -313,6 +316,51 @@ window.sharedComponents = {
         userInitialsElement.textContent = this.generateUserInitials(this.extractNameFromEmail(user?.email || ''));
       }
     }
+  },
+
+  // Setup mobile hamburger menu functionality
+  setupMobileHamburger() {
+    // Only run on mobile devices
+    if (window.innerWidth > 768) return;
+    
+    const mobileHamburgerBtn = document.getElementById('mobile-hamburger-btn');
+    if (!mobileHamburgerBtn) {
+      console.warn('⚠️ Mobile hamburger button not found');
+      return;
+    }
+    
+    mobileHamburgerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('🍔 Mobile hamburger menu clicked');
+      
+      // Try to trigger the desktop hamburger menu first
+      const desktopHamburger = document.getElementById('menu-toggle');
+      if (desktopHamburger) {
+        console.log('🍔 Triggering desktop hamburger menu via mobile button');
+        desktopHamburger.click();
+        return;
+      }
+      
+      // Direct sidebar manipulation if desktop hamburger not found
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar) {
+        console.log('🍔 Opening sidebar directly via mobile button');
+        sidebar.classList.add('show');
+        sidebar.style.transform = 'translateX(0%)';
+        
+        // Also show overlay
+        const overlay = document.getElementById('sidebar-overlay');
+        if (overlay) {
+          overlay.style.display = 'block';
+        }
+        
+        // Add hamburger animation
+        mobileHamburgerBtn.classList.add('active');
+      }
+    });
+    
+    console.log('📱 Mobile hamburger menu functionality setup complete');
   },
 
   // Load and setup sidebar with permissions
