@@ -325,6 +325,79 @@
             border-top: 1px solid rgba(216, 209, 197, 0.3);
         }
 
+        /* Artwork Collection Styles */
+        .artwork-upload-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(216, 209, 197, 0.3);
+        }
+
+        .artwork-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .remove-artwork-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .remove-artwork-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .artwork-size-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .artwork-size-inputs input {
+            padding: 8px;
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .artwork-size-inputs select {
+            padding: 8px;
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        #collectionSizeInputs {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--accent-color);
+        }
+
+        #collectionSizeInputs h5 {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            color: var(--secondary-color);
+        }
+
         .btn-primary {
             background: var(--primary-gradient) !important;
             color: white !important;
@@ -539,10 +612,43 @@
 
                 <div class="control-group">
                     <h3>2. Upload Artwork</h3>
-                    <div class="upload-area" id="artworkUpload">
-                        <input type="file" id="artworkFile" accept="image/*">
-                        <p>🎨 Drop artwork image here or click to browse</p>
-                        <img id="artworkPreview" class="upload-preview" style="display: none;">
+                    <div class="artwork-collection-option">
+                        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; font-size: 14px;">
+                            <input type="checkbox" id="collectionMode" style="transform: scale(1.2);">
+                            <span><strong>Collection Mode</strong> - All artworks same size</span>
+                        </label>
+                    </div>
+                    
+                    <div id="artworkUploads">
+                        <div class="artwork-upload-item" data-artwork-id="1">
+                            <div class="artwork-header">
+                                <h4 style="margin: 0; font-size: 14px; color: var(--secondary-color);">Artwork #1</h4>
+                                <button class="remove-artwork-btn" style="display: none;" onclick="removeArtwork(1)">✕</button>
+                            </div>
+                            <div class="upload-area artwork-upload" id="artworkUpload1">
+                                <input type="file" id="artworkFile1" accept="image/*">
+                                <p>🎨 Drop artwork image here or click to browse</p>
+                                <img id="artworkPreview1" class="upload-preview" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="addArtworkBtn" class="btn" style="width: 100%; margin-top: 10px; display: none;">
+                        + Add Another Artwork (Max 4)
+                    </button>
+                    
+                    <div id="collectionSizeInputs" style="display: none;">
+                        <h5>Collection Size (applies to all artworks)</h5>
+                        <div class="artwork-size-inputs">
+                            <input type="number" id="collectionWidth" placeholder="Width" step="0.1" min="0">
+                            <input type="number" id="collectionHeight" placeholder="Height" step="0.1" min="0">
+                            <select id="collectionUnit">
+                                <option value="ft">ft</option>
+                                <option value="m">m</option>
+                                <option value="cm">cm</option>
+                                <option value="in">in</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -563,16 +669,15 @@
                     <button class="btn" id="clearPoints">Clear Points</button>
                 </div>
 
-                <div class="control-group">
-                    <h3>4. Artwork Width</h3>
-                    <div class="measurement-input">
-                        <input type="number" id="artworkWidth" placeholder="Enter artwork width" step="0.1" min="0">
-                        <select id="artworkUnit">
-                            <option value="ft">ft</option>
-                            <option value="m">m</option>
-                            <option value="cm">cm</option>
-                            <option value="in">in</option>
-                        </select>
+                <div class="control-group" id="artworkSizeSection">
+                    <h3>4. Artwork Size</h3>
+                    <div id="individualArtworkSizes">
+                        <!-- Individual artwork size inputs will be populated here -->
+                    </div>
+                    <div id="collectionSizeSection" style="display: none;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                            All artworks will use the same size when Collection Mode is enabled
+                        </p>
                     </div>
                 </div>
 
@@ -640,24 +745,25 @@
                 this.canvas = document.getElementById('mainCanvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.roomImage = null;
-                this.artworkImage = null;
                 this.roomImageDisplayed = null;
                 this.scalePoints = [];
                 this.realDistance = 0;
                 this.distanceUnit = 'ft';
-                this.artworkWidth = 0;
-                this.artworkUnit = 'ft';
-                this.artworkPosition = { x: 0, y: 0 };
-                this.artworkSize = { width: 0, height: 0 };
-                this.artworkRotation = { x: 0, y: 0, z: 0 }; // Rotation in degrees for each axis
-                this.artworkElement = null; // HTML element for CSS transforms
-                this.colorIntensity = 100; // Color intensity percentage (100% = normal, 0% = grayscale, 200% = oversaturated)
                 this.pixelsPerUnit = 1;
                 this.isDragging = false;
                 this.dragOffset = { x: 0, y: 0 };
+                this.draggedArtworkId = null;
+                this.colorIntensity = 100; // Color intensity percentage (100% = normal, 0% = grayscale, 200% = oversaturated)
+                
+                // Multi-artwork support
+                this.artworks = {}; // Store all artworks by ID
+                this.artworkCounter = 1;
+                this.maxArtworks = 4;
+                this.collectionMode = false;
 
                 this.initializeCanvas();
                 this.bindEvents();
+                this.setupArtworkManagement();
                 this.showStatus('Welcome! Start by uploading a room image.', 'info');
             }
 
@@ -685,11 +791,11 @@
             bindEvents() {
                 // File uploads
                 document.getElementById('roomFile').addEventListener('change', (e) => this.handleRoomUpload(e));
-                document.getElementById('artworkFile').addEventListener('change', (e) => this.handleArtworkUpload(e));
+                document.getElementById('artworkFile1').addEventListener('change', (e) => this.handleArtworkUpload(e, 1));
 
                 // Drag and drop
                 this.setupDragDrop('roomUpload', 'roomFile');
-                this.setupDragDrop('artworkUpload', 'artworkFile');
+                this.setupDragDrop('artworkUpload1', 'artworkFile1');
 
                 // Canvas interactions
                 this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
@@ -705,13 +811,20 @@
                 // Controls
                 document.getElementById('realDistance').addEventListener('input', (e) => this.updateScale());
                 document.getElementById('distanceUnit').addEventListener('change', (e) => this.updateScale());
-                document.getElementById('artworkWidth').addEventListener('input', (e) => this.updateArtworkSize());
-                document.getElementById('artworkUnit').addEventListener('change', (e) => this.updateArtworkSize());
                 document.getElementById('clearPoints').addEventListener('click', () => this.clearScalePoints());
                 document.getElementById('rotationYSlider').addEventListener('input', (e) => this.updateRotationY(e));
                 document.getElementById('resetRotation').addEventListener('click', () => this.resetRotation());
                 document.getElementById('colorIntensitySlider').addEventListener('input', (e) => this.updateColorIntensity(e));
                 document.getElementById('resetColorIntensity').addEventListener('click', () => this.resetColorIntensity());
+                
+                // Collection mode
+                document.getElementById('collectionMode').addEventListener('change', (e) => this.toggleCollectionMode(e));
+                document.getElementById('addArtworkBtn').addEventListener('click', () => this.addNewArtwork());
+                
+                // Collection size inputs
+                document.getElementById('collectionWidth').addEventListener('input', (e) => this.updateCollectionSize());
+                document.getElementById('collectionHeight').addEventListener('input', (e) => this.updateCollectionSize());
+                document.getElementById('collectionUnit').addEventListener('change', (e) => this.updateCollectionSize());
 
                 // Export
                 document.getElementById('exportJPG').addEventListener('click', () => this.exportImage('jpg'));
@@ -769,7 +882,7 @@
                 reader.readAsDataURL(file);
             }
 
-            handleArtworkUpload(e) {
+            handleArtworkUpload(e, artworkId) {
                 const file = e.target.files[0];
                 if (!file) return;
 
@@ -777,34 +890,161 @@
                 reader.onload = (e) => {
                     const img = new Image();
                     img.onload = () => {
-                        this.artworkImage = img;
-                        document.getElementById('artworkPreview').src = e.target.result;
-                        document.getElementById('artworkPreview').style.display = 'block';
-                        this.createArtworkElement(e.target.result);
+                        // Store artwork data
+                        this.artworks[artworkId] = {
+                            id: artworkId,
+                            image: img,
+                            position: { x: 0, y: 0 },
+                            size: { width: 0, height: 0 },
+                            rotation: { x: 0, y: 0, z: 0 },
+                            element: null,
+                            width: 0,
+                            unit: 'ft'
+                        };
                         
-                        // Set initial size if no width specified yet
-                        if (this.artworkWidth === 0) {
-                            // Set default size to make artwork visible
-                            const defaultSize = 200;
-                            const aspectRatio = img.width / img.height;
-                            this.artworkSize.width = defaultSize;
-                            this.artworkSize.height = defaultSize / aspectRatio;
-                            
-                            // Center it
-                            this.artworkPosition.x = (this.canvas.width - this.artworkSize.width) / 2;
-                            this.artworkPosition.y = (this.canvas.height - this.artworkSize.height) / 2;
-                            
-                            this.updateArtworkElement();
-                        } else {
-                            this.updateArtworkSize();
+                        // Update preview
+                        document.getElementById(`artworkPreview${artworkId}`).src = e.target.result;
+                        document.getElementById(`artworkPreview${artworkId}`).style.display = 'block';
+                        
+                        // Create visual element
+                        this.createArtworkElement(e.target.result, artworkId);
+                        
+                        // Set initial size
+                        const defaultSize = 200;
+                        const aspectRatio = img.width / img.height;
+                        this.artworks[artworkId].size.width = defaultSize;
+                        this.artworks[artworkId].size.height = defaultSize / aspectRatio;
+                        
+                        // Position artwork (spread them out)
+                        const offset = (artworkId - 1) * 50;
+                        this.artworks[artworkId].position.x = (this.canvas.width - defaultSize) / 2 + offset;
+                        this.artworks[artworkId].position.y = (this.canvas.height - defaultSize / aspectRatio) / 2 + offset;
+                        
+                        this.updateArtworkElement(artworkId);
+                        this.updateArtworkSizeInputs();
+                        
+                        // Show add button if less than max artworks
+                        if (Object.keys(this.artworks).length < this.maxArtworks) {
+                            document.getElementById('addArtworkBtn').style.display = 'block';
                         }
                         
                         this.redraw();
-                        this.showStatus('Artwork loaded! Set the artwork width to scale it properly.', 'success');
+                        this.showStatus(`Artwork ${artworkId} loaded! Set artwork sizes to scale properly.`, 'success');
                     };
                     img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
+            }
+
+            setupArtworkManagement() {
+                // Initialize first artwork slot
+                this.updateArtworkSizeInputs();
+            }
+            
+            toggleCollectionMode(e) {
+                this.collectionMode = e.target.checked;
+                const collectionInputs = document.getElementById('collectionSizeInputs');
+                const individualInputs = document.getElementById('individualArtworkSizes');
+                
+                if (this.collectionMode) {
+                    collectionInputs.style.display = 'block';
+                    individualInputs.innerHTML = '<p style="font-size: 12px; color: #666;">Collection mode active - all artworks use the same size</p>';
+                } else {
+                    collectionInputs.style.display = 'none';
+                    this.updateArtworkSizeInputs();
+                }
+                
+                this.updateAllArtworkSizes();
+            }
+            
+            addNewArtwork() {
+                if (Object.keys(this.artworks).length >= this.maxArtworks) return;
+                
+                this.artworkCounter++;
+                const newId = this.artworkCounter;
+                
+                // Create new artwork upload section
+                const artworkUploads = document.getElementById('artworkUploads');
+                const newArtworkDiv = document.createElement('div');
+                newArtworkDiv.className = 'artwork-upload-item';
+                newArtworkDiv.setAttribute('data-artwork-id', newId);
+                
+                newArtworkDiv.innerHTML = `
+                    <div class="artwork-header">
+                        <h4 style="margin: 0; font-size: 14px; color: var(--secondary-color);">Artwork #${newId}</h4>
+                        <button class="remove-artwork-btn" onclick="removeArtwork(${newId})">✕</button>
+                    </div>
+                    <div class="upload-area artwork-upload" id="artworkUpload${newId}">
+                        <input type="file" id="artworkFile${newId}" accept="image/*">
+                        <p>🎨 Drop artwork image here or click to browse</p>
+                        <img id="artworkPreview${newId}" class="upload-preview" style="display: none;">
+                    </div>
+                `;
+                
+                artworkUploads.appendChild(newArtworkDiv);
+                
+                // Set up event listeners for new artwork
+                document.getElementById(`artworkFile${newId}`).addEventListener('change', (e) => this.handleArtworkUpload(e, newId));
+                this.setupDragDrop(`artworkUpload${newId}`, `artworkFile${newId}`);
+                
+                // Hide add button if at max
+                if (Object.keys(this.artworks).length + 1 >= this.maxArtworks) {
+                    document.getElementById('addArtworkBtn').style.display = 'none';
+                }
+                
+                // Show remove button on all artworks
+                document.querySelectorAll('.remove-artwork-btn').forEach(btn => {
+                    btn.style.display = 'block';
+                });
+            }
+            
+            updateArtworkSizeInputs() {
+                if (this.collectionMode) return;
+                
+                const container = document.getElementById('individualArtworkSizes');
+                container.innerHTML = '';
+                
+                Object.keys(this.artworks).forEach(id => {
+                    const artwork = this.artworks[id];
+                    const div = document.createElement('div');
+                    div.style.marginBottom = '15px';
+                    div.innerHTML = `
+                        <h5 style="margin: 0 0 8px 0; font-size: 13px; color: var(--secondary-color);">Artwork #${id} Size</h5>
+                        <div class="artwork-size-inputs">
+                            <input type="number" id="artworkWidth${id}" placeholder="Width" step="0.1" min="0" value="${artwork.width || ''}">
+                            <input type="number" id="artworkHeight${id}" placeholder="Height" step="0.1" min="0" value="">
+                            <select id="artworkUnit${id}">
+                                <option value="ft" ${artwork.unit === 'ft' ? 'selected' : ''}>ft</option>
+                                <option value="m" ${artwork.unit === 'm' ? 'selected' : ''}>m</option>
+                                <option value="cm" ${artwork.unit === 'cm' ? 'selected' : ''}>cm</option>
+                                <option value="in" ${artwork.unit === 'in' ? 'selected' : ''}>in</option>
+                            </select>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                    
+                    // Add event listeners
+                    document.getElementById(`artworkWidth${id}`).addEventListener('input', () => this.updateArtworkSize(id));
+                    document.getElementById(`artworkUnit${id}`).addEventListener('change', () => this.updateArtworkSize(id));
+                });
+            }
+            
+            updateCollectionSize() {
+                if (!this.collectionMode) return;
+                
+                const width = parseFloat(document.getElementById('collectionWidth').value) || 0;
+                const height = parseFloat(document.getElementById('collectionHeight').value) || 0;
+                const unit = document.getElementById('collectionUnit').value;
+                
+                // Apply to all artworks
+                Object.keys(this.artworks).forEach(id => {
+                    this.artworks[id].width = width;
+                    this.artworks[id].unit = unit;
+                    
+                    if (width > 0 && this.pixelsPerUnit > 0) {
+                        this.updateArtworkSize(id, width, unit);
+                    }
+                });
             }
 
             handleCanvasClick(e) {
@@ -830,60 +1070,73 @@
             }
 
             handleMouseDown(e) {
-                if (!this.artworkImage) return;
+                if (Object.keys(this.artworks).length === 0) return;
 
                 const rect = this.canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                // Check if click is on artwork
-                if (this.artworkImage && x >= this.artworkPosition.x && x <= this.artworkPosition.x + this.artworkSize.width &&
-                    y >= this.artworkPosition.y && y <= this.artworkPosition.y + this.artworkSize.height) {
-                    this.isDragging = true;
-                    this.dragOffset.x = x - this.artworkPosition.x;
-                    this.dragOffset.y = y - this.artworkPosition.y;
-                    this.canvas.style.cursor = 'grabbing';
+                // Check if click is on any artwork (check in reverse order for top artwork)
+                const artworkIds = Object.keys(this.artworks).reverse();
+                for (const id of artworkIds) {
+                    const artwork = this.artworks[id];
+                    if (x >= artwork.position.x && x <= artwork.position.x + artwork.size.width &&
+                        y >= artwork.position.y && y <= artwork.position.y + artwork.size.height) {
+                        this.isDragging = true;
+                        this.draggedArtworkId = id;
+                        this.dragOffset.x = x - artwork.position.x;
+                        this.dragOffset.y = y - artwork.position.y;
+                        this.canvas.style.cursor = 'grabbing';
+                        break;
+                    }
                 }
             }
 
             handleMouseMove(e) {
-                if (!this.isDragging) return;
+                if (!this.isDragging || !this.draggedArtworkId) return;
 
                 const rect = this.canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                this.artworkPosition.x = x - this.dragOffset.x;
-                this.artworkPosition.y = y - this.dragOffset.y;
+                const artwork = this.artworks[this.draggedArtworkId];
+                artwork.position.x = x - this.dragOffset.x;
+                artwork.position.y = y - this.dragOffset.y;
 
                 // Update HTML element position
-                this.updateArtworkTransform();
+                this.updateArtworkTransform(this.draggedArtworkId);
                 this.redraw();
             }
 
             handleMouseUp(e) {
                 if (this.isDragging) {
                     this.isDragging = false;
+                    this.draggedArtworkId = null;
                     this.canvas.style.cursor = 'default';
-                    if (this.artworkElement) {
-                        this.artworkElement.style.cursor = 'move';
-                    }
+                    
+                    // Reset cursor for all artwork elements
+                    Object.keys(this.artworks).forEach(id => {
+                        if (this.artworks[id].element) {
+                            this.artworks[id].element.style.cursor = 'move';
+                        }
+                    });
                 }
             }
 
             handleGlobalMouseMove(e) {
                 // Only handle if we're dragging
-                if (!this.isDragging) return;
+                if (!this.isDragging || !this.draggedArtworkId) return;
                 
                 const rect = this.canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                this.artworkPosition.x = x - this.dragOffset.x;
-                this.artworkPosition.y = y - this.dragOffset.y;
+                const artwork = this.artworks[this.draggedArtworkId];
+                artwork.position.x = x - this.dragOffset.x;
+                artwork.position.y = y - this.dragOffset.y;
 
                 // Update HTML element position
-                this.updateArtworkTransform();
+                this.updateArtworkTransform(this.draggedArtworkId);
                 this.redraw();
             }
 
@@ -891,10 +1144,15 @@
                 // Always stop dragging on any global mouse up or leave
                 if (this.isDragging) {
                     this.isDragging = false;
+                    this.draggedArtworkId = null;
                     this.canvas.style.cursor = 'default';
-                    if (this.artworkElement) {
-                        this.artworkElement.style.cursor = 'move';
-                    }
+                    
+                    // Reset cursor for all artwork elements
+                    Object.keys(this.artworks).forEach(id => {
+                        if (this.artworks[id].element) {
+                            this.artworks[id].element.style.cursor = 'move';
+                        }
+                    });
                 }
             }
 
@@ -905,48 +1163,67 @@
                 if (this.scalePoints.length === 2 && this.realDistance > 0) {
                     const pixelDistance = this.calculateDistance(this.scalePoints[0], this.scalePoints[1]);
                     this.pixelsPerUnit = pixelDistance / this.realDistance;
-                    this.updateArtworkSize();
-                    this.showStatus('Scale updated! Artwork will now be sized correctly.', 'success');
+                    this.updateAllArtworkSizes();
+                    this.showStatus('Scale updated! Artworks will now be sized correctly.', 'success');
                 }
             }
 
-            updateArtworkSize() {
-                this.artworkWidth = parseFloat(document.getElementById('artworkWidth').value) || 0;
-                this.artworkUnit = document.getElementById('artworkUnit').value;
+            updateArtworkSize(artworkId, width = null, unit = null) {
+                const artwork = this.artworks[artworkId];
+                if (!artwork || !artwork.image) return;
+                
+                const artworkWidth = width || parseFloat(document.getElementById(`artworkWidth${artworkId}`)?.value) || 0;
+                const artworkUnit = unit || document.getElementById(`artworkUnit${artworkId}`)?.value || 'ft';
+                
+                artwork.width = artworkWidth;
+                artwork.unit = artworkUnit;
 
-                if (this.artworkImage && this.artworkWidth > 0 && this.pixelsPerUnit > 0) {
+                if (artworkWidth > 0 && this.pixelsPerUnit > 0) {
                     // Convert artwork width to same unit as scale
-                    const widthInScaleUnits = this.convertUnits(this.artworkWidth, this.artworkUnit, this.distanceUnit);
+                    const widthInScaleUnits = this.convertUnits(artworkWidth, artworkUnit, this.distanceUnit);
                     const pixelWidth = widthInScaleUnits * this.pixelsPerUnit;
                     
                     // Calculate height maintaining original image aspect ratio
-                    const originalAspectRatio = this.artworkImage.width / this.artworkImage.height;
+                    const originalAspectRatio = artwork.image.width / artwork.image.height;
                     const pixelHeight = pixelWidth / originalAspectRatio;
                     
-                    this.artworkSize.width = pixelWidth;
-                    this.artworkSize.height = pixelHeight;
+                    artwork.size.width = pixelWidth;
+                    artwork.size.height = pixelHeight;
 
                     // Center artwork initially or when size changes significantly
-                    if (this.artworkPosition.x === 0 && this.artworkPosition.y === 0) {
-                        this.artworkPosition.x = (this.canvas.width - this.artworkSize.width) / 2;
-                        this.artworkPosition.y = (this.canvas.height - this.artworkSize.height) / 2;
+                    if (artwork.position.x === 0 && artwork.position.y === 0) {
+                        artwork.position.x = (this.canvas.width - artwork.size.width) / 2;
+                        artwork.position.y = (this.canvas.height - artwork.size.height) / 2;
                     }
 
                     // Update HTML element size and position
-                    this.updateArtworkElement();
+                    this.updateArtworkElement(artworkId);
                     this.redraw();
                 }
             }
+            
+            updateAllArtworkSizes() {
+                Object.keys(this.artworks).forEach(id => {
+                    if (this.collectionMode) {
+                        const width = parseFloat(document.getElementById('collectionWidth').value) || 0;
+                        const unit = document.getElementById('collectionUnit').value;
+                        this.updateArtworkSize(id, width, unit);
+                    } else {
+                        this.updateArtworkSize(id);
+                    }
+                });
+            }
 
-            updateArtworkElement() {
-                if (!this.artworkElement) return;
+            updateArtworkElement(artworkId) {
+                const artwork = this.artworks[artworkId];
+                if (!artwork || !artwork.element) return;
 
                 // Set size
-                this.artworkElement.style.width = this.artworkSize.width + 'px';
-                this.artworkElement.style.height = this.artworkSize.height + 'px';
+                artwork.element.style.width = artwork.size.width + 'px';
+                artwork.element.style.height = artwork.size.height + 'px';
 
                 // Update transform with current position and rotation
-                this.updateArtworkTransform();
+                this.updateArtworkTransform(artworkId);
             }
 
             convertUnits(value, fromUnit, toUnit) {
@@ -974,40 +1251,45 @@
                 this.showStatus('Scale points cleared. Click two new points to set scale.', 'info');
             }
 
-            createArtworkElement(imageSrc) {
+            createArtworkElement(imageSrc, artworkId) {
+                const artwork = this.artworks[artworkId];
+                
                 // Remove existing artwork element if it exists
-                if (this.artworkElement) {
-                    this.artworkElement.remove();
+                if (artwork.element) {
+                    artwork.element.remove();
                 }
 
                 // Create new artwork element
-                this.artworkElement = document.createElement('div');
-                this.artworkElement.className = 'artwork-element';
-                this.artworkElement.style.backgroundImage = `url(${imageSrc})`;
+                artwork.element = document.createElement('div');
+                artwork.element.className = 'artwork-element';
+                artwork.element.style.backgroundImage = `url(${imageSrc})`;
+                artwork.element.setAttribute('data-artwork-id', artworkId);
                 
                 // Add to canvas container
                 const canvasContainer = document.querySelector('.center-canvas');
-                canvasContainer.appendChild(this.artworkElement);
+                canvasContainer.appendChild(artwork.element);
 
                 // Add drag functionality
-                this.setupArtworkDragging();
+                this.setupArtworkDragging(artworkId);
             }
 
-            setupArtworkDragging() {
-                if (!this.artworkElement) return;
+            setupArtworkDragging(artworkId) {
+                const artwork = this.artworks[artworkId];
+                if (!artwork.element) return;
 
-                this.artworkElement.addEventListener('mousedown', (e) => {
+                artwork.element.addEventListener('mousedown', (e) => {
                     this.isDragging = true;
+                    this.draggedArtworkId = artworkId;
                     const rect = this.canvas.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
                     
                     // Use consistent offset calculation (same as canvas dragging)
-                    this.dragOffset.x = x - this.artworkPosition.x;
-                    this.dragOffset.y = y - this.artworkPosition.y;
+                    this.dragOffset.x = x - artwork.position.x;
+                    this.dragOffset.y = y - artwork.position.y;
                     
                     this.canvas.style.cursor = 'grabbing';
-                    this.artworkElement.style.cursor = 'grabbing';
+                    artwork.element.style.cursor = 'grabbing';
                     
                     e.preventDefault();
                     e.stopPropagation(); // Prevent canvas mousedown from also firing
@@ -1015,29 +1297,46 @@
             }
 
             updateRotationY(e) {
-                this.artworkRotation.y = parseInt(e.target.value);
-                document.getElementById('rotationYValue').textContent = this.artworkRotation.y + '°';
-                this.updateArtworkTransform();
+                const rotation = parseInt(e.target.value);
+                document.getElementById('rotationYValue').textContent = rotation + '°';
+                
+                // Apply to all artworks
+                Object.keys(this.artworks).forEach(id => {
+                    this.artworks[id].rotation.y = rotation;
+                    this.updateArtworkTransform(id);
+                });
             }
 
             resetRotation() {
-                this.artworkRotation = { x: 0, y: 0, z: 0 };
                 document.getElementById('rotationYSlider').value = 0;
                 document.getElementById('rotationYValue').textContent = '0°';
-                this.updateArtworkTransform();
+                
+                // Reset rotation for all artworks
+                Object.keys(this.artworks).forEach(id => {
+                    this.artworks[id].rotation = { x: 0, y: 0, z: 0 };
+                    this.updateArtworkTransform(id);
+                });
             }
 
             updateColorIntensity(e) {
                 this.colorIntensity = parseInt(e.target.value);
                 document.getElementById('colorIntensityValue').textContent = this.colorIntensity + '%';
-                this.updateArtworkTransform();
+                
+                // Apply to all artworks
+                Object.keys(this.artworks).forEach(id => {
+                    this.updateArtworkTransform(id);
+                });
             }
 
             resetColorIntensity() {
                 this.colorIntensity = 100;
                 document.getElementById('colorIntensitySlider').value = 100;
                 document.getElementById('colorIntensityValue').textContent = '100%';
-                this.updateArtworkTransform();
+                
+                // Apply to all artworks
+                Object.keys(this.artworks).forEach(id => {
+                    this.updateArtworkTransform(id);
+                });
             }
 
             calculateContentBounds() {
@@ -1057,24 +1356,27 @@
                     };
                 }
                 
-                // Expand bounds to include artwork if present
-                if (this.artworkElement) {
-                    const artworkRect = this.artworkElement.getBoundingClientRect();
-                    
-                    if (!bounds) {
-                        bounds = {
-                            left: artworkRect.left,
-                            top: artworkRect.top,
-                            right: artworkRect.right,
-                            bottom: artworkRect.bottom
-                        };
-                    } else {
-                        bounds.left = Math.min(bounds.left, artworkRect.left);
-                        bounds.top = Math.min(bounds.top, artworkRect.top);
-                        bounds.right = Math.max(bounds.right, artworkRect.right);
-                        bounds.bottom = Math.max(bounds.bottom, artworkRect.bottom);
+                // Expand bounds to include all artworks if present
+                Object.keys(this.artworks).forEach(id => {
+                    const artwork = this.artworks[id];
+                    if (artwork.element) {
+                        const artworkRect = artwork.element.getBoundingClientRect();
+                        
+                        if (!bounds) {
+                            bounds = {
+                                left: artworkRect.left,
+                                top: artworkRect.top,
+                                right: artworkRect.right,
+                                bottom: artworkRect.bottom
+                            };
+                        } else {
+                            bounds.left = Math.min(bounds.left, artworkRect.left);
+                            bounds.top = Math.min(bounds.top, artworkRect.top);
+                            bounds.right = Math.max(bounds.right, artworkRect.right);
+                            bounds.bottom = Math.max(bounds.bottom, artworkRect.bottom);
+                        }
                     }
-                }
+                });
                 
                 // If we have scale points, include them in bounds
                 if (this.scalePoints && this.scalePoints.length > 0) {
@@ -1107,18 +1409,19 @@
                 }, 1500); // Increased delay for better timing
             }
 
-            updateArtworkTransform() {
-                if (!this.artworkElement) return;
+            updateArtworkTransform(artworkId) {
+                const artwork = this.artworks[artworkId];
+                if (!artwork || !artwork.element) return;
 
                 // Position relative to the canvas container
-                this.artworkElement.style.left = this.artworkPosition.x + 'px';
-                this.artworkElement.style.top = this.artworkPosition.y + 'px';
-                this.artworkElement.style.transform = 
-                    `perspective(500px) rotateX(${this.artworkRotation.x}deg) rotateY(${this.artworkRotation.y}deg) rotateZ(${this.artworkRotation.z}deg)`;
+                artwork.element.style.left = artwork.position.x + 'px';
+                artwork.element.style.top = artwork.position.y + 'px';
+                artwork.element.style.transform = 
+                    `perspective(500px) rotateX(${artwork.rotation.x}deg) rotateY(${artwork.rotation.y}deg) rotateZ(${artwork.rotation.z}deg)`;
                 
                 // Apply color intensity filter (saturation)
                 const saturation = this.colorIntensity / 100; // Convert percentage to decimal
-                this.artworkElement.style.filter = `saturate(${saturation})`;
+                artwork.element.style.filter = `saturate(${saturation})`;
             }
 
 
@@ -1200,7 +1503,9 @@
                 }
 
                 // Only use screenshot method for rotation or color intensity changes
-                const hasRotation = this.artworkRotation.x !== 0 || this.artworkRotation.y !== 0 || this.artworkRotation.z !== 0;
+                const hasRotation = Object.values(this.artworks).some(artwork => 
+                    artwork.rotation.x !== 0 || artwork.rotation.y !== 0 || artwork.rotation.z !== 0
+                );
                 const hasColorIntensityChange = this.colorIntensity !== 100;
                 if (hasRotation || hasColorIntensityChange) {
                     let reason = hasRotation ? 'Rotation' : 'Color intensity adjustment';
@@ -1229,10 +1534,10 @@
                     // Draw the main canvas (room image and measurement lines)
                     exportCtx.drawImage(this.canvas, 0, 0);
 
-                    // Draw artwork with proper 3D rotation if it exists
-                    if (this.artworkImage) {
-                        this.drawArtworkWith3DRotation(exportCtx);
-                    }
+                    // Draw all artworks with proper 3D rotation if they exist
+                    Object.keys(this.artworks).forEach(id => {
+                        this.drawArtworkWith3DRotation(exportCtx, id);
+                    });
 
                     const dataURL = exportCanvas.toDataURL(format === 'jpg' ? 'image/jpeg' : 'image/png', 0.92);
                     const link = document.createElement('a');
@@ -1430,14 +1735,15 @@
                 }
             }
 
-            drawArtworkShadow(ctx) {
-                if (!this.artworkImage) return;
+            drawArtworkShadow(ctx, artworkId) {
+                const artwork = this.artworks[artworkId];
+                if (!artwork || !artwork.image) return;
 
                 ctx.save();
                 
                 // Calculate artwork center
-                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
-                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+                const centerX = artwork.position.x + artwork.size.width / 2;
+                const centerY = artwork.position.y + artwork.size.height / 2;
                 
                 // Shadow offset and blur - closer and less blurry
                 const shadowOffsetX = 8;
@@ -1454,34 +1760,35 @@
                 // Create a temporary rectangle to generate shadow
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
                 ctx.fillRect(
-                    this.artworkPosition.x,
-                    this.artworkPosition.y,
-                    this.artworkSize.width,
-                    this.artworkSize.height
+                    artwork.position.x,
+                    artwork.position.y,
+                    artwork.size.width,
+                    artwork.size.height
                 );
                 
                 ctx.restore();
             }
 
-            drawArtworkWith3DRotation(ctx) {
-                if (!this.artworkImage) return;
+            drawArtworkWith3DRotation(ctx, artworkId) {
+                const artwork = this.artworks[artworkId];
+                if (!artwork || !artwork.image) return;
 
                 // Draw shadow first
-                this.drawArtworkShadow(ctx);
+                this.drawArtworkShadow(ctx, artworkId);
 
                 ctx.save();
                 
                 // Calculate artwork center
-                const centerX = this.artworkPosition.x + this.artworkSize.width / 2;
-                const centerY = this.artworkPosition.y + this.artworkSize.height / 2;
+                const centerX = artwork.position.x + artwork.size.width / 2;
+                const centerY = artwork.position.y + artwork.size.height / 2;
                 
                 // Move to center point
                 ctx.translate(centerX, centerY);
                 
                 // Convert rotations to radians
-                const xRad = (this.artworkRotation.x * Math.PI) / 180;
-                const yRad = (this.artworkRotation.y * Math.PI) / 180;
-                const zRad = (this.artworkRotation.z * Math.PI) / 180;
+                const xRad = (artwork.rotation.x * Math.PI) / 180;
+                const yRad = (artwork.rotation.y * Math.PI) / 180;
+                const zRad = (artwork.rotation.z * Math.PI) / 180;
                 
                 // Apply 3D rotation matrix calculations
                 // For proper 3D effect, we need to simulate perspective projection
@@ -1529,11 +1836,11 @@
                 
                 // Draw the artwork centered at origin
                 ctx.drawImage(
-                    this.artworkImage,
-                    -this.artworkSize.width / 2,
-                    -this.artworkSize.height / 2,
-                    this.artworkSize.width,
-                    this.artworkSize.height
+                    artwork.image,
+                    -artwork.size.width / 2,
+                    -artwork.size.height / 2,
+                    artwork.size.width,
+                    artwork.size.height
                 );
                 
                 ctx.restore();
@@ -1558,10 +1865,10 @@
                     // Draw the main canvas (room image and measurement lines)
                     shareCtx.drawImage(this.canvas, 0, 0);
 
-                    // Draw artwork with proper 3D rotation if it exists
-                    if (this.artworkImage) {
-                        this.drawArtworkWith3DRotation(shareCtx);
-                    }
+                    // Draw all artworks with proper 3D rotation if they exist
+                    Object.keys(this.artworks).forEach(id => {
+                        this.drawArtworkWith3DRotation(shareCtx, id);
+                    });
 
                     shareCanvas.toBlob((blob) => {
                         if (navigator.share && navigator.canShare({ files: [blob] })) {
@@ -1642,9 +1949,46 @@
             }
         }
 
+        // Global removeArtwork function for button onclick
+        function removeArtwork(artworkId) {
+            if (window.ywoaApp && window.ywoaApp.artworks[artworkId]) {
+                // Remove artwork element
+                if (window.ywoaApp.artworks[artworkId].element) {
+                    window.ywoaApp.artworks[artworkId].element.remove();
+                }
+                
+                // Remove artwork data
+                delete window.ywoaApp.artworks[artworkId];
+                
+                // Remove HTML upload section
+                const uploadSection = document.querySelector(`[data-artwork-id="${artworkId}"]`);
+                if (uploadSection) {
+                    uploadSection.remove();
+                }
+                
+                // Update UI
+                window.ywoaApp.updateArtworkSizeInputs();
+                window.ywoaApp.redraw();
+                
+                // Show add button if under max
+                if (Object.keys(window.ywoaApp.artworks).length < window.ywoaApp.maxArtworks) {
+                    document.getElementById('addArtworkBtn').style.display = 'block';
+                }
+                
+                // Hide remove buttons if only one artwork left
+                if (Object.keys(window.ywoaApp.artworks).length <= 1) {
+                    document.querySelectorAll('.remove-artwork-btn').forEach(btn => {
+                        btn.style.display = 'none';
+                    });
+                }
+                
+                window.ywoaApp.showStatus(`Artwork ${artworkId} removed.`, 'info');
+            }
+        }
+        
         // Initialize app when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            new YWOAApp();
+            window.ywoaApp = new YWOAApp();
         });
     </script>
 
