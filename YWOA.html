@@ -96,22 +96,28 @@
             display: flex;
             gap: 20px;
             align-items: flex-start;
+            height: calc(100vh - 140px);
+            overflow: hidden;
         }
 
         .ywoa .left-controls {
-            width: 280px;
+            width: 320px;
             background: var(--card-background);
             padding: 20px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-light);
+            overflow-y: auto;
+            max-height: 100%;
         }
 
         .ywoa .right-controls {
-            width: 280px;
+            width: 320px;
             background: var(--card-background);
             padding: 20px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-light);
+            overflow-y: auto;
+            max-height: 100%;
         }
 
         .ywoa .control-group {
@@ -242,8 +248,8 @@
             overflow: hidden;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-light);
-            width: 600px;
-            height: 1000px;
+            min-width: 500px;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -367,6 +373,117 @@
             grid-template-columns: 1fr 1fr 1fr;
             gap: 8px;
             margin-top: 10px;
+        }
+        
+        .artwork-angle-control {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+        }
+        
+        .artwork-angle-control h6 {
+            margin: 0 0 6px 0;
+            font-size: 11px;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+        
+        .individual-rotation-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .individual-rotation-control input[type="range"] {
+            flex: 1;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .individual-rotation-control input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .individual-rotation-control input[type="range"]::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: var(--shadow-light);
+        }
+        
+        .individual-rotation-control span {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 500;
+            color: var(--secondary-color);
+            font-family: var(--font-primary);
+            font-size: 11px;
+        }
+        
+        .individual-rotation-control label {
+            min-width: 35px;
+            font-weight: 500;
+            color: var(--secondary-color);
+            font-family: var(--font-primary);
+            font-size: 11px;
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            .ywoa .main-content {
+                flex-direction: column;
+                height: auto;
+                overflow: visible;
+            }
+            
+            .ywoa .left-controls,
+            .ywoa .right-controls {
+                width: 100%;
+                max-height: none;
+                overflow-y: visible;
+                margin-bottom: 20px;
+            }
+            
+            .ywoa .center-canvas {
+                width: 100%;
+                min-width: auto;
+                height: 400px;
+                order: -1;
+                margin-bottom: 20px;
+            }
+            
+            .artwork-size-inputs {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            
+            .individual-rotation-control {
+                gap: 4px;
+            }
+            
+            .individual-rotation-control label {
+                min-width: 30px;
+                font-size: 10px;
+            }
+            
+            .individual-rotation-control span {
+                min-width: 25px;
+                font-size: 10px;
+            }
         }
 
         .artwork-size-inputs input {
@@ -690,13 +807,11 @@
 
             <div class="right-controls">
                 <div class="control-group">
-                    <h3>5. Artwork Angle</h3>
+                    <h3>5. Global Controls</h3>
                     <div class="rotation-control primary-rotation">
-                        <label>Angle:</label>
-                        <input type="range" id="rotationYSlider" min="-90" max="90" value="0" step="1">
-                        <span id="rotationYValue">0°</span>
+                        <label>Reset All Angles:</label>
+                        <button class="btn" id="resetRotation" style="width: 100%; margin-top: 5px;">Reset All Angles</button>
                     </div>
-                    <button class="btn" id="resetRotation">Reset Angle</button>
                 </div>
 
                 <div class="control-group">
@@ -812,7 +927,6 @@
                 document.getElementById('realDistance').addEventListener('input', (e) => this.updateScale());
                 document.getElementById('distanceUnit').addEventListener('change', (e) => this.updateScale());
                 document.getElementById('clearPoints').addEventListener('click', () => this.clearScalePoints());
-                document.getElementById('rotationYSlider').addEventListener('input', (e) => this.updateRotationY(e));
                 document.getElementById('resetRotation').addEventListener('click', () => this.resetRotation());
                 document.getElementById('colorIntensitySlider').addEventListener('input', (e) => this.updateColorIntensity(e));
                 document.getElementById('resetColorIntensity').addEventListener('click', () => this.resetColorIntensity());
@@ -987,6 +1101,14 @@
                 document.getElementById(`artworkFile${newId}`).addEventListener('change', (e) => this.handleArtworkUpload(e, newId));
                 this.setupDragDrop(`artworkUpload${newId}`, `artworkFile${newId}`);
                 
+                // Set up angle control for new artwork (will be added when size inputs are updated)
+                setTimeout(() => {
+                    const angleSlider = document.getElementById(`artworkAngle${newId}`);
+                    if (angleSlider) {
+                        angleSlider.addEventListener('input', (e) => this.updateIndividualRotation(newId, e));
+                    }
+                }, 100);
+                
                 // Hide add button if at max
                 if (Object.keys(this.artworks).length + 1 >= this.maxArtworks) {
                     document.getElementById('addArtworkBtn').style.display = 'none';
@@ -1020,12 +1142,21 @@
                                 <option value="in" ${artwork.unit === 'in' ? 'selected' : ''}>in</option>
                             </select>
                         </div>
+                        <div class="artwork-angle-control">
+                            <h6>Individual Angle</h6>
+                            <div class="individual-rotation-control">
+                                <label>Angle:</label>
+                                <input type="range" id="artworkAngle${id}" min="-90" max="90" value="0" step="1">
+                                <span id="artworkAngleValue${id}">0°</span>
+                            </div>
+                        </div>
                     `;
                     container.appendChild(div);
                     
                     // Add event listeners
                     document.getElementById(`artworkWidth${id}`).addEventListener('input', () => this.updateArtworkSize(id));
                     document.getElementById(`artworkUnit${id}`).addEventListener('change', () => this.updateArtworkSize(id));
+                    document.getElementById(`artworkAngle${id}`).addEventListener('input', (e) => this.updateIndividualRotation(id, e));
                 });
             }
             
@@ -1296,24 +1427,27 @@
                 });
             }
 
-            updateRotationY(e) {
+            updateIndividualRotation(artworkId, e) {
                 const rotation = parseInt(e.target.value);
-                document.getElementById('rotationYValue').textContent = rotation + '°';
+                document.getElementById(`artworkAngleValue${artworkId}`).textContent = rotation + '°';
                 
-                // Apply to all artworks
-                Object.keys(this.artworks).forEach(id => {
-                    this.artworks[id].rotation.y = rotation;
-                    this.updateArtworkTransform(id);
-                });
+                const artwork = this.artworks[artworkId];
+                if (artwork) {
+                    artwork.rotation.y = rotation;
+                    this.updateArtworkTransform(artworkId);
+                }
             }
 
             resetRotation() {
-                document.getElementById('rotationYSlider').value = 0;
-                document.getElementById('rotationYValue').textContent = '0°';
-                
-                // Reset rotation for all artworks
+                // Reset rotation for all artworks and their individual controls
                 Object.keys(this.artworks).forEach(id => {
                     this.artworks[id].rotation = { x: 0, y: 0, z: 0 };
+                    const angleSlider = document.getElementById(`artworkAngle${id}`);
+                    const angleValue = document.getElementById(`artworkAngleValue${id}`);
+                    if (angleSlider && angleValue) {
+                        angleSlider.value = 0;
+                        angleValue.textContent = '0°';
+                    }
                     this.updateArtworkTransform(id);
                 });
             }
@@ -1504,7 +1638,7 @@
 
                 // Only use screenshot method for rotation or color intensity changes
                 const hasRotation = Object.values(this.artworks).some(artwork => 
-                    artwork.rotation.x !== 0 || artwork.rotation.y !== 0 || artwork.rotation.z !== 0
+                    artwork.rotation && (artwork.rotation.x !== 0 || artwork.rotation.y !== 0 || artwork.rotation.z !== 0)
                 );
                 const hasColorIntensityChange = this.colorIntensity !== 100;
                 if (hasRotation || hasColorIntensityChange) {
@@ -1955,6 +2089,12 @@
                 // Remove artwork element
                 if (window.ywoaApp.artworks[artworkId].element) {
                     window.ywoaApp.artworks[artworkId].element.remove();
+                }
+                
+                // Remove individual angle control event listeners
+                const angleSlider = document.getElementById(`artworkAngle${artworkId}`);
+                if (angleSlider) {
+                    angleSlider.removeEventListener('input', window.ywoaApp.updateIndividualRotation);
                 }
                 
                 // Remove artwork data
