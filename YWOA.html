@@ -1778,9 +1778,12 @@
                             hiddenElements.push({
                                 element: el,
                                 originalDisplay: el.style.display,
-                                originalVisibility: el.style.visibility
+                                originalVisibility: el.style.visibility,
+                                originalOpacity: el.style.opacity
                             });
-                            el.style.display = 'none';
+                            // Use visibility: hidden to preserve layout space and prevent position shifts
+                            el.style.visibility = 'hidden';
+                            el.style.opacity = '0';
                         }
                     });
                     
