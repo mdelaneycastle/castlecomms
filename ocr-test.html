@@ -499,14 +499,19 @@ ${text}
                     console.warn('Could not find IT Support team:', error);
                 }
 
-                // Prepare ticket data
+                // Generate a unique ticket ID
+                const ticketId = `OCR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                
+                // Prepare ticket data matching the Firestore rules structure
                 const ticketData = {
+                    ticketId: ticketId,
                     title: 'IT Support - Software Service Issue (OCR Generated)',
                     description: description,
                     category: 'IT Support',
                     status: 'open',
                     priority: 'medium',
-                    creator: {
+                    createdBy: {
+                        uid: currentUser.uid,
                         email: currentUser.email,
                         name: creatorName
                     },
@@ -515,7 +520,9 @@ ${text}
                         teamId: itSupportTeam.id,
                         teamName: itSupportTeam.name
                     } : {
-                        type: 'unassigned'
+                        type: 'individual',
+                        email: 'unassigned',
+                        name: 'Unassigned'
                     },
                     currentAssignedTeam: itSupportTeam ? itSupportTeam.id : null,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -543,11 +550,12 @@ ${text}
                 creatingMessage.className = 'ticket-analysis success';
                 creatingMessage.innerHTML = `
                     <strong>✅ Ticket Created Successfully!</strong><br>
-                    <strong>Ticket ID:</strong> ${docRef.id}<br>
+                    <strong>Ticket ID:</strong> ${ticketId}<br>
+                    <strong>Database ID:</strong> ${docRef.id}<br>
                     <strong>Title:</strong> IT Support - Software Service Issue (OCR Generated)<br>
                     <strong>System:</strong> CG Net<br>
                     <strong>Status:</strong> Open<br>
-                    ${itSupportTeam ? `<strong>Assigned to:</strong> ${itSupportTeam.name} team<br>` : ''}
+                    ${itSupportTeam ? `<strong>Assigned to:</strong> ${itSupportTeam.name} team<br>` : '<strong>Assigned to:</strong> Unassigned<br>'}
                     <br>
                     <em>The ticket has been created and is ready for processing by the IT Support team.</em>
                 `;
