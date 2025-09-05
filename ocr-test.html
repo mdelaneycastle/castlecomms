@@ -468,15 +468,16 @@
                 existingMessages.forEach(msg => msg.remove());
                 ticketAnalysis.parentNode.appendChild(creatingMessage);
                 
-                // Build IT Support ticket description
+                // Build IT Support ticket description matching the expected format
                 const description = `**IT SUPPORT TICKET**
 
 **Systems Affected:**
-- CG Net
+• CG Net
 
-**Issue Type:** Software Service Issue (eg. CG Net crashed/not working at all)
+**Issue Category:**
+• Software Service Issue (eg. CG Net crashed/not working at all)
 
-**Details:**
+**Detailed Description:**
 ${text}
 
 ---
