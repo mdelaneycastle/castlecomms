@@ -227,7 +227,20 @@
     <!-- Tesseract.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    
+    <!-- Firebase config -->
+    <script src="firebase-init.js"></script>
+    
     <script>
+        // Global variables
+        let currentUser = null;
+        let db = null;
+        
         const fileInput = document.getElementById('fileInput');
         const dropzone = document.getElementById('dropzone');
         const progress = document.getElementById('progress');
@@ -437,38 +450,179 @@
             }
         });
 
-        // Create IT Support ticket (for now, just show what would be created)
-        function createITSupportTicket(text) {
-            const ticketData = {
-                title: 'IT Support - Software Service Issue',
-                category: 'IT Support',
-                systems: ['CG Net'],
-                reason: 'Software Service Issue (eg. CG Net crashed/not working at all)',
-                details: text
-            };
-            
-            // For now, show what would be created
-            const successMessage = document.createElement('div');
-            successMessage.className = 'ticket-analysis success';
-            successMessage.style.marginTop = '1rem';
-            successMessage.innerHTML = `
-                <strong>✅ Ticket Ready to Create:</strong><br>
-                <strong>Title:</strong> ${ticketData.title}<br>
-                <strong>System:</strong> ${ticketData.systems.join(', ')}<br>
-                <strong>Reason:</strong> ${ticketData.reason}<br>
-                <strong>Details:</strong> ${text.length > 100 ? text.substring(0, 100) + '...' : text}
-                <br><br>
-                <em>This would create an IT Support ticket in the system. Integration with tickets.html coming soon!</em>
-            `;
-            
-            // Remove any existing messages
-            const existingMessages = document.querySelectorAll('.ticket-analysis[style*="margin-top"]');
-            existingMessages.forEach(msg => msg.remove());
-            
-            ticketAnalysis.parentNode.appendChild(successMessage);
-            
-            console.log('Ticket data prepared:', ticketData);
+        // Create actual IT Support ticket in Firebase
+        async function createITSupportTicket(text) {
+            if (!currentUser || !db) {
+                showError('Authentication required. Please log in to create tickets.');
+                return;
+            }
+
+            try {
+                // Show creating status
+                const creatingMessage = document.createElement('div');
+                creatingMessage.className = 'ticket-analysis success';
+                creatingMessage.style.marginTop = '1rem';
+                creatingMessage.innerHTML = '🔄 Creating IT Support ticket...';
+                
+                const existingMessages = document.querySelectorAll('.ticket-analysis[style*="margin-top"]');
+                existingMessages.forEach(msg => msg.remove());
+                ticketAnalysis.parentNode.appendChild(creatingMessage);
+                
+                // Build IT Support ticket description
+                const description = `**IT SUPPORT TICKET**
+
+**Systems Affected:**
+- CG Net
+
+**Issue Type:** Software Service Issue (eg. CG Net crashed/not working at all)
+
+**Details:**
+${text}
+
+---
+*This ticket was automatically created from OCR text extraction.*`;
+
+                // Get user info for ticket creation
+                const creatorName = currentUser.displayName || currentUser.email;
+                
+                // Find IT Support team (assuming it exists)
+                let itSupportTeam = null;
+                try {
+                    const teamsSnapshot = await db.collection('teams').where('name', '==', 'IT Support').get();
+                    if (!teamsSnapshot.empty) {
+                        itSupportTeam = {
+                            id: teamsSnapshot.docs[0].id,
+                            ...teamsSnapshot.docs[0].data()
+                        };
+                    }
+                } catch (error) {
+                    console.warn('Could not find IT Support team:', error);
+                }
+
+                // Prepare ticket data
+                const ticketData = {
+                    title: 'IT Support - Software Service Issue (OCR Generated)',
+                    description: description,
+                    category: 'IT Support',
+                    status: 'open',
+                    priority: 'medium',
+                    creator: {
+                        email: currentUser.email,
+                        name: creatorName
+                    },
+                    assignedTo: itSupportTeam ? {
+                        type: 'team',
+                        teamId: itSupportTeam.id,
+                        teamName: itSupportTeam.name
+                    } : {
+                        type: 'unassigned'
+                    },
+                    currentAssignedTeam: itSupportTeam ? itSupportTeam.id : null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    messages: [],
+                    timer: {
+                        timeStarted: firebase.firestore.Timestamp.now(),
+                        timeElapsed: 0,
+                        timePaused: null,
+                        totalPausedTime: 0,
+                        isRunning: true
+                    },
+                    itSupportData: {
+                        systems: ['CG Net'],
+                        reason: 'Software Service Issue (eg. CG Net crashed/not working at all)',
+                        details: text
+                    }
+                };
+
+                // Create the ticket
+                const docRef = await db.collection('tickets').add(ticketData);
+                console.log('✅ Ticket created successfully:', docRef.id);
+
+                // Show success message
+                creatingMessage.className = 'ticket-analysis success';
+                creatingMessage.innerHTML = `
+                    <strong>✅ Ticket Created Successfully!</strong><br>
+                    <strong>Ticket ID:</strong> ${docRef.id}<br>
+                    <strong>Title:</strong> IT Support - Software Service Issue (OCR Generated)<br>
+                    <strong>System:</strong> CG Net<br>
+                    <strong>Status:</strong> Open<br>
+                    ${itSupportTeam ? `<strong>Assigned to:</strong> ${itSupportTeam.name} team<br>` : ''}
+                    <br>
+                    <em>The ticket has been created and is ready for processing by the IT Support team.</em>
+                `;
+
+            } catch (error) {
+                console.error('❌ Failed to create ticket:', error);
+                
+                // Show error message
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'ticket-analysis failed';
+                errorMessage.style.marginTop = '1rem';
+                errorMessage.innerHTML = `❌ <strong>Failed to create ticket:</strong> ${error.message}`;
+                
+                const existingMessages = document.querySelectorAll('.ticket-analysis[style*="margin-top"]');
+                existingMessages.forEach(msg => msg.remove());
+                ticketAnalysis.parentNode.appendChild(errorMessage);
+            }
         }
+
+        // Initialize Firebase Auth
+        document.addEventListener('DOMContentLoaded', function() {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    db = firebase.firestore();
+                    console.log('✅ User authenticated:', user.email);
+                    
+                    // Update UI to show user is authenticated
+                    const authStatus = document.createElement('div');
+                    authStatus.id = 'auth-status';
+                    authStatus.style.cssText = `
+                        position: fixed;
+                        top: 10px;
+                        right: 10px;
+                        background: #d4edda;
+                        color: #155724;
+                        padding: 0.5rem 1rem;
+                        border-radius: 6px;
+                        font-size: 12px;
+                        border: 1px solid #c3e6cb;
+                        z-index: 1000;
+                    `;
+                    authStatus.textContent = `✅ Authenticated: ${user.email}`;
+                    document.body.appendChild(authStatus);
+                } else {
+                    currentUser = null;
+                    db = null;
+                    console.log('❌ User not authenticated - ticket creation will be disabled');
+                    
+                    // Show auth warning
+                    const authWarning = document.createElement('div');
+                    authWarning.id = 'auth-status';
+                    authWarning.style.cssText = `
+                        position: fixed;
+                        top: 10px;
+                        right: 10px;
+                        background: #f8d7da;
+                        color: #721c24;
+                        padding: 0.5rem 1rem;
+                        border-radius: 6px;
+                        font-size: 12px;
+                        border: 1px solid #f5c6cb;
+                        z-index: 1000;
+                    `;
+                    authWarning.innerHTML = `❌ Not authenticated<br><small>Login required for ticket creation</small>`;
+                    document.body.appendChild(authWarning);
+                }
+                
+                // Remove any existing auth status
+                const existingStatus = document.getElementById('auth-status');
+                if (existingStatus && existingStatus !== document.querySelector('#auth-status:last-child')) {
+                    existingStatus.remove();
+                }
+            });
+        });
 
         // Initialize
         console.log('OCR Test Page loaded. Ready to extract text from images!');
