@@ -786,6 +786,8 @@
         
         // Update COFT form fields with parsed data
         function updateCOFTFields(data) {
+            console.log('Updating COFT fields with data:', data); // Debug log
+            
             if (data.soNumber) {
                 document.getElementById('coft-so-number').value = data.soNumber.replace(/\*/g, '');
             }
@@ -794,6 +796,7 @@
             }
             if (data.lastName) {
                 document.getElementById('coft-client-lastname').value = data.lastName.replace(/\*/g, '');
+                console.log('Set client lastname to:', data.lastName.replace(/\*/g, '')); // Debug log
             }
             if (data.itemCodes.length > 0) {
                 document.getElementById('coft-item-code').value = data.itemCodes[0].code.replace(/\*/g, '');
@@ -964,28 +967,31 @@
                 return;
             }
             
-            // Get form data
+            // Get form data and clean asterisks
             const formData = {
                 coftType: document.querySelector('input[name="coft-type"]:checked')?.value,
-                soNumber: document.getElementById('coft-so-number').value,
-                clientId: document.getElementById('coft-client-id').value,
-                clientLastName: document.getElementById('coft-client-lastname').value,
-                itemCode: document.getElementById('coft-item-code').value,
-                artworkTitle: document.getElementById('coft-artwork-title').value,
-                editionNumber: document.getElementById('coft-edition-number').value,
+                soNumber: (document.getElementById('coft-so-number').value || '').replace(/\*/g, ''),
+                clientId: (document.getElementById('coft-client-id').value || '').replace(/\*/g, ''),
+                clientLastName: (document.getElementById('coft-client-lastname').value || '').replace(/\*/g, ''),
+                itemCode: (document.getElementById('coft-item-code').value || '').replace(/\*/g, ''),
+                artworkTitle: (document.getElementById('coft-artwork-title').value || '').replace(/\*/g, ''),
+                editionNumber: (document.getElementById('coft-edition-number').value || '').replace(/\*/g, ''),
                 clientAware: document.querySelector('input[name="coft-client-aware"]:checked')?.value,
                 orderDate: document.getElementById('coft-order-date').value,
                 deliveryMethod: document.getElementById('coft-delivery-method').value,
                 ticketReason: document.getElementById('coft-ticket-reason').value,
-                additionalInfo: document.getElementById('coft-additional-info').value
+                additionalInfo: (document.getElementById('coft-additional-info').value || '').replace(/\*/g, '')
             };
+            
+            console.log('Form data collected:', formData); // Debug log
             
             // Validate required fields
             const requiredFields = ['coftType', 'soNumber', 'clientId', 'clientLastName', 'itemCode', 'artworkTitle', 'clientAware', 'orderDate', 'deliveryMethod', 'ticketReason'];
             const missingFields = requiredFields.filter(field => !formData[field]);
             
             if (missingFields.length > 0) {
-                showTicketError('Please fill in all required fields.');
+                console.log('Missing fields:', missingFields);
+                showTicketError(`Please fill in all required fields. Missing: ${missingFields.join(', ')}`);
                 return;
             }
             
@@ -1091,6 +1097,8 @@ ${formData.additionalInfo || 'None provided'}
                     reason: formData.ticketReason,
                     additionalInfo: formData.additionalInfo || ''
                 };
+                
+                console.log('Final COFT data:', ticketData.coftData); // Debug log
 
                 // Create the ticket
                 const docRef = await db.collection('tickets').add(ticketData);
