@@ -215,6 +215,69 @@
             border-color: #007bff;
             box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
         }
+        
+        .parsed-data-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .parsed-data-section h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .parsed-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        
+        .field-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .field-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .field-input {
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            background-color: white;
+        }
+        
+        .field-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        
+        .field-input.readonly {
+            background-color: #e9ecef;
+            cursor: default;
+        }
+        
+        .item-codes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .item-code-entry {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -244,6 +307,30 @@
         <div class="text-input-section">
             <h3>💬 Or paste/type text directly:</h3>
             <textarea id="manualTextInput" class="manual-text-input" placeholder="Paste or type your text here..."></textarea>
+        </div>
+        
+        <div class="parsed-data-section">
+            <h3>📋 Extracted Information:</h3>
+            <div class="parsed-fields">
+                <div class="field-group">
+                    <label class="field-label">SO Number:</label>
+                    <input type="text" id="soNumber" class="field-input readonly" readonly placeholder="6-digit number">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Customer ID:</label>
+                    <input type="text" id="customerId" class="field-input readonly" readonly placeholder="Customer identifier">
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Order Date:</label>
+                    <input type="text" id="orderDate" class="field-input readonly" readonly placeholder="dd/mm/yyyy">
+                </div>
+                <div class="field-group" style="grid-column: 1 / -1;">
+                    <label class="field-label">Item Codes & Titles:</label>
+                    <div id="itemCodesContainer" class="item-codes-container">
+                        <!-- Item codes will be populated here -->
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="results-section">
@@ -284,6 +371,7 @@
         const copyButton = document.getElementById('copyButton');
         const raiseTicketButton = document.getElementById('raiseTicketButton');
         const ticketAnalysis = document.getElementById('ticketAnalysis');
+        const manualTextInput = document.getElementById('manualTextInput');
 
         // File processing function
         function processImage(file) {
@@ -330,6 +418,10 @@
                 if (text) {
                     progressText.innerHTML = `✅ Found ${text.split(/\s+/).length} words, ${text.length} characters`;
                     analyzeTextForTicket(text);
+                    
+                    // Parse and display extracted data
+                    const parsedData = parseTextData(text);
+                    updateParsedDataFields(parsedData);
                 }
             })
             .catch(function(error) {
@@ -339,6 +431,81 @@
             });
         }
 
+        // Parse text to extract specific information
+        function parseTextData(text) {
+            const data = {
+                soNumber: '',
+                customerId: '',
+                orderDate: '',
+                itemCodes: []
+            };
+            
+            // Extract SO Number (6 digits after "SO Number:")
+            const soMatch = text.match(/SO Number:\s*(\d{6})/i);
+            if (soMatch) {
+                data.soNumber = soMatch[1];
+            }
+            
+            // Extract Customer ID (after "Customer Id:" and "*")
+            const customerMatch = text.match(/Customer Id:\s*\*?\s*([^\s\n]+)/i);
+            if (customerMatch) {
+                data.customerId = customerMatch[1];
+            }
+            
+            // Extract Order Date (dd/mm/yyyy after "Date:")
+            const dateMatch = text.match(/Date:\s*(\d{1,2}\/\d{1,2}\/\d{4})/i);
+            if (dateMatch) {
+                data.orderDate = dateMatch[1];
+            }
+            
+            // Extract Item Codes and Titles
+            // Look for patterns like "123-wer-yui-12345f" (17-18 chars with 3 dashes)
+            // followed by a title, before "Total:"
+            const beforeTotal = text.split(/Total:/i)[0];
+            const itemCodePattern = /([A-Za-z0-9]{2,}-[A-Za-z0-9]{2,}-[A-Za-z0-9]{2,}-[A-Za-z0-9]{2,})\s+([^\n\r]+?)(?=\n|\r|$)/g;
+            
+            let match;
+            while ((match = itemCodePattern.exec(beforeTotal)) !== null) {
+                const itemCode = match[1].trim();
+                const title = match[2].trim();
+                
+                // Check if item code is 17-18 characters and has exactly 3 dashes
+                if (itemCode.length >= 17 && itemCode.length <= 18 && (itemCode.match(/-/g) || []).length === 3) {
+                    data.itemCodes.push({
+                        code: itemCode,
+                        title: title
+                    });
+                }
+            }
+            
+            return data;
+        }
+        
+        // Update the parsed data fields
+        function updateParsedDataFields(data) {
+            document.getElementById('soNumber').value = data.soNumber;
+            document.getElementById('customerId').value = data.customerId;
+            document.getElementById('orderDate').value = data.orderDate;
+            
+            // Update item codes container
+            const container = document.getElementById('itemCodesContainer');
+            container.innerHTML = '';
+            
+            if (data.itemCodes.length === 0) {
+                container.innerHTML = '<div style="color: #6c757d; font-style: italic;">No item codes found</div>';
+            } else {
+                data.itemCodes.forEach((item, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item-code-entry';
+                    itemDiv.innerHTML = `
+                        <input type="text" value="${item.code}" class="field-input readonly" readonly placeholder="Item code">
+                        <input type="text" value="${item.title}" class="field-input readonly" readonly placeholder="Title">
+                    `;
+                    container.appendChild(itemDiv);
+                });
+            }
+        }
+        
         // Analyze extracted text for ticket creation
         function analyzeTextForTicket(text) {
             const lowerText = text.toLowerCase();
@@ -419,6 +586,23 @@
             if (files.length > 0) {
                 fileInput.files = files;
                 processImage(files[0]);
+            }
+        });
+        
+        // Manual text input handler
+        manualTextInput.addEventListener('input', function() {
+            const text = manualTextInput.value.trim();
+            if (text) {
+                const parsedData = parseTextData(text);
+                updateParsedDataFields(parsedData);
+            } else {
+                // Clear fields when text is empty
+                updateParsedDataFields({
+                    soNumber: '',
+                    customerId: '',
+                    orderDate: '',
+                    itemCodes: []
+                });
             }
         });
 
