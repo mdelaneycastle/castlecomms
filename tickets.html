@@ -2947,6 +2947,10 @@
             <span class="coft-value" id="coft-detail-client">-</span>
           </div>
           <div class="coft-detail-row">
+            <span class="coft-label">Order Status:</span>
+            <span class="coft-value" id="coft-detail-order-status">-</span>
+          </div>
+          <div class="coft-detail-row">
             <span class="coft-label">Item Code:</span>
             <span class="coft-value" id="coft-detail-item-code">-</span>
           </div>
@@ -4800,6 +4804,7 @@ async function openTicket(ticketId) {
       // Populate COFT details
       document.getElementById('coft-detail-so').textContent = coftModalData.soNumber || '-';
       document.getElementById('coft-detail-client').textContent = coftModalData.clientName || '-';
+      document.getElementById('coft-detail-order-status').textContent = coftModalData.orderStatus || '-';
       document.getElementById('coft-detail-item-code').textContent = coftModalData.itemCode || '-';
       document.getElementById('coft-detail-artwork').textContent = coftModalData.artworkTitle || '-';
       document.getElementById('coft-detail-edition').textContent = coftModalData.editionNumber || '-';
@@ -5836,6 +5841,7 @@ function extractCOFTDataFromTicket(ticket) {
     if (ticket.coftData) {
       defaultData.soNumber = ticket.coftData.soNumber || null;
       defaultData.clientName = ticket.coftData.clientName || null;
+      defaultData.orderStatus = ticket.coftData.orderStatus || null;
     } else {
       // Fallback to parsing from description for legacy tickets
       const description = ticket.description || '';
@@ -5924,6 +5930,7 @@ function extractComprehensiveCOFTData(ticket) {
     isCOFTTicket: false,
     soNumber: null,
     clientName: null,
+    orderStatus: null,
     itemCode: null,
     artworkTitle: null,
     editionNumber: null,
@@ -5944,6 +5951,24 @@ function extractComprehensiveCOFTData(ticket) {
   defaultData.isCOFTTicket = true;
   
   try {
+    // First, try to get comprehensive data from coftData field if available
+    if (ticket.coftData) {
+      defaultData.soNumber = ticket.coftData.soNumber || null;
+      defaultData.clientName = ticket.coftData.clientName || null;
+      defaultData.orderStatus = ticket.coftData.orderStatus || null;
+      defaultData.itemCode = ticket.coftData.itemCode || null;
+      defaultData.artworkTitle = ticket.coftData.artworkTitle || null;
+      defaultData.editionNumber = ticket.coftData.editionNumber || null;
+      defaultData.orderDate = ticket.coftData.orderDate || null;
+      defaultData.deliveryMethod = ticket.coftData.deliveryMethod || null;
+      defaultData.clientAware = ticket.coftData.clientAware || null;
+      defaultData.ticketReason = ticket.coftData.reason || null;
+      defaultData.additionalInfo = ticket.coftData.additionalInfo || null;
+      
+      return defaultData; // Return early if we have complete coftData
+    }
+    
+    // Fallback: parse from description for legacy tickets
     const description = ticket.description || '';
     
     // Extract SO Number
@@ -5956,6 +5981,12 @@ function extractComprehensiveCOFTData(ticket) {
     const clientMatch = description.match(/Client:\s*([^\n\r]+)/i);
     if (clientMatch) {
       defaultData.clientName = clientMatch[1].trim();
+    }
+    
+    // Extract Order Status
+    const orderStatusMatch = description.match(/Order Status:\s*([^\n\r]+)/i);
+    if (orderStatusMatch) {
+      defaultData.orderStatus = orderStatusMatch[1].trim();
     }
     
     // Extract Item Code
