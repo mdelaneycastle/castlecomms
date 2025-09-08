@@ -694,13 +694,13 @@
             // Extract SO Number (6 digits after "SO Number:" or "S.O Number:")
             const soMatch = text.match(/S\.?O\.?\s*Number:\s*(\d{6})/i);
             if (soMatch) {
-                data.soNumber = soMatch[1];
+                data.soNumber = soMatch[1].replace(/\*/g, ''); // Remove any * characters
             }
             
             // Extract Customer ID (after "Customer Id:" and "*")
             const customerMatch = text.match(/Customer Id:\s*\*?\s*([^\s\n]+)/i);
             if (customerMatch) {
-                data.customerId = customerMatch[1];
+                data.customerId = customerMatch[1].replace(/\*/g, ''); // Remove any * characters
             }
             
             // Extract Order Date (dd/mm/yyyy after "Date:")
@@ -712,7 +712,7 @@
             // Extract Last Name (after "Last Name:")
             const lastNameMatch = text.match(/Last Name:\s*([^\n\r]+)/i);
             if (lastNameMatch) {
-                data.lastName = lastNameMatch[1].trim();
+                data.lastName = lastNameMatch[1].trim().replace(/\*/g, ''); // Remove any * characters
             }
             
             // Extract Item Codes and Titles
@@ -723,11 +723,11 @@
             
             let match;
             while ((match = itemCodePattern.exec(beforeTotal)) !== null) {
-                const itemCode = match[1].trim();
+                const itemCode = match[1].trim().replace(/\*/g, ''); // Remove any * characters
                 let title = match[2].trim();
                 
-                // Clean up title - remove extra whitespace and tabs
-                title = title.replace(/\s+/g, ' ').trim();
+                // Clean up title - remove extra whitespace, tabs, and * characters
+                title = title.replace(/\s+/g, ' ').replace(/\*/g, '').trim();
                 
                 // Check if item code is 17-18 characters and has exactly 3 dashes
                 if (itemCode.length >= 17 && itemCode.length <= 18 && (itemCode.match(/-/g) || []).length === 3) {
@@ -753,17 +753,17 @@
         // Update COFT form fields with parsed data
         function updateCOFTFields(data) {
             if (data.soNumber) {
-                document.getElementById('coft-so-number').value = data.soNumber;
+                document.getElementById('coft-so-number').value = data.soNumber.replace(/\*/g, '');
             }
             if (data.customerId) {
-                document.getElementById('coft-client-id').value = data.customerId;
+                document.getElementById('coft-client-id').value = data.customerId.replace(/\*/g, '');
             }
             if (data.lastName) {
-                document.getElementById('coft-client-lastname').value = data.lastName;
+                document.getElementById('coft-client-lastname').value = data.lastName.replace(/\*/g, '');
             }
             if (data.itemCodes.length > 0) {
-                document.getElementById('coft-item-code').value = data.itemCodes[0].code;
-                document.getElementById('coft-artwork-title').value = data.itemCodes[0].title;
+                document.getElementById('coft-item-code').value = data.itemCodes[0].code.replace(/\*/g, '');
+                document.getElementById('coft-artwork-title').value = data.itemCodes[0].title.replace(/\*/g, '');
             }
             if (data.orderDate) {
                 // Convert dd/mm/yyyy to yyyy-mm-dd for date input
@@ -1047,15 +1047,15 @@ ${formData.additionalInfo || 'None provided'}
                 ticketData.coftData = {
                     coftType: formData.coftType,
                     soNumber: formData.soNumber,
-                    clientName: formData.clientLastName, // Match original field name
+                    clientName: formData.clientLastName, // Use last name for client
                     itemCode: formData.itemCode,
                     artworkTitle: formData.artworkTitle,
-                    editionNumber: formData.editionNumber,
-                    clientAware: formData.clientAware,
+                    editionNumber: formData.editionNumber || '',
+                    clientAware: formData.clientAware === 'yes' ? 'YES' : 'NO', // Convert to uppercase
                     orderDate: formData.orderDate,
                     deliveryMethod: formData.deliveryMethod,
                     reason: formData.ticketReason,
-                    additionalInfo: formData.additionalInfo
+                    additionalInfo: formData.additionalInfo || ''
                 };
 
                 // Create the ticket
