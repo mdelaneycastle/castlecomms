@@ -324,6 +324,10 @@
                     <label class="field-label">Order Date:</label>
                     <input type="text" id="orderDate" class="field-input readonly" readonly placeholder="dd/mm/yyyy">
                 </div>
+                <div class="field-group">
+                    <label class="field-label">Last Name:</label>
+                    <input type="text" id="lastName" class="field-input readonly" readonly placeholder="Customer last name">
+                </div>
                 <div class="field-group" style="grid-column: 1 / -1;">
                     <label class="field-label">Item Codes & Titles:</label>
                     <div id="itemCodesContainer" class="item-codes-container">
@@ -437,6 +441,7 @@
                 soNumber: '',
                 customerId: '',
                 orderDate: '',
+                lastName: '',
                 itemCodes: []
             };
             
@@ -456,6 +461,12 @@
             const dateMatch = text.match(/Date:\s*(\d{1,2}\/\d{1,2}\/\d{4})/i);
             if (dateMatch) {
                 data.orderDate = dateMatch[1];
+            }
+            
+            // Extract Last Name (after "Last Name:")
+            const lastNameMatch = text.match(/Last Name:\s*([^\n\r]+)/i);
+            if (lastNameMatch) {
+                data.lastName = lastNameMatch[1].trim();
             }
             
             // Extract Item Codes and Titles
@@ -492,6 +503,7 @@
             document.getElementById('soNumber').value = data.soNumber;
             document.getElementById('customerId').value = data.customerId;
             document.getElementById('orderDate').value = data.orderDate;
+            document.getElementById('lastName').value = data.lastName;
             
             // Update item codes container
             const container = document.getElementById('itemCodesContainer');
@@ -607,6 +619,7 @@
                     soNumber: '',
                     customerId: '',
                     orderDate: '',
+                    lastName: '',
                     itemCodes: []
                 });
             }
