@@ -1116,6 +1116,10 @@
             }
             
             // Get form data and clean asterisks
+            const orderStatus = document.getElementById('coft-order-status').value;
+            const otherStatus = document.getElementById('coft-other-status').value;
+            const finalOrderStatus = orderStatus === 'Other' ? otherStatus : orderStatus;
+            
             const formData = {
                 coftType: document.querySelector('input[name="coft-type"]:checked')?.value,
                 soNumber: (document.getElementById('coft-so-number').value || '').replace(/\*/g, ''),
@@ -1128,6 +1132,7 @@
                 orderDate: document.getElementById('coft-order-date').value,
                 deliveryMethod: document.getElementById('coft-delivery-method').value,
                 ticketReason: document.getElementById('coft-ticket-reason').value,
+                orderStatus: finalOrderStatus,
                 additionalInfo: (document.getElementById('coft-additional-info').value || '').replace(/\*/g, '')
             };
             
@@ -1154,6 +1159,7 @@
 **Order Details:**
 • SO Number: ${formData.soNumber}
 • Client: ${formData.clientLastName}
+• Order Status: ${formData.orderStatus}
 • Item Code: ${formData.itemCode}
 • Artwork Title: ${formData.artworkTitle}
 • Edition Number: ${formData.editionNumber || ''}
@@ -1247,6 +1253,7 @@ ${formData.additionalInfo || 'None provided'}
                     orderDate: formData.orderDate,
                     deliveryMethod: formData.deliveryMethod,
                     reason: formData.ticketReason,
+                    orderStatus: formData.orderStatus || '',
                     additionalInfo: formData.additionalInfo || ''
                 };
                 
