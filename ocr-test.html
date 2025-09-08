@@ -426,7 +426,7 @@
             <label for="ticket-assign-team" class="form-label">Select Team/Group:</label>
             <select id="ticket-assign-team" class="form-select full-width">
                 <option value="">Choose a team...</option>
-                <option value="Client Order Fulfilment Team/Group">Client Order Fulfilment Team/Group</option>
+                <option value="COFT">COFT (Client Order Fulfilment Team)</option>
                 <option value="Manufacturing and QC">Manufacturing and QC</option>
                 <option value="Framing">Framing</option>
                 <option value="Stock Control">Stock Control</option>
@@ -901,7 +901,7 @@
             // Handle team selection
             function handleTeamSelection() {
                 const selectedTeam = teamSelect.value;
-                if (selectedTeam === 'Client Order Fulfilment Team/Group') {
+                if (selectedTeam === 'COFT') {
                     coftFields.classList.remove('hidden');
                     createTicketBtn.disabled = false;
                 } else {
@@ -986,7 +986,7 @@ ${formData.additionalInfo || 'None provided'}
                 // Find COFT team from teams collection
                 let coftTeam = null;
                 try {
-                    const teamsSnapshot = await db.collection('teams').where('name', '==', 'Client Order Fulfilment Team/Group').get();
+                    const teamsSnapshot = await db.collection('teams').where('name', '==', 'COFT').get();
                     if (!teamsSnapshot.empty) {
                         const teamDoc = teamsSnapshot.docs[0];
                         coftTeam = {
@@ -1013,7 +1013,7 @@ ${formData.additionalInfo || 'None provided'}
                     ticketId: ticketId,
                     title: `COFT Ticket - SO: ${formData.soNumber} - ${formData.clientLastName}`,
                     description: description,
-                    category: 'Client Order Fulfilment Team/Group',
+                    category: 'COFT',
                     status: 'open',
                     createdBy: {
                         uid: currentUser.uid,
