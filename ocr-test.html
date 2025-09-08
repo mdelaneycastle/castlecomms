@@ -410,6 +410,34 @@
     <div class="container">
         <h1>📷 OCR Test - Extract Text from Images</h1>
         
+        <!-- Assignment Type Selection -->
+        <div class="form-group assignment-selector">
+            <label class="form-label">Assign To:</label>
+            <div class="assignment-type-buttons">
+                <input type="radio" id="assign-individual" name="assign-type" value="individual" checked>
+                <label for="assign-individual" class="assignment-btn">👤 Individual</label>
+                <input type="radio" id="assign-team" name="assign-type" value="team">
+                <label for="assign-team" class="assignment-btn">👥 Team/Group</label>
+            </div>
+        </div>
+        
+        <!-- Team Selection -->
+        <div class="form-group hidden" id="team-assignment">
+            <label for="ticket-assign-team" class="form-label">Select Team/Group:</label>
+            <select id="ticket-assign-team" class="form-select full-width">
+                <option value="">Choose a team...</option>
+                <option value="Client Order Fulfilment Team/Group">Client Order Fulfilment Team/Group</option>
+                <option value="Manufacturing and QC">Manufacturing and QC</option>
+                <option value="Framing">Framing</option>
+                <option value="Stock Control">Stock Control</option>
+                <option value="Logistics">Logistics</option>
+                <option value="Operations">Operations</option>
+                <option value="Inventory">Inventory</option>
+                <option value="IT Support">IT Support</option>
+                <option value="HR">HR</option>
+            </select>
+        </div>
+
         <div class="upload-section">
             <div class="file-input">
                 <label for="fileInput"><strong>Select an image file:</strong></label>
@@ -435,64 +463,8 @@
             <textarea id="manualTextInput" class="manual-text-input" placeholder="Paste or type your text here..."></textarea>
         </div>
         
-        <div class="parsed-data-section">
-            <h3>📋 Extracted Information:</h3>
-            <div class="parsed-fields">
-                <div class="field-group">
-                    <label class="field-label">SO Number:</label>
-                    <input type="text" id="soNumber" class="field-input readonly" readonly placeholder="6-digit number">
-                </div>
-                <div class="field-group">
-                    <label class="field-label">Customer ID:</label>
-                    <input type="text" id="customerId" class="field-input readonly" readonly placeholder="Customer identifier">
-                </div>
-                <div class="field-group">
-                    <label class="field-label">Order Date:</label>
-                    <input type="text" id="orderDate" class="field-input readonly" readonly placeholder="dd/mm/yyyy">
-                </div>
-                <div class="field-group">
-                    <label class="field-label">Last Name:</label>
-                    <input type="text" id="lastName" class="field-input readonly" readonly placeholder="Customer last name">
-                </div>
-                <div class="field-group" style="grid-column: 1 / -1;">
-                    <label class="field-label">Item Codes & Titles:</label>
-                    <div id="itemCodesContainer" class="item-codes-container">
-                        <!-- Item codes will be populated here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-        
         <div class="ticket-creation-section">
             <h3>🎫 Create Ticket</h3>
-            
-            <!-- Assignment Type Selection -->
-            <div class="form-group assignment-selector">
-                <label class="form-label">Assign To:</label>
-                <div class="assignment-type-buttons">
-                    <input type="radio" id="assign-individual" name="assign-type" value="individual" checked>
-                    <label for="assign-individual" class="assignment-btn">👤 Individual</label>
-                    <input type="radio" id="assign-team" name="assign-type" value="team">
-                    <label for="assign-team" class="assignment-btn">👥 Team/Group</label>
-                </div>
-            </div>
-            
-            <!-- Team Selection -->
-            <div class="form-group hidden" id="team-assignment">
-                <label for="ticket-assign-team" class="form-label">Select Team/Group:</label>
-                <select id="ticket-assign-team" class="form-select full-width">
-                    <option value="">Choose a team...</option>
-                    <option value="Client Order Fulfilment Team/Group">Client Order Fulfilment Team/Group</option>
-                    <option value="Manufacturing and QC">Manufacturing and QC</option>
-                    <option value="Framing">Framing</option>
-                    <option value="Stock Control">Stock Control</option>
-                    <option value="Logistics">Logistics</option>
-                    <option value="Operations">Operations</option>
-                    <option value="Inventory">Inventory</option>
-                    <option value="IT Support">IT Support</option>
-                    <option value="HR">HR</option>
-                </select>
-            </div>
             
             <!-- COFT Specific Fields -->
             <div id="coft-form-fields" class="hidden">
@@ -772,31 +744,8 @@
             return data;
         }
         
-        // Update the parsed data fields
+        // Update the parsed data fields (now just updates COFT form)
         function updateParsedDataFields(data) {
-            document.getElementById('soNumber').value = data.soNumber;
-            document.getElementById('customerId').value = data.customerId;
-            document.getElementById('orderDate').value = data.orderDate;
-            document.getElementById('lastName').value = data.lastName;
-            
-            // Update item codes container
-            const container = document.getElementById('itemCodesContainer');
-            container.innerHTML = '';
-            
-            if (data.itemCodes.length === 0) {
-                container.innerHTML = '<div style="color: #6c757d; font-style: italic;">No item codes found</div>';
-            } else {
-                data.itemCodes.forEach((item, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'item-code-entry';
-                    itemDiv.innerHTML = `
-                        <input type="text" value="${item.code}" class="field-input readonly" readonly placeholder="Item code">
-                        <input type="text" value="${item.title}" class="field-input readonly" readonly placeholder="Title">
-                    `;
-                    container.appendChild(itemDiv);
-                });
-            }
-            
             // Auto-fill COFT form fields if data is available
             updateCOFTFields(data);
         }
@@ -916,8 +865,8 @@
                 const parsedData = parseTextData(text);
                 updateParsedDataFields(parsedData);
             } else {
-                // Clear fields when text is empty
-                updateParsedDataFields({
+                // Clear COFT fields when text is empty
+                updateCOFTFields({
                     soNumber: '',
                     customerId: '',
                     orderDate: '',
@@ -974,6 +923,8 @@
         
         // Create COFT ticket function
         async function createCOFTTicket() {
+            const createTicketBtn = document.getElementById('create-ticket-btn');
+            
             if (!currentUser || !db) {
                 showTicketError('Authentication required. Please log in to create tickets.');
                 return;
