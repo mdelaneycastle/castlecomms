@@ -404,6 +404,45 @@
             background-color: #6c757d;
             cursor: not-allowed;
         }
+        
+        .autocomplete-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .autocomplete-suggestion {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        
+        .autocomplete-suggestion:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .autocomplete-suggestion.selected {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .autocomplete-suggestion:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
@@ -550,6 +589,21 @@
                         </select>
                     </div>
 
+                    <!-- Order Status -->
+                    <div class="form-group">
+                        <label for="coft-order-status" class="form-label">Order Status:</label>
+                        <div class="autocomplete-container">
+                            <input type="text" id="coft-order-status" class="form-input full-width" placeholder="Start typing to select order status..." autocomplete="off">
+                            <div id="order-status-suggestions" class="autocomplete-suggestions"></div>
+                        </div>
+                    </div>
+
+                    <!-- Other Status (shown when "Other" is selected) -->
+                    <div class="form-group hidden" id="other-status-group">
+                        <label for="coft-other-status" class="form-label">Please specify other status:</label>
+                        <input type="text" id="coft-other-status" class="form-input full-width" placeholder="Enter custom order status...">
+                    </div>
+
                     <!-- Additional Info -->
                     <div class="form-group">
                         <label for="coft-additional-info" class="form-label">Additional Information:</label>
@@ -606,6 +660,9 @@
     
     <!-- Firebase config -->
     <script src="firebase-init.js"></script>
+    
+    <!-- Order Status List -->
+    <script src="orderstatus.js"></script>
     
     <script>
         // Global variables
@@ -914,8 +971,98 @@
             }
         });
         
+        // Order Status Autocomplete functionality
+        function setupOrderStatusAutocomplete() {
+            const input = document.getElementById('coft-order-status');
+            const suggestions = document.getElementById('order-status-suggestions');
+            const otherStatusGroup = document.getElementById('other-status-group');
+            let selectedIndex = -1;
+            let filteredStatuses = [];
+            
+            input.addEventListener('input', function() {
+                const value = this.value.toLowerCase();
+                filteredStatuses = ORDER_STATUSES.filter(status => 
+                    status.toLowerCase().includes(value)
+                );
+                
+                if (value === '' || filteredStatuses.length === 0) {
+                    suggestions.style.display = 'none';
+                    selectedIndex = -1;
+                    return;
+                }
+                
+                suggestions.innerHTML = '';
+                filteredStatuses.forEach((status, index) => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'autocomplete-suggestion';
+                    suggestion.textContent = status;
+                    suggestion.addEventListener('click', function() {
+                        selectStatus(status);
+                    });
+                    suggestions.appendChild(suggestion);
+                });
+                
+                suggestions.style.display = 'block';
+                selectedIndex = -1;
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (suggestions.style.display === 'none') return;
+                
+                const suggestionElements = suggestions.querySelectorAll('.autocomplete-suggestion');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, suggestionElements.length - 1);
+                    updateSelection(suggestionElements);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    updateSelection(suggestionElements);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selectedIndex >= 0) {
+                        selectStatus(filteredStatuses[selectedIndex]);
+                    }
+                } else if (e.key === 'Escape') {
+                    suggestions.style.display = 'none';
+                    selectedIndex = -1;
+                }
+            });
+            
+            // Close suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+                    suggestions.style.display = 'none';
+                    selectedIndex = -1;
+                }
+            });
+            
+            function updateSelection(suggestionElements) {
+                suggestionElements.forEach((el, index) => {
+                    el.classList.toggle('selected', index === selectedIndex);
+                });
+            }
+            
+            function selectStatus(status) {
+                input.value = status;
+                suggestions.style.display = 'none';
+                selectedIndex = -1;
+                
+                // Show/hide "Other" text input
+                if (status === 'Other') {
+                    otherStatusGroup.classList.remove('hidden');
+                } else {
+                    otherStatusGroup.classList.add('hidden');
+                    document.getElementById('coft-other-status').value = '';
+                }
+            }
+        }
+        
         // Ticket creation event handlers
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize order status autocomplete
+            setupOrderStatusAutocomplete();
             // Assignment type radio buttons
             const assignIndividual = document.getElementById('assign-individual');
             const assignTeam = document.getElementById('assign-team');
