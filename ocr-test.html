@@ -440,8 +440,8 @@
                 itemCodes: []
             };
             
-            // Extract SO Number (6 digits after "SO Number:")
-            const soMatch = text.match(/SO Number:\s*(\d{6})/i);
+            // Extract SO Number (6 digits after "SO Number:" or "S.O Number:")
+            const soMatch = text.match(/S\.?O\.?\s*Number:\s*(\d{6})/i);
             if (soMatch) {
                 data.soNumber = soMatch[1];
             }
@@ -459,22 +459,28 @@
             }
             
             // Extract Item Codes and Titles
-            // Look for patterns like "123-wer-yui-12345f" (17-18 chars with 3 dashes)
-            // followed by a title, before "Total:"
+            // Look for patterns like "BGE-SLE-POR-34491F" (17-18 chars with 3 dashes)
+            // followed by all words until we hit a number, before "Total:"
             const beforeTotal = text.split(/Total:/i)[0];
-            const itemCodePattern = /([A-Za-z0-9]{2,}-[A-Za-z0-9]{2,}-[A-Za-z0-9]{2,}-[A-Za-z0-9]{2,})\s+([^\n\r]+?)(?=\n|\r|$)/g;
+            const itemCodePattern = /([A-Za-z0-9]{2,}-[A-Za-z0-9]{2,}-[A-Za-z0-9]{2,}-[A-Za-z0-9]{2,})\s+([^0-9\n\r]*?)(?=\s*\d|\n|\r|$)/g;
             
             let match;
             while ((match = itemCodePattern.exec(beforeTotal)) !== null) {
                 const itemCode = match[1].trim();
-                const title = match[2].trim();
+                let title = match[2].trim();
+                
+                // Clean up title - remove extra whitespace and tabs
+                title = title.replace(/\s+/g, ' ').trim();
                 
                 // Check if item code is 17-18 characters and has exactly 3 dashes
                 if (itemCode.length >= 17 && itemCode.length <= 18 && (itemCode.match(/-/g) || []).length === 3) {
-                    data.itemCodes.push({
-                        code: itemCode,
-                        title: title
-                    });
+                    // Only add if we found a meaningful title
+                    if (title && title.length > 0) {
+                        data.itemCodes.push({
+                            code: itemCode,
+                            title: title
+                        });
+                    }
                 }
             }
             
