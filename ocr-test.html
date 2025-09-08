@@ -187,6 +187,34 @@
             border-radius: 6px;
             border: 1px solid #f5c6cb;
         }
+        
+        .text-input-section {
+            margin: 2rem 0;
+        }
+        
+        .text-input-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .manual-text-input {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            background-color: white;
+        }
+        
+        .manual-text-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
     </style>
 </head>
 <body>
@@ -211,6 +239,11 @@
         <div id="imagePreview" class="image-preview" style="display: none;">
             <h3>Image Preview:</h3>
             <img id="previewImg" src="" alt="Preview">
+        </div>
+        
+        <div class="text-input-section">
+            <h3>💬 Or paste/type text directly:</h3>
+            <textarea id="manualTextInput" class="manual-text-input" placeholder="Paste or type your text here..."></textarea>
         </div>
         
         <div class="results-section">
