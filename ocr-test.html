@@ -980,46 +980,57 @@ ${formData.additionalInfo || 'None provided'}
 ---
 *This ticket was created from OCR text extraction.*`;
 
-                // Generate unique ticket ID
-                const ticketId = `COFT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                // Generate ticket ID matching original format
+                const ticketId = 'TKT-' + Date.now().toString().slice(-6);
                 
-                // Find COFT team
+                // Find COFT team from teams collection
                 let coftTeam = null;
                 try {
                     const teamsSnapshot = await db.collection('teams').where('name', '==', 'Client Order Fulfilment Team/Group').get();
                     if (!teamsSnapshot.empty) {
+                        const teamDoc = teamsSnapshot.docs[0];
                         coftTeam = {
-                            id: teamsSnapshot.docs[0].id,
-                            ...teamsSnapshot.docs[0].data()
+                            id: teamDoc.id,
+                            name: teamDoc.data().name,
+                            members: teamDoc.data().members || []
                         };
                     }
                 } catch (error) {
                     console.warn('Could not find COFT team:', error);
                 }
                 
-                // Prepare ticket data
+                // Get current user's display name (simplified version)
+                const creatorName = currentUser.displayName || currentUser.email;
+                
+                // Check for COFT reprocessing override
+                let coftTeamMemberOverride = null;
+                if (formData.coftType === 'reprocessing') {
+                    coftTeamMemberOverride = 'Katie Lewis';
+                }
+                
+                // Prepare ticket data matching the original structure exactly
                 const ticketData = {
                     ticketId: ticketId,
-                    title: `COFT - ${formData.ticketReason} (SO: ${formData.soNumber})`,
+                    title: `COFT Ticket - SO: ${formData.soNumber} - ${formData.clientLastName}`,
                     description: description,
                     category: 'Client Order Fulfilment Team/Group',
                     status: 'open',
-                    priority: 'medium',
                     createdBy: {
                         uid: currentUser.uid,
                         email: currentUser.email,
-                        name: currentUser.displayName || currentUser.email
+                        name: creatorName
                     },
                     assignedTo: coftTeam ? {
                         type: 'team',
                         teamId: coftTeam.id,
-                        teamName: coftTeam.name
+                        teamName: coftTeam.name,
+                        teamMembers: coftTeam.members
                     } : {
                         type: 'individual',
                         email: 'unassigned',
                         name: 'Unassigned'
                     },
-                    currentAssignedTeam: coftTeam ? coftTeam.id : null,
+                    coftTeamMemberOverride: coftTeamMemberOverride,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     messages: [],
@@ -1029,21 +1040,22 @@ ${formData.additionalInfo || 'None provided'}
                         timePaused: null,
                         totalPausedTime: 0,
                         isRunning: true
-                    },
-                    coftData: {
-                        type: formData.coftType,
-                        soNumber: formData.soNumber,
-                        clientId: formData.clientId,
-                        clientLastName: formData.clientLastName,
-                        itemCode: formData.itemCode,
-                        artworkTitle: formData.artworkTitle,
-                        editionNumber: formData.editionNumber,
-                        clientAware: formData.clientAware,
-                        orderDate: formData.orderDate,
-                        deliveryMethod: formData.deliveryMethod,
-                        reason: formData.ticketReason,
-                        additionalInfo: formData.additionalInfo
                     }
+                };
+                
+                // Add COFT data exactly as the original does
+                ticketData.coftData = {
+                    coftType: formData.coftType,
+                    soNumber: formData.soNumber,
+                    clientName: formData.clientLastName, // Match original field name
+                    itemCode: formData.itemCode,
+                    artworkTitle: formData.artworkTitle,
+                    editionNumber: formData.editionNumber,
+                    clientAware: formData.clientAware,
+                    orderDate: formData.orderDate,
+                    deliveryMethod: formData.deliveryMethod,
+                    reason: formData.ticketReason,
+                    additionalInfo: formData.additionalInfo
                 };
 
                 // Create the ticket
