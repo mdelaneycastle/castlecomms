@@ -999,20 +999,24 @@
                 createTicketBtn.disabled = true;
                 createTicketBtn.textContent = '🔄 Creating Ticket...';
                 
-                // Build ticket description
-                const description = `**COFT Ticket - ${formData.coftType}**
+                // Build ticket description matching the parsing regex exactly
+                const typeLabel = formData.coftType === 'order-chasing' ? 'ORDER CHASING' : 'REPROCESSING/ITEMS SOURCED';
+                const description = `**COFT TICKET - ${typeLabel}**
 
-**SO Number:** ${formData.soNumber}
-**Client ID:** ${formData.clientId}
-**Client Last Name:** ${formData.clientLastName}
-**Item Code:** ${formData.itemCode}
-**Artwork Title:** ${formData.artworkTitle}
-**Edition Number:** ${formData.editionNumber || 'N/A'}
+**Order Details:**
+• SO Number: ${formData.soNumber}
+• Client: ${formData.clientLastName}
+• Item Code: ${formData.itemCode}
+• Artwork Title: ${formData.artworkTitle}
+• Edition Number: ${formData.editionNumber || ''}
+• Order Date: ${new Date(formData.orderDate).toLocaleDateString()}
+• Delivery Method: ${formData.deliveryMethod}
 
-**Order Date:** ${formData.orderDate}
-**Delivery Method:** ${formData.deliveryMethod}
-**Reason:** ${formData.ticketReason}
-**Client Aware of 4 Week Fulfillment:** ${formData.clientAware}
+**Client Awareness:**
+• Is client aware of 4 week fulfilment time? ${formData.clientAware.toUpperCase()}
+
+**Issue Details:**
+• Reason: ${formData.ticketReason}
 
 **Additional Information:**
 ${formData.additionalInfo || 'None provided'}
