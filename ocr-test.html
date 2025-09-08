@@ -438,26 +438,6 @@
             </select>
         </div>
 
-        <div class="upload-section">
-            <div class="file-input">
-                <label for="fileInput"><strong>Select an image file:</strong></label>
-                <input type="file" id="fileInput" accept="image/*">
-            </div>
-            
-            <div class="dropzone" id="dropzone">
-                <p>📁 Or drag and drop an image here</p>
-            </div>
-        </div>
-        
-        <div id="progress" class="progress">
-            <div id="progressText">Ready to process image...</div>
-        </div>
-        
-        <div id="imagePreview" class="image-preview" style="display: none;">
-            <h3>Image Preview:</h3>
-            <img id="previewImg" src="" alt="Preview">
-        </div>
-        
         <div class="text-input-section">
             <h3>💬 Or paste/type text directly:</h3>
             <textarea id="manualTextInput" class="manual-text-input" placeholder="Paste or type your text here..."></textarea>
@@ -581,6 +561,27 @@
             <button type="button" id="create-ticket-btn" class="create-ticket-button" disabled>
                 🎫 Create Ticket
             </button>
+        </div>
+        
+        <div class="upload-section">
+            <h3>📷 OCR Image Processing</h3>
+            <div class="file-input">
+                <label for="fileInput"><strong>Select an image file:</strong></label>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+            
+            <div class="dropzone" id="dropzone">
+                <p>📁 Or drag and drop an image here</p>
+            </div>
+            
+            <div id="progress" class="progress">
+                <div id="progressText">Ready to process image...</div>
+            </div>
+            
+            <div id="imagePreview" class="image-preview" style="display: none;">
+                <h3>Image Preview:</h3>
+                <img id="previewImg" src="" alt="Preview">
+            </div>
         </div>
         
         <div class="results-section">
