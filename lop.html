@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>LOP – Letter of Provenance</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="style.css?v=20250822_095956_chatbot_cache_bust" />
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); 
+      margin: 0; 
+      position: relative;
+    }
+    
+    .background-slideshow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .background-slideshow img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .background-slideshow img.active {
+      opacity: 0.3;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      background: rgba(51, 51, 51, 0.95);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 0.5rem 1rem;
+    }
+    
+    header h1 { margin: 0 0 0 1rem; font-size: 1.25rem; }
+    
+    .hamburger {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    main {
+      margin: 2rem auto;
+      max-width: 1000px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-container {
+      margin-bottom: 2rem;
+    }
+
+    .tab-buttons {
+      display: flex;
+      border-bottom: 2px solid #e0e0e0;
+      margin-bottom: 2rem;
+      gap: 1rem;
+    }
+
+    .tab-button {
+      padding: 1rem 2rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 1rem;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      color: #666;
+    }
+
+    .tab-button.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+      font-weight: bold;
+    }
+
+    .tab-button:hover {
+      color: #667eea;
+      background: rgba(102, 126, 234, 0.1);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    .form-group input[type="file"] {
+      padding: 0.5rem;
+    }
+
+    .form-group textarea {
+      height: 100px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn {
+      padding: 0.75rem 2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5a6fd8;
+    }
+
+    .btn-success {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #45a049;
+    }
+
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #da190b;
+    }
+
+    .image-preview {
+      max-width: 200px;
+      max-height: 200px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 0.5rem;
+      display: none;
+    }
+
+    .pending-requests {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .pending-request {
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .pending-request:last-child {
+      border-bottom: none;
+    }
+
+    .request-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .request-image {
+      max-width: 150px;
+      max-height: 150px;
+      border-radius: 8px;
+    }
+
+    .approved-requests {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+
+    .approved-request {
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .approved-request:last-child {
+      border-bottom: none;
+    }
+
+    .admin-only {
+      display: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .alert {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+      border: 1px solid transparent;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      border-color: #f5c6cb;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-slideshow" id="background-slideshow"></div>
+  
+  <div id="header-container"></div>
+  <div id="sidebar-container"></div>
+
+  <main>
+    <h1>Letter of Provenance (LOP)</h1>
+    <p>Create and manage Letter of Provenance documents for Castle Fine Art purchases.</p>
+
+    <div class="tab-container">
+      <div class="tab-buttons">
+        <button class="tab-button active" data-tab="request">Request Form</button>
+        <button class="tab-button" data-tab="approvals">Approvals</button>
+        <button class="tab-button admin-only" data-tab="admin">Admin to Approve</button>
+      </div>
+
+      <!-- Request Form Tab -->
+      <div id="request-tab" class="tab-content active">
+        <h2>Create LOP Request</h2>
+        <form id="lop-request-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="customer-name">Customer Name *</label>
+              <input type="text" id="customer-name" name="customerName" required>
+            </div>
+            <div class="form-group">
+              <label for="customer-email">Customer Email *</label>
+              <input type="email" id="customer-email" name="customerEmail" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="artwork-title">Artwork Title *</label>
+              <input type="text" id="artwork-title" name="artworkTitle" required>
+            </div>
+            <div class="form-group">
+              <label for="artist-name">Artist Name *</label>
+              <input type="text" id="artist-name" name="artistName" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="medium">Medium *</label>
+              <input type="text" id="medium" name="medium" required placeholder="e.g., Oil on Canvas, Lithograph, etc.">
+            </div>
+            <div class="form-group">
+              <label for="purchase-date">Purchase Date *</label>
+              <input type="date" id="purchase-date" name="purchaseDate" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="so-number">Sales Order Number *</label>
+              <input type="text" id="so-number" name="soNumber" required>
+            </div>
+            <div class="form-group">
+              <label for="gallery">Gallery Location *</label>
+              <input type="text" id="gallery" name="gallery" required placeholder="e.g., Windsor, Brighton, etc.">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="artwork-image">Artwork Image *</label>
+            <input type="file" id="artwork-image" name="artworkImage" accept="image/*" required>
+            <img id="image-preview" class="image-preview" alt="Preview">
+          </div>
+
+          <div class="form-group">
+            <label for="additional-notes">Additional Notes</label>
+            <textarea id="additional-notes" name="additionalNotes" placeholder="Any additional information about the artwork"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Submit LOP Request</button>
+        </form>
+      </div>
+
+      <!-- Approvals Tab -->
+      <div id="approvals-tab" class="tab-content">
+        <h2>Your Approved LOPs</h2>
+        <div id="user-approved-requests" class="approved-requests">
+          <p>No approved LOPs found.</p>
+        </div>
+      </div>
+
+      <!-- Admin Tab -->
+      <div id="admin-tab" class="tab-content admin-only">
+        <h2>Pending LOP Requests</h2>
+        <div id="pending-requests" class="pending-requests">
+          <p>No pending requests.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Firebase and other scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script src="firebase-init.js"></script>
+  <script src="shared-components.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    console.log("🔥 LOP page initialized");
+
+    // Global variables
+    let currentUser = null;
+    let isAdmin = false;
+    let pendingRequests = [];
+    let userApprovedRequests = [];
+
+    // Tab switching functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      setupTabs();
+      setupFormHandlers();
+      setupImagePreview();
+      
+      // Setup Firebase auth listener
+      firebase.auth().onAuthStateChanged(async (user) => {
+        currentUser = user;
+        if (user) {
+          await checkAdminStatus();
+          loadUserData();
+        } else {
+          // Redirect to login if not authenticated
+          window.location.href = 'index.html';
+        }
+      });
+    });
+
+    function setupTabs() {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          const targetTab = button.getAttribute('data-tab');
+          
+          // Remove active class from all tabs
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          // Add active class to clicked tab
+          button.classList.add('active');
+          document.getElementById(targetTab + '-tab').classList.add('active');
+        });
+      });
+    }
+
+    async function checkAdminStatus() {
+      if (currentUser) {
+        try {
+          const token = await currentUser.getIdTokenResult();
+          isAdmin = token.claims.admin === true;
+          
+          // Show/hide admin tab
+          const adminElements = document.querySelectorAll('.admin-only');
+          adminElements.forEach(element => {
+            element.style.display = isAdmin ? 'block' : 'none';
+          });
+          
+          if (isAdmin) {
+            loadPendingRequests();
+          }
+        } catch (error) {
+          console.warn("Could not check admin status:", error);
+        }
+      }
+    }
+
+    function setupImagePreview() {
+      const imageInput = document.getElementById('artwork-image');
+      const preview = document.getElementById('image-preview');
+
+      imageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        } else {
+          preview.style.display = 'none';
+        }
+      });
+    }
+
+    function setupFormHandlers() {
+      const form = document.getElementById('lop-request-form');
+      form.addEventListener('submit', handleFormSubmission);
+    }
+
+    async function handleFormSubmission(e) {
+      e.preventDefault();
+      
+      if (!currentUser) {
+        showAlert('Please log in to submit a request.', 'error');
+        return;
+      }
+
+      const formData = new FormData(e.target);
+      const imageFile = formData.get('artworkImage');
+
+      if (!imageFile || imageFile.size === 0) {
+        showAlert('Please select an artwork image.', 'error');
+        return;
+      }
+
+      try {
+        showAlert('Submitting request...', 'success');
+        
+        // Upload image to Firebase Storage
+        const imageRef = firebase.storage().ref().child(`lop-images/${Date.now()}_${imageFile.name}`);
+        const uploadTask = await imageRef.put(imageFile);
+        const imageUrl = await uploadTask.ref.getDownloadURL();
+
+        // Create request object
+        const request = {
+          customerName: formData.get('customerName'),
+          customerEmail: formData.get('customerEmail'),
+          artworkTitle: formData.get('artworkTitle'),
+          artistName: formData.get('artistName'),
+          medium: formData.get('medium'),
+          purchaseDate: formData.get('purchaseDate'),
+          soNumber: formData.get('soNumber'),
+          gallery: formData.get('gallery'),
+          imageUrl: imageUrl,
+          additionalNotes: formData.get('additionalNotes'),
+          requesterId: currentUser.uid,
+          requesterEmail: currentUser.email,
+          status: 'pending',
+          submittedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        // Save to Firebase Database
+        await firebase.database().ref('lopRequests').push(request);
+
+        showAlert('LOP request submitted successfully!', 'success');
+        e.target.reset();
+        document.getElementById('image-preview').style.display = 'none';
+
+      } catch (error) {
+        console.error('Error submitting request:', error);
+        showAlert('Error submitting request. Please try again.', 'error');
+      }
+    }
+
+    async function loadPendingRequests() {
+      if (!isAdmin) return;
+
+      try {
+        const snapshot = await firebase.database().ref('lopRequests').orderByChild('status').equalTo('pending').once('value');
+        const requests = [];
+        
+        snapshot.forEach(child => {
+          requests.push({
+            id: child.key,
+            ...child.val()
+          });
+        });
+
+        displayPendingRequests(requests);
+      } catch (error) {
+        console.error('Error loading pending requests:', error);
+      }
+    }
+
+    function displayPendingRequests(requests) {
+      const container = document.getElementById('pending-requests');
+      
+      if (requests.length === 0) {
+        container.innerHTML = '<p>No pending requests.</p>';
+        return;
+      }
+
+      container.innerHTML = requests.map(request => `
+        <div class="pending-request" data-request-id="${request.id}">
+          <div class="request-details">
+            <div>
+              <h3>${request.artworkTitle}</h3>
+              <p><strong>Customer:</strong> ${request.customerName}</p>
+              <p><strong>Email:</strong> ${request.customerEmail}</p>
+              <p><strong>Artist:</strong> ${request.artistName}</p>
+              <p><strong>Medium:</strong> ${request.medium}</p>
+              <p><strong>Purchase Date:</strong> ${request.purchaseDate}</p>
+              <p><strong>SO Number:</strong> ${request.soNumber}</p>
+              <p><strong>Gallery:</strong> ${request.gallery}</p>
+              ${request.additionalNotes ? `<p><strong>Notes:</strong> ${request.additionalNotes}</p>` : ''}
+            </div>
+            <div>
+              <img src="${request.imageUrl}" alt="Artwork" class="request-image">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="value-${request.id}">Insurance Value (£) *</label>
+            <input type="number" id="value-${request.id}" name="value" required min="0" step="0.01" placeholder="Enter insurance value">
+          </div>
+          <div style="margin-top: 1rem;">
+            <button class="btn btn-success" onclick="approveRequest('${request.id}')">Approve LOP</button>
+            <button class="btn btn-danger" onclick="rejectRequest('${request.id}')">Reject</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function approveRequest(requestId) {
+      const valueInput = document.getElementById(`value-${requestId}`);
+      const value = valueInput.value;
+
+      if (!value || value <= 0) {
+        showAlert('Please enter a valid insurance value.', 'error');
+        return;
+      }
+
+      try {
+        // Get the request data
+        const requestSnapshot = await firebase.database().ref(`lopRequests/${requestId}`).once('value');
+        const requestData = requestSnapshot.val();
+
+        if (!requestData) {
+          showAlert('Request not found.', 'error');
+          return;
+        }
+
+        // Update request status and add value
+        await firebase.database().ref(`lopRequests/${requestId}`).update({
+          status: 'approved',
+          insuranceValue: parseFloat(value),
+          approvedBy: currentUser.uid,
+          approvedAt: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        // Send email notification
+        sendApprovalEmail(requestData, value);
+
+        showAlert('LOP approved and email sent!', 'success');
+        loadPendingRequests(); // Refresh the list
+
+      } catch (error) {
+        console.error('Error approving request:', error);
+        showAlert('Error approving request. Please try again.', 'error');
+      }
+    }
+
+    async function rejectRequest(requestId) {
+      if (!confirm('Are you sure you want to reject this LOP request?')) {
+        return;
+      }
+
+      try {
+        await firebase.database().ref(`lopRequests/${requestId}`).update({
+          status: 'rejected',
+          rejectedBy: currentUser.uid,
+          rejectedAt: firebase.database.ServerValue.TIMESTAMP
+        });
+
+        showAlert('LOP request rejected.', 'success');
+        loadPendingRequests(); // Refresh the list
+
+      } catch (error) {
+        console.error('Error rejecting request:', error);
+        showAlert('Error rejecting request. Please try again.', 'error');
+      }
+    }
+
+    function sendApprovalEmail(requestData, value) {
+      const subject = encodeURIComponent('LOP Approved');
+      const body = encodeURIComponent(`Your LOP has been approved, please see attached document.
+
+Artwork: ${requestData.artworkTitle}
+Artist: ${requestData.artistName}
+Insurance Value: £${value}
+
+Best regards,
+Castle Fine Art Team`);
+
+      const mailtoLink = `mailto:${requestData.customerEmail}?subject=${subject}&body=${body}`;
+      window.open(mailtoLink);
+    }
+
+    async function loadUserData() {
+      if (!currentUser) return;
+
+      try {
+        // Load user's approved requests
+        const snapshot = await firebase.database().ref('lopRequests')
+          .orderByChild('requesterId')
+          .equalTo(currentUser.uid)
+          .once('value');
+
+        const requests = [];
+        snapshot.forEach(child => {
+          const data = child.val();
+          if (data.status === 'approved') {
+            requests.push({
+              id: child.key,
+              ...data
+            });
+          }
+        });
+
+        displayUserApprovedRequests(requests);
+
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    }
+
+    function displayUserApprovedRequests(requests) {
+      const container = document.getElementById('user-approved-requests');
+      
+      if (requests.length === 0) {
+        container.innerHTML = '<p>No approved LOPs found.</p>';
+        return;
+      }
+
+      container.innerHTML = requests.map(request => `
+        <div class="approved-request">
+          <div>
+            <h3>${request.artworkTitle}</h3>
+            <p><strong>Artist:</strong> ${request.artistName}</p>
+            <p><strong>Insurance Value:</strong> £${request.insuranceValue}</p>
+            <p><strong>Approved:</strong> ${new Date(request.approvedAt).toLocaleDateString()}</p>
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="downloadLOP('${request.id}')">Download PDF</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function downloadLOP(requestId) {
+      // This would generate and download the LOP document
+      // For now, we'll show an alert
+      showAlert('PDF generation feature will be implemented next.', 'success');
+    }
+
+    function showAlert(message, type) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.textContent = message;
+
+      const main = document.querySelector('main');
+      main.insertBefore(alertDiv, main.firstChild);
+
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 5000);
+    }
+
+    // Initialize background slideshow
+    document.addEventListener('DOMContentLoaded', function() {
+      new BackgroundSlideshow();
+    });
+  </script>
+</body>
+</html>
