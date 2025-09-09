@@ -347,13 +347,6 @@
 
           <button type="submit" class="btn btn-primary">Submit LOP Request</button>
         </form>
-        
-        <div style="margin-top: 3rem;">
-          <h3>Your Submitted Requests</h3>
-          <div id="user-pending-requests" class="pending-requests">
-            <p>No submitted requests.</p>
-          </div>
-        </div>
       </div>
 
       <!-- Approvals Tab -->
@@ -702,21 +695,6 @@ Castle Fine Art Team`);
 
         displayUserApprovedRequests(approvedRequests);
 
-        // Also load user's pending requests for the Request Form tab
-        const pendingRequests = [];
-        snapshot.forEach(child => {
-          const data = child.val();
-          // Include pending and rejected requests in the Request Form tab
-          if (data.status === 'pending' || data.status === 'rejected') {
-            pendingRequests.push({
-              id: child.key,
-              ...data
-            });
-          }
-        });
-
-        displayUserPendingRequests(pendingRequests);
-
       } catch (error) {
         console.error('Error loading user data:', error);
       }
@@ -745,32 +723,6 @@ Castle Fine Art Team`);
       `).join('');
     }
 
-    function displayUserPendingRequests(requests) {
-      const container = document.getElementById('user-pending-requests');
-      
-      if (requests.length === 0) {
-        container.innerHTML = '<p>No submitted requests.</p>';
-        return;
-      }
-
-      container.innerHTML = requests.map(request => `
-        <div class="pending-request">
-          <div class="request-details">
-            <div>
-              <h4>${request.artworkTitle}</h4>
-              <p><strong>Artist:</strong> ${request.artistName}</p>
-              <p><strong>Medium:</strong> ${request.medium}</p>
-              <p><strong>Status:</strong> <span style="color: ${request.status === 'pending' ? '#ff9800' : '#f44336'}; font-weight: bold; text-transform: capitalize;">${request.status}</span></p>
-              <p><strong>Submitted:</strong> ${new Date(request.submittedAt).toLocaleDateString()}</p>
-              ${request.status === 'rejected' ? '<p style="color: #f44336;"><em>This request was not approved.</em></p>' : ''}
-            </div>
-            <div>
-              <img src="${request.imageUrl}" alt="Artwork" class="request-image" style="max-width: 100px; max-height: 100px;">
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
 
     async function downloadLOP(requestId) {
       try {
@@ -822,9 +774,11 @@ Castle Fine Art Team`);
       doc.setFontSize(14);
       doc.text(`'${requestData.artworkTitle}'`, 105, yPos, { align: 'center' });
       
-      yPos += 15;
+      // Fixed image box area - positions stay consistent
+      const imageBoxY = yPos + 15;
+      const imageBoxHeight = 45; // Fixed height for image area
       
-      // Add artwork image
+      // Add artwork image in fixed box
       if (requestData.imageUrl) {
         try {
           // Create a promise to load the image
@@ -833,25 +787,26 @@ Castle Fine Art Team`);
             img.crossOrigin = 'anonymous';
             img.onload = function() {
               try {
-                // Calculate dimensions to fit in the space while maintaining aspect ratio
+                // Calculate dimensions to fit within the fixed box height
                 const maxWidth = 60;
-                const maxHeight = 40;
+                const maxHeight = imageBoxHeight - 5; // Leave 5pt margin
                 const imgWidth = this.width;
                 const imgHeight = this.height;
                 
                 let newWidth = maxWidth;
                 let newHeight = (imgHeight * maxWidth) / imgWidth;
                 
+                // Ensure image fits within the fixed height
                 if (newHeight > maxHeight) {
                   newHeight = maxHeight;
                   newWidth = (imgWidth * maxHeight) / imgHeight;
                 }
                 
                 const xPos = 105 - (newWidth / 2);
-                const currentYPos = yPos;
+                const imageYPos = imageBoxY + ((imageBoxHeight - newHeight) / 2); // Center vertically in box
                 
                 // Add image to PDF
-                doc.addImage(this, 'JPEG', xPos, currentYPos, newWidth, newHeight);
+                doc.addImage(this, 'JPEG', xPos, imageYPos, newWidth, newHeight);
                 resolve();
               } catch (error) {
                 console.warn('Could not add image to PDF:', error);
@@ -866,14 +821,13 @@ Castle Fine Art Team`);
           });
           
           await imagePromise;
-          yPos += 45;
         } catch (error) {
           console.warn('Error processing image:', error);
-          yPos += 15;
         }
       }
       
-      // Artist name
+      // Artist name - always at consistent position after fixed image box
+      yPos = imageBoxY + imageBoxHeight + 5;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.text(`By ${requestData.artistName}`, 105, yPos, { align: 'center' });
