@@ -4673,6 +4673,9 @@ async function loadTickets() {
     // Update visible ticket counter
     updateVisibleTicketCount(tickets);
     
+    // Check admin status after tickets are rendered
+    checkAdminStatus();
+    
   } catch (error) {
     console.error('Error loading tickets:', error);
     ticketsList.innerHTML = `
@@ -7775,11 +7778,21 @@ function checkAdminStatus() {
     'mdelaney@castlefineart.com'
   ];
   
+  console.log('🔍 Checking admin status...');
+  console.log('Current user:', currentUser);
+  console.log('Current user email:', currentUser?.email);
+  console.log('Admin emails:', adminEmails);
+  
   if (currentUser && adminEmails.includes(currentUser.email)) {
     // Show all admin-only elements
-    document.querySelectorAll('.admin-only').forEach(element => {
+    const adminElements = document.querySelectorAll('.admin-only');
+    console.log('Found admin elements:', adminElements.length);
+    
+    adminElements.forEach(element => {
       element.classList.add('show');
+      console.log('Showing admin element:', element);
     });
+    
     console.log('✅ Admin access granted for:', currentUser.email);
     return true;
   } else {
@@ -7787,6 +7800,7 @@ function checkAdminStatus() {
     document.querySelectorAll('.admin-only').forEach(element => {
       element.classList.remove('show');
     });
+    console.log('❌ Admin access denied for:', currentUser?.email);
     return false;
   }
 }
