@@ -2,7 +2,7 @@
   "rules": {
     ".read": false,
     ".write": false,
-    
+
     "users": {
       ".read": "auth != null",
       ".indexOn": ["email"],
@@ -16,117 +16,73 @@
         }
       }
     },
-    
+
+    "userTokens": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid",
+        ".validate": "newData.hasChildren(['fcmToken', 'userId']) && newData.child('fcmToken').isString() && newData.child('userId').isString()"
+      }
+    },
+
     "posts": {
       ".read": "auth != null",
       ".indexOn": ["timestamp"],
       "$postId": {
-        ".write": "auth != null && (
-          (!data.exists() && auth.uid != null) || 
-          (data.exists() && data.child('userId').val() == auth.uid) ||
-          auth.token.admin == true
-        )",
-        ".validate": "newData.hasChildren(['name', 'message', 'timestamp']) && 
-                     newData.child('name').isString() && 
-                     newData.child('message').isString() && 
-                     newData.child('timestamp').isNumber()",
+        ".write": "auth != null && ((!data.exists() && auth.uid != null) || (data.exists() && data.child('userId').val() == auth.uid) || auth.token.admin == true)",
+        ".validate": "newData.hasChildren(['name', 'message', 'timestamp']) && newData.child('name').isString() && newData.child('message').isString() && newData.child('timestamp').isNumber()",
         "comments": {
           "$commentId": {
             ".write": "auth != null",
-            ".validate": "newData.hasChildren(['text', 'timestamp']) && 
-                         newData.child('text').isString() && 
-                         newData.child('timestamp').isNumber()"
+            ".validate": "newData.hasChildren(['text', 'timestamp']) && newData.child('text').isString() && newData.child('timestamp').isNumber()"
           }
         }
       }
     },
-    
+
     "files": {
       ".read": "auth != null",
       "$fileId": {
-        ".write": "auth != null && (
-          (!data.exists() && auth.uid != null) || 
-          (data.exists() && data.child('uploadedBy').val() == auth.uid) ||
-          auth.token.admin == true
-        )",
-        ".validate": "newData.hasChildren(['name', 'url', 'uploadedBy', 'timestamp']) && 
-                     newData.child('name').isString() && 
-                     newData.child('url').isString() && 
-                     newData.child('uploadedBy').isString() && 
-                     newData.child('timestamp').isNumber()"
+        ".write": "auth != null && ((!data.exists() && auth.uid != null) || (data.exists() && data.child('uploadedBy').val() == auth.uid) || auth.token.admin == true)",
+        ".validate": "newData.hasChildren(['name', 'url', 'uploadedBy', 'timestamp']) && newData.child('name').isString() && newData.child('url').isString() && newData.child('uploadedBy').isString() && newData.child('timestamp').isNumber()"
       }
     },
-    
+
     "news-articles": {
       ".read": "auth != null",
       ".indexOn": ["timestamp"],
       "$articleId": {
-        ".write": "auth != null && (
-          (!data.exists() && auth.uid != null) || 
-          (data.exists() && data.child('addedBy').val() == auth.uid) ||
-          auth.token.admin == true
-        )",
-        ".validate": "newData.hasChildren(['url', 'title', 'site_name', 'timestamp', 'addedBy']) && 
-                     newData.child('url').isString() && 
-                     newData.child('title').isString() && 
-                     newData.child('site_name').isString() && 
-                     newData.child('timestamp').isNumber() && 
-                     newData.child('addedBy').isString()"
+        ".write": "auth != null && ((!data.exists() && auth.uid != null) || (data.exists() && data.child('addedBy').val() == auth.uid) || auth.token.admin == true)",
+        ".validate": "newData.hasChildren(['url', 'title', 'site_name', 'timestamp', 'addedBy']) && newData.child('url').isString() && newData.child('title').isString() && newData.child('site_name').isString() && newData.child('timestamp').isNumber() && newData.child('addedBy').isString()"
       }
     },
-    
+
     "gallery-images": {
       ".read": "auth != null",
       ".indexOn": ["uploadDate", "bestPractice"],
       "$imageId": {
         ".write": "auth != null && auth.token.admin == true",
-        ".validate": "newData.hasChildren(['filename', 'originalName', 'uploadDate', 'uploadedBy', 'uploaderName', 'bestPractice']) && 
-                     newData.child('filename').isString() && 
-                     newData.child('originalName').isString() && 
-                     newData.child('uploadDate').isString() && 
-                     newData.child('uploadedBy').isString() && 
-                     newData.child('uploaderName').isString() && 
-                     newData.child('bestPractice').isBoolean()"
+        ".validate": "newData.hasChildren(['filename', 'originalName', 'uploadDate', 'uploadedBy', 'uploaderName', 'bestPractice']) && newData.child('filename').isString() && newData.child('originalName').isString() && newData.child('uploadDate').isString() && newData.child('uploadedBy').isString() && newData.child('uploaderName').isString() && newData.child('bestPractice').isBoolean()"
       }
     },
-    
+
     "notifications": {
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
         ".write": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
         "$notificationId": {
-          ".validate": "newData.hasChildren(['message', 'timestamp', 'read']) && 
-                       newData.child('message').isString() && 
-                       newData.child('timestamp').isNumber() && 
-                       newData.child('read').isBoolean()"
+          ".validate": "newData.hasChildren(['message', 'timestamp', 'read']) && newData.child('message').isString() && newData.child('timestamp').isNumber() && newData.child('read').isBoolean()"
         }
       }
     },
-    
+
     "lopRequests": {
       ".read": "auth != null && (auth.token.admin == true)",
       ".indexOn": ["status", "requesterId", "submittedAt"],
       "$requestId": {
-        ".read": "auth != null && (
-          auth.token.admin == true || 
-          data.child('requesterId').val() == auth.uid
-        )",
-        ".write": "auth != null && (
-          (!data.exists() && auth.uid != null) ||
-          (data.exists() && auth.token.admin == true)
-        )",
-        ".validate": "newData.hasChildren(['customerName', 'artworkTitle', 'artistName', 'medium', 'purchaseDate', 'soNumber', 'gallery', 'imageUrl', 'requesterId', 'requesterEmail', 'status', 'submittedAt']) && 
-                     newData.child('customerName').isString() && 
-                     newData.child('artworkTitle').isString() && 
-                     newData.child('artistName').isString() && 
-                     newData.child('medium').isString() && 
-                     newData.child('purchaseDate').isString() && 
-                     newData.child('soNumber').isString() && 
-                     newData.child('gallery').isString() && 
-                     newData.child('imageUrl').isString() && 
-                     newData.child('requesterId').isString() && 
-                     newData.child('requesterEmail').isString() && 
-                     newData.child('status').isString()"
+        ".read": "auth != null && (auth.token.admin == true || data.child('requesterId').val() == auth.uid)",
+        ".write": "auth != null && ((!data.exists() && auth.uid != null) || (data.exists() && auth.token.admin == true))",
+        ".validate": "newData.hasChildren(['customerName', 'artworkTitle', 'artistName', 'medium', 'purchaseDate', 'soNumber', 'gallery', 'imageUrl', 'requesterId', 'requesterEmail', 'status', 'submittedAt']) && newData.child('customerName').isString() && newData.child('artworkTitle').isString() && newData.child('artistName').isString() && newData.child('medium').isString() && newData.child('purchaseDate').isString() && newData.child('soNumber').isString() && newData.child('gallery').isString() && newData.child('imageUrl').isString() && newData.child('requesterId').isString() && newData.child('requesterEmail').isString() && newData.child('status').isString()"
       }
     }
   }
