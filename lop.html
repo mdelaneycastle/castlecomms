@@ -382,7 +382,7 @@
   <!-- PDF generation library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- Custom DIN LightAlternative font for PDF -->
-  <script src="fonts/DINLightAlt-normal.js"></script>
+  <script src="fonts/DIN LightAlternate-normal.js"></script>
   <script src="firebase-init.js"></script>
   <script src="shared-components.js"></script>
   <script src="script.js"></script>
@@ -392,8 +392,8 @@
 
     // Register the custom DIN LightAlternative font
     jsPDF.API.events.push(['addFonts', function() {
-      this.addFileToVFS('DINLightAlt.ttf', DINLightAlt_normal);
-      this.addFont('DINLightAlt.ttf', 'DINLightAlt', 'normal');
+      this.addFileToVFS('DINLightAlternate.ttf', DINLightAlternatenormal);
+      this.addFont('DINLightAlternate.ttf', 'DINLightAlternate', 'normal');
     }]);
 
     // Global variables
@@ -805,7 +805,7 @@ Castle Fine Art Team`);
       const doc = new jsPDF();
 
       // Set up custom font
-      doc.setFont('DINLightAlt', 'normal');
+      doc.setFont('DINLightAlternate', 'normal');
       doc.setFontSize(12);
 
       const insuranceValue = overrideValue || requestData.insuranceValue;
@@ -826,18 +826,18 @@ Castle Fine Art Team`);
 
       // Artwork title
       doc.setFontSize(14);
-      doc.setFont('DINLightAlt', 'bold');
+      doc.setFont('DINLightAlternate', 'bold');
       doc.text(`'${requestData.artworkTitle}'`, 105, y, { align: 'center' });
       y += 10;
 
       // Artist name
       doc.setFontSize(12);
-      doc.setFont('DINLightAlt', 'bold');
+      doc.setFont('DINLightAlternate', 'bold');
       doc.text(`By ${requestData.artistName}`, 105, y, { align: 'center' });
       y += 10;
 
       // Medium
-      doc.setFont('DINLightAlt', 'normal');
+      doc.setFont('DINLightAlternate', 'normal');
       doc.text(`A Hand-Signed ${requestData.medium}`, 105, y, { align: 'center' });
       y += 20;
 
@@ -876,7 +876,7 @@ Castle Fine Art Team`);
 
       // Purchase Details
       doc.setFontSize(12);
-      doc.setFont('DINLightAlt', 'normal');
+      doc.setFont('DINLightAlternate', 'normal');
       doc.text(`Purchased | ${new Date(requestData.purchaseDate).toLocaleDateString()}`, 105, y, {
         align: 'center'
       });
@@ -894,14 +894,14 @@ Castle Fine Art Team`);
 
       // Provenance paragraph
       doc.setFontSize(10);
-      doc.setFont('DINLightAlt', 'italic');
+      doc.setFont('DINLightAlternate', 'italic');
       const provenanceText =
         'This letter of provenance is provided by Castle Fine Art to establish the ownership and authenticity of an original piece of artwork. This piece of original artwork is sold by Washington Green Retail Limited trading as Castle Fine Art with a verified confidence that it is the original artwork of the artist specified.';
       doc.text(provenanceText, 20, y, { maxWidth: 170 });
       y += 25;
 
       // Footer
-      doc.setFont('DINLightAlt', 'normal');
+      doc.setFont('DINLightAlternate', 'normal');
       doc.setFontSize(12);
       doc.text('Please retain this document for your records.', 105, y, { align: 'center' });
 
