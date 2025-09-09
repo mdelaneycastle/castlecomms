@@ -296,15 +296,9 @@
       <div id="request-tab" class="tab-content active">
         <h2>Create LOP Request</h2>
         <form id="lop-request-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="customer-name">Customer Name *</label>
-              <input type="text" id="customer-name" name="customerName" required>
-            </div>
-            <div class="form-group">
-              <label for="customer-email">Customer Email *</label>
-              <input type="email" id="customer-email" name="customerEmail" required>
-            </div>
+          <div class="form-group">
+            <label for="customer-name">Customer Name *</label>
+            <input type="text" id="customer-name" name="customerName" required>
           </div>
 
           <div class="form-row">
@@ -501,7 +495,6 @@
         // Create request object
         const request = {
           customerName: formData.get('customerName'),
-          customerEmail: formData.get('customerEmail'),
           artworkTitle: formData.get('artworkTitle'),
           artistName: formData.get('artistName'),
           medium: formData.get('medium'),
@@ -563,7 +556,7 @@
             <div>
               <h3>${request.artworkTitle}</h3>
               <p><strong>Customer:</strong> ${request.customerName}</p>
-              <p><strong>Email:</strong> ${request.customerEmail}</p>
+              <p><strong>Email:</strong> ${request.requesterEmail}</p>
               <p><strong>Artist:</strong> ${request.artistName}</p>
               <p><strong>Medium:</strong> ${request.medium}</p>
               <p><strong>Purchase Date:</strong> ${request.purchaseDate}</p>
@@ -658,7 +651,7 @@ Insurance Value: £${value}
 Best regards,
 Castle Fine Art Team`);
 
-      const mailtoLink = `mailto:${requestData.customerEmail}?subject=${subject}&body=${body}`;
+      const mailtoLink = `mailto:${requestData.requesterEmail}?subject=${subject}&body=${body}`;
       window.open(mailtoLink);
     }
 
