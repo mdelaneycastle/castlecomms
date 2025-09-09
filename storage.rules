@@ -42,7 +42,7 @@ service firebase.storage {
                     request.auth.token.admin == true;
     }
     
-    // LOP (Letter of Provenance) images - authenticated users can upload for requests, admins can read all
+    // LOP (Letter of Provenance) images - authenticated users can upload for requests
     match /lop-images/{imageId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null &&
