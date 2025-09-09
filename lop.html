@@ -933,10 +933,10 @@ Castle Fine Art Team`);
       // Insurance Value (centered)
       if (insuranceValue) {
         doc.text(`Recommended Insurance Value | £${insuranceValue}`, 105, y, { align: 'center' });
-        y += 30; // 3 line breaks
+        y += 20; // 2 line breaks instead of 3
       } else {
         console.warn('⚠️ No insurance value found for PDF');
-        y += 30; // Still add space even if no value
+        y += 20; // Still add space even if no value
       }
 
       // Provenance paragraph
