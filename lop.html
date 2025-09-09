@@ -838,11 +838,22 @@ Castle Fine Art Team`);
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Set up font - use Helvetica for now since custom font isn't loading properly
+      // Set up font - use Helvetica for now since custom DIN LightAlternate font file has ES6 import issues
+      // The font file needs to be regenerated without ES6 imports for browser compatibility
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
 
-      const insuranceValue = overrideValue || requestData.insuranceValue;
+      // Get insurance value - prioritize the override value passed from approval
+      let insuranceValue = overrideValue || requestData.insuranceValue;
+      
+      // If still no value, try to get it from the approval input field
+      if (!insuranceValue && requestData.id) {
+        const valueInput = document.getElementById(`value-${requestData.id}`);
+        if (valueInput && valueInput.value) {
+          insuranceValue = parseFloat(valueInput.value);
+        }
+      }
+      
       console.log('🔍 PDF Generation - Insurance Value:', insuranceValue, 'Override:', overrideValue, 'Request:', requestData.insuranceValue);
       
       // Start lower on page with extra line break
