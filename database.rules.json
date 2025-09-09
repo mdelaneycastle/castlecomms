@@ -101,6 +101,33 @@
                        newData.child('read').isBoolean()"
         }
       }
+    },
+    
+    "lopRequests": {
+      ".read": "auth != null && (auth.token.admin == true)",
+      ".indexOn": ["status", "requesterId", "submittedAt"],
+      "$requestId": {
+        ".read": "auth != null && (
+          auth.token.admin == true || 
+          data.child('requesterId').val() == auth.uid
+        )",
+        ".write": "auth != null && (
+          (!data.exists() && auth.uid != null) ||
+          (data.exists() && auth.token.admin == true)
+        )",
+        ".validate": "newData.hasChildren(['customerName', 'artworkTitle', 'artistName', 'medium', 'purchaseDate', 'soNumber', 'gallery', 'imageUrl', 'requesterId', 'requesterEmail', 'status', 'submittedAt']) && 
+                     newData.child('customerName').isString() && 
+                     newData.child('artworkTitle').isString() && 
+                     newData.child('artistName').isString() && 
+                     newData.child('medium').isString() && 
+                     newData.child('purchaseDate').isString() && 
+                     newData.child('soNumber').isString() && 
+                     newData.child('gallery').isString() && 
+                     newData.child('imageUrl').isString() && 
+                     newData.child('requesterId').isString() && 
+                     newData.child('requesterEmail').isString() && 
+                     newData.child('status').isString()"
+      }
     }
   }
 }
