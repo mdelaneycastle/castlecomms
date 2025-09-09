@@ -2702,13 +2702,7 @@
       background: rgba(220, 53, 69, 0.2);
     }
     
-    .admin-only {
-      display: none;
-    }
-    
-    .admin-only.show {
-      display: inline-flex;
-    }
+    /* Admin elements are now controlled by Firebase authUtils.toggleAdminElements() using [data-admin-only] */
 
     .ticket-actions {
       text-align: center;
@@ -4655,7 +4649,7 @@ async function loadTickets() {
             <button class="edit-ticket-btn" onclick="event.stopPropagation(); editTicket('${ticket.id}')" title="Edit Ticket">
               ✏️ Edit
             </button>
-            <button class="delete-ticket-btn admin-only" onclick="event.stopPropagation(); deleteTicket('${ticket.id}', '${ticket.ticketId}')" title="Delete Ticket (Admin Only)">
+            <button class="delete-ticket-btn" data-admin-only onclick="event.stopPropagation(); deleteTicket('${ticket.id}', '${ticket.ticketId}')" title="Delete Ticket (Admin Only)">
               🗑️ Delete
             </button>
           </div></td>
@@ -4673,8 +4667,10 @@ async function loadTickets() {
     // Update visible ticket counter
     updateVisibleTicketCount(tickets);
     
-    // Check admin status after tickets are rendered
-    checkAdminStatus();
+    // Check admin status after tickets are rendered using Firebase auth
+    if (window.authUtils) {
+      window.authUtils.toggleAdminElements();
+    }
     
   } catch (error) {
     console.error('Error loading tickets:', error);
@@ -7772,45 +7768,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 })();
 
-// Admin functionality
-function checkAdminStatus() {
-  const adminEmails = [
-    'mdelaney@castlefineart.com',
-    'admin@castlefineart.com',
-    'appleone@castlefineart.com'
-  ];
-  
-  console.log('🔍 Checking admin status...');
-  console.log('Current user:', currentUser);
-  console.log('Current user email:', currentUser?.email);
-  console.log('Admin emails:', adminEmails);
-  
-  if (currentUser && adminEmails.includes(currentUser.email)) {
-    // Show all admin-only elements
-    const adminElements = document.querySelectorAll('.admin-only');
-    console.log('Found admin elements:', adminElements.length);
-    
-    adminElements.forEach(element => {
-      element.classList.add('show');
-      console.log('Showing admin element:', element);
-    });
-    
-    console.log('✅ Admin access granted for:', currentUser.email);
-    return true;
-  } else {
-    // Hide all admin-only elements
-    document.querySelectorAll('.admin-only').forEach(element => {
-      element.classList.remove('show');
-    });
-    console.log('❌ Admin access denied for:', currentUser?.email);
-    return false;
-  }
-}
+// Admin functionality now handled by Firebase authUtils.toggleAdminElements()
 
 // Delete ticket function (Admin only)
 async function deleteTicket(ticketDocId, ticketId) {
-  // Double-check admin status
-  if (!checkAdminStatus()) {
+  // Double-check admin status using Firebase auth
+  if (!window.authUtils || !(await window.authUtils.isAdmin())) {
     alert('❌ Access denied. This function is only available to administrators.');
     return;
   }
