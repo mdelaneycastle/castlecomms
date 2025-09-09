@@ -662,8 +662,9 @@
           approvedAt: firebase.database.ServerValue.TIMESTAMP
         });
 
-        // Generate PDF and send email notification
-        await generateLOPPDF(requestData);
+        // Generate PDF and send email notification with the insurance value
+        const requestWithValue = { ...requestData, insuranceValue: parseFloat(value) };
+        await generateLOPPDF(requestWithValue);
         sendApprovalEmail(requestData, value);
 
         showAlert('LOP approved! PDF generated and email opened. Please attach the downloaded PDF to the email before sending.', 'success');
@@ -837,62 +838,36 @@ Castle Fine Art Team`);
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Set up font (try custom font, fallback to Helvetica)
-      try {
-        doc.setFont('DINLightAlternate', 'normal');
-        console.log('✅ Using DIN LightAlternate font for PDF');
-      } catch (error) {
-        console.warn('⚠️ Custom font not available, using Helvetica:', error);
-        doc.setFont('helvetica', 'normal');
-      }
+      // Set up font - use Helvetica for now since custom font isn't loading properly
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
 
       const insuranceValue = overrideValue || requestData.insuranceValue;
-      let y = 25;
+      console.log('🔍 PDF Generation - Insurance Value:', insuranceValue, 'Override:', overrideValue, 'Request:', requestData.insuranceValue);
+      
+      // Start lower on page with extra line break
+      let y = 35;
 
       // Greeting
       doc.text(`Dear ${requestData.customerName},`, 20, y);
-      y += 10;
+      y += 15;
 
-      // Intro
+      // Thank you intro
       doc.text(
         `Thank you for your purchase from Castle Fine Art, please find the provenance details of your artwork below.`,
         20,
         y,
         { maxWidth: 170 }
       );
-      y += 20;
+      y += 25;
 
-      // Artwork title
+      // Artwork title (centered)
       doc.setFontSize(14);
-      try {
-        doc.setFont('DINLightAlternate', 'bold');
-      } catch (e) {
-        doc.setFont('helvetica', 'bold');
-      }
+      doc.setFont('helvetica', 'bold');
       doc.text(`'${requestData.artworkTitle}'`, 105, y, { align: 'center' });
-      y += 10;
+      y += 15;
 
-      // Artist name
-      doc.setFontSize(12);
-      try {
-        doc.setFont('DINLightAlternate', 'bold');
-      } catch (e) {
-        doc.setFont('helvetica', 'bold');
-      }
-      doc.text(`By ${requestData.artistName}`, 105, y, { align: 'center' });
-      y += 10;
-
-      // Medium
-      try {
-        doc.setFont('DINLightAlternate', 'normal');
-      } catch (e) {
-        doc.setFont('helvetica', 'normal');
-      }
-      doc.text(`A Hand-Signed ${requestData.medium}`, 105, y, { align: 'center' });
-      y += 20;
-
-      // Artwork Image
+      // Artwork Image (AFTER title)
       if (requestData.imageUrl) {
         const imageLoaded = await new Promise((resolve) => {
           const img = new Image();
@@ -921,50 +896,47 @@ Castle Fine Art Team`);
         });
 
         if (imageLoaded) {
-          y += 65;
+          y += 70; // Space after image
         }
       }
 
-      // Purchase Details
+      // Artist name (centered, AFTER image)
       doc.setFontSize(12);
-      try {
-        doc.setFont('DINLightAlternate', 'normal');
-      } catch (e) {
-        doc.setFont('helvetica', 'normal');
-      }
-      doc.text(`Purchased | ${new Date(requestData.purchaseDate).toLocaleDateString()}`, 105, y, {
-        align: 'center'
-      });
+      doc.setFont('helvetica', 'bold');
+      doc.text(`By ${requestData.artistName}`, 105, y, { align: 'center' });
+      y += 12;
+
+      // Medium (centered, AFTER artist)
+      doc.setFont('helvetica', 'normal');
+      doc.text(`A Hand-Signed ${requestData.medium}`, 105, y, { align: 'center' });
+      y += 20; // 2 line breaks
+
+      // Purchase Details (centered)
+      doc.text(`Purchased | ${new Date(requestData.purchaseDate).toLocaleDateString()}`, 105, y, { align: 'center' });
       y += 8;
       doc.text(`Order number | ${requestData.soNumber}`, 105, y, { align: 'center' });
       y += 8;
       doc.text(`Castle Fine Art ${requestData.gallery}`, 105, y, { align: 'center' });
-      y += 8;
+      y += 20; // 2 line breaks
 
-      // Insurance Value
+      // Insurance Value (centered)
       if (insuranceValue) {
         doc.text(`Recommended Insurance Value | £${insuranceValue}`, 105, y, { align: 'center' });
-        y += 15;
+        y += 30; // 3 line breaks
+      } else {
+        console.warn('⚠️ No insurance value found for PDF');
+        y += 30; // Still add space even if no value
       }
 
       // Provenance paragraph
       doc.setFontSize(10);
-      try {
-        doc.setFont('DINLightAlternate', 'italic');
-      } catch (e) {
-        doc.setFont('helvetica', 'italic');
-      }
-      const provenanceText =
-        'This letter of provenance is provided by Castle Fine Art to establish the ownership and authenticity of an original piece of artwork. This piece of original artwork is sold by Washington Green Retail Limited trading as Castle Fine Art with a verified confidence that it is the original artwork of the artist specified.';
+      doc.setFont('helvetica', 'italic');
+      const provenanceText = 'This letter of provenance is provided by Castle Fine Art to establish the ownership and authenticity of an original piece of artwork. This piece of original artwork is sold by Washington Green Retail Limited trading as Castle Fine Art with a verified confidence that it is the original artwork of the artist specified.';
       doc.text(provenanceText, 20, y, { maxWidth: 170 });
       y += 25;
 
       // Footer
-      try {
-        doc.setFont('DINLightAlternate', 'normal');
-      } catch (e) {
-        doc.setFont('helvetica', 'normal');
-      }
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
       doc.text('Please retain this document for your records.', 105, y, { align: 'center' });
 
