@@ -347,6 +347,13 @@
 
           <button type="submit" class="btn btn-primary">Submit LOP Request</button>
         </form>
+        
+        <div style="margin-top: 3rem;">
+          <h3>Your Submitted Requests</h3>
+          <div id="user-pending-requests" class="pending-requests">
+            <p>No submitted requests.</p>
+          </div>
+        </div>
       </div>
 
       <!-- Approvals Tab -->
@@ -695,6 +702,21 @@ Castle Fine Art Team`);
 
         displayUserApprovedRequests(approvedRequests);
 
+        // Also load user's pending requests for the Request Form tab
+        const pendingRequests = [];
+        snapshot.forEach(child => {
+          const data = child.val();
+          // Include pending and rejected requests in the Request Form tab
+          if (data.status === 'pending' || data.status === 'rejected') {
+            pendingRequests.push({
+              id: child.key,
+              ...data
+            });
+          }
+        });
+
+        displayUserPendingRequests(pendingRequests);
+
       } catch (error) {
         console.error('Error loading user data:', error);
       }
@@ -718,6 +740,33 @@ Castle Fine Art Team`);
           </div>
           <div>
             <button class="btn btn-primary" onclick="downloadLOP('${request.id}')">Download PDF</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function displayUserPendingRequests(requests) {
+      const container = document.getElementById('user-pending-requests');
+      
+      if (requests.length === 0) {
+        container.innerHTML = '<p>No submitted requests.</p>';
+        return;
+      }
+
+      container.innerHTML = requests.map(request => `
+        <div class="pending-request">
+          <div class="request-details">
+            <div>
+              <h4>${request.artworkTitle}</h4>
+              <p><strong>Artist:</strong> ${request.artistName}</p>
+              <p><strong>Medium:</strong> ${request.medium}</p>
+              <p><strong>Status:</strong> <span style="color: ${request.status === 'pending' ? '#ff9800' : '#f44336'}; font-weight: bold; text-transform: capitalize;">${request.status}</span></p>
+              <p><strong>Submitted:</strong> ${new Date(request.submittedAt).toLocaleDateString()}</p>
+              ${request.status === 'rejected' ? '<p style="color: #f44336;"><em>This request was not approved.</em></p>' : ''}
+            </div>
+            <div>
+              <img src="${request.imageUrl}" alt="Artwork" class="request-image" style="max-width: 100px; max-height: 100px;">
+            </div>
           </div>
         </div>
       `).join('');
@@ -748,86 +797,106 @@ Castle Fine Art Team`);
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Set up fonts and colors
+      // Set up fonts
       doc.setFont('helvetica');
       
-      // Add Castle Fine Art letterhead/header
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Castle Fine Art', 105, 20, { align: 'center' });
-      
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Letter of Provenance', 105, 30, { align: 'center' });
-      
-      // Add line separator
-      doc.setLineWidth(0.5);
-      doc.line(20, 35, 190, 35);
-      
-      let yPos = 50;
+      let yPos = 30;
       
       // Customer greeting
       doc.setFontSize(12);
       doc.text(`Dear ${requestData.customerName},`, 20, yPos);
-      yPos += 15;
+      yPos += 20;
       
       // Introduction text
       const introText = 'Thank you for your purchase from Castle Fine Art, please find the provenance details of your artwork below.';
       doc.text(introText, 20, yPos, { maxWidth: 170 });
-      yPos += 25;
+      yPos += 30;
       
       // Artwork details box
-      doc.setFillColor(245, 245, 245);
-      doc.rect(20, yPos, 170, 80, 'F');
       doc.setDrawColor(0, 0, 0);
-      doc.rect(20, yPos, 170, 80);
+      doc.rect(20, yPos, 170, 120);
       
       // Artwork title
-      yPos += 15;
+      yPos += 20;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
       doc.text(`'${requestData.artworkTitle}'`, 105, yPos, { align: 'center' });
       
       yPos += 15;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
       
-      // Add image if available
+      // Add artwork image
       if (requestData.imageUrl) {
         try {
-          // Note: In a real implementation, you'd need to handle CORS for external images
-          // For now, we'll add a placeholder for the image
-          doc.text('[Artwork Image]', 105, yPos, { align: 'center' });
-          yPos += 15;
+          // Create a promise to load the image
+          const imagePromise = new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+              try {
+                // Calculate dimensions to fit in the space while maintaining aspect ratio
+                const maxWidth = 60;
+                const maxHeight = 40;
+                const imgWidth = this.width;
+                const imgHeight = this.height;
+                
+                let newWidth = maxWidth;
+                let newHeight = (imgHeight * maxWidth) / imgWidth;
+                
+                if (newHeight > maxHeight) {
+                  newHeight = maxHeight;
+                  newWidth = (imgWidth * maxHeight) / imgHeight;
+                }
+                
+                const xPos = 105 - (newWidth / 2);
+                const currentYPos = yPos;
+                
+                // Add image to PDF
+                doc.addImage(this, 'JPEG', xPos, currentYPos, newWidth, newHeight);
+                resolve();
+              } catch (error) {
+                console.warn('Could not add image to PDF:', error);
+                resolve(); // Continue without image
+              }
+            };
+            img.onerror = function() {
+              console.warn('Could not load image for PDF');
+              resolve(); // Continue without image
+            };
+            img.src = requestData.imageUrl;
+          });
+          
+          await imagePromise;
+          yPos += 45;
         } catch (error) {
-          console.warn('Could not add image to PDF:', error);
+          console.warn('Error processing image:', error);
           yPos += 15;
         }
       }
       
       // Artist name
       doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
       doc.text(`By ${requestData.artistName}`, 105, yPos, { align: 'center' });
-      yPos += 10;
+      yPos += 15;
       
       // Medium
       doc.setFont('helvetica', 'normal');
       doc.text(`A Hand-Signed ${requestData.medium}`, 105, yPos, { align: 'center' });
-      yPos += 20;
+      yPos += 25;
       
       // Purchase details
-      yPos += 15;
       doc.text(`Purchased | ${new Date(requestData.purchaseDate).toLocaleDateString()}`, 105, yPos, { align: 'center' });
       yPos += 10;
       doc.text(`Order number | ${requestData.soNumber}`, 105, yPos, { align: 'center' });
       yPos += 10;
       doc.text(`Castle Fine Art ${requestData.gallery}`, 105, yPos, { align: 'center' });
-      
-      yPos += 25;
+      yPos += 20;
       
       // Insurance value
       if (requestData.insuranceValue) {
         doc.text(`Recommended Insurance Value | £${requestData.insuranceValue}`, 105, yPos, { align: 'center' });
+        yPos += 30;
+      } else {
         yPos += 20;
       }
       
@@ -841,12 +910,6 @@ Castle Fine Art Team`);
       // Footer instruction
       doc.setFont('helvetica', 'normal');
       doc.text('Please retain this document for your records', 105, yPos, { align: 'center' });
-      
-      // Add footer with generation date
-      doc.setFontSize(8);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 280);
-      doc.text('Castle Fine Art - Letter of Provenance', 190, 280, { align: 'right' });
       
       // Download the PDF
       const filename = `LOP_${requestData.artworkTitle.replace(/[^a-z0-9]/gi, '_')}_${requestData.soNumber}.pdf`;
