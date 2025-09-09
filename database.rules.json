@@ -77,7 +77,7 @@
     },
 
     "lopRequests": {
-      ".read": "auth != null && (auth.token.admin == true)",
+      ".read": "auth != null",
       ".indexOn": ["status", "requesterId", "submittedAt"],
       "$requestId": {
         ".read": "auth != null && (auth.token.admin == true || data.child('requesterId').val() == auth.uid)",
