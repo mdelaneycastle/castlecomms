@@ -381,12 +381,20 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
   <!-- PDF generation library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Custom DIN LightAlternative font for PDF -->
+  <script src="fonts/DINLightAlt-normal.js"></script>
   <script src="firebase-init.js"></script>
   <script src="shared-components.js"></script>
   <script src="script.js"></script>
 
   <script>
     console.log("🔥 LOP page initialized");
+
+    // Register the custom DIN LightAlternative font
+    jsPDF.API.events.push(['addFonts', function() {
+      this.addFileToVFS('DINLightAlt.ttf', DINLightAlt_normal);
+      this.addFont('DINLightAlt.ttf', 'DINLightAlt', 'normal');
+    }]);
 
     // Global variables
     let currentUser = null;
@@ -792,139 +800,112 @@ Castle Fine Art Team`);
       }
     }
 
-    async function generateLOPPDF(requestData) {
+    async function generateLOPPDF(requestData, overrideValue = null) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Set up fonts
-      doc.setFont('helvetica');
-      
-      let yPos = 30;
-      
-      // Customer greeting
+      // Set up custom font
+      doc.setFont('DINLightAlt', 'normal');
       doc.setFontSize(12);
-      doc.text(`Dear ${requestData.customerName},`, 20, yPos);
-      yPos += 20;
-      
-      // Introduction text
-      const introText = 'Thank you for your purchase from Castle Fine Art, please find the provenance details of your artwork below.';
-      doc.text(introText, 20, yPos, { maxWidth: 170 });
-      yPos += 30;
-      
-      // Main artwork details box - make it slimmer as requested
-      doc.setDrawColor(0, 0, 0);
-      doc.setLineWidth(1);
-      const boxWidth = 140; // Slimmer box
-      const boxHeight = 100; // Shorter box
-      const boxX = 35; // Center the slimmer box
-      doc.rect(boxX, yPos, boxWidth, boxHeight);
-      
-      const boxTop = yPos;
-      yPos += 15;
-      
+
+      const insuranceValue = overrideValue || requestData.insuranceValue;
+      let y = 25;
+
+      // Greeting
+      doc.text(`Dear ${requestData.customerName},`, 20, y);
+      y += 10;
+
+      // Intro
+      doc.text(
+        `Thank you for your purchase from Castle Fine Art, please find the provenance details of your artwork below.`,
+        20,
+        y,
+        { maxWidth: 170 }
+      );
+      y += 20;
+
       // Artwork title
-      doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
-      doc.text(`'${requestData.artworkTitle}'`, 105, yPos, { align: 'center' });
-      yPos += 15;
-      
-      // Larger image text box area as requested
-      const imageBoxY = yPos;
-      const imageBoxHeight = 35; // Larger height for image area
-      const imageBoxX = boxX + 5;
-      const imageBoxWidth = boxWidth - 10;
-      
-      // Draw the image text box border
-      doc.setLineWidth(0.5);
-      doc.rect(imageBoxX, imageBoxY, imageBoxWidth, imageBoxHeight);
-      
-      // Add artwork image in the text box
+      doc.setFont('DINLightAlt', 'bold');
+      doc.text(`'${requestData.artworkTitle}'`, 105, y, { align: 'center' });
+      y += 10;
+
+      // Artist name
+      doc.setFontSize(12);
+      doc.setFont('DINLightAlt', 'bold');
+      doc.text(`By ${requestData.artistName}`, 105, y, { align: 'center' });
+      y += 10;
+
+      // Medium
+      doc.setFont('DINLightAlt', 'normal');
+      doc.text(`A Hand-Signed ${requestData.medium}`, 105, y, { align: 'center' });
+      y += 20;
+
+      // Artwork Image
       if (requestData.imageUrl) {
-        try {
-          const imagePromise = new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = function() {
-              try {
-                // Calculate dimensions to fit within the image box
-                const maxWidth = imageBoxWidth - 4; // Leave margins
-                const maxHeight = imageBoxHeight - 4;
-                const imgWidth = this.width;
-                const imgHeight = this.height;
-                
-                let newWidth = maxWidth;
-                let newHeight = (imgHeight * maxWidth) / imgWidth;
-                
-                // Fit within box height
-                if (newHeight > maxHeight) {
-                  newHeight = maxHeight;
-                  newWidth = (imgWidth * maxHeight) / imgHeight;
-                }
-                
-                const xPos = imageBoxX + (imageBoxWidth - newWidth) / 2;
-                const imageYPos = imageBoxY + (imageBoxHeight - newHeight) / 2;
-                
-                // Add image to PDF
-                doc.addImage(this, 'JPEG', xPos, imageYPos, newWidth, newHeight);
-                resolve();
-              } catch (error) {
-                console.warn('Could not add image to PDF:', error);
-                resolve();
-              }
-            };
-            img.onerror = function() {
-              console.warn('Could not load image for PDF');
-              resolve();
-            };
-            img.src = requestData.imageUrl;
-          });
-          
-          await imagePromise;
-        } catch (error) {
-          console.warn('Error processing image:', error);
+        const imageLoaded = await new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = function () {
+            const maxWidth = 100;
+            const maxHeight = 60;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+              height = (maxWidth / width) * height;
+              width = maxWidth;
+            }
+            if (height > maxHeight) {
+              width = (maxHeight / height) * width;
+              height = maxHeight;
+            }
+
+            const x = (210 - width) / 2;
+            doc.addImage(img, 'JPEG', x, y, width, height);
+            resolve(true);
+          };
+          img.onerror = () => resolve(false);
+          img.src = requestData.imageUrl;
+        });
+
+        if (imageLoaded) {
+          y += 65;
         }
       }
-      
-      // Artist name - below the image box
-      yPos = imageBoxY + imageBoxHeight + 10;
-      doc.setFont('helvetica', 'bold');
+
+      // Purchase Details
       doc.setFontSize(12);
-      doc.text(`By ${requestData.artistName}`, 105, yPos, { align: 'center' });
-      yPos += 10;
-      
-      // Medium
-      doc.setFont('helvetica', 'normal');
-      doc.text(`A Hand-Signed ${requestData.medium}`, 105, yPos, { align: 'center' });
-      
-      // Move outside the box for purchase details
-      yPos = boxTop + boxHeight + 20;
-      
-      // Purchase details
-      doc.text(`Purchased | ${new Date(requestData.purchaseDate).toLocaleDateString()}`, 105, yPos, { align: 'center' });
-      yPos += 8;
-      doc.text(`Order number | ${requestData.soNumber}`, 105, yPos, { align: 'center' });
-      yPos += 8;
-      doc.text(`Castle Fine Art ${requestData.gallery}`, 105, yPos, { align: 'center' });
-      yPos += 15;
-      
-      // Insurance value - ONLY if it exists
-      if (requestData.insuranceValue) {
-        doc.text(`Recommended Insurance Value | £${requestData.insuranceValue}`, 105, yPos, { align: 'center' });
-        yPos += 20;
+      doc.setFont('DINLightAlt', 'normal');
+      doc.text(`Purchased | ${new Date(requestData.purchaseDate).toLocaleDateString()}`, 105, y, {
+        align: 'center'
+      });
+      y += 8;
+      doc.text(`Order number | ${requestData.soNumber}`, 105, y, { align: 'center' });
+      y += 8;
+      doc.text(`Castle Fine Art ${requestData.gallery}`, 105, y, { align: 'center' });
+      y += 8;
+
+      // Insurance Value
+      if (insuranceValue) {
+        doc.text(`Recommended Insurance Value | £${insuranceValue}`, 105, y, { align: 'center' });
+        y += 15;
       }
-      
-      // Provenance statement
+
+      // Provenance paragraph
       doc.setFontSize(10);
-      doc.setFont('helvetica', 'italic');
-      const provenanceText = `This letter of provenance is provided by Castle Fine Art to establish the ownership and authenticity of an original piece of artwork. This piece of original artwork is sold by Washington Green Retail Limited trading as Castle Fine Art with a verified confidence that is the original artwork of the artist specified.`;
-      doc.text(provenanceText, 20, yPos, { maxWidth: 170 });
-      yPos += 25;
-      
-      // Footer instruction
-      doc.setFont('helvetica', 'normal');
-      doc.text('Please retain this document for your records', 105, yPos, { align: 'center' });
-      
-      // Download the PDF
+      doc.setFont('DINLightAlt', 'italic');
+      const provenanceText =
+        'This letter of provenance is provided by Castle Fine Art to establish the ownership and authenticity of an original piece of artwork. This piece of original artwork is sold by Washington Green Retail Limited trading as Castle Fine Art with a verified confidence that it is the original artwork of the artist specified.';
+      doc.text(provenanceText, 20, y, { maxWidth: 170 });
+      y += 25;
+
+      // Footer
+      doc.setFont('DINLightAlt', 'normal');
+      doc.setFontSize(12);
+      doc.text('Please retain this document for your records.', 105, y, { align: 'center' });
+
+      // Save
       const filename = `LOP_${requestData.artworkTitle.replace(/[^a-z0-9]/gi, '_')}_${requestData.soNumber}.pdf`;
       doc.save(filename);
     }
