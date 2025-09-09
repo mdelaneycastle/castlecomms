@@ -347,6 +347,13 @@
 
           <button type="submit" class="btn btn-primary">Submit LOP Request</button>
         </form>
+        
+        <div style="margin-top: 3rem;">
+          <h3>Your Submitted Requests</h3>
+          <div id="user-pending-requests" class="pending-requests">
+            <p>No submitted requests.</p>
+          </div>
+        </div>
       </div>
 
       <!-- Approvals Tab -->
@@ -695,6 +702,21 @@ Castle Fine Art Team`);
 
         displayUserApprovedRequests(approvedRequests);
 
+        // Also load user's pending requests for the Request Form tab
+        const pendingRequests = [];
+        snapshot.forEach(child => {
+          const data = child.val();
+          // Include pending and rejected requests in the Request Form tab
+          if (data.status === 'pending' || data.status === 'rejected') {
+            pendingRequests.push({
+              id: child.key,
+              ...data
+            });
+          }
+        });
+
+        displayUserPendingRequests(pendingRequests);
+
       } catch (error) {
         console.error('Error loading user data:', error);
       }
@@ -723,6 +745,31 @@ Castle Fine Art Team`);
       `).join('');
     }
 
+    function displayUserPendingRequests(requests) {
+      const container = document.getElementById('user-pending-requests');
+      
+      if (requests.length === 0) {
+        container.innerHTML = '<p>No submitted requests.</p>';
+        return;
+      }
+
+      container.innerHTML = requests.map(request => `
+        <div class="pending-request">
+          <div class="request-details">
+            <div>
+              <h4>${request.artworkTitle}</h4>
+              <p><strong>Client:</strong> ${request.customerName}</p>
+              <p><strong>Artist:</strong> ${request.artistName}</p>
+              <p><strong>SO Number:</strong> ${request.soNumber}</p>
+              <p><strong>Status:</strong> <span style="color: ${request.status === 'pending' ? '#ff9800' : '#f44336'}; font-weight: bold; text-transform: capitalize;">${request.status}</span></p>
+            </div>
+            <div>
+              <img src="${request.imageUrl}" alt="Artwork" class="request-image" style="max-width: 100px; max-height: 100px;">
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
 
     async function downloadLOP(requestId) {
       try {
@@ -764,58 +811,70 @@ Castle Fine Art Team`);
       doc.text(introText, 20, yPos, { maxWidth: 170 });
       yPos += 30;
       
-      // Artwork details box
+      // Main artwork details box - make it slimmer as requested
       doc.setDrawColor(0, 0, 0);
-      doc.rect(20, yPos, 170, 120);
+      doc.setLineWidth(1);
+      const boxWidth = 140; // Slimmer box
+      const boxHeight = 100; // Shorter box
+      const boxX = 35; // Center the slimmer box
+      doc.rect(boxX, yPos, boxWidth, boxHeight);
+      
+      const boxTop = yPos;
+      yPos += 15;
       
       // Artwork title
-      yPos += 20;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
       doc.text(`'${requestData.artworkTitle}'`, 105, yPos, { align: 'center' });
+      yPos += 15;
       
-      // Fixed image box area - positions stay consistent
-      const imageBoxY = yPos + 15;
-      const imageBoxHeight = 45; // Fixed height for image area
+      // Larger image text box area as requested
+      const imageBoxY = yPos;
+      const imageBoxHeight = 35; // Larger height for image area
+      const imageBoxX = boxX + 5;
+      const imageBoxWidth = boxWidth - 10;
       
-      // Add artwork image in fixed box
+      // Draw the image text box border
+      doc.setLineWidth(0.5);
+      doc.rect(imageBoxX, imageBoxY, imageBoxWidth, imageBoxHeight);
+      
+      // Add artwork image in the text box
       if (requestData.imageUrl) {
         try {
-          // Create a promise to load the image
           const imagePromise = new Promise((resolve, reject) => {
             const img = new Image();
             img.crossOrigin = 'anonymous';
             img.onload = function() {
               try {
-                // Calculate dimensions to fit within the fixed box height
-                const maxWidth = 60;
-                const maxHeight = imageBoxHeight - 5; // Leave 5pt margin
+                // Calculate dimensions to fit within the image box
+                const maxWidth = imageBoxWidth - 4; // Leave margins
+                const maxHeight = imageBoxHeight - 4;
                 const imgWidth = this.width;
                 const imgHeight = this.height;
                 
                 let newWidth = maxWidth;
                 let newHeight = (imgHeight * maxWidth) / imgWidth;
                 
-                // Ensure image fits within the fixed height
+                // Fit within box height
                 if (newHeight > maxHeight) {
                   newHeight = maxHeight;
                   newWidth = (imgWidth * maxHeight) / imgHeight;
                 }
                 
-                const xPos = 105 - (newWidth / 2);
-                const imageYPos = imageBoxY + ((imageBoxHeight - newHeight) / 2); // Center vertically in box
+                const xPos = imageBoxX + (imageBoxWidth - newWidth) / 2;
+                const imageYPos = imageBoxY + (imageBoxHeight - newHeight) / 2;
                 
                 // Add image to PDF
                 doc.addImage(this, 'JPEG', xPos, imageYPos, newWidth, newHeight);
                 resolve();
               } catch (error) {
                 console.warn('Could not add image to PDF:', error);
-                resolve(); // Continue without image
+                resolve();
               }
             };
             img.onerror = function() {
               console.warn('Could not load image for PDF');
-              resolve(); // Continue without image
+              resolve();
             };
             img.src = requestData.imageUrl;
           });
@@ -826,31 +885,31 @@ Castle Fine Art Team`);
         }
       }
       
-      // Artist name - always at consistent position after fixed image box
-      yPos = imageBoxY + imageBoxHeight + 5;
+      // Artist name - below the image box
+      yPos = imageBoxY + imageBoxHeight + 10;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
       doc.text(`By ${requestData.artistName}`, 105, yPos, { align: 'center' });
-      yPos += 15;
+      yPos += 10;
       
       // Medium
       doc.setFont('helvetica', 'normal');
       doc.text(`A Hand-Signed ${requestData.medium}`, 105, yPos, { align: 'center' });
-      yPos += 25;
+      
+      // Move outside the box for purchase details
+      yPos = boxTop + boxHeight + 20;
       
       // Purchase details
       doc.text(`Purchased | ${new Date(requestData.purchaseDate).toLocaleDateString()}`, 105, yPos, { align: 'center' });
-      yPos += 10;
+      yPos += 8;
       doc.text(`Order number | ${requestData.soNumber}`, 105, yPos, { align: 'center' });
-      yPos += 10;
+      yPos += 8;
       doc.text(`Castle Fine Art ${requestData.gallery}`, 105, yPos, { align: 'center' });
-      yPos += 20;
+      yPos += 15;
       
-      // Insurance value
+      // Insurance value - ONLY if it exists
       if (requestData.insuranceValue) {
         doc.text(`Recommended Insurance Value | £${requestData.insuranceValue}`, 105, yPos, { align: 'center' });
-        yPos += 30;
-      } else {
         yPos += 20;
       }
       
