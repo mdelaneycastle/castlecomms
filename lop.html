@@ -463,9 +463,19 @@
             claims: token.claims 
           });
           
-          // Show/hide admin tab
+          // Show/hide admin tab and check for duplicates
           const adminElements = document.querySelectorAll('.admin-only');
+          const adminTabs = document.querySelectorAll('#admin-tab');
           console.log('🔍 Found admin elements:', adminElements.length);
+          console.log('🚨 Found admin tabs with same ID:', adminTabs.length);
+          
+          // Remove any duplicate admin tabs
+          if (adminTabs.length > 1) {
+            for (let i = 1; i < adminTabs.length; i++) {
+              console.log('🗑️ Removing duplicate admin tab');
+              adminTabs[i].remove();
+            }
+          }
           
           adminElements.forEach(element => {
             element.style.display = isAdmin ? 'block' : 'none';
@@ -855,18 +865,30 @@ Castle Fine Art Team`);
 
       // Artwork title
       doc.setFontSize(14);
-      doc.setFont('DINLightAlternate', 'bold');
+      try {
+        doc.setFont('DINLightAlternate', 'bold');
+      } catch (e) {
+        doc.setFont('helvetica', 'bold');
+      }
       doc.text(`'${requestData.artworkTitle}'`, 105, y, { align: 'center' });
       y += 10;
 
       // Artist name
       doc.setFontSize(12);
-      doc.setFont('DINLightAlternate', 'bold');
+      try {
+        doc.setFont('DINLightAlternate', 'bold');
+      } catch (e) {
+        doc.setFont('helvetica', 'bold');
+      }
       doc.text(`By ${requestData.artistName}`, 105, y, { align: 'center' });
       y += 10;
 
       // Medium
-      doc.setFont('DINLightAlternate', 'normal');
+      try {
+        doc.setFont('DINLightAlternate', 'normal');
+      } catch (e) {
+        doc.setFont('helvetica', 'normal');
+      }
       doc.text(`A Hand-Signed ${requestData.medium}`, 105, y, { align: 'center' });
       y += 20;
 
@@ -905,7 +927,11 @@ Castle Fine Art Team`);
 
       // Purchase Details
       doc.setFontSize(12);
-      doc.setFont('DINLightAlternate', 'normal');
+      try {
+        doc.setFont('DINLightAlternate', 'normal');
+      } catch (e) {
+        doc.setFont('helvetica', 'normal');
+      }
       doc.text(`Purchased | ${new Date(requestData.purchaseDate).toLocaleDateString()}`, 105, y, {
         align: 'center'
       });
@@ -923,14 +949,22 @@ Castle Fine Art Team`);
 
       // Provenance paragraph
       doc.setFontSize(10);
-      doc.setFont('DINLightAlternate', 'italic');
+      try {
+        doc.setFont('DINLightAlternate', 'italic');
+      } catch (e) {
+        doc.setFont('helvetica', 'italic');
+      }
       const provenanceText =
         'This letter of provenance is provided by Castle Fine Art to establish the ownership and authenticity of an original piece of artwork. This piece of original artwork is sold by Washington Green Retail Limited trading as Castle Fine Art with a verified confidence that it is the original artwork of the artist specified.';
       doc.text(provenanceText, 20, y, { maxWidth: 170 });
       y += 25;
 
       // Footer
-      doc.setFont('DINLightAlternate', 'normal');
+      try {
+        doc.setFont('DINLightAlternate', 'normal');
+      } catch (e) {
+        doc.setFont('helvetica', 'normal');
+      }
       doc.setFontSize(12);
       doc.text('Please retain this document for your records.', 105, y, { align: 'center' });
 
