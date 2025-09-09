@@ -2675,6 +2675,40 @@
       transform: translateY(0);
       background: rgba(0, 0, 0, 0.1);
     }
+    
+    /* Delete Ticket Button Styles (Admin Only) */
+    .delete-ticket-btn {
+      background: none;
+      color: #dc3545;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.875rem;
+      margin-left: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    
+    .delete-ticket-btn:hover {
+      background: rgba(220, 53, 69, 0.1);
+      transform: translateY(-1px);
+    }
+    
+    .delete-ticket-btn:active {
+      transform: translateY(0);
+      background: rgba(220, 53, 69, 0.2);
+    }
+    
+    .admin-only {
+      display: none;
+    }
+    
+    .admin-only.show {
+      display: inline-flex;
+    }
 
     .ticket-actions {
       text-align: center;
@@ -3779,6 +3813,9 @@ async function initializeInternalSystem() {
   
   // Handle direct ticket links (e.g., #ticket-434592)
   handleDirectTicketLink();
+  
+  // Check admin status after everything is loaded
+  checkAdminStatus();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -4617,6 +4654,9 @@ async function loadTickets() {
           <td><div class="ticket-actions">
             <button class="edit-ticket-btn" onclick="event.stopPropagation(); editTicket('${ticket.id}')" title="Edit Ticket">
               ✏️ Edit
+            </button>
+            <button class="delete-ticket-btn admin-only" onclick="event.stopPropagation(); deleteTicket('${ticket.id}', '${ticket.ticketId}')" title="Delete Ticket (Admin Only)">
+              🗑️ Delete
             </button>
           </div></td>
         </tr>
@@ -7728,6 +7768,85 @@ document.addEventListener('DOMContentLoaded', () => {
     mountChips();
   });
 })();
+
+// Admin functionality
+function checkAdminStatus() {
+  const adminEmails = [
+    'mdelaney@castlefineart.com'
+  ];
+  
+  if (currentUser && adminEmails.includes(currentUser.email)) {
+    // Show all admin-only elements
+    document.querySelectorAll('.admin-only').forEach(element => {
+      element.classList.add('show');
+    });
+    console.log('✅ Admin access granted for:', currentUser.email);
+    return true;
+  } else {
+    // Hide all admin-only elements
+    document.querySelectorAll('.admin-only').forEach(element => {
+      element.classList.remove('show');
+    });
+    return false;
+  }
+}
+
+// Delete ticket function (Admin only)
+async function deleteTicket(ticketDocId, ticketId) {
+  // Double-check admin status
+  if (!checkAdminStatus()) {
+    alert('❌ Access denied. This function is only available to administrators.');
+    return;
+  }
+  
+  // Confirm deletion
+  const confirmMessage = `⚠️ WARNING: This will permanently delete ticket ${ticketId} from the database.\n\nThis action CANNOT be undone.\n\nAre you sure you want to continue?`;
+  
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+  
+  // Second confirmation
+  const finalConfirm = `🚨 FINAL CONFIRMATION\n\nYou are about to PERMANENTLY DELETE ticket: ${ticketId}\n\nThis will remove ALL data including:\n- Ticket details\n- Messages\n- History\n- Timer data\n\nType "DELETE" to confirm:`;
+  
+  const userInput = prompt(finalConfirm);
+  
+  if (userInput !== 'DELETE') {
+    alert('❌ Deletion cancelled. Ticket was not deleted.');
+    return;
+  }
+  
+  try {
+    console.log(`🗑️ Admin ${currentUser.email} attempting to delete ticket:`, ticketDocId);
+    
+    // Delete the ticket document from Firebase
+    await db.collection('tickets').doc(ticketDocId).delete();
+    
+    console.log('✅ Ticket deleted successfully from Firebase');
+    
+    // Show success message
+    alert(`✅ Ticket ${ticketId} has been permanently deleted from the database.`);
+    
+    // Reload the tickets table to reflect the deletion
+    await loadTickets();
+    
+  } catch (error) {
+    console.error('❌ Error deleting ticket:', error);
+    
+    // Show user-friendly error message
+    let errorMessage = 'Failed to delete ticket. Please try again.';
+    if (error.code === 'permission-denied') {
+      errorMessage = 'Permission denied. You do not have the required permissions to delete tickets.';
+    } else if (error.code === 'not-found') {
+      errorMessage = 'Ticket not found. It may have already been deleted.';
+    } else if (error.code === 'unauthenticated') {
+      errorMessage = 'Authentication required. Please log in and try again.';
+    }
+    
+    alert(`❌ Error: ${errorMessage}`);
+  }
+}
+
 </script>
 </body>
 </html>
