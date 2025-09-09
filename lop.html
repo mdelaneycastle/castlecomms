@@ -372,6 +372,8 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <!-- PDF generation library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="firebase-init.js"></script>
   <script src="shared-components.js"></script>
   <script src="script.js"></script>
@@ -526,14 +528,19 @@
       if (!isAdmin) return;
 
       try {
+        // Only get PENDING requests for the admin tab
         const snapshot = await firebase.database().ref('lopRequests').orderByChild('status').equalTo('pending').once('value');
         const requests = [];
         
         snapshot.forEach(child => {
-          requests.push({
-            id: child.key,
-            ...child.val()
-          });
+          const requestData = child.val();
+          // Double check it's pending status
+          if (requestData.status === 'pending') {
+            requests.push({
+              id: child.key,
+              ...requestData
+            });
+          }
         });
 
         displayPendingRequests(requests);
@@ -607,11 +614,12 @@
           approvedAt: firebase.database.ServerValue.TIMESTAMP
         });
 
-        // Send email notification
+        // Generate PDF and send email notification
+        await generateLOPPDF(requestData);
         sendApprovalEmail(requestData, value);
 
-        showAlert('LOP approved and email sent!', 'success');
-        loadPendingRequests(); // Refresh the list
+        showAlert('LOP approved! PDF generated and email opened. Please attach the downloaded PDF to the email before sending.', 'success');
+        loadPendingRequests(); // Refresh the admin pending requests list
 
       } catch (error) {
         console.error('Error approving request:', error);
@@ -642,11 +650,19 @@
 
     function sendApprovalEmail(requestData, value) {
       const subject = encodeURIComponent('LOP Approved');
-      const body = encodeURIComponent(`Your LOP has been approved, please see attached document.
+      const body = encodeURIComponent(`Dear ${requestData.customerName},
 
-Artwork: ${requestData.artworkTitle}
-Artist: ${requestData.artistName}
-Insurance Value: £${value}
+Your Letter of Provenance has been approved and is attached to this email.
+
+Artwork Details:
+- Title: ${requestData.artworkTitle}
+- Artist: ${requestData.artistName}
+- Medium: ${requestData.medium}
+- Purchase Date: ${new Date(requestData.purchaseDate).toLocaleDateString()}
+- Order Number: ${requestData.soNumber}
+- Insurance Value: £${value}
+
+Please retain this document for your records as proof of authenticity and ownership.
 
 Best regards,
 Castle Fine Art Team`);
@@ -659,24 +675,25 @@ Castle Fine Art Team`);
       if (!currentUser) return;
 
       try {
-        // Load user's approved requests
+        // Load ONLY user's approved requests for the Approvals tab
         const snapshot = await firebase.database().ref('lopRequests')
           .orderByChild('requesterId')
           .equalTo(currentUser.uid)
           .once('value');
 
-        const requests = [];
+        const approvedRequests = [];
         snapshot.forEach(child => {
           const data = child.val();
+          // Only include approved requests in the user's Approvals tab
           if (data.status === 'approved') {
-            requests.push({
+            approvedRequests.push({
               id: child.key,
               ...data
             });
           }
         });
 
-        displayUserApprovedRequests(requests);
+        displayUserApprovedRequests(approvedRequests);
 
       } catch (error) {
         console.error('Error loading user data:', error);
@@ -706,10 +723,134 @@ Castle Fine Art Team`);
       `).join('');
     }
 
-    function downloadLOP(requestId) {
-      // This would generate and download the LOP document
-      // For now, we'll show an alert
-      showAlert('PDF generation feature will be implemented next.', 'success');
+    async function downloadLOP(requestId) {
+      try {
+        // Get the request data
+        const requestSnapshot = await firebase.database().ref(`lopRequests/${requestId}`).once('value');
+        const requestData = requestSnapshot.val();
+
+        if (!requestData) {
+          showAlert('Request data not found.', 'error');
+          return;
+        }
+
+        // Generate and download PDF
+        await generateLOPPDF(requestData);
+        showAlert('LOP PDF generated successfully!', 'success');
+
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        showAlert('Error generating PDF. Please try again.', 'error');
+      }
+    }
+
+    async function generateLOPPDF(requestData) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Set up fonts and colors
+      doc.setFont('helvetica');
+      
+      // Add Castle Fine Art letterhead/header
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Castle Fine Art', 105, 20, { align: 'center' });
+      
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Letter of Provenance', 105, 30, { align: 'center' });
+      
+      // Add line separator
+      doc.setLineWidth(0.5);
+      doc.line(20, 35, 190, 35);
+      
+      let yPos = 50;
+      
+      // Customer greeting
+      doc.setFontSize(12);
+      doc.text(`Dear ${requestData.customerName},`, 20, yPos);
+      yPos += 15;
+      
+      // Introduction text
+      const introText = 'Thank you for your purchase from Castle Fine Art, please find the provenance details of your artwork below.';
+      doc.text(introText, 20, yPos, { maxWidth: 170 });
+      yPos += 25;
+      
+      // Artwork details box
+      doc.setFillColor(245, 245, 245);
+      doc.rect(20, yPos, 170, 80, 'F');
+      doc.setDrawColor(0, 0, 0);
+      doc.rect(20, yPos, 170, 80);
+      
+      // Artwork title
+      yPos += 15;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text(`'${requestData.artworkTitle}'`, 105, yPos, { align: 'center' });
+      
+      yPos += 15;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      
+      // Add image if available
+      if (requestData.imageUrl) {
+        try {
+          // Note: In a real implementation, you'd need to handle CORS for external images
+          // For now, we'll add a placeholder for the image
+          doc.text('[Artwork Image]', 105, yPos, { align: 'center' });
+          yPos += 15;
+        } catch (error) {
+          console.warn('Could not add image to PDF:', error);
+          yPos += 15;
+        }
+      }
+      
+      // Artist name
+      doc.setFont('helvetica', 'bold');
+      doc.text(`By ${requestData.artistName}`, 105, yPos, { align: 'center' });
+      yPos += 10;
+      
+      // Medium
+      doc.setFont('helvetica', 'normal');
+      doc.text(`A Hand-Signed ${requestData.medium}`, 105, yPos, { align: 'center' });
+      yPos += 20;
+      
+      // Purchase details
+      yPos += 15;
+      doc.text(`Purchased | ${new Date(requestData.purchaseDate).toLocaleDateString()}`, 105, yPos, { align: 'center' });
+      yPos += 10;
+      doc.text(`Order number | ${requestData.soNumber}`, 105, yPos, { align: 'center' });
+      yPos += 10;
+      doc.text(`Castle Fine Art ${requestData.gallery}`, 105, yPos, { align: 'center' });
+      
+      yPos += 25;
+      
+      // Insurance value
+      if (requestData.insuranceValue) {
+        doc.text(`Recommended Insurance Value | £${requestData.insuranceValue}`, 105, yPos, { align: 'center' });
+        yPos += 20;
+      }
+      
+      // Provenance statement
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic');
+      const provenanceText = `This letter of provenance is provided by Castle Fine Art to establish the ownership and authenticity of an original piece of artwork. This piece of original artwork is sold by Washington Green Retail Limited trading as Castle Fine Art with a verified confidence that is the original artwork of the artist specified.`;
+      doc.text(provenanceText, 20, yPos, { maxWidth: 170 });
+      yPos += 25;
+      
+      // Footer instruction
+      doc.setFont('helvetica', 'normal');
+      doc.text('Please retain this document for your records', 105, yPos, { align: 'center' });
+      
+      // Add footer with generation date
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 280);
+      doc.text('Castle Fine Art - Letter of Provenance', 190, 280, { align: 'right' });
+      
+      // Download the PDF
+      const filename = `LOP_${requestData.artworkTitle.replace(/[^a-z0-9]/gi, '_')}_${requestData.soNumber}.pdf`;
+      doc.save(filename);
     }
 
     function showAlert(message, type) {
