@@ -390,11 +390,22 @@
   <script>
     console.log("🔥 LOP page initialized");
 
-    // Register the custom DIN LightAlternative font
-    jsPDF.API.events.push(['addFonts', function() {
-      this.addFileToVFS('DINLightAlternate.ttf', DINLightAlternatenormal);
-      this.addFont('DINLightAlternate.ttf', 'DINLightAlternate', 'normal');
-    }]);
+    // Register the custom DIN LightAlternative font when jsPDF is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.jspdf && window.jspdf.jsPDF) {
+        window.jspdf.jsPDF.API.events.push(['addFonts', function() {
+          if (typeof DINLightAlternatenormal !== 'undefined') {
+            this.addFileToVFS('DINLightAlternate.ttf', DINLightAlternatenormal);
+            this.addFont('DINLightAlternate.ttf', 'DINLightAlternate', 'normal');
+            console.log('✅ DIN LightAlternate font registered successfully');
+          } else {
+            console.warn('⚠️ DINLightAlternatenormal font data not loaded');
+          }
+        }]);
+      } else {
+        console.warn('⚠️ jsPDF not available');
+      }
+    });
 
     // Global variables
     let currentUser = null;
@@ -446,13 +457,25 @@
           const token = await currentUser.getIdTokenResult();
           isAdmin = token.claims.admin === true;
           
+          console.log('🔍 LOP Admin Status:', { 
+            isAdmin, 
+            email: currentUser.email,
+            claims: token.claims 
+          });
+          
           // Show/hide admin tab
           const adminElements = document.querySelectorAll('.admin-only');
+          console.log('🔍 Found admin elements:', adminElements.length);
+          
           adminElements.forEach(element => {
             element.style.display = isAdmin ? 'block' : 'none';
+            if (isAdmin) {
+              element.style.visibility = 'visible';
+            }
           });
           
           if (isAdmin) {
+            console.log('🔑 Loading pending requests for admin');
             loadPendingRequests();
           }
         } catch (error) {
@@ -804,8 +827,14 @@ Castle Fine Art Team`);
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Set up custom font
-      doc.setFont('DINLightAlternate', 'normal');
+      // Set up font (try custom font, fallback to Helvetica)
+      try {
+        doc.setFont('DINLightAlternate', 'normal');
+        console.log('✅ Using DIN LightAlternate font for PDF');
+      } catch (error) {
+        console.warn('⚠️ Custom font not available, using Helvetica:', error);
+        doc.setFont('helvetica', 'normal');
+      }
       doc.setFontSize(12);
 
       const insuranceValue = overrideValue || requestData.insuranceValue;
