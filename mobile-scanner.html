@@ -295,6 +295,47 @@
             background: #ccc;
             color: #333;
         }
+        
+        .manual-entry-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #45494e;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #45494e;
+        }
+        
+        .form-input:focus {
+            border-color: #45494e;
+            outline: none;
+        }
+        
+        .guest-item.clickable {
+            cursor: pointer;
+        }
+        
+        .guest-item.clickable:hover {
+            background-color: #f0f0f0;
+        }
 
         @media (max-width: 480px) {
             .stats-grid {
@@ -358,6 +399,23 @@
                 </div>
             </div>
             
+            <div class="manual-entry-form">
+                <h3>Manual Entry</h3>
+                <div class="form-group">
+                    <label for="manualName">Guest Name</label>
+                    <input type="text" id="manualName" class="form-input" placeholder="Enter guest name">
+                </div>
+                <div class="form-group">
+                    <label for="manualGuests">Number of Guests</label>
+                    <input type="number" id="manualGuests" class="form-input" min="1" value="1" placeholder="1">
+                </div>
+                <div class="form-group">
+                    <label for="manualEmail">Email (Optional)</label>
+                    <input type="email" id="manualEmail" class="form-input" placeholder="guest@example.com">
+                </div>
+                <button class="btn" onclick="addManualGuest()">Add Guest</button>
+            </div>
+            
             <input type="file" id="csvFile" class="file-input" accept=".csv,.txt" onchange="importGuestList(event)">
         </div>
     </div>
@@ -367,8 +425,11 @@
         <div id="guestsList" class="guest-list"></div>
         <div id="emptyGuestsState" class="empty-state">
             <h3>No guests loaded</h3>
-            <p>Import a CSV file to get started</p>
+            <p>Import a CSV file or add guests manually</p>
             <button class="btn" onclick="document.getElementById('csvFile').click()">Import Guest List</button>
+            <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                Tip: Click on any guest name to manually check them in
+            </p>
         </div>
     </div>
 
@@ -622,6 +683,71 @@
             setTimeout(() => refreshData(), 2000);
         }
 
+        function addManualGuest() {
+            const nameInput = document.getElementById('manualName');
+            const guestsInput = document.getElementById('manualGuests');
+            const emailInput = document.getElementById('manualEmail');
+            
+            const name = nameInput.value.trim();
+            const guestCount = parseInt(guestsInput.value) || 1;
+            const email = emailInput.value.trim();
+            
+            if (!name) {
+                alert('Please enter a guest name');
+                nameInput.focus();
+                return;
+            }
+            
+            // Check if guest already exists
+            const existingGuest = guests.find(g => 
+                g.name.toLowerCase() === name.toLowerCase() && g.guestCount === guestCount
+            );
+            
+            if (existingGuest) {
+                alert('This guest is already in the list');
+                return;
+            }
+            
+            // Add new guest
+            const newGuest = {
+                id: generateId(name, guestCount),
+                name: name,
+                guestCount: guestCount,
+                email: email,
+                checkedIn: false,
+                checkedInCount: 0,
+                checkInTime: null,
+                checkInTimes: []
+            };
+            
+            guests.push(newGuest);
+            
+            // Clear form
+            nameInput.value = '';
+            guestsInput.value = '1';
+            emailInput.value = '';
+            
+            // Save and update
+            saveData();
+            updateDisplay();
+            showStatus(`✅ Added ${name} (${guestCount} guests) to the list`, true);
+        }
+
+        function manualCheckIn(guestIndex) {
+            const guest = guests[guestIndex];
+            if (!guest) return;
+            
+            // Check if already fully checked in
+            if (guest.checkedInCount >= guest.guestCount) {
+                showStatus(`✅ ${guest.name} - Full party already arrived!`, true);
+                return;
+            }
+            
+            // Use the same modal as QR scanning
+            currentGuest = guest;
+            showGuestCountModal(guest);
+        }
+
         function importGuestList(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -733,7 +859,7 @@
                 }
 
                 return `
-                    <div class="guest-item">
+                    <div class="guest-item clickable" onclick="manualCheckIn(${guests.indexOf(guest)})">
                         <div class="guest-status ${isFullyCheckedIn ? 'checked-in' : (checkedInCount > 0 ? 'checked-in' : 'pending')}"></div>
                         <div class="guest-info">
                             <div class="guest-name">${guest.name}</div>
@@ -743,6 +869,9 @@
                                 ${statusText}
                                 ${guest.checkInTime ? ' • Last: ' + guest.checkInTime : ''}
                             </div>
+                        </div>
+                        <div style="color: #666; font-size: 12px; margin-left: auto; padding-left: 10px;">
+                            ${isFullyCheckedIn ? '✓' : 'Tap to check in'}
                         </div>
                     </div>
                 `;
