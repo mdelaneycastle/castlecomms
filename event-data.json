@@ -39,10 +39,15 @@
       "name": "Michael Smith",
       "guestCount": 1,
       "email": "michael.smith@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "19:39:54",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "19:39:54"
+        }
+      ]
     },
     {
       "id": "RW1pbHkgRG",
@@ -526,5 +531,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-10T18:39:03.938Z"
+  "lastUpdated": "2025-09-10T18:39:54.236Z"
 }
