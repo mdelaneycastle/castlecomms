@@ -402,7 +402,13 @@
         let scanner = null;
         let currentGuest = null;
 
-        // Load data from localStorage on startup
+        // GitHub storage configuration
+        const GITHUB_OWNER = 'mdelaneycastle';
+        const GITHUB_REPO = 'castlecomms';
+        const GITHUB_PATH = 'event-data.json';
+        const GITHUB_TOKEN = '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'; // You'll need to set this
+
+        // Load data from GitHub on startup
         loadData();
 
         function switchTab(tabName) {
@@ -734,24 +740,128 @@
             }
         }
 
-        function saveData() {
+        async function saveData() {
+            // Save to local storage as backup
             localStorage.setItem('eventsqr_guests', JSON.stringify(guests));
             localStorage.setItem('eventsqr_event', eventName);
+
+            // Save to GitHub
+            await saveToGitHub();
         }
 
-        function loadData() {
-            const savedGuests = localStorage.getItem('eventsqr_guests');
-            const savedEvent = localStorage.getItem('eventsqr_event');
+        async function loadData() {
+            try {
+                // Try to load from GitHub first
+                await loadFromGitHub();
+            } catch (error) {
+                console.log('GitHub load failed, using localStorage:', error);
+                // Fallback to localStorage
+                const savedGuests = localStorage.getItem('eventsqr_guests');
+                const savedEvent = localStorage.getItem('eventsqr_event');
 
-            if (savedGuests) {
-                guests = JSON.parse(savedGuests);
-            }
-            if (savedEvent) {
-                eventName = savedEvent;
+                if (savedGuests) {
+                    guests = JSON.parse(savedGuests);
+                }
+                if (savedEvent) {
+                    eventName = savedEvent;
+                }
             }
 
             updateDisplay();
         }
+
+        async function loadFromGitHub() {
+            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
+                throw new Error('GitHub token not configured');
+            }
+
+            const response = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+                headers: {
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
+            if (response.status === 404) {
+                // File doesn't exist yet, that's OK
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`GitHub API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const content = JSON.parse(atob(data.content));
+            
+            guests = content.guests || [];
+            eventName = content.eventName || 'Event';
+
+            showStatus('✅ Data synced from cloud', true);
+        }
+
+        async function saveToGitHub() {
+            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
+                return; // Skip GitHub save if no token
+            }
+
+            try {
+                // Get current file SHA if it exists
+                let sha = null;
+                try {
+                    const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+                        headers: {
+                            'Authorization': `token ${GITHUB_TOKEN}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    if (getResponse.ok) {
+                        const fileData = await getResponse.json();
+                        sha = fileData.sha;
+                    }
+                } catch (e) {}
+
+                // Save the data
+                const content = {
+                    guests: guests,
+                    eventName: eventName,
+                    lastUpdated: new Date().toISOString()
+                };
+
+                const putResponse = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Update event data - ${new Date().toLocaleString()}`,
+                        content: btoa(JSON.stringify(content, null, 2)),
+                        ...(sha && { sha })
+                    })
+                });
+
+                if (!putResponse.ok) {
+                    throw new Error(`Save failed: ${putResponse.status}`);
+                }
+
+                console.log('Data saved to GitHub successfully');
+            } catch (error) {
+                console.error('GitHub save failed:', error);
+                // Don't show error to user, local storage is still working
+            }
+        }
+
+        // Auto-sync every 30 seconds
+        setInterval(async () => {
+            try {
+                await loadFromGitHub();
+                updateDisplay();
+            } catch (error) {
+                // Ignore sync errors
+            }
+        }, 30000);
 
         // Initialize scanner when page loads
         setTimeout(startScanner, 1000);
