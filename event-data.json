@@ -59,10 +59,15 @@
       "name": "James Wilson",
       "guestCount": 2,
       "email": "james.wilson@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 2,
+      "checkInTime": "19:36:55",
+      "checkInTimes": [
+        {
+          "count": 2,
+          "time": "19:36:55"
+        }
+      ]
     },
     {
       "id": "SmVzc2ljYS",
@@ -516,5 +521,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-10T18:30:36.521Z"
+  "lastUpdated": "2025-09-10T18:36:55.326Z"
 }
