@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>EventsQR Mobile Scanner</title>
+    <title>Castle Fine Art Events Scanner</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         * {
@@ -14,14 +14,14 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f8f9fa;
-            color: #333;
+            background: #d8d1c5;
+            color: #45494e;
             overflow-x: hidden;
         }
         
         .header {
-            background: #2196F3;
-            color: white;
+            background: #45494e;
+            color: #d8d1c5;
             padding: 15px;
             text-align: center;
             position: sticky;
@@ -31,8 +31,8 @@
         
         .tab-nav {
             display: flex;
-            background: #fff;
-            border-bottom: 1px solid #ddd;
+            background: #d8d1c5;
+            border-bottom: 1px solid #45494e;
             position: sticky;
             top: 60px;
             z-index: 99;
@@ -47,11 +47,12 @@
             font-size: 14px;
             border-bottom: 3px solid transparent;
             transition: all 0.3s;
+            color: #45494e;
         }
         
         .tab-btn.active {
-            border-bottom-color: #2196F3;
-            color: #2196F3;
+            border-bottom-color: #45494e;
+            color: #45494e;
             font-weight: bold;
         }
         
@@ -71,7 +72,7 @@
         }
         
         #reader {
-            border: 2px solid #2196F3;
+            border: 2px solid #45494e;
             border-radius: 10px;
             overflow: hidden;
             margin: 20px 0;
@@ -111,7 +112,7 @@
         .stat-number {
             font-size: 32px;
             font-weight: bold;
-            color: #2196F3;
+            color: #45494e;
             display: block;
         }
         
@@ -171,8 +172,8 @@
         }
         
         .btn {
-            background: #2196F3;
-            color: white;
+            background: #45494e;
+            color: #d8d1c5;
             border: none;
             padding: 15px 20px;
             border-radius: 8px;
@@ -184,7 +185,7 @@
         }
         
         .btn:hover {
-            background: #1976D2;
+            background: #2d3033;
         }
         
         .btn-danger {
@@ -216,10 +217,67 @@
         }
         
         .import-zone:hover {
-            border-color: #2196F3;
-            background: #f3f8ff;
+            border-color: #45494e;
+            background: #e8e3db;
         }
         
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .guest-count-input {
+            width: 80px;
+            height: 50px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #45494e;
+            border-radius: 8px;
+            margin: 20px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            min-width: 80px;
+        }
+        
+        .modal-btn-primary {
+            background: #45494e;
+            color: #d8d1c5;
+        }
+        
+        .modal-btn-secondary {
+            background: #ccc;
+            color: #333;
+        }
+
         @media (max-width: 480px) {
             .stats-grid {
                 grid-template-columns: 1fr;
@@ -237,12 +295,18 @@
             .tab-content {
                 padding: 15px;
             }
+            
+            .modal-content {
+                width: 90%;
+                margin: 20% auto;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>EventsQR Scanner</h1>
+        <h1>Castle Fine Art Events Scanner</h1>
         <div id="eventInfo">No event loaded</div>
     </div>
 
@@ -315,11 +379,28 @@
         </div>
     </div>
 
+    <!-- Guest Count Modal -->
+    <div id="guestCountModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalGuestName">Guest Name</h2>
+            <p>How many guests have arrived?</p>
+            <p><small id="modalGuestInfo">Expected: X guests</small></p>
+            
+            <input type="number" id="arrivingGuestCount" class="guest-count-input" min="1" value="1">
+            
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn modal-btn-primary" onclick="confirmCheckIn()">Check In</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global state
         let guests = [];
         let eventName = 'Event';
         let scanner = null;
+        let currentGuest = null;
 
         // Load data from localStorage on startup
         loadData();
@@ -410,22 +491,87 @@
                     return;
                 }
 
-                if (guest.checkedIn) {
-                    showStatus(`⚠️ ${name} already checked in!`, false);
+                // Check if already fully checked in
+                if (guest.checkedInCount >= guest.guestCount) {
+                    showStatus(`✅ ${name} - Full party already arrived!`, true);
                     return;
                 }
 
-                // Check in the guest
-                guest.checkedIn = true;
-                guest.checkInTime = new Date().toLocaleTimeString();
-
-                showStatus(`✅ ${name} (${guestCount} guests) checked in successfully!`, true);
-                saveData();
-                updateDisplay();
+                // Show modal for guest count input
+                currentGuest = guest;
+                showGuestCountModal(guest);
 
             } catch (error) {
                 showStatus('❌ Invalid QR code format', false);
             }
+        }
+
+        function showGuestCountModal(guest) {
+            const modal = document.getElementById('guestCountModal');
+            const nameEl = document.getElementById('modalGuestName');
+            const infoEl = document.getElementById('modalGuestInfo');
+            const inputEl = document.getElementById('arrivingGuestCount');
+
+            nameEl.textContent = guest.name;
+            const remaining = guest.guestCount - (guest.checkedInCount || 0);
+            infoEl.textContent = `Expected: ${guest.guestCount} guests | Remaining: ${remaining}`;
+            inputEl.value = Math.min(remaining, 1);
+            inputEl.max = remaining;
+
+            modal.style.display = 'block';
+            inputEl.focus();
+            inputEl.select();
+        }
+
+        function closeModal() {
+            document.getElementById('guestCountModal').style.display = 'none';
+            currentGuest = null;
+        }
+
+        function confirmCheckIn() {
+            if (!currentGuest) return;
+
+            const arrivingCount = parseInt(document.getElementById('arrivingGuestCount').value);
+            if (!arrivingCount || arrivingCount < 1) {
+                alert('Please enter a valid number of arriving guests');
+                return;
+            }
+
+            const remainingCount = currentGuest.guestCount - (currentGuest.checkedInCount || 0);
+            if (arrivingCount > remainingCount) {
+                alert(`Only ${remainingCount} guests remaining to check in`);
+                return;
+            }
+
+            // Update guest check-in status
+            if (!currentGuest.checkedInCount) {
+                currentGuest.checkedInCount = 0;
+                currentGuest.checkInTimes = [];
+            }
+
+            currentGuest.checkedInCount += arrivingCount;
+            currentGuest.checkInTimes.push({
+                count: arrivingCount,
+                time: new Date().toLocaleTimeString()
+            });
+
+            // Update legacy fields for compatibility
+            currentGuest.checkedIn = currentGuest.checkedInCount > 0;
+            currentGuest.checkInTime = currentGuest.checkInTimes[currentGuest.checkInTimes.length - 1].time;
+
+            const remaining = currentGuest.guestCount - currentGuest.checkedInCount;
+            let statusMessage;
+
+            if (remaining === 0) {
+                statusMessage = `✅ ${currentGuest.name} - Full party arrived! (${currentGuest.guestCount} guests)`;
+            } else {
+                statusMessage = `✅ ${currentGuest.name} - ${arrivingCount} guests checked in. ${remaining} remaining.`;
+            }
+
+            showStatus(statusMessage, true);
+            saveData();
+            updateDisplay();
+            closeModal();
         }
 
         function importGuestList(event) {
@@ -468,7 +614,9 @@
                             guestCount: guestCount,
                             email: email,
                             checkedIn: false,
-                            checkInTime: null
+                            checkedInCount: 0,
+                            checkInTime: null,
+                            checkInTimes: []
                         });
                     }
                 }
@@ -500,7 +648,7 @@
             // Update stats
             const checkedInCount = guests.filter(g => g.checkedIn).length;
             const totalGuestCount = guests.reduce((sum, g) => sum + g.guestCount, 0);
-            const checkedInGuestCount = guests.filter(g => g.checkedIn).reduce((sum, g) => sum + g.guestCount, 0);
+            const checkedInGuestCount = guests.reduce((sum, g) => sum + (g.checkedInCount || 0), 0);
 
             document.getElementById('totalEntries').textContent = guests.length;
             document.getElementById('checkedInEntries').textContent = checkedInCount;
@@ -524,19 +672,33 @@
             listDiv.style.display = 'block';
             emptyDiv.style.display = 'none';
 
-            listDiv.innerHTML = guests.map(guest => `
-                <div class="guest-item">
-                    <div class="guest-status ${guest.checkedIn ? 'checked-in' : 'pending'}"></div>
-                    <div class="guest-info">
-                        <div class="guest-name">${guest.name}</div>
-                        <div class="guest-details">
-                            ${guest.guestCount} guest${guest.guestCount !== 1 ? 's' : ''}
-                            ${guest.email ? ' • ' + guest.email : ''}
-                            ${guest.checkedIn ? ' • Checked in at ' + guest.checkInTime : ''}
+            listDiv.innerHTML = guests.map(guest => {
+                const checkedInCount = guest.checkedInCount || 0;
+                const remaining = guest.guestCount - checkedInCount;
+                const isFullyCheckedIn = checkedInCount >= guest.guestCount;
+                
+                let statusText = '';
+                if (isFullyCheckedIn) {
+                    statusText = ' • Full party arrived';
+                } else if (checkedInCount > 0) {
+                    statusText = ` • ${checkedInCount}/${guest.guestCount} checked in`;
+                }
+
+                return `
+                    <div class="guest-item">
+                        <div class="guest-status ${isFullyCheckedIn ? 'checked-in' : (checkedInCount > 0 ? 'checked-in' : 'pending')}"></div>
+                        <div class="guest-info">
+                            <div class="guest-name">${guest.name}</div>
+                            <div class="guest-details">
+                                ${guest.guestCount} guest${guest.guestCount !== 1 ? 's' : ''}
+                                ${guest.email ? ' • ' + guest.email : ''}
+                                ${statusText}
+                                ${guest.checkInTime ? ' • Last: ' + guest.checkInTime : ''}
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function exportResults() {
@@ -545,9 +707,12 @@
                 return;
             }
 
-            let csv = 'Name,Guests,Email,Checked In,Check In Time\n';
+            let csv = 'Name,Expected Guests,Email,Guests Checked In,Fully Arrived,Check In Times\n';
             guests.forEach(guest => {
-                csv += `"${guest.name}",${guest.guestCount},"${guest.email}",${guest.checkedIn ? 'Yes' : 'No'},"${guest.checkInTime || ''}"\n`;
+                const checkedInCount = guest.checkedInCount || 0;
+                const fullyArrived = checkedInCount >= guest.guestCount ? 'Yes' : 'No';
+                const checkInTimes = (guest.checkInTimes || []).map(t => `${t.count} at ${t.time}`).join('; ');
+                csv += `"${guest.name}",${guest.guestCount},"${guest.email}",${checkedInCount},${fullyArrived},"${checkInTimes}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
