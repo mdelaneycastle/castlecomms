@@ -534,12 +534,17 @@
       "name": "Bob Dylan",
       "guestCount": 3,
       "email": "",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 3,
+      "checkInTime": "19:48:44",
+      "checkInTimes": [
+        {
+          "count": 3,
+          "time": "19:48:44"
+        }
+      ]
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-10T18:48:28.960Z"
+  "lastUpdated": "2025-09-10T18:48:45.048Z"
 }
