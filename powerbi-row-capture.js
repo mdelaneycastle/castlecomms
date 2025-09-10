@@ -22,35 +22,370 @@ class PowerBIRowCapture {
    */
   initialize() {
     console.log('PowerBI Row Capture: Initializing...');
-    this.loadPowerBISDK();
+    this.setupClipboardCapture();
     this.createPDFButton();
     this.loadPDFGenerator();
+    this.showInstructions();
   }
 
   /**
-   * Load PowerBI JavaScript SDK
+   * Setup clipboard capture for PowerBI copy operations
    */
-  async loadPowerBISDK() {
-    if (window.powerbi) {
-      this.setupPowerBIEventListeners();
+  setupClipboardCapture() {
+    console.log('Setting up clipboard capture for PowerBI data...');
+    
+    // Create clipboard capture button
+    this.createClipboardButton();
+    
+    // Listen for paste events to capture PowerBI data
+    document.addEventListener('paste', (event) => {
+      this.handleClipboardPaste(event);
+    });
+    
+    // Also listen for copy events within PowerBI iframes
+    document.addEventListener('copy', (event) => {
+      this.handlePowerBICopy(event);
+    });
+  }
+
+  /**
+   * Create clipboard capture button
+   */
+  createClipboardButton() {
+    const button = document.createElement('button');
+    button.id = 'powerbi-clipboard-btn';
+    button.className = 'powerbi-clipboard-button';
+    button.innerHTML = `
+      <span class="clipboard-icon">📋</span>
+      <span class="clipboard-text">Paste PowerBI Data Here</span>
+    `;
+    
+    button.addEventListener('click', () => this.showClipboardInterface());
+
+    // Add styles
+    const style = document.createElement('style');
+    style.textContent = `
+      .powerbi-clipboard-button {
+        position: fixed;
+        top: 120px;
+        right: 20px;
+        z-index: 1000;
+        background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 250px;
+      }
+      
+      .powerbi-clipboard-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+      }
+      
+      .clipboard-interface {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+      }
+      
+      .clipboard-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 90%;
+        max-height: 70vh;
+        overflow-y: auto;
+      }
+      
+      .paste-area {
+        width: 100%;
+        min-height: 200px;
+        padding: 15px;
+        border: 2px dashed #17a2b8;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 12px;
+        resize: vertical;
+        background: #f8f9fa;
+        margin: 15px 0;
+      }
+      
+      .paste-instructions {
+        background: #e3f2fd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-left: 4px solid #2196f3;
+      }
+    `;
+
+    if (!document.getElementById('clipboard-capture-styles')) {
+      style.id = 'clipboard-capture-styles';
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(button);
+  }
+
+  /**
+   * Show clipboard interface for pasting PowerBI data
+   */
+  showClipboardInterface() {
+    // Remove existing interface if present
+    const existing = document.getElementById('clipboard-interface');
+    if (existing) {
+      existing.remove();
+    }
+
+    const interface = document.createElement('div');
+    interface.id = 'clipboard-interface';
+    interface.className = 'clipboard-interface';
+    
+    interface.innerHTML = `
+      <div class="clipboard-content">
+        <h3>📋 PowerBI Data Capture</h3>
+        
+        <div class="paste-instructions">
+          <strong>How to use:</strong>
+          <ol style="margin: 10px 0; padding-left: 20px;">
+            <li>Right-click on a PowerBI table row</li>
+            <li>Select "Copy" or "Copy selection"</li>
+            <li>Click in the text area below and paste (Ctrl+V)</li>
+            <li>Click "Generate PDF"</li>
+          </ol>
+        </div>
+        
+        <textarea 
+          class="paste-area" 
+          id="clipboard-paste-area" 
+          placeholder="Right-click a PowerBI row → Copy → Paste here (Ctrl+V)"
+          autofocus></textarea>
+        
+        <div class="button-group">
+          <button type="button" class="btn-secondary" onclick="document.getElementById('clipboard-interface').remove()">Cancel</button>
+          <button type="button" class="btn-primary" onclick="powerBIRowCapture.processClipboardData()">Generate PDF</button>
+          <button type="button" class="btn-info" onclick="powerBIRowCapture.showSampleData()" style="background: #17a2b8;">Show Sample</button>
+        </div>
+      </div>
+    `;
+
+    // Add button styles
+    const style = document.createElement('style');
+    style.textContent = `
+      .button-group {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #e1e5e9;
+      }
+      
+      .btn-primary, .btn-secondary, .btn-info {
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        color: white;
+      }
+      
+      .btn-primary { background: #667eea; }
+      .btn-secondary { background: #6c757d; }
+      .btn-info { background: #17a2b8; }
+    `;
+    
+    if (!document.getElementById('button-styles')) {
+      style.id = 'button-styles';
+      document.head.appendChild(style);
+    }
+
+    // Close on outside click
+    interface.addEventListener('click', (e) => {
+      if (e.target === interface) {
+        interface.remove();
+      }
+    });
+
+    document.body.appendChild(interface);
+    
+    // Focus the textarea
+    setTimeout(() => {
+      const textarea = document.getElementById('clipboard-paste-area');
+      if (textarea) {
+        textarea.focus();
+      }
+    }, 100);
+  }
+
+  /**
+   * Show sample data for testing
+   */
+  showSampleData() {
+    const textarea = document.getElementById('clipboard-paste-area');
+    if (textarea) {
+      textarea.value = `Gallery	Qty Sold	SO Total	%of Sales by Gallery
+WEB	1402	£1,503,702.26	19.13%
+MAI	276	£541,356.49	6.89%
+CDF	172	£287,659.00	3.66%`;
+    }
+  }
+
+  /**
+   * Handle clipboard paste events
+   */
+  handleClipboardPaste(event) {
+    // Only process if we're in our interface
+    if (!document.getElementById('clipboard-interface')) {
+      return;
+    }
+
+    const clipboardData = event.clipboardData || window.clipboardData;
+    const pastedData = clipboardData.getData('text');
+    
+    if (pastedData && this.isPowerBITableData(pastedData)) {
+      console.log('PowerBI table data detected in clipboard:', pastedData);
+      // The data will be processed when user clicks "Generate PDF"
+    }
+  }
+
+  /**
+   * Check if pasted data looks like PowerBI table data
+   */
+  isPowerBITableData(data) {
+    // Check for common PowerBI table patterns
+    const patterns = [
+      /Gallery.*Qty Sold.*SO Total/i,
+      /\t.*\t.*£/,  // Tab separated with currency
+      /[A-Z]{3}\s+\d+.*£/,  // Gallery code, number, currency
+    ];
+    
+    return patterns.some(pattern => pattern.test(data));
+  }
+
+  /**
+   * Handle PowerBI copy events
+   */
+  handlePowerBICopy(event) {
+    // This might not work due to security restrictions, but worth trying
+    console.log('Copy event detected');
+  }
+
+  /**
+   * Process clipboard data and generate PDF
+   */
+  processClipboardData() {
+    const textarea = document.getElementById('clipboard-paste-area');
+    const data = textarea?.value?.trim();
+    
+    if (!data) {
+      alert('Please paste some PowerBI data first.');
       return;
     }
 
     try {
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.innerHTML = `
-        import * as powerbi from "https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.min.js";
-        window.powerbi = powerbi;
-        window.powerBIRowCapture.setupPowerBIEventListeners();
-      `;
-      document.head.appendChild(script);
-      console.log('PowerBI SDK loading...');
+      const parsedData = this.parseTabDelimitedData(data);
+      
+      if (!parsedData || parsedData.length === 0) {
+        alert('Could not parse the pasted data. Please make sure you copied from a PowerBI table.');
+        return;
+      }
+
+      // Convert to our expected format
+      this.selectedRowData = {
+        timestamp: new Date().toISOString(),
+        source: 'PowerBI Clipboard Data',
+        rows: parsedData.map((row, index) => ({
+          rowIndex: index,
+          data: row
+        }))
+      };
+
+      // Close interface and update PDF button
+      document.getElementById('clipboard-interface').remove();
+      this.updatePDFButton();
+      
+      console.log('Clipboard data processed:', this.selectedRowData);
+      
+      // Auto-generate PDF
+      this.generatePDF();
+
     } catch (error) {
-      console.error('Failed to load PowerBI SDK:', error);
-      // Fallback to manual data entry if SDK fails
-      this.showManualDataEntry();
+      console.error('Error processing clipboard data:', error);
+      alert('Error processing the pasted data. Please try again.');
     }
+  }
+
+  /**
+   * Parse tab-delimited data from PowerBI clipboard
+   */
+  parseTabDelimitedData(data) {
+    const lines = data.split('\n').filter(line => line.trim());
+    
+    if (lines.length < 2) {
+      return null; // Need at least header and one data row
+    }
+
+    const headers = lines[0].split('\t').map(h => h.trim());
+    const rows = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split('\t').map(v => v.trim());
+      
+      if (values.length !== headers.length) {
+        continue; // Skip malformed rows
+      }
+
+      const row = {};
+      headers.forEach((header, index) => {
+        let value = values[index];
+        
+        // Clean up currency values
+        if (value.startsWith('£')) {
+          value = value.replace(/[£,]/g, '');
+          if (!isNaN(value)) {
+            value = parseFloat(value);
+          }
+        }
+        
+        // Clean up percentage values
+        if (value.endsWith('%')) {
+          value = value.replace('%', '');
+          if (!isNaN(value)) {
+            value = parseFloat(value) / 100; // Convert to decimal
+          }
+        }
+        
+        // Convert numbers
+        if (typeof value === 'string' && !isNaN(value) && value !== '') {
+          value = parseFloat(value);
+        }
+        
+        row[header] = value;
+      });
+      
+      rows.push(row);
+    }
+
+    return rows;
   }
 
   /**
@@ -361,12 +696,19 @@ class PowerBIRowCapture {
     overlay.id = 'powerbi-instructions';
     overlay.innerHTML = `
       <div class="instruction-content">
-        <h3>📋 PowerBI Row Selection</h3>
-        <p>Click on any row in the PowerBI table to select data for PDF generation.</p>
-        <p>The PDF button will appear when you select data.</p>
+        <h3>📋 PowerBI Data to PDF</h3>
+        <p><strong>New Method:</strong> Use the blue "Paste PowerBI Data Here" button!</p>
+        <div style="text-align: left; margin: 15px 0; padding: 15px; background: #e3f2fd; border-radius: 8px; border-left: 4px solid #2196f3;">
+          <strong>Steps:</strong>
+          <ol style="margin: 10px 0; padding-left: 20px;">
+            <li>Right-click on a PowerBI table row</li>
+            <li>Select "Copy" or "Copy selection"</li>
+            <li>Click the blue "Paste PowerBI Data Here" button</li>
+            <li>Paste the data and click "Generate PDF"</li>
+          </ol>
+        </div>
+        <p style="font-size: 14px; color: #666;">This works with the exact same right-click → Copy method you showed in the screenshot!</p>
         <button onclick="this.parentElement.parentElement.remove()">Got it!</button>
-        <br><br>
-        <button onclick="window.powerBIRowCapture.showManualDataEntry(); this.parentElement.parentElement.remove();" style="background: #28a745; margin-top: 10px;">Or Enter Data Manually</button>
       </div>
     `;
     
@@ -391,7 +733,7 @@ class PowerBIRowCapture {
         border-radius: 12px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         text-align: center;
-        max-width: 400px;
+        max-width: 500px;
       }
       
       .instruction-content h3 {
@@ -419,12 +761,12 @@ class PowerBIRowCapture {
     document.head.appendChild(style);
     document.body.appendChild(overlay);
     
-    // Auto-remove after 8 seconds
+    // Auto-remove after 10 seconds
     setTimeout(() => {
       if (overlay.parentElement) {
         overlay.remove();
       }
-    }, 8000);
+    }, 10000);
   }
 
   /**
