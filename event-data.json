@@ -528,8 +528,18 @@
       "checkedInCount": 0,
       "checkInTime": null,
       "checkInTimes": []
+    },
+    {
+      "id": "Qm9iIER5bG",
+      "name": "Bob Dylan",
+      "guestCount": 3,
+      "email": "",
+      "checkedIn": false,
+      "checkedInCount": 0,
+      "checkInTime": null,
+      "checkInTimes": []
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-10T18:39:54.236Z"
+  "lastUpdated": "2025-09-10T18:48:28.960Z"
 }
