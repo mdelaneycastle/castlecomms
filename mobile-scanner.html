@@ -537,15 +537,21 @@
         function startScanner() {
             if (scanner) return;
 
-            scanner = new Html5Qrcode("reader");
-            scanner.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                onScanSuccess,
-                onScanFailure
-            ).catch(err => {
-                showStatus('Camera access denied or not available', false);
-            });
+            try {
+                scanner = new Html5Qrcode("reader");
+                scanner.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess,
+                    onScanFailure
+                ).catch(err => {
+                    console.log('Scanner start error:', err);
+                    showStatus('Camera access denied or not available', false);
+                });
+            } catch (error) {
+                console.log('Scanner initialization error:', error);
+                showStatus('Scanner initialization failed', false);
+            }
         }
 
         function stopScanner() {
@@ -561,7 +567,10 @@
         }
 
         function onScanFailure(error) {
-            // Ignore scan failures, they happen frequently
+            // Silently ignore scan failures and library internal errors
+            if (!error.includes('NotFoundException') && !error.includes('dataset')) {
+                console.log('Scan error:', error);
+            }
         }
 
         function handleQRScan(qrData) {
@@ -1034,8 +1043,18 @@
             }
         }, 30000);
 
-        // Initialize scanner when page loads
-        setTimeout(startScanner, 1000);
+        // Initialize scanner when page loads and DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(startScanner, 1500);
+        });
+        
+        // Fallback for already loaded pages
+        if (document.readyState === 'loading') {
+            // DOM still loading
+        } else {
+            // DOM already loaded
+            setTimeout(startScanner, 1500);
+        }
     </script>
 </body>
 </html>
