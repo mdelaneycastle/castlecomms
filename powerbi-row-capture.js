@@ -22,59 +22,94 @@ class PowerBIRowCapture {
    */
   initialize() {
     console.log('PowerBI Row Capture: Initializing...');
-    this.setupMessageListener();
+    this.loadPowerBISDK();
     this.createPDFButton();
     this.loadPDFGenerator();
   }
 
   /**
-   * Set up postMessage listener for PowerBI events
+   * Load PowerBI JavaScript SDK
    */
-  setupMessageListener() {
-    if (this.isListening) return;
+  async loadPowerBISDK() {
+    if (window.powerbi) {
+      this.setupPowerBIEventListeners();
+      return;
+    }
 
-    window.addEventListener('message', (event) => {
-      // Only accept messages from PowerBI domains
-      if (!this.isPowerBIDomain(event.origin)) {
-        return;
-      }
-
-      console.log('PowerBI Message Received:', event.data);
-
-      // Handle different PowerBI event types
-      if (event.data && event.data.event) {
-        switch (event.data.event) {
-          case 'loaded':
-            this.handleReportLoaded(event.data);
-            break;
-          case 'rendered':
-            this.handleReportRendered(event.data);
-            break;
-          case 'dataSelected':
-            this.handleDataSelected(event.data);
-            break;
-          case 'selectionChanged':
-            this.handleSelectionChanged(event.data);
-            break;
-        }
-      }
-    });
-
-    this.isListening = true;
-    console.log('PowerBI Row Capture: Message listener ready');
+    try {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.innerHTML = `
+        import * as powerbi from "https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.min.js";
+        window.powerbi = powerbi;
+        window.powerBIRowCapture.setupPowerBIEventListeners();
+      `;
+      document.head.appendChild(script);
+      console.log('PowerBI SDK loading...');
+    } catch (error) {
+      console.error('Failed to load PowerBI SDK:', error);
+      // Fallback to manual data entry if SDK fails
+      this.showManualDataEntry();
+    }
   }
 
   /**
-   * Check if origin is from PowerBI domain
+   * Setup PowerBI SDK event listeners
    */
-  isPowerBIDomain(origin) {
-    const powerbiDomains = [
-      'https://app.powerbi.com',
-      'https://msit.powerbi.com',
-      'https://powerbi.microsoft.com'
-    ];
+  setupPowerBIEventListeners() {
+    console.log('Setting up PowerBI SDK event listeners...');
     
-    return powerbiDomains.some(domain => origin.startsWith(domain));
+    // Wait for iframes to be available
+    setTimeout(() => {
+      this.attachToReports();
+    }, 2000);
+  }
+
+  /**
+   * Attach event listeners to PowerBI reports
+   */
+  attachToReports() {
+    const reportIframes = document.querySelectorAll('iframe[src*="powerbi.com"]');
+    console.log('Found PowerBI iframes:', reportIframes.length);
+    
+    reportIframes.forEach((iframe, index) => {
+      try {
+        // Get the embedded report using PowerBI SDK
+        const report = window.powerbi?.get(iframe);
+        
+        if (report) {
+          console.log(`Attaching to report ${index + 1}`);
+          
+          // Listen for data selection events
+          report.on("dataSelected", (event) => {
+            console.log('PowerBI dataSelected event:', event);
+            this.handlePowerBIDataSelected(event);
+          });
+
+          // Optional: listen for selection changes
+          report.on("selectionChanged", (event) => {
+            console.log('PowerBI selectionChanged event:', event);
+          });
+
+          // Listen for report loaded
+          report.on("loaded", () => {
+            console.log('PowerBI report loaded');
+            this.showInstructions();
+          });
+
+        } else {
+          console.warn(`Could not get PowerBI report from iframe ${index + 1}`);
+        }
+      } catch (error) {
+        console.warn(`Error attaching to PowerBI report ${index + 1}:`, error);
+      }
+    });
+
+    // If no reports found or SDK issues, show manual entry
+    if (reportIframes.length === 0) {
+      console.log('No PowerBI iframes found, showing manual entry option');
+      this.showManualDataEntry();
+    }
   }
 
   /**
@@ -94,10 +129,84 @@ class PowerBIRowCapture {
   }
 
   /**
-   * Handle data selection events from PowerBI
+   * Handle PowerBI SDK data selection events
+   */
+  handlePowerBIDataSelected(event) {
+    console.log('PowerBI Row Capture: Data selected via SDK', event);
+    
+    const dataPoint = event?.detail?.dataPoints?.[0];
+    if (!dataPoint) {
+      console.log('No data points found in selection');
+      return;
+    }
+
+    // Process the selected data
+    this.selectedRowData = this.processPowerBIDataPoint(dataPoint);
+    this.updatePDFButton();
+    this.showSelectedDataPreview();
+  }
+
+  /**
+   * Process PowerBI data point from SDK
+   */
+  processPowerBIDataPoint(dataPoint) {
+    const processedData = {
+      timestamp: new Date().toISOString(),
+      source: 'PowerBI Report (SDK)',
+      rows: []
+    };
+
+    const row = {
+      rowIndex: 0,
+      data: {}
+    };
+
+    // Extract values from dataPoint
+    const values = dataPoint.values || {};
+    const identity = dataPoint.identity || [];
+
+    // Map common field names - adjust these based on your PowerBI table columns
+    const fieldMappings = {
+      'Gallery': ['Gallery', 'Table.Gallery'],
+      'Qty Sold': ['Qty Sold', 'Table.Qty Sold', 'QtySold'],
+      'SO Total': ['SO Total', 'Table.SO Total', 'SOTotal'],
+      '% of Sales by Gallery': ['%of Sales by Gallery', 'Table.%of Sales by Gallery', 'PctByGallery', 'Percentage']
+    };
+
+    // Extract values using field mappings
+    Object.entries(fieldMappings).forEach(([displayName, possibleKeys]) => {
+      for (const key of possibleKeys) {
+        if (values[key] !== undefined) {
+          row.data[displayName] = values[key];
+          break;
+        }
+      }
+    });
+
+    // Also extract identity values
+    identity.forEach(id => {
+      const key = id.source?.displayName || id.source?.queryName || 'field';
+      if (id.equals !== undefined) {
+        row.data[key] = id.equals;
+      }
+    });
+
+    // Extract any other values that weren't mapped
+    Object.entries(values).forEach(([key, value]) => {
+      if (value !== undefined && !Object.values(row.data).includes(value)) {
+        row.data[key] = value;
+      }
+    });
+
+    processedData.rows.push(row);
+    return processedData;
+  }
+
+  /**
+   * Handle data selection events from PowerBI (legacy postMessage)
    */
   handleDataSelected(data) {
-    console.log('PowerBI Row Capture: Data selected', data);
+    console.log('PowerBI Row Capture: Data selected via postMessage', data);
     
     if (data.detail && data.detail.dataPoints) {
       this.selectedRowData = this.processDataPoints(data.detail.dataPoints);
@@ -256,6 +365,8 @@ class PowerBIRowCapture {
         <p>Click on any row in the PowerBI table to select data for PDF generation.</p>
         <p>The PDF button will appear when you select data.</p>
         <button onclick="this.parentElement.parentElement.remove()">Got it!</button>
+        <br><br>
+        <button onclick="window.powerBIRowCapture.showManualDataEntry(); this.parentElement.parentElement.remove();" style="background: #28a745; margin-top: 10px;">Or Enter Data Manually</button>
       </div>
     `;
     
@@ -308,12 +419,167 @@ class PowerBIRowCapture {
     document.head.appendChild(style);
     document.body.appendChild(overlay);
     
-    // Auto-remove after 5 seconds
+    // Auto-remove after 8 seconds
     setTimeout(() => {
       if (overlay.parentElement) {
         overlay.remove();
       }
-    }, 5000);
+    }, 8000);
+  }
+
+  /**
+   * Show manual data entry interface as fallback
+   */
+  showManualDataEntry() {
+    // Create manual data entry modal
+    const modal = document.createElement('div');
+    modal.id = 'manual-data-entry';
+    modal.innerHTML = `
+      <div class="manual-entry-content">
+        <h3>📝 Enter PowerBI Data Manually</h3>
+        <p>Copy data from your PowerBI table and paste it here:</p>
+        
+        <div class="entry-form">
+          <div class="form-group">
+            <label>Gallery:</label>
+            <input type="text" id="manual-gallery" placeholder="e.g. Castle Gallery">
+          </div>
+          <div class="form-group">
+            <label>Qty Sold:</label>
+            <input type="number" id="manual-qty" placeholder="e.g. 25">
+          </div>
+          <div class="form-group">
+            <label>SO Total:</label>
+            <input type="number" id="manual-total" placeholder="e.g. 15000">
+          </div>
+          <div class="form-group">
+            <label>% of Sales by Gallery:</label>
+            <input type="number" id="manual-percent" placeholder="e.g. 19.13" step="0.01">
+          </div>
+          
+          <div class="form-actions">
+            <button onclick="window.powerBIRowCapture.processManualData()" style="background: #28a745;">Generate PDF</button>
+            <button onclick="document.getElementById('manual-data-entry').remove()" style="background: #dc3545; margin-left: 10px;">Cancel</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      #manual-data-entry {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+      }
+      
+      .manual-entry-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      
+      .manual-entry-content h3 {
+        margin: 0 0 15px 0;
+        color: #333;
+      }
+      
+      .form-group {
+        margin: 15px 0;
+        text-align: left;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+      }
+      
+      .form-group input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      
+      .form-actions {
+        margin-top: 20px;
+        text-align: center;
+      }
+      
+      .form-actions button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+      }
+    `;
+    
+    if (!document.getElementById('manual-data-entry-styles')) {
+      style.id = 'manual-data-entry-styles';
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(modal);
+  }
+
+  /**
+   * Process manually entered data
+   */
+  processManualData() {
+    const gallery = document.getElementById('manual-gallery')?.value || '';
+    const qty = document.getElementById('manual-qty')?.value || '';
+    const total = document.getElementById('manual-total')?.value || '';
+    const percent = document.getElementById('manual-percent')?.value || '';
+
+    if (!gallery && !qty && !total && !percent) {
+      alert('Please enter at least one field of data.');
+      return;
+    }
+
+    // Create data structure
+    this.selectedRowData = {
+      timestamp: new Date().toISOString(),
+      source: 'Manual Entry',
+      rows: [{
+        rowIndex: 0,
+        data: {
+          'Gallery': gallery,
+          'Qty Sold': qty ? Number(qty) : '',
+          'SO Total': total ? Number(total) : '',
+          '% of Sales by Gallery': percent ? Number(percent) / 100 : '' // Convert to decimal
+        }
+      }]
+    };
+
+    // Remove empty values
+    Object.keys(this.selectedRowData.rows[0].data).forEach(key => {
+      if (this.selectedRowData.rows[0].data[key] === '') {
+        delete this.selectedRowData.rows[0].data[key];
+      }
+    });
+
+    // Update UI and close modal
+    this.updatePDFButton();
+    document.getElementById('manual-data-entry')?.remove();
+    
+    console.log('Manual data processed:', this.selectedRowData);
   }
 
   /**
