@@ -94,10 +94,15 @@
       "name": "David Miller",
       "guestCount": 5,
       "email": "david.miller@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "19:48:55",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "19:48:55"
+        }
+      ]
     },
     {
       "id": "QXNobGV5IE",
@@ -551,5 +556,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-10T18:48:48.187Z"
+  "lastUpdated": "2025-09-10T18:48:55.954Z"
 }
