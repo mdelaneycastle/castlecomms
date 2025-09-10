@@ -406,7 +406,10 @@
         const GITHUB_OWNER = 'mdelaneycastle';
         const GITHUB_REPO = 'castlecomms';
         const GITHUB_PATH = 'event-data.json';
-        const GITHUB_TOKEN = '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'; // You'll need to set this
+        const GITHUB_TOKEN = prompt('Enter GitHub token (one-time setup):') || localStorage.getItem('github_token');
+          if (GITHUB_TOKEN && GITHUB_TOKEN !== 'null') {
+              localStorage.setItem('github_token', GITHUB_TOKEN);
+          }; // You'll need to set this
 
         // Load data from GitHub on startup
         loadData();
