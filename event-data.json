@@ -219,10 +219,15 @@
       "name": "Ryan Walker",
       "guestCount": 3,
       "email": "ryan.walker@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 3,
+      "checkInTime": "19:52:04",
+      "checkInTimes": [
+        {
+          "count": 3,
+          "time": "19:52:04"
+        }
+      ]
     },
     {
       "id": "Tmljb2xlIE",
@@ -556,5 +561,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-10T18:51:10.992Z"
+  "lastUpdated": "2025-09-10T18:52:04.826Z"
 }
