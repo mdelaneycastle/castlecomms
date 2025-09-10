@@ -6,12 +6,16 @@
       "guestCount": 2,
       "email": "marc.delaney@example.com",
       "checkedIn": true,
-      "checkedInCount": 1,
-      "checkInTime": "19:28:57",
+      "checkedInCount": 2,
+      "checkInTime": "19:30:36",
       "checkInTimes": [
         {
           "count": 1,
           "time": "19:28:57"
+        },
+        {
+          "count": 1,
+          "time": "19:30:36"
         }
       ]
     },
@@ -512,5 +516,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-10T18:29:36.042Z"
+  "lastUpdated": "2025-09-10T18:30:36.521Z"
 }
