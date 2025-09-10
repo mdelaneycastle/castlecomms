@@ -29,6 +29,24 @@
             z-index: 100;
         }
         
+        .refresh-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: none;
+            border: 1px solid #d8d1c5;
+            color: #d8d1c5;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .refresh-btn:hover {
+            background: #d8d1c5;
+            color: #45494e;
+        }
+        
         .tab-nav {
             display: flex;
             background: #d8d1c5;
@@ -301,12 +319,20 @@
                 margin: 20% auto;
                 padding: 20px;
             }
+            
+            .refresh-btn {
+                right: 10px;
+                top: 10px;
+                font-size: 12px;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Castle Fine Art Events Scanner</h1>
+        <button class="refresh-btn" onclick="refreshData()" title="Refresh data from cloud">🔄 Refresh</button>
         <div id="eventInfo">No event loaded</div>
     </div>
 
@@ -406,13 +432,23 @@
         const GITHUB_OWNER = 'mdelaneycastle';
         const GITHUB_REPO = 'castlecomms';
         const GITHUB_PATH = 'event-data.json';
-        const GITHUB_TOKEN = prompt('Enter GitHub token (one-time setup):') || localStorage.getItem('github_token');
-          if (GITHUB_TOKEN && GITHUB_TOKEN !== 'null') {
-              localStorage.setItem('github_token', GITHUB_TOKEN);
-          }; // You'll need to set this
+        
+        // Get token from localStorage first, then prompt if not found
+        let GITHUB_TOKEN = localStorage.getItem('github_token');
+        if (!GITHUB_TOKEN || GITHUB_TOKEN === 'null' || GITHUB_TOKEN === '') {
+            GITHUB_TOKEN = prompt('Enter GitHub token (one-time setup):');
+            if (GITHUB_TOKEN && GITHUB_TOKEN.trim() !== '') {
+                localStorage.setItem('github_token', GITHUB_TOKEN);
+            }
+        }
 
         // Load data from GitHub on startup
         loadData();
+
+        function refreshData() {
+            showStatus('🔄 Refreshing data...', true);
+            loadData();
+        }
 
         function switchTab(tabName) {
             // Hide all tabs
@@ -581,6 +617,9 @@
             saveData();
             updateDisplay();
             closeModal();
+            
+            // Auto-refresh to sync with other devices
+            setTimeout(() => refreshData(), 2000);
         }
 
         function importGuestList(event) {
@@ -774,7 +813,7 @@
         }
 
         async function loadFromGitHub() {
-            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
+            if (!GITHUB_TOKEN || GITHUB_TOKEN.trim() === '') {
                 throw new Error('GitHub token not configured');
             }
 
@@ -804,7 +843,7 @@
         }
 
         async function saveToGitHub() {
-            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
+            if (!GITHUB_TOKEN || GITHUB_TOKEN.trim() === '') {
                 return; // Skip GitHub save if no token
             }
 
