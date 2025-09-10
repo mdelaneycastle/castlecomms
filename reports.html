@@ -1751,7 +1751,31 @@
       const currentReport = selectedReports[currentReportIndex];
       
       if (iframe && title && currentReport) {
-        iframe.src = currentReport.url;
+        // Enhanced iframe configuration for PowerBI postMessage
+        let enhancedUrl = currentReport.url;
+        
+        // Add postMessage parameters if PowerBI URL
+        if (enhancedUrl.includes('powerbi.com')) {
+          const separator = enhancedUrl.includes('?') ? '&' : '?';
+          enhancedUrl += separator + 'enableRLSEmbed=true&enablePostMessage=true&enableDataSelection=true';
+        }
+        
+        iframe.src = enhancedUrl;
+        iframe.setAttribute('allowfullscreen', 'true');
+        iframe.setAttribute('allow', 'fullscreen');
+        
+        // Set up iframe load handler
+        iframe.onload = function() {
+          console.log('PowerBI iframe loaded:', currentReport.name);
+          
+          // Notify the row capture system
+          if (window.powerBIRowCapture) {
+            setTimeout(() => {
+              window.powerBIRowCapture.enableRowCapture();
+            }, 1000); // Give PowerBI time to initialize
+          }
+        };
+        
         title.textContent = currentReport.name;
         
         // Update indicators
@@ -2780,5 +2804,9 @@
   window.exportTaskReports   = exportTaskReports;
 })();
 </script>
+
+<!-- PowerBI Row Capture System -->
+<script src="powerbi-row-capture.js"></script>
+
 </body>
 </html>
