@@ -75,10 +75,15 @@
       "name": "Ashley Garcia",
       "guestCount": 2,
       "email": "ashley.garcia@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 2,
+      "checkInTime": "18:20:17",
+      "checkInTimes": [
+        {
+          "count": 2,
+          "time": "18:20:17"
+        }
+      ]
     },
     {
       "id": "Q2hyaXN0b3",
@@ -507,5 +512,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-11T14:37:30.063Z"
+  "lastUpdated": "2025-09-11T17:20:17.468Z"
 }
