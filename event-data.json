@@ -369,10 +369,15 @@
       "name": "Jeremy Perez",
       "guestCount": 1,
       "email": "jeremy.perez@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "08:54:46",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "08:54:46"
+        }
+      ]
     },
     {
       "id": "Q3J5c3RhbC",
@@ -561,5 +566,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-10T18:52:04.826Z"
+  "lastUpdated": "2025-09-11T07:54:46.219Z"
 }
