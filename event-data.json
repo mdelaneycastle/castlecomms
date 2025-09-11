@@ -16,12 +16,16 @@
       "guestCount": 4,
       "email": "sarah.johnson@example.com",
       "checkedIn": true,
-      "checkedInCount": 1,
-      "checkInTime": "10:13:16",
+      "checkedInCount": 4,
+      "checkInTime": "10:22:52",
       "checkInTimes": [
         {
           "count": 1,
           "time": "10:13:16"
+        },
+        {
+          "count": 3,
+          "time": "10:22:52"
         }
       ]
     },
@@ -507,5 +511,5 @@
     }
   ],
   "eventName": "sample_guest_list_checkin_results",
-  "lastUpdated": "2025-09-11T09:13:16.638Z"
+  "lastUpdated": "2025-09-11T09:22:52.218Z"
 }
