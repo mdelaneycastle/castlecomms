@@ -164,10 +164,15 @@
       "name": "Andrew Jackson",
       "guestCount": 1,
       "email": "andrew.jackson@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "09:24:03",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "09:24:03"
+        }
+      ]
     },
     {
       "id": "UmFjaGVsIF",
@@ -571,5 +576,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-11T08:23:53.784Z"
+  "lastUpdated": "2025-09-11T08:24:03.064Z"
 }
