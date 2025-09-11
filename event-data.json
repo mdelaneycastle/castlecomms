@@ -139,10 +139,15 @@
       "name": "Matthew Taylor",
       "guestCount": 4,
       "email": "matt.taylor@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 4,
+      "checkInTime": "09:23:53",
+      "checkInTimes": [
+        {
+          "count": 4,
+          "time": "09:23:53"
+        }
+      ]
     },
     {
       "id": "TGlzYSBUaG",
@@ -566,5 +571,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-11T07:54:46.219Z"
+  "lastUpdated": "2025-09-11T08:23:53.784Z"
 }
