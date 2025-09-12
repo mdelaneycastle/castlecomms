@@ -5,19 +5,10 @@
       "name": "Marc Delaney",
       "guestCount": 2,
       "email": "marc.delaney@example.com",
-      "checkedIn": true,
-      "checkedInCount": 2,
-      "checkInTime": "08:16:05",
-      "checkInTimes": [
-        {
-          "count": 1,
-          "time": "08:15:55"
-        },
-        {
-          "count": 1,
-          "time": "08:16:05"
-        }
-      ]
+      "checkedIn": false,
+      "checkedInCount": 0,
+      "checkInTime": null,
+      "checkInTimes": []
     },
     {
       "id": "U2FyYWggSm",
@@ -34,38 +25,20 @@
       "name": "Michael Smith",
       "guestCount": 1,
       "email": "michael.smith@example.com",
-      "checkedIn": true,
-      "checkedInCount": 1,
-      "checkInTime": "10:28:43",
-      "checkInTimes": [
-        {
-          "count": 1,
-          "time": "10:28:43"
-        }
-      ]
+      "checkedIn": false,
+      "checkedInCount": 0,
+      "checkInTime": null,
+      "checkInTimes": []
     },
     {
       "id": "RW1pbHkgRG",
       "name": "Emily Davis",
       "guestCount": 3,
       "email": "emily.davis@example.com",
-      "checkedIn": true,
-      "checkedInCount": 3,
-      "checkInTime": "09:33:11",
-      "checkInTimes": [
-        {
-          "count": 1,
-          "time": "09:28:22"
-        },
-        {
-          "count": 1,
-          "time": "09:29:29"
-        },
-        {
-          "count": 1,
-          "time": "09:33:11"
-        }
-      ]
+      "checkedIn": false,
+      "checkedInCount": 0,
+      "checkInTime": null,
+      "checkInTimes": []
     },
     {
       "id": "SmFtZXMgV2",
@@ -92,30 +65,20 @@
       "name": "David Miller",
       "guestCount": 5,
       "email": "david.miller@example.com",
-      "checkedIn": true,
-      "checkedInCount": 3,
-      "checkInTime": "18:44:26",
-      "checkInTimes": [
-        {
-          "count": 3,
-          "time": "18:44:26"
-        }
-      ]
+      "checkedIn": false,
+      "checkedInCount": 0,
+      "checkInTime": null,
+      "checkInTimes": []
     },
     {
       "id": "QXNobGV5IE",
       "name": "Ashley Garcia",
       "guestCount": 2,
       "email": "ashley.garcia@example.com",
-      "checkedIn": true,
-      "checkedInCount": 2,
-      "checkInTime": "18:20:17",
-      "checkInTimes": [
-        {
-          "count": 2,
-          "time": "18:20:17"
-        }
-      ]
+      "checkedIn": false,
+      "checkedInCount": 0,
+      "checkInTime": null,
+      "checkInTimes": []
     },
     {
       "id": "Q2hyaXN0b3",
@@ -432,15 +395,10 @@
       "name": "Heather Edwards",
       "guestCount": 1,
       "email": "heather.edwards@example.com",
-      "checkedIn": true,
-      "checkedInCount": 1,
-      "checkInTime": "15:37:30",
-      "checkInTimes": [
-        {
-          "count": 1,
-          "time": "15:37:30"
-        }
-      ]
+      "checkedIn": false,
+      "checkedInCount": 0,
+      "checkInTime": null,
+      "checkInTimes": []
     },
     {
       "id": "QWRhbSBDb2",
@@ -544,5 +502,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-12T09:28:43.199Z"
+  "lastUpdated": "2025-09-12T13:21:28.944Z"
 }
