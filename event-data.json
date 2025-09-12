@@ -21,10 +21,15 @@
       "passId": "PASS002",
       "hostGallery": "London Covent Garden",
       "artConsultant": "James Henderson",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 4,
+      "checkInTime": "14:46:27",
+      "checkInTimes": [
+        {
+          "count": 4,
+          "time": "14:46:27"
+        }
+      ]
     },
     {
       "id": "TWljaGFlbC",
@@ -652,5 +657,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-12T13:45:42.363Z"
+  "lastUpdated": "2025-09-12T13:46:27.183Z"
 }
