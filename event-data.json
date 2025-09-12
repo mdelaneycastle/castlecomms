@@ -45,8 +45,8 @@
       "guestCount": 3,
       "email": "emily.davis@example.com",
       "checkedIn": true,
-      "checkedInCount": 2,
-      "checkInTime": "09:29:29",
+      "checkedInCount": 3,
+      "checkInTime": "09:33:11",
       "checkInTimes": [
         {
           "count": 1,
@@ -55,6 +55,10 @@
         {
           "count": 1,
           "time": "09:29:29"
+        },
+        {
+          "count": 1,
+          "time": "09:33:11"
         }
       ]
     },
@@ -535,5 +539,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-12T08:29:30.571Z"
+  "lastUpdated": "2025-09-12T08:33:11.698Z"
 }
