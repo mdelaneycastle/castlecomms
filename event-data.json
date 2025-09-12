@@ -22,12 +22,16 @@
       "hostGallery": "London Covent Garden",
       "artConsultant": "James Henderson",
       "checkedIn": true,
-      "checkedInCount": 1,
-      "checkInTime": "14:35:00",
+      "checkedInCount": 2,
+      "checkInTime": "14:35:12",
       "checkInTimes": [
         {
           "count": 1,
           "time": "14:35:00"
+        },
+        {
+          "count": 1,
+          "time": "14:35:12"
         }
       ]
     },
@@ -657,5 +661,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-12T13:35:00.878Z"
+  "lastUpdated": "2025-09-12T13:35:12.919Z"
 }
