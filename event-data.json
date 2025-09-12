@@ -44,10 +44,15 @@
       "name": "Emily Davis",
       "guestCount": 3,
       "email": "emily.davis@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "09:28:22",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "09:28:22"
+        }
+      ]
     },
     {
       "id": "SmFtZXMgV2",
@@ -526,5 +531,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-12T08:24:36.527Z"
+  "lastUpdated": "2025-09-12T08:28:22.098Z"
 }
