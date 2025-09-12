@@ -24,10 +24,15 @@
       "name": "Sarah Johnson",
       "guestCount": 4,
       "email": "sarah.johnson@example.com",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "13:25:28",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "13:25:28"
+        }
+      ]
     },
     {
       "id": "TWljaGFlbC",
@@ -544,5 +549,5 @@
     }
   ],
   "eventName": "sample_guest_list",
-  "lastUpdated": "2025-09-12T09:28:43.199Z"
+  "lastUpdated": "2025-09-12T12:25:28.835Z"
 }
