@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Create Product PDF - Castle Comms</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="style.css?v=20250813_din_font_update">
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-init.js"></script>
+    <script src="shared-components.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .create-pdf-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--card-background);
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-light);
+            margin-top: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .upload-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px dashed var(--primary-color);
+            border-radius: var(--border-radius);
+            background: #fafafa;
+            font-family: var(--font-primary);
+            cursor: pointer;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .file-input:hover {
+            border-color: var(--secondary-color);
+            background: #f5f5f5;
+        }
+
+        .image-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .image-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-subtle);
+            position: relative;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+        }
+
+        .image-details {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .input-group input {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: var(--font-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(69, 73, 78, 0.1);
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .remove-image:hover {
+            background: #cc0000;
+        }
+
+        .pdf-actions {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .generate-pdf-btn {
+            background: var(--secondary-color);
+            color: white;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: var(--font-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+
+        .generate-pdf-btn:hover {
+            background: var(--tertiary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .generate-pdf-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .modern-main {
+            margin-top: 2rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: var(--text-light);
+            margin-top: 1rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-light);
+            padding: 3rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="modern-body">
+    <!-- Loading screen -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Authentication container -->
+    <div class="auth-container" id="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="brand-logo">
+                    <span class="brand-initials">CC</span>
+                </div>
+                <h1 class="auth-title">Castle Comms</h1>
+                <p class="auth-subtitle">Please sign in to continue</p>
+            </div>
+            <form class="auth-form" id="auth-form">
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Email address" required />
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required />
+                </div>
+                <button type="submit" class="auth-button">Sign In</button>
+            </form>
+            <div class="auth-error" id="auth-error"></div>
+        </div>
+    </div>
+
+    <!-- Header Container -->
+    <div id="header-container"></div>
+
+    <!-- Sidebar Container -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content -->
+    <div class="modern-main" id="main-content">
+        <div class="create-pdf-container">
+        <div class="page-header">
+            <h1>Create Art Catalog PDF</h1>
+            <p>Upload images and create a professional PDF catalog with Castle Fine Art branding</p>
+        </div>
+
+        <div class="upload-section">
+            <h3>Upload Images</h3>
+            <input type="file" id="imageUpload" class="file-input" multiple accept="image/*" 
+                   placeholder="Click to select images or drag and drop">
+            <p style="text-align: center; margin-top: 1rem; color: var(--text-light);">
+                Select multiple images to add to your catalog
+            </p>
+        </div>
+
+        <div id="imageContainer">
+            <div class="empty-state">
+                No images uploaded yet. Please select images to begin creating your catalog.
+            </div>
+        </div>
+
+        <div class="pdf-actions">
+            <button id="generatePDF" class="generate-pdf-btn" disabled>
+                Generate PDF Catalog
+            </button>
+            <div id="loading" class="loading">
+                <p>Generating PDF... Please wait</p>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Contact Chatbot -->
+    <button class="cc-launcher" id="cc-launcher">
+        <span class="cc-launcher-icon">💬</span>
+        <span class="cc-launcher-text">Who should I contact?</span>
+    </button>
+
+    <div class="cc-chat" id="cc-chat">
+        <div class="cc-chat-header">
+            <h3>Who should I contact?</h3>
+            <button class="cc-close-btn" id="cc-close-btn">×</button>
+        </div>
+        <div class="cc-chat-messages" id="cc-chat-messages">
+            <div class="cc-message cc-bot-message">
+                <p>Hi! I'm here to help you find the right person to contact. What do you need help with?</p>
+            </div>
+        </div>
+        <div class="cc-chat-input-container">
+            <input type="text" class="cc-chat-input" id="cc-chat-input" placeholder="Type your message...">
+            <button class="cc-send-btn" id="cc-send-btn">Send</button>
+        </div>
+    </div>
+
+    <style>
+        /* Contact Chatbot Styles */
+        .cc-launcher {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 999999;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            background: var(--secondary-color);
+            color: white;
+            box-shadow: var(--shadow-medium);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .cc-launcher:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .cc-chat {
+            position: fixed;
+            right: 20px;
+            bottom: 80px;
+            width: 350px;
+            height: 450px;
+            background: white;
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-heavy);
+            z-index: 999998;
+            display: none;
+            flex-direction: column;
+        }
+
+        .cc-chat.show {
+            display: flex;
+        }
+
+        .cc-chat-header {
+            background: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cc-chat-header h3 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .cc-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cc-chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .cc-message {
+            max-width: 80%;
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .cc-bot-message {
+            background: #f0f0f0;
+            color: var(--text-dark);
+            align-self: flex-start;
+        }
+
+        .cc-user-message {
+            background: var(--secondary-color);
+            color: white;
+            align-self: flex-end;
+        }
+
+        .cc-chat-input-container {
+            padding: 1rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .cc-chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: var(--font-primary);
+            font-size: 0.9rem;
+        }
+
+        .cc-send-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .cc-chat {
+                width: calc(100vw - 40px);
+                max-width: 350px;
+            }
+        }
+    </style>
+
+    <script>
+        let images = [];
+        let imageCounter = 0;
+
+        const imageUpload = document.getElementById('imageUpload');
+        const imageContainer = document.getElementById('imageContainer');
+        const generatePDFBtn = document.getElementById('generatePDF');
+        const loading = document.getElementById('loading');
+
+        imageUpload.addEventListener('change', handleImageUpload);
+
+        function handleImageUpload(event) {
+            const files = Array.from(event.target.files);
+            
+            if (files.length === 0) return;
+
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        addImageToList(e.target.result, file.name);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Clear the input
+            event.target.value = '';
+        }
+
+        function addImageToList(imageSrc, fileName) {
+            const imageId = ++imageCounter;
+            const imageData = {
+                id: imageId,
+                src: imageSrc,
+                fileName: fileName,
+                artist: '',
+                title: '',
+                price: ''
+            };
+
+            images.push(imageData);
+            renderImages();
+            updateGenerateButton();
+        }
+
+        function renderImages() {
+            if (images.length === 0) {
+                imageContainer.innerHTML = `
+                    <div class="empty-state">
+                        No images uploaded yet. Please select images to begin creating your catalog.
+                    </div>
+                `;
+                return;
+            }
+
+            imageContainer.innerHTML = `
+                <div class="image-preview-container">
+                    ${images.map(image => `
+                        <div class="image-item" data-id="${image.id}">
+                            <button class="remove-image" onclick="removeImage(${image.id})">×</button>
+                            <img src="${image.src}" alt="${image.fileName}" class="image-preview">
+                            <div class="image-details">
+                                <div class="input-group">
+                                    <label>Artist Name</label>
+                                    <input type="text" value="${image.artist}" 
+                                           onchange="updateImageData(${image.id}, 'artist', this.value)"
+                                           placeholder="Enter artist name">
+                                </div>
+                                <div class="input-group">
+                                    <label>Title</label>
+                                    <input type="text" value="${image.title}" 
+                                           onchange="updateImageData(${image.id}, 'title', this.value)"
+                                           placeholder="Enter artwork title">
+                                </div>
+                                <div class="input-group">
+                                    <label>Price</label>
+                                    <input type="text" value="${image.price}" 
+                                           onchange="updateImageData(${image.id}, 'price', this.value)"
+                                           placeholder="Enter price (e.g., £1,500)">
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function updateImageData(imageId, field, value) {
+            const image = images.find(img => img.id === imageId);
+            if (image) {
+                image[field] = value;
+            }
+        }
+
+        function removeImage(imageId) {
+            images = images.filter(img => img.id !== imageId);
+            renderImages();
+            updateGenerateButton();
+        }
+
+        function updateGenerateButton() {
+            generatePDFBtn.disabled = images.length === 0;
+        }
+
+        generatePDFBtn.addEventListener('click', generatePDF);
+
+        async function generatePDF() {
+            if (images.length === 0) {
+                alert('Please upload at least one image before generating the PDF.');
+                return;
+            }
+
+            loading.classList.add('show');
+            generatePDFBtn.disabled = true;
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = 210; // A4 width in mm
+                const pageHeight = 297; // A4 height in mm
+                const margin = 20;
+
+                // First page - Castle Fine Art Logo
+                await addLogoPage(pdf, pageWidth, pageHeight, margin);
+
+                // Add pages for each image
+                for (let i = 0; i < images.length; i++) {
+                    pdf.addPage();
+                    await addImagePage(pdf, images[i], pageWidth, pageHeight, margin);
+                }
+
+                // Save the PDF
+                const fileName = `Castle_Fine_Art_Catalog_${new Date().getTime()}.pdf`;
+                pdf.save(fileName);
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
+            } finally {
+                loading.classList.remove('show');
+                generatePDFBtn.disabled = false;
+            }
+        }
+
+        async function addLogoPage(pdf, pageWidth, pageHeight, margin) {
+            // Add Castle Fine Art logo
+            try {
+                const logoImg = await loadImage('./Castle Fine Art logo square black.png');
+                const logoSize = 100; // Logo size in mm
+                const logoX = (pageWidth - logoSize) / 2;
+                const logoY = (pageHeight - logoSize) / 2;
+
+                pdf.addImage(logoImg, 'PNG', logoX, logoY, logoSize, logoSize);
+
+                // Add title below logo
+                pdf.setFontSize(24);
+                pdf.setFont('helvetica', 'bold');
+                const titleY = logoY + logoSize + 30;
+                pdf.text('Art Catalog', pageWidth / 2, titleY, { align: 'center' });
+
+                // Add date
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'normal');
+                const dateY = titleY + 15;
+                const currentDate = new Date().toLocaleDateString('en-GB');
+                pdf.text(`Created: ${currentDate}`, pageWidth / 2, dateY, { align: 'center' });
+
+            } catch (error) {
+                console.error('Error loading logo:', error);
+                // Fallback - just add text
+                pdf.setFontSize(32);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('CASTLE FINE ART', pageWidth / 2, pageHeight / 2, { align: 'center' });
+                
+                pdf.setFontSize(24);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Art Catalog', pageWidth / 2, (pageHeight / 2) + 20, { align: 'center' });
+            }
+        }
+
+        async function addImagePage(pdf, imageData, pageWidth, pageHeight, margin) {
+            const contentWidth = pageWidth - (margin * 2);
+            const availableHeight = pageHeight - (margin * 2) - 60; // Reserve space for text
+
+            // Add artist name at top
+            pdf.setFontSize(18);
+            pdf.setFont('helvetica', 'bold');
+            const artistY = margin + 15;
+            pdf.text(imageData.artist || 'Unknown Artist', pageWidth / 2, artistY, { align: 'center' });
+
+            // Add title below artist
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'italic');
+            const titleY = artistY + 10;
+            pdf.text(imageData.title || 'Untitled', pageWidth / 2, titleY, { align: 'center' });
+
+            // Calculate image dimensions and position
+            const img = new Image();
+            img.src = imageData.src;
+            
+            await new Promise((resolve) => {
+                img.onload = () => {
+                    const imgAspectRatio = img.width / img.height;
+                    const availableWidth = contentWidth;
+                    const maxImageHeight = availableHeight - 40; // Reserve more space for price
+
+                    let imgWidth, imgHeight;
+                    
+                    if (imgAspectRatio > (availableWidth / maxImageHeight)) {
+                        // Image is wider - fit to width
+                        imgWidth = availableWidth;
+                        imgHeight = availableWidth / imgAspectRatio;
+                    } else {
+                        // Image is taller - fit to height
+                        imgHeight = maxImageHeight;
+                        imgWidth = maxImageHeight * imgAspectRatio;
+                    }
+
+                    const imgX = (pageWidth - imgWidth) / 2;
+                    const imgY = titleY + 20;
+
+                    pdf.addImage(imageData.src, 'JPEG', imgX, imgY, imgWidth, imgHeight);
+
+                    // Add price at bottom
+                    pdf.setFontSize(16);
+                    pdf.setFont('helvetica', 'bold');
+                    const priceY = imgY + imgHeight + 20;
+                    pdf.text(imageData.price || 'Price on request', pageWidth / 2, priceY, { align: 'center' });
+
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.error('Error loading image for PDF');
+                    resolve();
+                };
+            });
+        }
+
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        // Contact Chatbot functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const launcher = document.getElementById('cc-launcher');
+            const chat = document.getElementById('cc-chat');
+            const closeBtn = document.getElementById('cc-close-btn');
+            const chatInput = document.getElementById('cc-chat-input');
+            const sendBtn = document.getElementById('cc-send-btn');
+            const chatMessages = document.getElementById('cc-chat-messages');
+
+            launcher.addEventListener('click', function() {
+                chat.classList.toggle('show');
+            });
+
+            closeBtn.addEventListener('click', function() {
+                chat.classList.remove('show');
+            });
+
+            function addMessage(message, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `cc-message ${isUser ? 'cc-user-message' : 'cc-bot-message'}`;
+                messageDiv.innerHTML = `<p>${message}</p>`;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function handleUserMessage(message) {
+                addMessage(message, true);
+                
+                // Simple response logic
+                setTimeout(() => {
+                    if (message.toLowerCase().includes('pdf') || message.toLowerCase().includes('catalog')) {
+                        addMessage("For PDF catalog creation or technical issues, please contact the IT Support team at support@castlefinearts.com");
+                    } else if (message.toLowerCase().includes('art') || message.toLowerCase().includes('artwork')) {
+                        addMessage("For artwork-related questions, please contact the Art Department at art@castlefinearts.com");
+                    } else {
+                        addMessage("For general inquiries, please contact our main office at info@castlefinearts.com or call +44 (0) 20 7000 0000");
+                    }
+                }, 500);
+            }
+
+            sendBtn.addEventListener('click', function() {
+                const message = chatInput.value.trim();
+                if (message) {
+                    handleUserMessage(message);
+                    chatInput.value = '';
+                }
+            });
+
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const message = chatInput.value.trim();
+                    if (message) {
+                        handleUserMessage(message);
+                        chatInput.value = '';
+                    }
+                }
+            });
+        });
+
+        // Authentication and initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const authContainer = document.getElementById('auth-container');
+            const mainContent = document.getElementById('main-content');
+            const loadingOverlay = document.getElementById('loading-overlay');
+
+            // Check auth state
+            firebase.auth().onAuthStateChanged(function(user) {
+                loadingOverlay.style.display = 'none';
+                
+                if (user) {
+                    // User is signed in
+                    authContainer.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    
+                    // Load shared components after authentication
+                    if (window.sharedComponents) {
+                        window.sharedComponents.init();
+                    }
+                } else {
+                    // User is signed out
+                    authContainer.style.display = 'flex';
+                    mainContent.style.display = 'none';
+                }
+            });
+
+            // Handle sign-in form
+            const authForm = document.getElementById('auth-form');
+            const authError = document.getElementById('auth-error');
+
+            authForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                authError.textContent = '';
+                
+                firebase.auth().signInWithEmailAndPassword(email, password)
+                    .then(function(userCredential) {
+                        // Sign-in successful
+                        console.log('User signed in:', userCredential.user);
+                    })
+                    .catch(function(error) {
+                        authError.textContent = error.message;
+                    });
+            });
+
+            // Load sidebar
+            fetch('sidebar.html')
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('sidebar-container').innerHTML = html;
+                    
+                    // Setup sidebar close functionality
+                    const closeBtn = document.getElementById('close-btn');
+                    const sidebar = document.getElementById('sidebar');
+                    
+                    if (closeBtn && sidebar) {
+                        closeBtn.addEventListener('click', function() {
+                            sidebar.classList.remove('show');
+                        });
+                    }
+                })
+                .catch(error => console.error('Error loading sidebar:', error));
+        });
+    </script>
+</body>
+</html>
