@@ -482,6 +482,29 @@
         </div>
     </div>
 
+    <!-- Host Information Modal -->
+    <div id="hostInfoModal" class="modal">
+        <div class="modal-content">
+            <h2>Guest Information</h2>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: left;">
+                <h3 id="hostModalGuestName" style="margin-bottom: 15px; color: #45494e;">Guest Name</h3>
+                <div style="margin-bottom: 12px;">
+                    <strong style="color: #666;">Host Gallery:</strong>
+                    <div id="hostModalGallery" style="font-size: 18px; color: #45494e; margin-top: 4px;"></div>
+                </div>
+                <div>
+                    <strong style="color: #666;">Art Consultant:</strong>
+                    <div id="hostModalConsultant" style="font-size: 18px; color: #45494e; margin-top: 4px;"></div>
+                </div>
+            </div>
+            <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Direct the guests to their assigned gallery and consultant.</p>
+            
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-primary" onclick="closeHostInfoModal()" style="width: 100%;">Got It!</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global state
         let guests = [];
@@ -643,6 +666,23 @@
             currentGuest = null;
         }
 
+        function showHostInfoModal(guest) {
+            const modal = document.getElementById('hostInfoModal');
+            const nameEl = document.getElementById('hostModalGuestName');
+            const galleryEl = document.getElementById('hostModalGallery');
+            const consultantEl = document.getElementById('hostModalConsultant');
+
+            nameEl.textContent = guest.name;
+            galleryEl.textContent = guest.hostGallery || 'Not assigned';
+            consultantEl.textContent = guest.artConsultant || 'Not assigned';
+
+            modal.style.display = 'block';
+        }
+
+        function closeHostInfoModal() {
+            document.getElementById('hostInfoModal').style.display = 'none';
+        }
+
         function confirmCheckIn() {
             if (!currentGuest) return;
 
@@ -688,6 +728,9 @@
             updateDisplay();
             closeModal();
             
+            // Show host information modal
+            showHostInfoModal(currentGuest);
+            
             // Auto-refresh to sync with other devices
             setTimeout(() => refreshData(), 2000);
         }
@@ -723,6 +766,9 @@
                 name: name,
                 guestCount: guestCount,
                 email: email,
+                passId: '',
+                hostGallery: '',
+                artConsultant: '',
                 checkedIn: false,
                 checkedInCount: 0,
                 checkInTime: null,
@@ -788,14 +834,20 @@
                     const parts = line.split(',').map(part => part.replace(/"/g, '').trim());
                     if (parts.length >= 2) {
                         const name = parts[0];
-                        const guestCount = parseInt(parts[1]) || 1;
-                        const email = parts[2] || '';
+                        const email = parts[1] || '';
+                        const guestCount = parseInt(parts[2]) || 1;
+                        const passId = parts[3] || '';
+                        const hostGallery = parts[4] || '';
+                        const artConsultant = parts[5] || '';
                         
                         guests.push({
                             id: generateId(name, guestCount),
                             name: name,
                             guestCount: guestCount,
                             email: email,
+                            passId: passId,
+                            hostGallery: hostGallery,
+                            artConsultant: artConsultant,
                             checkedIn: false,
                             checkedInCount: 0,
                             checkInTime: null,
@@ -877,6 +929,8 @@
                                 ${guest.email ? ' • ' + guest.email : ''}
                                 ${statusText}
                                 ${guest.checkInTime ? ' • Last: ' + guest.checkInTime : ''}
+                                ${guest.hostGallery ? '<br>📍 ' + guest.hostGallery : ''}
+                                ${guest.artConsultant ? ' • 👤 ' + guest.artConsultant : ''}
                             </div>
                         </div>
                         <div style="color: #666; font-size: 12px; margin-left: auto; padding-left: 10px;">
@@ -893,12 +947,12 @@
                 return;
             }
 
-            let csv = 'Name,Expected Guests,Email,Guests Checked In,Fully Arrived,Check In Times\n';
+            let csv = 'Name,Email,Expected Guests,Pass ID,Host Gallery,Art Consultant,Guests Checked In,Fully Arrived,Check In Times\n';
             guests.forEach(guest => {
                 const checkedInCount = guest.checkedInCount || 0;
                 const fullyArrived = checkedInCount >= guest.guestCount ? 'Yes' : 'No';
                 const checkInTimes = (guest.checkInTimes || []).map(t => `${t.count} at ${t.time}`).join('; ');
-                csv += `"${guest.name}",${guest.guestCount},"${guest.email}",${checkedInCount},${fullyArrived},"${checkInTimes}"\n`;
+                csv += `"${guest.name}","${guest.email}",${guest.guestCount},"${guest.passId || ''}","${guest.hostGallery || ''}","${guest.artConsultant || ''}",${checkedInCount},${fullyArrived},"${checkInTimes}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv' });
