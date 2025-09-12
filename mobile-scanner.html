@@ -726,10 +726,17 @@
             showStatus(statusMessage, true);
             saveData();
             updateDisplay();
+            
+            // Store guest info before closing modal
+            const guestForHostInfo = currentGuest;
             closeModal();
             
-            // Show host information modal
-            showHostInfoModal(currentGuest);
+            // Show host information modal after a brief delay
+            setTimeout(() => {
+                if (guestForHostInfo && (guestForHostInfo.hostGallery || guestForHostInfo.artConsultant)) {
+                    showHostInfoModal(guestForHostInfo);
+                }
+            }, 300);
             
             // Auto-refresh to sync with other devices
             setTimeout(() => refreshData(), 2000);
