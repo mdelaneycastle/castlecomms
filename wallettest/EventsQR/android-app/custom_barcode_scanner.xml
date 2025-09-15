@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.journeyapps.barcodescanner.BarcodeView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/zxing_barcode_surface">
+    </com.journeyapps.barcodescanner.BarcodeView>
+
+    <com.journeyapps.barcodescanner.ViewfinderView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/zxing_viewfinder_view"
+        app:zxing_viewfinder_laser_color="#ff0000"
+        app:zxing_viewfinder_mask_color="#60000000"
+        app:zxing_viewfinder_border_color="#00ff00"
+        app:zxing_viewfinder_border_stroke_width="2dp"
+        app:zxing_viewfinder_border_length="30dp"
+        app:zxing_possible_result_points="#c0ffff00"
+        app:zxing_result_view="#b0000000"
+        app:zxing_viewfinder_laser_visibility="true"/>
+
+    <TextView
+        android:id="@+id/zxing_status_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:background="#90000000"
+        android:text="Point camera at QR code"
+        android:textColor="#ffffff"
+        android:textSize="14sp"
+        android:padding="10dp"
+        android:layout_marginBottom="20dp"/>
+
+</merge>

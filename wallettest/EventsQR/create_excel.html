@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Sample Excel File</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>Excel File Generator</h1>
+    <button onclick="createExcelFile()">Download Sample Excel File</button>
+    
+    <script>
+        function createExcelFile() {
+            const data = [
+                ['Client Name', 'Guests'],
+                ['Marc Delaney', 2],
+                ['Sarah Johnson', 4],
+                ['Michael Smith', 1],
+                ['Emily Davis', 3],
+                ['James Wilson', 2],
+                ['Jessica Brown', 1],
+                ['David Miller', 5],
+                ['Ashley Garcia', 2],
+                ['Christopher Martinez', 3],
+                ['Amanda Anderson', 1],
+                ['Matthew Taylor', 4],
+                ['Lisa Thomas', 2],
+                ['Andrew Jackson', 1],
+                ['Rachel White', 3],
+                ['Daniel Harris', 2],
+                ['Michelle Lewis', 4],
+                ['Kevin Clark', 1],
+                ['Stephanie Rodriguez', 2],
+                ['Ryan Walker', 3],
+                ['Nicole Hall', 1],
+                ['Brandon Young', 5],
+                ['Jennifer Allen', 2],
+                ['Justin King', 1],
+                ['Melissa Wright', 4],
+                ['Sean Lopez', 2],
+                ['Kimberly Hill', 3],
+                ['Tyler Green', 1],
+                ['Laura Adams', 2],
+                ['Jonathan Baker', 4],
+                ['Amy Nelson', 1],
+                ['Nathan Carter', 3],
+                ['Rebecca Mitchell', 2],
+                ['Jeremy Perez', 1],
+                ['Crystal Roberts', 4],
+                ['Austin Turner', 2],
+                ['Samantha Phillips', 3],
+                ['Gregory Campbell', 1],
+                ['Diana Parker', 2],
+                ['Eric Evans', 4],
+                ['Heather Edwards', 1],
+                ['Adam Collins', 3],
+                ['Tiffany Stewart', 2],
+                ['Jordan Sanchez', 1],
+                ['Brittany Morris', 4],
+                ['Kyle Rogers', 2],
+                ['Vanessa Reed', 3],
+                ['Zachary Cook', 1],
+                ['Angela Bailey', 2],
+                ['Trevor Cooper', 4],
+                ['Monica Richardson', 1]
+            ];
+            
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Guest List");
+            
+            XLSX.writeFile(wb, "sample_guest_list.xlsx");
+        }
+    </script>
+</body>
+</html>

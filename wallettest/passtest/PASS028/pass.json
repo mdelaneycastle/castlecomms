@@ -1,0 +1,61 @@
+{
+    "formatVersion": 1,
+    "passTypeIdentifier": "pass.com.castlefineart.guest",
+    "serialNumber": "PASS028-20250912140900",
+    "teamIdentifier": "R3NC84JPSH",
+    "organizationName": "Castle Fine Art",
+    "description": "Event Entry Pass",
+    "backgroundColor": "rgb(255, 0, 255)",
+    "foregroundColor": "rgb(255, 255, 255)",
+    "labelColor": "rgb(255, 255, 255)",
+    "storeCard": {
+        "primaryFields": [
+            {
+                "key": "spacer",
+                "label": "",
+                "value": " "
+            }
+        ],
+        "secondaryFields": [
+            {
+                "key": "name",
+                "label": "Name",
+                "value": "Laura Adams"
+            },
+            {
+                "key": "guests",
+                "label": "Guests",
+                "value": "2"
+            }
+        ],
+        "auxiliaryFields": [
+            {
+                "key": "host_gallery",
+                "label": "Host Gallery",
+                "value": "Stamford"
+            },
+            {
+                "key": "art_consultant",
+                "label": "Art Consultant",
+                "value": "Logan Lopez"
+            },
+            {
+                "key": "date",
+                "label": "Date",
+                "value": "13 Sep 2025"
+            },
+            {
+                "key": "location",
+                "label": "Event Location",
+                "value": "Castle Fine Art, The Mailbox"
+            }
+        ]
+    },
+    "barcode": {
+        "message": "{\"name\": \"Laura Adams\", \"guests\": 2}",
+        "format": "PKBarcodeFormatQR",
+        "messageEncoding": "iso-8859-1"
+    },
+    "expirationDate": "2025-09-13T14:09:00Z",
+    "relevantDate": "2025-09-13T14:09:00Z"
+}

@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Castle Fine Art Events Scanner</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #d8d1c5;
+            color: #45494e;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            background: #45494e;
+            color: #d8d1c5;
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .refresh-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: none;
+            border: 1px solid #d8d1c5;
+            color: #d8d1c5;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .refresh-btn:hover {
+            background: #d8d1c5;
+            color: #45494e;
+        }
+        
+        .tab-nav {
+            display: flex;
+            background: #d8d1c5;
+            border-bottom: 1px solid #45494e;
+            position: sticky;
+            top: 60px;
+            z-index: 99;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            color: #45494e;
+        }
+        
+        .tab-btn.active {
+            border-bottom-color: #45494e;
+            color: #45494e;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            min-height: calc(100vh - 120px);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .scanner-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        #reader {
+            border: 2px solid #45494e;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .status-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .status-success {
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .status-error {
+            border-left: 5px solid #f44336;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #45494e;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .guest-list {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .guest-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: between;
+        }
+        
+        .guest-item:last-child {
+            border-bottom: none;
+        }
+        
+        .guest-info {
+            flex: 1;
+        }
+        
+        .guest-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .guest-details {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .guest-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        
+        .checked-in {
+            background: #4CAF50;
+        }
+        
+        .pending {
+            background: #ccc;
+        }
+        
+        .btn {
+            background: #45494e;
+            color: #d8d1c5;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2d3033;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .import-zone {
+            border: 2px dashed #ddd;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .import-zone:hover {
+            border-color: #45494e;
+            background: #e8e3db;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .guest-count-input {
+            width: 80px;
+            height: 50px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #45494e;
+            border-radius: 8px;
+            margin: 20px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            min-width: 80px;
+        }
+        
+        .modal-btn-primary {
+            background: #45494e;
+            color: #d8d1c5;
+        }
+        
+        .modal-btn-secondary {
+            background: #ccc;
+            color: #333;
+        }
+        
+        .manual-entry-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #45494e;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #45494e;
+        }
+        
+        .form-input:focus {
+            border-color: #45494e;
+            outline: none;
+        }
+        
+        .guest-item.clickable {
+            cursor: pointer;
+        }
+        
+        .guest-item.clickable:hover {
+            background-color: #f0f0f0;
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab-btn {
+                font-size: 12px;
+                padding: 12px 8px;
+            }
+            
+            .header {
+                padding: 10px;
+            }
+            
+            .tab-content {
+                padding: 15px;
+            }
+            
+            .modal-content {
+                width: 90%;
+                margin: 20% auto;
+                padding: 20px;
+            }
+            
+            .refresh-btn {
+                right: 10px;
+                top: 10px;
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Castle Fine Art Events Scanner</h1>
+        <button class="refresh-btn" onclick="refreshData()" title="Firebase real-time sync active">🔥 Live</button>
+        <div id="eventInfo">No event loaded</div>
+    </div>
+
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('scan')">📷 Scan</button>
+        <button class="tab-btn" onclick="switchTab('guests')">👥 Guests</button>
+        <button class="tab-btn" onclick="switchTab('stats')">📊 Stats</button>
+    </div>
+
+    <!-- Scan Tab -->
+    <div id="scan" class="tab-content active">
+        <div class="scanner-container">
+            <div id="reader"></div>
+            
+            <div id="scanStatus" class="status-card" style="display: none;">
+                <div id="statusMessage"></div>
+            </div>
+            
+            <div class="import-zone" onclick="document.getElementById('csvFile').click()">
+                📁 Import Guest List (CSV)
+                <div style="font-size: 14px; color: #666; margin-top: 10px;">
+                    Tap to select CSV file with guest names and counts
+                </div>
+            </div>
+            
+            <div class="manual-entry-form">
+                <h3>Manual Entry</h3>
+                <div class="form-group">
+                    <label for="manualName">Guest Name</label>
+                    <input type="text" id="manualName" class="form-input" placeholder="Enter guest name">
+                </div>
+                <div class="form-group">
+                    <label for="manualGuests">Number of Guests</label>
+                    <input type="number" id="manualGuests" class="form-input" min="1" value="1" placeholder="1">
+                </div>
+                <div class="form-group">
+                    <label for="manualEmail">Email (Optional)</label>
+                    <input type="email" id="manualEmail" class="form-input" placeholder="guest@example.com">
+                </div>
+                <button class="btn" onclick="addManualGuest()">Add Guest</button>
+            </div>
+            
+            <input type="file" id="csvFile" class="file-input" accept=".csv,.txt" onchange="importGuestList(event)">
+        </div>
+    </div>
+
+    <!-- Guests Tab -->
+    <div id="guests" class="tab-content">
+        <div id="guestsList" class="guest-list"></div>
+        <div id="emptyGuestsState" class="empty-state">
+            <h3>No guests loaded</h3>
+            <p>Import a CSV file or add guests manually</p>
+            <button class="btn" onclick="document.getElementById('csvFile').click()">Import Guest List</button>
+            <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                Tip: Click on any guest name to manually check them in
+            </p>
+        </div>
+    </div>
+
+    <!-- Stats Tab -->
+    <div id="stats" class="tab-content">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number" id="totalEntries">0</span>
+                <div class="stat-label">Total Entries</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="checkedInEntries">0</span>
+                <div class="stat-label">Checked In</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="totalGuests">0</span>
+                <div class="stat-label">Total Guests</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="checkedInGuests">0</span>
+                <div class="stat-label">Guests Checked In</div>
+            </div>
+        </div>
+        
+        <div class="status-card">
+            <h3>Export Results</h3>
+            <button class="btn" onclick="exportResults()">Download Check-in Report</button>
+        </div>
+        
+        <div class="status-card">
+            <h3>Clear Data</h3>
+            <p>This will clear all guest data and check-ins</p>
+            <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+        </div>
+    </div>
+
+    <!-- Guest Count Modal -->
+    <div id="guestCountModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalGuestName">Guest Name</h2>
+            <p>How many guests have arrived?</p>
+            <p><small id="modalGuestInfo">Expected: X guests</small></p>
+            
+            <input type="number" id="arrivingGuestCount" class="guest-count-input" min="1" value="1">
+            
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn modal-btn-primary" onclick="confirmCheckIn()">Check In</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJvHNZB_pzhytD7yLa69auStrZBk2SEHk",
+            authDomain: "castle-comms.firebaseapp.com",
+            databaseURL: "https://castle-comms-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "castle-comms",
+            storageBucket: "castle-comms.firebasestorage.app",
+            messagingSenderId: "959264765744",
+            appId: "1:959264765744:web:7aee345a37673f720cfaf5"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global state
+        let guests = [];
+        let eventName = 'Event';
+        let scanner = null;
+        let currentGuest = null;
+        let dataRef = null;
+
+        // Load data from Firebase on startup
+        loadData();
+
+        function refreshData() {
+            showStatus('🔄 Data synced from Firebase', true);
+            // No need to manually refresh - Firebase provides real-time updates
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Start/stop scanner based on tab
+            if (tabName === 'scan') {
+                startScanner();
+            } else {
+                stopScanner();
+            }
+
+            updateDisplay();
+        }
+
+        function startScanner() {
+            if (scanner) return;
+
+            try {
+                scanner = new Html5Qrcode("reader");
+                scanner.start(
+                    { facingMode: "environment" },
+                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    onScanSuccess,
+                    onScanFailure
+                ).catch(err => {
+                    console.log('Scanner start error:', err);
+                    showStatus('Camera access denied or not available', false);
+                });
+            } catch (error) {
+                console.log('Scanner initialization error:', error);
+                showStatus('Scanner initialization failed', false);
+            }
+        }
+
+        function stopScanner() {
+            if (scanner) {
+                scanner.stop().then(() => {
+                    scanner = null;
+                }).catch(err => console.log(err));
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            handleQRScan(decodedText);
+        }
+
+        function onScanFailure(error) {
+            // Completely suppress all scanning errors and console spam
+        }
+
+        function handleQRScan(qrData) {
+            try {
+                let name = '';
+                let guestCount = 0;
+                let id = '';
+
+                // Try pipe-separated format first
+                if (qrData.includes('|')) {
+                    const parts = qrData.split('|');
+                    if (parts.length >= 3) {
+                        id = parts[0];
+                        name = parts[1];
+                        guestCount = parseInt(parts[2]);
+                    }
+                } else {
+                    // Try JSON format
+                    const data = JSON.parse(qrData);
+                    name = data.name || data.clientName;
+                    guestCount = parseInt(data.guests);
+                    id = data.id;
+                }
+
+                // Find guest in list
+                const guest = guests.find(g => 
+                    (id && g.id === id) || 
+                    (g.name.toLowerCase() === name.toLowerCase() && g.guestCount === guestCount)
+                );
+
+                if (!guest) {
+                    showStatus(`❌ Guest not found: ${name}`, false);
+                    return;
+                }
+
+                // Check if already fully checked in
+                if (guest.checkedInCount >= guest.guestCount) {
+                    showStatus(`✅ ${name} - Full party already arrived!`, true);
+                    return;
+                }
+
+                // Show modal for guest count input
+                currentGuest = guest;
+                showGuestCountModal(guest);
+
+            } catch (error) {
+                showStatus('❌ Invalid QR code format', false);
+            }
+        }
+
+        function showGuestCountModal(guest) {
+            const modal = document.getElementById('guestCountModal');
+            const nameEl = document.getElementById('modalGuestName');
+            const infoEl = document.getElementById('modalGuestInfo');
+            const inputEl = document.getElementById('arrivingGuestCount');
+
+            nameEl.textContent = guest.name;
+            const remaining = guest.guestCount - (guest.checkedInCount || 0);
+            infoEl.textContent = `Expected: ${guest.guestCount} guests | Remaining: ${remaining}`;
+            inputEl.value = Math.min(remaining, 1);
+            inputEl.max = remaining;
+
+            modal.style.display = 'block';
+            inputEl.focus();
+            inputEl.select();
+        }
+
+        function closeModal() {
+            document.getElementById('guestCountModal').style.display = 'none';
+            currentGuest = null;
+        }
+
+        function confirmCheckIn() {
+            if (!currentGuest) return;
+
+            const arrivingCount = parseInt(document.getElementById('arrivingGuestCount').value);
+            if (!arrivingCount || arrivingCount < 1) {
+                alert('Please enter a valid number of arriving guests');
+                return;
+            }
+
+            const remainingCount = currentGuest.guestCount - (currentGuest.checkedInCount || 0);
+            if (arrivingCount > remainingCount) {
+                alert(`Only ${remainingCount} guests remaining to check in`);
+                return;
+            }
+
+            // Update guest check-in status
+            if (!currentGuest.checkedInCount) {
+                currentGuest.checkedInCount = 0;
+                currentGuest.checkInTimes = [];
+            }
+
+            currentGuest.checkedInCount += arrivingCount;
+            currentGuest.checkInTimes.push({
+                count: arrivingCount,
+                time: new Date().toLocaleTimeString()
+            });
+
+            // Update legacy fields for compatibility
+            currentGuest.checkedIn = currentGuest.checkedInCount > 0;
+            currentGuest.checkInTime = currentGuest.checkInTimes[currentGuest.checkInTimes.length - 1].time;
+
+            const remaining = currentGuest.guestCount - currentGuest.checkedInCount;
+            let statusMessage;
+
+            if (remaining === 0) {
+                statusMessage = `✅ ${currentGuest.name} - Full party arrived! (${currentGuest.guestCount} guests)`;
+            } else {
+                statusMessage = `✅ ${currentGuest.name} - ${arrivingCount} guests checked in. ${remaining} remaining.`;
+            }
+
+            showStatus(statusMessage, true);
+            saveData();
+            updateDisplay();
+            closeModal();
+            
+            // Firebase syncs automatically - no manual refresh needed!
+        }
+
+        function addManualGuest() {
+            const nameInput = document.getElementById('manualName');
+            const guestsInput = document.getElementById('manualGuests');
+            const emailInput = document.getElementById('manualEmail');
+            
+            const name = nameInput.value.trim();
+            const guestCount = parseInt(guestsInput.value) || 1;
+            const email = emailInput.value.trim();
+            
+            if (!name) {
+                alert('Please enter a guest name');
+                nameInput.focus();
+                return;
+            }
+            
+            // Check if guest already exists
+            const existingGuest = guests.find(g => 
+                g.name.toLowerCase() === name.toLowerCase() && g.guestCount === guestCount
+            );
+            
+            if (existingGuest) {
+                alert('This guest is already in the list');
+                return;
+            }
+            
+            // Add new guest
+            const newGuest = {
+                id: generateId(name, guestCount),
+                name: name,
+                guestCount: guestCount,
+                email: email,
+                checkedIn: false,
+                checkedInCount: 0,
+                checkInTime: null,
+                checkInTimes: []
+            };
+            
+            guests.push(newGuest);
+            
+            // Clear form
+            nameInput.value = '';
+            guestsInput.value = '1';
+            emailInput.value = '';
+            
+            // Save and update
+            saveData();
+            updateDisplay();
+            showStatus(`✅ Added ${name} (${guestCount} guests) to the list`, true);
+        }
+
+        function manualCheckIn(guestIndex) {
+            const guest = guests[guestIndex];
+            if (!guest) return;
+            
+            // Check if already fully checked in
+            if (guest.checkedInCount >= guest.guestCount) {
+                showStatus(`✅ ${guest.name} - Full party already arrived!`, true);
+                return;
+            }
+            
+            // Use the same modal as QR scanning
+            currentGuest = guest;
+            showGuestCountModal(guest);
+        }
+
+        function importGuestList(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    parseCSV(csv);
+                    eventName = file.name.replace('.csv', '');
+                    
+                    // Setup new Firebase reference for this event
+                    const eventPath = `eventsqr/${sanitizeEventName(eventName)}`;
+                    if (dataRef) {
+                        dataRef.off(); // Remove old listener
+                    }
+                    dataRef = database.ref(eventPath);
+                    setupFirebaseListener();
+                    
+                    saveData();
+                    updateDisplay();
+                    showStatus(`✅ Imported ${guests.length} guests successfully!`, true);
+                } catch (error) {
+                    showStatus('❌ Error reading CSV file', false);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n').filter(line => line.trim());
+            guests = [];
+
+            // Skip header row
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line) {
+                    const parts = line.split(',').map(part => part.replace(/"/g, '').trim());
+                    if (parts.length >= 2) {
+                        const name = parts[0];
+                        const guestCount = parseInt(parts[1]) || 1;
+                        const email = parts[2] || '';
+                        
+                        guests.push({
+                            id: generateId(name, guestCount),
+                            name: name,
+                            guestCount: guestCount,
+                            email: email,
+                            checkedIn: false,
+                            checkedInCount: 0,
+                            checkInTime: null,
+                            checkInTimes: []
+                        });
+                    }
+                }
+            }
+        }
+
+        function generateId(name, guestCount) {
+            return btoa(name + guestCount + Date.now()).slice(0, 10);
+        }
+
+        function showStatus(message, success) {
+            const statusDiv = document.getElementById('scanStatus');
+            const messageDiv = document.getElementById('statusMessage');
+            
+            statusDiv.className = success ? 'status-card status-success' : 'status-card status-error';
+            messageDiv.textContent = message;
+            statusDiv.style.display = 'block';
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        function updateDisplay() {
+            // Update event info
+            document.getElementById('eventInfo').textContent = `${eventName} (${guests.length} entries)`;
+
+            // Update stats
+            const checkedInCount = guests.filter(g => g.checkedIn).length;
+            const totalGuestCount = guests.reduce((sum, g) => sum + g.guestCount, 0);
+            const checkedInGuestCount = guests.reduce((sum, g) => sum + (g.checkedInCount || 0), 0);
+
+            document.getElementById('totalEntries').textContent = guests.length;
+            document.getElementById('checkedInEntries').textContent = checkedInCount;
+            document.getElementById('totalGuests').textContent = totalGuestCount;
+            document.getElementById('checkedInGuests').textContent = checkedInGuestCount;
+
+            // Update guests list
+            updateGuestsList();
+        }
+
+        function updateGuestsList() {
+            const listDiv = document.getElementById('guestsList');
+            const emptyDiv = document.getElementById('emptyGuestsState');
+
+            if (guests.length === 0) {
+                listDiv.style.display = 'none';
+                emptyDiv.style.display = 'block';
+                return;
+            }
+
+            listDiv.style.display = 'block';
+            emptyDiv.style.display = 'none';
+
+            listDiv.innerHTML = guests.map(guest => {
+                const checkedInCount = guest.checkedInCount || 0;
+                const remaining = guest.guestCount - checkedInCount;
+                const isFullyCheckedIn = checkedInCount >= guest.guestCount;
+                
+                let statusText = '';
+                if (isFullyCheckedIn) {
+                    statusText = ' • Full party arrived';
+                } else if (checkedInCount > 0) {
+                    statusText = ` • ${checkedInCount}/${guest.guestCount} checked in`;
+                }
+
+                return `
+                    <div class="guest-item clickable" onclick="manualCheckIn(${guests.indexOf(guest)})">
+                        <div class="guest-status ${isFullyCheckedIn ? 'checked-in' : (checkedInCount > 0 ? 'checked-in' : 'pending')}"></div>
+                        <div class="guest-info">
+                            <div class="guest-name">${guest.name}</div>
+                            <div class="guest-details">
+                                ${guest.guestCount} guest${guest.guestCount !== 1 ? 's' : ''}
+                                ${guest.email ? ' • ' + guest.email : ''}
+                                ${statusText}
+                                ${guest.checkInTime ? ' • Last: ' + guest.checkInTime : ''}
+                            </div>
+                        </div>
+                        <div style="color: #666; font-size: 12px; margin-left: auto; padding-left: 10px;">
+                            ${isFullyCheckedIn ? '✓' : 'Tap to check in'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportResults() {
+            if (guests.length === 0) {
+                alert('No guest data to export');
+                return;
+            }
+
+            let csv = 'Name,Expected Guests,Email,Guests Checked In,Fully Arrived,Check In Times\n';
+            guests.forEach(guest => {
+                const checkedInCount = guest.checkedInCount || 0;
+                const fullyArrived = checkedInCount >= guest.guestCount ? 'Yes' : 'No';
+                const checkInTimes = (guest.checkInTimes || []).map(t => `${t.count} at ${t.time}`).join('; ');
+                csv += `"${guest.name}",${guest.guestCount},"${guest.email}",${checkedInCount},${fullyArrived},"${checkInTimes}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${eventName}_checkin_results.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all guest data and check-ins?')) {
+                guests = [];
+                eventName = 'Event';
+                saveData();
+                updateDisplay();
+                showStatus('✅ All data cleared', true);
+            }
+        }
+
+        async function saveData() {
+            // Save to local storage as backup
+            localStorage.setItem('eventsqr_guests', JSON.stringify(guests));
+            localStorage.setItem('eventsqr_event', eventName);
+
+            // Save to Firebase
+            await saveToFirebase();
+        }
+
+        async function loadData() {
+            try {
+                // Setup Firebase real-time listener
+                await setupFirebaseListener();
+            } catch (error) {
+                console.log('Firebase load failed, using localStorage:', error);
+                // Fallback to localStorage
+                const savedGuests = localStorage.getItem('eventsqr_guests');
+                const savedEvent = localStorage.getItem('eventsqr_event');
+
+                if (savedGuests) {
+                    guests = JSON.parse(savedGuests);
+                }
+                if (savedEvent) {
+                    eventName = savedEvent;
+                }
+                updateDisplay();
+            }
+        }
+
+        async function setupFirebaseListener() {
+            const eventPath = `eventsqr/${sanitizeEventName(eventName)}`;
+            dataRef = database.ref(eventPath);
+            
+            // Setup real-time listener
+            dataRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    guests = data.guests || [];
+                    eventName = data.eventName || 'Event';
+                    console.log('Data updated from Firebase');
+                    updateDisplay();
+                } else {
+                    console.log('No data found in Firebase');
+                }
+            });
+            
+            showStatus('✅ Connected to Firebase - Real-time sync active', true);
+        }
+
+        async function saveToFirebase() {
+            if (!dataRef) {
+                const eventPath = `eventsqr/${sanitizeEventName(eventName)}`;
+                dataRef = database.ref(eventPath);
+            }
+
+            try {
+                const data = {
+                    guests: guests,
+                    eventName: eventName,
+                    lastUpdated: firebase.database.ServerValue.TIMESTAMP
+                };
+
+                await dataRef.set(data);
+                console.log('Data saved to Firebase successfully');
+            } catch (error) {
+                console.error('Firebase save failed:', error);
+                showStatus('❌ Firebase save failed, using local storage only', false);
+            }
+        }
+
+        function sanitizeEventName(name) {
+            // Firebase keys cannot contain . # $ [ ] or control characters
+            return name.replace(/[.#$[\]]/g, '_').replace(/[^\w-]/g, '_') || 'default_event';
+        }
+
+        // No more polling needed - Firebase provides real-time updates!
+
+        // Suppress console errors from html5-qrcode library
+        const originalConsoleError = console.error;
+        console.error = function(message) {
+            if (typeof message === 'string' && (
+                message.includes('dataset') || 
+                message.includes('QR code') || 
+                message.includes('MultiFormat')
+            )) {
+                return; // Suppress library errors
+            }
+            originalConsoleError.apply(console, arguments);
+        };
+
+        // Initialize scanner when page loads and DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(startScanner, 1500);
+        });
+        
+        // Fallback for already loaded pages
+        if (document.readyState === 'loading') {
+            // DOM still loading
+        } else {
+            // DOM already loaded
+            setTimeout(startScanner, 1500);
+        }
+    </script>
+</body>
+</html>

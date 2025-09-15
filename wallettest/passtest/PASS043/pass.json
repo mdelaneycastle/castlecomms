@@ -1,0 +1,61 @@
+{
+    "formatVersion": 1,
+    "passTypeIdentifier": "pass.com.castlefineart.guest",
+    "serialNumber": "PASS043-20250912140900",
+    "teamIdentifier": "R3NC84JPSH",
+    "organizationName": "Castle Fine Art",
+    "description": "Event Entry Pass",
+    "backgroundColor": "rgb(255, 0, 255)",
+    "foregroundColor": "rgb(255, 255, 255)",
+    "labelColor": "rgb(255, 255, 255)",
+    "storeCard": {
+        "primaryFields": [
+            {
+                "key": "spacer",
+                "label": "",
+                "value": " "
+            }
+        ],
+        "secondaryFields": [
+            {
+                "key": "name",
+                "label": "Name",
+                "value": "Jordan Sanchez"
+            },
+            {
+                "key": "guests",
+                "label": "Guests",
+                "value": "1"
+            }
+        ],
+        "auxiliaryFields": [
+            {
+                "key": "host_gallery",
+                "label": "Host Gallery",
+                "value": "Bath"
+            },
+            {
+                "key": "art_consultant",
+                "label": "Art Consultant",
+                "value": "Stella Edwards"
+            },
+            {
+                "key": "date",
+                "label": "Date",
+                "value": "13 Sep 2025"
+            },
+            {
+                "key": "location",
+                "label": "Event Location",
+                "value": "Castle Fine Art, The Mailbox"
+            }
+        ]
+    },
+    "barcode": {
+        "message": "{\"name\": \"Jordan Sanchez\", \"guests\": 1}",
+        "format": "PKBarcodeFormatQR",
+        "messageEncoding": "iso-8859-1"
+    },
+    "expirationDate": "2025-09-13T14:09:00Z",
+    "relevantDate": "2025-09-13T14:09:00Z"
+}

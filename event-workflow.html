@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Castle Fine Art - Event Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="qr-bridge.js"></script>
+    <style>
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        .step-indicator.completed {
+            background-color: #10b981;
+            color: white;
+        }
+        .step-indicator.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .step-indicator.pending {
+            background-color: #e5e7eb;
+            color: #6b7280;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.active {
+            display: block;
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        .file-drop-zone {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .file-drop-zone:hover {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+        .file-drop-zone.dragover {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">Castle Fine Art</h1>
+                    <span class="ml-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">Event Management System</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="saveTemplateBtn" class="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">Save as Template</button>
+                    <button id="loadTemplateBtn" class="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">Load Template</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between mb-4">
+                <h2 id="currentStepTitle" class="text-lg font-medium text-gray-900">Step 1: Event Setup</h2>
+                <span id="progressPercentage" class="text-sm text-gray-500">0% Complete</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progressBar" class="progress-bar bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step Navigation -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8 overflow-x-auto py-4">
+                <div class="flex items-center space-x-2 step-indicator active" data-step="1">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">1</div>
+                    <span class="text-sm font-medium whitespace-nowrap">Event Setup</span>
+                </div>
+                <div class="flex items-center space-x-2 step-indicator pending" data-step="2">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">2</div>
+                    <span class="text-sm font-medium whitespace-nowrap">QR Generation</span>
+                </div>
+                <div class="flex items-center space-x-2 step-indicator pending" data-step="3">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">3</div>
+                    <span class="text-sm font-medium whitespace-nowrap">Apple Wallet</span>
+                </div>
+                <div class="flex items-center space-x-2 step-indicator pending" data-step="4">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">4</div>
+                    <span class="text-sm font-medium whitespace-nowrap">Google Wallet</span>
+                </div>
+                <div class="flex items-center space-x-2 step-indicator pending" data-step="5">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">5</div>
+                    <span class="text-sm font-medium whitespace-nowrap">Email Campaign</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Step 1: Event Setup -->
+        <div id="step1" class="step-content active">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Event Configuration</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Event Name</label>
+                        <input type="text" id="eventName" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. Christmas Private View 2024">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Event Date</label>
+                        <input type="date" id="eventDate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Event Time</label>
+                        <input type="time" id="eventTime" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" value="18:00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <input type="text" id="eventLocation" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Castle Fine Art, The Mailbox">
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <label class="block text-sm font-medium text-gray-700 mb-4">Guest List CSV</label>
+                    <div id="csvDropZone" class="file-drop-zone rounded-lg p-8 text-center cursor-pointer">
+                        <div class="flex flex-col items-center">
+                            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-lg font-medium text-gray-900 mb-2">Drop your CSV file here</p>
+                            <p class="text-sm text-gray-500 mb-4">Or click to select a file</p>
+                            <p class="text-xs text-gray-400">Required columns: name, email, guest_count, pass_id, host_gallery, art_consultant</p>
+                        </div>
+                    </div>
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                </div>
+
+                <div id="csvPreview" class="hidden mb-8">
+                    <h4 class="text-md font-medium text-gray-900 mb-4">Guest List Preview</h4>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div id="guestCount" class="text-sm text-gray-600 mb-2"></div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th class="py-2 pr-4">Name</th>
+                                        <th class="py-2 pr-4">Email</th>
+                                        <th class="py-2 pr-4">Guests</th>
+                                        <th class="py-2 pr-4">Pass ID</th>
+                                        <th class="py-2 pr-4">Gallery</th>
+                                        <th class="py-2 pr-4">Consultant</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="csvTableBody" class="text-sm">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between">
+                    <div></div>
+                    <button id="step1NextBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Continue to QR Generation →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: QR Generation -->
+        <div id="step2" class="step-content">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">QR Code Generation</h3>
+
+                <div class="mb-6">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex">
+                            <svg class="w-5 h-5 text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-800">
+                                    Your QR codes will be generated with the correct format for your mobile scanner.
+                                    Each code includes the guest's name, ID, and guest count in JSON format.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <button id="generateQRBtn" class="w-full bg-green-600 text-white py-4 px-6 rounded-lg hover:bg-green-700 transition font-medium text-lg">
+                        🔄 Open QR Creator
+                    </button>
+
+                    <div id="qrGenerationStatus" class="hidden">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                            <h4 class="font-semibold text-blue-900 mb-4">📱 QR Creator Instructions</h4>
+                            <div class="text-blue-800 space-y-3">
+                                <p><strong>Step 1:</strong> The QR Creator opened in a new window/tab</p>
+                                <p><strong>Step 2:</strong> Your guest data should be automatically loaded</p>
+                                <p><strong>Step 3:</strong> Click "Generate QRs" in that window</p>
+                                <p><strong>Step 4:</strong> Download the QR codes as a ZIP file</p>
+                                <p><strong>Step 5:</strong> Upload the ZIP file below to continue</p>
+                            </div>
+
+                            <div class="mt-6 p-4 border-2 border-dashed border-blue-300 rounded-lg text-center">
+                                <input type="file" id="qrZipUpload" accept=".zip" class="hidden">
+                                <button onclick="document.getElementById('qrZipUpload').click()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                                    📁 Upload QR Codes ZIP
+                                </button>
+                                <p class="text-sm text-blue-600 mt-2">Click here to upload the downloaded ZIP file</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="qrResults" class="hidden">
+                        <h4 class="text-md font-medium text-gray-900 mb-4">Generated QR Codes</h4>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <p class="text-sm text-green-800">
+                                        <span id="qrCount">0</span> QR codes generated successfully and ready for wallet creation.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+                            <div id="qrPreviewGrid" class="contents">
+                                <!-- QR previews will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button id="step2BackBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
+                        ← Back to Event Setup
+                    </button>
+                    <button id="step2NextBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Continue to Apple Wallet →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Apple Wallet -->
+        <div id="step3" class="step-content">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Apple Wallet Pass Generation</h3>
+
+                <div class="space-y-6">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h4 class="font-medium text-gray-900 mb-4">Pass Configuration</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div><span class="font-medium">Pass Type:</span> Event Entry Pass</div>
+                            <div><span class="font-medium">Organization:</span> Castle Fine Art</div>
+                            <div><span class="font-medium">Format:</span> Apple Wallet (.pkpass)</div>
+                            <div><span class="font-medium">QR Integration:</span> Compatible with mobile scanner</div>
+                        </div>
+                    </div>
+
+                    <button id="generateAppleWalletBtn" class="w-full bg-gray-900 text-white py-4 px-6 rounded-lg hover:bg-gray-800 transition font-medium text-lg">
+                        📱 Generate Apple Wallet Passes
+                    </button>
+
+                    <div id="appleWalletStatus" class="hidden">
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3 text-sm text-gray-600">
+                                <div class="spinner w-4 h-4 border-2 border-gray-200 border-t-gray-900 rounded-full"></div>
+                                <span id="appleStatusText">Preparing passes...</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="appleProgressBar" class="bg-gray-900 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="appleWalletResults" class="hidden">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <p class="text-sm text-green-800">
+                                        <span id="applePassCount">0</span> Apple Wallet passes created successfully.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button id="step3BackBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
+                        ← Back to QR Generation
+                    </button>
+                    <button id="step3NextBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Continue to Google Wallet →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Google Wallet -->
+        <div id="step4" class="step-content">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Google Wallet Pass Generation</h3>
+
+                <div class="space-y-6">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h4 class="font-medium text-gray-900 mb-4">Pass Configuration</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div><span class="font-medium">Pass Type:</span> Generic Event Pass</div>
+                            <div><span class="font-medium">Format:</span> Google Wallet URL</div>
+                            <div><span class="font-medium">QR Integration:</span> Compatible with mobile scanner</div>
+                            <div><span class="font-medium">Delivery:</span> Via email link</div>
+                        </div>
+                    </div>
+
+                    <button id="generateGoogleWalletBtn" class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition font-medium text-lg">
+                        📱 Generate Google Wallet Passes
+                    </button>
+
+                    <div id="googleWalletStatus" class="hidden">
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3 text-sm text-gray-600">
+                                <div class="spinner w-4 h-4 border-2 border-gray-200 border-t-blue-600 rounded-full"></div>
+                                <span id="googleStatusText">Creating passes...</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="googleProgressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="googleWalletResults" class="hidden">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <p class="text-sm text-green-800">
+                                        <span id="googlePassCount">0</span> Google Wallet passes created successfully.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button id="step4BackBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
+                        ← Back to Apple Wallet
+                    </button>
+                    <button id="step4NextBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Continue to Email Campaign →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: Email Campaign -->
+        <div id="step5" class="step-content">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Email Campaign</h3>
+
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Subject</label>
+                            <input type="text" id="emailSubject" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Your Castle Fine Art Private View Invitation">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">From Email</label>
+                            <input type="email" id="fromEmail" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="events@castlefineart.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Template Preview</label>
+                        <div class="border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-64 overflow-y-auto">
+                            <div class="text-sm text-gray-600">
+                                <p class="font-medium mb-2">Dear [Guest Name],</p>
+                                <p class="mb-2">You're invited to our exclusive private viewing event!</p>
+                                <p class="mb-2"><strong>Event:</strong> <span id="previewEventName">[Event Name]</span></p>
+                                <p class="mb-2"><strong>Date:</strong> <span id="previewEventDate">[Event Date]</span></p>
+                                <p class="mb-2"><strong>Time:</strong> <span id="previewEventTime">[Event Time]</span></p>
+                                <p class="mb-4"><strong>Location:</strong> <span id="previewEventLocation">[Event Location]</span></p>
+                                <div class="bg-blue-100 p-3 rounded">
+                                    <p class="text-blue-800 font-medium">Add to your wallet:</p>
+                                    <p class="text-blue-600 text-xs">📱 Apple Wallet & Google Wallet buttons will be included</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div class="flex">
+                            <svg class="w-5 h-5 text-yellow-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-800">
+                                    Each email will include both Apple Wallet (.pkpass attachment) and Google Wallet (clickable link) options for maximum compatibility.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-4">
+                        <button id="sendTestEmailBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
+                            📧 Send Test Email
+                        </button>
+                        <button id="sendAllEmailsBtn" class="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition font-medium text-lg">
+                            📬 Send All Invitations
+                        </button>
+                    </div>
+
+                    <div id="emailSendingStatus" class="hidden">
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3 text-sm text-gray-600">
+                                <div class="spinner w-4 h-4 border-2 border-gray-200 border-t-green-600 rounded-full"></div>
+                                <span id="emailStatusText">Preparing emails...</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="emailProgressBar" class="bg-green-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="emailResults" class="hidden">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <p class="text-sm text-green-800">
+                                        All <span id="emailSentCount">0</span> invitations sent successfully! 🎉
+                                    </p>
+                                    <p class="text-xs text-green-600 mt-1">
+                                        Event workflow completed. Guests will receive their digital passes via email.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button id="step5BackBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
+                        ← Back to Google Wallet
+                    </button>
+                    <button id="newEventBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition hidden">
+                        🆕 Start New Event
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Status Messages -->
+    <div id="statusToast" class="fixed bottom-4 right-4 max-w-sm bg-white border border-gray-200 rounded-lg shadow-lg p-4 transform translate-y-full transition-transform duration-300 z-50">
+        <div class="flex items-start">
+            <div id="toastIcon" class="flex-shrink-0 w-5 h-5 mt-0.5"></div>
+            <div class="ml-3">
+                <p id="toastMessage" class="text-sm text-gray-900"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state management
+        const appState = {
+            currentStep: 1,
+            eventName: '',
+            eventData: {},
+            csvData: [],
+            qrGenerated: false,
+            appleWalletGenerated: false,
+            googleWalletGenerated: false,
+            emailsSent: false
+        };
+
+        // Initialize API and QR Bridge
+        const workflowAPI = new WorkflowAPI('http://localhost:5001');
+        const qrBridge = new QRBridge();
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            updateStepDisplay();
+            loadEventTemplates();
+            checkBackendConnection();
+        });
+
+        // Event listeners setup
+        function initializeEventListeners() {
+            // CSV file handling
+            const csvDropZone = document.getElementById('csvDropZone');
+            const csvFileInput = document.getElementById('csvFileInput');
+
+            csvDropZone.addEventListener('click', () => csvFileInput.click());
+            csvDropZone.addEventListener('dragover', handleDragOver);
+            csvDropZone.addEventListener('drop', handleDrop);
+            csvFileInput.addEventListener('change', handleFileSelect);
+
+            // Step navigation
+            document.querySelectorAll('[data-step]').forEach(indicator => {
+                indicator.addEventListener('click', (e) => {
+                    const step = parseInt(e.currentTarget.dataset.step);
+                    if (step <= getMaxAllowedStep()) {
+                        navigateToStep(step);
+                    }
+                });
+            });
+
+            // Next/Back buttons
+            document.getElementById('step1NextBtn').addEventListener('click', () => navigateToStep(2));
+            document.getElementById('step2BackBtn').addEventListener('click', () => navigateToStep(1));
+            document.getElementById('step2NextBtn').addEventListener('click', () => navigateToStep(3));
+            document.getElementById('step3BackBtn').addEventListener('click', () => navigateToStep(2));
+            document.getElementById('step3NextBtn').addEventListener('click', () => navigateToStep(4));
+            document.getElementById('step4BackBtn').addEventListener('click', () => navigateToStep(3));
+            document.getElementById('step4NextBtn').addEventListener('click', () => navigateToStep(5));
+            document.getElementById('step5BackBtn').addEventListener('click', () => navigateToStep(4));
+
+            // Action buttons
+            document.getElementById('generateQRBtn').addEventListener('click', generateQRCodes);
+            document.getElementById('qrZipUpload').addEventListener('change', handleQRZipUpload);
+            document.getElementById('generateAppleWalletBtn').addEventListener('click', generateAppleWallet);
+            document.getElementById('generateGoogleWalletBtn').addEventListener('click', generateGoogleWallet);
+            document.getElementById('sendTestEmailBtn').addEventListener('click', sendTestEmail);
+            document.getElementById('sendAllEmailsBtn').addEventListener('click', sendAllEmails);
+            document.getElementById('newEventBtn').addEventListener('click', startNewEvent);
+
+            // Form validation
+            ['eventName', 'eventDate', 'eventTime', 'eventLocation'].forEach(id => {
+                document.getElementById(id).addEventListener('input', validateStep1);
+            });
+
+            // Email preview updates
+            ['eventName', 'eventDate', 'eventTime', 'eventLocation'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateEmailPreview);
+            });
+        }
+
+        // File handling functions
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].name.endsWith('.csv')) {
+                processCSVFile(files[0]);
+            } else {
+                showToast('Please drop a valid CSV file', 'error');
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                processCSVFile(file);
+            }
+        }
+
+        function processCSVFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n').filter(line => line.trim());
+                    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+
+                    // Validate required columns
+                    const requiredColumns = ['name', 'email', 'guest_count', 'pass_id', 'host_gallery', 'art_consultant'];
+                    const missingColumns = requiredColumns.filter(col => !headers.includes(col));
+
+                    if (missingColumns.length > 0) {
+                        showToast(`Missing required columns: ${missingColumns.join(', ')}`, 'error');
+                        return;
+                    }
+
+                    // Parse CSV data
+                    appState.csvData = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                        if (values.length >= headers.length && values[0]) {
+                            const row = {};
+                            headers.forEach((header, index) => {
+                                row[header] = values[index] || '';
+                            });
+                            appState.csvData.push(row);
+                        }
+                    }
+
+                    displayCSVPreview();
+                    validateStep1();
+                    showToast(`Successfully loaded ${appState.csvData.length} guests`, 'success');
+
+                } catch (error) {
+                    showToast('Error parsing CSV file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function displayCSVPreview() {
+            const preview = document.getElementById('csvPreview');
+            const guestCount = document.getElementById('guestCount');
+            const tableBody = document.getElementById('csvTableBody');
+
+            const totalGuests = appState.csvData.reduce((sum, row) => sum + parseInt(row.guest_count || 0), 0);
+            guestCount.textContent = `${appState.csvData.length} entries, ${totalGuests} total guests`;
+
+            tableBody.innerHTML = appState.csvData.slice(0, 10).map(row => `
+                <tr class="border-t border-gray-200">
+                    <td class="py-2 pr-4">${row.name}</td>
+                    <td class="py-2 pr-4">${row.email}</td>
+                    <td class="py-2 pr-4">${row.guest_count}</td>
+                    <td class="py-2 pr-4">${row.pass_id}</td>
+                    <td class="py-2 pr-4">${row.host_gallery}</td>
+                    <td class="py-2 pr-4">${row.art_consultant}</td>
+                </tr>
+            `).join('');
+
+            if (appState.csvData.length > 10) {
+                tableBody.innerHTML += `
+                    <tr class="border-t border-gray-200">
+                        <td colspan="6" class="py-2 text-center text-gray-500 italic">... and ${appState.csvData.length - 10} more entries</td>
+                    </tr>
+                `;
+            }
+
+            preview.classList.remove('hidden');
+        }
+
+        // Step validation functions
+        function validateStep1() {
+            const eventName = document.getElementById('eventName').value.trim();
+            const eventDate = document.getElementById('eventDate').value;
+            const eventTime = document.getElementById('eventTime').value;
+            const eventLocation = document.getElementById('eventLocation').value.trim();
+            const hasCSV = appState.csvData.length > 0;
+
+            const isValid = eventName && eventDate && eventTime && eventLocation && hasCSV;
+            document.getElementById('step1NextBtn').disabled = !isValid;
+
+            if (isValid) {
+                appState.eventData = {
+                    name: eventName,
+                    date: eventDate,
+                    time: eventTime,
+                    location: eventLocation
+                };
+            }
+
+            return isValid;
+        }
+
+        // Navigation functions
+        function navigateToStep(stepNumber) {
+            if (stepNumber > getMaxAllowedStep()) return;
+
+            appState.currentStep = stepNumber;
+            updateStepDisplay();
+            updateProgress();
+        }
+
+        function getMaxAllowedStep() {
+            if (!validateStep1()) return 1;
+            if (!appState.qrGenerated) return 2;
+            if (!appState.appleWalletGenerated) return 3;
+            if (!appState.googleWalletGenerated) return 4;
+            return 5;
+        }
+
+        function updateStepDisplay() {
+            // Hide all step content
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Show current step content
+            document.getElementById(`step${appState.currentStep}`).classList.add('active');
+
+            // Update step indicators
+            document.querySelectorAll('.step-indicator').forEach(indicator => {
+                const step = parseInt(indicator.dataset.step);
+                indicator.classList.remove('active', 'completed', 'pending');
+
+                if (step < appState.currentStep) {
+                    indicator.classList.add('completed');
+                } else if (step === appState.currentStep) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.add('pending');
+                }
+            });
+
+            // Update step title
+            const stepTitles = {
+                1: 'Step 1: Event Setup',
+                2: 'Step 2: QR Generation',
+                3: 'Step 3: Apple Wallet',
+                4: 'Step 4: Google Wallet',
+                5: 'Step 5: Email Campaign'
+            };
+            document.getElementById('currentStepTitle').textContent = stepTitles[appState.currentStep];
+        }
+
+        function updateProgress() {
+            const progress = (appState.currentStep - 1) / 4 * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressPercentage').textContent = `${Math.round(progress)}% Complete`;
+        }
+
+        // Backend connection check
+        async function checkBackendConnection() {
+            try {
+                const response = await fetch('http://localhost:5001/api/events', {
+                    method: 'OPTIONS'
+                });
+                if (!response.ok) throw new Error('Backend not available');
+                console.log('✅ Backend connection established');
+            } catch (error) {
+                console.warn('⚠️ Backend not available - running in demo mode');
+                showToast('Backend not available - running in demo mode', 'info');
+            }
+        }
+
+        // Generation functions with manual QR upload
+        async function generateQRCodes() {
+            const btn = document.getElementById('generateQRBtn');
+            const status = document.getElementById('qrGenerationStatus');
+
+            try {
+                // First create event in backend if not already created
+                if (!appState.eventName) {
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                    appState.eventName = `${appState.eventData.name || 'event'}_${timestamp}`;
+
+                    const createResult = await workflowAPI.createEvent(
+                        appState.eventName,
+                        appState.csvData,
+                        appState.eventData
+                    );
+
+                    if (!createResult.success) {
+                        throw new Error(createResult.error || 'Failed to create event');
+                    }
+                }
+
+                // Open QR creator in new tab/window
+                const qrCreatorUrl = 'qrcreator.html';
+                window.open(qrCreatorUrl, 'qrcreator', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+
+                // Show instructions
+                btn.textContent = 'QR Creator Opened';
+                btn.disabled = true;
+                status.classList.remove('hidden');
+
+                showToast('QR Creator opened in new window. Follow the instructions to upload your QR codes.', 'info');
+
+            } catch (error) {
+                console.error('QR generation error:', error);
+                showToast('Failed to create event: ' + error.message, 'error');
+            }
+        }
+
+        async function handleQRZipUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !file.name.endsWith('.zip')) {
+                showToast('Please select a valid ZIP file', 'error');
+                return;
+            }
+
+            try {
+                showToast('Uploading QR codes...', 'info');
+
+                // Upload ZIP to backend
+                const formData = new FormData();
+                formData.append('qr_zip', file);
+
+                const response = await fetch(`http://localhost:5001/api/events/${appState.eventName}/qr-extract`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // QR codes successfully uploaded and extracted
+                    appState.qrGenerated = true;
+
+                    document.getElementById('qrGenerationStatus').classList.add('hidden');
+                    document.getElementById('qrResults').classList.remove('hidden');
+                    document.getElementById('qrCount').textContent = result.qr_count;
+                    document.getElementById('step2NextBtn').disabled = false;
+
+                    // Generate preview grid
+                    generateQRPreviewGrid();
+
+                    showToast(`${result.qr_count} QR codes uploaded and processed successfully!`, 'success');
+
+                } else {
+                    throw new Error(result.error || 'Failed to process QR codes');
+                }
+
+            } catch (error) {
+                console.error('QR upload error:', error);
+                showToast('Failed to upload QR codes: ' + error.message, 'error');
+            }
+        }
+
+        function generateQRPreviewGrid() {
+            const grid = document.getElementById('qrPreviewGrid');
+            grid.innerHTML = appState.csvData.slice(0, 6).map(row => `
+                <div class="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                    <div class="text-xs text-gray-600 mb-2">${row.name}</div>
+                    <div class="w-16 h-16 bg-gray-300 mx-auto rounded flex items-center justify-center text-xs">QR</div>
+                </div>
+            `).join('');
+        }
+
+        async function generateAppleWallet() {
+            const btn = document.getElementById('generateAppleWalletBtn');
+            const status = document.getElementById('appleWalletStatus');
+            const results = document.getElementById('appleWalletResults');
+            const statusText = document.getElementById('appleStatusText');
+            const progressBar = document.getElementById('appleProgressBar');
+
+            btn.disabled = true;
+            status.classList.remove('hidden');
+
+            try {
+                // Start Apple Wallet generation
+                const startResult = await workflowAPI.generateAppleWallet(appState.eventName);
+
+                if (!startResult.success) {
+                    throw new Error(startResult.message || 'Failed to start Apple Wallet generation');
+                }
+
+                // Monitor progress
+                let progress = 0;
+                progressBar.style.width = '0%';
+                statusText.textContent = 'Starting Apple Wallet generation...';
+
+                const monitorProgress = async () => {
+                    try {
+                        const progressResult = await workflowAPI.getProgress(appState.eventName);
+
+                        if (progressResult.step === 'apple_wallet') {
+                            progress = progressResult.progress;
+                            progressBar.style.width = `${progress}%`;
+                            statusText.textContent = progressResult.status;
+
+                            if (progressResult.completed) {
+                                appState.appleWalletGenerated = true;
+                                status.classList.add('hidden');
+                                results.classList.remove('hidden');
+
+                                document.getElementById('applePassCount').textContent = progressResult.pass_count;
+                                document.getElementById('step3NextBtn').disabled = false;
+
+                                showToast(`${progressResult.pass_count} Apple Wallet passes created`, 'success');
+                                btn.disabled = false;
+                                return;
+                            }
+
+                            if (progressResult.error) {
+                                throw new Error(progressResult.error);
+                            }
+                        }
+
+                        // Continue monitoring
+                        setTimeout(monitorProgress, 1000);
+
+                    } catch (error) {
+                        throw error;
+                    }
+                };
+
+                // Start monitoring
+                setTimeout(monitorProgress, 1000);
+
+            } catch (error) {
+                console.error('Apple Wallet generation error:', error);
+                showToast('Apple Wallet generation failed: ' + error.message, 'error');
+                status.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        async function generateGoogleWallet() {
+            const btn = document.getElementById('generateGoogleWalletBtn');
+            const status = document.getElementById('googleWalletStatus');
+            const results = document.getElementById('googleWalletResults');
+            const statusText = document.getElementById('googleStatusText');
+            const progressBar = document.getElementById('googleProgressBar');
+
+            btn.disabled = true;
+            status.classList.remove('hidden');
+
+            try {
+                // Start Google Wallet generation
+                const startResult = await workflowAPI.generateGoogleWallet(appState.eventName);
+
+                if (!startResult.success) {
+                    throw new Error(startResult.message || 'Failed to start Google Wallet generation');
+                }
+
+                // Monitor progress
+                let progress = 0;
+                progressBar.style.width = '0%';
+                statusText.textContent = 'Starting Google Wallet generation...';
+
+                const monitorProgress = async () => {
+                    try {
+                        const progressResult = await workflowAPI.getProgress(appState.eventName);
+
+                        if (progressResult.step === 'google_wallet') {
+                            progress = progressResult.progress;
+                            progressBar.style.width = `${progress}%`;
+                            statusText.textContent = progressResult.status;
+
+                            if (progressResult.completed) {
+                                appState.googleWalletGenerated = true;
+                                status.classList.add('hidden');
+                                results.classList.remove('hidden');
+
+                                document.getElementById('googlePassCount').textContent = progressResult.pass_count;
+                                document.getElementById('step4NextBtn').disabled = false;
+
+                                showToast(`${progressResult.pass_count} Google Wallet passes created`, 'success');
+                                btn.disabled = false;
+                                return;
+                            }
+
+                            if (progressResult.error) {
+                                throw new Error(progressResult.error);
+                            }
+                        }
+
+                        // Continue monitoring
+                        setTimeout(monitorProgress, 1000);
+
+                    } catch (error) {
+                        throw error;
+                    }
+                };
+
+                // Start monitoring
+                setTimeout(monitorProgress, 1000);
+
+            } catch (error) {
+                console.error('Google Wallet generation error:', error);
+                showToast('Google Wallet generation failed: ' + error.message, 'error');
+                status.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        async function sendTestEmail() {
+            try {
+                if (appState.csvData.length > 0) {
+                    const testEmail = prompt('Enter test email address:', appState.csvData[0].email);
+                    if (testEmail) {
+                        // Generate emails first
+                        const generateResult = await workflowAPI.generateEmails(appState.eventName);
+                        if (generateResult.success) {
+                            showToast(`Test email would be sent to ${testEmail}`, 'success');
+                        } else {
+                            throw new Error(generateResult.error || 'Failed to generate emails');
+                        }
+                    }
+                }
+            } catch (error) {
+                showToast('Test email failed: ' + error.message, 'error');
+            }
+        }
+
+        async function sendAllEmails() {
+            const btn = document.getElementById('sendAllEmailsBtn');
+            const status = document.getElementById('emailSendingStatus');
+            const results = document.getElementById('emailResults');
+            const statusText = document.getElementById('emailStatusText');
+            const progressBar = document.getElementById('emailProgressBar');
+
+            btn.disabled = true;
+            status.classList.remove('hidden');
+
+            try {
+                // First generate personalized emails
+                statusText.textContent = 'Generating personalized emails...';
+                const generateResult = await workflowAPI.generateEmails(appState.eventName);
+
+                if (!generateResult.success) {
+                    throw new Error(generateResult.error || 'Failed to generate emails');
+                }
+
+                // Start email sending
+                const sendResult = await workflowAPI.sendEmails(appState.eventName);
+
+                if (!sendResult.success) {
+                    throw new Error(sendResult.message || 'Failed to start email sending');
+                }
+
+                // Monitor progress
+                const total = appState.csvData.length;
+                let sent = 0;
+
+                const monitorProgress = async () => {
+                    try {
+                        const progressResult = await workflowAPI.getProgress(appState.eventName);
+
+                        if (progressResult.step === 'emails') {
+                            const progress = progressResult.progress;
+                            progressBar.style.width = `${progress}%`;
+                            statusText.textContent = progressResult.status;
+
+                            if (progressResult.completed) {
+                                appState.emailsSent = true;
+                                status.classList.add('hidden');
+                                results.classList.remove('hidden');
+
+                                document.getElementById('emailSentCount').textContent = total;
+                                document.getElementById('newEventBtn').classList.remove('hidden');
+
+                                showToast('All invitations sent successfully!', 'success');
+                                btn.disabled = false;
+                                return;
+                            }
+
+                            if (progressResult.error) {
+                                throw new Error(progressResult.error);
+                            }
+                        }
+
+                        // Continue monitoring
+                        setTimeout(monitorProgress, 1000);
+
+                    } catch (error) {
+                        throw error;
+                    }
+                };
+
+                // Start monitoring
+                setTimeout(monitorProgress, 1000);
+
+            } catch (error) {
+                console.error('Email sending error:', error);
+                showToast('Email sending failed: ' + error.message, 'error');
+                status.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        function startNewEvent() {
+            if (confirm('Start a new event? This will clear all current progress.')) {
+                // Reset app state
+                appState.currentStep = 1;
+                appState.csvData = [];
+                appState.qrGenerated = false;
+                appState.appleWalletGenerated = false;
+                appState.googleWalletGenerated = false;
+                appState.emailsSent = false;
+
+                // Reset form
+                document.querySelectorAll('input').forEach(input => {
+                    if (input.type !== 'file') input.value = '';
+                });
+
+                // Reset UI
+                document.getElementById('csvPreview').classList.add('hidden');
+                ['qrResults', 'appleWalletResults', 'googleWalletResults', 'emailResults'].forEach(id => {
+                    document.getElementById(id).classList.add('hidden');
+                });
+
+                document.querySelectorAll('[id$="NextBtn"]').forEach(btn => btn.disabled = true);
+                document.getElementById('newEventBtn').classList.add('hidden');
+
+                navigateToStep(1);
+                showToast('Started new event', 'success');
+            }
+        }
+
+        // Email preview update
+        function updateEmailPreview() {
+            document.getElementById('previewEventName').textContent =
+                document.getElementById('eventName').value || '[Event Name]';
+            document.getElementById('previewEventDate').textContent =
+                document.getElementById('eventDate').value || '[Event Date]';
+            document.getElementById('previewEventTime').textContent =
+                document.getElementById('eventTime').value || '[Event Time]';
+            document.getElementById('previewEventLocation').textContent =
+                document.getElementById('eventLocation').value || '[Event Location]';
+        }
+
+        // Template functions (placeholder)
+        function loadEventTemplates() {
+            // Load saved templates from localStorage
+        }
+
+        // Toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('statusToast');
+            const icon = document.getElementById('toastIcon');
+            const messageEl = document.getElementById('toastMessage');
+
+            messageEl.textContent = message;
+
+            // Set icon based on type
+            const icons = {
+                success: '<svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>',
+                error: '<svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>',
+                info: '<svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>'
+            };
+
+            icon.innerHTML = icons[type] || icons.info;
+
+            // Show toast
+            toast.style.transform = 'translateY(0)';
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.style.transform = 'translateY(100%)';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
