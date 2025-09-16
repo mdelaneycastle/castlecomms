@@ -637,10 +637,15 @@
       "passId": "PASS049",
       "hostGallery": "Cheltenham",
       "artConsultant": "Violet Reed",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "13:14:49",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "13:14:49"
+        }
+      ]
     },
     {
       "id": "TW9uaWNhIF",
@@ -657,5 +662,5 @@
     }
   ],
   "eventName": "sample_guest_list (3)",
-  "lastUpdated": "2025-09-16T09:20:17.358Z"
+  "lastUpdated": "2025-09-16T12:14:49.439Z"
 }
