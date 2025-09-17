@@ -87,12 +87,16 @@
       "hostGallery": "Leeds",
       "artConsultant": "Isabella Clarke",
       "checkedIn": true,
-      "checkedInCount": 1,
-      "checkInTime": "15:02:38",
+      "checkedInCount": 2,
+      "checkInTime": "15:14:26",
       "checkInTimes": [
         {
           "count": 1,
           "time": "15:02:38"
+        },
+        {
+          "count": 1,
+          "time": "15:14:26"
         }
       ]
     },
@@ -657,5 +661,5 @@
     }
   ],
   "eventName": "sample_guest_list (3)",
-  "lastUpdated": "2025-09-17T14:02:38.893Z"
+  "lastUpdated": "2025-09-17T14:14:27.978Z"
 }
