@@ -91,10 +91,15 @@
       "passId": "PASS007",
       "hostGallery": "Leeds",
       "artConsultant": "Isabella Clarke",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 5,
+      "checkInTime": "13:25:00",
+      "checkInTimes": [
+        {
+          "count": 5,
+          "time": "13:25:00"
+        }
+      ]
     },
     {
       "id": "QXNobGV5IE",
@@ -662,5 +667,5 @@
     }
   ],
   "eventName": "sample_guest_list (3)",
-  "lastUpdated": "2025-09-16T12:14:49.439Z"
+  "lastUpdated": "2025-09-17T12:25:00.133Z"
 }
