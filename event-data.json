@@ -78,10 +78,15 @@
       "passId": "PASS006",
       "hostGallery": "Birmingham - ICC",
       "artConsultant": "Thomas Mitchell",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "13:25:34",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "13:25:34"
+        }
+      ]
     },
     {
       "id": "RGF2aWQgTW",
@@ -667,5 +672,5 @@
     }
   ],
   "eventName": "sample_guest_list (3)",
-  "lastUpdated": "2025-09-17T12:25:00.133Z"
+  "lastUpdated": "2025-09-17T12:25:34.234Z"
 }
