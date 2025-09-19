@@ -16,7 +16,7 @@ from google.oauth2 import service_account
 
 # Configuration
 ISSUER_ID = "3388000000023012606"
-SERVICE_ACCOUNT_FILE = "castle-comms-844017cd9840.json"
+SERVICE_ACCOUNT_FILE = "castle-comms-d0343d041e20.json"
 CSV_FILE = "/Users/marcdelaney/Documents/GitHub/castlecomms/events/Johnny Depp_2025-09-16T09-15-31-369Z/csv/guest_list.csv"
 
 # Google Wallet API endpoints

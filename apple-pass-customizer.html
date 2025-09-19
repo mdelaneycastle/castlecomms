@@ -353,32 +353,68 @@
     </div>
 
     <script>
-        // File upload handlers
+        // File upload handlers with dimension validation
         function handleFileUpload(inputId, labelId, previewId) {
             const input = document.getElementById(inputId);
             const label = document.getElementById(labelId);
             const preview = document.getElementById(previewId);
 
+            // Define required dimensions
+            const requiredDimensions = {
+                'logoUpload': { width: 160, height: 50, name: 'Logo' },
+                'stripUpload': { width: 375, height: 123, name: 'Strip' },
+                'backgroundUpload': { width: 180, height: 220, name: 'Background' }
+            };
+
             input.addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
-                    label.classList.add('has-file');
-                    label.innerHTML = `
-                        <div class="upload-icon">✅</div>
-                        <div class="upload-text">File selected: ${file.name}<br><small>${(file.size / 1024).toFixed(1)} KB</small></div>
-                    `;
-                    
-                    preview.style.display = 'block';
-                    preview.innerHTML = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-
-                    // Update preview if it's logo or strip
+                    // Validate image dimensions
+                    const img = new Image();
                     const reader = new FileReader();
+
                     reader.onload = function(e) {
-                        if (inputId === 'logoUpload') {
-                            document.getElementById('previewLogo').src = e.target.result;
-                        } else if (inputId === 'stripUpload') {
-                            document.getElementById('previewStrip').style.backgroundImage = `url(${e.target.result})`;
-                        }
+                        img.onload = function() {
+                            const required = requiredDimensions[inputId];
+                            const isValidSize = img.width === required.width && img.height === required.height;
+
+                            if (isValidSize) {
+                                // Valid dimensions
+                                label.classList.add('has-file');
+                                label.innerHTML = `
+                                    <div class="upload-icon">✅</div>
+                                    <div class="upload-text">File selected: ${file.name}<br><small>${(file.size / 1024).toFixed(1)} KB - ${img.width}x${img.height}px ✓</small></div>
+                                `;
+
+                                preview.style.display = 'block';
+                                preview.innerHTML = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB) - Dimensions: ${img.width}x${img.height}px ✓`;
+                                preview.style.color = '#27ae60';
+
+                                // Update preview
+                                if (inputId === 'logoUpload') {
+                                    document.getElementById('previewLogo').src = e.target.result;
+                                } else if (inputId === 'stripUpload') {
+                                    document.getElementById('previewStrip').style.backgroundImage = `url(${e.target.result})`;
+                                }
+                            } else {
+                                // Invalid dimensions
+                                label.classList.remove('has-file');
+                                label.style.borderColor = '#e74c3c';
+                                label.style.backgroundColor = '#ffeaea';
+                                label.innerHTML = `
+                                    <div class="upload-icon">❌</div>
+                                    <div class="upload-text">Invalid size: ${img.width}x${img.height}px<br><small>${required.name} must be exactly ${required.width}x${required.height}px</small></div>
+                                `;
+
+                                preview.style.display = 'block';
+                                preview.innerHTML = `❌ Invalid dimensions: ${img.width}x${img.height}px (required: ${required.width}x${required.height}px)`;
+                                preview.style.color = '#e74c3c';
+
+                                // Clear the file input
+                                input.value = '';
+                            }
+                        };
+                        img.src = e.target.result;
                     };
                     reader.readAsDataURL(file);
                 }
@@ -437,7 +473,15 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    // Handle HTTP error responses (4xx, 5xx)
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     alert('✅ Customizations saved successfully!\n\nYour pass template will be updated for future passes.');
@@ -447,7 +491,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('❌ Error saving customizations. Please try again.');
+                alert('❌ Error saving customizations: ' + error.message);
             });
         });
 

@@ -173,5 +173,12 @@
     "status": "Generated 50 passes",
     "completed": true,
     "pass_count": 50
+  },
+  "Johnny Depp - Monoprints_2025-09-19T13-14-46-636Z": {
+    "step": "google_wallet",
+    "progress": 100,
+    "status": "Generated 50 passes",
+    "completed": true,
+    "pass_count": 50
   }
 }
