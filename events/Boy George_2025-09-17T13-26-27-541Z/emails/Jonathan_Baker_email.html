@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Castle Fine Art Private View - Your Digital Pass</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #ff00ff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #ff00ff;
+            margin: 0;
+            font-size: 28px;
+        }
+        .header h2 {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-weight: normal;
+            font-size: 18px;
+        }
+        .guest-info {
+            background-color: #f8f8f8;
+            border-left: 4px solid #ff00ff;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+        .guest-info h3 {
+            margin: 0 0 10px 0;
+            color: #ff00ff;
+        }
+        .event-details {
+            margin: 25px 0;
+        }
+        .event-details h3 {
+            color: #ff00ff;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .wallet-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+        }
+        .wallet-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .wallet-button {
+            display: inline-block;
+            margin: 10px;
+            transition: transform 0.2s ease;
+        }
+        .wallet-button:hover {
+            transform: scale(1.05);
+        }
+        .wallet-button img {
+            height: 50px;
+            width: auto;
+        }
+        .instructions {
+            background-color: #fff9e6;
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Castle Fine Art</h1>
+            <h2>Private View Invitation</h2>
+        </div>
+
+        <div class="guest-info">
+            <h3>Dear Jonathan Baker</h3>
+            <p><strong>Guest Count:</strong> 4 people</p>
+            <p>You're invited to our exclusive private viewing event!</p>
+        </div>
+
+        <div class="event-details">
+            <h3>Event Details</h3>
+            <p><strong>Date:</strong> 2025-10-15</p>
+            <p><strong>Time:</strong> 18:00 onwards</p>
+            <p><strong>Location:</strong> Castle Fine Art, Mailbox</p>
+        </div>
+
+        <div class="wallet-section">
+            <h3>Add Your Digital Pass</h3>
+            <p>Choose your preferred wallet to save your entry pass:</p>
+            
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;">
+                <!-- Apple Wallet Button -->
+                <a href="http://localhost:5001/api/events/Boy%20George_2025-09-17T13-26-27-541Z/apple-pass/PASS029" class="wallet-button" style="text-decoration: none;">
+                    <div style="background: #000; color: white; padding: 8px 16px; border-radius: 8px; font-size: 14px; border: 2px solid #000; transition: all 0.2s;">
+                        📱 Download for Apple Wallet
+                    </div>
+                </a>
+                
+                <!-- Google Wallet Button -->
+                <a href="https://pay.google.com/gp/v/save/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjYXN0bGUtY29tbXNAYXBwc3BvdC5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiZ29vZ2xlIiwidHlwIjoic2F2ZXRvd2FsbGV0IiwiaWF0IjoxNzU4MTE1ODE5LCJwYXlsb2FkIjp7ImdlbmVyaWNPYmplY3RzIjpbeyJpZCI6IjMzODgwMDAwMDAwMjMwMTI2MDYuR1BBU1MwMjkiLCJjbGFzc0lkIjoiMzM4ODAwMDAwMDAyMzAxMjYwNi5jYXN0bGVfZmluZV9hcnRfZ2VuZXJpYyIsImxvZ28iOnsic291cmNlVXJpIjp7InVyaSI6Imh0dHBzOi8vbWRlbGFuZXljYXN0bGUuZ2l0aHViLmlvL2Nhc3RsZWNvbW1zL2ltYWdlcy9sb2dvaW1hZ2UucG5nIn0sImNvbnRlbnREZXNjcmlwdGlvbiI6eyJkZWZhdWx0VmFsdWUiOnsibGFuZ3VhZ2UiOiJlbi1VUyIsInZhbHVlIjoiQ2FzdGxlIEZpbmUgQXJ0IExvZ28ifX19LCJjYXJkVGl0bGUiOnsiZGVmYXVsdFZhbHVlIjp7Imxhbmd1YWdlIjoiZW4tVVMiLCJ2YWx1ZSI6IkNBU1RMRSBGSU5FIEFSVCJ9fSwic3ViaGVhZGVyIjp7ImRlZmF1bHRWYWx1ZSI6eyJsYW5ndWFnZSI6ImVuLVVTIiwidmFsdWUiOiJDbGllbnQgTmFtZSJ9fSwiaGVhZGVyIjp7ImRlZmF1bHRWYWx1ZSI6eyJsYW5ndWFnZSI6ImVuLVVTIiwidmFsdWUiOiJKb25hdGhhbiBCYWtlciJ9fSwidGV4dE1vZHVsZXNEYXRhIjpbeyJpZCI6Imd1ZXN0cyIsImhlYWRlciI6Ikd1ZXN0cyIsImJvZHkiOiI0In0seyJpZCI6Imhvc3RfZ2FsbGVyeSIsImhlYWRlciI6Ikhvc3QgR2FsbGVyeSIsImJvZHkiOiJTdHJhdGZvcmQtdXBvbi1Bdm9uIn0seyJpZCI6ImFydF9jb25zdWx0YW50IiwiaGVhZGVyIjoiQXJ0IENvbnN1bHRhbnQiLCJib2R5IjoiSGFubmFoIEhpbGwifSx7ImlkIjoiZXZlbnRfc3RhcnRfdGltZSIsImhlYWRlciI6IkV2ZW50IFN0YXJ0IFRpbWUiLCJib2R5IjoiMTg6MDAifV0sImJhcmNvZGUiOnsidHlwZSI6IlFSX0NPREUiLCJ2YWx1ZSI6IntcIm5hbWVcIjogXCJKb25hdGhhbiBCYWtlclwiLCBcImd1ZXN0c1wiOiA0fSJ9LCJoZXhCYWNrZ3JvdW5kQ29sb3IiOiIjZmYwMGZmIiwiaGVyb0ltYWdlIjp7InNvdXJjZVVyaSI6eyJ1cmkiOiJodHRwczovL21kZWxhbmV5Y2FzdGxlLmdpdGh1Yi5pby9jYXN0bGVjb21tcy9pbWFnZXMvc3RyaXAucG5nIn0sImNvbnRlbnREZXNjcmlwdGlvbiI6eyJkZWZhdWx0VmFsdWUiOnsibGFuZ3VhZ2UiOiJlbi1VUyIsInZhbHVlIjoiQ2FzdGxlIEZpbmUgQXJ0IEhlcm8gSW1hZ2UifX19fV19fQ.lAJyMHA1k-E5OwhQBpykWl3U1eXF9D6tYaisTstyMRm0gbZChmj8lemlNeyRhs2LesDXobuV8RvoIReYHfwTGQAHIGH5vfgh9TKj63lUrqgNkILhZn42tQeLg34vAttoBB2kmpiqpVDMV7owjWs7SMN0Hl-N8lV0tcB7lveXD68E3oeUldb9tjwzettral43pU8X2gnJrp5oyNDi6U8HqURZO3YO6t5NRR_HthsZEBfvpjZ3Mk3ePkywXRuoi4Nd1qI4C_OY38yju79UmZYOG8g2KeAVfyARQpjxenNAUroEd0kpr52McmnIRSxldAgBkI_R_Hw3UEI46UeYtbUibg" class="wallet-button">
+                    <img src="Add_to_Google_Wallet_badge.svg.png" alt="Add to Google Wallet" />
+                </a>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h4>Instructions:</h4>
+            <ol>
+                <li><strong>Apple Users:</strong> Click "Download for Apple Wallet" to get your .pkpass file</li>
+                <li><strong>Android Users:</strong> Click "Add to Google Wallet" to save to Google Wallet</li>
+                <li>Present the pass (with QR code) at the event entrance</li>
+                <li>The QR code contains your name and guest count for verification</li>
+            </ol>
+        </div>
+
+        <div class="footer">
+            <p>Looking forward to seeing you at our private view!</p>
+            <p><em>Castle Fine Art Team</em></p>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+            <p style="font-size: 12px; color: #999;">
+                This is your personal invitation. Please do not forward this email.<br>
+                If you have any questions, please contact us at events@castlefineart.com
+            </p>
+        </div>
+    </div>
+</body>
+</html>

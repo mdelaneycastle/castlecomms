@@ -1,11 +1,11 @@
 {
     "formatVersion": 1,
     "passTypeIdentifier": "pass.com.castlefineart.guest",
-    "serialNumber": "PASS016-20250912140900",
+    "serialNumber": "PASS016-20250917143205",
     "teamIdentifier": "R3NC84JPSH",
     "organizationName": "Castle Fine Art",
     "description": "Event Entry Pass",
-    "backgroundColor": "rgb(255, 0, 255)",
+    "backgroundColor": "rgb(228, 200, 46)",
     "foregroundColor": "rgb(255, 255, 255)",
     "labelColor": "rgb(255, 255, 255)",
     "storeCard": {
@@ -42,7 +42,7 @@
             {
                 "key": "date",
                 "label": "Date",
-                "value": "13 Sep 2025"
+                "value": "18 Sep 2025"
             },
             {
                 "key": "location",
@@ -56,6 +56,6 @@
         "format": "PKBarcodeFormatQR",
         "messageEncoding": "iso-8859-1"
     },
-    "expirationDate": "2025-09-13T14:09:00Z",
-    "relevantDate": "2025-09-13T14:09:00Z"
+    "expirationDate": "2025-09-18T14:32:05Z",
+    "relevantDate": "2025-09-18T14:32:05Z"
 }

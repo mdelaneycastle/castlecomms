@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Pass Customizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 20px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-label:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .file-upload-label.has-file {
+            border-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: #95a5a6;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            font-size: 1rem;
+            color: #7f8c8d;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .color-option {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .color-option.selected {
+            border-color: #2c3e50;
+            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.3);
+        }
+
+        .color-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .custom-color {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .custom-color input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .preview-section {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .pass-preview {
+            max-width: 300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+        }
+
+        .pass-header {
+            height: 60px;
+            background: #667eea;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pass-logo {
+            max-width: 100px;
+            max-height: 40px;
+            object-fit: contain;
+        }
+
+        .pass-strip {
+            height: 40px;
+            background: #95a5a6;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .pass-content {
+            padding: 20px;
+            text-align: left;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .file-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .form-section {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎫 Apple Pass Customizer</h1>
+            <p>Customize your event passes with logos, images, and colors</p>
+        </div>
+
+        <form id="passCustomizer" class="form-section">
+            <div class="section-title">🖼️ Images</div>
+            
+            <div class="form-group">
+                <label for="logoUpload">Logo (appears in pass header)</label>
+                <div class="file-upload">
+                    <input type="file" id="logoUpload" name="logo" accept="image/png,image/jpeg">
+                    <label for="logoUpload" class="file-upload-label" id="logoLabel">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">Click to upload logo image<br><small>PNG recommended. Required: 160x50px (will auto-generate @2x, @3x)</small></div>
+                    </label>
+                </div>
+                <div id="logoPreview" class="file-preview" style="display: none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="stripUpload">Strip Image (decorative banner)</label>
+                <div class="file-upload">
+                    <input type="file" id="stripUpload" name="strip" accept="image/png,image/jpeg">
+                    <label for="stripUpload" class="file-upload-label" id="stripLabel">
+                        <div class="upload-icon">🎨</div>
+                        <div class="upload-text">Click to upload strip image<br><small>PNG recommended. Required: 375x123px for store cards (will auto-generate @2x, @3x)</small></div>
+                    </label>
+                </div>
+                <div id="stripPreview" class="file-preview" style="display: none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="backgroundUpload">Background Image (optional)</label>
+                <div class="file-upload">
+                    <input type="file" id="backgroundUpload" name="background" accept="image/png,image/jpeg">
+                    <label for="backgroundUpload" class="file-upload-label" id="backgroundLabel">
+                        <div class="upload-icon">🌅</div>
+                        <div class="upload-text">Click to upload background image<br><small>PNG recommended. Required: 180x220px (will be blurred by Apple)</small></div>
+                    </label>
+                </div>
+                <div id="backgroundPreview" class="file-preview" style="display: none;"></div>
+            </div>
+
+            <div class="section-title">🎨 Colors</div>
+            
+            <div class="form-group">
+                <label for="customBgColor">Background Color</label>
+                <div class="custom-color">
+                    <input type="color" id="customBgColor" name="backgroundColor" value="#000000">
+                    <label for="customBgColor">Choose your background color</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="customFgColor">Text Color</label>
+                <div class="custom-color">
+                    <input type="color" id="customFgColor" name="foregroundColor" value="#ffffff">
+                    <label for="customFgColor">Choose your text color</label>
+                </div>
+            </div>
+        </form>
+
+        <div class="preview-section">
+            <div class="section-title">👀 Live Preview</div>
+            <div class="pass-preview" id="passPreview">
+                <div class="pass-header" id="previewHeader">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiB2aWV3Qm94PSIwIDAgMTAwIDQwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiBmaWxsPSJ3aGl0ZSIvPgo8dGV4dCB4PSI1MCIgeT0iMjQiIGZpbGw9IiM2NjdlZWEiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Q0FTVExFPC90ZXh0Pgo8L3N2Zz4K" 
+                         alt="Logo" class="pass-logo" id="previewLogo">
+                </div>
+                <div class="pass-strip" id="previewStrip"></div>
+                <div class="pass-content">
+                    <h3 style="margin-bottom: 10px; color: #2c3e50;">Event Entry Pass</h3>
+                    <p style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 5px;"><strong>Name:</strong> Sample Guest</p>
+                    <p style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 5px;"><strong>Guests:</strong> 2</p>
+                    <p style="color: #7f8c8d; font-size: 0.9rem;"><strong>Date:</strong> Event Date</p>
+                </div>
+            </div>
+            <button type="submit" class="submit-btn" form="passCustomizer">
+                🚀 Apply Customizations
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // File upload handlers
+        function handleFileUpload(inputId, labelId, previewId) {
+            const input = document.getElementById(inputId);
+            const label = document.getElementById(labelId);
+            const preview = document.getElementById(previewId);
+
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    label.classList.add('has-file');
+                    label.innerHTML = `
+                        <div class="upload-icon">✅</div>
+                        <div class="upload-text">File selected: ${file.name}<br><small>${(file.size / 1024).toFixed(1)} KB</small></div>
+                    `;
+                    
+                    preview.style.display = 'block';
+                    preview.innerHTML = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+                    // Update preview if it's logo or strip
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (inputId === 'logoUpload') {
+                            document.getElementById('previewLogo').src = e.target.result;
+                        } else if (inputId === 'stripUpload') {
+                            document.getElementById('previewStrip').style.backgroundImage = `url(${e.target.result})`;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Color selection handlers
+        function handleColorSelection() {
+            // Background color handler
+            document.getElementById('customBgColor').addEventListener('change', function(e) {
+                updatePreview();
+            });
+
+            // Foreground color handler
+            document.getElementById('customFgColor').addEventListener('change', function(e) {
+                updatePreview();
+            });
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})` : null;
+        }
+
+        function updatePreview() {
+            const bgColorInput = document.getElementById('customBgColor');
+            const fgColorInput = document.getElementById('customFgColor');
+            
+            const bgColor = bgColorInput?.value || '#000000';
+            const fgColor = fgColorInput?.value || '#ffffff';
+            
+            const header = document.getElementById('previewHeader');
+            header.style.background = bgColor;
+            
+            // Update text colors in content
+            const content = document.querySelector('.pass-content');
+            if (fgColor !== '#ffffff') {
+                content.style.color = fgColor;
+            }
+        }
+
+        // Form submission
+        document.getElementById('passCustomizer').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const bgColor = document.getElementById('customBgColor').value;
+            const fgColor = document.getElementById('customFgColor').value;
+            
+            // Convert hex to rgb for Apple Wallet compatibility
+            formData.set('backgroundColor', hexToRgb(bgColor));
+            formData.set('foregroundColor', hexToRgb(fgColor));
+            
+            // Submit to backend
+            fetch('/api/customize', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Customizations saved successfully!\n\nYour pass template will be updated for future passes.');
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('❌ Error saving customizations. Please try again.');
+            });
+        });
+
+        // Initialize
+        handleFileUpload('logoUpload', 'logoLabel', 'logoPreview');
+        handleFileUpload('stripUpload', 'stripLabel', 'stripPreview');
+        handleFileUpload('backgroundUpload', 'backgroundLabel', 'backgroundPreview');
+        handleColorSelection();
+        updatePreview();
+    </script>
+</body>
+</html>

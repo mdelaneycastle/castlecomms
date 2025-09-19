@@ -1,13 +1,1 @@
-{
-  "background.png": "10deda08af89889e87f033d0422e3b48e9ec9c87"
-,
-  "icon.png": "c92e6aa823c60a1abb48b80b84d28f8e3e1494df"
-,
-  "logo.png": "4861e46dd432ce40097310ba486a39b8d15e0654"
-,
-  "pass.json": "e9d32adbbf26e0b37df7742a4ffd458508ebb325"
-,
-  "qr.png": "fa1aa0f2aecc7776373b977eb33511d5e3d227de"
-,
-  "strip.png": "0092940492ab0d0b9ffd9654e6c11aab6991f62f"
-}
+{"icon.png":"c92e6aa823c60a1abb48b80b84d28f8e3e1494df","icon@2x.png":"c92e6aa823c60a1abb48b80b84d28f8e3e1494df","logo.png":"acdfd0b39ca2c78c323932d24edc9212dfcd8e15","logo@2x.png":"3ab3e7402acebeb1f2b56873883ba483bee13523","logo@3x.png":"37938219cc3262102fdffcb76ced76ac0a5bce22","pass.json":"dfa6fa80ad1d6f0906da50b90983307079893c4e","qr.png":"60fbc0d1dbfac8092a235563ba4e336bd91c27a0","strip.png":"1d01f06987d27b4c753d744d404ccb1027566d6f","strip@2x.png":"82fa6156a1d598e3d52fa3f961a2a64b78433008","strip@3x.png":"80df429f7e29516f24362fd5efb3206f6f921f86"}

@@ -105,7 +105,11 @@
                 </div>
                 <div class="flex items-center space-x-2 step-indicator pending" data-step="5">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">5</div>
-                    <span class="text-sm font-medium whitespace-nowrap">Email Campaign</span>
+                    <span class="text-sm font-medium whitespace-nowrap">Email Templates</span>
+                </div>
+                <div class="flex items-center space-x-2 step-indicator pending" data-step="6">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium">6</div>
+                    <span class="text-sm font-medium whitespace-nowrap">Send Emails</span>
                 </div>
             </div>
         </div>
@@ -271,6 +275,149 @@
                 <h3 class="text-lg font-semibold text-gray-900 mb-6">Apple Wallet Pass Generation</h3>
 
                 <div class="space-y-6">
+                    <!-- Pass Customizer Interface -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v1.5a2.5 2.5 0 000 5V13a2 2 0 002 2h12a2 2 0 002-2v-1.5a2.5 2.5 0 000-5V5a2 2 0 00-2-2H4zm8 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <h4 class="text-lg font-medium text-blue-900">🎨 Customize Your Pass Design</h4>
+                            </div>
+                            <button id="toggleCustomizer" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                                <span id="customizerToggleText">Show Options</span>
+                                <svg id="customizerToggleIcon" class="w-4 h-4 inline ml-1 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div id="customizerInterface" class="hidden">
+                            <form id="passCustomizer" class="space-y-6">
+                                <!-- Images Section -->
+                                <div>
+                                    <h5 class="text-md font-medium text-gray-900 mb-4 flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        Images
+                                    </h5>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <!-- Logo Upload -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Logo</label>
+                                            <div class="file-upload-zone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition cursor-pointer">
+                                                <input type="file" id="logoUpload" name="logo" accept="image/png,image/jpeg" class="hidden">
+                                                <label for="logoUpload" class="cursor-pointer">
+                                                    <div class="text-2xl mb-2">📷</div>
+                                                    <div class="text-xs text-gray-600">160x50px PNG/JPG</div>
+                                                </label>
+                                            </div>
+                                            <div id="logoPreview" class="mt-2 text-xs text-green-600 hidden"></div>
+                                        </div>
+                                        
+                                        <!-- Strip Upload -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Strip Image</label>
+                                            <div class="file-upload-zone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition cursor-pointer">
+                                                <input type="file" id="stripUpload" name="strip" accept="image/png,image/jpeg" class="hidden">
+                                                <label for="stripUpload" class="cursor-pointer">
+                                                    <div class="text-2xl mb-2">🎨</div>
+                                                    <div class="text-xs text-gray-600">375x123px PNG/JPG</div>
+                                                </label>
+                                            </div>
+                                            <div id="stripPreview" class="mt-2 text-xs text-green-600 hidden"></div>
+                                        </div>
+                                        
+                                        <!-- Background Upload -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Background (Optional)</label>
+                                            <div class="file-upload-zone border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition cursor-pointer">
+                                                <input type="file" id="backgroundUpload" name="background" accept="image/png,image/jpeg" class="hidden">
+                                                <label for="backgroundUpload" class="cursor-pointer">
+                                                    <div class="text-2xl mb-2">🌅</div>
+                                                    <div class="text-xs text-gray-600">180x220px PNG/JPG</div>
+                                                </label>
+                                            </div>
+                                            <div id="backgroundPreview" class="mt-2 text-xs text-green-600 hidden"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Colors Section -->
+                                <div>
+                                    <h5 class="text-md font-medium text-gray-900 mb-4 flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a4 4 0 004-4V5z" />
+                                        </svg>
+                                        Colors
+                                    </h5>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="customBgColor" class="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
+                                            <div class="flex items-center space-x-3">
+                                                <input type="color" id="customBgColor" name="backgroundColor" value="#000000" class="h-10 w-16 rounded border border-gray-300">
+                                                <span class="text-sm text-gray-600">Choose your background color</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="customFgColor" class="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                                            <div class="flex items-center space-x-3">
+                                                <input type="color" id="customFgColor" name="foregroundColor" value="#ffffff" class="h-10 w-16 rounded border border-gray-300">
+                                                <span class="text-sm text-gray-600">Choose your text color</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Preview Section -->
+                                <div>
+                                    <h5 class="text-md font-medium text-gray-900 mb-4 flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Live Preview
+                                    </h5>
+                                    
+                                    <div class="flex justify-center">
+                                        <div id="passPreview" class="w-64 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                                            <div id="previewHeader" class="h-16 bg-black flex items-center justify-center relative">
+                                                <img id="previewLogo" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCA4MCAzMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHRleHQgeD0iNDAiIHk9IjE4IiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DQVNUTE08L3RleHQ+Cjwvc3ZnPgo=" alt="Logo" class="max-h-10 max-w-20 object-contain">
+                                            </div>
+                                            <div id="previewStrip" class="h-8 bg-gray-400"></div>
+                                            <div class="p-4 text-sm">
+                                                <div class="font-semibold text-gray-900 mb-2">Event Entry Pass</div>
+                                                <div class="text-gray-600 mb-1"><strong>Name:</strong> Sample Guest</div>
+                                                <div class="text-gray-600 mb-1"><strong>Guests:</strong> 2</div>
+                                                <div class="text-gray-600"><strong>Date:</strong> Event Date</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Save Button -->
+                                <div class="flex justify-center pt-4">
+                                    <button type="submit" id="saveCustomization" class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Apply Customizations
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Status when collapsed -->
+                        <div id="customizationSummary" class="text-sm text-gray-600">
+                            <span id="customizationStatus">Click "Show Options" to customize your pass design</span>
+                        </div>
+                    </div>
+
                     <div class="bg-gray-50 rounded-lg p-6">
                         <h4 class="font-medium text-gray-900 mb-4">Pass Configuration</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -383,10 +530,10 @@
             </div>
         </div>
 
-        <!-- Step 5: Email Campaign -->
+        <!-- Step 5: Email Template Generation -->
         <div id="step5" class="step-content">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-6">Email Campaign</h3>
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Email Template Generation</h3>
 
                 <div class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -431,6 +578,83 @@
                         </div>
                     </div>
 
+                    <button id="generateEmailTemplatesBtn" class="w-full bg-purple-600 text-white py-4 px-6 rounded-lg hover:bg-purple-700 transition font-medium text-lg">
+                        📝 Generate Email Templates
+                    </button>
+                    
+                    <div id="emailTemplateStatus" class="hidden">
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3 text-sm text-gray-600">
+                                <div class="spinner w-4 h-4 border-2 border-gray-200 border-t-purple-600 rounded-full"></div>
+                                <span id="emailTemplateStatusText">Generating templates...</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="emailTemplateProgressBar" class="bg-purple-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="emailTemplateResults" class="hidden">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex">
+                                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <p class="text-sm text-green-800">
+                                        <span id="emailTemplateCount">0</span> personalized email templates generated successfully.
+                                    </p>
+                                    <p class="text-xs text-green-600 mt-1">
+                                        Templates saved for review before sending. You can preview them before proceeding to email sending.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8">
+                    <button id="step5BackBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
+                        ← Back to Google Wallet
+                    </button>
+                    <button id="step5NextBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Continue to Send Emails →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 6: Send Emails -->
+        <div id="step6" class="step-content">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6">Send Email Campaign</h3>
+
+                <div class="space-y-6">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex">
+                            <svg class="w-5 h-5 text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-800">
+                                    <strong>Ready to send:</strong> Email templates have been generated and are ready for sending. 
+                                    Each email includes personalized content with both Apple Wallet (.pkpass attachment) and Google Wallet (clickable link) options.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email Subject</label>
+                            <input type="text" id="emailSubject" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Your Castle Fine Art Private View Invitation">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">From Email</label>
+                            <input type="email" id="fromEmail" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500" placeholder="events@castlefineart.com">
+                        </div>
+                    </div>
+
                     <div class="flex space-x-4">
                         <button id="sendTestEmailBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
                             📧 Send Test Email
@@ -472,8 +696,8 @@
                 </div>
 
                 <div class="flex justify-between mt-8">
-                    <button id="step5BackBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
-                        ← Back to Google Wallet
+                    <button id="step6BackBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition">
+                        ← Back to Email Templates
                     </button>
                     <button id="newEventBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition hidden">
                         🆕 Start New Event
@@ -503,15 +727,19 @@
             qrGenerated: false,
             appleWalletGenerated: false,
             googleWalletGenerated: false,
+            emailTemplatesGenerated: false,
             emailsSent: false
         };
 
         // Initialize API and QR Bridge
+        
         const workflowAPI = new WorkflowAPI('http://localhost:5001');
         const qrBridge = new QRBridge();
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize pass customizer
+            initializePassCustomizer();
             initializeEventListeners();
             updateStepDisplay();
             loadEventTemplates();
@@ -540,6 +768,28 @@
             });
 
             // Next/Back buttons
+            // Pass Customization Toggle
+            document.getElementById('toggleCustomizer').addEventListener('click', () => {
+                const interface = document.getElementById('customizerInterface');
+                const summary = document.getElementById('customizationSummary');
+                const toggleText = document.getElementById('customizerToggleText');
+                const toggleIcon = document.getElementById('customizerToggleIcon');
+                
+                const isHidden = interface.classList.contains('hidden');
+                
+                if (isHidden) {
+                    interface.classList.remove('hidden');
+                    summary.classList.add('hidden');
+                    toggleText.textContent = 'Hide Options';
+                    toggleIcon.style.transform = 'rotate(180deg)';
+                } else {
+                    interface.classList.add('hidden');
+                    summary.classList.remove('hidden');
+                    toggleText.textContent = 'Show Options';
+                    toggleIcon.style.transform = 'rotate(0deg)';
+                }
+            });
+
             document.getElementById('step1NextBtn').addEventListener('click', () => navigateToStep(2));
             document.getElementById('step2BackBtn').addEventListener('click', () => navigateToStep(1));
             document.getElementById('step2NextBtn').addEventListener('click', () => navigateToStep(3));
@@ -548,12 +798,15 @@
             document.getElementById('step4BackBtn').addEventListener('click', () => navigateToStep(3));
             document.getElementById('step4NextBtn').addEventListener('click', () => navigateToStep(5));
             document.getElementById('step5BackBtn').addEventListener('click', () => navigateToStep(4));
+            document.getElementById('step5NextBtn').addEventListener('click', () => navigateToStep(6));
+            document.getElementById('step6BackBtn').addEventListener('click', () => navigateToStep(5));
 
             // Action buttons
             document.getElementById('generateQRBtn').addEventListener('click', generateQRCodes);
             document.getElementById('qrZipUpload').addEventListener('change', handleQRZipUpload);
             document.getElementById('generateAppleWalletBtn').addEventListener('click', generateAppleWallet);
             document.getElementById('generateGoogleWalletBtn').addEventListener('click', generateGoogleWallet);
+            document.getElementById('generateEmailTemplatesBtn').addEventListener('click', generateEmailTemplates);
             document.getElementById('sendTestEmailBtn').addEventListener('click', sendTestEmail);
             document.getElementById('sendAllEmailsBtn').addEventListener('click', sendAllEmails);
             document.getElementById('newEventBtn').addEventListener('click', startNewEvent);
@@ -701,7 +954,8 @@
             if (!appState.qrGenerated) return 2;
             if (!appState.appleWalletGenerated) return 3;
             if (!appState.googleWalletGenerated) return 4;
-            return 5;
+            if (!appState.emailTemplatesGenerated) return 5;
+            return 6;
         }
 
         function updateStepDisplay() {
@@ -733,13 +987,14 @@
                 2: 'Step 2: QR Generation',
                 3: 'Step 3: Apple Wallet',
                 4: 'Step 4: Google Wallet',
-                5: 'Step 5: Email Campaign'
+                5: 'Step 5: Email Templates',
+                6: 'Step 6: Send Emails'
             };
             document.getElementById('currentStepTitle').textContent = stepTitles[appState.currentStep];
         }
 
         function updateProgress() {
-            const progress = (appState.currentStep - 1) / 4 * 100;
+            const progress = (appState.currentStep - 1) / 5 * 100;
             document.getElementById('progressBar').style.width = `${progress}%`;
             document.getElementById('progressPercentage').textContent = `${Math.round(progress)}% Complete`;
         }
@@ -863,8 +1118,12 @@
             status.classList.remove('hidden');
 
             try {
-                // Start Apple Wallet generation
-                const startResult = await workflowAPI.generateAppleWallet(appState.eventName);
+                // Get pass customization data from localStorage
+                const customizationConfig = localStorage.getItem('passCustomizationConfig');
+                const passConfig = customizationConfig ? JSON.parse(customizationConfig) : null;
+                
+                // Start Apple Wallet generation with customization
+                const startResult = await workflowAPI.generateAppleWallet(appState.eventName, passConfig);
 
                 if (!startResult.success) {
                     throw new Error(startResult.message || 'Failed to start Apple Wallet generation');
@@ -990,18 +1249,246 @@
             }
         }
 
+        async function generateEmailTemplates() {
+            const btn = document.getElementById('generateEmailTemplatesBtn');
+            const status = document.getElementById('emailTemplateStatus');
+            const results = document.getElementById('emailTemplateResults');
+            const statusText = document.getElementById('emailTemplateStatusText');
+            const progressBar = document.getElementById('emailTemplateProgressBar');
+
+            btn.disabled = true;
+            status.classList.remove('hidden');
+
+            try {
+                statusText.textContent = 'Generating personalized email templates...';
+                progressBar.style.width = '25%';
+
+                const generateResult = await workflowAPI.generateEmails(appState.eventName);
+
+                if (!generateResult.success) {
+                    throw new Error(generateResult.error || 'Failed to generate email templates');
+                }
+
+                progressBar.style.width = '100%';
+                statusText.textContent = 'Email templates generated successfully!';
+
+                setTimeout(() => {
+                    appState.emailTemplatesGenerated = true;
+                    status.classList.add('hidden');
+                    results.classList.remove('hidden');
+                    
+                    document.getElementById('emailTemplateCount').textContent = appState.csvData.length;
+                    document.getElementById('step5NextBtn').disabled = false;
+                    
+                    showToast(`${appState.csvData.length} email templates generated successfully!`, 'success');
+                    btn.disabled = false;
+                }, 1000);
+
+            } catch (error) {
+                console.error('Email template generation error:', error);
+                showToast('Email template generation failed: ' + error.message, 'error');
+                status.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        // Pass Customizer Functions
+        let passCustomizationData = {
+            backgroundColor: '#000000',
+            foregroundColor: '#ffffff',
+            logo: null,
+            strip: null,
+            background: null
+        };
+
+        function hexToRgb(hex) {
+            if (!hex) return null;
+            const s = String(hex).trim();
+            const m = s.match(/^#?([A-Fa-f0-9]{6})$/);
+            if (!m) return null;
+            const n = parseInt(m[1], 16);
+            const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function initializePassCustomizer() {
+            // File upload handlers
+            handleFileUpload('logoUpload', 'logoPreview', 'logo');
+            handleFileUpload('stripUpload', 'stripPreview', 'strip');
+            handleFileUpload('backgroundUpload', 'backgroundPreview', 'background');
+            
+            // Color change handlers
+            document.getElementById('customBgColor').addEventListener('change', updatePassPreview);
+            document.getElementById('customFgColor').addEventListener('change', updatePassPreview);
+            
+            // Form submission
+            document.getElementById('passCustomizer').addEventListener('submit', savePassCustomization);
+        }
+
+        function handleFileUpload(inputId, previewId, type) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+
+            input.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate dimensions based on type
+                    const img = new Image();
+                    img.onload = function() {
+                        const validDimensions = validateImageDimensions(this.width, this.height, type);
+                        
+                        if (validDimensions.valid) {
+                            passCustomizationData[type] = file;
+                            preview.textContent = `✅ ${file.name} (${this.width}x${this.height}px)`;
+                            preview.classList.remove('hidden');
+                            
+                            // Update preview
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                updatePassPreviewImage(type, e.target.result);
+                            };
+                            reader.readAsDataURL(file);
+                        } else {
+                            preview.textContent = `❌ Invalid size: ${validDimensions.message}`;
+                            preview.classList.remove('hidden');
+                            preview.classList.add('text-red-600');
+                        }
+                    };
+                    img.src = URL.createObjectURL(file);
+                }
+            });
+        }
+
+        function validateImageDimensions(width, height, type) {
+            const specs = {
+                logo: { width: 160, height: 50 },
+                strip: { width: 375, height: 123 },
+                background: { width: 180, height: 220 }
+            };
+            
+            const spec = specs[type];
+            if (!spec) return { valid: false, message: 'Unknown image type' };
+            
+            if (width === spec.width && height === spec.height) {
+                return { valid: true };
+            } else {
+                return { 
+                    valid: false, 
+                    message: `Must be ${spec.width}x${spec.height}px (got ${width}x${height}px)` 
+                };
+            }
+        }
+
+        function updatePassPreview() {
+            const bgColor = document.getElementById('customBgColor').value;
+            const fgColor = document.getElementById('customFgColor').value;
+            
+            document.getElementById('previewHeader').style.backgroundColor = bgColor;
+            
+            // Update stored data
+            passCustomizationData.backgroundColor = bgColor;
+            passCustomizationData.foregroundColor = fgColor;
+        }
+
+        function updatePassPreviewImage(type, imageSrc) {
+            if (type === 'logo') {
+                document.getElementById('previewLogo').src = imageSrc;
+            } else if (type === 'strip') {
+                document.getElementById('previewStrip').style.backgroundImage = `url(${imageSrc})`;
+                document.getElementById('previewStrip').style.backgroundSize = 'cover';
+                document.getElementById('previewStrip').style.backgroundPosition = 'center';
+            }
+        }
+
+        async function savePassCustomization(e) {
+            e.preventDefault();
+            
+            try {
+                // Get current values directly from form inputs
+                const bgColor = document.getElementById('customBgColor').value;
+                const fgColor = document.getElementById('customFgColor').value;
+                
+                // Check if files were uploaded
+                const logoFile = document.getElementById('logoUpload').files[0];
+                const stripFile = document.getElementById('stripUpload').files[0];
+                const backgroundFile = document.getElementById('backgroundUpload').files[0];
+                
+                console.log('Form values:', { bgColor, fgColor, logoFile: logoFile?.name, stripFile: stripFile?.name, backgroundFile: backgroundFile?.name });
+                
+                // Create FormData to send files to the server
+                const formData = new FormData();
+                formData.append('backgroundColor', bgColor);
+                formData.append('foregroundColor', fgColor);
+                
+                if (logoFile) formData.append('logo', logoFile);
+                if (stripFile) formData.append('strip', stripFile);
+                if (backgroundFile) formData.append('background', backgroundFile);
+                
+                // Send to the apple_pass_customizer backend
+                const response = await fetch('/api/customize', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to save customization');
+                }
+                
+                // Save the returned config to localStorage
+                localStorage.setItem('passCustomizationConfig', JSON.stringify(result.config));
+                
+                // Update summary text
+                const summary = document.getElementById('customizationStatus');
+                summary.innerHTML = '✅ Custom design applied - colors and images saved';
+                summary.classList.add('text-green-600');
+                
+                showToast('Pass customization saved successfully!', 'success');
+                
+                // Collapse the interface
+                document.getElementById('toggleCustomizer').click();
+                
+            } catch (error) {
+                console.error('Error saving customization:', error);
+                showToast('Error saving customization: ' + error.message, 'error');
+            }
+        }
+
+        async function writeConfigFile(config) {
+            try {
+                // Since we can't write files directly from the browser,
+                // let's create a download and show clear instructions
+                const configBlob = new Blob([JSON.stringify(config, null, 4)], { type: 'application/json' });
+                const url = URL.createObjectURL(configBlob);
+                
+                // Auto-download the config file with clear naming
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'pass_config.json';
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                // Show detailed instructions
+                showToast('📁 Config downloaded! Replace wallettest/pass_config.json with the downloaded file, then regenerate passes.', 'info');
+                console.log('✅ Pass configuration saved. Replace wallettest/pass_config.json with downloaded file.');
+                
+            } catch (error) {
+                console.error('Could not create config file:', error);
+                showToast('❌ Error creating config file: ' + error.message, 'error');
+            }
+        }
+
+
         async function sendTestEmail() {
             try {
                 if (appState.csvData.length > 0) {
                     const testEmail = prompt('Enter test email address:', appState.csvData[0].email);
                     if (testEmail) {
-                        // Generate emails first
-                        const generateResult = await workflowAPI.generateEmails(appState.eventName);
-                        if (generateResult.success) {
-                            showToast(`Test email would be sent to ${testEmail}`, 'success');
-                        } else {
-                            throw new Error(generateResult.error || 'Failed to generate emails');
-                        }
+                        showToast(`Test email would be sent to ${testEmail} (Demo Mode)`, 'success');
                     }
                 }
             } catch (error) {
@@ -1020,15 +1507,9 @@
             status.classList.remove('hidden');
 
             try {
-                // First generate personalized emails
-                statusText.textContent = 'Generating personalized emails...';
-                const generateResult = await workflowAPI.generateEmails(appState.eventName);
-
-                if (!generateResult.success) {
-                    throw new Error(generateResult.error || 'Failed to generate emails');
-                }
-
-                // Start email sending
+                // Start email sending (templates already generated)
+                statusText.textContent = 'Preparing to send emails...';
+                progressBar.style.width = '10%';
                 const sendResult = await workflowAPI.sendEmails(appState.eventName);
 
                 if (!sendResult.success) {
@@ -1093,6 +1574,7 @@
                 appState.qrGenerated = false;
                 appState.appleWalletGenerated = false;
                 appState.googleWalletGenerated = false;
+                appState.emailTemplatesGenerated = false;
                 appState.emailsSent = false;
 
                 // Reset form
@@ -1102,7 +1584,7 @@
 
                 // Reset UI
                 document.getElementById('csvPreview').classList.add('hidden');
-                ['qrResults', 'appleWalletResults', 'googleWalletResults', 'emailResults'].forEach(id => {
+                ['qrResults', 'appleWalletResults', 'googleWalletResults', 'emailTemplateResults', 'emailResults'].forEach(id => {
                     document.getElementById(id).classList.add('hidden');
                 });
 

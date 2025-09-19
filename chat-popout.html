@@ -320,6 +320,16 @@
       font-size: 10px;
     }
 
+    /* Message media styles - GIF support */
+    .message-gif, .message-image {
+      margin: 8px 0;
+    }
+    
+    .message-gif img, .message-image img {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
     /* Ticket Preview Card - compact for popout */
     .ticket-preview {
       position: fixed;
@@ -714,7 +724,7 @@
         <div class="chat-input-area">
           <div class="typing-indicators" id="typing-indicators"></div>
           <div class="chat-input-container">
-            <textarea class="chat-input" id="message-input" placeholder="Type a message..." rows="1"></textarea>
+            <textarea class="chat-input" id="message-input" placeholder="Type a message or paste a GIF URL..." rows="1"></textarea>
             <button class="send-button" id="send-message-btn" onclick="sendMessage()">Send</button>
           </div>
         </div>
@@ -1138,11 +1148,36 @@
     let ticketCache = new Map();
     let activeTicketPreview = null;
 
-    // Detect and enhance ticket references in messages
+    // Detect and enhance ticket references, GIFs, and images in messages
     function enhanceMessageWithTickets(messageText) {
       if (!messageText) return messageText;
       
-      // Patterns to detect: #1234, ticket:1234, TKT-434592, etc.
+      let enhancedText = messageText;
+      
+      // Handle GIF URLs first
+      const gifPattern = /(https?:\/\/[^\s]+\.gif(?:\?[^\s]*)?)/gi;
+      enhancedText = enhancedText.replace(gifPattern, (match) => {
+        return `__GIF_PLACEHOLDER_${btoa(match)}__`;
+      });
+      
+      // Handle general image URLs
+      const imagePattern = /(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s]*)?)/gi;
+      enhancedText = enhancedText.replace(imagePattern, (match) => {
+        return `__IMAGE_PLACEHOLDER_${btoa(match)}__`;
+      });
+      
+      // Handle general URLs (excluding images/gifs)
+      const urlPattern = /(https?:\/\/[^\s]+)/gi;
+      enhancedText = enhancedText.replace(urlPattern, (match) => {
+        // Skip if already processed as image/gif
+        if (enhancedText.includes(`__GIF_PLACEHOLDER_${btoa(match)}__`) || 
+            enhancedText.includes(`__IMAGE_PLACEHOLDER_${btoa(match)}__`)) {
+          return match;
+        }
+        return `<a href="${match}" target="_blank" style="color: #6264a7; text-decoration: underline;">${match}</a>`;
+      });
+      
+      // Handle ticket patterns
       const ticketPatterns = [
         /\#(\d{1,6})\b/g,                    // #1234
         /ticket:?\s*(\d{1,6})\b/gi,          // ticket:1234, ticket 1234
@@ -1151,12 +1186,21 @@
         /(TKT-\d{1,6})\b/gi                  // Full TKT-434592 format
       ];
       
-      let enhancedText = messageText;
-      
       ticketPatterns.forEach(pattern => {
         enhancedText = enhancedText.replace(pattern, (match, ticketId) => {
           return `<span class="ticket-link" data-ticket-id="${ticketId}" onclick="openTicket('${ticketId}')" onmouseenter="showTicketPreview(event, '${ticketId}')" onmouseleave="hideTicketPreview()">${match}</span>`;
         });
+      });
+      
+      // Replace placeholders with actual HTML
+      enhancedText = enhancedText.replace(/__GIF_PLACEHOLDER_([^_]+)__/g, (match, encodedUrl) => {
+        const url = atob(encodedUrl);
+        return `<div class="message-gif"><img src="${url}" alt="GIF" loading="lazy" onclick="openImageModal('${url}')" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;"></div>`;
+      });
+      
+      enhancedText = enhancedText.replace(/__IMAGE_PLACEHOLDER_([^_]+)__/g, (match, encodedUrl) => {
+        const url = atob(encodedUrl);
+        return `<div class="message-image"><img src="${url}" alt="Image" loading="lazy" onclick="openImageModal('${url}')" style="max-width: 300px; max-height: 200px; border-radius: 8px; cursor: pointer;"></div>`;
       });
       
       return enhancedText;
@@ -1338,6 +1382,50 @@
       } else {
         window.open(`tickets.html#ticket-${ticketId}`, '_blank');
       }
+    }
+
+    // Open image modal for GIFs and images
+    function openImageModal(imageUrl) {
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        cursor: pointer;
+      `;
+      
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.style.cssText = `
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      `;
+      
+      modal.appendChild(img);
+      document.body.appendChild(modal);
+      
+      // Close on click
+      modal.addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      // Close on Escape key
+      const escapeHandler = (e) => {
+        if (e.key === 'Escape') {
+          document.body.removeChild(modal);
+          document.removeEventListener('keydown', escapeHandler);
+        }
+      };
+      document.addEventListener('keydown', escapeHandler);
     }
 
     // Cleanup when window closes

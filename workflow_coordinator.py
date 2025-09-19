@@ -4,7 +4,7 @@ Castle Fine Art - Event Workflow Coordinator
 Orchestrates QR generation, Apple Wallet, Google Wallet, and email sending
 """
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 import os
 import shutil
@@ -28,13 +28,32 @@ app = Flask(__name__)
 CORS(app)
 
 # Configuration
-WALLETTEST_DIR = "/Users/appleone/Documents/wallettest"
-EVENTS_DIR = os.path.join(os.path.expanduser("~"), "Documents", "events")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # repo root
+WALLETTEST_DIR = os.path.join(BASE_DIR, "wallettest")  # inside repo
+EVENTS_DIR = os.path.join(BASE_DIR, "events")          # inside repo
 QR_EXPORTS_DIR = os.path.join(WALLETTEST_DIR, "qr_exports")
 GOOGLE_WALLET_DIR = os.path.join(WALLETTEST_DIR, "google_wallet")
 
-# Progress tracking
-progress_data = {}
+# Progress tracking with file persistence
+PROGRESS_FILE = os.path.join(BASE_DIR, "progress_data.json")
+
+def load_progress_data():
+    if os.path.exists(PROGRESS_FILE):
+        try:
+            with open(PROGRESS_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            pass
+    return {}
+
+def save_progress_data(data):
+    try:
+        with open(PROGRESS_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+    except:
+        pass
+
+progress_data = load_progress_data()
 
 class EventCoordinator:
     def __init__(self, event_name):
@@ -43,7 +62,6 @@ class EventCoordinator:
         self.ensure_directories()
 
     def ensure_directories(self):
-        """Create event directory structure"""
         directories = [
             self.event_dir,
             os.path.join(self.event_dir, "csv"),
@@ -51,134 +69,209 @@ class EventCoordinator:
             os.path.join(self.event_dir, "apple_passes"),
             os.path.join(self.event_dir, "google_passes"),
             os.path.join(self.event_dir, "emails"),
-            QR_EXPORTS_DIR  # Ensure wallettest qr_exports exists
+            QR_EXPORTS_DIR
         ]
-
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
 
     def save_csv_data(self, csv_data):
-        """Save CSV data to event directory"""
         csv_path = os.path.join(self.event_dir, "csv", "guest_list.csv")
-
         with open(csv_path, 'w', newline='', encoding='utf-8') as file:
             if csv_data:
                 writer = csv.DictWriter(file, fieldnames=csv_data[0].keys())
                 writer.writeheader()
                 writer.writerows(csv_data)
-
         return csv_path
 
     def extract_qr_codes(self, qr_zip_path):
-        """Extract QR codes from ZIP and place in qr_exports"""
         try:
-            # Clear existing QR exports
             for file in glob.glob(os.path.join(QR_EXPORTS_DIR, "*.png")):
                 os.remove(file)
-
-            # Extract ZIP to qr_exports
             with zipfile.ZipFile(qr_zip_path, 'r') as zip_ref:
                 zip_ref.extractall(QR_EXPORTS_DIR)
-
-            # Move files from subdirectory if needed
             for root, dirs, files in os.walk(QR_EXPORTS_DIR):
                 for file in files:
                     if file.endswith('.png') and root != QR_EXPORTS_DIR:
-                        source = os.path.join(root, file)
-                        destination = os.path.join(QR_EXPORTS_DIR, file)
-                        shutil.move(source, destination)
-
-            # Clean up any empty directories
+                        shutil.move(os.path.join(root, file), os.path.join(QR_EXPORTS_DIR, file))
             for root, dirs, files in os.walk(QR_EXPORTS_DIR, topdown=False):
                 for dir in dirs:
                     dir_path = os.path.join(root, dir)
                     if not os.listdir(dir_path):
                         os.rmdir(dir_path)
-
-            # Copy QR codes to event directory for archival
             qr_event_dir = os.path.join(self.event_dir, "qr_codes")
             for file in glob.glob(os.path.join(QR_EXPORTS_DIR, "*.png")):
                 shutil.copy2(file, qr_event_dir)
-
             qr_count = len(glob.glob(os.path.join(QR_EXPORTS_DIR, "*.png")))
             return {"success": True, "qr_count": qr_count}
-
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def generate_apple_wallet_passes(self, csv_path):
-        """Run Apple Wallet generation scripts"""
+    def generate_apple_wallet_passes(self, csv_path, event_name=None):
+        """Run Apple Wallet generation with live debug logs"""
         try:
-            # Update CSV path in generate_passes.py
             self.update_generate_passes_csv_path(csv_path)
 
-            # Run generate_passes.py
-            result1 = subprocess.run(
+            def run_subprocess(cmd, cwd, step_name):
+                import select
+                import time
+                
+                process = subprocess.Popen(
+                    cmd,
+                    cwd=cwd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1,
+                    universal_newlines=True
+                )
+                logs = []
+                start_time = time.time()
+                
+                try:
+                    while True:
+                        # Check if process is still running
+                        poll_result = process.poll()
+                        if poll_result is not None:
+                            break
+                            
+                        # Check for timeout (10 minutes)
+                        if time.time() - start_time > 600:
+                            print(f"[{step_name}] Process timed out after 10 minutes")
+                            process.kill()
+                            if event_name:
+                                progress_data[event_name]["status"] = f"{step_name} timed out after 10 minutes"
+                                save_progress_data(progress_data)
+                            return 1, f"{step_name} timed out after 10 minutes"
+                        
+                        # Read available output
+                        line = process.stdout.readline()
+                        if line:
+                            line = line.strip()
+                            logs.append(line)
+                            print(f"[{step_name}] {line}")
+                            if event_name:
+                                progress_data[event_name]["status"] = f"{step_name}: {line}"
+                                save_progress_data(progress_data)
+                                
+                                # Extract progress from create_passes.sh output
+                                if step_name == "create_passes.sh" and "Processing PASS" in line and "/" in line:
+                                    try:
+                                        # Extract current/total from "Processing PASS001... (1/50)"
+                                        parts = line.split("(")[1].split(")")[0].split("/")
+                                        current = int(parts[0])
+                                        total = int(parts[1])
+                                        # Map progress from 50% to 90% based on pass processing
+                                        base_progress = 50
+                                        max_progress = 90
+                                        progress_range = max_progress - base_progress
+                                        pass_progress = int(base_progress + (current / total) * progress_range)
+                                        progress_data[event_name]["progress"] = pass_progress
+                                        save_progress_data(progress_data)
+                                    except (IndexError, ValueError):
+                                        pass  # Ignore parsing errors
+                        
+                        time.sleep(0.1)  # Small delay to prevent busy waiting
+                    
+                    # Get any remaining output
+                    remaining_stdout, stderr_output = process.communicate()
+                    if remaining_stdout:
+                        for line in remaining_stdout.splitlines():
+                            line = line.strip()
+                            if line:
+                                logs.append(line)
+                                print(f"[{step_name}] {line}")
+                                if event_name:
+                                    progress_data[event_name]["status"] = f"{step_name}: {line}"
+                                    save_progress_data(progress_data)
+                    
+                    # Process stderr
+                    if stderr_output:
+                        print(f"[{step_name} ERROR] {stderr_output}")
+                        if event_name:
+                            progress_data[event_name]["status"] = f"{step_name} ERROR: {stderr_output}"
+                            save_progress_data(progress_data)
+                        logs.append(stderr_output)
+                        
+                    return process.returncode, "\n".join(logs)
+                    
+                except Exception as e:
+                    print(f"[{step_name}] Error during execution: {e}")
+                    process.kill()
+                    if event_name:
+                        progress_data[event_name]["status"] = f"{step_name} error: {e}"
+                        save_progress_data(progress_data)
+                    return 1, f"{step_name} error: {e}"
+
+            # Step 1
+            if event_name:
+                progress_data[event_name]["status"] = "Starting generate_passes.py..."
+                progress_data[event_name]["progress"] = 10
+                save_progress_data(progress_data)
+            code1, logs1 = run_subprocess(
                 ["python3", os.path.join(WALLETTEST_DIR, "generate_passes.py")],
                 cwd=WALLETTEST_DIR,
-                capture_output=True,
-                text=True
+                step_name="generate_passes.py"
             )
+            if code1 != 0:
+                return {"success": False, "error": f"generate_passes.py failed:\n{logs1}"}
 
-            if result1.returncode != 0:
-                return {"success": False, "error": f"generate_passes.py failed: {result1.stderr}"}
-
-            # Run create_passes.sh (modified to handle all passes)
-            result2 = subprocess.run(
+            # Step 2
+            if event_name:
+                progress_data[event_name]["status"] = "Starting create_passes.sh..."
+                progress_data[event_name]["progress"] = 50
+                save_progress_data(progress_data)
+            code2, logs2 = run_subprocess(
                 ["bash", os.path.join(WALLETTEST_DIR, "create_passes.sh")],
                 cwd=WALLETTEST_DIR,
-                capture_output=True,
-                text=True
+                step_name="create_passes.sh"
             )
+            if code2 != 0:
+                return {"success": False, "error": f"create_passes.sh failed:\n{logs2}"}
+                
+            # Step 3 - Copying files
+            if event_name:
+                progress_data[event_name]["status"] = "Copying passes to event directory..."
+                progress_data[event_name]["progress"] = 90
+                save_progress_data(progress_data)
 
-            if result2.returncode != 0:
-                return {"success": False, "error": f"create_passes.sh failed: {result2.stderr}"}
-
-            # Copy generated passes to event directory
             pkpass_dir = os.path.join(WALLETTEST_DIR, "pkpasses")
             event_apple_dir = os.path.join(self.event_dir, "apple_passes")
+            os.makedirs(event_apple_dir, exist_ok=True)  # ensure it exists
 
             if os.path.exists(pkpass_dir):
                 for file in glob.glob(os.path.join(pkpass_dir, "*.pkpass")):
-                    shutil.copy2(file, event_apple_dir)
+                    try:
+                        shutil.copy2(file, event_apple_dir)
+                        print(f"[Apple Wallet] Copied {os.path.basename(file)} → {event_apple_dir}")
+                    except Exception as e:
+                        print(f"[Apple Wallet ERROR] Failed copying {file}: {e}")
 
             pass_count = len(glob.glob(os.path.join(event_apple_dir, "*.pkpass")))
+            print(f"[Apple Wallet] Final pass count: {pass_count}")
             return {"success": True, "pass_count": pass_count}
-
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     def update_generate_passes_csv_path(self, csv_path):
-        """Update the CSV path in generate_passes.py temporarily"""
-        generate_script = os.path.join(WALLETTEST_DIR, "generate_passes.py")
-
-        # Read current script
-        with open(generate_script, 'r') as f:
+        script = os.path.join(WALLETTEST_DIR, "generate_passes.py")
+        with open(script, 'r') as f:
             content = f.read()
-
-        # Create backup
-        backup_script = generate_script + '.backup'
-        shutil.copy2(generate_script, backup_script)
-
-        # Update CSV path
+        backup = script + ".backup"
+        shutil.copy2(script, backup)
         lines = content.split('\n')
         for i, line in enumerate(lines):
             if line.startswith('csv_path = '):
                 lines[i] = f'csv_path = "{csv_path}"'
                 break
-
-        # Write updated script
-        with open(generate_script, 'w') as f:
+        with open(script, 'w') as f:
             f.write('\n'.join(lines))
 
     def restore_generate_passes_script(self):
-        """Restore original generate_passes.py"""
-        generate_script = os.path.join(WALLETTEST_DIR, "generate_passes.py")
-        backup_script = generate_script + '.backup'
-
-        if os.path.exists(backup_script):
-            shutil.copy2(backup_script, generate_script)
-            os.remove(backup_script)
+        script = os.path.join(WALLETTEST_DIR, "generate_passes.py")
+        backup = script + ".backup"
+        if os.path.exists(backup):
+            shutil.copy2(backup, script)
+            os.remove(backup)
 
     def generate_google_wallet_passes(self, csv_path):
         """Run Google Wallet generation script"""
@@ -277,9 +370,19 @@ class EventCoordinator:
                 personalized_email = personalized_email.replace("6:00 PM - 10:00 PM", f"{event_data.get('time', 'TBD')} onwards")
                 personalized_email = personalized_email.replace("Castle Fine Art, The Mailbox, Birmingham", event_data.get('location', 'TBD'))
 
+                # Update Apple Wallet download link
+                from urllib.parse import quote
+                encoded_event_name = quote(self.event_name)
+                apple_download_url = f"http://localhost:5001/api/events/{encoded_event_name}/apple-pass/{row['pass_id']}"
+                personalized_email = personalized_email.replace('APPLE_WALLET_DOWNLOAD_LINK', apple_download_url)
+                
                 # Update Google Wallet URL
                 google_url = google_passes.get(row['name'], '#')
-                personalized_email = personalized_email.replace('href="https://pay.google.com/gp/v/save/eyJ', f'href="{google_url}"')
+                if google_url != '#':
+                    # Find and replace the entire href attribute for Google Wallet button
+                    import re
+                    google_pattern = r'href="https://pay\.google\.com/gp/v/save/[^"]*"'
+                    personalized_email = re.sub(google_pattern, f'href="{google_url}"', personalized_email)
 
                 # Find corresponding Apple Wallet pass
                 apple_pass_file = os.path.join(apple_passes_dir, f"{row['pass_id']}.pkpass")
@@ -368,38 +471,33 @@ def extract_qr_codes(event_name):
 
 @app.route('/api/events/<event_name>/apple-wallet', methods=['POST'])
 def generate_apple_wallet(event_name):
-    """Generate Apple Wallet passes"""
     def generate_async():
         progress_data[event_name] = {"step": "apple_wallet", "progress": 0, "status": "Starting..."}
-
+        save_progress_data(progress_data)
         try:
             coordinator = EventCoordinator(event_name)
             csv_path = os.path.join(coordinator.event_dir, "csv", "guest_list.csv")
-
             progress_data[event_name]["progress"] = 25
             progress_data[event_name]["status"] = "Running generate_passes.py..."
-
-            result = coordinator.generate_apple_wallet_passes(csv_path)
-
+            save_progress_data(progress_data)
+            result = coordinator.generate_apple_wallet_passes(csv_path, event_name=event_name)
             progress_data[event_name]["progress"] = 100
             if result["success"]:
                 progress_data[event_name]["status"] = f"Generated {result['pass_count']} passes"
                 progress_data[event_name]["completed"] = True
                 progress_data[event_name]["pass_count"] = result['pass_count']
+                save_progress_data(progress_data)
             else:
                 progress_data[event_name]["status"] = f"Error: {result['error']}"
                 progress_data[event_name]["error"] = result['error']
-
-            # Restore original script
+                save_progress_data(progress_data)
             coordinator.restore_generate_passes_script()
-
         except Exception as e:
             progress_data[event_name]["status"] = f"Error: {str(e)}"
             progress_data[event_name]["error"] = str(e)
-
+            save_progress_data(progress_data)
     thread = threading.Thread(target=generate_async)
     thread.start()
-
     return jsonify({"success": True, "message": "Apple Wallet generation started"})
 
 
@@ -408,6 +506,7 @@ def generate_google_wallet(event_name):
     """Generate Google Wallet passes"""
     def generate_async():
         progress_data[event_name] = {"step": "google_wallet", "progress": 0, "status": "Starting..."}
+        save_progress_data(progress_data)
 
         try:
             coordinator = EventCoordinator(event_name)
@@ -415,10 +514,12 @@ def generate_google_wallet(event_name):
 
             progress_data[event_name]["progress"] = 25
             progress_data[event_name]["status"] = "Authenticating with Google Wallet API..."
+            save_progress_data(progress_data)
             time.sleep(1)
 
             progress_data[event_name]["progress"] = 50
             progress_data[event_name]["status"] = "Creating pass objects..."
+            save_progress_data(progress_data)
 
             result = coordinator.generate_google_wallet_passes(csv_path)
 
@@ -427,9 +528,11 @@ def generate_google_wallet(event_name):
                 progress_data[event_name]["status"] = f"Generated {result['pass_count']} passes"
                 progress_data[event_name]["completed"] = True
                 progress_data[event_name]["pass_count"] = result['pass_count']
+                save_progress_data(progress_data)
             else:
                 progress_data[event_name]["status"] = f"Error: {result['error']}"
                 progress_data[event_name]["error"] = result['error']
+                save_progress_data(progress_data)
 
             # Restore original script
             coordinator.restore_google_wallet_script()
@@ -437,6 +540,7 @@ def generate_google_wallet(event_name):
         except Exception as e:
             progress_data[event_name]["status"] = f"Error: {str(e)}"
             progress_data[event_name]["error"] = str(e)
+            save_progress_data(progress_data)
 
     thread = threading.Thread(target=generate_async)
     thread.start()
@@ -476,6 +580,7 @@ def send_emails(event_name):
     # This is a placeholder - would need SMTP configuration
     def send_async():
         progress_data[event_name] = {"step": "emails", "progress": 0, "status": "Preparing emails..."}
+        save_progress_data(progress_data)
 
         try:
             coordinator = EventCoordinator(event_name)
@@ -491,16 +596,19 @@ def send_emails(event_name):
                 progress = int((i + 1) / total_guests * 100)
                 progress_data[event_name]["progress"] = progress
                 progress_data[event_name]["status"] = f"Sending email {i+1}/{total_guests} to {guest['name']}"
+                save_progress_data(progress_data)
 
                 # Simulate email sending delay
                 time.sleep(0.2)
 
             progress_data[event_name]["completed"] = True
             progress_data[event_name]["status"] = f"All {total_guests} emails sent successfully"
+            save_progress_data(progress_data)
 
         except Exception as e:
             progress_data[event_name]["status"] = f"Error: {str(e)}"
             progress_data[event_name]["error"] = str(e)
+            save_progress_data(progress_data)
 
     thread = threading.Thread(target=send_async)
     thread.start()
@@ -543,6 +651,55 @@ def download_files(event_name, file_type):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/api/events/<event_name>/apple-pass/<pass_id>', methods=['GET'])
+def download_apple_pass(event_name, pass_id):
+    """Download individual Apple Wallet pass"""
+    try:
+        coordinator = EventCoordinator(event_name)
+        apple_dir = os.path.join(coordinator.event_dir, "apple_passes")
+        pass_file = os.path.join(apple_dir, f"{pass_id}.pkpass")
+        
+        if os.path.exists(pass_file):
+            return send_file(pass_file, 
+                           as_attachment=True, 
+                           download_name=f"{pass_id}.pkpass",
+                           mimetype='application/vnd.apple.pkpass')
+        else:
+            return jsonify({"error": "Pass not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/')
+def index():
+    """Serve the event workflow HTML interface"""
+    return send_from_directory(BASE_DIR, 'event-workflow.html')
+
+
+@app.route('/api/customize', methods=['POST'])
+def customize_pass_route():
+    """Handle pass customization form submission"""
+    try:
+        import sys
+        import os
+        sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+        from apple_pass_customizer import customize_pass
+        return customize_pass()
+    except ImportError as e:
+        print(f"Import error: {e}")
+        return jsonify({"error": f"Pass customizer not available: {str(e)}"}), 500
+    except Exception as e:
+        print(f"Error in customize: {e}")
+        return jsonify({"error": f"Customization failed: {str(e)}"}), 500
+
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files like JS, CSS, etc."""
+    return send_from_directory(BASE_DIR, filename)
+
+
 if __name__ == '__main__':
     # Ensure base directories exist
     os.makedirs(EVENTS_DIR, exist_ok=True)
@@ -553,4 +710,4 @@ if __name__ == '__main__':
     print(f"📁 Wallettest directory: {WALLETTEST_DIR}")
     print("🌐 Server running on http://localhost:5001")
 
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=False, host='0.0.0.0', port=5001)

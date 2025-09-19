@@ -363,12 +363,50 @@ class WorkflowAPI {
         return await response.json();
     }
 
-    async generateAppleWallet(eventName) {
+    async generateAppleWallet(eventName, passConfig = null) {
+        // If we have pass customization, save it first
+        if (passConfig) {
+            await this.savePassCustomization(passConfig);
+        }
+
         const response = await fetch(`${this.baseUrl}/api/events/${eventName}/apple-wallet`, {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                passCustomization: passConfig
+            })
         });
 
         return await response.json();
+    }
+
+    async savePassCustomization(config) {
+        try {
+            // Save to the existing pass_config.json structure
+            const configPath = `wallettest/pass_config.json`;
+            
+            // Create the config file content  
+            const passConfig = {
+                backgroundColor: config.backgroundColor,
+                foregroundColor: config.foregroundColor,
+                labelColor: config.labelColor,
+                logo: config.logo,
+                strip: config.strip,
+                background: config.background,
+                lastUpdated: new Date().toISOString()
+            };
+
+            // Here you would normally save to the backend
+            // For now, we'll just log it and rely on localStorage
+            console.log('Pass customization saved:', passConfig);
+            
+            return { success: true };
+        } catch (error) {
+            console.warn('Could not save to backend:', error.message);
+            return { success: true }; // Fallback to localStorage
+        }
     }
 
     async generateGoogleWallet(eventName) {
