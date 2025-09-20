@@ -194,8 +194,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            if (!window.isFirebaseReady()) {
-                showStatus('Firebase not initialized properly', 'error');
+            // Check if Firebase Database is ready (we don't need Auth for client pages)
+            if (!window.firebaseServices || !window.firebaseServices.db) {
+                showStatus('Database connection failed', 'error');
                 return;
             }
 

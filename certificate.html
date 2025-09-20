@@ -404,6 +404,7 @@
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
     <!-- Firebase init config -->
@@ -425,7 +426,8 @@
                     return;
                 }
 
-                if (!window.isFirebaseReady()) {
+                // Check if Firebase Database is ready (we don't need Auth for client pages)
+                if (!window.firebaseServices || !window.firebaseServices.db) {
                     showError();
                     return;
                 }
