@@ -287,6 +287,31 @@
     </header>
 
     <div class="container">
+        <!-- Client Management Section -->
+        <div class="form-section">
+            <h2 class="section-title">Client Management</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="new-client-id">New Client ID (6 digits)</label>
+                    <input type="text" id="new-client-id" pattern="[0-9]{6}" maxlength="6" placeholder="123456">
+                </div>
+                <div class="form-group">
+                    <label for="new-client-name">Client Name</label>
+                    <input type="text" id="new-client-name" placeholder="Client Full Name">
+                </div>
+                <div class="form-group">
+                    <label for="new-client-password">Password</label>
+                    <input type="text" id="new-client-password" placeholder="Default: temp123">
+                </div>
+                <div class="form-group">
+                    <button type="button" class="search-btn" onclick="createClient()">
+                        Create Client
+                    </button>
+                </div>
+            </div>
+            <div class="status" id="client-status"></div>
+        </div>
+
         <form id="artwork-form">
             <!-- URL Search Section -->
             <div class="form-section">
@@ -613,6 +638,74 @@
             await db.ref(`clientArtworks/${clientId}/${artworkId}`).set(artworkData);
 
             console.log(`Artwork ${artworkId} added to client ${clientId}`);
+        }
+
+        async function createClient() {
+            const clientId = document.getElementById('new-client-id').value.trim();
+            const clientName = document.getElementById('new-client-name').value.trim();
+            const password = document.getElementById('new-client-password').value.trim() || 'temp123';
+
+            // Validate client ID (6 digits only)
+            if (!clientId || !/^\d{6}$/.test(clientId)) {
+                showClientStatus('Client ID must be exactly 6 digits', 'error');
+                return;
+            }
+
+            if (!clientName) {
+                showClientStatus('Client name is required', 'error');
+                return;
+            }
+
+            try {
+                showClientStatus('Creating client...', 'loading');
+
+                if (!window.isFirebaseReady()) {
+                    throw new Error('Firebase not ready');
+                }
+
+                const db = firebase.database();
+
+                // Check if client ID already exists
+                const existingClient = await db.ref(`artClients/${clientId}`).once('value');
+                if (existingClient.exists()) {
+                    showClientStatus(`Client ID ${clientId} already exists`, 'error');
+                    return;
+                }
+
+                // Create new client
+                const clientData = {
+                    name: clientName,
+                    password: password,
+                    createdDate: new Date().toISOString(),
+                    createdBy: firebase.auth().currentUser.email
+                };
+
+                await db.ref(`artClients/${clientId}`).set(clientData);
+
+                showClientStatus(`Client ${clientId} created successfully!`, 'success');
+
+                // Clear form
+                document.getElementById('new-client-id').value = '';
+                document.getElementById('new-client-name').value = '';
+                document.getElementById('new-client-password').value = '';
+
+            } catch (error) {
+                console.error('Client creation error:', error);
+                showClientStatus('Failed to create client. Please try again.', 'error');
+            }
+        }
+
+        function showClientStatus(message, type) {
+            const status = document.getElementById('client-status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
         }
 
         function showStatus(message, type) {
