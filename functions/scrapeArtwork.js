@@ -122,7 +122,7 @@ exports.scrapeArtworkData = onCall(
             title: title,
             artist: artist,
             edition: edition || 'Edition information not found',
-            imageUrl: imageUrl || 'https://via.placeholder.com/910x910/667eea/white?text=No%20Image',
+            imageUrl: imageUrl || 'https://placehold.co/910x910/667eea/white?text=No+Image',
             sourceUrl: url,
             extractedAt: new Date().toISOString()
         };
@@ -262,7 +262,7 @@ async function scrapeArtworkDataInternal(url) {
             title,
             artist,
             edition: edition || 'Edition information not found',
-            imageUrl: imageUrl || 'https://via.placeholder.com/910x910/667eea/white?text=No%20Image',
+            imageUrl: imageUrl || 'https://placehold.co/910x910/667eea/white?text=No+Image',
             sourceUrl: url,
             extractedAt: new Date().toISOString()
         }

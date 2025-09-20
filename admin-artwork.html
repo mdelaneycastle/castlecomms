@@ -476,14 +476,14 @@
 
                 // Try calling Firebase Cloud Function first
                 try {
-                    const callableFunction = firebase.functions().httpsCallable('scrapeArtworkData');
+                    const callableFunction = window.firebaseServices.functions.httpsCallable('scrapeArtworkData');
                     const result = await callableFunction({ url });
                     return result.data;
                 } catch (functionError) {
                     console.warn('Cloud function failed, trying HTTP endpoint:', functionError);
 
-                    // Fallback to HTTP endpoint
-                    const response = await fetch('https://europe-west1-castle-comms.cloudfunctions.net/scrapeArtworkHttp', {
+                    // Fallback to HTTP endpoint - using the new Cloud Run URL
+                    const response = await fetch('https://scrapeartworkhttp-ngp3khlsna-ew.a.run.app', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

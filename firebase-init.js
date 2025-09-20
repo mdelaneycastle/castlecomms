@@ -72,7 +72,7 @@ try {
 // Functions initialization
 try {
   if (typeof firebase.functions === "function") {
-    window.firebaseServices.functions = firebase.functions('europe-west1');
+    window.firebaseServices.functions = firebase.app().functions('europe-west1');
     window.functions = window.firebaseServices.functions; // Maintain backward compatibility
     console.log("⚡ Firebase Functions initialized (europe-west1)");
   } else {
