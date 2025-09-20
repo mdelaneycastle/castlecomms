@@ -12,6 +12,14 @@
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 
     <style>
+        @font-face {
+            font-family: 'DIN Light Alternate';
+            src: url('DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -19,11 +27,13 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            margin: 0;
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 300;
+            background: linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%);
             background-attachment: fixed;
             min-height: 100vh;
-            color: #ffffff;
+            color: #45494e;
             position: relative;
         }
 
@@ -34,18 +44,16 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 20% 80%, rgba(204, 194, 71, 0.05) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(204, 194, 71, 0.03) 0%, transparent 50%);
+            background: rgba(216, 209, 197, 0.95);
             pointer-events: none;
             z-index: 0;
         }
 
         .header {
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(204, 194, 71, 0.2);
+            background: #F0EDE9;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.3);
             padding: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -63,9 +71,9 @@
 
         .header h1 {
             font-size: 28px;
-            font-weight: 700;
-            color: #CCC247;
-            text-shadow: 0 2px 10px rgba(204, 194, 71, 0.3);
+            font-weight: 500;
+            color: #45494e;
+            letter-spacing: 0.025em;
         }
 
         .client-info {
@@ -77,38 +85,37 @@
         .client-avatar {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #CCC247 0%, #E6D55A 100%);
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #1a1a1a;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(204, 194, 71, 0.3);
+            color: #d8d1c5;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
         }
 
         .client-info span {
-            color: #ffffff;
-            font-weight: 500;
+            color: #45494e;
+            font-weight: 400;
             margin: 0 15px;
         }
 
         .logout-btn {
             padding: 8px 16px;
-            background: rgba(220, 38, 38, 0.2);
-            color: #fca5a5;
-            border: 1px solid rgba(220, 38, 38, 0.3);
-            border-radius: 20px;
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: 8px;
             font-size: 14px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
         }
 
         .logout-btn:hover {
-            background: rgba(220, 38, 38, 0.3);
-            border-color: rgba(220, 38, 38, 0.5);
-            color: #ffffff;
+            background: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.3);
         }
 
         .container {
@@ -122,28 +129,28 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(204, 194, 71, 0.2);
-            border-radius: 20px;
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
             margin: 20px 0;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
         }
 
         .empty-state .icon {
             font-size: 80px;
             margin-bottom: 20px;
-            opacity: 0.5;
-            filter: sepia(1) hue-rotate(35deg) saturate(3) brightness(1.2);
+            opacity: 0.6;
         }
 
         .empty-state h2 {
-            color: #CCC247;
+            color: #45494e;
             margin-bottom: 10px;
             font-size: 24px;
+            font-weight: 500;
         }
 
         .empty-state p {
-            color: rgba(255, 255, 255, 0.7);
+            color: #6a6e73;
             font-size: 16px;
         }
 
@@ -155,27 +162,24 @@
         }
 
         .art-pass {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(204, 194, 71, 0.2);
-            border-radius: 20px;
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3),
-                        0 0 30px rgba(204, 194, 71, 0.1);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
         }
 
         .art-pass:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4),
-                        0 0 40px rgba(204, 194, 71, 0.2);
-            border-color: rgba(204, 194, 71, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(69, 73, 78, 0.15);
+            border-color: rgba(69, 73, 78, 0.2);
         }
 
         .pass-header {
-            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
-            color: white;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            color: #d8d1c5;
             padding: 20px;
             position: relative;
         }
@@ -187,28 +191,28 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, #CCC247, #E6D55A, #CCC247, #E6D55A, #CCC247);
+            background: linear-gradient(90deg, #c5bdb1, #d8d1c5, #c5bdb1, #d8d1c5, #c5bdb1);
         }
 
         .pass-title {
             font-size: 18px;
-            font-weight: 600;
+            font-weight: 500;
             margin-bottom: 5px;
-            color: #CCC247;
+            color: #d8d1c5;
         }
 
         .pass-artist {
             font-size: 14px;
             opacity: 0.9;
             margin-bottom: 10px;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(216, 209, 197, 0.8);
         }
 
         .pass-id {
             font-size: 12px;
             opacity: 0.7;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            color: rgba(204, 194, 71, 0.8);
+            color: rgba(197, 189, 177, 0.8);
         }
 
         .pass-image {
@@ -220,7 +224,7 @@
 
         .pass-details {
             padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(240, 237, 233, 0.5);
         }
 
         .detail-row {
@@ -228,7 +232,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid rgba(204, 194, 71, 0.1);
+            border-bottom: 1px solid rgba(216, 209, 197, 0.2);
         }
 
         .detail-row:last-child {
@@ -237,65 +241,68 @@
 
         .detail-label {
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: 500;
+            color: #6a6e73;
+            font-weight: 400;
         }
 
         .detail-value {
             font-size: 14px;
-            color: #ffffff;
-            font-weight: 600;
+            color: #45494e;
+            font-weight: 500;
         }
 
         .price {
-            color: #CCC247;
+            color: #45494e;
+            font-weight: 600;
         }
 
         .edition {
-            color: #CCC247;
+            color: #45494e;
+            font-weight: 500;
         }
 
         .purchase-date {
-            color: rgba(255, 255, 255, 0.7);
+            color: #6a6e73;
         }
 
         .pass-footer {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(69, 73, 78, 0.05);
             padding: 15px 20px;
-            border-top: 1px solid rgba(204, 194, 71, 0.2);
+            border-top: 1px solid rgba(216, 209, 197, 0.2);
         }
 
         .certificate-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #CCC247 0%, #E6D55A 100%);
-            color: #1a1a1a;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            color: #d8d1c5;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 400;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(204, 194, 71, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
         }
 
         .certificate-btn:hover {
-            background: linear-gradient(135deg, #E6D55A 0%, #CCC247 100%);
+            background: linear-gradient(135deg, #6a6e73 0%, #45494e 100%);
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(204, 194, 71, 0.4);
+            box-shadow: 0 6px 16px rgba(69, 73, 78, 0.15);
         }
 
         .loading {
             text-align: center;
             padding: 40px;
-            color: #8e8e93;
+            color: #6a6e73;
         }
 
         .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #007aff;
+            border: 3px solid #d8d1c5;
+            border-top: 3px solid #45494e;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
@@ -329,7 +336,7 @@
             }
 
             .art-pass {
-                border-radius: 15px;
+                border-radius: 10px;
             }
 
             .pass-header {

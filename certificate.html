@@ -12,6 +12,14 @@
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 
     <style>
+        @font-face {
+            font-family: 'DIN Light Alternate';
+            src: url('DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -19,14 +27,16 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 300;
+            background: linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%);
             min-height: 100vh;
             padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            color: #45494e;
         }
 
         body::before {
@@ -36,8 +46,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 30% 70%, rgba(204, 194, 71, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 30%, rgba(204, 194, 71, 0.05) 0%, transparent 50%);
+            background: rgba(216, 209, 197, 0.95);
             pointer-events: none;
             z-index: 0;
         }
@@ -45,20 +54,18 @@
         .certificate-container {
             max-width: 400px;
             width: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(204, 194, 71, 0.3);
-            border-radius: 25px;
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
-                        0 0 80px rgba(204, 194, 71, 0.1);
+            box-shadow: 0 8px 20px rgba(69, 73, 78, 0.15);
             position: relative;
             z-index: 1;
         }
 
         .pass-header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-            color: white;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            color: #d8d1c5;
             padding: 25px;
             position: relative;
             text-align: center;
@@ -71,33 +78,32 @@
             left: 0;
             right: 0;
             height: 6px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            background: linear-gradient(90deg, #c5bdb1, #d8d1c5, #c5bdb1, #d8d1c5, #c5bdb1);
         }
 
         .certificate-logo {
             width: 60px;
             height: 60px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(216, 209, 197, 0.2);
             border-radius: 15px;
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            backdrop-filter: blur(10px);
         }
 
         .certificate-title {
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 500;
             margin-bottom: 5px;
-            opacity: 0.9;
+            opacity: 0.95;
         }
 
         .certificate-subtitle {
             font-size: 12px;
-            opacity: 0.7;
-            font-weight: 400;
+            opacity: 0.8;
+            font-weight: 300;
         }
 
         .artwork-image {
@@ -113,14 +119,14 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            background: linear-gradient(transparent, rgba(69, 73, 78, 0.8));
             padding: 20px;
-            color: white;
+            color: #d8d1c5;
         }
 
         .artwork-title {
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 500;
             margin-bottom: 5px;
         }
 
@@ -131,7 +137,7 @@
 
         .certificate-details {
             padding: 25px;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(240, 237, 233, 0.3);
         }
 
         .detail-section {
@@ -144,8 +150,8 @@
 
         .section-title {
             font-size: 12px;
-            font-weight: 600;
-            color: #CCC247;
+            font-weight: 500;
+            color: #45494e;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
@@ -163,79 +169,78 @@
 
         .detail-value {
             font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
+            font-weight: 500;
+            color: #45494e;
             margin-bottom: 4px;
         }
 
         .detail-label {
             font-size: 12px;
-            color: #8e8e93;
-            font-weight: 500;
+            color: #6a6e73;
+            font-weight: 400;
         }
 
         .edition-badge {
-            background: linear-gradient(135deg, #CCC247 0%, #E6D55A 100%);
-            color: #1a1a1a;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            color: #d8d1c5;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 500;
             display: inline-block;
-            box-shadow: 0 4px 15px rgba(204, 194, 71, 0.3);
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
         }
 
         .price-value {
-            color: #CCC247;
+            color: #45494e;
             font-size: 18px;
-            font-weight: 700;
+            font-weight: 600;
         }
 
         .authenticity-section {
-            background: rgba(204, 194, 71, 0.1);
+            background: rgba(69, 73, 78, 0.05);
             border-radius: 15px;
             padding: 20px;
             text-align: center;
-            border: 2px solid rgba(204, 194, 71, 0.3);
-            backdrop-filter: blur(10px);
+            border: 2px solid rgba(69, 73, 78, 0.1);
         }
 
         .authenticity-badge {
             width: 50px;
             height: 50px;
-            background: linear-gradient(135deg, #CCC247 0%, #E6D55A 100%);
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
             border-radius: 50%;
             margin: 0 auto 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #1a1a1a;
+            color: #d8d1c5;
             font-size: 20px;
-            box-shadow: 0 4px 15px rgba(204, 194, 71, 0.3);
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
         }
 
         .authenticity-text {
             font-size: 14px;
-            font-weight: 600;
-            color: #ffffff;
+            font-weight: 500;
+            color: #45494e;
             margin-bottom: 5px;
         }
 
         .authenticity-subtext {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.7);
+            color: #6a6e73;
         }
 
         .certificate-id {
             text-align: center;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            border-top: 1px solid rgba(204, 194, 71, 0.2);
+            background: rgba(69, 73, 78, 0.05);
+            border-top: 1px solid rgba(216, 209, 197, 0.3);
         }
 
         .id-label {
             font-size: 11px;
-            color: rgba(204, 194, 71, 0.8);
+            color: #6a6e73;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 5px;
@@ -244,21 +249,21 @@
         .id-value {
             font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
             font-size: 12px;
-            color: #ffffff;
+            color: #45494e;
             font-weight: 600;
         }
 
         .loading {
             text-align: center;
             padding: 60px 20px;
-            color: #8e8e93;
+            color: #6a6e73;
         }
 
         .loading-spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #007aff;
+            border: 3px solid #d8d1c5;
+            border-top: 3px solid #45494e;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
@@ -272,7 +277,7 @@
         .error {
             text-align: center;
             padding: 60px 20px;
-            color: #ff3b30;
+            color: #dc2626;
         }
 
         .actions {
@@ -285,35 +290,35 @@
             flex: 1;
             padding: 12px;
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 400;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
         }
 
         .primary-btn {
-            background: linear-gradient(135deg, #CCC247 0%, #E6D55A 100%);
-            color: #1a1a1a;
-            box-shadow: 0 4px 15px rgba(204, 194, 71, 0.3);
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            color: #d8d1c5;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
         }
 
         .primary-btn:hover {
-            background: linear-gradient(135deg, #E6D55A 0%, #CCC247 100%);
+            background: linear-gradient(135deg, #6a6e73 0%, #45494e 100%);
             transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(204, 194, 71, 0.4);
+            box-shadow: 0 6px 16px rgba(69, 73, 78, 0.15);
         }
 
         .secondary-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: #CCC247;
-            border: 1px solid rgba(204, 194, 71, 0.3);
-            backdrop-filter: blur(10px);
+            background: rgba(69, 73, 78, 0.1);
+            color: #45494e;
+            border: 1px solid rgba(69, 73, 78, 0.2);
         }
 
         .secondary-btn:hover {
-            background: rgba(204, 194, 71, 0.1);
-            border-color: rgba(204, 194, 71, 0.5);
+            background: rgba(69, 73, 78, 0.15);
+            border-color: rgba(69, 73, 78, 0.3);
         }
 
         @media (max-width: 480px) {
@@ -323,7 +328,7 @@
 
             .certificate-container {
                 max-width: 100%;
-                border-radius: 20px;
+                border-radius: 10px;
             }
 
             .pass-header {
