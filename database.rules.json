@@ -84,6 +84,25 @@
         ".write": "auth != null && ((!data.exists() && auth.uid != null) || (data.exists() && auth.token.admin == true))",
         ".validate": "newData.hasChildren(['customerName', 'artworkTitle', 'artistName', 'medium', 'purchaseDate', 'soNumber', 'gallery', 'imageUrl', 'requesterId', 'requesterEmail', 'status', 'submittedAt']) && newData.child('customerName').isString() && newData.child('artworkTitle').isString() && newData.child('artistName').isString() && newData.child('medium').isString() && newData.child('purchaseDate').isString() && newData.child('soNumber').isString() && newData.child('gallery').isString() && newData.child('imageUrl').isString() && newData.child('requesterId').isString() && newData.child('requesterEmail').isString() && newData.child('status').isString()"
       }
+    },
+
+    "artClients": {
+      ".read": "auth != null && auth.token.admin == true",
+      "$clientId": {
+        ".read": "auth != null && auth.token.admin == true",
+        ".write": "auth != null && auth.token.admin == true",
+        ".validate": "newData.hasChildren(['name', 'password', 'createdDate']) && newData.child('name').isString() && newData.child('password').isString() && newData.child('createdDate').isString()"
+      }
+    },
+
+    "clientArtworks": {
+      "$clientId": {
+        ".read": "auth != null && auth.token.admin == true",
+        ".write": "auth != null && auth.token.admin == true",
+        "$artworkId": {
+          ".validate": "newData.hasChildren(['title', 'artist', 'price', 'purchaseDate']) && newData.child('title').isString() && newData.child('artist').isString() && newData.child('price').isNumber() && newData.child('purchaseDate').isString()"
+        }
+      }
     }
   }
 }

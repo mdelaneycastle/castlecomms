@@ -536,7 +536,9 @@
         function displayArtworkPreview(data) {
             document.getElementById('preview-image').src = data.imageUrl;
             document.getElementById('preview-title').textContent = data.title;
-            document.getElementById('preview-artist').textContent = `by ${data.artist}`;
+            // Remove "by" if it's already in the artist name
+            const artistName = data.artist.toLowerCase().startsWith('by ') ? data.artist.substring(3) : data.artist;
+            document.getElementById('preview-artist').textContent = `by ${artistName}`;
             document.getElementById('preview-edition').textContent = data.edition;
 
             document.getElementById('artwork-preview').style.display = 'block';
