@@ -68,44 +68,36 @@ exports.scrapeArtworkData = onCall(
             edition = editionElement.text().trim();
         }
 
-        // Extract main image (910x910)
+        // Extract main image from product gallery
         let imageUrl = '';
-        const mainImages = $('img').filter((i, el) => {
-            const src = $(el).attr('src');
-            const width = $(el).attr('width');
-            const height = $(el).attr('height');
 
-            // Look for 910x910 images or main product images
-            return (src && (
-                (width === '910' && height === '910') ||
-                src.includes('910x910') ||
-                $(el).hasClass('product-image') ||
-                $(el).closest('.product-images').length > 0
-            ));
-        });
+        // Look for the main product gallery image first (with is-initial class)
+        const galleryImage = $('.product-gallery__media.is-initial img').first();
+        if (galleryImage.length > 0) {
+            imageUrl = galleryImage.attr('src');
+        }
 
-        if (mainImages.length > 0) {
-            imageUrl = $(mainImages[0]).attr('src');
-
-            // Handle relative URLs
-            if (imageUrl && imageUrl.startsWith('//')) {
-                imageUrl = 'https:' + imageUrl;
-            } else if (imageUrl && imageUrl.startsWith('/')) {
-                imageUrl = 'https://www.castlefineart.com' + imageUrl;
+        // Fallback: look for any product gallery image
+        if (!imageUrl) {
+            const anyGalleryImage = $('.product-gallery__media img').first();
+            if (anyGalleryImage.length > 0) {
+                imageUrl = anyGalleryImage.attr('src');
             }
         }
 
-        // If no specific 910x910 image found, try to find any main product image
-        if (!imageUrl) {
-            const productImages = $('.product-image, .main-image, [class*="product"][class*="image"]');
-            if (productImages.length > 0) {
-                imageUrl = $(productImages[0]).attr('src');
+        // Clean up image URL and get high-quality version
+        if (imageUrl) {
+            if (imageUrl.startsWith('//')) {
+                imageUrl = 'https:' + imageUrl;
+            } else if (imageUrl.startsWith('/')) {
+                imageUrl = 'https://www.castlefineart.com' + imageUrl;
+            }
 
-                if (imageUrl && imageUrl.startsWith('//')) {
-                    imageUrl = 'https:' + imageUrl;
-                } else if (imageUrl && imageUrl.startsWith('/')) {
-                    imageUrl = 'https://www.castlefineart.com' + imageUrl;
-                }
+            // Ensure we get a high-quality version by requesting width=1200
+            if (imageUrl.includes('?v=') && imageUrl.includes('&width=')) {
+                imageUrl = imageUrl.replace(/&width=\d+/, '&width=1200');
+            } else if (imageUrl.includes('?v=')) {
+                imageUrl = imageUrl + '&width=1200';
             }
         }
 
@@ -228,24 +220,36 @@ async function scrapeArtworkDataInternal(url) {
         edition = editionElement.text().trim();
     }
 
-    // Find the main 910x910 image
+    // Extract main image from product gallery
     let imageUrl = '';
-    const images = $('img');
-    images.each((i, el) => {
-        const src = $(el).attr('src');
-        if (src && (src.includes('910x910') ||
-                   $(el).attr('width') === '910' && $(el).attr('height') === '910')) {
-            imageUrl = src;
-            return false; // Break the loop
-        }
-    });
 
-    // Clean up image URL
+    // Look for the main product gallery image first (with is-initial class)
+    const galleryImage = $('.product-gallery__media.is-initial img').first();
+    if (galleryImage.length > 0) {
+        imageUrl = galleryImage.attr('src');
+    }
+
+    // Fallback: look for any product gallery image
+    if (!imageUrl) {
+        const anyGalleryImage = $('.product-gallery__media img').first();
+        if (anyGalleryImage.length > 0) {
+            imageUrl = anyGalleryImage.attr('src');
+        }
+    }
+
+    // Clean up image URL and get high-quality version
     if (imageUrl) {
         if (imageUrl.startsWith('//')) {
             imageUrl = 'https:' + imageUrl;
         } else if (imageUrl.startsWith('/')) {
             imageUrl = 'https://www.castlefineart.com' + imageUrl;
+        }
+
+        // Ensure we get a high-quality version by requesting width=1200
+        if (imageUrl.includes('?v=') && imageUrl.includes('&width=')) {
+            imageUrl = imageUrl.replace(/&width=\d+/, '&width=1200');
+        } else if (imageUrl.includes('?v=')) {
+            imageUrl = imageUrl + '&width=1200';
         }
     }
 
