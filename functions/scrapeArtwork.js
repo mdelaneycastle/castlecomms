@@ -1,7 +1,22 @@
 const { onCall } = require("firebase-functions/v2/https");
 const { onRequest } = require("firebase-functions/v2/https");
+const cors = require('cors');
 const axios = require('axios');
 const cheerio = require('cheerio');
+
+// CORS configuration
+const corsOptions = {
+  origin: [
+    "https://mdelaneycastle.github.io",
+    "https://castle-comms.web.app",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+const corsHandler = cors(corsOptions);
 
 exports.scrapeArtworkData = onCall(
   { region: "europe-west1" },
@@ -107,7 +122,7 @@ exports.scrapeArtworkData = onCall(
             title: title,
             artist: artist,
             edition: edition || 'Edition information not found',
-            imageUrl: imageUrl || 'https://via.placeholder.com/910x910/667eea/white?text=No+Image',
+            imageUrl: imageUrl || 'https://via.placeholder.com/910x910/667eea/white?text=No%20Image',
             sourceUrl: url,
             extractedAt: new Date().toISOString()
         };
@@ -136,12 +151,10 @@ exports.scrapeArtworkData = onCall(
 
 // Alternative HTTP endpoint for direct calls
 exports.scrapeArtworkHttp = onRequest(
-  { region: "europe-west1" },
+  { region: "europe-west1", cors: true },
   async (req, res) => {
-    // Enable CORS
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    // Handle CORS
+    corsHandler(req, res, async () => {
 
     if (req.method === 'OPTIONS') {
         res.status(204).send('');
@@ -177,6 +190,7 @@ exports.scrapeArtworkHttp = onRequest(
             error: error.message || 'Internal server error'
         });
     }
+    });
   }
 );
 
@@ -248,7 +262,7 @@ async function scrapeArtworkDataInternal(url) {
             title,
             artist,
             edition: edition || 'Edition information not found',
-            imageUrl: imageUrl || 'https://via.placeholder.com/910x910/667eea/white?text=No+Image',
+            imageUrl: imageUrl || 'https://via.placeholder.com/910x910/667eea/white?text=No%20Image',
             sourceUrl: url,
             extractedAt: new Date().toISOString()
         }
