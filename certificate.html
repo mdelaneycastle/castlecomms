@@ -482,9 +482,20 @@
             // Update artwork image
             document.getElementById('artwork-image').style.backgroundImage = `url('${artwork.imageUrl}')`;
 
+            // Clean up artist name (remove duplicates and handle "by" prefix)
+            let cleanArtist = artwork.artist || '';
+            cleanArtist = cleanArtist.replace(/(.+)\1+/, '$1'); // Remove duplicates like "Jon JonesJon Jones"
+            if (!cleanArtist.toLowerCase().startsWith('by ')) {
+                cleanArtist = 'by ' + cleanArtist;
+            }
+
+            // Clean up title (remove duplicates)
+            let cleanTitle = artwork.title || '';
+            cleanTitle = cleanTitle.replace(/(.+)\1+/, '$1'); // Remove duplicates
+
             // Update artwork details
-            document.getElementById('artwork-title').textContent = artwork.title;
-            document.getElementById('artwork-artist').textContent = `by ${artwork.artist}`;
+            document.getElementById('artwork-title').textContent = cleanTitle;
+            document.getElementById('artwork-artist').textContent = cleanArtist;
 
             // Update purchase details
             document.getElementById('purchase-price').textContent = `£${artwork.price.toLocaleString()}`;

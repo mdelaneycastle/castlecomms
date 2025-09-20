@@ -460,10 +460,21 @@
                 year: 'numeric'
             });
 
+            // Clean up artist name (remove duplicates and handle "by" prefix)
+            let cleanArtist = artwork.artist || '';
+            cleanArtist = cleanArtist.replace(/(.+)\1+/, '$1'); // Remove duplicates like "Jon JonesJon Jones"
+            if (!cleanArtist.toLowerCase().startsWith('by ')) {
+                cleanArtist = 'by ' + cleanArtist;
+            }
+
+            // Clean up title (remove duplicates)
+            let cleanTitle = artwork.title || '';
+            cleanTitle = cleanTitle.replace(/(.+)\1+/, '$1'); // Remove duplicates
+
             pass.innerHTML = `
                 <div class="pass-header">
-                    <div class="pass-title">${artwork.title}</div>
-                    <div class="pass-artist">by ${artwork.artist}</div>
+                    <div class="pass-title">${cleanTitle}</div>
+                    <div class="pass-artist">${cleanArtist}</div>
                     <div class="pass-id">ID: ${artworkId}</div>
                 </div>
                 <div class="pass-image" style="background-image: url('${artwork.imageUrl}')"></div>
