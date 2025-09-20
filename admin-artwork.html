@@ -395,22 +395,37 @@
             }
 
             const auth = firebase.auth();
-            const user = auth.currentUser;
 
-            if (!user) {
-                window.location.href = 'index.html';
-                return;
-            }
+            // Wait for auth state to be ready
+            auth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    // Not logged in, redirect to login
+                    window.location.href = 'index.html';
+                    return;
+                }
 
-            // Check if user has admin privileges
-            const isAdmin = await window.authUtils.isAdmin(user);
-            if (!isAdmin) {
-                showStatus('Access denied. Admin privileges required.', 'error');
-                setTimeout(() => {
-                    window.location.href = 'main.html';
-                }, 2000);
-                return;
-            }
+                try {
+                    // Check if user has admin privileges
+                    const isAdmin = await window.authUtils.isAdmin(user);
+                    if (!isAdmin) {
+                        showStatus('Access denied. Admin privileges required.', 'error');
+                        setTimeout(() => {
+                            window.location.href = 'main.html';
+                        }, 2000);
+                        return;
+                    }
+
+                    // User is authenticated and is admin - show the page content
+                    console.log('✅ Admin access verified for:', user.email);
+
+                } catch (error) {
+                    console.error('Error checking admin status:', error);
+                    showStatus('Authentication error. Please try again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                }
+            });
         }
 
         async function searchArtwork() {
