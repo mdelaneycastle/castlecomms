@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Artwork Management</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            color: #1d1d1f;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #8e8e93;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1d1d1f;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="url"],
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="url"]:focus,
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #007aff;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .url-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-btn {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .search-btn:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .search-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .artwork-preview {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #e1e5e9;
+        }
+
+        .preview-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .preview-artist {
+            color: #8e8e93;
+            margin-bottom: 10px;
+        }
+
+        .preview-edition {
+            background: #007aff;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .client-section {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #34c759;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background: #30a14e;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 199, 89, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.loading {
+            background: #cce7ff;
+            color: #0056b3;
+            border: 1px solid #b8daff;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007aff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+
+            .form-section {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .header {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Artwork Management</h1>
+            <p>Add artwork certificates for clients</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <form id="artwork-form">
+            <!-- URL Search Section -->
+            <div class="form-section">
+                <h2 class="section-title">1. Artwork URL</h2>
+                <div class="url-section">
+                    <div class="form-group">
+                        <label for="artwork-url">Castle Fine Art Product URL</label>
+                        <input type="url" id="artwork-url" placeholder="https://www.castlefineart.com/products/..." required>
+                        <button type="button" class="search-btn" id="search-btn" onclick="searchArtwork()">
+                            Search Artwork
+                        </button>
+                    </div>
+
+                    <div class="artwork-preview" id="artwork-preview">
+                        <img id="preview-image" class="preview-image" alt="Artwork preview">
+                        <div class="preview-title" id="preview-title"></div>
+                        <div class="preview-artist" id="preview-artist"></div>
+                        <div class="preview-edition" id="preview-edition"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manual Entry Section (if scraping fails) -->
+            <div class="form-section" id="manual-section" style="display: none;">
+                <h2 class="section-title">2. Manual Entry (if needed)</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="manual-title">Artwork Title</label>
+                        <input type="text" id="manual-title">
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-artist">Artist Name</label>
+                        <input type="text" id="manual-artist">
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-edition">Edition Info</label>
+                        <input type="text" id="manual-edition" placeholder="e.g., Edition of 295">
+                    </div>
+                    <div class="form-group">
+                        <label for="manual-image">Image URL</label>
+                        <input type="url" id="manual-image">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Information Section -->
+            <div class="form-section">
+                <h2 class="section-title">3. Client & Purchase Information</h2>
+                <div class="client-section">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="client-id">Client ID</label>
+                            <input type="text" id="client-id" required placeholder="Enter existing client ID">
+                        </div>
+                        <div class="form-group">
+                            <label for="purchase-price">Purchase Price (£)</label>
+                            <input type="number" id="purchase-price" required min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="purchase-date">Purchase Date</label>
+                            <input type="date" id="purchase-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="certificate-notes">Additional Notes (Optional)</label>
+                            <input type="text" id="certificate-notes" placeholder="Special notes about the purchase">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                Add Artwork to Client Portfolio
+            </button>
+
+            <div class="status" id="status"></div>
+        </form>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        let scrapedData = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check admin authentication
+            checkAdminAuth();
+
+            // Set today's date as default
+            document.getElementById('purchase-date').valueAsDate = new Date();
+
+            // Form submission
+            document.getElementById('artwork-form').addEventListener('submit', handleFormSubmission);
+        });
+
+        async function checkAdminAuth() {
+            if (!window.isFirebaseReady()) {
+                showStatus('Firebase not initialized', 'error');
+                return;
+            }
+
+            const auth = firebase.auth();
+            const user = auth.currentUser;
+
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Check if user has admin privileges
+            const isAdmin = await window.authUtils.isAdmin(user);
+            if (!isAdmin) {
+                showStatus('Access denied. Admin privileges required.', 'error');
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 2000);
+                return;
+            }
+        }
+
+        async function searchArtwork() {
+            const url = document.getElementById('artwork-url').value.trim();
+            if (!url) {
+                showStatus('Please enter a valid URL', 'error');
+                return;
+            }
+
+            const searchBtn = document.getElementById('search-btn');
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = '<span class="loading-spinner"></span>Searching...';
+
+            try {
+                showStatus('Searching artwork details...', 'loading');
+
+                // Call scraping function
+                const result = await scrapeArtworkData(url);
+
+                if (result.success) {
+                    scrapedData = result.data;
+                    displayArtworkPreview(result.data);
+                    showStatus('Artwork found successfully!', 'success');
+                } else {
+                    showManualEntry();
+                    showStatus('Could not automatically extract data. Please enter manually.', 'error');
+                }
+
+            } catch (error) {
+                console.error('Search error:', error);
+                showManualEntry();
+                showStatus('Search failed. Please enter artwork details manually.', 'error');
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search Artwork';
+            }
+        }
+
+        async function scrapeArtworkData(url) {
+            try {
+                // Get admin token for authentication
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    throw new Error('Not authenticated');
+                }
+
+                const token = await user.getIdToken();
+
+                // Try calling Firebase Cloud Function first
+                try {
+                    const callableFunction = firebase.functions().httpsCallable('scrapeArtworkData');
+                    const result = await callableFunction({ url });
+                    return result.data;
+                } catch (functionError) {
+                    console.warn('Cloud function failed, trying HTTP endpoint:', functionError);
+
+                    // Fallback to HTTP endpoint
+                    const response = await fetch('https://europe-west1-castle-comms.cloudfunctions.net/scrapeArtworkHttp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            url: url,
+                            adminToken: 'admin-scraping-token'
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    return await response.json();
+                }
+
+            } catch (error) {
+                console.error('Scraping error:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        function displayArtworkPreview(data) {
+            document.getElementById('preview-image').src = data.imageUrl;
+            document.getElementById('preview-title').textContent = data.title;
+            document.getElementById('preview-artist').textContent = `by ${data.artist}`;
+            document.getElementById('preview-edition').textContent = data.edition;
+
+            document.getElementById('artwork-preview').style.display = 'block';
+        }
+
+        function showManualEntry() {
+            document.getElementById('manual-section').style.display = 'block';
+        }
+
+        async function handleFormSubmission(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span>Adding Artwork...';
+
+            try {
+                showStatus('Adding artwork to client portfolio...', 'loading');
+
+                // Get artwork data (either scraped or manual)
+                let artworkData;
+                if (scrapedData) {
+                    artworkData = scrapedData;
+                } else {
+                    artworkData = {
+                        title: document.getElementById('manual-title').value.trim(),
+                        artist: document.getElementById('manual-artist').value.trim(),
+                        edition: document.getElementById('manual-edition').value.trim(),
+                        imageUrl: document.getElementById('manual-image').value.trim()
+                    };
+                }
+
+                // Validate artwork data
+                if (!artworkData.title || !artworkData.artist) {
+                    showStatus('Please provide artwork title and artist', 'error');
+                    return;
+                }
+
+                // Get client and purchase data
+                const clientId = document.getElementById('client-id').value.trim();
+                const price = parseFloat(document.getElementById('purchase-price').value);
+                const purchaseDate = document.getElementById('purchase-date').value;
+                const notes = document.getElementById('certificate-notes').value.trim();
+
+                if (!clientId || !price || !purchaseDate) {
+                    showStatus('Please fill in all required client information', 'error');
+                    return;
+                }
+
+                // Save to Firebase
+                await saveArtworkToClient({
+                    ...artworkData,
+                    price,
+                    purchaseDate,
+                    notes,
+                    addedDate: new Date().toISOString(),
+                    addedBy: firebase.auth().currentUser.email
+                }, clientId);
+
+                showStatus('Artwork successfully added to client portfolio!', 'success');
+
+                // Reset form
+                document.getElementById('artwork-form').reset();
+                document.getElementById('artwork-preview').style.display = 'none';
+                document.getElementById('manual-section').style.display = 'none';
+                scrapedData = null;
+
+            } catch (error) {
+                console.error('Form submission error:', error);
+                showStatus('Failed to add artwork. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Add Artwork to Client Portfolio';
+            }
+        }
+
+        async function saveArtworkToClient(artworkData, clientId) {
+            if (!window.isFirebaseReady()) {
+                throw new Error('Firebase not ready');
+            }
+
+            const db = firebase.database();
+
+            // Generate unique artwork ID
+            const artworkId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+
+            // Check if client exists, create if not
+            const clientSnapshot = await db.ref(`artClients/${clientId}`).once('value');
+            if (!clientSnapshot.exists()) {
+                // Create basic client record
+                await db.ref(`artClients/${clientId}`).set({
+                    name: `Client ${clientId}`,
+                    password: 'temp123', // Default password - should be changed
+                    createdDate: new Date().toISOString()
+                });
+            }
+
+            // Save artwork to client's collection
+            await db.ref(`clientArtworks/${clientId}/${artworkId}`).set(artworkData);
+
+            console.log(`Artwork ${artworkId} added to client ${clientId}`);
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

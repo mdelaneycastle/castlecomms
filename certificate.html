@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Authenticity</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f2f2f7;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .certificate-container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .pass-header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+            color: white;
+            padding: 25px;
+            position: relative;
+            text-align: center;
+        }
+
+        .pass-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+        }
+
+        .certificate-logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .certificate-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .certificate-subtitle {
+            font-size: 12px;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        .artwork-image {
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        .artwork-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            padding: 20px;
+            color: white;
+        }
+
+        .artwork-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .artwork-artist {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .certificate-details {
+            padding: 25px;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #8e8e93;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 4px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #8e8e93;
+            font-weight: 500;
+        }
+
+        .edition-badge {
+            background: linear-gradient(135deg, #007aff 0%, #5ac8fa 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .price-value {
+            color: #34c759;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .authenticity-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+
+        .authenticity-badge {
+            width: 50px;
+            height: 50px;
+            background: #34c759;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .authenticity-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 5px;
+        }
+
+        .authenticity-subtext {
+            font-size: 12px;
+            color: #8e8e93;
+        }
+
+        .certificate-id {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .id-label {
+            font-size: 11px;
+            color: #8e8e93;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .id-value {
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-size: 12px;
+            color: #1d1d1f;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8e8e93;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007aff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+            color: #ff3b30;
+        }
+
+        .actions {
+            padding: 20px 25px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .primary-btn {
+            background: #007aff;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #0056b3;
+        }
+
+        .secondary-btn {
+            background: #f8f9fa;
+            color: #007aff;
+            border: 1px solid #e9ecef;
+        }
+
+        .secondary-btn:hover {
+            background: #e9ecef;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .certificate-container {
+                max-width: 100%;
+                border-radius: 20px;
+            }
+
+            .pass-header {
+                padding: 20px;
+            }
+
+            .certificate-details {
+                padding: 20px;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .actions {
+                flex-direction: column;
+                padding: 15px 20px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .certificate-container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+
+            .actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate-container">
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading certificate...</p>
+        </div>
+
+        <div class="error" id="error" style="display: none;">
+            <p>Certificate not found</p>
+        </div>
+
+        <div id="certificate-content" style="display: none;">
+            <div class="pass-header">
+                <div class="certificate-logo">🎨</div>
+                <div class="certificate-title">Certificate of Authenticity</div>
+                <div class="certificate-subtitle">Castle Fine Art</div>
+            </div>
+
+            <div class="artwork-image" id="artwork-image">
+                <div class="artwork-overlay">
+                    <div class="artwork-title" id="artwork-title">Loading...</div>
+                    <div class="artwork-artist" id="artwork-artist">Loading...</div>
+                </div>
+            </div>
+
+            <div class="certificate-details">
+                <div class="detail-section">
+                    <div class="section-title">Artwork Details</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-value" id="purchase-price">£0</div>
+                            <div class="detail-label">Purchase Price</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-value" id="purchase-date">-</div>
+                            <div class="detail-label">Purchase Date</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="section-title">Edition Information</div>
+                    <div class="edition-badge" id="edition-info">Loading...</div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="section-title">Authenticity Verification</div>
+                    <div class="authenticity-section">
+                        <div class="authenticity-badge">✓</div>
+                        <div class="authenticity-text">Verified Authentic</div>
+                        <div class="authenticity-subtext">This artwork has been verified by Castle Fine Art and comes with a full certificate of authenticity and provenance.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="certificate-id">
+                <div class="id-label">Certificate ID</div>
+                <div class="id-value" id="certificate-id">Loading...</div>
+            </div>
+
+            <div class="actions">
+                <button class="action-btn secondary-btn" onclick="window.print()">Print Certificate</button>
+                <button class="action-btn primary-btn" onclick="downloadPDF()">Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCertificate();
+        });
+
+        async function loadCertificate() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const clientId = urlParams.get('client');
+                const artworkId = urlParams.get('artwork');
+
+                if (!clientId || !artworkId) {
+                    showError();
+                    return;
+                }
+
+                if (!window.isFirebaseReady()) {
+                    showError();
+                    return;
+                }
+
+                const db = firebase.database();
+
+                // Load artwork data
+                const artworkSnapshot = await db.ref(`clientArtworks/${clientId}/${artworkId}`).once('value');
+                const artwork = artworkSnapshot.val();
+
+                if (!artwork) {
+                    showError();
+                    return;
+                }
+
+                displayCertificate(artwork, artworkId);
+
+            } catch (error) {
+                console.error('Error loading certificate:', error);
+                showError();
+            }
+        }
+
+        function displayCertificate(artwork, artworkId) {
+            // Update artwork image
+            document.getElementById('artwork-image').style.backgroundImage = `url('${artwork.imageUrl}')`;
+
+            // Update artwork details
+            document.getElementById('artwork-title').textContent = artwork.title;
+            document.getElementById('artwork-artist').textContent = `by ${artwork.artist}`;
+
+            // Update purchase details
+            document.getElementById('purchase-price').textContent = `£${artwork.price.toLocaleString()}`;
+
+            const purchaseDate = new Date(artwork.purchaseDate).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+            document.getElementById('purchase-date').textContent = purchaseDate;
+
+            // Update edition info
+            document.getElementById('edition-info').textContent = artwork.edition;
+
+            // Update certificate ID
+            document.getElementById('certificate-id').textContent = `CA-${artworkId.toUpperCase()}`;
+
+            // Show certificate
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('certificate-content').style.display = 'block';
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+
+        function downloadPDF() {
+            // In a real implementation, this would generate a PDF
+            alert('PDF download functionality would be implemented here.');
+        }
+    </script>
+</body>
+</html>

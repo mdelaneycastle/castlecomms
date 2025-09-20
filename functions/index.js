@@ -764,6 +764,9 @@ const sendMessageNotification = onDocumentCreated(
   }
 );
 
+// Import scraping functions
+const { scrapeArtworkData, scrapeArtworkHttp } = require('./scrapeArtwork');
+
 module.exports = {
   uploadToGallery,
   deleteFromGallery,
@@ -772,5 +775,7 @@ module.exports = {
   updateUserHttp,
   deleteUserHttp,
   healthCheck,
-  sendMessageNotification
+  sendMessageNotification,
+  scrapeArtworkData,
+  scrapeArtworkHttp
 };

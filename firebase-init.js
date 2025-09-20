@@ -69,8 +69,18 @@ try {
   console.error("❌ Firebase Storage initialization failed:", error);
 }
 
-// Functions - Using direct HTTP calls, no SDK needed
-console.log("⚡ Firebase Functions will use direct HTTP calls (no SDK initialization needed)");
+// Functions initialization
+try {
+  if (typeof firebase.functions === "function") {
+    window.firebaseServices.functions = firebase.functions();
+    window.functions = window.firebaseServices.functions; // Maintain backward compatibility
+    console.log("⚡ Firebase Functions initialized");
+  } else {
+    console.warn("⚠️ Firebase Functions SDK not loaded");
+  }
+} catch (error) {
+  console.error("❌ Firebase Functions initialization failed:", error);
+}
 
 // Utility function to check if Firebase is ready
 window.isFirebaseReady = function() {

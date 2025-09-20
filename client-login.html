@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Portal - Art Certificates</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.error {
+            background: #fee;
+            color: #c53030;
+            border: 1px solid #fc8181;
+        }
+
+        .status.success {
+            background: #f0fff4;
+            color: #38a169;
+            border: 1px solid #68d391;
+        }
+
+        .status.loading {
+            background: #ebf8ff;
+            color: #3182ce;
+            border: 1px solid #90cdf4;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">🎨</div>
+        <h1>Client Portal</h1>
+        <p class="subtitle">Access your art certificates and provenance letters</p>
+
+        <form id="client-login-form">
+            <div class="form-group">
+                <label for="client-id">Client ID</label>
+                <input type="text" id="client-id" name="client-id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="login-btn" id="login-btn">
+                Access Portfolio
+            </button>
+        </form>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.isFirebaseReady()) {
+                showStatus('Firebase not initialized properly', 'error');
+                return;
+            }
+
+            const db = firebase.database();
+            const form = document.getElementById('client-login-form');
+            const loginBtn = document.getElementById('login-btn');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const clientId = document.getElementById('client-id').value.trim();
+                const password = document.getElementById('password').value;
+
+                if (!clientId || !password) {
+                    showStatus('Please enter both Client ID and Password', 'error');
+                    return;
+                }
+
+                try {
+                    setLoading(true);
+                    showStatus('Verifying credentials...', 'loading');
+
+                    // Check client credentials in Firebase
+                    const clientSnapshot = await db.ref(`artClients/${clientId}`).once('value');
+                    const clientData = clientSnapshot.val();
+
+                    if (!clientData) {
+                        showStatus('Invalid Client ID', 'error');
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Simple password verification (in production, use proper hashing)
+                    if (clientData.password !== password) {
+                        showStatus('Invalid Password', 'error');
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Store client session
+                    sessionStorage.setItem('clientId', clientId);
+                    sessionStorage.setItem('clientName', clientData.name || 'Client');
+
+                    showStatus('Login successful! Redirecting...', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = 'client-dashboard.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showStatus('Login failed. Please try again.', 'error');
+                    setLoading(false);
+                }
+            });
+
+            function showStatus(message, type) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = `status ${type}`;
+                status.style.display = 'block';
+
+                if (type !== 'loading') {
+                    setTimeout(() => {
+                        status.style.display = 'none';
+                    }, 5000);
+                }
+            }
+
+            function setLoading(loading) {
+                loginBtn.disabled = loading;
+                loginBtn.textContent = loading ? 'Verifying...' : 'Access Portfolio';
+            }
+        });
+    </script>
+</body>
+</html>
