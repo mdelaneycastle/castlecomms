@@ -907,19 +907,23 @@
         let currentUser = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Check Firebase Auth
-            if (!window.firebaseServices || !window.firebaseServices.auth) {
+            // Check for client portal session instead of Firebase Auth
+            const clientUser = sessionStorage.getItem('clientPortalUser');
+
+            if (!clientUser) {
                 window.location.href = 'client-login.html';
                 return;
             }
 
-            currentUser = window.firebaseServices.auth.currentUser;
-            if (!currentUser) {
+            try {
+                currentUser = JSON.parse(clientUser);
+                loadExistingPreferences();
+            } catch (error) {
+                console.error('Invalid session data:', error);
+                sessionStorage.removeItem('clientPortalUser');
                 window.location.href = 'client-login.html';
                 return;
             }
-
-            loadExistingPreferences();
         });
 
         async function loadExistingPreferences() {
@@ -936,7 +940,7 @@
                 }
 
                 const db = window.firebaseServices.db;
-                const snapshot = await db.ref(`client_preferences/${currentUser.uid}`).once('value');
+                const snapshot = await db.ref(`client_preferences/${currentUser.clientUid}`).once('value');
                 const preferences = snapshot.val();
 
                 if (preferences) {
@@ -1053,7 +1057,7 @@
 
                 // Save to Firebase
                 const db = window.firebaseServices.db;
-                await db.ref(`client_preferences/${currentUser.uid}`).set(preferences);
+                await db.ref(`client_preferences/${currentUser.clientUid}`).set(preferences);
 
                 successMsg.style.display = 'block';
                 this.scrollIntoView({ behavior: 'smooth' });
