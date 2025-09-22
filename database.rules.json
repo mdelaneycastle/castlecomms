@@ -108,9 +108,9 @@
     "client_preferences": {
       ".read": "auth != null && auth.token.admin == true",
       "$clientId": {
-        ".read": "root.child('artClients').child($clientId).exists() || (auth != null && auth.token.admin == true)",
-        ".write": "root.child('artClients').child($clientId).exists() || (auth != null && auth.token.admin == true)",
-        ".validate": "newData.hasChildren(['client_id', 'updated_at']) && newData.child('client_id').isString() && newData.child('updated_at').isString()"
+        ".read": "true",
+        ".write": "true",
+        ".validate": "newData.hasChildren(['client_id', 'updated_at']) && newData.child('client_id').isString() && newData.child('updated_at').isString() && newData.child('client_id').val() == $clientId"
       }
     }
   }
