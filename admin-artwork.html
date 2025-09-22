@@ -679,8 +679,8 @@
 
                 const db = firebase.database();
 
-                // Check if client ID already exists
-                const existingClientId = await db.ref(`clients/${clientId}`).once('value');
+                // Check if client ID already exists in the mapping
+                const existingClientId = await db.ref(`clientIdMapping/${clientId}`).once('value');
                 if (existingClientId.exists()) {
                     showClientStatus(`Client ID ${clientId} already exists`, 'error');
                     return;
