@@ -87,23 +87,13 @@
     },
 
     "clients": {
-      ".read": "auth != null && auth.token.admin == true",
-      ".write": "auth != null && auth.token.admin == true",
-      "$uid": {
-        ".read": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
-        ".write": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
-        ".validate": "newData.hasChildren(['name', 'email', 'role']) && newData.child('name').isString() && newData.child('email').isString() && newData.child('role').isString()"
-      }
+      ".read": true,
+      ".write": true
     },
 
     "clientIdMapping": {
       ".read": true,
-      ".write": true,
-      "$clientId": {
-        ".read": true,
-        ".write": true,
-        ".validate": "newData.hasChildren(['uid', 'email', 'name']) && newData.child('uid').isString() && newData.child('email').isString() && newData.child('name').isString()"
-      }
+      ".write": true
     },
 
     "clientArtworks": {
