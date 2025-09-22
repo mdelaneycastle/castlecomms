@@ -87,21 +87,21 @@
     },
 
     "clients": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null && auth.token.admin == true",
+      ".write": "auth != null && auth.token.admin == true",
       "$uid": {
-        ".read": true,
-        ".write": true,
+        ".read": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
+        ".write": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
         ".validate": "newData.hasChildren(['name', 'email', 'role']) && newData.child('name').isString() && newData.child('email').isString() && newData.child('role').isString()"
       }
     },
 
     "clientIdMapping": {
-      ".read": true,
-      ".write": true,
+      ".read": "auth != null && auth.token.admin == true",
+      ".write": "auth != null && auth.token.admin == true",
       "$clientId": {
-        ".read": true,
-        ".write": true,
+        ".read": "auth != null && auth.token.admin == true",
+        ".write": "auth != null && auth.token.admin == true",
         ".validate": "newData.hasChildren(['uid', 'email', 'name']) && newData.child('uid').isString() && newData.child('email').isString() && newData.child('name').isString()"
       }
     },
