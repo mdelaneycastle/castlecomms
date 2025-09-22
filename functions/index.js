@@ -764,6 +764,119 @@ const sendMessageNotification = onDocumentCreated(
   }
 );
 
+/**
+ * Cloud Function to create a new client user
+ * Only admins can call this function
+ */
+const createClient = onRequest(
+  { region: "europe-west1" },
+  async (req, res) => {
+    corsHandler(req, res, async () => {
+      try {
+        // Check authentication
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+          return res.status(401).json({ error: 'No authorization header' });
+        }
+
+        const token = authHeader.split('Bearer ')[1];
+        const { getAuth } = require("firebase-admin/auth");
+        const auth = getAuth();
+        const decodedToken = await auth.verifyIdToken(token);
+
+        // Check if user is admin
+        if (!decodedToken.admin) {
+          return res.status(403).json({ error: 'Admin privileges required to create clients' });
+        }
+
+        const { clientId, clientName, clientEmail, password } = req.body;
+
+        // Validate input
+        if (!clientId || !clientName || !clientEmail || !password) {
+          return res.status(400).json({ error: 'Missing required fields: clientId, clientName, clientEmail, password' });
+        }
+
+        // Validate client ID format (6 digits)
+        if (!/^\d{6}$/.test(clientId)) {
+          return res.status(400).json({ error: 'Client ID must be exactly 6 digits' });
+        }
+
+        // Validate email format
+        if (!clientEmail.includes('@')) {
+          return res.status(400).json({ error: 'Invalid email address' });
+        }
+
+        const database = getDatabase();
+
+        // Check if client ID already exists in the mapping
+        const existingClientSnapshot = await database.ref(`clientIdMapping/${clientId}`).once('value');
+        if (existingClientSnapshot.exists()) {
+          return res.status(409).json({ error: `Client ID ${clientId} already exists` });
+        }
+
+        // Create Firebase Auth user
+        const userRecord = await auth.createUser({
+          email: clientEmail,
+          password: password,
+          displayName: clientName,
+          emailVerified: false
+        });
+
+        // Set custom claims for the new user
+        await auth.setCustomUserClaims(userRecord.uid, {
+          role: 'client',
+          clientId: clientId
+        });
+
+        // Create client data
+        const clientData = {
+          clientId: clientId,
+          name: clientName,
+          email: clientEmail,
+          role: 'client',
+          createdDate: new Date().toISOString(),
+          createdBy: decodedToken.uid
+        };
+
+        // Store client data using Firebase UID as key
+        await database.ref(`clients/${userRecord.uid}`).set(clientData);
+
+        // Create mapping from clientId to UID for backward compatibility
+        await database.ref(`clientIdMapping/${clientId}`).set({
+          uid: userRecord.uid,
+          email: clientEmail,
+          name: clientName,
+          createdDate: new Date().toISOString()
+        });
+
+        logger.info(`Client created successfully: ${clientName} (${clientEmail}) with UID: ${userRecord.uid}`);
+
+        res.json({
+          success: true,
+          uid: userRecord.uid,
+          clientId: clientId,
+          message: `Client ${clientName} created successfully`
+        });
+
+      } catch (error) {
+        logger.error('Error creating client:', error);
+
+        // Handle specific Firebase Auth errors
+        if (error.code === 'auth/email-already-exists') {
+          return res.status(409).json({ error: 'Email address is already in use' });
+        } else if (error.code === 'auth/weak-password') {
+          return res.status(400).json({ error: 'Password is too weak' });
+        } else if (error.code === 'auth/invalid-email') {
+          return res.status(400).json({ error: 'Invalid email address' });
+        }
+
+        // Generic error
+        res.status(500).json({ error: 'Failed to create client: ' + error.message });
+      }
+    });
+  }
+);
+
 // Import scraping functions
 const { scrapeArtworkData, scrapeArtworkHttp } = require('./scrapeArtwork');
 
@@ -777,5 +890,6 @@ module.exports = {
   healthCheck,
   sendMessageNotification,
   scrapeArtworkData,
-  scrapeArtworkHttp
+  scrapeArtworkHttp,
+  createClient
 };

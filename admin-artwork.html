@@ -696,47 +696,36 @@
                     throw new Error('Firebase not ready');
                 }
 
-                const db = firebase.database();
-
-                // Check if client ID already exists in the mapping
-                const existingClientId = await db.ref(`clientIdMapping/${clientId}`).once('value');
-                if (existingClientId.exists()) {
-                    showClientStatus(`Client ID ${clientId} already exists`, 'error');
-                    return;
+                // Get user's auth token
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    throw new Error('User not authenticated');
                 }
 
-                // Create Firebase Auth user using Admin SDK (requires Cloud Function)
-                // For now, we'll create the user directly and set custom claims later
-                const userCredential = await firebase.auth().createUserWithEmailAndPassword(clientEmail, password);
-                const user = userCredential.user;
+                const token = await user.getIdToken();
 
-                // Update user profile with display name
-                await user.updateProfile({
-                    displayName: clientName
+                // Call the Cloud Function to create client
+                const response = await fetch('https://createclient-ngp3khlsna-ew.a.run.app', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        clientId: clientId,
+                        clientName: clientName,
+                        clientEmail: clientEmail,
+                        password: password
+                    })
                 });
 
-                // Set custom claims for client role (this would typically be done via Admin SDK/Cloud Function)
-                // For demo purposes, we'll store the role in the database
-                const clientData = {
-                    clientId: clientId,
-                    name: clientName,
-                    email: clientEmail,
-                    role: 'client',
-                    createdDate: new Date().toISOString(),
-                    createdBy: firebase.auth().currentUser?.email || 'admin'
-                };
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
 
-                // Store client data using Firebase UID as key
-                await db.ref(`clients/${user.uid}`).set(clientData);
-
-                // Also create a mapping from clientId to UID for backward compatibility
-                await db.ref(`clientIdMapping/${clientId}`).set({
-                    uid: user.uid,
-                    email: clientEmail,
-                    name: clientName
-                });
-
-                showClientStatus(`Client ${clientName} created successfully! UID: ${user.uid}`, 'success');
+                const result = await response.json();
+                showClientStatus(`Client ${clientName} created successfully! UID: ${result.uid}`, 'success');
 
                 // Clear form
                 document.getElementById('new-client-id').value = '';
