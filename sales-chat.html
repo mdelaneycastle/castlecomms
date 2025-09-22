@@ -337,12 +337,12 @@
                 <h3>Welcome to Sales Data Chat!</h3>
                 <p>I can help you analyze your sales data. Ask me questions about customers, sales totals, trends, or specific items.</p>
                 <div class="sample-questions">
+                    <div class="sample-question" onclick="askSampleQuestion(this)">Who bought the most items?</div>
                     <div class="sample-question" onclick="askSampleQuestion(this)">Who spent the most money?</div>
+                    <div class="sample-question" onclick="askSampleQuestion(this)">Who was the 7th highest spender?</div>
                     <div class="sample-question" onclick="askSampleQuestion(this)">In June who spent over 5k?</div>
+                    <div class="sample-question" onclick="askSampleQuestion(this)">Top 5 customers by items bought</div>
                     <div class="sample-question" onclick="askSampleQuestion(this)">Show me customers who spent under 1000</div>
-                    <div class="sample-question" onclick="askSampleQuestion(this)">What are total sales for January 2025?</div>
-                    <div class="sample-question" onclick="askSampleQuestion(this)">Top 5 customers in February</div>
-                    <div class="sample-question" onclick="askSampleQuestion(this)">How much did we sell in June?</div>
                 </div>
             </div>
         </div>
@@ -645,20 +645,61 @@
                 itemFilter: null,
                 limit: null,
                 sortBy: 'total',
-                operation: 'list'
+                operation: 'list',
+                responseScope: 'multiple',
+                ordinalPosition: null
             };
 
             const lowerQuery = query.toLowerCase();
 
-            // Detect intent
+            // Detect intent and sorting preference
             if (lowerQuery.includes('who') || lowerQuery.includes('which customer')) {
                 info.intent = 'customers';
+
+                // Detect if this is about quantity (items/orders) or spending (money)
+                if (lowerQuery.includes('bought most') || lowerQuery.includes('most items') ||
+                    lowerQuery.includes('most orders') || lowerQuery.includes('most purchases') ||
+                    lowerQuery.includes('bought the most')) {
+                    info.sortBy = 'count';
+                } else if (lowerQuery.includes('spent most') || lowerQuery.includes('most money') ||
+                          lowerQuery.includes('highest spend') || lowerQuery.includes('biggest spend') ||
+                          lowerQuery.includes('highest value') || lowerQuery.includes('most cash')) {
+                    info.sortBy = 'total';
+                }
             } else if (lowerQuery.includes('what') || lowerQuery.includes('show me')) {
                 info.intent = 'data';
             } else if (lowerQuery.includes('how much') || lowerQuery.includes('total')) {
                 info.intent = 'totals';
             } else if (lowerQuery.includes('how many')) {
                 info.intent = 'counts';
+                info.sortBy = 'count';
+            }
+
+            // Detect response scope (singular vs plural)
+            if (lowerQuery.startsWith('who ') && !lowerQuery.includes('top ') &&
+                !lowerQuery.includes('show me') && !lowerQuery.includes('list')) {
+                // Singular "who" questions should return one result
+                info.responseScope = 'single';
+                info.limit = 1;
+            } else if (lowerQuery.includes('top ') || lowerQuery.includes('show me') ||
+                      lowerQuery.includes('list') || lowerQuery.includes('customers')) {
+                info.responseScope = 'multiple';
+            }
+
+            // Detect ordinal positions (7th, third, second, etc.)
+            const ordinalMatches = lowerQuery.match(/\b(\d+)(?:st|nd|rd|th)\b|\b(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\b/);
+            if (ordinalMatches) {
+                if (ordinalMatches[1]) {
+                    info.ordinalPosition = parseInt(ordinalMatches[1]);
+                } else if (ordinalMatches[2]) {
+                    const wordToNumber = {
+                        'first': 1, 'second': 2, 'third': 3, 'fourth': 4, 'fifth': 5,
+                        'sixth': 6, 'seventh': 7, 'eighth': 8, 'ninth': 9, 'tenth': 10
+                    };
+                    info.ordinalPosition = wordToNumber[ordinalMatches[2]];
+                }
+                info.responseScope = 'single';
+                info.limit = info.ordinalPosition;
             }
 
             // Detect operation type
@@ -796,12 +837,38 @@
                 customerTotals[customerName].purchases.push(row);
             });
 
-            // Sort and limit
-            const customers = Object.entries(customerTotals)
-                .sort(([,a], [,b]) => b.total - a.total);
+            // Sort by the appropriate metric
+            const customers = Object.entries(customerTotals);
+            if (queryInfo.sortBy === 'count') {
+                customers.sort(([,a], [,b]) => b.count - a.count);
+            } else {
+                customers.sort(([,a], [,b]) => b.total - a.total);
+            }
 
-            const limit = queryInfo.limit || (queryInfo.operation === 'above' || queryInfo.operation === 'below' ? 20 : 10);
+            // Determine how many results to show
+            let limit;
+            if (queryInfo.responseScope === 'single') {
+                limit = queryInfo.ordinalPosition || 1;
+            } else {
+                limit = queryInfo.limit || (queryInfo.operation === 'above' || queryInfo.operation === 'below' ? 20 : 10);
+            }
+
             const topCustomers = customers.slice(0, limit);
+
+            // If this is an ordinal request, get the specific position
+            if (queryInfo.ordinalPosition && queryInfo.responseScope === 'single') {
+                const specificCustomer = customers[queryInfo.ordinalPosition - 1];
+                if (specificCustomer) {
+                    return getSingleCustomerResponse(specificCustomer, queryInfo, originalQuery, queryInfo.ordinalPosition);
+                } else {
+                    return `No customer found at position ${queryInfo.ordinalPosition}.`;
+                }
+            }
+
+            // If this is a single result request, return just one
+            if (queryInfo.responseScope === 'single' && topCustomers.length > 0) {
+                return getSingleCustomerResponse(topCustomers[0], queryInfo, originalQuery, 1);
+            }
 
             let response = `<h4>${getResponseTitle(queryInfo, originalQuery)}</h4>`;
             response += getFilterSummary(queryInfo);
@@ -868,9 +935,81 @@
             return getCustomerAnalysis(data, queryInfo, originalQuery);
         }
 
+        function getSingleCustomerResponse(customerEntry, queryInfo, originalQuery, position) {
+            const [name, customerData] = customerEntry;
+
+            let response = `<h4>${getSingleCustomerTitle(queryInfo, originalQuery, position)}</h4>`;
+            response += getFilterSummary(queryInfo);
+
+            response += `<div class="summary-card">`;
+            response += `<h3 style="margin-bottom: 15px; color: #45494e;">${name}</h3>`;
+            response += `<div class="summary-stats">`;
+            response += `<div class="stat-item"><div class="stat-value">${customerData.custId}</div><div class="stat-label">Customer ID</div></div>`;
+
+            if (queryInfo.sortBy === 'count') {
+                response += `<div class="stat-item"><div class="stat-value">${customerData.count}</div><div class="stat-label">Items Bought</div></div>`;
+                response += `<div class="stat-item"><div class="stat-value">£${customerData.total.toLocaleString()}</div><div class="stat-label">Total Spent</div></div>`;
+            } else {
+                response += `<div class="stat-item"><div class="stat-value">£${customerData.total.toLocaleString()}</div><div class="stat-label">Total Spent</div></div>`;
+                response += `<div class="stat-item"><div class="stat-value">${customerData.count}</div><div class="stat-label">Items Bought</div></div>`;
+            }
+
+            response += `<div class="stat-item"><div class="stat-value">£${Math.round(customerData.total/customerData.count).toLocaleString()}</div><div class="stat-label">Avg per Item</div></div>`;
+            response += `</div></div>`;
+
+            // Show recent purchases
+            if (customerData.purchases.length > 0) {
+                const recentPurchases = customerData.purchases
+                    .sort((a, b) => b.SOTotal - a.SOTotal)
+                    .slice(0, 5);
+
+                response += `<h4>Recent Purchases</h4>`;
+                response += `<table class="data-table">`;
+                response += `<thead><tr><th>Item Code</th><th>Amount</th><th>Date</th></tr></thead>`;
+                response += `<tbody>`;
+
+                recentPurchases.forEach(purchase => {
+                    response += `<tr>`;
+                    response += `<td>${purchase.ItemCode}</td>`;
+                    response += `<td>£${purchase.SOTotal.toLocaleString()}</td>`;
+                    response += `<td>${purchase.SODate.toLocaleDateString()}</td>`;
+                    response += `</tr>`;
+                });
+
+                response += `</tbody></table>`;
+            }
+
+            return response;
+        }
+
+        function getSingleCustomerTitle(queryInfo, originalQuery, position) {
+            const lowerQuery = originalQuery.toLowerCase();
+
+            if (position > 1) {
+                const ordinals = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'];
+                const ordinalText = ordinals[position] || `${position}th`;
+
+                if (queryInfo.sortBy === 'count') {
+                    return `🛒 ${ordinalText} Highest - Items Bought`;
+                } else {
+                    return `💰 ${ordinalText} Highest - Total Spent`;
+                }
+            }
+
+            if (queryInfo.sortBy === 'count') {
+                return '🛒 Customer Who Bought the Most Items';
+            } else {
+                return '💰 Highest Spending Customer';
+            }
+        }
+
         function getResponseTitle(queryInfo, originalQuery) {
-            if (originalQuery.toLowerCase().includes('who spent most') || originalQuery.toLowerCase().includes('top')) {
-                return '🏆 Top Spending Customers';
+            const lowerQuery = originalQuery.toLowerCase();
+
+            if (queryInfo.sortBy === 'count') {
+                return '🛒 Customers by Items Bought';
+            } else if (lowerQuery.includes('who spent most') || lowerQuery.includes('highest spend')) {
+                return '💰 Top Spending Customers';
             } else if (queryInfo.amountFilter?.min) {
                 return `💰 Customers Who Spent Over £${queryInfo.amountFilter.min.toLocaleString()}`;
             } else if (queryInfo.amountFilter?.max) {
