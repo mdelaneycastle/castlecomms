@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Preferences - Client Portal</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <style>
+        @font-face {
+            font-family: 'DIN Light Alternate';
+            src: url('DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 300;
+            background: linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #45494e;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(216, 209, 197, 0.95);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header {
+            background: #F0EDE9;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.3);
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            color: #45494e;
+            letter-spacing: 0.025em;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: rgba(69, 73, 78, 0.1);
+            color: #45494e;
+            border: 1px solid rgba(69, 73, 78, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(69, 73, 78, 0.15);
+            border-color: rgba(69, 73, 78, 0.3);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .preferences-form {
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .form-intro {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-intro h2 {
+            font-size: 24px;
+            font-weight: 500;
+            color: #45494e;
+            margin-bottom: 10px;
+        }
+
+        .form-intro p {
+            color: #6a6e73;
+            font-size: 16px;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: #45494e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(69, 73, 78, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #45494e;
+            margin-bottom: 10px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(69, 73, 78, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            background: white;
+            color: #45494e;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #0f9d58;
+            box-shadow: 0 0 0 2px rgba(15, 157, 88, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .checkbox-grid, .radio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: white;
+            border: 1px solid rgba(69, 73, 78, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover, .radio-item:hover {
+            border-color: rgba(15, 157, 88, 0.3);
+            background: rgba(15, 157, 88, 0.05);
+        }
+
+        .checkbox-item input, .radio-item input {
+            margin: 0;
+        }
+
+        .room-colors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .room-color-group {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(69, 73, 78, 0.1);
+        }
+
+        .room-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #45494e;
+            margin-bottom: 10px;
+        }
+
+        .color-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-input {
+            width: 50px;
+            height: 40px;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .budget-range {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #0f9d58 0%, #0a7142 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(15, 157, 88, 0.25);
+        }
+
+        .save-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-message {
+            display: none;
+            background: rgba(15, 157, 88, 0.1);
+            border: 1px solid rgba(15, 157, 88, 0.2);
+            color: #0a7142;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            display: none;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .preferences-form {
+                padding: 20px;
+            }
+
+            .checkbox-grid, .radio-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .room-colors {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>My Art Preferences</h1>
+            <div class="nav-actions">
+                <a href="client-dashboard.html" class="back-btn">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="loading" id="loading">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+            <h3>Loading your preferences...</h3>
+        </div>
+
+        <div class="success-message" id="success-message">
+            <strong>✅ Preferences saved successfully!</strong><br>
+            Your art consultant will use this information to provide personalized recommendations.
+        </div>
+
+        <div class="error-message" id="error-message">
+            <strong>❌ Error saving preferences</strong><br>
+            <span id="error-text">Please try again later.</span>
+        </div>
+
+        <form class="preferences-form" id="preferences-form">
+            <div class="form-intro">
+                <h2>Tell Us About Your Art Preferences</h2>
+                <p>Help us understand your style and preferences so we can recommend the perfect artwork for your space.</p>
+            </div>
+
+            <!-- Personal Style Section -->
+            <div class="form-section">
+                <div class="section-title">Personal Style</div>
+
+                <div class="form-group">
+                    <label class="form-label">Favourite Season</label>
+                    <div class="radio-grid">
+                        <label class="radio-item">
+                            <input type="radio" name="favourite_season" value="spring">
+                            Spring
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="favourite_season" value="summer">
+                            Summer
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="favourite_season" value="autumn">
+                            Autumn
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="favourite_season" value="winter">
+                            Winter
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Favourite Colours (select all that apply)</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="red">
+                            Red
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="blue">
+                            Blue
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="green">
+                            Green
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="yellow">
+                            Yellow
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="purple">
+                            Purple
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="orange">
+                            Orange
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="pink">
+                            Pink
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="black">
+                            Black
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="white">
+                            White
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="favourite_colors" value="neutral">
+                            Neutral Tones
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Preferred Art Styles (select all that apply)</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="art_styles" value="contemporary">
+                            Contemporary
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="art_styles" value="traditional">
+                            Traditional
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="art_styles" value="abstract">
+                            Abstract
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="art_styles" value="landscape">
+                            Landscape
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="art_styles" value="portrait">
+                            Portrait
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="art_styles" value="still_life">
+                            Still Life
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="art_styles" value="minimalist">
+                            Minimalist
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="art_styles" value="impressionist">
+                            Impressionist
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">What mood do you want your artwork to create?</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_mood" value="calming">
+                            Calming & Peaceful
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_mood" value="energizing">
+                            Energizing & Vibrant
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_mood" value="sophisticated">
+                            Sophisticated & Elegant
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_mood" value="warm">
+                            Warm & Cozy
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_mood" value="dramatic">
+                            Bold & Dramatic
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_mood" value="inspirational">
+                            Inspirational & Uplifting
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Home Environment Section -->
+            <div class="form-section">
+                <div class="section-title">Your Home Environment</div>
+
+                <div class="form-group">
+                    <label class="form-label">Room Wall Colours</label>
+                    <div class="room-colors">
+                        <div class="room-color-group">
+                            <div class="room-title">Living Room</div>
+                            <div class="color-input-group">
+                                <input type="color" class="color-input" name="living_room_color" value="#ffffff">
+                                <input type="text" class="form-input" name="living_room_color_desc" placeholder="Describe the color/finish">
+                            </div>
+                        </div>
+                        <div class="room-color-group">
+                            <div class="room-title">Bedroom</div>
+                            <div class="color-input-group">
+                                <input type="color" class="color-input" name="bedroom_color" value="#ffffff">
+                                <input type="text" class="form-input" name="bedroom_color_desc" placeholder="Describe the color/finish">
+                            </div>
+                        </div>
+                        <div class="room-color-group">
+                            <div class="room-title">Dining Room</div>
+                            <div class="color-input-group">
+                                <input type="color" class="color-input" name="dining_room_color" value="#ffffff">
+                                <input type="text" class="form-input" name="dining_room_color_desc" placeholder="Describe the color/finish">
+                            </div>
+                        </div>
+                        <div class="room-color-group">
+                            <div class="room-title">Kitchen</div>
+                            <div class="color-input-group">
+                                <input type="color" class="color-input" name="kitchen_color" value="#ffffff">
+                                <input type="text" class="form-input" name="kitchen_color_desc" placeholder="Describe the color/finish">
+                            </div>
+                        </div>
+                        <div class="room-color-group">
+                            <div class="room-title">Home Office/Study</div>
+                            <div class="color-input-group">
+                                <input type="color" class="color-input" name="office_color" value="#ffffff">
+                                <input type="text" class="form-input" name="office_color_desc" placeholder="Describe the color/finish">
+                            </div>
+                        </div>
+                        <div class="room-color-group">
+                            <div class="room-title">Hallway/Entry</div>
+                            <div class="color-input-group">
+                                <input type="color" class="color-input" name="hallway_color" value="#ffffff">
+                                <input type="text" class="form-input" name="hallway_color_desc" placeholder="Describe the color/finish">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Overall Home Decor Style</label>
+                    <div class="radio-grid">
+                        <label class="radio-item">
+                            <input type="radio" name="decor_style" value="modern">
+                            Modern
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="decor_style" value="traditional">
+                            Traditional
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="decor_style" value="contemporary">
+                            Contemporary
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="decor_style" value="minimalist">
+                            Minimalist
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="decor_style" value="eclectic">
+                            Eclectic
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="decor_style" value="rustic">
+                            Rustic
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="decor_style" value="industrial">
+                            Industrial
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="decor_style" value="scandinavian">
+                            Scandinavian
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Room Lighting (select all that apply)</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="lighting" value="natural">
+                            Lots of Natural Light
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="lighting" value="warm_artificial">
+                            Warm Artificial Light
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="lighting" value="cool_artificial">
+                            Cool/White Artificial Light
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="lighting" value="dimmer">
+                            Dimmer Controlled
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Artwork Preferences Section -->
+            <div class="form-section">
+                <div class="section-title">Artwork Preferences</div>
+
+                <div class="form-group">
+                    <label class="form-label">Preferred Artwork Sizes (select all that apply)</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_sizes" value="small">
+                            Small (up to 40cm)
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_sizes" value="medium">
+                            Medium (40-80cm)
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_sizes" value="large">
+                            Large (80-120cm)
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="artwork_sizes" value="statement">
+                            Statement Pieces (120cm+)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Frame Preferences (select all that apply)</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="frame_preferences" value="gold">
+                            Gold Frames
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="frame_preferences" value="silver">
+                            Silver Frames
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="frame_preferences" value="black">
+                            Black Frames
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="frame_preferences" value="white">
+                            White Frames
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="frame_preferences" value="wood">
+                            Wood Frames
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="frame_preferences" value="no_frame">
+                            No Frame/Canvas
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Budget Range (optional)</label>
+                    <div class="budget-range">
+                        <label class="radio-item">
+                            <input type="radio" name="budget_range" value="under_500">
+                            Under £500
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="budget_range" value="500_1000">
+                            £500 - £1,000
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="budget_range" value="1000_2500">
+                            £1,000 - £2,500
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="budget_range" value="2500_5000">
+                            £2,500 - £5,000
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="budget_range" value="5000_10000">
+                            £5,000 - £10,000
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="budget_range" value="over_10000">
+                            Over £10,000
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lifestyle & Interests Section -->
+            <div class="form-section">
+                <div class="section-title">Lifestyle & Interests</div>
+
+                <div class="form-group">
+                    <label class="form-label">Do you entertain guests frequently?</label>
+                    <div class="radio-grid">
+                        <label class="radio-item">
+                            <input type="radio" name="entertaining" value="frequently">
+                            Yes, frequently
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="entertaining" value="occasionally">
+                            Occasionally
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="entertaining" value="rarely">
+                            Rarely
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Considerations (select all that apply)</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="considerations" value="pets">
+                            Pets in the home
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="considerations" value="children">
+                            Young children
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="considerations" value="high_traffic">
+                            High traffic areas
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="considerations" value="sunlight">
+                            Direct sunlight exposure
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="hobbies_interests" class="form-label">Hobbies & Interests</label>
+                    <textarea class="form-textarea" name="hobbies_interests" id="hobbies_interests"
+                              placeholder="Tell us about your hobbies, interests, or places you've traveled that inspire you..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="additional_notes" class="form-label">Additional Notes</label>
+                    <textarea class="form-textarea" name="additional_notes" id="additional_notes"
+                              placeholder="Any other preferences, dislikes, or specific requirements..."></textarea>
+                </div>
+            </div>
+
+            <button type="submit" class="save-btn">Save My Preferences</button>
+        </form>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        let clientId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get client ID from session storage
+            clientId = sessionStorage.getItem('clientId');
+            if (!clientId) {
+                window.location.href = 'client-login.html';
+                return;
+            }
+
+            loadExistingPreferences();
+        });
+
+        async function loadExistingPreferences() {
+            const loading = document.getElementById('loading');
+            const form = document.getElementById('preferences-form');
+
+            try {
+                loading.style.display = 'block';
+                form.style.display = 'none';
+
+                // Check if Firebase Database is ready
+                if (!window.firebaseServices || !window.firebaseServices.db) {
+                    throw new Error('Database not available');
+                }
+
+                const db = window.firebaseServices.db;
+                const snapshot = await db.ref(`client_preferences/${clientId}`).once('value');
+                const preferences = snapshot.val();
+
+                if (preferences) {
+                    populateForm(preferences);
+                }
+
+            } catch (error) {
+                console.error('Error loading preferences:', error);
+            } finally {
+                loading.style.display = 'none';
+                form.style.display = 'block';
+            }
+        }
+
+        function populateForm(preferences) {
+            // Radio buttons
+            const radioFields = ['favourite_season', 'decor_style', 'budget_range', 'entertaining'];
+            radioFields.forEach(field => {
+                if (preferences[field]) {
+                    const radio = document.querySelector(`input[name="${field}"][value="${preferences[field]}"]`);
+                    if (radio) radio.checked = true;
+                }
+            });
+
+            // Checkboxes
+            const checkboxFields = ['favourite_colors', 'art_styles', 'artwork_mood', 'lighting', 'artwork_sizes', 'frame_preferences', 'considerations'];
+            checkboxFields.forEach(field => {
+                if (preferences[field] && Array.isArray(preferences[field])) {
+                    preferences[field].forEach(value => {
+                        const checkbox = document.querySelector(`input[name="${field}"][value="${value}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+            });
+
+            // Text inputs and textareas
+            const textFields = ['hobbies_interests', 'additional_notes'];
+            textFields.forEach(field => {
+                if (preferences[field]) {
+                    const input = document.querySelector(`[name="${field}"]`);
+                    if (input) input.value = preferences[field];
+                }
+            });
+
+            // Room colors
+            const roomColorFields = ['living_room_color', 'bedroom_color', 'dining_room_color', 'kitchen_color', 'office_color', 'hallway_color'];
+            roomColorFields.forEach(field => {
+                if (preferences[field]) {
+                    const colorInput = document.querySelector(`input[name="${field}"]`);
+                    if (colorInput) colorInput.value = preferences[field];
+                }
+
+                const descField = field + '_desc';
+                if (preferences[descField]) {
+                    const descInput = document.querySelector(`input[name="${descField}"]`);
+                    if (descInput) descInput.value = preferences[descField];
+                }
+            });
+        }
+
+        document.getElementById('preferences-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const saveBtn = this.querySelector('.save-btn');
+            const successMsg = document.getElementById('success-message');
+            const errorMsg = document.getElementById('error-message');
+
+            try {
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Saving...';
+                successMsg.style.display = 'none';
+                errorMsg.style.display = 'none';
+
+                // Check if Firebase Database is ready
+                if (!window.firebaseServices || !window.firebaseServices.db) {
+                    throw new Error('Database not available');
+                }
+
+                const formData = new FormData(this);
+                const preferences = {};
+
+                // Process radio buttons and single values
+                const radioFields = ['favourite_season', 'decor_style', 'budget_range', 'entertaining'];
+                radioFields.forEach(field => {
+                    const value = formData.get(field);
+                    if (value) preferences[field] = value;
+                });
+
+                // Process checkboxes (multiple values)
+                const checkboxFields = ['favourite_colors', 'art_styles', 'artwork_mood', 'lighting', 'artwork_sizes', 'frame_preferences', 'considerations'];
+                checkboxFields.forEach(field => {
+                    const values = formData.getAll(field);
+                    if (values.length > 0) preferences[field] = values;
+                });
+
+                // Process text fields
+                const textFields = ['hobbies_interests', 'additional_notes'];
+                textFields.forEach(field => {
+                    const value = formData.get(field);
+                    if (value && value.trim()) preferences[field] = value.trim();
+                });
+
+                // Process room colors
+                const roomColorFields = ['living_room_color', 'bedroom_color', 'dining_room_color', 'kitchen_color', 'office_color', 'hallway_color'];
+                roomColorFields.forEach(field => {
+                    const color = formData.get(field);
+                    const desc = formData.get(field + '_desc');
+                    if (color) preferences[field] = color;
+                    if (desc && desc.trim()) preferences[field + '_desc'] = desc.trim();
+                });
+
+                // Add metadata
+                preferences.updated_at = new Date().toISOString();
+                preferences.client_id = clientId;
+
+                // Save to Firebase
+                const db = window.firebaseServices.db;
+                await db.ref(`client_preferences/${clientId}`).set(preferences);
+
+                successMsg.style.display = 'block';
+                this.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Error saving preferences:', error);
+                errorMsg.style.display = 'block';
+                document.getElementById('error-text').textContent = error.message;
+                this.scrollIntoView({ behavior: 'smooth' });
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save My Preferences';
+            }
+        });
+    </script>
+</body>
+</html>

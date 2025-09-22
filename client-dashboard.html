@@ -101,6 +101,27 @@
             margin: 0 15px;
         }
 
+        .preferences-btn {
+            padding: 8px 16px;
+            background: rgba(15, 157, 88, 0.1);
+            color: #0f9d58;
+            border: 1px solid rgba(15, 157, 88, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preferences-btn:hover {
+            background: rgba(15, 157, 88, 0.15);
+            border-color: rgba(15, 157, 88, 0.3);
+        }
+
         .logout-btn {
             padding: 8px 16px;
             background: rgba(220, 38, 38, 0.1);
@@ -372,6 +393,9 @@
             <div class="client-info">
                 <div class="client-avatar" id="client-avatar">?</div>
                 <span id="client-name">Loading...</span>
+                <a href="client-preferences.html" class="preferences-btn">
+                    🎨 My Preferences
+                </a>
                 <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
