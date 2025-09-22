@@ -87,19 +87,21 @@
     },
 
     "clients": {
-      ".read": "auth != null",
+      ".read": true,
+      ".write": true,
       "$uid": {
-        ".read": "auth != null && (auth.uid == $uid || root.child('users').child(auth.uid).child('isAdmin').val() == true)",
-        ".write": "auth != null && (auth.uid == $uid || root.child('users').child(auth.uid).child('isAdmin').val() == true)",
+        ".read": true,
+        ".write": true,
         ".validate": "newData.hasChildren(['name', 'email', 'role']) && newData.child('name').isString() && newData.child('email').isString() && newData.child('role').isString()"
       }
     },
 
     "clientIdMapping": {
-      ".read": "auth != null",
+      ".read": true,
+      ".write": true,
       "$clientId": {
-        ".read": "auth != null",
-        ".write": "auth != null",
+        ".read": true,
+        ".write": true,
         ".validate": "newData.hasChildren(['uid', 'email', 'name']) && newData.child('uid').isString() && newData.child('email').isString() && newData.child('name').isString()"
       }
     },
