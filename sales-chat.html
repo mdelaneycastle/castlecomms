@@ -337,10 +337,12 @@
                 <h3>Welcome to Sales Data Chat!</h3>
                 <p>I can help you analyze your sales data. Ask me questions about customers, sales totals, trends, or specific items.</p>
                 <div class="sample-questions">
-                    <div class="sample-question" onclick="askSampleQuestion(this)">Show me top 10 customers by sales</div>
+                    <div class="sample-question" onclick="askSampleQuestion(this)">Who spent the most money?</div>
+                    <div class="sample-question" onclick="askSampleQuestion(this)">In June who spent over 5k?</div>
+                    <div class="sample-question" onclick="askSampleQuestion(this)">Show me customers who spent under 1000</div>
                     <div class="sample-question" onclick="askSampleQuestion(this)">What are total sales for January 2025?</div>
-                    <div class="sample-question" onclick="askSampleQuestion(this)">Who bought the most expensive item?</div>
-                    <div class="sample-question" onclick="askSampleQuestion(this)">Show me sales by item code</div>
+                    <div class="sample-question" onclick="askSampleQuestion(this)">Top 5 customers in February</div>
+                    <div class="sample-question" onclick="askSampleQuestion(this)">How much did we sell in June?</div>
                 </div>
             </div>
         </div>
@@ -618,64 +620,298 @@
             }
 
             // Parse numeric values and dates
-            const processedData = salesData.map(row => ({
+            let processedData = salesData.map(row => ({
                 ...row,
                 SOTotal: parseFloat(row.SOTotal) || 0,
                 SODate: new Date(row.SODate)
             })).filter(row => !isNaN(row.SOTotal));
 
-            // WHO SPENT THE MOST / TOP SPENDER queries
-            if ((query.includes('who spent') && query.includes('most')) ||
-                (query.includes('highest') && query.includes('spend')) ||
-                (query.includes('biggest') && query.includes('spend')) ||
-                (query.includes('top') && query.includes('spend'))) {
-                return getTopSpender(processedData, query);
+            // Parse the query for filters and constraints
+            const queryInfo = parseQuery(query);
+
+            // Apply filters to data
+            const filteredData = applyFilters(processedData, queryInfo);
+
+            // Determine what type of response to generate
+            return generateResponse(filteredData, queryInfo, query);
+        }
+
+        function parseQuery(query) {
+            const info = {
+                intent: 'general',
+                dateFilter: null,
+                amountFilter: null,
+                customerFilter: null,
+                itemFilter: null,
+                limit: null,
+                sortBy: 'total',
+                operation: 'list'
+            };
+
+            const lowerQuery = query.toLowerCase();
+
+            // Detect intent
+            if (lowerQuery.includes('who') || lowerQuery.includes('which customer')) {
+                info.intent = 'customers';
+            } else if (lowerQuery.includes('what') || lowerQuery.includes('show me')) {
+                info.intent = 'data';
+            } else if (lowerQuery.includes('how much') || lowerQuery.includes('total')) {
+                info.intent = 'totals';
+            } else if (lowerQuery.includes('how many')) {
+                info.intent = 'counts';
             }
 
-            // Top customers queries
-            if (query.includes('top') && (query.includes('customer') || query.includes('client'))) {
-                return getTopCustomers(processedData, query);
+            // Detect operation type
+            if (lowerQuery.includes('spent most') || lowerQuery.includes('highest') || lowerQuery.includes('top')) {
+                info.operation = 'top';
+            } else if (lowerQuery.includes('spent over') || lowerQuery.includes('more than') || lowerQuery.includes('above')) {
+                info.operation = 'above';
+            } else if (lowerQuery.includes('spent under') || lowerQuery.includes('less than') || lowerQuery.includes('below')) {
+                info.operation = 'below';
             }
 
-            // MOST MONEY / HIGHEST VALUE queries
-            if ((query.includes('most money') || query.includes('most cash') ||
-                 query.includes('highest value') || query.includes('biggest purchase'))) {
-                return getTopSpender(processedData, query);
+            // Extract amounts
+            const amountMatches = lowerQuery.match(/(\d+(?:,\d{3})*(?:\.\d{2})?)\s*(?:k|thousand)?/g);
+            if (amountMatches) {
+                let amount = parseFloat(amountMatches[0].replace(/,/g, ''));
+                if (lowerQuery.includes('k') || lowerQuery.includes('thousand')) {
+                    amount *= 1000;
+                }
+
+                if (lowerQuery.includes('over') || lowerQuery.includes('more than') || lowerQuery.includes('above')) {
+                    info.amountFilter = { min: amount };
+                } else if (lowerQuery.includes('under') || lowerQuery.includes('less than') || lowerQuery.includes('below')) {
+                    info.amountFilter = { max: amount };
+                } else {
+                    info.amountFilter = { exact: amount };
+                }
             }
 
-            // PIECES / ITEMS COUNT queries
-            if (query.includes('pieces') || query.includes('items') ||
-                (query.includes('how many') && (query.includes('buy') || query.includes('bought') || query.includes('purchase')))) {
-                return getCustomerPurchaseCounts(processedData, query);
+            // Extract dates/months
+            const months = ['january', 'february', 'march', 'april', 'may', 'june',
+                          'july', 'august', 'september', 'october', 'november', 'december',
+                          'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+            for (let i = 0; i < months.length; i++) {
+                if (lowerQuery.includes(months[i])) {
+                    const monthIndex = i >= 12 ? i - 12 : i; // Handle short forms
+                    info.dateFilter = { month: monthIndex };
+                    break;
+                }
             }
 
-            // Total sales queries
-            if (query.includes('total') && query.includes('sales')) {
-                return getTotalSales(processedData, query);
+            // Extract year
+            const yearMatch = lowerQuery.match(/\b(20\d{2})\b/);
+            if (yearMatch) {
+                if (!info.dateFilter) info.dateFilter = {};
+                info.dateFilter.year = parseInt(yearMatch[1]);
             }
 
-            // Most expensive item queries
-            if ((query.includes('most expensive') || query.includes('highest')) && query.includes('item')) {
-                return getMostExpensive(processedData);
+            // Extract limits
+            const limitMatch = lowerQuery.match(/\b(top|first)\s+(\d+)\b/);
+            if (limitMatch) {
+                info.limit = parseInt(limitMatch[2]);
             }
 
-            // Sales by item code
-            if (query.includes('item code') || query.includes('itemcode')) {
-                return getSalesByItemCode(processedData);
+            // Extract customer names
+            const customerMatch = lowerQuery.match(/customer\s+([a-zA-Z\s]+?)(?:\s|$|who|what|spent)/);
+            if (customerMatch) {
+                info.customerFilter = customerMatch[1].trim();
             }
 
-            // Customer search
-            if (query.includes('customer') && (query.includes('bought') || query.includes('purchased'))) {
-                return getCustomerPurchases(processedData, query);
+            return info;
+        }
+
+        function applyFilters(data, queryInfo) {
+            let filtered = [...data];
+
+            // Apply date filter
+            if (queryInfo.dateFilter) {
+                filtered = filtered.filter(row => {
+                    const date = row.SODate;
+                    if (queryInfo.dateFilter.month !== undefined && date.getMonth() !== queryInfo.dateFilter.month) {
+                        return false;
+                    }
+                    if (queryInfo.dateFilter.year !== undefined && date.getFullYear() !== queryInfo.dateFilter.year) {
+                        return false;
+                    }
+                    return true;
+                });
             }
 
-            // Sales trends or monthly data
-            if (query.includes('january') || query.includes('jan') || query.includes('2025')) {
-                return getSalesForPeriod(processedData, query);
+            // Apply amount filter
+            if (queryInfo.amountFilter) {
+                filtered = filtered.filter(row => {
+                    if (queryInfo.amountFilter.min !== undefined && row.SOTotal <= queryInfo.amountFilter.min) {
+                        return false;
+                    }
+                    if (queryInfo.amountFilter.max !== undefined && row.SOTotal >= queryInfo.amountFilter.max) {
+                        return false;
+                    }
+                    if (queryInfo.amountFilter.exact !== undefined && row.SOTotal !== queryInfo.amountFilter.exact) {
+                        return false;
+                    }
+                    return true;
+                });
             }
 
-            // Default response with general stats
-            return getGeneralStats(processedData);
+            // Apply customer filter
+            if (queryInfo.customerFilter) {
+                filtered = filtered.filter(row => {
+                    const customerName = `${row.FirstName} ${row.LastName}`.toLowerCase();
+                    return customerName.includes(queryInfo.customerFilter.toLowerCase());
+                });
+            }
+
+            return filtered;
+        }
+
+        function generateResponse(data, queryInfo, originalQuery) {
+            if (data.length === 0) {
+                return `No data found matching your criteria. ${getFilterSummary(queryInfo)}`;
+            }
+
+            switch (queryInfo.intent) {
+                case 'customers':
+                    return getCustomerAnalysis(data, queryInfo, originalQuery);
+                case 'totals':
+                    return getTotalAnalysis(data, queryInfo, originalQuery);
+                case 'counts':
+                    return getCountAnalysis(data, queryInfo, originalQuery);
+                default:
+                    return getFilteredDataSummary(data, queryInfo, originalQuery);
+            }
+        }
+
+        function getCustomerAnalysis(data, queryInfo, originalQuery) {
+            // Group by customer
+            const customerTotals = {};
+            data.forEach(row => {
+                const customerName = `${row.FirstName} ${row.LastName}`.trim();
+                if (!customerTotals[customerName]) {
+                    customerTotals[customerName] = { total: 0, count: 0, custId: row.CustID, purchases: [] };
+                }
+                customerTotals[customerName].total += row.SOTotal;
+                customerTotals[customerName].count += 1;
+                customerTotals[customerName].purchases.push(row);
+            });
+
+            // Sort and limit
+            const customers = Object.entries(customerTotals)
+                .sort(([,a], [,b]) => b.total - a.total);
+
+            const limit = queryInfo.limit || (queryInfo.operation === 'above' || queryInfo.operation === 'below' ? 20 : 10);
+            const topCustomers = customers.slice(0, limit);
+
+            let response = `<h4>${getResponseTitle(queryInfo, originalQuery)}</h4>`;
+            response += getFilterSummary(queryInfo);
+
+            const totalValue = topCustomers.reduce((sum, [, data]) => sum + data.total, 0);
+            const totalOrders = topCustomers.reduce((sum, [, data]) => sum + data.count, 0);
+
+            response += `<div class="summary-card">`;
+            response += `<div class="summary-stats">`;
+            response += `<div class="stat-item"><div class="stat-value">${topCustomers.length}</div><div class="stat-label">Customers Found</div></div>`;
+            response += `<div class="stat-item"><div class="stat-value">£${totalValue.toLocaleString()}</div><div class="stat-label">Total Value</div></div>`;
+            response += `<div class="stat-item"><div class="stat-value">${totalOrders}</div><div class="stat-label">Total Orders</div></div>`;
+            if (totalOrders > 0) {
+                response += `<div class="stat-item"><div class="stat-value">£${Math.round(totalValue/totalOrders).toLocaleString()}</div><div class="stat-label">Avg Order</div></div>`;
+            }
+            response += `</div></div>`;
+
+            response += `<table class="data-table">`;
+            response += `<thead><tr><th>Rank</th><th>Customer</th><th>Customer ID</th><th>Total Spent</th><th>Orders</th><th>Avg Order</th></tr></thead>`;
+            response += `<tbody>`;
+
+            topCustomers.forEach(([name, data], index) => {
+                const avgOrder = Math.round(data.total / data.count);
+                response += `<tr>`;
+                response += `<td>${index + 1}</td>`;
+                response += `<td><strong>${name}</strong></td>`;
+                response += `<td>${data.custId}</td>`;
+                response += `<td>£${data.total.toLocaleString()}</td>`;
+                response += `<td>${data.count}</td>`;
+                response += `<td>£${avgOrder.toLocaleString()}</td>`;
+                response += `</tr>`;
+            });
+
+            response += `</tbody></table>`;
+            return response;
+        }
+
+        function getTotalAnalysis(data, queryInfo, originalQuery) {
+            const totalSales = data.reduce((sum, row) => sum + row.SOTotal, 0);
+            const totalOrders = data.length;
+            const uniqueCustomers = new Set(data.map(row => `${row.FirstName} ${row.LastName}`)).size;
+
+            let response = `<h4>${getResponseTitle(queryInfo, originalQuery)}</h4>`;
+            response += getFilterSummary(queryInfo);
+            response += `<div class="summary-card">`;
+            response += `<div class="summary-stats">`;
+            response += `<div class="stat-item"><div class="stat-value">£${totalSales.toLocaleString()}</div><div class="stat-label">Total Sales</div></div>`;
+            response += `<div class="stat-item"><div class="stat-value">${totalOrders}</div><div class="stat-label">Total Orders</div></div>`;
+            response += `<div class="stat-item"><div class="stat-value">${uniqueCustomers}</div><div class="stat-label">Customers</div></div>`;
+            if (totalOrders > 0) {
+                response += `<div class="stat-item"><div class="stat-value">£${Math.round(totalSales/totalOrders).toLocaleString()}</div><div class="stat-label">Avg Order</div></div>`;
+            }
+            response += `</div></div>`;
+
+            return response;
+        }
+
+        function getCountAnalysis(data, queryInfo, originalQuery) {
+            return getCustomerAnalysis(data, {...queryInfo, intent: 'customers'}, originalQuery);
+        }
+
+        function getFilteredDataSummary(data, queryInfo, originalQuery) {
+            // Default to customer analysis for most queries
+            return getCustomerAnalysis(data, queryInfo, originalQuery);
+        }
+
+        function getResponseTitle(queryInfo, originalQuery) {
+            if (originalQuery.toLowerCase().includes('who spent most') || originalQuery.toLowerCase().includes('top')) {
+                return '🏆 Top Spending Customers';
+            } else if (queryInfo.amountFilter?.min) {
+                return `💰 Customers Who Spent Over £${queryInfo.amountFilter.min.toLocaleString()}`;
+            } else if (queryInfo.amountFilter?.max) {
+                return `💰 Customers Who Spent Under £${queryInfo.amountFilter.max.toLocaleString()}`;
+            } else if (queryInfo.dateFilter) {
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                 'July', 'August', 'September', 'October', 'November', 'December'];
+                const month = queryInfo.dateFilter.month !== undefined ? monthNames[queryInfo.dateFilter.month] : '';
+                const year = queryInfo.dateFilter.year || '';
+                return `📅 Sales Data - ${month} ${year}`.trim();
+            }
+            return '📊 Sales Analysis Results';
+        }
+
+        function getFilterSummary(queryInfo) {
+            let filters = [];
+
+            if (queryInfo.dateFilter) {
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                 'July', 'August', 'September', 'October', 'November', 'December'];
+                if (queryInfo.dateFilter.month !== undefined) {
+                    filters.push(`Month: ${monthNames[queryInfo.dateFilter.month]}`);
+                }
+                if (queryInfo.dateFilter.year) {
+                    filters.push(`Year: ${queryInfo.dateFilter.year}`);
+                }
+            }
+
+            if (queryInfo.amountFilter) {
+                if (queryInfo.amountFilter.min) {
+                    filters.push(`Amount: Over £${queryInfo.amountFilter.min.toLocaleString()}`);
+                }
+                if (queryInfo.amountFilter.max) {
+                    filters.push(`Amount: Under £${queryInfo.amountFilter.max.toLocaleString()}`);
+                }
+            }
+
+            if (filters.length > 0) {
+                return `<div class="summary-card"><p><strong>Applied Filters:</strong> ${filters.join(', ')}</p></div>`;
+            }
+            return '';
         }
 
         function getTopCustomers(data, query) {
