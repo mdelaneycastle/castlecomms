@@ -449,32 +449,28 @@
         let filteredPreferences = {};
 
         document.addEventListener('DOMContentLoaded', function() {
-            checkAuthentication();
+            initializeAuth();
         });
 
-        async function checkAuthentication() {
-            try {
-                // Check if Firebase Auth is ready
-                if (!window.firebaseServices || !window.firebaseServices.auth) {
-                    throw new Error('Authentication not available');
-                }
-
-                const auth = window.firebaseServices.auth;
-                const user = auth.currentUser;
-
-                if (!user) {
-                    // Redirect to login if not authenticated
-                    window.location.href = 'index.html';
-                    return;
-                }
-
-                console.log('✅ User authenticated:', user.email);
-                loadClientPreferences();
-
-            } catch (error) {
-                console.error('Authentication error:', error);
-                showError('Authentication failed. Please log in first.');
+        function initializeAuth() {
+            // Wait for Firebase to be ready
+            if (!window.firebaseServices || !window.firebaseServices.auth) {
+                setTimeout(initializeAuth, 100);
+                return;
             }
+
+            const auth = window.firebaseServices.auth;
+
+            // Listen for auth state changes
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('✅ User authenticated:', user.email);
+                    loadClientPreferences();
+                } else {
+                    console.log('❌ No user authenticated, redirecting to login');
+                    window.location.href = 'index.html';
+                }
+            });
         }
 
         async function loadClientPreferences() {
