@@ -268,20 +268,66 @@
                     setLoading(true);
                     showStatus('Verifying credentials...', 'loading');
 
-                    // Sign in with Firebase Auth
-                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                    const user = userCredential.user;
+                    // Hash the provided password to compare with stored hash
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(password);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-                    // Verify this is a client user
-                    const clientSnapshot = await db.ref(`clients/${user.uid}`).once('value');
-                    const clientData = clientSnapshot.val();
+                    // Check if this is a client portal user (by email)
+                    let clientUser = null;
+                    let clientId = null;
 
-                    if (!clientData || clientData.role !== 'client') {
-                        await auth.signOut(); // Sign out if not a client
-                        showStatus('Access denied. This portal is for clients only.', 'error');
+                    // Search through clientIdMapping to find user by email
+                    const mappingSnapshot = await db.ref('clientIdMapping').once('value');
+                    const mappingData = mappingSnapshot.val();
+
+                    if (mappingData) {
+                        for (const [id, mapping] of Object.entries(mappingData)) {
+                            if (mapping.email === email && mapping.isClientPortalOnly) {
+                                clientId = id;
+
+                                // Get the actual client user data
+                                const clientSnapshot = await db.ref(`clientPortalUsers/${mapping.clientUid}`).once('value');
+                                clientUser = clientSnapshot.val();
+
+                                if (clientUser) {
+                                    clientUser.clientUid = mapping.clientUid;
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!clientUser) {
+                        showStatus('Access denied. No client account found with this email.', 'error');
                         setLoading(false);
                         return;
                     }
+
+                    // Verify password
+                    if (clientUser.hashedPassword !== hashedPassword) {
+                        showStatus('Invalid password.', 'error');
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Verify this is a client-portal-only user
+                    if (clientUser.role !== 'client_portal_only' || clientUser.canAccessMainSite) {
+                        showStatus('Access denied. Invalid client account type.', 'error');
+                        setLoading(false);
+                        return;
+                    }
+
+                    // Store client session info in sessionStorage (NOT Firebase Auth)
+                    sessionStorage.setItem('clientPortalUser', JSON.stringify({
+                        clientUid: clientUser.clientUid,
+                        clientId: clientId,
+                        name: clientUser.name,
+                        email: clientUser.email,
+                        loginTime: new Date().toISOString()
+                    }));
 
                     showStatus('Login successful! Redirecting...', 'success');
 

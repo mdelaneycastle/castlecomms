@@ -431,20 +431,23 @@
         });
 
         function checkAuth() {
-            if (!window.firebaseServices || !window.firebaseServices.auth) {
+            // Check for client portal session instead of Firebase Auth
+            const clientUser = sessionStorage.getItem('clientPortalUser');
+
+            if (!clientUser) {
                 window.location.href = 'client-login.html';
                 return;
             }
 
-            const auth = window.firebaseServices.auth;
-            const user = auth.currentUser;
-
-            if (!user) {
+            try {
+                const userData = JSON.parse(clientUser);
+                return userData;
+            } catch (error) {
+                console.error('Invalid session data:', error);
+                sessionStorage.removeItem('clientPortalUser');
                 window.location.href = 'client-login.html';
                 return;
             }
-
-            return user;
         }
 
         async function loadClientData() {
@@ -460,22 +463,12 @@
 
                 const db = window.firebaseServices.db;
 
-                // Load client data
-                const clientSnapshot = await db.ref(`clients/${user.uid}`).once('value');
-                const clientData = clientSnapshot.val();
+                // Update header with session data
+                document.getElementById('client-name').textContent = user.name;
+                document.getElementById('client-avatar').textContent = user.name.charAt(0).toUpperCase();
 
-                if (!clientData || clientData.role !== 'client') {
-                    await window.firebaseServices.auth.signOut();
-                    window.location.href = 'client-login.html';
-                    return;
-                }
-
-                // Update header
-                document.getElementById('client-name').textContent = clientData.name;
-                document.getElementById('client-avatar').textContent = clientData.name.charAt(0).toUpperCase();
-
-                // Load client's artworks
-                const artworksSnapshot = await db.ref(`clientArtworks/${user.uid}`).once('value');
+                // Load client's artworks using clientUid from session
+                const artworksSnapshot = await db.ref(`clientArtworks/${user.clientUid}`).once('value');
                 const artworks = artworksSnapshot.val();
 
                 hideLoading();
@@ -562,9 +555,10 @@
 
         function viewCertificate(artworkId) {
             // Open certificate in new window or modal
-            const user = window.firebaseServices.auth.currentUser;
-            if (user) {
-                window.open(`certificate.html?client=${user.uid}&artwork=${artworkId}`, '_blank', 'width=800,height=1000');
+            const clientUser = sessionStorage.getItem('clientPortalUser');
+            if (clientUser) {
+                const userData = JSON.parse(clientUser);
+                window.open(`certificate.html?client=${userData.clientUid}&artwork=${artworkId}`, '_blank', 'width=800,height=1000');
             }
         }
 
@@ -589,7 +583,8 @@
 
         async function logout() {
             try {
-                await window.firebaseServices.auth.signOut();
+                // Clear client portal session
+                sessionStorage.removeItem('clientPortalUser');
             } catch (error) {
                 console.error('Logout error:', error);
             }
