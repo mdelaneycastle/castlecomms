@@ -494,22 +494,22 @@
 
                 const db = window.firebaseServices.db;
 
-                // Load both client preferences and client profile data
-                const [preferencesSnapshot, clientsSnapshot] = await Promise.all([
+                // Load client preferences and client portal data
+                const [preferencesSnapshot, clientPortalSnapshot] = await Promise.all([
                     db.ref('client_preferences').once('value'),
-                    db.ref('clients').once('value')
+                    db.ref('clientPortalUsers').once('value')
                 ]);
 
                 const preferences = preferencesSnapshot.val() || {};
-                const clients = clientsSnapshot.val() || {};
+                const clientPortalUsers = clientPortalSnapshot.val() || {};
 
-                // Merge preferences with client profile data
+                // Merge preferences with client portal profile data
                 allPreferences = {};
-                Object.keys(preferences).forEach(uid => {
-                    if (clients[uid] && clients[uid].role === 'client') {
-                        allPreferences[uid] = {
-                            ...preferences[uid],
-                            clientProfile: clients[uid]
+                Object.keys(preferences).forEach(clientUid => {
+                    if (clientPortalUsers[clientUid] && clientPortalUsers[clientUid].role === 'client_portal_only') {
+                        allPreferences[clientUid] = {
+                            ...preferences[clientUid],
+                            clientProfile: clientPortalUsers[clientUid]
                         };
                     }
                 });
