@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EMERGENCY: Delete Firebase Auth User</title>
+</head>
+<body>
+    <h1>🚨 EMERGENCY: Delete Benjamin's Firebase Auth Account</h1>
+    <p>This will delete Benjamin Highfield's Firebase Auth account so he can't log into the main site.</p>
+
+    <button onclick="deleteBenjamin()">Delete Benjamin's Firebase Auth Account</button>
+
+    <div id="status"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        async function deleteBenjamin() {
+            try {
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    alert('You must be logged in as admin');
+                    return;
+                }
+
+                const token = await user.getIdToken();
+
+                // Delete Benjamin's Firebase Auth account
+                const response = await fetch('https://europe-west1-castle-comms.cloudfunctions.net/deleteFirebaseAuthUser', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        uid: 'jkY8tXpyMkdJckzLLqlCnZ7p4fv2'  // Benjamin's UID from logs
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                document.getElementById('status').innerHTML = `<h2 style="color: green;">✅ SUCCESS: ${result.message}</h2>`;
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('status').innerHTML = `<h2 style="color: red;">❌ ERROR: ${error.message}</h2>`;
+            }
+        }
+    </script>
+</body>
+</html>

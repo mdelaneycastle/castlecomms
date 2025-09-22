@@ -814,64 +814,100 @@ const createClient = onRequest(
           return res.status(409).json({ error: `Client ID ${clientId} already exists` });
         }
 
-        // Create Firebase Auth user
-        const userRecord = await auth.createUser({
-          email: clientEmail,
-          password: password,
-          displayName: clientName,
-          emailVerified: false
-        });
+        // DO NOT create Firebase Auth user - clients should not have main site access
+        // Instead, create a client-only record with hashed password for client portal
+        const crypto = require('crypto');
+        const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
-        // Set custom claims for the new user
-        await auth.setCustomUserClaims(userRecord.uid, {
-          role: 'client',
-          clientId: clientId
-        });
+        // Generate a unique client UID (not Firebase Auth UID)
+        const clientUid = `client_${clientId}_${Date.now()}`;
 
-        // Create client data
+        // Create client data for client portal only
         const clientData = {
           clientId: clientId,
           name: clientName,
           email: clientEmail,
-          role: 'client',
+          hashedPassword: hashedPassword,
+          role: 'client_portal_only',
           createdDate: new Date().toISOString(),
-          createdBy: decodedToken.uid
+          createdBy: decodedToken.uid,
+          canAccessMainSite: false
         };
 
-        // Store client data using Firebase UID as key
-        await database.ref(`clients/${userRecord.uid}`).set(clientData);
+        // Store client data using client UID (not Firebase Auth UID)
+        await database.ref(`clientPortalUsers/${clientUid}`).set(clientData);
 
-        // Create mapping from clientId to UID for backward compatibility
+        // Create mapping from clientId to client UID
         await database.ref(`clientIdMapping/${clientId}`).set({
-          uid: userRecord.uid,
+          clientUid: clientUid,
           email: clientEmail,
           name: clientName,
-          createdDate: new Date().toISOString()
+          createdDate: new Date().toISOString(),
+          isClientPortalOnly: true
         });
 
-        logger.info(`Client created successfully: ${clientName} (${clientEmail}) with UID: ${userRecord.uid}`);
+        logger.info(`Client portal user created: ${clientName} (${clientEmail}) with Client UID: ${clientUid}`);
 
         res.json({
           success: true,
-          uid: userRecord.uid,
+          clientUid: clientUid,
           clientId: clientId,
-          message: `Client ${clientName} created successfully`
+          message: `Client portal access created for ${clientName} - NO main site access`
         });
 
       } catch (error) {
         logger.error('Error creating client:', error);
 
-        // Handle specific Firebase Auth errors
-        if (error.code === 'auth/email-already-exists') {
-          return res.status(409).json({ error: 'Email address is already in use' });
-        } else if (error.code === 'auth/weak-password') {
-          return res.status(400).json({ error: 'Password is too weak' });
-        } else if (error.code === 'auth/invalid-email') {
-          return res.status(400).json({ error: 'Invalid email address' });
+        // Generic error for client portal creation
+        res.status(500).json({ error: 'Failed to create client portal access: ' + error.message });
+      }
+    });
+  }
+);
+
+/**
+ * EMERGENCY: Delete Firebase Auth user (for clients who shouldn't have main site access)
+ */
+const deleteFirebaseAuthUser = onRequest(
+  { region: "europe-west1" },
+  async (req, res) => {
+    corsHandler(req, res, async () => {
+      try {
+        // Check authentication
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+          return res.status(401).json({ error: 'No authorization header' });
         }
 
-        // Generic error
-        res.status(500).json({ error: 'Failed to create client: ' + error.message });
+        const token = authHeader.split('Bearer ')[1];
+        const { getAuth } = require("firebase-admin/auth");
+        const auth = getAuth();
+        const decodedToken = await auth.verifyIdToken(token);
+
+        // Check if user is admin
+        if (!decodedToken.admin) {
+          return res.status(403).json({ error: 'Admin privileges required' });
+        }
+
+        const { uid } = req.body;
+
+        if (!uid) {
+          return res.status(400).json({ error: 'Missing UID' });
+        }
+
+        // Delete the Firebase Auth user
+        await auth.deleteUser(uid);
+
+        logger.info(`EMERGENCY: Deleted Firebase Auth user with UID: ${uid}`);
+
+        res.json({
+          success: true,
+          message: `Deleted Firebase Auth user ${uid}`
+        });
+
+      } catch (error) {
+        logger.error('Error deleting Firebase Auth user:', error);
+        res.status(500).json({ error: 'Failed to delete user: ' + error.message });
       }
     });
   }
@@ -891,5 +927,6 @@ module.exports = {
   sendMessageNotification,
   scrapeArtworkData,
   scrapeArtworkHttp,
-  createClient
+  createClient,
+  deleteFirebaseAuthUser
 };
