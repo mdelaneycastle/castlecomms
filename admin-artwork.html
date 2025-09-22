@@ -649,6 +649,23 @@
         }
 
         async function createClient() {
+            // Debug: Check current user's token claims
+            try {
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    const idTokenResult = await user.getIdTokenResult();
+                    console.log('🔍 Current user token claims:', idTokenResult.claims);
+                    console.log('🔍 Admin claim value:', idTokenResult.claims.admin);
+
+                    if (!idTokenResult.claims.admin) {
+                        showClientStatus('❌ Admin privileges not found in token. Please visit admin.html and grant yourself admin privileges, then refresh this page.', 'error');
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking token claims:', error);
+            }
+
             const clientId = document.getElementById('new-client-id').value.trim();
             const clientName = document.getElementById('new-client-name').value.trim();
             const clientEmail = document.getElementById('new-client-email').value.trim();
