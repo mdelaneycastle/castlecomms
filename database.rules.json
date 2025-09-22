@@ -97,19 +97,40 @@
     },
 
     "clientIdMapping": {
-      ".read": "auth != null && auth.token.admin === true",
+      ".read": true,
       ".write": "auth != null && auth.token.admin === true",
       "$clientId": {
-        ".read": "auth != null && auth.token.admin === true",
+        ".read": true,
         ".write": "auth != null && auth.token.admin === true",
         ".validate": "newData.hasChildren(['uid', 'email', 'name']) && newData.child('uid').isString() && newData.child('email').isString() && newData.child('name').isString()"
       }
     },
 
+    "clientPortalUsers": {
+      ".read": true,
+      ".write": "auth != null && auth.token.admin === true",
+      "$clientUid": {
+        ".read": true,
+        ".write": "auth != null && auth.token.admin === true",
+        ".validate": "newData.hasChildren(['name', 'email', 'hashedPassword', 'role']) && newData.child('name').isString() && newData.child('email').isString() && newData.child('hashedPassword').isString() && newData.child('role').isString()"
+      }
+    },
+
+    "artClients": {
+      ".read": "auth != null && auth.token.admin === true",
+      ".write": "auth != null && auth.token.admin === true",
+      "$clientId": {
+        ".read": "auth != null && auth.token.admin === true",
+        ".write": "auth != null && auth.token.admin === true"
+      }
+    },
+
     "clientArtworks": {
+      ".read": "auth != null && auth.token.admin === true",
+      ".write": "auth != null && auth.token.admin === true",
       "$uid": {
-        ".read": "auth != null && (auth.uid == $uid || root.child('users').child(auth.uid).child('isAdmin').val() == true)",
-        ".write": "auth != null",
+        ".read": true,
+        ".write": "auth != null && auth.token.admin === true",
         "$artworkId": {
           ".validate": "newData.hasChildren(['title', 'artist', 'price', 'purchaseDate']) && newData.child('title').isString() && newData.child('artist').isString() && newData.child('price').isNumber() && newData.child('purchaseDate').isString()"
         }

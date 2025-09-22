@@ -631,19 +631,26 @@
             // Generate unique artwork ID
             const artworkId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
 
-            // Check if client exists, create if not
-            const clientSnapshot = await db.ref(`artClients/${clientId}`).once('value');
-            if (!clientSnapshot.exists()) {
-                // Create basic client record
-                await db.ref(`artClients/${clientId}`).set({
-                    name: `Client ${clientId}`,
-                    password: 'temp123', // Default password - should be changed
-                    createdDate: new Date().toISOString()
-                });
+            // Find client UID from clientId mapping
+            const mappingSnapshot = await db.ref('clientIdMapping').once('value');
+            const mappingData = mappingSnapshot.val();
+            let clientUid = null;
+
+            if (mappingData) {
+                for (const [id, mapping] of Object.entries(mappingData)) {
+                    if (id === clientId) {
+                        clientUid = mapping.clientUid;
+                        break;
+                    }
+                }
             }
 
-            // Save artwork to client's collection
-            await db.ref(`clientArtworks/${clientId}/${artworkId}`).set(artworkData);
+            if (!clientUid) {
+                throw new Error(`Client ${clientId} not found in client portal system. Please create the client first.`);
+            }
+
+            // Save artwork to client's collection using clientUid
+            await db.ref(`clientArtworks/${clientUid}/${artworkId}`).set(artworkData);
 
             console.log(`Artwork ${artworkId} added to client ${clientId}`);
         }
