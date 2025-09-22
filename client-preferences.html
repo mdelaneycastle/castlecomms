@@ -200,6 +200,7 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .checkbox-item:hover, .radio-item:hover {
@@ -209,6 +210,28 @@
 
         .checkbox-item input, .radio-item input {
             margin: 0;
+        }
+
+        .info-btn {
+            background: rgba(15, 157, 88, 0.1);
+            border: 1px solid rgba(15, 157, 88, 0.2);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+            transition: all 0.3s ease;
+            color: #0f9d58;
+        }
+
+        .info-btn:hover {
+            background: rgba(15, 157, 88, 0.2);
+            border-color: rgba(15, 157, 88, 0.4);
+            transform: scale(1.1);
         }
 
         .room-colors {
@@ -305,6 +328,95 @@
             border-radius: 8px;
             margin-bottom: 20px;
             text-align: center;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #F0EDE9;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(216, 209, 197, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(69, 73, 78, 0.1);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: #45494e;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6a6e73;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(69, 73, 78, 0.1);
+            color: #45494e;
+        }
+
+        .modal-content {
+            color: #45494e;
+            line-height: 1.6;
+        }
+
+        .modal-content h4 {
+            color: #0f9d58;
+            margin: 15px 0 8px 0;
+            font-size: 16px;
+        }
+
+        .modal-content p {
+            margin: 10px 0;
+        }
+
+        .modal-content ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .modal-content li {
+            margin: 5px 0;
         }
 
         @media (max-width: 768px) {
@@ -438,34 +550,42 @@
                         <label class="checkbox-item">
                             <input type="checkbox" name="art_styles" value="contemporary">
                             Contemporary
+                            <button type="button" class="info-btn" onclick="showStyleInfo('contemporary')">ℹ️</button>
                         </label>
                         <label class="checkbox-item">
                             <input type="checkbox" name="art_styles" value="traditional">
                             Traditional
+                            <button type="button" class="info-btn" onclick="showStyleInfo('traditional')">ℹ️</button>
                         </label>
                         <label class="checkbox-item">
                             <input type="checkbox" name="art_styles" value="abstract">
                             Abstract
+                            <button type="button" class="info-btn" onclick="showStyleInfo('abstract')">ℹ️</button>
                         </label>
                         <label class="checkbox-item">
                             <input type="checkbox" name="art_styles" value="landscape">
                             Landscape
+                            <button type="button" class="info-btn" onclick="showStyleInfo('landscape')">ℹ️</button>
                         </label>
                         <label class="checkbox-item">
                             <input type="checkbox" name="art_styles" value="portrait">
                             Portrait
+                            <button type="button" class="info-btn" onclick="showStyleInfo('portrait')">ℹ️</button>
                         </label>
                         <label class="checkbox-item">
                             <input type="checkbox" name="art_styles" value="still_life">
                             Still Life
+                            <button type="button" class="info-btn" onclick="showStyleInfo('still_life')">ℹ️</button>
                         </label>
                         <label class="checkbox-item">
                             <input type="checkbox" name="art_styles" value="minimalist">
                             Minimalist
+                            <button type="button" class="info-btn" onclick="showStyleInfo('minimalist')">ℹ️</button>
                         </label>
                         <label class="checkbox-item">
                             <input type="checkbox" name="art_styles" value="impressionist">
                             Impressionist
+                            <button type="button" class="info-btn" onclick="showStyleInfo('impressionist')">ℹ️</button>
                         </label>
                     </div>
                 </div>
@@ -762,6 +882,19 @@
         </form>
     </div>
 
+    <!-- Art Style Info Modal -->
+    <div class="modal-overlay" id="style-modal-overlay" onclick="closeStyleModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Art Style Information</h3>
+                <button class="modal-close" onclick="closeStyleModal()">×</button>
+            </div>
+            <div class="modal-content" id="modal-content">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -929,6 +1062,213 @@
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Save My Preferences';
+            }
+        });
+
+        // Art style information modal functions
+        const artStyleInfo = {
+            contemporary: {
+                title: "Contemporary Art",
+                content: `
+                    <p>Contemporary art refers to art created in the present day, typically from the 1970s onwards.</p>
+
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li>Created by living artists or recently deceased artists</li>
+                        <li>Reflects current social, political, and cultural issues</li>
+                        <li>Uses modern materials and innovative techniques</li>
+                        <li>Often conceptual and thought-provoking</li>
+                        <li>May incorporate digital media and technology</li>
+                    </ul>
+
+                    <h4>Perfect for:</h4>
+                    <ul>
+                        <li>Modern homes with clean lines</li>
+                        <li>Those who enjoy conversation-starting pieces</li>
+                        <li>Spaces that celebrate innovation and creativity</li>
+                    </ul>
+                `
+            },
+            traditional: {
+                title: "Traditional Art",
+                content: `
+                    <p>Traditional art follows established artistic conventions and techniques passed down through generations.</p>
+
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li>Uses classical techniques and materials</li>
+                        <li>Realistic representation of subjects</li>
+                        <li>Often depicts historical, religious, or mythological themes</li>
+                        <li>Emphasis on craftsmanship and technical skill</li>
+                        <li>Timeless aesthetic appeal</li>
+                    </ul>
+
+                    <h4>Perfect for:</h4>
+                    <ul>
+                        <li>Classic and formal home decor</li>
+                        <li>Those who appreciate historical beauty</li>
+                        <li>Spaces requiring elegant and sophisticated artwork</li>
+                    </ul>
+                `
+            },
+            abstract: {
+                title: "Abstract Art",
+                content: `
+                    <p>Abstract art uses shapes, colors, forms, and gestural marks to achieve its effect rather than depicting visual reality.</p>
+
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li>Non-representational visual language</li>
+                        <li>Emphasis on color, form, and composition</li>
+                        <li>Encourages personal interpretation</li>
+                        <li>Can be geometric or more fluid and organic</li>
+                        <li>Expresses emotions and ideas rather than objects</li>
+                    </ul>
+
+                    <h4>Perfect for:</h4>
+                    <ul>
+                        <li>Contemporary and modern interiors</li>
+                        <li>Those who enjoy open interpretation</li>
+                        <li>Spaces that benefit from bold visual impact</li>
+                    </ul>
+                `
+            },
+            landscape: {
+                title: "Landscape Art",
+                content: `
+                    <p>Landscape art depicts natural scenery such as mountains, valleys, trees, rivers, and forests.</p>
+
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li>Features natural outdoor environments</li>
+                        <li>Can range from realistic to impressionistic</li>
+                        <li>Often evokes peace and tranquility</li>
+                        <li>May include seasonal variations</li>
+                        <li>Connects viewers with nature</li>
+                    </ul>
+
+                    <h4>Perfect for:</h4>
+                    <ul>
+                        <li>Creating calming environments</li>
+                        <li>Nature lovers and outdoor enthusiasts</li>
+                        <li>Spaces that lack natural views</li>
+                        <li>Traditional and country-style homes</li>
+                    </ul>
+                `
+            },
+            portrait: {
+                title: "Portrait Art",
+                content: `
+                    <p>Portrait art focuses on representing a person or group of people, capturing their appearance, personality, and mood.</p>
+
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li>Emphasis on human subjects</li>
+                        <li>Captures facial expressions and emotions</li>
+                        <li>Can be realistic or stylized</li>
+                        <li>Often tells a story about the subject</li>
+                        <li>Creates personal connection with viewers</li>
+                    </ul>
+
+                    <h4>Perfect for:</h4>
+                    <ul>
+                        <li>Personal and intimate spaces</li>
+                        <li>Those interested in human stories</li>
+                        <li>Formal settings like studies or dining rooms</li>
+                        <li>Creating focal points in rooms</li>
+                    </ul>
+                `
+            },
+            still_life: {
+                title: "Still Life Art",
+                content: `
+                    <p>Still life art depicts inanimate objects, typically commonplace items like flowers, food, books, or household objects.</p>
+
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li>Features arranged inanimate objects</li>
+                        <li>Emphasizes composition and lighting</li>
+                        <li>Often symbolic with deeper meanings</li>
+                        <li>Demonstrates technical skill in detail</li>
+                        <li>Creates intimate, contemplative mood</li>
+                    </ul>
+
+                    <h4>Perfect for:</h4>
+                    <ul>
+                        <li>Kitchens and dining areas</li>
+                        <li>Those who appreciate subtle beauty</li>
+                        <li>Smaller, more intimate spaces</li>
+                        <li>Traditional and classical interiors</li>
+                    </ul>
+                `
+            },
+            minimalist: {
+                title: "Minimalist Art",
+                content: `
+                    <p>Minimalist art is characterized by extreme simplicity and the use of minimal compositional elements.</p>
+
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li>Simple geometric forms and clean lines</li>
+                        <li>Limited color palette</li>
+                        <li>Emphasis on space and negative space</li>
+                        <li>"Less is more" philosophy</li>
+                        <li>Focus on pure form and color</li>
+                    </ul>
+
+                    <h4>Perfect for:</h4>
+                    <ul>
+                        <li>Modern and contemporary interiors</li>
+                        <li>Those who prefer clean, uncluttered spaces</li>
+                        <li>Meditation or wellness areas</li>
+                        <li>Scandinavian and minimalist design styles</li>
+                    </ul>
+                `
+            },
+            impressionist: {
+                title: "Impressionist Art",
+                content: `
+                    <p>Impressionism captures the changing qualities of light and color in outdoor settings, often with visible brushstrokes.</p>
+
+                    <h4>Key Characteristics:</h4>
+                    <ul>
+                        <li>Visible brushstrokes and texture</li>
+                        <li>Emphasis on light and its changing qualities</li>
+                        <li>Often painted outdoors (en plein air)</li>
+                        <li>Captures momentary effects of light</li>
+                        <li>Soft, dreamy quality with vibrant colors</li>
+                    </ul>
+
+                    <h4>Perfect for:</h4>
+                    <ul>
+                        <li>Creating warm, inviting atmospheres</li>
+                        <li>Those who love soft, romantic aesthetics</li>
+                        <li>Bedrooms and living areas</li>
+                        <li>French or cottage-style interiors</li>
+                    </ul>
+                `
+            }
+        };
+
+        function showStyleInfo(style) {
+            const info = artStyleInfo[style];
+            if (!info) return;
+
+            document.getElementById('modal-title').textContent = info.title;
+            document.getElementById('modal-content').innerHTML = info.content;
+            document.getElementById('style-modal-overlay').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeStyleModal() {
+            document.getElementById('style-modal-overlay').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeStyleModal();
             }
         });
     </script>

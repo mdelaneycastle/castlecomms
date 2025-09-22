@@ -103,6 +103,15 @@
           ".validate": "newData.hasChildren(['title', 'artist', 'price', 'purchaseDate']) && newData.child('title').isString() && newData.child('artist').isString() && newData.child('price').isNumber() && newData.child('purchaseDate').isString()"
         }
       }
+    },
+
+    "client_preferences": {
+      ".read": "auth != null && auth.token.admin == true",
+      "$clientId": {
+        ".read": "root.child('artClients').child($clientId).exists() || (auth != null && auth.token.admin == true)",
+        ".write": "root.child('artClients').child($clientId).exists() || (auth != null && auth.token.admin == true)",
+        ".validate": "newData.hasChildren(['client_id', 'updated_at']) && newData.child('client_id').isString() && newData.child('updated_at').isString()"
+      }
     }
   }
 }
