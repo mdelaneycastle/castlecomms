@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Artwork Location</title>
+</head>
+<body>
+    <h1>🔧 Fix Artwork Location for Client 660927</h1>
+    <p>This will move artwork from wrong path to correct clientUid path.</p>
+
+    <button onclick="fixArtworkLocation()">Move Artwork to Correct Location</button>
+
+    <div id="status"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        async function fixArtworkLocation() {
+            try {
+                if (!window.firebaseServices || !window.firebaseServices.db) {
+                    alert('Firebase not ready');
+                    return;
+                }
+
+                const db = window.firebaseServices.db;
+
+                // Get artwork from wrong location (clientId)
+                const wrongPathSnapshot = await db.ref('clientArtworks/660927').once('value');
+                const artworks = wrongPathSnapshot.val();
+
+                if (!artworks) {
+                    document.getElementById('status').innerHTML = '<h2 style="color: red;">No artwork found at wrong path</h2>';
+                    return;
+                }
+
+                // Move to correct location (clientUid)
+                const correctPath = 'clientArtworks/client_660927_1758555980274';
+                await db.ref(correctPath).set(artworks);
+
+                // Remove from wrong location
+                await db.ref('clientArtworks/660927').remove();
+
+                document.getElementById('status').innerHTML = '<h2 style="color: green;">✅ SUCCESS: Artwork moved to correct location!</h2>';
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('status').innerHTML = `<h2 style="color: red;">❌ ERROR: ${error.message}</h2>`;
+            }
+        }
+    </script>
+</body>
+</html>

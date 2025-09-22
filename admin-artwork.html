@@ -632,22 +632,14 @@
             const artworkId = Date.now().toString() + Math.random().toString(36).substr(2, 5);
 
             // Find client UID from clientId mapping
-            const mappingSnapshot = await db.ref('clientIdMapping').once('value');
-            const mappingData = mappingSnapshot.val();
-            let clientUid = null;
+            const mappingSnapshot = await db.ref(`clientIdMapping/${clientId}`).once('value');
+            const mapping = mappingSnapshot.val();
 
-            if (mappingData) {
-                for (const [id, mapping] of Object.entries(mappingData)) {
-                    if (id === clientId) {
-                        clientUid = mapping.clientUid;
-                        break;
-                    }
-                }
-            }
-
-            if (!clientUid) {
+            if (!mapping || !mapping.clientUid) {
                 throw new Error(`Client ${clientId} not found in client portal system. Please create the client first.`);
             }
+
+            const clientUid = mapping.clientUid;
 
             // Save artwork to client's collection using clientUid
             await db.ref(`clientArtworks/${clientUid}/${artworkId}`).set(artworkData);
