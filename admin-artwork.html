@@ -656,6 +656,8 @@
                     const idTokenResult = await user.getIdTokenResult();
                     console.log('🔍 Current user token claims:', idTokenResult.claims);
                     console.log('🔍 Admin claim value:', idTokenResult.claims.admin);
+                    console.log('🔍 Your Firebase UID:', user.uid);
+                    console.log('🔍 Your email:', user.email);
 
                     if (!idTokenResult.claims.admin) {
                         showClientStatus('❌ Admin privileges not found in token. Please visit admin.html and grant yourself admin privileges, then refresh this page.', 'error');

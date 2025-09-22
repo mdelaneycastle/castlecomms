@@ -97,11 +97,11 @@
     },
 
     "clientIdMapping": {
-      ".read": "auth != null && auth.token.admin == true",
-      ".write": "auth != null && auth.token.admin == true",
+      ".read": true,
+      ".write": true,
       "$clientId": {
-        ".read": "auth != null && auth.token.admin == true",
-        ".write": "auth != null && auth.token.admin == true",
+        ".read": true,
+        ".write": true,
         ".validate": "newData.hasChildren(['uid', 'email', 'name']) && newData.child('uid').isString() && newData.child('email').isString() && newData.child('name').isString()"
       }
     },
