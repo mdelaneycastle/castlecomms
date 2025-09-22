@@ -138,10 +138,11 @@
     },
 
     "client_preferences": {
-      ".read": "auth != null",
+      ".read": true,
+      ".write": true,
       "$uid": {
-        ".read": "auth != null && (auth.uid == $uid || root.child('users').child(auth.uid).child('isAdmin').val() == true)",
-        ".write": "auth != null && (auth.uid == $uid || root.child('users').child(auth.uid).child('isAdmin').val() == true)",
+        ".read": true,
+        ".write": true,
         ".validate": "newData.hasChildren(['updated_at']) && newData.child('updated_at').isString()"
       }
     }
