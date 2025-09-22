@@ -624,9 +624,29 @@
                 SODate: new Date(row.SODate)
             })).filter(row => !isNaN(row.SOTotal));
 
+            // WHO SPENT THE MOST / TOP SPENDER queries
+            if ((query.includes('who spent') && query.includes('most')) ||
+                (query.includes('highest') && query.includes('spend')) ||
+                (query.includes('biggest') && query.includes('spend')) ||
+                (query.includes('top') && query.includes('spend'))) {
+                return getTopSpender(processedData, query);
+            }
+
             // Top customers queries
             if (query.includes('top') && (query.includes('customer') || query.includes('client'))) {
                 return getTopCustomers(processedData, query);
+            }
+
+            // MOST MONEY / HIGHEST VALUE queries
+            if ((query.includes('most money') || query.includes('most cash') ||
+                 query.includes('highest value') || query.includes('biggest purchase'))) {
+                return getTopSpender(processedData, query);
+            }
+
+            // PIECES / ITEMS COUNT queries
+            if (query.includes('pieces') || query.includes('items') ||
+                (query.includes('how many') && (query.includes('buy') || query.includes('bought') || query.includes('purchase')))) {
+                return getCustomerPurchaseCounts(processedData, query);
             }
 
             // Total sales queries
@@ -840,6 +860,108 @@
             response += `<div class="stat-item"><div class="stat-value">£${Math.round(avgOrder).toLocaleString()}</div><div class="stat-label">Avg Order</div></div>`;
             response += `</div></div>`;
 
+            return response;
+        }
+
+        function getTopSpender(data, query) {
+            // Group by customer and calculate totals
+            const customerTotals = {};
+            data.forEach(row => {
+                const customerName = `${row.FirstName} ${row.LastName}`.trim();
+                if (!customerTotals[customerName]) {
+                    customerTotals[customerName] = { total: 0, count: 0, custId: row.CustID };
+                }
+                customerTotals[customerName].total += row.SOTotal;
+                customerTotals[customerName].count += 1;
+            });
+
+            // Find the top spender
+            const topSpender = Object.entries(customerTotals)
+                .sort(([,a], [,b]) => b.total - a.total)[0];
+
+            if (!topSpender) {
+                return 'No customer data found.';
+            }
+
+            const [name, customerData] = topSpender;
+
+            let response = `<h4>🏆 Top Spending Customer</h4>`;
+            response += `<div class="summary-card">`;
+            response += `<p><strong>${name}</strong> is your highest spending customer.</p>`;
+            response += `<div class="summary-stats">`;
+            response += `<div class="stat-item"><div class="stat-value">£${customerData.total.toLocaleString()}</div><div class="stat-label">Total Spent</div></div>`;
+            response += `<div class="stat-item"><div class="stat-value">${customerData.count}</div><div class="stat-label">Items Purchased</div></div>`;
+            response += `<div class="stat-item"><div class="stat-value">£${Math.round(customerData.total/customerData.count).toLocaleString()}</div><div class="stat-label">Avg per Item</div></div>`;
+            response += `<div class="stat-item"><div class="stat-value">${customerData.custId}</div><div class="stat-label">Customer ID</div></div>`;
+            response += `</div></div>`;
+
+            // Show their recent purchases
+            const customerPurchases = data.filter(row =>
+                `${row.FirstName} ${row.LastName}`.trim() === name
+            ).sort((a, b) => b.SOTotal - a.SOTotal).slice(0, 10);
+
+            if (customerPurchases.length > 0) {
+                response += `<h4>Recent Purchases by ${name}</h4>`;
+                response += `<table class="data-table">`;
+                response += `<thead><tr><th>Item Code</th><th>Amount</th><th>Date</th></tr></thead>`;
+                response += `<tbody>`;
+
+                customerPurchases.forEach(purchase => {
+                    response += `<tr>`;
+                    response += `<td>${purchase.ItemCode}</td>`;
+                    response += `<td>£${purchase.SOTotal.toLocaleString()}</td>`;
+                    response += `<td>${purchase.SODate.toLocaleDateString()}</td>`;
+                    response += `</tr>`;
+                });
+
+                response += `</tbody></table>`;
+            }
+
+            return response;
+        }
+
+        function getCustomerPurchaseCounts(data, query) {
+            // Group by customer
+            const customerTotals = {};
+            data.forEach(row => {
+                const customerName = `${row.FirstName} ${row.LastName}`.trim();
+                if (!customerTotals[customerName]) {
+                    customerTotals[customerName] = { total: 0, count: 0, custId: row.CustID };
+                }
+                customerTotals[customerName].total += row.SOTotal;
+                customerTotals[customerName].count += 1;
+            });
+
+            // Sort by number of purchases
+            const topBuyers = Object.entries(customerTotals)
+                .sort(([,a], [,b]) => b.count - a.count)
+                .slice(0, 15);
+
+            let response = `<h4>Top Customers by Number of Purchases</h4>`;
+
+            const totalPurchases = topBuyers.reduce((sum, [, data]) => sum + data.count, 0);
+            response += `<div class="summary-card">`;
+            response += `<div class="summary-stats">`;
+            response += `<div class="stat-item"><div class="stat-value">${totalPurchases}</div><div class="stat-label">Total Purchases</div></div>`;
+            response += `<div class="stat-item"><div class="stat-value">${topBuyers[0][1].count}</div><div class="stat-label">Most by One Customer</div></div>`;
+            response += `</div></div>`;
+
+            response += `<table class="data-table">`;
+            response += `<thead><tr><th>Rank</th><th>Customer</th><th>Items Bought</th><th>Total Spent</th><th>Avg per Item</th></tr></thead>`;
+            response += `<tbody>`;
+
+            topBuyers.forEach(([name, data], index) => {
+                const avgPerItem = Math.round(data.total / data.count);
+                response += `<tr>`;
+                response += `<td>${index + 1}</td>`;
+                response += `<td><strong>${name}</strong></td>`;
+                response += `<td>${data.count}</td>`;
+                response += `<td>£${data.total.toLocaleString()}</td>`;
+                response += `<td>£${avgPerItem.toLocaleString()}</td>`;
+                response += `</tr>`;
+            });
+
+            response += `</tbody></table>`;
             return response;
         }
 
