@@ -913,6 +913,132 @@ const deleteFirebaseAuthUser = onRequest(
   }
 );
 
+// Fetch Shopify Sitemap Data
+exports.fetchSitemapData = onRequest(
+  { cors: corsOptions },
+  async (req, res) => {
+    try {
+      // Verify admin authentication
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Authorization header required' });
+      }
+
+      const token = authHeader.split('Bearer ')[1];
+      const { getAuth } = require("firebase-admin/auth");
+      const auth = getAuth();
+      const decodedToken = await auth.verifyIdToken(token);
+
+      if (!decodedToken.admin) {
+        return res.status(403).json({ error: 'Admin privileges required' });
+      }
+
+      const { url } = req.body;
+      if (!url) {
+        return res.status(400).json({ error: 'Sitemap URL required' });
+      }
+
+      // Fetch the sitemap XML using axios
+      const axios = require('axios');
+      const response = await axios.get(url, {
+        timeout: 30000,
+        headers: {
+          'User-Agent': 'Castle-Comms-Bot/1.0'
+        }
+      });
+
+      const xmlText = response.data;
+
+      // Parse XML using cheerio
+      const cheerio = require('cheerio');
+      const $ = cheerio.load(xmlText, {
+        xmlMode: true,
+        decodeEntities: false
+      });
+
+      const products = [];
+
+      // Process each URL element
+      $('url').each((index, element) => {
+        try {
+          const $url = $(element);
+          const loc = $url.find('loc').text();
+
+          if (!loc || !loc.includes('/products/')) {
+            return; // continue
+          }
+
+          const $imageElement = $url.find('image\\:image').first();
+          if ($imageElement.length === 0) {
+            return; // continue
+          }
+
+          const imageUrl = $imageElement.find('image\\:loc').text();
+          const imageTitle = $imageElement.find('image\\:title').text();
+          const imageCaption = $imageElement.find('image\\:caption').text();
+
+          if (!imageUrl || !imageTitle) {
+            return; // continue
+          }
+
+          const productSlug = loc.split('/products/')[1];
+          const artistName = extractArtistName(imageTitle, imageCaption, productSlug);
+
+          products.push({
+            url: loc,
+            imageUrl: imageUrl,
+            title: imageTitle,
+            caption: imageCaption || '',
+            productSlug: productSlug,
+            artistName: artistName,
+            searchText: `${imageTitle} ${imageCaption} ${productSlug} ${artistName}`.toLowerCase()
+          });
+        } catch (parseError) {
+          logger.warn('Error parsing product:', parseError);
+        }
+      });
+
+      logger.info(`Parsed ${products.length} products from sitemap: ${url}`);
+
+      res.json({
+        success: true,
+        products: products,
+        count: products.length
+      });
+
+    } catch (error) {
+      logger.error('Error fetching sitemap:', error);
+      res.status(500).json({ error: 'Failed to fetch sitemap: ' + error.message });
+    }
+  }
+);
+
+function extractArtistName(title, caption, slug) {
+  const sources = [title, caption, slug].filter(Boolean);
+
+  for (const source of sources) {
+    const patterns = [
+      /^([A-Za-z\s]+?)(?:\s-\s|$)/,
+      /^by\s+([A-Za-z\s]+)/i,
+      /([A-Za-z]+\s[A-Za-z]+)/
+    ];
+
+    for (const pattern of patterns) {
+      const match = source.match(pattern);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+  }
+
+  const slugParts = slug.split('-');
+  if (slugParts.length >= 2) {
+    return slugParts.slice(0, 2).join(' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  return 'Unknown Artist';
+}
+
 // Import scraping functions
 const { scrapeArtworkData, scrapeArtworkHttp } = require('./scrapeArtwork');
 

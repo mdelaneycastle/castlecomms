@@ -401,103 +401,43 @@
         }
 
         async function fetchSitemapProducts(url) {
-            // Use CORS proxy to fetch external sitemap
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-
-            const response = await fetch(proxyUrl);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch sitemap: ${response.status}`);
-            }
-
-            const xmlText = await response.text();
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-
-            const products = [];
-            const urlElements = xmlDoc.getElementsByTagName('url');
-
-            for (let i = 0; i < urlElements.length; i++) {
-                const urlElement = urlElements[i];
-                const product = parseProductFromXML(urlElement);
-
-                if (product) {
-                    products.push(product);
-                }
-            }
-
-            return products;
-        }
-
-        function parseProductFromXML(urlElement) {
             try {
-                const loc = urlElement.getElementsByTagName('loc')[0]?.textContent;
-                if (!loc || !loc.includes('/products/')) {
-                    return null;
+                console.log(`Fetching sitemap via Cloud Function: ${url}`);
+
+                // Get current user token for authentication
+                const auth = window.firebaseServices.auth;
+                const user = auth.currentUser;
+                const token = await user.getIdToken();
+
+                const response = await fetch('https://europe-west1-castle-comms.cloudfunctions.net/fetchSitemapData', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                const imageElements = urlElement.getElementsByTagName('image:image');
-                if (imageElements.length === 0) {
-                    return null;
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to fetch sitemap data');
                 }
 
-                const imageElement = imageElements[0];
-                const imageUrl = imageElement.getElementsByTagName('image:loc')[0]?.textContent;
-                const imageTitle = imageElement.getElementsByTagName('image:title')[0]?.textContent;
-                const imageCaption = imageElement.getElementsByTagName('image:caption')[0]?.textContent;
+                console.log(`✅ Successfully loaded ${data.products.length} products from ${url}`);
+                return data.products;
 
-                if (!imageUrl || !imageTitle) {
-                    return null;
-                }
-
-                // Extract product slug from URL
-                const productSlug = loc.split('/products/')[1];
-
-                // Extract artist name from title or caption
-                const artistName = extractArtistName(imageTitle, imageCaption, productSlug);
-
-                return {
-                    url: loc,
-                    imageUrl: imageUrl,
-                    title: imageTitle,
-                    caption: imageCaption || '',
-                    productSlug: productSlug,
-                    artistName: artistName,
-                    searchText: `${imageTitle} ${imageCaption} ${productSlug} ${artistName}`.toLowerCase()
-                };
             } catch (error) {
-                console.error('Error parsing product XML:', error);
-                return null;
+                console.error(`❌ Failed to fetch sitemap ${url}:`, error);
+                throw error;
             }
         }
 
-        function extractArtistName(title, caption, slug) {
-            // Try to extract artist name from various sources
-            const sources = [title, caption, slug].filter(Boolean);
-
-            for (const source of sources) {
-                // Look for common artist name patterns
-                const patterns = [
-                    /^([A-Za-z\s]+?)(?:\s-\s|$)/,  // "Artist Name - Title" or "Artist Name"
-                    /^by\s+([A-Za-z\s]+)/i,       // "by Artist Name"
-                    /([A-Za-z]+\s[A-Za-z]+)/      // Two word names
-                ];
-
-                for (const pattern of patterns) {
-                    const match = source.match(pattern);
-                    if (match && match[1]) {
-                        return match[1].trim();
-                    }
-                }
-            }
-
-            // Fallback: extract from slug
-            const slugParts = slug.split('-');
-            if (slugParts.length >= 2) {
-                return slugParts.slice(0, 2).join(' ').replace(/\b\w/g, l => l.toUpperCase());
-            }
-
-            return 'Unknown Artist';
-        }
 
         function setupSearch() {
             const searchInput = document.getElementById('searchInput');
