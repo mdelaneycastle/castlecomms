@@ -300,6 +300,10 @@
                     <input type="text" id="new-client-name" placeholder="Client Full Name">
                 </div>
                 <div class="form-group">
+                    <label for="new-client-email">Client Email</label>
+                    <input type="email" id="new-client-email" placeholder="client@example.com">
+                </div>
+                <div class="form-group">
                     <label for="new-client-password">Password</label>
                     <input type="text" id="new-client-password" placeholder="Default: temp123">
                 </div>
@@ -645,6 +649,7 @@
         async function createClient() {
             const clientId = document.getElementById('new-client-id').value.trim();
             const clientName = document.getElementById('new-client-name').value.trim();
+            const clientEmail = document.getElementById('new-client-email').value.trim();
             const password = document.getElementById('new-client-password').value.trim() || 'temp123';
 
             // Validate client ID (6 digits only)
@@ -658,8 +663,13 @@
                 return;
             }
 
+            if (!clientEmail || !clientEmail.includes('@')) {
+                showClientStatus('Valid email address is required', 'error');
+                return;
+            }
+
             try {
-                showClientStatus('Creating client...', 'loading');
+                showClientStatus('Creating client account...', 'loading');
 
                 if (!window.isFirebaseReady()) {
                     throw new Error('Firebase not ready');
@@ -668,32 +678,66 @@
                 const db = firebase.database();
 
                 // Check if client ID already exists
-                const existingClient = await db.ref(`artClients/${clientId}`).once('value');
-                if (existingClient.exists()) {
+                const existingClientId = await db.ref(`clients/${clientId}`).once('value');
+                if (existingClientId.exists()) {
                     showClientStatus(`Client ID ${clientId} already exists`, 'error');
                     return;
                 }
 
-                // Create new client
+                // Create Firebase Auth user using Admin SDK (requires Cloud Function)
+                // For now, we'll create the user directly and set custom claims later
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(clientEmail, password);
+                const user = userCredential.user;
+
+                // Update user profile with display name
+                await user.updateProfile({
+                    displayName: clientName
+                });
+
+                // Set custom claims for client role (this would typically be done via Admin SDK/Cloud Function)
+                // For demo purposes, we'll store the role in the database
                 const clientData = {
+                    clientId: clientId,
                     name: clientName,
-                    password: password,
+                    email: clientEmail,
+                    role: 'client',
                     createdDate: new Date().toISOString(),
-                    createdBy: firebase.auth().currentUser.email
+                    createdBy: firebase.auth().currentUser?.email || 'admin'
                 };
 
-                await db.ref(`artClients/${clientId}`).set(clientData);
+                // Store client data using Firebase UID as key
+                await db.ref(`clients/${user.uid}`).set(clientData);
 
-                showClientStatus(`Client ${clientId} created successfully!`, 'success');
+                // Also create a mapping from clientId to UID for backward compatibility
+                await db.ref(`clientIdMapping/${clientId}`).set({
+                    uid: user.uid,
+                    email: clientEmail,
+                    name: clientName
+                });
+
+                showClientStatus(`Client ${clientName} created successfully! UID: ${user.uid}`, 'success');
 
                 // Clear form
                 document.getElementById('new-client-id').value = '';
                 document.getElementById('new-client-name').value = '';
+                document.getElementById('new-client-email').value = '';
                 document.getElementById('new-client-password').value = '';
 
             } catch (error) {
                 console.error('Client creation error:', error);
-                showClientStatus('Failed to create client. Please try again.', 'error');
+
+                let errorMessage = 'Failed to create client. ';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage += 'Email address is already in use.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage += 'Password is too weak.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage += 'Invalid email address.';
+                } else {
+                    errorMessage += error.message;
+                }
+
+                showClientStatus(errorMessage, 'error');
             }
         }
 

@@ -904,12 +904,17 @@
     <script src="firebase-init.js"></script>
 
     <script>
-        let clientId = null;
+        let currentUser = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Get client ID from session storage
-            clientId = sessionStorage.getItem('clientId');
-            if (!clientId) {
+            // Check Firebase Auth
+            if (!window.firebaseServices || !window.firebaseServices.auth) {
+                window.location.href = 'client-login.html';
+                return;
+            }
+
+            currentUser = window.firebaseServices.auth.currentUser;
+            if (!currentUser) {
                 window.location.href = 'client-login.html';
                 return;
             }
@@ -931,7 +936,7 @@
                 }
 
                 const db = window.firebaseServices.db;
-                const snapshot = await db.ref(`client_preferences/${clientId}`).once('value');
+                const snapshot = await db.ref(`client_preferences/${currentUser.uid}`).once('value');
                 const preferences = snapshot.val();
 
                 if (preferences) {
@@ -1045,11 +1050,10 @@
 
                 // Add metadata
                 preferences.updated_at = new Date().toISOString();
-                preferences.client_id = clientId;
 
                 // Save to Firebase
                 const db = window.firebaseServices.db;
-                await db.ref(`client_preferences/${clientId}`).set(preferences);
+                await db.ref(`client_preferences/${currentUser.uid}`).set(preferences);
 
                 successMsg.style.display = 'block';
                 this.scrollIntoView({ behavior: 'smooth' });

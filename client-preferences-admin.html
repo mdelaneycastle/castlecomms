@@ -493,10 +493,27 @@
                 }
 
                 const db = window.firebaseServices.db;
-                const snapshot = await db.ref('client_preferences').once('value');
-                const preferences = snapshot.val();
 
-                allPreferences = preferences || {};
+                // Load both client preferences and client profile data
+                const [preferencesSnapshot, clientsSnapshot] = await Promise.all([
+                    db.ref('client_preferences').once('value'),
+                    db.ref('clients').once('value')
+                ]);
+
+                const preferences = preferencesSnapshot.val() || {};
+                const clients = clientsSnapshot.val() || {};
+
+                // Merge preferences with client profile data
+                allPreferences = {};
+                Object.keys(preferences).forEach(uid => {
+                    if (clients[uid] && clients[uid].role === 'client') {
+                        allPreferences[uid] = {
+                            ...preferences[uid],
+                            clientProfile: clients[uid]
+                        };
+                    }
+                });
+
                 filteredPreferences = { ...allPreferences };
 
                 updateStats();
@@ -555,13 +572,13 @@
 
             noResults.style.display = 'none';
 
-            grid.innerHTML = clientIds.map(clientId => {
-                const prefs = filteredPreferences[clientId];
-                return createClientCard(clientId, prefs);
+            grid.innerHTML = clientIds.map(uid => {
+                const prefs = filteredPreferences[uid];
+                return createClientCard(uid, prefs);
             }).join('');
         }
 
-        function createClientCard(clientId, prefs) {
+        function createClientCard(uid, prefs) {
             const formatDate = (dateString) => {
                 if (!dateString) return 'Never';
                 return new Date(dateString).toLocaleDateString();
@@ -590,12 +607,16 @@
                 }).filter(Boolean).join('');
             };
 
+            const clientProfile = prefs.clientProfile || {};
+            const clientName = clientProfile.name || 'Unknown Client';
+            const clientId = clientProfile.clientId || 'N/A';
+
             return `
                 <div class="client-card">
                     <div class="client-header">
                         <div>
-                            <div class="client-name">Client ${clientId}</div>
-                            <div class="client-id">ID: ${clientId}</div>
+                            <div class="client-name">${clientName}</div>
+                            <div class="client-id">Client ID: ${clientId} | UID: ${uid.substring(0, 8)}...</div>
                         </div>
                     </div>
 

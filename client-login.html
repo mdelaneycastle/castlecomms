@@ -208,13 +208,17 @@
 
         <form id="client-login-form">
             <div class="form-group">
-                <label for="client-id">Client ID</label>
-                <input type="text" id="client-id" name="client-id" required>
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
+            </div>
+
+            <div class="form-group">
+                <a href="#" onclick="showForgotPassword()" style="color: #0f9d58; text-decoration: none; font-size: 14px;">Forgot Password?</a>
             </div>
 
             <button type="submit" class="login-btn" id="login-btn">
@@ -235,24 +239,25 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if Firebase Database is ready (we don't need Auth for client pages)
-            if (!window.firebaseServices || !window.firebaseServices.db) {
-                showStatus('Database connection failed', 'error');
+            // Check if Firebase is ready
+            if (!window.firebaseServices || !window.firebaseServices.auth || !window.firebaseServices.db) {
+                showStatus('Firebase connection failed', 'error');
                 return;
             }
 
-            const db = firebase.database();
+            const auth = window.firebaseServices.auth;
+            const db = window.firebaseServices.db;
             const form = document.getElementById('client-login-form');
             const loginBtn = document.getElementById('login-btn');
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                const clientId = document.getElementById('client-id').value.trim();
+                const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
 
-                if (!clientId || !password) {
-                    showStatus('Please enter both Client ID and Password', 'error');
+                if (!email || !password) {
+                    showStatus('Please enter both email and password', 'error');
                     return;
                 }
 
@@ -260,26 +265,20 @@
                     setLoading(true);
                     showStatus('Verifying credentials...', 'loading');
 
-                    // Check client credentials in Firebase
-                    const clientSnapshot = await db.ref(`artClients/${clientId}`).once('value');
+                    // Sign in with Firebase Auth
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+
+                    // Verify this is a client user
+                    const clientSnapshot = await db.ref(`clients/${user.uid}`).once('value');
                     const clientData = clientSnapshot.val();
 
-                    if (!clientData) {
-                        showStatus('Invalid Client ID', 'error');
+                    if (!clientData || clientData.role !== 'client') {
+                        await auth.signOut(); // Sign out if not a client
+                        showStatus('Access denied. This portal is for clients only.', 'error');
                         setLoading(false);
                         return;
                     }
-
-                    // Simple password verification (in production, use proper hashing)
-                    if (clientData.password !== password) {
-                        showStatus('Invalid Password', 'error');
-                        setLoading(false);
-                        return;
-                    }
-
-                    // Store client session
-                    sessionStorage.setItem('clientId', clientId);
-                    sessionStorage.setItem('clientName', clientData.name || 'Client');
 
                     showStatus('Login successful! Redirecting...', 'success');
 
@@ -289,7 +288,21 @@
 
                 } catch (error) {
                     console.error('Login error:', error);
-                    showStatus('Login failed. Please try again.', 'error');
+
+                    let errorMessage = 'Login failed. ';
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage += 'No account found with this email.';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMessage += 'Incorrect password.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage += 'Invalid email address.';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        errorMessage += 'Too many failed attempts. Please try again later.';
+                    } else {
+                        errorMessage += 'Please try again.';
+                    }
+
+                    showStatus(errorMessage, 'error');
                     setLoading(false);
                 }
             });
@@ -312,6 +325,26 @@
                 loginBtn.textContent = loading ? 'Verifying...' : 'Access Portfolio';
             }
         });
+
+        function showForgotPassword() {
+            const email = document.getElementById('email').value.trim();
+
+            if (!email) {
+                alert('Please enter your email address first, then click "Forgot Password?"');
+                return;
+            }
+
+            if (confirm(`Send password reset email to ${email}?`)) {
+                firebase.auth().sendPasswordResetEmail(email)
+                    .then(() => {
+                        alert('Password reset email sent! Check your inbox.');
+                    })
+                    .catch((error) => {
+                        console.error('Password reset error:', error);
+                        alert('Error sending password reset email. Please contact support.');
+                    });
+            }
+        }
     </script>
 </body>
 </html>

@@ -86,18 +86,27 @@
       }
     },
 
-    "artClients": {
+    "clients": {
+      ".read": "auth != null && auth.token.admin == true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
+        ".write": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
+        ".validate": "newData.hasChildren(['name', 'email', 'role']) && newData.child('name').isString() && newData.child('email').isString() && newData.child('role').isString()"
+      }
+    },
+
+    "clientIdMapping": {
       ".read": "auth != null && auth.token.admin == true",
       "$clientId": {
         ".read": "auth != null && auth.token.admin == true",
         ".write": "auth != null && auth.token.admin == true",
-        ".validate": "newData.hasChildren(['name', 'password', 'createdDate']) && newData.child('name').isString() && newData.child('password').isString() && newData.child('createdDate').isString()"
+        ".validate": "newData.hasChildren(['uid', 'email', 'name']) && newData.child('uid').isString() && newData.child('email').isString() && newData.child('name').isString()"
       }
     },
 
     "clientArtworks": {
-      "$clientId": {
-        ".read": "auth != null && auth.token.admin == true",
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
         ".write": "auth != null && auth.token.admin == true",
         "$artworkId": {
           ".validate": "newData.hasChildren(['title', 'artist', 'price', 'purchaseDate']) && newData.child('title').isString() && newData.child('artist').isString() && newData.child('price').isNumber() && newData.child('purchaseDate').isString()"
@@ -107,10 +116,10 @@
 
     "client_preferences": {
       ".read": "auth != null && auth.token.admin == true",
-      "$clientId": {
-        ".read": "true",
-        ".write": "true",
-        ".validate": "newData.hasChildren(['client_id', 'updated_at']) && newData.child('client_id').isString() && newData.child('updated_at').isString() && newData.child('client_id').val() == $clientId"
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
+        ".write": "auth != null && (auth.uid == $uid || auth.token.admin == true)",
+        ".validate": "newData.hasChildren(['updated_at']) && newData.child('updated_at').isString()"
       }
     }
   }

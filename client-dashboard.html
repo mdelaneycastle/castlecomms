@@ -431,32 +431,51 @@
         });
 
         function checkAuth() {
-            const clientId = sessionStorage.getItem('clientId');
-            if (!clientId) {
+            if (!window.firebaseServices || !window.firebaseServices.auth) {
                 window.location.href = 'client-login.html';
                 return;
             }
+
+            const auth = window.firebaseServices.auth;
+            const user = auth.currentUser;
+
+            if (!user) {
+                window.location.href = 'client-login.html';
+                return;
+            }
+
+            return user;
         }
 
         async function loadClientData() {
             try {
-                const clientId = sessionStorage.getItem('clientId');
-                const clientName = sessionStorage.getItem('clientName');
+                const user = checkAuth();
+                if (!user) return;
 
-                // Update header
-                document.getElementById('client-name').textContent = clientName;
-                document.getElementById('client-avatar').textContent = clientName.charAt(0).toUpperCase();
-
-                // Check if Firebase Database is ready (we don't need Auth for client pages)
+                // Check if Firebase Database is ready
                 if (!window.firebaseServices || !window.firebaseServices.db) {
                     showError('Database connection failed');
                     return;
                 }
 
-                const db = firebase.database();
+                const db = window.firebaseServices.db;
+
+                // Load client data
+                const clientSnapshot = await db.ref(`clients/${user.uid}`).once('value');
+                const clientData = clientSnapshot.val();
+
+                if (!clientData || clientData.role !== 'client') {
+                    await window.firebaseServices.auth.signOut();
+                    window.location.href = 'client-login.html';
+                    return;
+                }
+
+                // Update header
+                document.getElementById('client-name').textContent = clientData.name;
+                document.getElementById('client-avatar').textContent = clientData.name.charAt(0).toUpperCase();
 
                 // Load client's artworks
-                const artworksSnapshot = await db.ref(`clientArtworks/${clientId}`).once('value');
+                const artworksSnapshot = await db.ref(`clientArtworks/${user.uid}`).once('value');
                 const artworks = artworksSnapshot.val();
 
                 hideLoading();
@@ -543,8 +562,10 @@
 
         function viewCertificate(artworkId) {
             // Open certificate in new window or modal
-            const clientId = sessionStorage.getItem('clientId');
-            window.open(`certificate.html?client=${clientId}&artwork=${artworkId}`, '_blank', 'width=800,height=1000');
+            const user = window.firebaseServices.auth.currentUser;
+            if (user) {
+                window.open(`certificate.html?client=${user.uid}&artwork=${artworkId}`, '_blank', 'width=800,height=1000');
+            }
         }
 
         function hideLoading() {
@@ -566,9 +587,12 @@
             `;
         }
 
-        function logout() {
-            sessionStorage.removeItem('clientId');
-            sessionStorage.removeItem('clientName');
+        async function logout() {
+            try {
+                await window.firebaseServices.auth.signOut();
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
             window.location.href = 'client-login.html';
         }
     </script>
