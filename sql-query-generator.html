@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natural Language to SQL Query Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        #queryInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.3s ease;
+        }
+
+        #queryInput:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .button-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background: #1e3c72;
+        }
+
+        .clear-btn {
+            background: #dc3545;
+        }
+
+        .clear-btn:hover {
+            background: #c82333;
+        }
+
+        .output-section {
+            margin-top: 30px;
+        }
+
+        .output-section h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+        }
+
+        #sqlOutput {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+            background: #28a745;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+        }
+
+        .examples {
+            margin-top: 30px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .examples h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+        }
+
+        .example-queries {
+            display: grid;
+            gap: 10px;
+        }
+
+        .example-query {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border-left: 4px solid #2a5298;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .example-query:hover {
+            background: #e3f2fd;
+        }
+
+        .help-section {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+        }
+
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .keyword-matches {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 SQL Query Generator</h1>
+            <p>Convert natural language questions into SQL queries for your Halcyon database</p>
+        </div>
+
+        <div class="main-content">
+            <div class="alert alert-info">
+                <strong>How it works:</strong> Type your question in plain English below. The system will analyze your keywords and generate a SQL query that you can copy and paste into DBeaver or any SQL client.
+            </div>
+
+            <div class="input-section">
+                <h3>Ask Your Question</h3>
+                <textarea id="queryInput" placeholder="Example: Show me sales by gallery last month&#10;Example: Who are the top 5 customers by spending?&#10;Example: Find all orders over £1000 this year"></textarea>
+
+                <div class="button-group">
+                    <button onclick="generateSQL()">Generate SQL Query</button>
+                    <button onclick="clearAll()" class="clear-btn">Clear All</button>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h3>Generated SQL Query</h3>
+                <div id="sqlOutput">Your SQL query will appear here...</div>
+                <button onclick="copyToClipboard()" class="copy-btn">Copy to Clipboard</button>
+                <div id="keywordMatches" class="keyword-matches" style="display: none;"></div>
+            </div>
+
+            <div class="examples">
+                <h3>Example Questions You Can Ask</h3>
+                <div class="example-queries">
+                    <div class="example-query" onclick="setQuery(this.textContent)">Top 10 customers from Manchester over the last 6 months</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Sales by gallery in 2024</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Orders from London gallery this month</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Best customers from Birmingham this year</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Sales by salesperson last quarter</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Orders over £5000 in the last 3 months</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Sales orders from January 2024</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Top 5 customers from Glasgow in 2023</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Average order value by gallery this year</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Orders from Edinburgh gallery last month</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Customers from Bristol gallery with gmail addresses</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Orders from yesterday</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">YTD sales by gallery</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Customers who haven't bought anything in 6 months</div>
+                    <div class="example-query" onclick="setQuery(this.textContent)">Manchester gallery orders over £1000 this year</div>
+                </div>
+            </div>
+
+            <div class="help-section">
+                <h3>💡 Tips for Better Results</h3>
+                <ul>
+                    <li>Use specific terms like "gallery", "customer", "orders", "sales"</li>
+                    <li>Include time periods: "last month", "this year", "2024", "last 6 months"</li>
+                    <li>Specify amounts: "over £1000", "less than £500"</li>
+                    <li>Use comparison words: "top", "highest", "lowest", "average"</li>
+                    <li>Be specific about what you want to see: "show", "find", "list"</li>
+                </ul>
+
+                <h3>📅 Date Format Examples</h3>
+                <ul>
+                    <li><strong>Specific years:</strong> "2024", "2023", "sales in 2024"</li>
+                    <li><strong>Months:</strong> "January 2024", "this month", "last month"</li>
+                    <li><strong>Relative periods:</strong> "last 6 months", "past 3 months", "last 30 days"</li>
+                    <li><strong>Quarters:</strong> "this quarter", "last quarter", "Q1 2024"</li>
+                    <li><strong>Year to date:</strong> "YTD", "year to date", "this year so far"</li>
+                    <li><strong>Recent:</strong> "today", "yesterday", "this week", "last week"</li>
+                    <li><strong>Ranges:</strong> "between 2024-01-01 and 2024-12-31"</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Comprehensive keyword mapping based on your schema
+        const keywordMappings = {
+            // Table references
+            'customer': ['Hal_Customers', 'c'],
+            'customers': ['Hal_Customers', 'c'],
+            'client': ['Hal_Customers', 'c'],
+            'clients': ['Hal_Customers', 'c'],
+            'people': ['Hal_Customers', 'c'],
+            'person': ['Hal_Customers', 'c'],
+
+            'gallery': ['Hal_GalleryMaster', 'g'],
+            'galleries': ['Hal_GalleryMaster', 'g'],
+            'location': ['Hal_GalleryMaster', 'g'],
+            'locations': ['Hal_GalleryMaster', 'g'],
+            'store': ['Hal_GalleryMaster', 'g'],
+            'stores': ['Hal_GalleryMaster', 'g'],
+            'branch': ['Hal_GalleryMaster', 'g'],
+            'branches': ['Hal_GalleryMaster', 'g'],
+
+            'order': ['Hal_SalesOrderHeader', 'soh'],
+            'orders': ['Hal_SalesOrderHeader', 'soh'],
+            'sales': ['Hal_SalesOrderHeader', 'soh'],
+            'sale': ['Hal_SalesOrderHeader', 'soh'],
+            'transaction': ['Hal_SalesOrderHeader', 'soh'],
+            'transactions': ['Hal_SalesOrderHeader', 'soh'],
+            'purchase': ['Hal_SalesOrderHeader', 'soh'],
+            'purchases': ['Hal_SalesOrderHeader', 'soh'],
+
+            'items': ['Hal_SalesOrderDetails', 'sod'],
+            'item': ['Hal_SalesOrderDetails', 'sod'],
+            'products': ['Hal_SalesOrderDetails', 'sod'],
+            'product': ['Hal_SalesOrderDetails', 'sod'],
+            'artwork': ['Hal_SalesOrderDetails', 'sod'],
+            'artworks': ['Hal_SalesOrderDetails', 'sod'],
+            'pieces': ['Hal_SalesOrderDetails', 'sod'],
+            'piece': ['Hal_SalesOrderDetails', 'sod'],
+
+            'salesperson': ['Hal_SalesPerson', 'sp'],
+            'salesmeople': ['Hal_SalesPerson', 'sp'],
+            'staff': ['Hal_SalesPerson', 'sp'],
+            'employee': ['Hal_SalesPerson', 'sp'],
+            'employees': ['Hal_SalesPerson', 'sp'],
+            'rep': ['Hal_SalesPerson', 'sp'],
+            'reps': ['Hal_SalesPerson', 'sp'],
+
+            // Customer fields
+            'name': ['FirstName', 'LastName', 'c.FirstName', 'c.LastName'],
+            'firstname': ['FirstName', 'c.FirstName'],
+            'lastname': ['LastName', 'c.LastName'],
+            'surname': ['LastName', 'c.LastName'],
+            'email': ['Email', 'c.Email'],
+            'phone': ['Mobile', 'Homephone', 'Workphone', 'c.Mobile', 'c.Homephone'],
+            'mobile': ['Mobile', 'c.Mobile'],
+            'address': ['Home_Address', 'Business_Address', 'Billing_Address', 'Delivery_Address'],
+            'postcode': ['Home_PostCode', 'Business_PostCode', 'Billing_PostCode'],
+            'balance': ['Balance', 'SageBalance', 'c.Balance'],
+            'credit': ['CreditLimit', 'CrNoteAmount', 'c.CreditLimit'],
+            'birthday': ['BirthDay', 'c.BirthDay'],
+            'anniversary': ['Anniversary', 'c.Anniversary'],
+
+            // Order fields
+            'total': ['SOTotal', 'soh.SOTotal'],
+            'amount': ['SOTotal', 'SoldPrice', 'soh.SOTotal', 'sod.SoldPrice'],
+            'value': ['SOTotal', 'SoldPrice', 'soh.SOTotal', 'sod.SoldPrice'],
+            'price': ['SoldPrice', 'RetailPrice', 'sod.SoldPrice', 'sod.RetailPrice'],
+            'cost': ['SoldPrice', 'FramingCost', 'sod.SoldPrice', 'sod.FramingCost'],
+            'date': ['SODate', 'Order_Date', 'Invoice_Date', 'soh.SODate'],
+            'orderdate': ['SODate', 'soh.SODate'],
+            'invoicedate': ['Invoice_Date', 'soh.Invoice_Date'],
+            'status': ['SOStatus', 'soh.SOStatus'],
+            'balance': ['SoBalance', 'soh.SoBalance'],
+            'commission': ['Commission', 'Commission2', 'Commission3', 'soh.Commission'],
+            'delivery': ['DeliveryCharges', 'DeliveryAddress', 'DeliveryDate', 'soh.DeliveryCharges'],
+            'vat': ['Vat', 'VatRate', 'soh.Vat', 'sod.Vat'],
+            'discount': ['DiscountAmount', 'sod.DiscountAmount'],
+            'quantity': ['Qty', 'sod.Qty'],
+            'qty': ['Qty', 'sod.Qty'],
+
+            // Gallery fields
+            'galleryname': ['Name', 'GalleryName', 'g.Name', 'g.GalleryName'],
+            'gallerycode': ['GalleryCode', 'g.GalleryCode'],
+            'gallerytype': ['GalleryType', 'g.GalleryType'],
+            'galleryemail': ['Email', 'g.Email'],
+
+            // Salesperson fields
+            'salespersonname': ['Name', 'sp.Name'],
+            'spname': ['Name', 'sp.Name'],
+            'slpnum': ['SLPNum', 'sp.SLPNum'],
+
+            // Common SQL functions and operations
+            'count': ['COUNT'],
+            'sum': ['SUM'],
+            'average': ['AVG'],
+            'avg': ['AVG'],
+            'max': ['MAX'],
+            'min': ['MIN'],
+            'top': ['TOP'],
+            'distinct': ['DISTINCT'],
+
+            // Time periods - comprehensive date handling
+            'today': ['CAST(GETDATE() AS DATE)'],
+            'yesterday': ['CAST(DATEADD(day, -1, GETDATE()) AS DATE)'],
+            'thisweek': ['DATEPART(week, GETDATE())'],
+            'lastweek': ['DATEPART(week, DATEADD(week, -1, GETDATE()))'],
+            'thismonth': ['MONTH(GETDATE())', 'YEAR(GETDATE())'],
+            'lastmonth': ['DATEADD(month, -1, GETDATE())'],
+            'thisyear': ['YEAR(GETDATE())'],
+            'lastyear': ['YEAR(DATEADD(year, -1, GETDATE()))'],
+            'currentyear': ['YEAR(GETDATE())'],
+            'previousyear': ['YEAR(DATEADD(year, -1, GETDATE()))'],
+            'quarter': ['DATEPART(quarter, GETDATE())'],
+            'lastquarter': ['DATEPART(quarter, DATEADD(quarter, -1, GETDATE()))'],
+
+            // Specific time periods
+            '6months': ['DATEADD(month, -6, GETDATE())'],
+            'sixmonths': ['DATEADD(month, -6, GETDATE())'],
+            '3months': ['DATEADD(month, -3, GETDATE())'],
+            'threemonths': ['DATEADD(month, -3, GETDATE())'],
+            '12months': ['DATEADD(month, -12, GETDATE())'],
+            'twelvemonths': ['DATEADD(month, -12, GETDATE())'],
+            'ytd': ['DATEFROMPARTS(YEAR(GETDATE()), 1, 1)'],
+            'yeartodate': ['DATEFROMPARTS(YEAR(GETDATE()), 1, 1)'],
+
+            // Comparison operators
+            'over': ['>'],
+            'above': ['>'],
+            'more': ['>'],
+            'greater': ['>'],
+            'under': ['<'],
+            'below': ['<'],
+            'less': ['<'],
+            'equal': ['='],
+            'equals': ['='],
+            'between': ['BETWEEN'],
+            'like': ['LIKE'],
+            'contains': ['LIKE'],
+            'null': ['IS NULL'],
+            'empty': ['IS NULL'],
+            'notnull': ['IS NOT NULL'],
+            'notempty': ['IS NOT NULL'],
+
+            // Common words that indicate actions
+            'show': ['SELECT'],
+            'find': ['SELECT'],
+            'get': ['SELECT'],
+            'list': ['SELECT'],
+            'display': ['SELECT'],
+            'search': ['SELECT'],
+            'where': ['WHERE'],
+            'with': ['WHERE'],
+            'having': ['HAVING'],
+            'groupby': ['GROUP BY'],
+            'orderby': ['ORDER BY'],
+            'sortby': ['ORDER BY'],
+        };
+
+        // Common query templates
+        const queryTemplates = {
+            'customer_list': `SELECT c.CustID, c.FirstName, c.LastName, c.Email, g.Name as GalleryName
+FROM Hal_Customers c
+LEFT JOIN Hal_GalleryMaster g ON c.GalleryCode = g.GalleryCode`,
+
+            'top_customers': `SELECT TOP {limit}
+    c.CustID,
+    c.FirstName + ' ' + c.LastName as CustomerName,
+    g.Name as GalleryName,
+    SUM(soh.SOTotal) as TotalSpent
+FROM Hal_Customers c
+JOIN Hal_SalesOrderHeader soh ON c.CustID = soh.CustID
+LEFT JOIN Hal_GalleryMaster g ON c.GalleryCode = g.GalleryCode
+GROUP BY c.CustID, c.FirstName, c.LastName, g.Name
+ORDER BY TotalSpent DESC`,
+
+            'sales_by_gallery': `SELECT
+    g.Name as GalleryName,
+    COUNT(soh.SoId) as OrderCount,
+    SUM(soh.SOTotal) as TotalSales
+FROM Hal_GalleryMaster g
+LEFT JOIN Hal_SalesOrderHeader soh ON g.GalleryCode = soh.GalleryCode
+GROUP BY g.GalleryCode, g.Name
+ORDER BY TotalSales DESC`,
+
+            'orders_by_date': `SELECT
+    soh.SoId,
+    soh.SODate,
+    c.FirstName + ' ' + c.LastName as CustomerName,
+    g.Name as GalleryName,
+    soh.SOTotal
+FROM Hal_SalesOrderHeader soh
+JOIN Hal_Customers c ON soh.CustID = c.CustID
+JOIN Hal_GalleryMaster g ON soh.GalleryCode = g.GalleryCode`,
+
+            'sales_by_salesperson': `SELECT
+    sp.Name as SalespersonName,
+    COUNT(soh.SoId) as OrderCount,
+    SUM(soh.SOTotal) as TotalSales,
+    AVG(soh.SOTotal) as AvgOrderValue
+FROM Hal_SalesPerson sp
+JOIN Hal_SalesOrderHeader soh ON sp.SLPNum = soh.SlpNum
+GROUP BY sp.SLPNum, sp.Name
+ORDER BY TotalSales DESC`,
+
+            'order_details': `SELECT
+    soh.SoId,
+    soh.SODate,
+    sod.ItemCode,
+    sod.Qty,
+    sod.SoldPrice,
+    c.FirstName + ' ' + c.LastName as CustomerName
+FROM Hal_SalesOrderHeader soh
+JOIN Hal_SalesOrderDetails sod ON soh.SoId = sod.SoId
+JOIN Hal_Customers c ON soh.CustID = c.CustID`
+        };
+
+        // Enhanced date parsing function
+        function parseDateFromInput(input) {
+            const dateConditions = [];
+            const keywords = [];
+
+            // Specific year detection (2024, 2023, etc.)
+            const yearMatch = input.match(/\b(20[0-9]{2})\b/);
+            if (yearMatch) {
+                const year = yearMatch[1];
+                dateConditions.push(`YEAR(soh.SODate) = ${year}`);
+                keywords.push(`Year ${year}`);
+            }
+
+            // Month and year combinations
+            const monthYearMatch = input.match(/(january|february|march|april|may|june|july|august|september|october|november|december)\s+(20[0-9]{2})/i);
+            if (monthYearMatch) {
+                const monthNames = {
+                    'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'june': 6,
+                    'july': 7, 'august': 8, 'september': 9, 'october': 10, 'november': 11, 'december': 12
+                };
+                const month = monthNames[monthYearMatch[1].toLowerCase()];
+                const year = monthYearMatch[2];
+                dateConditions.push(`YEAR(soh.SODate) = ${year} AND MONTH(soh.SODate) = ${month}`);
+                keywords.push(`${monthYearMatch[1]} ${year}`);
+            }
+
+            // Number of months back (6 months, 3 months, etc.)
+            const monthsBackMatch = input.match(/(?:last|past|over|in)\s*(\d+)\s*months?/);
+            if (monthsBackMatch) {
+                const months = monthsBackMatch[1];
+                dateConditions.push(`soh.SODate >= DATEADD(month, -${months}, GETDATE())`);
+                keywords.push(`Last ${months} months`);
+            }
+
+            // Days back
+            const daysBackMatch = input.match(/(?:last|past|over|in)\s*(\d+)\s*days?/);
+            if (daysBackMatch) {
+                const days = daysBackMatch[1];
+                dateConditions.push(`soh.SODate >= DATEADD(day, -${days}, GETDATE())`);
+                keywords.push(`Last ${days} days`);
+            }
+
+            // Weeks back
+            const weeksBackMatch = input.match(/(?:last|past|over|in)\s*(\d+)\s*weeks?/);
+            if (weeksBackMatch) {
+                const weeks = weeksBackMatch[1];
+                dateConditions.push(`soh.SODate >= DATEADD(week, -${weeks}, GETDATE())`);
+                keywords.push(`Last ${weeks} weeks`);
+            }
+
+            // Common relative dates
+            if (input.includes('this month') && !input.includes('last')) {
+                dateConditions.push(`YEAR(soh.SODate) = YEAR(GETDATE()) AND MONTH(soh.SODate) = MONTH(GETDATE())`);
+                keywords.push('This month');
+            }
+            if (input.includes('last month')) {
+                dateConditions.push(`soh.SODate >= DATEADD(month, DATEDIFF(month, 0, GETDATE()) - 1, 0) AND soh.SODate < DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0)`);
+                keywords.push('Last month');
+            }
+            if (input.includes('this year') && !yearMatch) {
+                dateConditions.push(`YEAR(soh.SODate) = YEAR(GETDATE())`);
+                keywords.push('This year');
+            }
+            if (input.includes('last year')) {
+                dateConditions.push(`YEAR(soh.SODate) = YEAR(GETDATE()) - 1`);
+                keywords.push('Last year');
+            }
+            if (input.includes('ytd') || input.includes('year to date')) {
+                dateConditions.push(`soh.SODate >= DATEFROMPARTS(YEAR(GETDATE()), 1, 1)`);
+                keywords.push('Year to date');
+            }
+            if (input.includes('this quarter')) {
+                dateConditions.push(`DATEPART(quarter, soh.SODate) = DATEPART(quarter, GETDATE()) AND YEAR(soh.SODate) = YEAR(GETDATE())`);
+                keywords.push('This quarter');
+            }
+            if (input.includes('last quarter')) {
+                dateConditions.push(`DATEPART(quarter, soh.SODate) = DATEPART(quarter, DATEADD(quarter, -1, GETDATE())) AND YEAR(soh.SODate) = YEAR(DATEADD(quarter, -1, GETDATE()))`);
+                keywords.push('Last quarter');
+            }
+
+            // Today and yesterday
+            if (input.includes('today')) {
+                dateConditions.push(`CAST(soh.SODate AS DATE) = CAST(GETDATE() AS DATE)`);
+                keywords.push('Today');
+            }
+            if (input.includes('yesterday')) {
+                dateConditions.push(`CAST(soh.SODate AS DATE) = CAST(DATEADD(day, -1, GETDATE()) AS DATE)`);
+                keywords.push('Yesterday');
+            }
+
+            // Date ranges
+            const betweenMatch = input.match(/between\s+(\d{4})-(\d{2})-(\d{2})\s+and\s+(\d{4})-(\d{2})-(\d{2})/);
+            if (betweenMatch) {
+                const startDate = `${betweenMatch[1]}-${betweenMatch[2]}-${betweenMatch[3]}`;
+                const endDate = `${betweenMatch[4]}-${betweenMatch[5]}-${betweenMatch[6]}`;
+                dateConditions.push(`soh.SODate BETWEEN '${startDate}' AND '${endDate}'`);
+                keywords.push(`Between ${startDate} and ${endDate}`);
+            }
+
+            return { conditions: dateConditions, keywords: keywords };
+        }
+
+        function generateSQL() {
+            const input = document.getElementById('queryInput').value.toLowerCase().trim();
+            if (!input) {
+                document.getElementById('sqlOutput').textContent = 'Please enter a question first.';
+                return;
+            }
+
+            let sql = '';
+            let matchedKeywords = [];
+
+            // Parse date information
+            const dateInfo = parseDateFromInput(input);
+            matchedKeywords.push(...dateInfo.keywords);
+
+            // Analyze the input for patterns and generate appropriate SQL
+            if (input.includes('top') && (input.includes('customer') || input.includes('client'))) {
+                const match = input.match(/top\s*(\d+)/);
+                const limit = match ? match[1] : '10';
+                sql = queryTemplates.top_customers.replace('{limit}', limit);
+                matchedKeywords.push('Top customers query');
+
+                // Add date conditions to top customers query
+                if (dateInfo.conditions.length > 0) {
+                    sql = sql.replace('GROUP BY c.CustID, c.FirstName, c.LastName',
+                        `WHERE ${dateInfo.conditions.join(' AND ')}\nGROUP BY c.CustID, c.FirstName, c.LastName`);
+                }
+            }
+            else if ((input.includes('sales') || input.includes('order')) && input.includes('gallery')) {
+                sql = queryTemplates.sales_by_gallery;
+                matchedKeywords.push('Sales by gallery query');
+
+                // Add date conditions to sales by gallery query
+                if (dateInfo.conditions.length > 0) {
+                    sql = sql.replace('GROUP BY g.GalleryCode, g.Name',
+                        `WHERE ${dateInfo.conditions.join(' AND ')}\nGROUP BY g.GalleryCode, g.Name`);
+                }
+            }
+            else if (input.includes('salesperson') || input.includes('staff') || input.includes('rep')) {
+                sql = queryTemplates.sales_by_salesperson;
+                matchedKeywords.push('Sales by salesperson query');
+
+                // Add date conditions to salesperson query
+                if (dateInfo.conditions.length > 0) {
+                    sql = sql.replace('GROUP BY sp.SLPNum, sp.Name',
+                        `WHERE ${dateInfo.conditions.join(' AND ')}\nGROUP BY sp.SLPNum, sp.Name`);
+                }
+            }
+            else if (input.includes('customer') && (input.includes('email') || input.includes('gmail') || input.includes('hotmail'))) {
+                sql = `SELECT c.CustID, c.FirstName, c.LastName, c.Email, g.Name as GalleryName
+FROM Hal_Customers c
+LEFT JOIN Hal_GalleryMaster g ON c.GalleryCode = g.GalleryCode`;
+
+                if (input.includes('gmail')) {
+                    sql += `\nWHERE c.Email LIKE '%gmail%'`;
+                    matchedKeywords.push('Gmail filter');
+                } else if (input.includes('hotmail')) {
+                    sql += `\nWHERE c.Email LIKE '%hotmail%'`;
+                    matchedKeywords.push('Hotmail filter');
+                } else if (input.includes('empty') || input.includes('null')) {
+                    sql += `\nWHERE c.Email IS NULL OR c.Email = ''`;
+                    matchedKeywords.push('Empty email filter');
+                } else {
+                    sql += `\nWHERE c.Email IS NOT NULL AND c.Email != ''`;
+                    matchedKeywords.push('Has email filter');
+                }
+            }
+            else if (input.includes('order') && (input.includes('over') || input.includes('above') || input.includes('more'))) {
+                const match = input.match(/(?:over|above|more than|>\s*)[\£\$]?(\d+(?:,\d{3})*)/);
+                const amount = match ? match[1].replace(',', '') : '1000';
+
+                sql = `SELECT
+    soh.SoId,
+    soh.SODate,
+    c.FirstName + ' ' + c.LastName as CustomerName,
+    g.Name as GalleryName,
+    soh.SOTotal
+FROM Hal_SalesOrderHeader soh
+JOIN Hal_Customers c ON soh.CustID = c.CustID
+JOIN Hal_GalleryMaster g ON soh.GalleryCode = g.GalleryCode
+WHERE soh.SOTotal > ${amount}
+ORDER BY soh.SOTotal DESC`;
+
+                matchedKeywords.push(`Orders over £${amount}`);
+            }
+            else if (input.includes('average') || input.includes('avg')) {
+                if (input.includes('gallery')) {
+                    sql = `SELECT
+    g.Name as GalleryName,
+    AVG(soh.SOTotal) as AverageOrderValue,
+    COUNT(soh.SoId) as OrderCount
+FROM Hal_GalleryMaster g
+LEFT JOIN Hal_SalesOrderHeader soh ON g.GalleryCode = soh.GalleryCode
+GROUP BY g.GalleryCode, g.Name
+ORDER BY AverageOrderValue DESC`;
+                    matchedKeywords.push('Average order value by gallery');
+                } else {
+                    sql = `SELECT AVG(SOTotal) as AverageOrderValue
+FROM Hal_SalesOrderHeader
+WHERE SOTotal > 0`;
+                    matchedKeywords.push('Average order value');
+                }
+            }
+            else if (input.includes('duplicate') && input.includes('email')) {
+                sql = `SELECT c.Email, COUNT(*) as DuplicateCount
+FROM Hal_Customers c
+WHERE c.Email IS NOT NULL AND c.Email != ''
+GROUP BY c.Email
+HAVING COUNT(*) > 1
+ORDER BY DuplicateCount DESC`;
+                matchedKeywords.push('Duplicate email addresses');
+            }
+            else if ((input.includes('haven\'t') || input.includes('havent') || input.includes('not bought')) && input.includes('month')) {
+                const match = input.match(/(\d+)\s*month/);
+                const months = match ? match[1] : '6';
+
+                sql = `SELECT
+    c.CustID,
+    c.FirstName + ' ' + c.LastName as CustomerName,
+    c.Email,
+    MAX(soh.SODate) as LastOrderDate
+FROM Hal_Customers c
+LEFT JOIN Hal_SalesOrderHeader soh ON c.CustID = soh.CustID
+GROUP BY c.CustID, c.FirstName, c.LastName, c.Email
+HAVING MAX(soh.SODate) < DATEADD(month, -${months}, GETDATE())
+    OR MAX(soh.SODate) IS NULL
+ORDER BY LastOrderDate DESC`;
+
+                matchedKeywords.push(`Customers inactive for ${months} months`);
+            }
+            else if (input.includes('pending') || input.includes('outstanding')) {
+                sql = `SELECT
+    soh.SoId,
+    soh.SODate,
+    c.FirstName + ' ' + c.LastName as CustomerName,
+    g.Name as GalleryName,
+    soh.SOTotal,
+    soh.SoBalance,
+    soh.SOStatus
+FROM Hal_SalesOrderHeader soh
+JOIN Hal_Customers c ON soh.CustID = c.CustID
+JOIN Hal_GalleryMaster g ON soh.GalleryCode = g.GalleryCode
+WHERE soh.SoBalance > 0 OR soh.SOStatus IN ('Pending', 'Outstanding')
+ORDER BY soh.SODate DESC`;
+
+                matchedKeywords.push('Pending/outstanding orders');
+            }
+            else {
+                // Generic customer query with filters
+                sql = queryTemplates.customer_list;
+                matchedKeywords.push('Customer list');
+
+                // Add filters based on keywords
+                const conditions = [];
+
+                // Gallery location filtering
+                const galleryNames = ['london', 'manchester', 'birmingham', 'glasgow', 'edinburgh', 'bristol', 'liverpool', 'leeds', 'cardiff', 'newcastle'];
+                for (const gallery of galleryNames) {
+                    if (input.includes(gallery)) {
+                        conditions.push(`g.Name LIKE '%${gallery}%'`);
+                        matchedKeywords.push(`${gallery.charAt(0).toUpperCase() + gallery.slice(1)} gallery filter`);
+
+                        // Make sure we're using a query that includes gallery joins
+                        if (sql === queryTemplates.customer_list) {
+                            // Customer list already has gallery join, we're good
+                        } else if (!sql.includes('g.Name')) {
+                            // Switch to orders query which will include gallery
+                            sql = queryTemplates.orders_by_date;
+                        }
+                        break;
+                    }
+                }
+
+                // If we have date conditions and no specific query type, use orders query
+                if (dateInfo.conditions.length > 0 && !sql.includes('soh.')) {
+                    sql = queryTemplates.orders_by_date;
+                    conditions.push(...dateInfo.conditions);
+                }
+
+                if (conditions.length > 0) {
+                    sql += '\nWHERE ' + conditions.join(' AND ');
+                }
+            }
+
+            // Add common ORDER BY if not already present
+            if (!sql.toLowerCase().includes('order by')) {
+                if (sql.includes('SUM(') || sql.includes('COUNT(') || sql.includes('AVG(')) {
+                    // Already has aggregation, probably already ordered
+                } else if (sql.includes('SODate')) {
+                    sql += '\nORDER BY soh.SODate DESC';
+                } else if (sql.includes('FirstName')) {
+                    sql += '\nORDER BY c.LastName, c.FirstName';
+                }
+            }
+
+            // Display results
+            document.getElementById('sqlOutput').textContent = sql;
+
+            if (matchedKeywords.length > 0) {
+                const keywordDiv = document.getElementById('keywordMatches');
+                keywordDiv.style.display = 'block';
+                keywordDiv.innerHTML = '<strong>Detected patterns:</strong> ' + matchedKeywords.join(', ');
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('queryInput').value = '';
+            document.getElementById('sqlOutput').textContent = 'Your SQL query will appear here...';
+            document.getElementById('keywordMatches').style.display = 'none';
+        }
+
+        function setQuery(query) {
+            document.getElementById('queryInput').value = query;
+            generateSQL();
+        }
+
+        function copyToClipboard() {
+            const sqlText = document.getElementById('sqlOutput').textContent;
+            if (sqlText === 'Your SQL query will appear here...' || sqlText === 'Please enter a question first.') {
+                alert('No SQL query to copy. Please generate a query first.');
+                return;
+            }
+
+            navigator.clipboard.writeText(sqlText).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#28a745';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#28a745';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy to clipboard. Please select and copy manually.');
+            });
+        }
+
+        // Allow Enter key to generate query
+        document.getElementById('queryInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                generateSQL();
+            }
+        });
+
+        // Auto-resize textarea
+        document.getElementById('queryInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(80, this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>

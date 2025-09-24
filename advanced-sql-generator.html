@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced SQL Query Generator</title>
+
+    <!-- Syntax highlighting library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .status-bar {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            font-size: 1.2em;
+        }
+
+        #queryInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        #queryInput:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        button:hover {
+            background: #1e3c72;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .clear-btn {
+            background: #dc3545;
+        }
+
+        .clear-btn:hover {
+            background: #c82333;
+        }
+
+        .copy-btn {
+            background: #28a745;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+        }
+
+        .output-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .output-header {
+            background: #e9ecef;
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .confidence-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .confidence-high { background: #d4edda; color: #155724; }
+        .confidence-medium { background: #fff3cd; color: #856404; }
+        .confidence-low { background: #f8d7da; color: #721c24; }
+
+        #sqlOutput {
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            min-height: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .metadata-panel {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 13px;
+        }
+
+        .metadata-section {
+            margin-bottom: 12px;
+        }
+
+        .metadata-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .metadata-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .keyword-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .keyword-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .examples-grid {
+            display: grid;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .example-query {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2a5298;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .example-query:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .templates-grid {
+            display: grid;
+            gap: 10px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .template-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .template-card:hover {
+            border-color: #2a5298;
+            background: #f8f9fa;
+        }
+
+        .template-name {
+            font-weight: bold;
+            color: #2a5298;
+            margin-bottom: 5px;
+        }
+
+        .template-description {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .suggestions-list {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .suggestions-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-item {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .suggestion-item:hover {
+            background: #f8f9fa;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2a5298;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
+            margin-top: 10px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #c3e6cb;
+            margin-top: 10px;
+        }
+
+        .file-input-container {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-container:hover {
+            border-color: #2a5298;
+            background: #f0f8ff;
+        }
+
+        .file-input-container.dragover {
+            border-color: #2a5298;
+            background: #e3f2fd;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2.2em;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        /* Syntax highlighting custom styles */
+        .hljs {
+            background: transparent !important;
+            padding: 0 !important;
+        }
+
+        .hljs-keyword {
+            color: #0000ff;
+            font-weight: bold;
+        }
+
+        .hljs-string {
+            color: #008000;
+        }
+
+        .hljs-number {
+            color: #ff0000;
+        }
+
+        .hljs-comment {
+            color: #808080;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Advanced SQL Query Generator</h1>
+            <p>AI-powered natural language to SQL conversion with schema awareness</p>
+        </div>
+
+        <div class="status-bar" id="statusBar">
+            ⚠️ Please load your schema file to begin
+        </div>
+
+        <div class="main-content">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Schema Upload -->
+                <div class="section">
+                    <h3><span class="section-icon">📊</span>Schema Loading</h3>
+                    <div class="file-input-container" id="fileContainer">
+                        <p>📁 Drop your tablescolumns.csv file here or click to browse</p>
+                        <button onclick="document.getElementById('fileInput').click()">Choose File</button>
+                        <input type="file" id="fileInput" accept=".csv" />
+                    </div>
+                </div>
+
+                <!-- Query Input -->
+                <div class="section">
+                    <h3><span class="section-icon">💬</span>Ask Your Question</h3>
+                    <textarea id="queryInput" placeholder="Examples:&#10;• Top 10 customers from Manchester over the last 6 months&#10;• Sales by gallery in 2024&#10;• Orders over £5000 this year&#10;• Inactive customers who haven't bought in 3 months&#10;• Commission report for sales staff last quarter"></textarea>
+
+                    <div class="button-group">
+                        <button onclick="generateSQL()" id="generateBtn" disabled>
+                            <span id="generateBtnText">Generate SQL Query</span>
+                        </button>
+                        <button onclick="clearAll()" class="clear-btn">Clear All</button>
+                    </div>
+
+                    <div id="suggestions" style="display: none;"></div>
+                </div>
+
+                <!-- Available Templates -->
+                <div class="section">
+                    <h3><span class="section-icon">🎯</span>Quick Templates</h3>
+                    <div class="templates-grid" id="templatesGrid">
+                        <div class="template-card" onclick="setQuery('Top 10 customers by spending')">
+                            <div class="template-name">Top Customers</div>
+                            <div class="template-description">Highest spending customers with order statistics</div>
+                        </div>
+                        <div class="template-card" onclick="setQuery('Sales by gallery this year')">
+                            <div class="template-name">Gallery Performance</div>
+                            <div class="template-description">Revenue and metrics by gallery location</div>
+                        </div>
+                        <div class="template-card" onclick="setQuery('Commission report for sales staff')">
+                            <div class="template-name">Commission Report</div>
+                            <div class="template-description">Earnings and performance by salesperson</div>
+                        </div>
+                        <div class="template-card" onclick="setQuery('Inactive customers last 6 months')">
+                            <div class="template-name">Inactive Customers</div>
+                            <div class="template-description">Customers who haven't purchased recently</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <!-- Query Output -->
+                <div class="section">
+                    <h3><span class="section-icon">⚡</span>Generated SQL Query</h3>
+                    <div class="output-container">
+                        <div class="output-header">
+                            <span id="queryType">Ready to generate...</span>
+                            <span id="confidenceBadge"></span>
+                        </div>
+                        <div id="sqlOutput">Your SQL query will appear here...</div>
+                    </div>
+                    <div class="button-group">
+                        <button onclick="copyToClipboard()" class="copy-btn" id="copyBtn" disabled>
+                            Copy to Clipboard
+                        </button>
+                        <button onclick="showQueryPlan()" id="planBtn" disabled>
+                            Show Query Plan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Query Analysis -->
+                <div class="section">
+                    <h3><span class="section-icon">🔍</span>Query Analysis</h3>
+                    <div class="metadata-panel" id="metadataPanel">
+                        <div class="metadata-section">
+                            <div class="metadata-title">Detected Keywords:</div>
+                            <div id="detectedKeywords">Generate a query to see analysis</div>
+                        </div>
+                        <div class="metadata-section">
+                            <div class="metadata-title">Date Filters:</div>
+                            <div id="dateFilters">None</div>
+                        </div>
+                        <div class="metadata-section">
+                            <div class="metadata-title">Tables Used:</div>
+                            <div id="tablesUsed">None</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example Queries -->
+                <div class="section">
+                    <h3><span class="section-icon">💡</span>Example Questions</h3>
+                    <div class="examples-grid">
+                        <div class="example-query" onclick="setQuery(this.textContent)">Top 5 customers by spending in 2024</div>
+                        <div class="example-query" onclick="setQuery(this.textContent)">Sales by Manchester gallery last quarter</div>
+                        <div class="example-query" onclick="setQuery(this.textContent)">Orders over £10000 this year</div>
+                        <div class="example-query" onclick="setQuery(this.textContent)">Show all salespeople</div>
+                        <div class="example-query" onclick="setQuery(this.textContent)">List all staff members</div>
+                        <div class="example-query" onclick="setQuery(this.textContent)">Sales by consultant Sarah this year</div>
+                        <div class="example-query" onclick="setQuery(this.textContent)">High value orders pending delivery</div>
+                        <div class="example-query" onclick="setQuery(this.textContent)">Customers with duplicate email addresses</div>
+                        <div class="example-query" onclick="setQuery(this.textContent)">Monthly sales trend for 2024</div>
+                        <div class="example-query" onclick="setQuery(this.textContent)">Customers missing contact information</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load all JavaScript modules -->
+    <script src="js/schema-parser.js"></script>
+    <script src="js/query-builder.js"></script>
+    <script src="js/keyword-detector.js"></script>
+    <script src="js/date-parser.js"></script>
+    <script src="js/query-templates.js"></script>
+    <script src="js/sql-generator.js"></script>
+
+    <script>
+        // Global variables
+        let sqlGenerator = new SQLGenerator();
+        let isGeneratorReady = false;
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFileUpload();
+            setupEventListeners();
+        });
+
+        function setupFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const fileContainer = document.getElementById('fileContainer');
+
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop
+            fileContainer.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                fileContainer.classList.add('dragover');
+            });
+
+            fileContainer.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                fileContainer.classList.remove('dragover');
+            });
+
+            fileContainer.addEventListener('drop', function(e) {
+                e.preventDefault();
+                fileContainer.classList.remove('dragover');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    loadSchemaFile(files[0]);
+                }
+            });
+
+            fileContainer.addEventListener('click', function() {
+                fileInput.click();
+            });
+        }
+
+        function setupEventListeners() {
+            // Enter key to generate query
+            document.getElementById('queryInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    generateSQL();
+                }
+            });
+
+            // Auto-resize textarea
+            document.getElementById('queryInput').addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.max(120, this.scrollHeight) + 'px';
+            });
+        }
+
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                loadSchemaFile(file);
+            }
+        }
+
+        function loadSchemaFile(file) {
+            if (!file.name.endsWith('.csv')) {
+                showError('Please select a CSV file');
+                return;
+            }
+
+            updateStatus('📊 Loading schema...', 'loading');
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const csvText = e.target.result;
+                    await initializeGenerator(csvText);
+                    updateStatus('✅ Schema loaded successfully', 'success');
+                } catch (error) {
+                    showError('Failed to load schema: ' + error.message);
+                    updateStatus('❌ Schema loading failed', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function initializeGenerator(csvText) {
+            const result = await sqlGenerator.initialize(csvText);
+
+            if (result.success) {
+                isGeneratorReady = true;
+                document.getElementById('generateBtn').disabled = false;
+
+                // Update UI with schema info
+                updateSchemaInfo(result.stats);
+                loadAvailableTemplates();
+
+                console.log('Generator initialized:', result.stats);
+            } else {
+                throw new Error(result.error);
+            }
+        }
+
+        function updateSchemaInfo(stats) {
+            const statusText = `📊 Ready • ${stats.tables} tables • ${stats.keywords} keywords • ${stats.relationships} relationships`;
+            updateStatus(statusText, 'ready');
+        }
+
+        function updateStatus(message, type) {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.textContent = message;
+
+            statusBar.className = 'status-bar';
+            if (type) {
+                statusBar.classList.add(`status-${type}`);
+            }
+        }
+
+        function loadAvailableTemplates() {
+            const templates = sqlGenerator.getAvailableTemplates();
+            const container = document.getElementById('templatesGrid');
+
+            container.innerHTML = templates.map(template => `
+                <div class="template-card" onclick="setQuery('${template.name}')">
+                    <div class="template-name">${template.name}</div>
+                    <div class="template-description">${template.description}</div>
+                </div>
+            `).join('');
+        }
+
+        async function generateSQL() {
+            if (!isGeneratorReady) {
+                showError('Please load schema first');
+                return;
+            }
+
+            const input = document.getElementById('queryInput').value.trim();
+            if (!input) {
+                showError('Please enter a question');
+                return;
+            }
+
+            // Validate input
+            const validationIssues = sqlGenerator.validateInput(input);
+            if (validationIssues.length > 0) {
+                showError(validationIssues[0]);
+                return;
+            }
+
+            // Show loading state
+            setGenerateButtonLoading(true);
+
+            try {
+                const result = await sqlGenerator.generateQuery(input);
+
+                if (result.success) {
+                    displayQuery(result);
+                    updateAnalysis(result.metadata);
+                    hideSuggestions();
+                } else {
+                    showError(result.error);
+                    if (result.suggestions) {
+                        showSuggestions(result.suggestions);
+                    }
+                }
+            } catch (error) {
+                showError('Query generation failed: ' + error.message);
+            } finally {
+                setGenerateButtonLoading(false);
+            }
+        }
+
+        function displayQuery(result) {
+            const output = document.getElementById('sqlOutput');
+            const queryType = document.getElementById('queryType');
+            const confidenceBadge = document.getElementById('confidenceBadge');
+
+            // Display formatted SQL with syntax highlighting
+            output.innerHTML = `<code class="language-sql">${escapeHtml(result.query)}</code>`;
+            hljs.highlightAll();
+
+            // Update header
+            queryType.textContent = result.explanation || `${result.type} query`;
+
+            // Show confidence
+            if (result.metadata && result.metadata.confidence !== undefined) {
+                const confidence = result.metadata.confidence;
+                const level = confidence > 0.8 ? 'high' : confidence > 0.5 ? 'medium' : 'low';
+                confidenceBadge.innerHTML = `<span class="confidence-badge confidence-${level}">
+                    ${Math.round(confidence * 100)}% confidence
+                </span>`;
+            } else {
+                confidenceBadge.innerHTML = '';
+            }
+
+            // Enable copy button
+            document.getElementById('copyBtn').disabled = false;
+            document.getElementById('planBtn').disabled = false;
+        }
+
+        function updateAnalysis(metadata) {
+            if (!metadata) return;
+
+            // Update detected keywords
+            const keywordsContainer = document.getElementById('detectedKeywords');
+            if (metadata.detectedKeywords && metadata.detectedKeywords.length > 0) {
+                keywordsContainer.innerHTML = metadata.detectedKeywords.map(keyword =>
+                    `<span class="keyword-tag">${keyword}</span>`
+                ).join('');
+            } else {
+                keywordsContainer.textContent = 'None detected';
+            }
+
+            // Update date filters
+            const dateFiltersContainer = document.getElementById('dateFilters');
+            if (metadata.dateFilters && metadata.dateFilters.length > 0) {
+                dateFiltersContainer.textContent = metadata.dateFilters.join(', ');
+            } else {
+                dateFiltersContainer.textContent = 'No date restrictions';
+            }
+
+            // Update tables used
+            const tablesContainer = document.getElementById('tablesUsed');
+            if (metadata.intent && metadata.intent.entities) {
+                tablesContainer.textContent = metadata.intent.entities.join(', ');
+            } else {
+                tablesContainer.textContent = 'Standard tables';
+            }
+        }
+
+        function showSuggestions(suggestions) {
+            const container = document.getElementById('suggestions');
+
+            if (suggestions && suggestions.length > 0) {
+                container.innerHTML = `
+                    <div class="suggestions-list">
+                        <div class="suggestions-title">💡 Did you mean:</div>
+                        ${suggestions.map(suggestion => `
+                            <div class="suggestion-item" onclick="setQuery('${suggestion}')">
+                                ${suggestion}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.style.display = 'block';
+            } else {
+                hideSuggestions();
+            }
+        }
+
+        function hideSuggestions() {
+            document.getElementById('suggestions').style.display = 'none';
+        }
+
+        function setGenerateButtonLoading(loading) {
+            const btn = document.getElementById('generateBtn');
+            const text = document.getElementById('generateBtnText');
+
+            if (loading) {
+                btn.disabled = true;
+                text.innerHTML = '<span class="loading"></span> Generating...';
+            } else {
+                btn.disabled = !isGeneratorReady;
+                text.textContent = 'Generate SQL Query';
+            }
+        }
+
+        function setQuery(query) {
+            document.getElementById('queryInput').value = query;
+            generateSQL();
+        }
+
+        function clearAll() {
+            document.getElementById('queryInput').value = '';
+            document.getElementById('sqlOutput').textContent = 'Your SQL query will appear here...';
+            document.getElementById('queryType').textContent = 'Ready to generate...';
+            document.getElementById('confidenceBadge').innerHTML = '';
+            document.getElementById('copyBtn').disabled = true;
+            document.getElementById('planBtn').disabled = true;
+
+            // Clear analysis
+            document.getElementById('detectedKeywords').textContent = 'Generate a query to see analysis';
+            document.getElementById('dateFilters').textContent = 'None';
+            document.getElementById('tablesUsed').textContent = 'None';
+
+            hideSuggestions();
+        }
+
+        function copyToClipboard() {
+            const sqlOutput = document.getElementById('sqlOutput');
+            const text = sqlOutput.textContent;
+
+            if (!text || text === 'Your SQL query will appear here...') {
+                showError('No query to copy');
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.style.background = '#28a745';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#28a745';
+                }, 2000);
+            }).catch(err => {
+                console.error('Copy failed:', err);
+                showError('Failed to copy to clipboard');
+            });
+        }
+
+        function showQueryPlan() {
+            const debugInfo = sqlGenerator.getDebugInfo();
+            if (debugInfo) {
+                console.log('Query Debug Info:', debugInfo);
+                alert('Query plan details logged to console (F12)');
+            }
+        }
+
+        function showError(message) {
+            // Remove existing messages
+            const existing = document.querySelector('.error-message');
+            if (existing) existing.remove();
+
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+
+            const container = document.querySelector('.left-panel .section');
+            container.appendChild(errorDiv);
+
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 5000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
