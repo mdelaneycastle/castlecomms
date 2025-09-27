@@ -1,143 +1,161 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chatbot Avatar Prompt Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    select, input, textarea, button {
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    .output {
+      background: #f8f8f8;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 6px;
+    }
+    .output h3 {
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Design Your Chatbot Avatar</h2>
 
-export default function ChatbotAvatarBuilder() {
-  const [form, setForm] = useState({
-    gender: "",
-    age: "",
-    hair: "",
-    eyes: "",
-    skin: "",
-    facialHair: "",
-    accessories: "",
-    attire: "",
-    attireColor: "",
-    demeanor: "",
-    talkStyle: "",
-    pose: "",
-    style: ""
-  });
+  <select id="gender">
+    <option value="">Select Gender/Presentation</option>
+    <option>Male</option>
+    <option>Female</option>
+    <option>Non-binary</option>
+    <option>Androgynous</option>
+  </select>
 
-  const [headshotPrompt, setHeadshotPrompt] = useState("");
-  const [fullBodyPrompt, setFullBodyPrompt] = useState("");
+  <select id="age">
+    <option value="">Select Age Range</option>
+    <option>Teen</option>
+    <option>Young Adult</option>
+    <option>Adult</option>
+    <option>Middle-aged</option>
+    <option>Elderly</option>
+  </select>
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  <input type="text" id="hair" placeholder="Hair (e.g. long curly red)" />
+  <input type="text" id="eyes" placeholder="Eye color" />
+  <input type="text" id="skin" placeholder="Skin tone" />
+  <input type="text" id="facialHair" placeholder="Facial hair (optional)" />
+  <input type="text" id="accessories" placeholder="Accessories (e.g. hoop earrings, glasses)" />
+  <input type="text" id="attire" placeholder="Attire style (e.g. business suit)" />
+  <input type="text" id="attireColor" placeholder="Attire color(s)" />
 
-  const generatePrompts = () => {
-    const accessoriesText = form.accessories ? ` with ${form.accessories}` : "";
+  <select id="demeanor">
+    <option value="">Select Demeanor</option>
+    <option>Shy</option>
+    <option>Confident</option>
+    <option>Sassy</option>
+    <option>Friendly</option>
+    <option>Mysterious</option>
+    <option>Cool</option>
+  </select>
 
-    const headshot = `A ${form.style} digital portrait headshot of a ${form.gender} ${form.age} with ${form.hair}, ${form.eyes} eyes, ${form.skin} skin tone${accessoriesText}. They are wearing ${form.attire} in ${form.attireColor}. The expression is ${form.demeanor} to reflect their personality. Studio-quality, clean background, optimized for use as a chatbot icon.`;
+  <select id="talkStyle">
+    <option value="">Select Talk Style</option>
+    <option>Professional</option>
+    <option>Flirty</option>
+    <option>Humorous</option>
+    <option>Empathetic</option>
+    <option>Sarcastic</option>
+    <option>Chill</option>
+    <option>Formal</option>
+  </select>
 
-    const fullBody = `A ${form.style} full-body illustration of the same character: a ${form.gender} ${form.age} with ${form.hair}, ${form.eyes} eyes, ${form.skin} skin tone${accessoriesText}. Wearing ${form.attire} in ${form.attireColor}. Personality is ${form.demeanor}, they speak in a ${form.talkStyle} style. They are posed ${form.pose}, looking relaxed. Background minimal or transparent. Stylized but professional artwork, consistent with the headshot design.`;
+  <select id="pose">
+    <option value="">Select Pose</option>
+    <option>Sitting casually on a chair</option>
+    <option>Leaning against a wall</option>
+    <option>Sitting on a desk/table edge</option>
+    <option>Crossed arms standing</option>
+    <option>Relaxed, hands in pockets</option>
+    <option>Standing with arms at sides</option>
+    <option>Hands on hips</option>
+    <option>Waving with one hand</option>
+  </select>
 
-    setHeadshotPrompt(headshot);
-    setFullBodyPrompt(fullBody);
-  };
+  <select id="style">
+    <option value="">Select Image Style</option>
+    <option>Realistic</option>
+    <option>Cartoony</option>
+    <option>Pixar style</option>
+    <option>Ghibli style</option>
+    <option>Anime style</option>
+    <option>Comic book style</option>
+  </select>
 
-  return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <Card className="mb-6">
-        <CardContent className="space-y-4">
-          <h2 className="text-xl font-bold">Design Your Chatbot Avatar</h2>
+  <textarea id="extraDetails" placeholder="Extra details about the character (optional)" rows="3"></textarea>
 
-          <select name="gender" onChange={handleChange} className="w-full p-2 border rounded">
-            <option value="">Select Gender/Presentation</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Non-binary</option>
-            <option>Androgynous</option>
-          </select>
+  <button onclick="generatePrompts()">Generate Prompts</button>
 
-          <select name="age" onChange={handleChange} className="w-full p-2 border rounded">
-            <option value="">Select Age Range</option>
-            <option>Teen</option>
-            <option>Young Adult</option>
-            <option>Adult</option>
-            <option>Middle-aged</option>
-            <option>Elderly</option>
-          </select>
+  <div class="output" id="headshotSection" style="display: none;">
+    <h3>Headshot Prompt</h3>
+    <p id="headshotPrompt"></p>
+  </div>
 
-          <input type="text" name="hair" placeholder="Hair (e.g. long curly red)" onChange={handleChange} className="w-full p-2 border rounded" />
+  <div class="output" id="fullBodySection" style="display: none;">
+    <h3>Full Body Prompt</h3>
+    <p id="fullBodyPrompt"></p>
+  </div>
 
-          <input type="text" name="eyes" placeholder="Eye color" onChange={handleChange} className="w-full p-2 border rounded" />
+  <script>
+    function generatePrompts() {
+      const form = {
+        gender: document.getElementById('gender').value,
+        age: document.getElementById('age').value,
+        hair: document.getElementById('hair').value,
+        eyes: document.getElementById('eyes').value,
+        skin: document.getElementById('skin').value,
+        facialHair: document.getElementById('facialHair').value,
+        accessories: document.getElementById('accessories').value,
+        attire: document.getElementById('attire').value,
+        attireColor: document.getElementById('attireColor').value,
+        demeanor: document.getElementById('demeanor').value,
+        talkStyle: document.getElementById('talkStyle').value,
+        pose: document.getElementById('pose').value,
+        style: document.getElementById('style').value,
+        extraDetails: document.getElementById('extraDetails').value
+      };
 
-          <input type="text" name="skin" placeholder="Skin tone" onChange={handleChange} className="w-full p-2 border rounded" />
+      const accessoriesText = form.accessories ? ` with ${form.accessories}` : '';
+      const extraText = form.extraDetails ? ` ${form.extraDetails}` : '';
 
-          <input type="text" name="facialHair" placeholder="Facial hair (optional)" onChange={handleChange} className="w-full p-2 border rounded" />
+      const headshot = `A ${form.style} digital portrait headshot of a ${form.gender} ${form.age} with ${form.hair}, ${form.eyes} eyes, ${form.skin} skin tone${accessoriesText}. They are wearing ${form.attire} in ${form.attireColor}. The expression is ${form.demeanor} to reflect their personality. Studio-quality, clean background, optimized for use as a chatbot icon.${extraText}`;
 
-          <input type="text" name="accessories" placeholder="Accessories (e.g. hoop earrings, glasses)" onChange={handleChange} className="w-full p-2 border rounded" />
+      const fullBody = `A ${form.style} full-body illustration of the same character: a ${form.gender} ${form.age} with ${form.hair}, ${form.eyes} eyes, ${form.skin} skin tone${accessoriesText}. Wearing ${form.attire} in ${form.attireColor}. Personality is ${form.demeanor}, they speak in a ${form.talkStyle} style. They are posed ${form.pose}, looking relaxed. Background minimal or transparent. Stylized but professional artwork, consistent with the headshot design.${extraText}`;
 
-          <input type="text" name="attire" placeholder="Attire style (e.g. business suit)" onChange={handleChange} className="w-full p-2 border rounded" />
-
-          <input type="text" name="attireColor" placeholder="Attire color(s)" onChange={handleChange} className="w-full p-2 border rounded" />
-
-          <select name="demeanor" onChange={handleChange} className="w-full p-2 border rounded">
-            <option value="">Select Demeanor</option>
-            <option>Shy</option>
-            <option>Confident</option>
-            <option>Sassy</option>
-            <option>Friendly</option>
-            <option>Mysterious</option>
-            <option>Cool</option>
-          </select>
-
-          <select name="talkStyle" onChange={handleChange} className="w-full p-2 border rounded">
-            <option value="">Select Talk Style</option>
-            <option>Professional</option>
-            <option>Flirty</option>
-            <option>Humorous</option>
-            <option>Empathetic</option>
-            <option>Sarcastic</option>
-            <option>Chill</option>
-            <option>Formal</option>
-          </select>
-
-          <select name="pose" onChange={handleChange} className="w-full p-2 border rounded">
-            <option value="">Select Pose</option>
-            <option>Sitting casually on a chair</option>
-            <option>Leaning against a wall</option>
-            <option>Sitting on a desk/table edge</option>
-            <option>Crossed arms standing</option>
-            <option>Relaxed, hands in pockets</option>
-            <option>Standing with arms at sides</option>
-            <option>Hands on hips</option>
-            <option>Waving with one hand</option>
-          </select>
-
-          <select name="style" onChange={handleChange} className="w-full p-2 border rounded">
-            <option value="">Select Image Style</option>
-            <option>Realistic</option>
-            <option>Cartoony</option>
-            <option>Pixar style</option>
-            <option>Ghibli style</option>
-            <option>Anime style</option>
-            <option>Comic book style</option>
-          </select>
-
-          <Button onClick={generatePrompts} className="w-full">Generate Prompts</Button>
-        </CardContent>
-      </Card>
-
-      {headshotPrompt && (
-        <Card className="mb-4">
-          <CardContent>
-            <h3 className="font-bold">Headshot Prompt</h3>
-            <p className="text-sm whitespace-pre-line">{headshotPrompt}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {fullBodyPrompt && (
-        <Card>
-          <CardContent>
-            <h3 className="font-bold">Full Body Prompt</h3>
-            <p className="text-sm whitespace-pre-line">{fullBodyPrompt}</p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-}
+      document.getElementById('headshotPrompt').textContent = headshot;
+      document.getElementById('fullBodyPrompt').textContent = fullBody;
+      document.getElementById('headshotSection').style.display = 'block';
+      document.getElementById('fullBodySection').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
