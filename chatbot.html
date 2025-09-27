@@ -1,0 +1,143 @@
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+export default function ChatbotAvatarBuilder() {
+  const [form, setForm] = useState({
+    gender: "",
+    age: "",
+    hair: "",
+    eyes: "",
+    skin: "",
+    facialHair: "",
+    accessories: "",
+    attire: "",
+    attireColor: "",
+    demeanor: "",
+    talkStyle: "",
+    pose: "",
+    style: ""
+  });
+
+  const [headshotPrompt, setHeadshotPrompt] = useState("");
+  const [fullBodyPrompt, setFullBodyPrompt] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const generatePrompts = () => {
+    const accessoriesText = form.accessories ? ` with ${form.accessories}` : "";
+
+    const headshot = `A ${form.style} digital portrait headshot of a ${form.gender} ${form.age} with ${form.hair}, ${form.eyes} eyes, ${form.skin} skin tone${accessoriesText}. They are wearing ${form.attire} in ${form.attireColor}. The expression is ${form.demeanor} to reflect their personality. Studio-quality, clean background, optimized for use as a chatbot icon.`;
+
+    const fullBody = `A ${form.style} full-body illustration of the same character: a ${form.gender} ${form.age} with ${form.hair}, ${form.eyes} eyes, ${form.skin} skin tone${accessoriesText}. Wearing ${form.attire} in ${form.attireColor}. Personality is ${form.demeanor}, they speak in a ${form.talkStyle} style. They are posed ${form.pose}, looking relaxed. Background minimal or transparent. Stylized but professional artwork, consistent with the headshot design.`;
+
+    setHeadshotPrompt(headshot);
+    setFullBodyPrompt(fullBody);
+  };
+
+  return (
+    <div className="p-6 max-w-3xl mx-auto">
+      <Card className="mb-6">
+        <CardContent className="space-y-4">
+          <h2 className="text-xl font-bold">Design Your Chatbot Avatar</h2>
+
+          <select name="gender" onChange={handleChange} className="w-full p-2 border rounded">
+            <option value="">Select Gender/Presentation</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Non-binary</option>
+            <option>Androgynous</option>
+          </select>
+
+          <select name="age" onChange={handleChange} className="w-full p-2 border rounded">
+            <option value="">Select Age Range</option>
+            <option>Teen</option>
+            <option>Young Adult</option>
+            <option>Adult</option>
+            <option>Middle-aged</option>
+            <option>Elderly</option>
+          </select>
+
+          <input type="text" name="hair" placeholder="Hair (e.g. long curly red)" onChange={handleChange} className="w-full p-2 border rounded" />
+
+          <input type="text" name="eyes" placeholder="Eye color" onChange={handleChange} className="w-full p-2 border rounded" />
+
+          <input type="text" name="skin" placeholder="Skin tone" onChange={handleChange} className="w-full p-2 border rounded" />
+
+          <input type="text" name="facialHair" placeholder="Facial hair (optional)" onChange={handleChange} className="w-full p-2 border rounded" />
+
+          <input type="text" name="accessories" placeholder="Accessories (e.g. hoop earrings, glasses)" onChange={handleChange} className="w-full p-2 border rounded" />
+
+          <input type="text" name="attire" placeholder="Attire style (e.g. business suit)" onChange={handleChange} className="w-full p-2 border rounded" />
+
+          <input type="text" name="attireColor" placeholder="Attire color(s)" onChange={handleChange} className="w-full p-2 border rounded" />
+
+          <select name="demeanor" onChange={handleChange} className="w-full p-2 border rounded">
+            <option value="">Select Demeanor</option>
+            <option>Shy</option>
+            <option>Confident</option>
+            <option>Sassy</option>
+            <option>Friendly</option>
+            <option>Mysterious</option>
+            <option>Cool</option>
+          </select>
+
+          <select name="talkStyle" onChange={handleChange} className="w-full p-2 border rounded">
+            <option value="">Select Talk Style</option>
+            <option>Professional</option>
+            <option>Flirty</option>
+            <option>Humorous</option>
+            <option>Empathetic</option>
+            <option>Sarcastic</option>
+            <option>Chill</option>
+            <option>Formal</option>
+          </select>
+
+          <select name="pose" onChange={handleChange} className="w-full p-2 border rounded">
+            <option value="">Select Pose</option>
+            <option>Sitting casually on a chair</option>
+            <option>Leaning against a wall</option>
+            <option>Sitting on a desk/table edge</option>
+            <option>Crossed arms standing</option>
+            <option>Relaxed, hands in pockets</option>
+            <option>Standing with arms at sides</option>
+            <option>Hands on hips</option>
+            <option>Waving with one hand</option>
+          </select>
+
+          <select name="style" onChange={handleChange} className="w-full p-2 border rounded">
+            <option value="">Select Image Style</option>
+            <option>Realistic</option>
+            <option>Cartoony</option>
+            <option>Pixar style</option>
+            <option>Ghibli style</option>
+            <option>Anime style</option>
+            <option>Comic book style</option>
+          </select>
+
+          <Button onClick={generatePrompts} className="w-full">Generate Prompts</Button>
+        </CardContent>
+      </Card>
+
+      {headshotPrompt && (
+        <Card className="mb-4">
+          <CardContent>
+            <h3 className="font-bold">Headshot Prompt</h3>
+            <p className="text-sm whitespace-pre-line">{headshotPrompt}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {fullBodyPrompt && (
+        <Card>
+          <CardContent>
+            <h3 className="font-bold">Full Body Prompt</h3>
+            <p className="text-sm whitespace-pre-line">{fullBodyPrompt}</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
