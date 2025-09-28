@@ -1,161 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Chatbot Avatar Prompt Generator</title>
   <style>
     body {
-      font-family: sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2rem;
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
     }
-    select, input, textarea, button {
+    label {
+      display: block;
+      margin: 8px 0 4px;
+    }
+    select, input, textarea {
       width: 100%;
-      margin-bottom: 1rem;
-      padding: 0.6rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
+      padding: 8px;
+      margin-bottom: 12px;
       border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    textarea {
+      height: 100px;
     }
     button {
-      background-color: #333;
+      padding: 10px 16px;
+      background-color: #444;
       color: white;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
+      margin-right: 8px;
     }
-    h2 {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
+    button:hover {
+      background-color: #000;
     }
-    .output {
-      background: #f8f8f8;
-      padding: 1rem;
-      margin-top: 1rem;
-      border-radius: 6px;
-    }
-    .output h3 {
-      margin-top: 0;
+    .output-container {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h2>Design Your Chatbot Avatar</h2>
 
+  <h2>Chatbot Avatar Prompt Generator</h2>
+
+  <label for="gender">Gender</label>
   <select id="gender">
-    <option value="">Select Gender/Presentation</option>
+    <option value="">Select...</option>
     <option>Male</option>
     <option>Female</option>
     <option>Non-binary</option>
-    <option>Androgynous</option>
   </select>
 
+  <label for="age">Age</label>
   <select id="age">
-    <option value="">Select Age Range</option>
-    <option>Teen</option>
+    <option value="">Select...</option>
+    <option>Child</option>
     <option>Young Adult</option>
-    <option>Adult</option>
     <option>Middle-aged</option>
     <option>Elderly</option>
   </select>
 
-  <input type="text" id="hair" placeholder="Hair (e.g. long curly red)" />
-  <input type="text" id="eyes" placeholder="Eye color" />
-  <input type="text" id="skin" placeholder="Skin tone" />
-  <input type="text" id="facialHair" placeholder="Facial hair (optional)" />
-  <input type="text" id="accessories" placeholder="Accessories (e.g. hoop earrings, glasses)" />
-  <input type="text" id="attire" placeholder="Attire style (e.g. business suit)" />
-  <input type="text" id="attireColor" placeholder="Attire color(s)" />
+  <label for="hair">Hair</label>
+  <input type="text" id="hair" placeholder="e.g. Long black hair, curly">
 
-  <select id="demeanor">
-    <option value="">Select Demeanor</option>
-    <option>Shy</option>
-    <option>Confident</option>
-    <option>Sassy</option>
-    <option>Friendly</option>
-    <option>Mysterious</option>
-    <option>Cool</option>
-  </select>
+  <label for="eyes">Eyes</label>
+  <input type="text" id="eyes" placeholder="e.g. Brown eyes">
 
-  <select id="talkStyle">
-    <option value="">Select Talk Style</option>
-    <option>Professional</option>
-    <option>Flirty</option>
-    <option>Humorous</option>
-    <option>Empathetic</option>
-    <option>Sarcastic</option>
-    <option>Chill</option>
-    <option>Formal</option>
-  </select>
+  <label for="skin">Skin Tone</label>
+  <input type="text" id="skin" placeholder="e.g. Pale with rosy cheeks">
 
-  <select id="pose">
-    <option value="">Select Pose</option>
-    <option>Sitting casually on a chair</option>
-    <option>Leaning against a wall</option>
-    <option>Sitting on a desk/table edge</option>
-    <option>Crossed arms standing</option>
-    <option>Relaxed, hands in pockets</option>
-    <option>Standing with arms at sides</option>
-    <option>Hands on hips</option>
-    <option>Waving with one hand</option>
-  </select>
+  <label for="facialHair">Facial Hair (optional)</label>
+  <input type="text" id="facialHair" placeholder="e.g. Goatee">
 
-  <select id="style">
-    <option value="">Select Image Style</option>
-    <option>Realistic</option>
-    <option>Cartoony</option>
-    <option>Pixar style</option>
-    <option>Ghibli style</option>
-    <option>Anime style</option>
-    <option>Comic book style</option>
-  </select>
+  <label for="accessories">Accessories</label>
+  <input type="text" id="accessories" placeholder="e.g. Dog collar with spikes">
 
-  <textarea id="extraDetails" placeholder="Extra details about the character (optional)" rows="3"></textarea>
+  <label for="attire">Attire</label>
+  <input type="text" id="attire" placeholder="e.g. Goth/Alternative">
+
+  <label for="attireColor">Attire Color</label>
+  <input type="text" id="attireColor" placeholder="e.g. Black">
+
+  <label for="demeanor">Demeanor/Expression</label>
+  <input type="text" id="demeanor" placeholder="e.g. Mysterious">
+
+  <label for="pose">Pose</label>
+  <input type="text" id="pose" placeholder="e.g. Crossed arms standing, looking relaxed">
+
+  <label for="style">Art Style</label>
+  <input type="text" id="style" placeholder="e.g. Realistic, Ghibli, Pixar">
+
+  <label for="extra">Extra Details</label>
+  <input type="text" id="extra" placeholder="e.g. freckles, nose ring, etc.">
 
   <button onclick="generatePrompts()">Generate Prompts</button>
 
-  <div class="output" id="headshotSection" style="display: none;">
-    <h3>Headshot Prompt</h3>
-    <p id="headshotPrompt"></p>
-  </div>
+  <div class="output-container">
+    <label>🎯 Headshot Prompt</label>
+    <textarea id="headshotPrompt" readonly></textarea>
+    <button onclick="copyText('headshotPrompt')">Copy Headshot Prompt</button>
 
-  <div class="output" id="fullBodySection" style="display: none;">
-    <h3>Full Body Prompt</h3>
-    <p id="fullBodyPrompt"></p>
+    <label>🧍 Full Body Prompt</label>
+    <textarea id="fullBodyPrompt" readonly></textarea>
+    <button onclick="copyText('fullBodyPrompt')">Copy Full Body Prompt</button>
   </div>
 
   <script>
     function generatePrompts() {
-      const form = {
-        gender: document.getElementById('gender').value,
-        age: document.getElementById('age').value,
-        hair: document.getElementById('hair').value,
-        eyes: document.getElementById('eyes').value,
-        skin: document.getElementById('skin').value,
-        facialHair: document.getElementById('facialHair').value,
-        accessories: document.getElementById('accessories').value,
-        attire: document.getElementById('attire').value,
-        attireColor: document.getElementById('attireColor').value,
-        demeanor: document.getElementById('demeanor').value,
-        talkStyle: document.getElementById('talkStyle').value,
-        pose: document.getElementById('pose').value,
-        style: document.getElementById('style').value,
-        extraDetails: document.getElementById('extraDetails').value
+      const get = id => document.getElementById(id).value;
+
+      const parts = {
+        gender: get('gender'),
+        age: get('age'),
+        hair: get('hair'),
+        eyes: get('eyes'),
+        skin: get('skin'),
+        facialHair: get('facialHair'),
+        accessories: get('accessories'),
+        attire: get('attire'),
+        attireColor: get('attireColor'),
+        demeanor: get('demeanor'),
+        pose: get('pose'),
+        style: get('style'),
+        extra: get('extra')
       };
 
-      const accessoriesText = form.accessories ? ` with ${form.accessories}` : '';
-      const extraText = form.extraDetails ? ` ${form.extraDetails}` : '';
+      const facialHair = parts.facialHair ? `, ${parts.facialHair}` : '';
+      const accessories = parts.accessories ? ` with ${parts.accessories}` : '';
+      const extra = parts.extra ? `, ${parts.extra}` : '';
 
-      const headshot = `A ${form.style} digital portrait headshot of a ${form.gender} ${form.age} with ${form.hair}, ${form.eyes} eyes, ${form.skin} skin tone${accessoriesText}. They are wearing ${form.attire} in ${form.attireColor}. The expression is ${form.demeanor} to reflect their personality. Studio-quality, clean background, optimized for use as a chatbot icon.${extraText}`;
+      const headshot = `${parts.style} digital portrait headshot of a ${parts.gender} ${parts.age} with ${parts.hair}, ${parts.eyes}, ${parts.skin}${facialHair}${accessories}. They are wearing ${parts.attire} in ${parts.attireColor}. The expression is ${parts.demeanor} to reflect their personality${extra}. Studio-quality, clean background, optimized for use as a chatbot icon.`;
 
-      const fullBody = `A ${form.style} full-body illustration of the same character: a ${form.gender} ${form.age} with ${form.hair}, ${form.eyes} eyes, ${form.skin} skin tone${accessoriesText}. Wearing ${form.attire} in ${form.attireColor}. Personality is ${form.demeanor}, they speak in a ${form.talkStyle} style. They are posed ${form.pose}, looking relaxed. Background minimal or transparent. Stylized but professional artwork, consistent with the headshot design.${extraText}`;
+      const fullBody = `${parts.style} full-body illustration of the same character: a ${parts.gender} ${parts.age} with ${parts.hair}, ${parts.eyes}, ${parts.skin}${facialHair}${accessories}. Wearing ${parts.attire} in ${parts.attireColor}. Personality is reflected as ${parts.demeanor}. They are posed ${parts.pose}${extra}. Background minimal or transparent. Stylized but professional artwork, consistent with the headshot design. Please export as a transparent background PNG.`;
 
-      document.getElementById('headshotPrompt').textContent = headshot;
-      document.getElementById('fullBodyPrompt').textContent = fullBody;
-      document.getElementById('headshotSection').style.display = 'block';
-      document.getElementById('fullBodySection').style.display = 'block';
+      document.getElementById('headshotPrompt').value = headshot;
+      document.getElementById('fullBodyPrompt').value = fullBody;
+    }
+
+    function copyText(id) {
+      const textBox = document.getElementById(id);
+      textBox.select();
+      textBox.setSelectionRange(0, 99999); // For mobile
+      document.execCommand("copy");
     }
   </script>
+
 </body>
 </html>
