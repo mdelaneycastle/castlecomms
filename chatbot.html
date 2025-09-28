@@ -1,47 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chatbot Avatar Prompt Generator</title>
   <style>
+    :root {
+      --bg: #f9f9f9;
+      --fg: #222;
+      --accent: #444;
+      --radius: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      padding: 2rem;
+      max-width: 720px;
+      margin: auto;
     }
+
+    h2 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
     label {
+      font-weight: 500;
+      margin-top: 1rem;
       display: block;
-      margin: 8px 0 4px;
     }
-    select, input, textarea {
+
+    input, select, textarea {
       width: 100%;
-      padding: 8px;
-      margin-bottom: 12px;
-      border-radius: 4px;
+      padding: 0.7rem;
+      margin-top: 0.4rem;
       border: 1px solid #ccc;
+      border-radius: var(--radius);
+      font-size: 1rem;
     }
-    textarea {
-      height: 100px;
-    }
+
     button {
-      padding: 10px 16px;
-      background-color: #444;
+      background: var(--accent);
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: var(--radius);
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      margin-top: 1rem;
       cursor: pointer;
-      margin-right: 8px;
     }
+
     button:hover {
-      background-color: #000;
+      background: black;
     }
+
     .output-container {
-      margin-top: 20px;
+      margin-top: 2rem;
+    }
+
+    textarea {
+      height: 120px;
+      resize: vertical;
+      font-family: monospace;
+    }
+
+    .copy-btn {
+      margin-bottom: 1rem;
     }
   </style>
 </head>
 <body>
-
   <h2>Chatbot Avatar Prompt Generator</h2>
 
   <label for="gender">Gender</label>
@@ -55,96 +89,93 @@
   <label for="age">Age</label>
   <select id="age">
     <option value="">Select...</option>
-    <option>Child</option>
     <option>Young Adult</option>
+    <option>Mid 30s</option>
     <option>Middle-aged</option>
     <option>Elderly</option>
   </select>
 
   <label for="hair">Hair</label>
-  <input type="text" id="hair" placeholder="e.g. Long black hair, curly">
+  <input type="text" id="hair" placeholder="e.g. Long black hair, curly" />
 
   <label for="eyes">Eyes</label>
-  <input type="text" id="eyes" placeholder="e.g. Brown eyes">
+  <input type="text" id="eyes" placeholder="e.g. Brown eyes" />
 
   <label for="skin">Skin Tone</label>
-  <input type="text" id="skin" placeholder="e.g. Pale with rosy cheeks">
+  <input type="text" id="skin" placeholder="e.g. Pale with rosy cheeks" />
 
   <label for="facialHair">Facial Hair (optional)</label>
-  <input type="text" id="facialHair" placeholder="e.g. Goatee">
+  <input type="text" id="facialHair" placeholder="e.g. Goatee" />
 
   <label for="accessories">Accessories</label>
-  <input type="text" id="accessories" placeholder="e.g. Dog collar with spikes">
+  <input type="text" id="accessories" placeholder="e.g. Dog collar with spikes" />
 
   <label for="attire">Attire</label>
-  <input type="text" id="attire" placeholder="e.g. Goth/Alternative">
+  <input type="text" id="attire" placeholder="e.g. Goth/Alternative" />
 
   <label for="attireColor">Attire Color</label>
-  <input type="text" id="attireColor" placeholder="e.g. Black">
+  <input type="text" id="attireColor" placeholder="e.g. Black" />
 
   <label for="demeanor">Demeanor/Expression</label>
-  <input type="text" id="demeanor" placeholder="e.g. Mysterious">
+  <input type="text" id="demeanor" placeholder="e.g. Mysterious" />
 
   <label for="pose">Pose</label>
-  <input type="text" id="pose" placeholder="e.g. Crossed arms standing, looking relaxed">
+  <input type="text" id="pose" placeholder="e.g. Crossed arms, standing" />
 
   <label for="style">Art Style</label>
-  <input type="text" id="style" placeholder="e.g. Realistic, Ghibli, Pixar">
+  <input type="text" id="style" placeholder="e.g. Realistic, Ghibli, Pixar" />
 
   <label for="extra">Extra Details</label>
-  <input type="text" id="extra" placeholder="e.g. freckles, nose ring, etc.">
+  <input type="text" id="extra" placeholder="e.g. freckles, nose ring, tattoos" />
 
   <button onclick="generatePrompts()">Generate Prompts</button>
 
   <div class="output-container">
     <label>🎯 Headshot Prompt</label>
     <textarea id="headshotPrompt" readonly></textarea>
-    <button onclick="copyText('headshotPrompt')">Copy Headshot Prompt</button>
+    <button class="copy-btn" onclick="copyText('headshotPrompt')">Copy Headshot Prompt</button>
 
     <label>🧍 Full Body Prompt</label>
     <textarea id="fullBodyPrompt" readonly></textarea>
-    <button onclick="copyText('fullBodyPrompt')">Copy Full Body Prompt</button>
+    <button class="copy-btn" onclick="copyText('fullBodyPrompt')">Copy Full Body Prompt</button>
   </div>
 
   <script>
     function generatePrompts() {
-      const get = id => document.getElementById(id).value;
+      const get = id => document.getElementById(id).value.trim();
 
-      const parts = {
-        gender: get('gender'),
-        age: get('age'),
-        hair: get('hair'),
-        eyes: get('eyes'),
-        skin: get('skin'),
-        facialHair: get('facialHair'),
-        accessories: get('accessories'),
-        attire: get('attire'),
-        attireColor: get('attireColor'),
-        demeanor: get('demeanor'),
-        pose: get('pose'),
-        style: get('style'),
-        extra: get('extra')
-      };
+      const gender = get('gender');
+      const age = get('age');
+      const hair = get('hair');
+      const eyes = get('eyes');
+      const skin = get('skin');
+      const facialHair = get('facialHair');
+      const accessories = get('accessories');
+      const attire = get('attire');
+      const attireColor = get('attireColor');
+      const demeanor = get('demeanor');
+      const pose = get('pose');
+      const style = get('style');
+      const extra = get('extra');
 
-      const facialHair = parts.facialHair ? `, ${parts.facialHair}` : '';
-      const accessories = parts.accessories ? ` with ${parts.accessories}` : '';
-      const extra = parts.extra ? `, ${parts.extra}` : '';
+      const facialHairText = facialHair ? `, ${facialHair}` : '';
+      const accessoriesText = accessories ? ` with ${accessories}` : '';
+      const extraText = extra ? `, ${extra}` : '';
 
-      const headshot = `${parts.style} digital portrait headshot of a ${parts.gender} ${parts.age} with ${parts.hair}, ${parts.eyes}, ${parts.skin}${facialHair}${accessories}. They are wearing ${parts.attire} in ${parts.attireColor}. The expression is ${parts.demeanor} to reflect their personality${extra}. Studio-quality, clean background, optimized for use as a chatbot icon.`;
+      const headshotPrompt = `${style} digital portrait headshot of a ${gender} ${age} with ${hair}, ${eyes}, ${skin}${facialHairText}${accessoriesText}. They are wearing ${attire} in ${attireColor}. The expression is ${demeanor} to reflect their personality${extraText}. Studio-quality, clean background, optimized for use as a chatbot icon.`;
 
-      const fullBody = `${parts.style} full-body illustration of the same character: a ${parts.gender} ${parts.age} with ${parts.hair}, ${parts.eyes}, ${parts.skin}${facialHair}${accessories}. Wearing ${parts.attire} in ${parts.attireColor}. Personality is reflected as ${parts.demeanor}. They are posed ${parts.pose}${extra}. Background minimal or transparent. Stylized but professional artwork, consistent with the headshot design. Please export as a transparent background PNG.`;
+      const fullBodyPrompt = `${style} full-body illustration of the same character: a ${gender} ${age} with ${hair}, ${eyes}, ${skin}${facialHairText}${accessoriesText}. Wearing ${attire} in ${attireColor}. Personality is reflected as ${demeanor}. They are posed ${pose}${extraText}. Background minimal or transparent. Stylized but professional artwork, consistent with the headshot design. Please export as a transparent background PNG.`;
 
-      document.getElementById('headshotPrompt').value = headshot;
-      document.getElementById('fullBodyPrompt').value = fullBody;
+      document.getElementById('headshotPrompt').value = headshotPrompt;
+      document.getElementById('fullBodyPrompt').value = fullBodyPrompt;
     }
 
     function copyText(id) {
-      const textBox = document.getElementById(id);
-      textBox.select();
-      textBox.setSelectionRange(0, 99999); // For mobile
-      document.execCommand("copy");
+      const textarea = document.getElementById(id);
+      textarea.select();
+      textarea.setSelectionRange(0, 99999); // mobile compatibility
+      document.execCommand('copy');
     }
   </script>
-
 </body>
 </html>
