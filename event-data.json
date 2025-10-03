@@ -8,10 +8,15 @@
       "passId": "PASS001",
       "hostGallery": "Bath",
       "artConsultant": "Sophie Mitchell",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "11:27:56",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "11:27:56"
+        }
+      ]
     },
     {
       "id": "U2FyYWggSm",
@@ -652,5 +657,5 @@
     }
   ],
   "eventName": "sample_guest_list (4)",
-  "lastUpdated": "2025-10-03T10:27:28.641Z"
+  "lastUpdated": "2025-10-03T10:27:56.762Z"
 }
