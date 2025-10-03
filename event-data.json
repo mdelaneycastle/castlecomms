@@ -9,12 +9,16 @@
       "hostGallery": "Bath",
       "artConsultant": "Sophie Mitchell",
       "checkedIn": true,
-      "checkedInCount": 1,
-      "checkInTime": "11:27:56",
+      "checkedInCount": 2,
+      "checkInTime": "11:28:09",
       "checkInTimes": [
         {
           "count": 1,
           "time": "11:27:56"
+        },
+        {
+          "count": 1,
+          "time": "11:28:09"
         }
       ]
     },
@@ -657,5 +661,5 @@
     }
   ],
   "eventName": "sample_guest_list (4)",
-  "lastUpdated": "2025-10-03T10:27:56.762Z"
+  "lastUpdated": "2025-10-03T10:28:09.716Z"
 }
