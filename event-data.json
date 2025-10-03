@@ -8,10 +8,15 @@
       "passId": "PASS001",
       "hostGallery": "Birmingham - Mailbox",
       "artConsultant": "Sophie Williams",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "11:33:59",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "11:33:59"
+        }
+      ]
     },
     {
       "id": "U2FyYWggSm",
@@ -652,5 +657,5 @@
     }
   ],
   "eventName": "sample_guest_list (3)",
-  "lastUpdated": "2025-10-03T10:33:51.754Z"
+  "lastUpdated": "2025-10-03T10:33:59.850Z"
 }
