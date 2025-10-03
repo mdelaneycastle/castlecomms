@@ -34,10 +34,15 @@
       "passId": "PASS003",
       "hostGallery": "Manchester",
       "artConsultant": "Emma Thompson",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "11:41:23",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "11:41:23"
+        }
+      ]
     },
     {
       "id": "RW1pbHkgRG",
@@ -652,5 +657,5 @@
     }
   ],
   "eventName": "sample_guest_list (3)",
-  "lastUpdated": "2025-10-03T10:41:13.371Z"
+  "lastUpdated": "2025-10-03T10:41:24.150Z"
 }
