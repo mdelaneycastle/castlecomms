@@ -8,10 +8,15 @@
       "passId": "PASS001",
       "hostGallery": "Birmingham - Mailbox",
       "artConsultant": "Sophie Williams",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "11:41:50",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "11:41:50"
+        }
+      ]
     },
     {
       "id": "U2FyYWggSm",
@@ -21,10 +26,15 @@
       "passId": "PASS002",
       "hostGallery": "London Covent Garden",
       "artConsultant": "James Henderson",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 4,
+      "checkInTime": "13:26:02",
+      "checkInTimes": [
+        {
+          "count": 4,
+          "time": "13:26:02"
+        }
+      ]
     },
     {
       "id": "TWljaGFlbC",
@@ -34,10 +44,15 @@
       "passId": "PASS003",
       "hostGallery": "Manchester",
       "artConsultant": "Emma Thompson",
-      "checkedIn": false,
-      "checkedInCount": 0,
-      "checkInTime": null,
-      "checkInTimes": []
+      "checkedIn": true,
+      "checkedInCount": 1,
+      "checkInTime": "11:41:23",
+      "checkInTimes": [
+        {
+          "count": 1,
+          "time": "11:41:23"
+        }
+      ]
     },
     {
       "id": "RW1pbHkgRG",
@@ -652,5 +667,5 @@
     }
   ],
   "eventName": "sample_guest_list (3)",
-  "lastUpdated": "2025-09-18T21:07:29.071Z"
+  "lastUpdated": "2025-10-03T12:26:02.342Z"
 }
