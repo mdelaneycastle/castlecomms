@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Benefits - The Collectors Circle</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <style>
+        @font-face {
+            font-family: 'DIN Light Alternate';
+            src: url('DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 300;
+            background: linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #45494e;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(216, 209, 197, 0.95);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header {
+            background: #F0EDE9;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.3);
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #45494e;
+            font-size: 24px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-3px);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            color: #45494e;
+            letter-spacing: 0.025em;
+        }
+
+        .client-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .client-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d8d1c5;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .tier-badge {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            color: #d8d1c5;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .logout-btn:hover {
+            background: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tier-card {
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            border-radius: 12px;
+            padding: 30px;
+            color: #d8d1c5;
+            box-shadow: 0 8px 20px rgba(69, 73, 78, 0.15);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tier-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #c5bdb1, #d8d1c5, #c5bdb1, #d8d1c5, #c5bdb1);
+        }
+
+        .tier-card h2 {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .tier-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .benefits-section {
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .benefits-section h3 {
+            font-size: 20px;
+            color: #45494e;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .benefits-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .benefits-list li {
+            padding: 15px 0;
+            color: #6a6e73;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.2);
+            display: flex;
+            align-items: start;
+            gap: 12px;
+        }
+
+        .benefits-list li:last-child {
+            border-bottom: none;
+        }
+
+        .benefit-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .benefit-text {
+            flex: 1;
+        }
+
+        .benefit-title {
+            font-weight: 500;
+            color: #45494e;
+            margin-bottom: 5px;
+        }
+
+        .benefit-description {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .tier-comparison {
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .tier-comparison h3 {
+            font-size: 20px;
+            color: #45494e;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .tier-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tier-table th,
+        .tier-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.2);
+        }
+
+        .tier-table th {
+            background: rgba(69, 73, 78, 0.05);
+            font-weight: 500;
+            color: #45494e;
+            font-size: 14px;
+        }
+
+        .tier-table td {
+            color: #6a6e73;
+        }
+
+        .tier-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .active-tier {
+            font-weight: 600;
+            color: #0f9d58;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .benefits-section,
+            .tier-card,
+            .tier-comparison {
+                padding: 20px;
+            }
+
+            .tier-table {
+                font-size: 14px;
+            }
+
+            .tier-table th,
+            .tier-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="client-dashboard.html" class="back-btn">←</a>
+                <h1>Member Benefits</h1>
+            </div>
+            <div class="client-info">
+                <div class="client-avatar" id="client-avatar">?</div>
+                <span id="client-name">Loading...</span>
+                <span class="tier-badge" id="member-tier">Foundation</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tier-card">
+            <h2>Your <span id="tier-name">Foundation</span> Tier Benefits</h2>
+            <p>Enjoy exclusive rewards and experiences as a valued member of The Collectors Circle</p>
+        </div>
+
+        <div class="benefits-section">
+            <h3>💳 Financial Benefits</h3>
+            <ul class="benefits-list">
+                <li>
+                    <span class="benefit-icon">💎</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Art Credit Points</div>
+                        <div class="benefit-description">Earn <span id="credits-rate">2%</span> back in Art Credits on every purchase, redeemable for 24 months</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="benefit-icon">🎨</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Exclusive Pricing</div>
+                        <div class="benefit-description">Access to members-only pricing on select artworks</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="benefits-section">
+            <h3>🎁 Weekly Rewards</h3>
+            <ul class="benefits-list">
+                <li>
+                    <span class="benefit-icon">☕</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Complimentary Coffee</div>
+                        <div class="benefit-description">Enjoy a free coffee at any Castle Fine Art gallery, every week</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="benefit-icon">🥂</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Weekly Prosecco</div>
+                        <div class="benefit-description" id="prosecco-benefit">Available from Signature tier and above</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="benefits-section">
+            <h3>🎭 Experiences & Events</h3>
+            <ul class="benefits-list">
+                <li>
+                    <span class="benefit-icon">🎟️</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Priority Event Invitations</div>
+                        <div class="benefit-description">First access to exhibition launches, artist meet-and-greets, and VIP events</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="benefit-icon">🖼️</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Private Gallery Appointments</div>
+                        <div class="benefit-description">Request exclusive viewing sessions outside regular hours</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="benefit-icon">✨</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Private Collection Access</div>
+                        <div class="benefit-description">View and purchase artworks not available to the general public</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="benefits-section">
+            <h3>📋 Services & Support</h3>
+            <ul class="benefits-list">
+                <li>
+                    <span class="benefit-icon">📜</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Digital Insurance Valuations</div>
+                        <div class="benefit-description">Professional valuation certificates for all purchased artworks</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="benefit-icon" id="insurance-icon">🛡️</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Complimentary Art Insurance</div>
+                        <div class="benefit-description" id="insurance-benefit">Available from Prestige tier and above</div>
+                    </div>
+                </li>
+                <li>
+                    <span class="benefit-icon">👤</span>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Dedicated Gallery Advisor</div>
+                        <div class="benefit-description">Personal support for collection curation and acquisition advice</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tier-comparison">
+            <h3>Membership Tier Benefits</h3>
+            <table class="tier-table">
+                <thead>
+                    <tr>
+                        <th>Tier</th>
+                        <th>Annual Spend</th>
+                        <th>Art Credits</th>
+                        <th>Key Benefits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="active-tier" id="foundation-row">Foundation</td>
+                        <td>£0 - £4,999</td>
+                        <td>2%</td>
+                        <td>Coffee, Events, Valuations</td>
+                    </tr>
+                    <tr>
+                        <td id="signature-row">Signature</td>
+                        <td>£5,000 - £14,999</td>
+                        <td>5%</td>
+                        <td>+ Weekly Prosecco</td>
+                    </tr>
+                    <tr>
+                        <td id="prestige-row">Prestige</td>
+                        <td>£15,000 - £29,999</td>
+                        <td>7.5%</td>
+                        <td>+ Complimentary Insurance</td>
+                    </tr>
+                    <tr>
+                        <td id="eminence-row">Eminence</td>
+                        <td>£30,000+</td>
+                        <td>10%</td>
+                        <td>+ Premium Insurance & Concierge</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadMemberBenefits();
+        });
+
+        function checkAuth() {
+            const clientUser = sessionStorage.getItem('clientPortalUser');
+            if (!clientUser) {
+                window.location.href = 'client-login.html';
+                return;
+            }
+            try {
+                return JSON.parse(clientUser);
+            } catch (error) {
+                console.error('Invalid session data:', error);
+                sessionStorage.removeItem('clientPortalUser');
+                window.location.href = 'client-login.html';
+                return;
+            }
+        }
+
+        async function loadMemberBenefits() {
+            try {
+                const user = checkAuth();
+                if (!user) return;
+
+                if (!window.firebaseServices || !window.firebaseServices.db) {
+                    console.error('Database connection failed');
+                    return;
+                }
+
+                const db = window.firebaseServices.db;
+
+                // Update header
+                document.getElementById('client-name').textContent = user.name;
+                document.getElementById('client-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+                // Load member tier
+                const memberSnapshot = await db.ref(`members/${user.clientUid}`).once('value');
+                const memberData = memberSnapshot.val();
+
+                const tier = (memberData && memberData.tier) ? memberData.tier : 'Foundation';
+                updateTierBenefits(tier);
+
+            } catch (error) {
+                console.error('Error loading member benefits:', error);
+                updateTierBenefits('Foundation');
+            }
+        }
+
+        function updateTierBenefits(tier) {
+            document.getElementById('member-tier').textContent = tier;
+            document.getElementById('tier-name').textContent = tier;
+
+            // Update credits rate
+            const rates = {
+                'Foundation': '2%',
+                'Signature': '5%',
+                'Prestige': '7.5%',
+                'Eminence': '10%'
+            };
+            document.getElementById('credits-rate').textContent = rates[tier] || '2%';
+
+            // Update prosecco benefit
+            if (tier !== 'Foundation') {
+                document.getElementById('prosecco-benefit').textContent = 'Enjoy a complimentary glass of prosecco at any gallery, every week';
+            }
+
+            // Update insurance benefit
+            if (tier === 'Prestige' || tier === 'Eminence') {
+                document.getElementById('insurance-benefit').textContent = 'Full collection insurance included with your membership';
+                document.getElementById('insurance-icon').style.opacity = '1';
+            }
+
+            // Highlight active tier in table
+            ['foundation', 'signature', 'prestige', 'eminence'].forEach(t => {
+                const row = document.getElementById(`${t}-row`);
+                if (row) {
+                    row.classList.remove('active-tier');
+                }
+            });
+
+            const activeRow = document.getElementById(`${tier.toLowerCase()}-row`);
+            if (activeRow) {
+                activeRow.classList.add('active-tier');
+            }
+        }
+
+        async function logout() {
+            sessionStorage.removeItem('clientPortalUser');
+            window.location.href = 'client-login.html';
+        }
+    </script>
+</body>
+</html>

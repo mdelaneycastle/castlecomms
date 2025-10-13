@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exclusive Artworks - The Collectors Circle</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <style>
+        @font-face {
+            font-family: 'DIN Light Alternate';
+            src: url('DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 300;
+            background: linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #45494e;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(216, 209, 197, 0.95);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header {
+            background: #F0EDE9;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.3);
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #45494e;
+            font-size: 24px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-3px);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            color: #45494e;
+            letter-spacing: 0.025em;
+        }
+
+        .client-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .client-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d8d1c5;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .logout-btn:hover {
+            background: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .intro-section {
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            text-align: center;
+        }
+
+        .intro-section h2 {
+            font-size: 24px;
+            color: #45494e;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .intro-section p {
+            color: #6a6e73;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .artworks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .artwork-card {
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .artwork-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(69, 73, 78, 0.15);
+        }
+
+        .artwork-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #c5bdb1, #d8d1c5, #c5bdb1, #d8d1c5, #c5bdb1);
+        }
+
+        .artwork-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: rgba(69, 73, 78, 0.05);
+        }
+
+        .artwork-info {
+            padding: 20px;
+        }
+
+        .exclusive-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            color: #d8d1c5;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-bottom: 10px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .artwork-title {
+            font-size: 18px;
+            color: #45494e;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .artwork-artist {
+            font-size: 14px;
+            color: #6a6e73;
+            margin-bottom: 15px;
+        }
+
+        .artwork-price {
+            font-size: 20px;
+            color: #45494e;
+            font-weight: 600;
+        }
+
+        .enquire-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            color: #d8d1c5;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            margin-top: 15px;
+        }
+
+        .enquire-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(69, 73, 78, 0.15);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .empty-state .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #45494e;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .empty-state p {
+            color: #6a6e73;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .artworks-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .intro-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="client-dashboard.html" class="back-btn">←</a>
+                <h1>Exclusive Artworks</h1>
+            </div>
+            <div class="client-info">
+                <div class="client-avatar" id="client-avatar">?</div>
+                <span id="client-name">Loading...</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="intro-section">
+            <h2>The Private Collection</h2>
+            <p>Discover exclusive artworks available only to Collectors Circle members. These carefully curated pieces represent exceptional investment opportunities and are not available to the public.</p>
+        </div>
+
+        <div class="artworks-grid" id="artworks-container">
+            <div class="empty-state">
+                <div class="icon">✨</div>
+                <h3>Coming Soon</h3>
+                <p>New exclusive artworks will be available shortly. Check back soon or contact your gallery advisor for advance previews.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadUserData();
+            loadExclusiveArtworks();
+        });
+
+        function checkAuth() {
+            const clientUser = sessionStorage.getItem('clientPortalUser');
+            if (!clientUser) {
+                window.location.href = 'client-login.html';
+                return;
+            }
+            try {
+                return JSON.parse(clientUser);
+            } catch (error) {
+                console.error('Invalid session data:', error);
+                sessionStorage.removeItem('clientPortalUser');
+                window.location.href = 'client-login.html';
+                return;
+            }
+        }
+
+        function loadUserData() {
+            const user = checkAuth();
+            if (!user) return;
+
+            document.getElementById('client-name').textContent = user.name;
+            document.getElementById('client-avatar').textContent = user.name.charAt(0).toUpperCase();
+        }
+
+        async function loadExclusiveArtworks() {
+            try {
+                const user = checkAuth();
+                if (!user) return;
+
+                if (!window.firebaseServices || !window.firebaseServices.db) {
+                    console.error('Database connection failed');
+                    return;
+                }
+
+                const db = window.firebaseServices.db;
+
+                // Load exclusive artworks from database
+                const artworksSnapshot = await db.ref('exclusiveArtworks').once('value');
+                const artworks = artworksSnapshot.val();
+
+                if (artworks && Object.keys(artworks).length > 0) {
+                    displayArtworks(artworks);
+                }
+
+            } catch (error) {
+                console.error('Error loading exclusive artworks:', error);
+            }
+        }
+
+        function displayArtworks(artworks) {
+            const container = document.getElementById('artworks-container');
+            container.innerHTML = '';
+
+            Object.entries(artworks).forEach(([id, artwork]) => {
+                const card = document.createElement('div');
+                card.className = 'artwork-card';
+
+                card.innerHTML = `
+                    <img src="${artwork.imageUrl || 'icon.png'}" alt="${artwork.title}" class="artwork-image" onerror="this.src='icon.png'">
+                    <div class="artwork-info">
+                        <span class="exclusive-badge">Members Only</span>
+                        <div class="artwork-title">${artwork.title}</div>
+                        <div class="artwork-artist">${artwork.artist}</div>
+                        <div class="artwork-price">£${artwork.price.toLocaleString()}</div>
+                        <button class="enquire-btn" onclick="enquireArtwork('${id}', '${artwork.title}')">Enquire Now</button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function enquireArtwork(artworkId, title) {
+            const user = checkAuth();
+            if (!user) return;
+
+            if (confirm(`Enquire about "${title}"?\n\nWe'll connect you with your gallery advisor who can provide more information and arrange a private viewing.`)) {
+                alert(`Thank you! Your enquiry has been submitted. A member of our team will contact you shortly about "${title}".`);
+            }
+        }
+
+        async function logout() {
+            sessionStorage.removeItem('clientPortalUser');
+            window.location.href = 'client-login.html';
+        }
+    </script>
+</body>
+</html>

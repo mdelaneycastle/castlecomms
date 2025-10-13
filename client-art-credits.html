@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Credits - The Collectors Circle</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <style>
+        @font-face {
+            font-family: 'DIN Light Alternate';
+            src: url('DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 300;
+            background: linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #45494e;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(216, 209, 197, 0.95);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header {
+            background: #F0EDE9;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.3);
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #45494e;
+            font-size: 24px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-3px);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            color: #45494e;
+            letter-spacing: 0.025em;
+        }
+
+        .client-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .client-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d8d1c5;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .logout-btn:hover {
+            background: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            border-radius: 12px;
+            padding: 40px;
+            color: #d8d1c5;
+            box-shadow: 0 8px 20px rgba(69, 73, 78, 0.15);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #c5bdb1, #d8d1c5, #c5bdb1, #d8d1c5, #c5bdb1);
+        }
+
+        .balance-card h2 {
+            font-size: 18px;
+            font-weight: 400;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .balance-expires {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .info-section {
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .info-section h2 {
+            font-size: 24px;
+            color: #45494e;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .info-section h3 {
+            font-size: 18px;
+            color: #45494e;
+            margin: 20px 0 10px 0;
+            font-weight: 500;
+        }
+
+        .info-section p {
+            color: #6a6e73;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .info-section ul {
+            color: #6a6e73;
+            line-height: 1.8;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .tier-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .tier-table th,
+        .tier-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.3);
+        }
+
+        .tier-table th {
+            background: rgba(69, 73, 78, 0.05);
+            font-weight: 500;
+            color: #45494e;
+        }
+
+        .tier-table td {
+            color: #6a6e73;
+        }
+
+        .transactions-section {
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .transactions-section h2 {
+            font-size: 24px;
+            color: #45494e;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.2);
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-desc {
+            font-size: 16px;
+            color: #45494e;
+            font-weight: 400;
+            margin-bottom: 5px;
+        }
+
+        .transaction-date {
+            font-size: 14px;
+            color: #6a6e73;
+        }
+
+        .transaction-amount {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .transaction-amount.earned {
+            color: #0f9d58;
+        }
+
+        .transaction-amount.redeemed {
+            color: #6a6e73;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6a6e73;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .balance-card {
+                padding: 30px 20px;
+            }
+
+            .balance-amount {
+                font-size: 36px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .info-section,
+            .transactions-section {
+                padding: 20px;
+            }
+
+            .transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="client-dashboard.html" class="back-btn">←</a>
+                <h1>Art Credits</h1>
+            </div>
+            <div class="client-info">
+                <div class="client-avatar" id="client-avatar">?</div>
+                <span id="client-name">Loading...</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="balance-card">
+            <h2>Available Art Credits</h2>
+            <div class="balance-amount" id="balance-amount">£0</div>
+            <p class="balance-expires">Credits expire 24 months from issue date</p>
+        </div>
+
+        <div class="info-section">
+            <h2>How Art Credits Work</h2>
+            <p>Every qualifying purchase earns Art Credit Points, redeemable towards future artwork purchases.</p>
+
+            <h3>Earning Credits</h3>
+            <div class="tier-table-wrapper">
+                <table class="tier-table">
+                    <thead>
+                        <tr>
+                            <th>Membership Tier</th>
+                            <th>Annual Spend</th>
+                            <th>Credits Earned</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Foundation</td>
+                            <td>£0 - £4,999</td>
+                            <td>2% back in Art Credits</td>
+                        </tr>
+                        <tr>
+                            <td>Signature</td>
+                            <td>£5,000 - £14,999</td>
+                            <td>5% back in Art Credits</td>
+                        </tr>
+                        <tr>
+                            <td>Prestige</td>
+                            <td>£15,000 - £29,999</td>
+                            <td>7.5% back in Art Credits</td>
+                        </tr>
+                        <tr>
+                            <td>Eminence</td>
+                            <td>£30,000+</td>
+                            <td>10% back in Art Credits</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Redeeming Credits</h3>
+            <ul>
+                <li>1 Art Credit = £1 in value</li>
+                <li>Redeemable at any gallery or online</li>
+                <li>Use credits at checkout for any artwork purchase</li>
+                <li>Credits automatically appear in your account within 7 days of purchase</li>
+                <li>Valid for 24 months from date of issue</li>
+            </ul>
+        </div>
+
+        <div class="transactions-section">
+            <h2>Transaction History</h2>
+            <div id="transactions-list">
+                <div class="empty-state">
+                    <p>Loading transaction history...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadCreditsData();
+        });
+
+        function checkAuth() {
+            const clientUser = sessionStorage.getItem('clientPortalUser');
+            if (!clientUser) {
+                window.location.href = 'client-login.html';
+                return;
+            }
+            try {
+                return JSON.parse(clientUser);
+            } catch (error) {
+                console.error('Invalid session data:', error);
+                sessionStorage.removeItem('clientPortalUser');
+                window.location.href = 'client-login.html';
+                return;
+            }
+        }
+
+        async function loadCreditsData() {
+            try {
+                const user = checkAuth();
+                if (!user) return;
+
+                if (!window.firebaseServices || !window.firebaseServices.db) {
+                    console.error('Database connection failed');
+                    return;
+                }
+
+                const db = window.firebaseServices.db;
+
+                // Update header
+                document.getElementById('client-name').textContent = user.name;
+                document.getElementById('client-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+                // Load credits balance
+                const memberSnapshot = await db.ref(`members/${user.clientUid}`).once('value');
+                const memberData = memberSnapshot.val();
+
+                if (memberData && memberData.artCredits !== undefined) {
+                    document.getElementById('balance-amount').textContent = `£${memberData.artCredits.toLocaleString()}`;
+                } else {
+                    document.getElementById('balance-amount').textContent = '£0';
+                }
+
+                // Load transaction history
+                const transactionsSnapshot = await db.ref(`artCreditTransactions/${user.clientUid}`).orderByChild('date').limitToLast(20).once('value');
+                const transactions = transactionsSnapshot.val();
+
+                displayTransactions(transactions);
+
+            } catch (error) {
+                console.error('Error loading credits data:', error);
+                document.getElementById('balance-amount').textContent = '£0';
+                showEmptyTransactions('Failed to load transaction history');
+            }
+        }
+
+        function displayTransactions(transactions) {
+            const list = document.getElementById('transactions-list');
+
+            if (!transactions || Object.keys(transactions).length === 0) {
+                showEmptyTransactions('No transactions yet');
+                return;
+            }
+
+            list.innerHTML = '';
+
+            // Convert to array and sort by date (newest first)
+            const transArray = Object.entries(transactions)
+                .map(([id, trans]) => ({id, ...trans}))
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            transArray.forEach(transaction => {
+                const item = document.createElement('div');
+                item.className = 'transaction-item';
+
+                const date = new Date(transaction.date).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+                const amountClass = transaction.type === 'earned' ? 'earned' : 'redeemed';
+                const amountPrefix = transaction.type === 'earned' ? '+' : '-';
+
+                item.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="transaction-desc">${transaction.description}</div>
+                        <div class="transaction-date">${date}</div>
+                    </div>
+                    <div class="transaction-amount ${amountClass}">
+                        ${amountPrefix}£${transaction.amount.toLocaleString()}
+                    </div>
+                `;
+
+                list.appendChild(item);
+            });
+        }
+
+        function showEmptyTransactions(message) {
+            const list = document.getElementById('transactions-list');
+            list.innerHTML = `
+                <div class="empty-state">
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        async function logout() {
+            sessionStorage.removeItem('clientPortalUser');
+            window.location.href = 'client-login.html';
+        }
+    </script>
+</body>
+</html>

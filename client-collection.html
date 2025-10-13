@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Collection - The Collectors Circle</title>
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <style>
+        @font-face {
+            font-family: 'DIN Light Alternate';
+            src: url('DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+            font-weight: 300;
+            background: linear-gradient(135deg, #d8d1c5 0%, #e5ded2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #45494e;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(216, 209, 197, 0.95);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .header {
+            background: #F0EDE9;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.3);
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #45494e;
+            font-size: 24px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-3px);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            color: #45494e;
+            letter-spacing: 0.025em;
+        }
+
+        .client-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .client-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d8d1c5;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .logout-btn:hover {
+            background: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #6a6e73;
+            margin-bottom: 10px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-card .value {
+            font-size: 36px;
+            color: #45494e;
+            font-weight: 500;
+        }
+
+        .section {
+            background: #F0EDE9;
+            border: 1px solid rgba(216, 209, 197, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+        }
+
+        .section h2 {
+            font-size: 24px;
+            color: #45494e;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .section p {
+            color: #6a6e73;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .valuation-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #45494e 0%, #6a6e73 100%);
+            color: #d8d1c5;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(69, 73, 78, 0.12);
+            font-family: 'DIN Light Alternate', 'DIN 2014', 'DIN', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .valuation-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(69, 73, 78, 0.15);
+        }
+
+        .artwork-list {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .artwork-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            border: 1px solid rgba(216, 209, 197, 0.2);
+        }
+
+        .artwork-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+            background: rgba(69, 73, 78, 0.1);
+        }
+
+        .artwork-details {
+            flex: 1;
+        }
+
+        .artwork-title {
+            font-size: 16px;
+            color: #45494e;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .artwork-artist {
+            font-size: 14px;
+            color: #6a6e73;
+            margin-bottom: 5px;
+        }
+
+        .artwork-price {
+            font-size: 14px;
+            color: #45494e;
+            font-weight: 600;
+        }
+
+        .benefits-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .benefits-list li {
+            padding: 12px 0;
+            color: #6a6e73;
+            border-bottom: 1px solid rgba(216, 209, 197, 0.2);
+        }
+
+        .benefits-list li:before {
+            content: "✓ ";
+            color: #0f9d58;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .benefits-list li:last-child {
+            border-bottom: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6a6e73;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .artwork-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .artwork-image {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="client-dashboard.html" class="back-btn">←</a>
+                <h1>My Collection</h1>
+            </div>
+            <div class="client-info">
+                <div class="client-avatar" id="client-avatar">?</div>
+                <span id="client-name">Loading...</span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Artworks</h3>
+                <div class="value" id="total-artworks">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Collection Value</h3>
+                <div class="value" id="collection-value">£0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Member Since</h3>
+                <div class="value" style="font-size: 20px;" id="member-since">2025</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Digital Insurance Valuations</h2>
+            <p>Access professional insurance valuations for all artworks in your collection. These digital certificates provide detailed provenance and current market value assessments.</p>
+
+            <ul class="benefits-list">
+                <li>Professional valuation certificates for all purchased artworks</li>
+                <li>Updated market value assessments</li>
+                <li>Detailed provenance documentation</li>
+                <li>Downloadable PDF certificates</li>
+            </ul>
+
+            <button class="valuation-btn" onclick="requestValuation()">Request Full Collection Valuation</button>
+        </div>
+
+        <div class="section">
+            <h2>Your Collection</h2>
+            <p>View all artworks in your collection with certificates and valuations.</p>
+            <div id="artworks-container" class="artwork-list">
+                <div class="empty-state">
+                    <p>Loading collection...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <!-- Firebase init config -->
+    <script src="firebase-init.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadCollectionData();
+        });
+
+        function checkAuth() {
+            const clientUser = sessionStorage.getItem('clientPortalUser');
+            if (!clientUser) {
+                window.location.href = 'client-login.html';
+                return;
+            }
+            try {
+                return JSON.parse(clientUser);
+            } catch (error) {
+                console.error('Invalid session data:', error);
+                sessionStorage.removeItem('clientPortalUser');
+                window.location.href = 'client-login.html';
+                return;
+            }
+        }
+
+        async function loadCollectionData() {
+            try {
+                const user = checkAuth();
+                if (!user) return;
+
+                if (!window.firebaseServices || !window.firebaseServices.db) {
+                    console.error('Database connection failed');
+                    return;
+                }
+
+                const db = window.firebaseServices.db;
+
+                // Update header
+                document.getElementById('client-name').textContent = user.name;
+                document.getElementById('client-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+                // Load artworks
+                const artworksSnapshot = await db.ref(`clientArtworks/${user.clientUid}`).once('value');
+                const artworks = artworksSnapshot.val();
+
+                if (artworks) {
+                    const artworksArray = Object.entries(artworks);
+                    const totalValue = artworksArray.reduce((sum, [id, art]) => sum + (art.price || 0), 0);
+
+                    // Update stats
+                    document.getElementById('total-artworks').textContent = artworksArray.length;
+                    document.getElementById('collection-value').textContent = `£${totalValue.toLocaleString()}`;
+
+                    // Get member since date from first purchase
+                    const dates = artworksArray.map(([id, art]) => new Date(art.purchaseDate));
+                    const earliestDate = new Date(Math.min(...dates));
+                    document.getElementById('member-since').textContent = earliestDate.getFullYear();
+
+                    // Display artworks
+                    displayArtworks(artworks);
+                } else {
+                    showEmptyCollection();
+                }
+
+            } catch (error) {
+                console.error('Error loading collection data:', error);
+                showEmptyCollection();
+            }
+        }
+
+        function displayArtworks(artworks) {
+            const container = document.getElementById('artworks-container');
+            container.innerHTML = '';
+
+            Object.entries(artworks).forEach(([id, artwork]) => {
+                const item = document.createElement('div');
+                item.className = 'artwork-item';
+
+                let cleanArtist = artwork.artist || '';
+                cleanArtist = cleanArtist.replace(/(.+)\1+/, '$1');
+                if (!cleanArtist.toLowerCase().startsWith('by ')) {
+                    cleanArtist = 'by ' + cleanArtist;
+                }
+
+                let cleanTitle = artwork.title || '';
+                cleanTitle = cleanTitle.replace(/(.+)\1+/, '$1');
+
+                item.innerHTML = `
+                    <img src="${artwork.imageUrl}" alt="${cleanTitle}" class="artwork-image" onerror="this.src='icon.png'">
+                    <div class="artwork-details">
+                        <div class="artwork-title">${cleanTitle}</div>
+                        <div class="artwork-artist">${cleanArtist}</div>
+                        <div class="artwork-price">£${artwork.price.toLocaleString()}</div>
+                    </div>
+                `;
+
+                item.onclick = () => window.open(`certificate.html?client=${user.clientUid}&artwork=${id}`, '_blank');
+
+                container.appendChild(item);
+            });
+        }
+
+        function showEmptyCollection() {
+            document.getElementById('total-artworks').textContent = '0';
+            document.getElementById('collection-value').textContent = '£0';
+            document.getElementById('member-since').textContent = new Date().getFullYear();
+            document.getElementById('artworks-container').innerHTML = '<div class="empty-state"><p>No artworks in collection yet</p></div>';
+        }
+
+        function requestValuation() {
+            alert('Valuation request submitted. A member of our team will contact you within 5 business days with your comprehensive collection valuation.');
+        }
+
+        async function logout() {
+            sessionStorage.removeItem('clientPortalUser');
+            window.location.href = 'client-login.html';
+        }
+    </script>
+</body>
+</html>
