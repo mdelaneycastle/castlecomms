@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artwork Presentation Maker - Castle Fine Art</title>
+    <title>Artist PDF Maker - Castle Fine Art</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @font-face {
@@ -257,8 +257,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Artwork Presentation Maker</h1>
-        <p class="subtitle">Create professional PDFs with artist bios and product pages</p>
+        <h1>Artist PDF Maker</h1>
+        <p class="subtitle">Create professional square PDFs with artist bios and product pages</p>
 
         <div class="section">
             <h2 class="section-title">1. Client & Artist Details</h2>
@@ -277,7 +277,6 @@
                     <option value="billy-schenck">Billy Schenck</option>
                     <option value="bisaillon-brothers">Bisaillon Brothers</option>
                     <option value="bob-barker">Bob Barker</option>
-                    <option value="bob-dylan">Bob Dylan</option>
                     <option value="boy-george">Boy George</option>
                     <option value="dan-lane">Dan Lane</option>
                     <option value="disney-vintage">Disney Vintage</option>
@@ -352,7 +351,6 @@
             'billy-schenck': { name: 'Billy Schenck', bioFiles: ['bios/billy-schenck-bio.jpg'] },
             'bisaillon-brothers': { name: 'Bisaillon Brothers', bioFiles: ['bios/bisaillon-brothers-page1-bio.jpg', 'bios/bisaillon-brothers-page2-bio.jpg'] },
             'bob-barker': { name: 'Bob Barker', bioFiles: ['bios/bob-barker-bio.jpg'] },
-            'bob-dylan': { name: 'Bob Dylan', frontPage: 'front-pages/BDY-PDF-Front.jpg', bioFiles: ['bios/bob-dylan-bio.jpg'] },
             'boy-george': { name: 'Boy George', frontPage: 'front-pages/BGE-PDF-Front.jpg', bioFiles: ['bios/boy-george-bio.jpg'] },
             'dan-lane': { name: 'Dan Lane', bioFiles: ['bios/dan-lane-bio.jpg'] },
             'disney-vintage': { name: 'Disney Vintage', bioFiles: [] },
@@ -650,7 +648,17 @@
 
                 pdf.addImage(frontPageData, 'JPEG', 0, 0, size, size);
 
-                // Page 2+: Bio Pages (load pre-generated bio files)
+                // Page 2: About Us page
+                showStatus('Loading about us page...', 'loading');
+                try {
+                    const aboutUsData = await loadImageAsDataURL('aboutus.jpg');
+                    pdf.addPage([size, size]);
+                    pdf.addImage(aboutUsData, 'JPEG', 0, 0, size, size);
+                } catch (error) {
+                    console.warn('About us page not found');
+                }
+
+                // Page 3+: Bio Pages (load pre-generated bio files)
                 if (artist.bioFiles && artist.bioFiles.length > 0) {
                     showStatus('Loading bio pages...', 'loading');
                     for (const bioFile of artist.bioFiles) {
@@ -669,7 +677,7 @@
                     pdf.addImage(placeholderData, 'JPEG', 0, 0, size, size);
                 }
 
-                // Pages 3+: Product Pages
+                // Product Pages
                 for (let i = 0; i < uploadedImages.length; i++) {
                     showStatus(`Adding product ${i + 1} of ${uploadedImages.length}...`, 'loading');
                     pdf.addPage([size, size]);
