@@ -684,6 +684,16 @@
                     await addProductPage(pdf, uploadedImages[i], size);
                 }
 
+                // Last Page: YWOA
+                showStatus('Adding final page...', 'loading');
+                try {
+                    const ywoaData = await loadImageAsDataURL('ywoa.jpg');
+                    pdf.addPage([size, size]);
+                    pdf.addImage(ywoaData, 'JPEG', 0, 0, size, size);
+                } catch (error) {
+                    console.warn('YWOA page not found');
+                }
+
                 // Save PDF
                 const clientSuffix = clientName ? `_${clientName.replace(/\s/g, '_')}` : '';
                 const fileName = `${artist.name.replace(/\s/g, '_')}${clientSuffix}_Catalog_${Date.now()}.pdf`;
