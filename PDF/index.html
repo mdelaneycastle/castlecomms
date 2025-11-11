@@ -735,7 +735,28 @@
             const imgX = (pageSize - imgWidth) / 2;
             const imgY = 1.5; // Start 1.5 inches from top
 
+            // Draw shadow layers (multiple gray rectangles with increasing offset and decreasing opacity)
+            const shadowOffset = 0.08; // Shadow offset in inches
+            const shadowBlur = 3; // Number of shadow layers for blur effect
+            
+            for (let i = shadowBlur; i > 0; i--) {
+                const opacity = 0.05 * (shadowBlur - i + 1); // Gradually decrease opacity
+                const offset = (shadowOffset / shadowBlur) * i;
+                pdf.setFillColor(0, 0, 0); // Black color
+                pdf.setGState(new pdf.GState({ opacity: opacity }));
+                pdf.rect(imgX + offset, imgY + offset, imgWidth, imgHeight, 'F');
+            }
+            
+            // Reset opacity for the image
+            pdf.setGState(new pdf.GState({ opacity: 1 }));
+            
+            // Add the main image
             pdf.addImage(imageData.src, 'JPEG', imgX, imgY, imgWidth, imgHeight);
+            
+            // Add a subtle border to define the edge
+            pdf.setDrawColor(200, 200, 200); // Light gray border
+            pdf.setLineWidth(0.01); // Thin line
+            pdf.rect(imgX, imgY, imgWidth, imgHeight, 'S'); // 'S' for stroke only
 
             // Text styling
             pdf.setTextColor(99, 101, 104); // #636568
