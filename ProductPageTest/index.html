@@ -215,6 +215,19 @@
             overflow: hidden;
         }
 
+        .fade-transition {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
         .product-image-container.roomset-mode {
             padding: 0;
             background: transparent;
@@ -226,6 +239,7 @@
             height: 100%;
             object-fit: cover;
             z-index: 1;
+            transition: opacity 0.5s ease-in-out;
         }
 
         .product-frame.in-roomset {
@@ -237,6 +251,7 @@
             transform: translateX(-50%);
             z-index: 2;
             filter: drop-shadow(0 10px 30px rgba(0,0,0,0.4));
+            transition: opacity 0.5s ease-in-out;
         }
 
         /* Room-specific positioning adjustments */
@@ -477,7 +492,7 @@
                         // Evening mode: show only the evening background (artwork already included)
                         return `
                             <div class="product-card">
-                                <div class="product-image-container roomset-mode">
+                                <div class="product-image-container roomset-mode fade-transition">
                                     <img src="${eveningImageMap[product.title]}" alt="Room" class="roomset-background">
                                 </div>
                                 <div class="product-details">
@@ -492,7 +507,7 @@
                         // Day mode or other rooms: show room background with artwork overlay
                         return `
                             <div class="product-card">
-                                <div class="product-image-container roomset-mode">
+                                <div class="product-image-container roomset-mode fade-transition">
                                     <img src="${roomsetMap[currentRoomset]}" alt="Room" class="roomset-background">
                                     <div class="product-frame in-roomset ${roomClass}">
                                         <img src="${product.image}" alt="${product.title}" class="product-image in-roomset">
