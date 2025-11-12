@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Johnny Depp - Art Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            max-width: 1400px;
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 300;
+            color: #333;
+            letter-spacing: -0.5px;
+        }
+
+        .controls-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .color-selector, .roomset-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .roomset-selector select {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .roomset-selector select:hover {
+            border-color: #999;
+        }
+
+        .color-selector label, .roomset-selector label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: #333;
+            box-shadow: 0 0 0 2px white, 0 0 0 3px #333;
+        }
+
+        .color-option[data-color="lightgray"] { background: #e5e5e5; }
+        .color-option[data-color="white"] { background: white; border: 2px solid #ddd; }
+        .color-option[data-color="beige"] { background: #f5e6d3; }
+        .color-option[data-color="lightblue"] { background: #e3f2fd; }
+        .color-option[data-color="lightpink"] { background: #fce4ec; }
+        .color-option[data-color="lightgreen"] { background: #e8f5e9; }
+        .color-option[data-color="lavender"] { background: #f3e5f5; }
+        .color-option[data-color="custom"] { 
+            background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .custom-color-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .products-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 0;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .product-image-container {
+            background: #e5e5e5;
+            padding: 40px;
+            position: relative;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+            overflow: hidden;
+        }
+
+        .product-image-container.roomset-mode {
+            padding: 0;
+            background: transparent;
+        }
+
+        .roomset-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .product-frame.in-roomset {
+            position: absolute;
+            width: 25%; /* Quarter of the height, which equals aspect ratio 1:1 */
+            height: 25%;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            filter: drop-shadow(0 10px 30px rgba(0,0,0,0.4));
+        }
+
+        /* Room-specific positioning adjustments */
+        .product-frame.in-roomset.modern-room {
+            top: 25%;
+            left: 55%;
+        }
+
+        .product-frame.in-roomset.traditional-room {
+            left: 45%;
+        }
+
+        .product-frame.in-roomset.scandinavian-room {
+            /* Perfect as is - using default positioning */
+        }
+
+        .product-frame.in-roomset.industrial-room {
+            top: 25%;
+        }
+
+        .product-image.in-roomset {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: none;
+        }
+
+        .product-frame {
+            position: relative;
+            width: 85%;
+            height: 85%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
+        }
+
+        .product-details {
+            padding: 25px;
+            background: white;
+        }
+
+        .product-title {
+            font-size: 18px;
+            font-weight: 400;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .product-artist {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 5px;
+            font-weight: 300;
+        }
+
+        .product-edition {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .product-price {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+            letter-spacing: -0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .color-selector {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="page-title">Johnny Depp Collection</h1>
+        <div class="controls-wrapper">
+            <div class="roomset-selector">
+                <label>View Mode:</label>
+                <select id="roomsetSelect">
+                    <option value="none">Gallery View</option>
+                    <option value="modern">Modern Room</option>
+                    <option value="traditional">Traditional Room</option>
+                    <option value="scandinavian">Scandinavian Room</option>
+                    <option value="industrial">Industrial Room</option>
+                </select>
+            </div>
+            <div class="color-selector" id="colorSelector">
+                <label>Background Color:</label>
+                <div class="color-options">
+                    <div class="color-option active" data-color="lightgray" title="Light Gray"></div>
+                    <div class="color-option" data-color="white" title="White"></div>
+                    <div class="color-option" data-color="beige" title="Beige"></div>
+                    <div class="color-option" data-color="lightblue" title="Light Blue"></div>
+                    <div class="color-option" data-color="lightpink" title="Light Pink"></div>
+                    <div class="color-option" data-color="lightgreen" title="Light Green"></div>
+                    <div class="color-option" data-color="lavender" title="Lavender"></div>
+                    <div class="color-option" data-color="custom" title="Custom Color">
+                        <input type="color" class="custom-color-input" value="#e5e5e5">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="products-grid" id="productsGrid">
+        <!-- Products will be loaded here -->
+    </div>
+
+    <script>
+        // Product data parsed from filenames
+        const products = [
+            {
+                image: 'Images/A Rose Is A Rose Is A Rose - Johnny Depp - 3950.jpg',
+                title: 'A Rose Is A Rose Is A Rose',
+                artist: 'Johnny Depp',
+                price: '£3,950.00',
+                edition: 'Limited Edition'
+            },
+            {
+                image: 'Images/Cosmic - Johnny Depp - 4500.jpg',
+                title: 'Cosmic',
+                artist: 'Johnny Depp',
+                price: '£4,500.00',
+                edition: 'Limited Edition'
+            },
+            {
+                image: 'Images/Strength - Johnny Depp - 3950.jpg',
+                title: 'Strength',
+                artist: 'Johnny Depp',
+                price: '£3,950.00',
+                edition: 'Limited Edition'
+            },
+            {
+                image: 'Images/The Emporer - Johnny Depp - 3950.jpg',
+                title: 'The Emporer',
+                artist: 'Johnny Depp',
+                price: '£3,950.00',
+                edition: 'Limited Edition'
+            },
+            {
+                image: 'Images/The Empress - Johnny Depp - 3950.jpg',
+                title: 'The Empress',
+                artist: 'Johnny Depp',
+                price: '£3,950.00',
+                edition: 'Limited Edition'
+            }
+        ];
+
+        // Color mapping
+        const colorMap = {
+            'lightgray': '#e5e5e5',
+            'white': '#ffffff',
+            'beige': '#f5e6d3',
+            'lightblue': '#e3f2fd',
+            'lightpink': '#fce4ec',
+            'lightgreen': '#e8f5e9',
+            'lavender': '#f3e5f5'
+        };
+
+        let currentColor = '#e5e5e5';
+        let currentRoomset = 'none';
+
+        // Roomset mapping
+        const roomsetMap = {
+            'none': null,
+            'modern': 'Roomsets/Modern.png',
+            'traditional': 'Roomsets/Traditional.png',
+            'scandinavian': 'Roomsets/Scandinavian.png',
+            'industrial': 'Roomsets/Industrial.png'
+        };
+
+        // Render products
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const isRoomsetMode = currentRoomset !== 'none';
+            
+            grid.innerHTML = products.map(product => {
+                if (isRoomsetMode) {
+                    const roomClass = currentRoomset + '-room';
+                    return `
+                        <div class="product-card">
+                            <div class="product-image-container roomset-mode">
+                                <img src="${roomsetMap[currentRoomset]}" alt="Room" class="roomset-background">
+                                <div class="product-frame in-roomset ${roomClass}">
+                                    <img src="${product.image}" alt="${product.title}" class="product-image in-roomset">
+                                </div>
+                            </div>
+                            <div class="product-details">
+                                <h3 class="product-title">${product.title}</h3>
+                                <p class="product-artist">${product.artist}</p>
+                                <p class="product-edition">${product.edition}</p>
+                                <p class="product-price">${product.price}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="product-card">
+                            <div class="product-image-container" style="background-color: ${currentColor};">
+                                <div class="product-frame">
+                                    <img src="${product.image}" alt="${product.title}" class="product-image">
+                                </div>
+                            </div>
+                            <div class="product-details">
+                                <h3 class="product-title">${product.title}</h3>
+                                <p class="product-artist">${product.artist}</p>
+                                <p class="product-edition">${product.edition}</p>
+                                <p class="product-price">${product.price}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+        }
+
+        // Handle color selection
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', function(e) {
+                // Remove active class from all options
+                document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+                // Add active class to clicked option
+                this.classList.add('active');
+                
+                const colorType = this.dataset.color;
+                if (colorType === 'custom') {
+                    // Don't change color on click, wait for input change
+                    return;
+                } else {
+                    currentColor = colorMap[colorType];
+                    updateBackgroundColors();
+                }
+            });
+        });
+
+        // Handle custom color input
+        document.querySelector('.custom-color-input').addEventListener('input', function(e) {
+            currentColor = e.target.value;
+            // Activate custom color option
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+            this.parentElement.classList.add('active');
+            updateBackgroundColors();
+        });
+
+        // Update all product backgrounds
+        function updateBackgroundColors() {
+            if (currentRoomset === 'none') {
+                document.querySelectorAll('.product-image-container').forEach(container => {
+                    container.style.backgroundColor = currentColor;
+                });
+            }
+        }
+
+        // Handle roomset selection
+        document.getElementById('roomsetSelect').addEventListener('change', function(e) {
+            currentRoomset = e.target.value;
+            const colorSelector = document.getElementById('colorSelector');
+            
+            // Hide color selector when in roomset mode
+            if (currentRoomset !== 'none') {
+                colorSelector.style.display = 'none';
+            } else {
+                colorSelector.style.display = 'flex';
+            }
+            
+            renderProducts();
+        });
+
+        // Initial render
+        renderProducts();
+    </script>
+</body>
+</html>
