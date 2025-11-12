@@ -69,6 +69,68 @@
             border-color: #999;
         }
 
+        .time-toggle {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .time-toggle.visible {
+            display: flex;
+        }
+
+        .time-toggle label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .toggle-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: #ddd;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #636568;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+        }
+
         .color-selector label, .roomset-selector label {
             font-size: 14px;
             color: #666;
@@ -295,6 +357,16 @@
                     <option value="industrial">Industrial Room</option>
                 </select>
             </div>
+            <div class="time-toggle" id="timeToggle">
+                <label>Time:</label>
+                <div class="toggle-container">
+                    <span class="toggle-label">Day</span>
+                    <div class="toggle-switch" id="toggleSwitch">
+                        <div class="toggle-slider"></div>
+                    </div>
+                    <span class="toggle-label">Evening</span>
+                </div>
+            </div>
             <div class="color-selector" id="colorSelector">
                 <label>Background Color:</label>
                 <div class="color-options">
@@ -370,6 +442,7 @@
 
         let currentColor = '#e5e5e5';
         let currentRoomset = 'none';
+        let isEvening = false;
 
         // Roomset mapping
         const roomsetMap = {
@@ -380,6 +453,15 @@
             'industrial': 'Roomsets/Industrial.png'
         };
 
+        // Evening image mapping for Modern room
+        const eveningImageMap = {
+            'A Rose Is A Rose Is A Rose': 'Roomsets/Evening/Rose.png',
+            'Cosmic': 'Roomsets/Evening/cosmic.png',
+            'Strength': 'Roomsets/Evening/Strength.png',
+            'The Emporer': 'Roomsets/Evening/Emporer.png',
+            'The Empress': 'Roomsets/Evening/Empress.png'
+        };
+
         // Render products
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
@@ -388,10 +470,16 @@
             grid.innerHTML = products.map(product => {
                 if (isRoomsetMode) {
                     const roomClass = currentRoomset + '-room';
+                    // Use evening image if Modern room and evening toggle is on
+                    let backgroundImage = roomsetMap[currentRoomset];
+                    if (currentRoomset === 'modern' && isEvening && eveningImageMap[product.title]) {
+                        backgroundImage = eveningImageMap[product.title];
+                    }
+                    
                     return `
                         <div class="product-card">
                             <div class="product-image-container roomset-mode">
-                                <img src="${roomsetMap[currentRoomset]}" alt="Room" class="roomset-background">
+                                <img src="${backgroundImage}" alt="Room" class="roomset-background">
                                 <div class="product-frame in-roomset ${roomClass}">
                                     <img src="${product.image}" alt="${product.title}" class="product-image in-roomset">
                                 </div>
@@ -465,15 +553,34 @@
         document.getElementById('roomsetSelect').addEventListener('change', function(e) {
             currentRoomset = e.target.value;
             const colorSelector = document.getElementById('colorSelector');
+            const timeToggle = document.getElementById('timeToggle');
             
-            // Hide color selector when in roomset mode
+            // Show/hide controls based on selection
             if (currentRoomset !== 'none') {
                 colorSelector.style.display = 'none';
+                // Show time toggle only for Modern room
+                if (currentRoomset === 'modern') {
+                    timeToggle.classList.add('visible');
+                } else {
+                    timeToggle.classList.remove('visible');
+                }
             } else {
                 colorSelector.style.display = 'flex';
+                timeToggle.classList.remove('visible');
             }
             
             renderProducts();
+        });
+
+        // Handle time toggle
+        document.getElementById('toggleSwitch').addEventListener('click', function() {
+            this.classList.toggle('active');
+            isEvening = this.classList.contains('active');
+            
+            // Re-render if Modern room is selected
+            if (currentRoomset === 'modern') {
+                renderProducts();
+            }
         });
 
         // Initial render
