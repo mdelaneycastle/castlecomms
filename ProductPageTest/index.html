@@ -470,28 +470,43 @@
             grid.innerHTML = products.map(product => {
                 if (isRoomsetMode) {
                     const roomClass = currentRoomset + '-room';
-                    // Use evening image if Modern room and evening toggle is on
-                    let backgroundImage = roomsetMap[currentRoomset];
-                    if (currentRoomset === 'modern' && isEvening && eveningImageMap[product.title]) {
-                        backgroundImage = eveningImageMap[product.title];
-                    }
+                    // Check if we're in evening mode for Modern room
+                    const isModernEvening = currentRoomset === 'modern' && isEvening && eveningImageMap[product.title];
                     
-                    return `
-                        <div class="product-card">
-                            <div class="product-image-container roomset-mode">
-                                <img src="${backgroundImage}" alt="Room" class="roomset-background">
-                                <div class="product-frame in-roomset ${roomClass}">
-                                    <img src="${product.image}" alt="${product.title}" class="product-image in-roomset">
+                    if (isModernEvening) {
+                        // Evening mode: show only the evening background (artwork already included)
+                        return `
+                            <div class="product-card">
+                                <div class="product-image-container roomset-mode">
+                                    <img src="${eveningImageMap[product.title]}" alt="Room" class="roomset-background">
+                                </div>
+                                <div class="product-details">
+                                    <h3 class="product-title">${product.title}</h3>
+                                    <p class="product-artist">${product.artist}</p>
+                                    <p class="product-edition">${product.edition}</p>
+                                    <p class="product-price">${product.price}</p>
                                 </div>
                             </div>
-                            <div class="product-details">
-                                <h3 class="product-title">${product.title}</h3>
-                                <p class="product-artist">${product.artist}</p>
-                                <p class="product-edition">${product.edition}</p>
-                                <p class="product-price">${product.price}</p>
+                        `;
+                    } else {
+                        // Day mode or other rooms: show room background with artwork overlay
+                        return `
+                            <div class="product-card">
+                                <div class="product-image-container roomset-mode">
+                                    <img src="${roomsetMap[currentRoomset]}" alt="Room" class="roomset-background">
+                                    <div class="product-frame in-roomset ${roomClass}">
+                                        <img src="${product.image}" alt="${product.title}" class="product-image in-roomset">
+                                    </div>
+                                </div>
+                                <div class="product-details">
+                                    <h3 class="product-title">${product.title}</h3>
+                                    <p class="product-artist">${product.artist}</p>
+                                    <p class="product-edition">${product.edition}</p>
+                                    <p class="product-price">${product.price}</p>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 } else {
                     return `
                         <div class="product-card">
