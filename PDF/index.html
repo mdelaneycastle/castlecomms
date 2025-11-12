@@ -757,35 +757,42 @@
             // Text styling
             pdf.setTextColor(99, 101, 104); // #636568
 
-            // Title (headers use helvetica bold italic to mimic Acta)
+            // Fixed spacing for exactly 4 lines
+            const baseY = imgY + imgHeight + 0.5;
+            const lineSpacing = 0.3; // Fixed spacing between lines
+
+            // Line 1: Title (always on one line, adjust font size if needed)
             pdf.setFont('helvetica', 'bolditalic');
-            pdf.setFontSize(22);
-            const titleY = imgY + imgHeight + 0.5;
             const title = imageData.title || 'Untitled';
-            pdf.text(title, pageSize / 2, titleY, { align: 'center', maxWidth: pageSize * 0.8 });
+            
+            // Start with default size and reduce if title is too long
+            let titleFontSize = 22;
+            pdf.setFontSize(titleFontSize);
+            
+            // Check if title fits and reduce font size if needed
+            while (pdf.getTextWidth(title) > pageSize * 0.85 && titleFontSize > 12) {
+                titleFontSize -= 1;
+                pdf.setFontSize(titleFontSize);
+            }
+            
+            pdf.text(title, pageSize / 2, baseY, { align: 'center' });
 
-            // Body text (use helvetica normal to mimic DIN)
+            // Line 2: Medium (always show, use dash if empty)
             pdf.setFont('helvetica', 'normal');
-
-            // Medium
             pdf.setFontSize(14);
-            const mediumY = titleY + 0.35;
-            if (imageData.medium) {
-                pdf.text(imageData.medium, pageSize / 2, mediumY, { align: 'center', maxWidth: pageSize * 0.8 });
-            }
+            const medium = imageData.medium || '—';
+            pdf.text(medium, pageSize / 2, baseY + lineSpacing, { align: 'center' });
 
-            // Size
-            const sizeY = mediumY + (imageData.medium ? 0.28 : 0);
-            if (imageData.size) {
-                pdf.text(imageData.size, pageSize / 2, sizeY, { align: 'center', maxWidth: pageSize * 0.8 });
-            }
+            // Line 3: Size (always show, use dash if empty)
+            pdf.setFontSize(14);
+            const size = imageData.size || '—';
+            pdf.text(size, pageSize / 2, baseY + (lineSpacing * 2), { align: 'center' });
 
-            // Price (larger, bold)
+            // Line 4: Price (always show)
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(18);
-            const priceY = sizeY + (imageData.size ? 0.45 : 0.25);
             const price = imageData.price || 'Price on request';
-            pdf.text(price, pageSize / 2, priceY, { align: 'center' });
+            pdf.text(price, pageSize / 2, baseY + (lineSpacing * 3), { align: 'center' });
         }
 
         // Initialize
