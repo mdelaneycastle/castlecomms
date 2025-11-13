@@ -566,7 +566,7 @@
             let totalHeight = lines.length * lineHeight;
 
             // Add client name height if provided
-            if (clientName) {
+            if (clientName && clientName.length > 0) {
                 totalHeight += 100; // Space for "For [Name]"
             }
 
@@ -579,7 +579,7 @@
             });
 
             // Draw client name if provided - DIN font (light)
-            if (clientName) {
+            if (clientName && clientName.length > 0) {
                 ctx.font = '60px "DIN LightAlternate", Arial, sans-serif';
                 ctx.fillText(`For ${clientName}`, size / 2, startY + 50);
             }
@@ -709,18 +709,20 @@
                 if (artist.frontPage) {
                     try {
                         const baseImage = await loadImageAsDataURL(artist.frontPage);
-                        // If we have a client name, generate custom front page
-                        if (clientName) {
+                        // If we have a client name, generate custom front page with client name overlay
+                        if (clientName && clientName.length > 0) {
                             frontPageData = await generateFrontPage(artist.name, clientName);
                         } else {
+                            // No client name - use the pre-made artist front page
                             frontPageData = baseImage;
                         }
                     } catch (error) {
                         console.warn('Front page not found, generating new one');
-                        frontPageData = await generateFrontPage(artist.name, clientName);
+                        frontPageData = await generateFrontPage(artist.name, '');
                     }
                 } else {
-                    frontPageData = await generateFrontPage(artist.name, clientName);
+                    // No custom front page - always generate one
+                    frontPageData = await generateFrontPage(artist.name, clientName || '');
                 }
 
                 pdf.addImage(frontPageData, 'JPEG', 0, 0, size, size);
