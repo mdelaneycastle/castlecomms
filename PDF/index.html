@@ -80,7 +80,7 @@
             color: #636568;
         }
 
-        select, input[type="text"], input[type="file"] {
+        select, input[type="text"], input[type="file"], textarea {
             width: 100%;
             padding: 0.75rem;
             border: 2px solid #e0e0e0;
@@ -92,7 +92,12 @@
             transition: border-color 0.3s;
         }
 
-        select:focus, input:focus {
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        select:focus, input:focus, textarea:focus {
             outline: none;
             border-color: #636568;
         }
@@ -270,6 +275,13 @@
                 </small>
             </div>
             <div class="form-group">
+                <label for="custom-message">Custom Message (optional):</label>
+                <textarea id="custom-message" placeholder="Enter your custom message here. If you enter one line, it will be split into 3 equal parts. If you enter multiple lines, they will be preserved as-is."></textarea>
+                <small style="color: #888; font-size: 0.9rem; margin-top: 0.5rem; display: block;">
+                    This message will appear on a dedicated page before the final page
+                </small>
+            </div>
+            <div class="form-group">
                 <label for="artist-select">Choose an artist:</label>
                 <select id="artist-select">
                     <option value="">-- Select Artist --</option>
@@ -395,11 +407,13 @@
         // State
         let selectedArtist = null;
         let clientName = '';
+        let customMessage = '';
         let uploadedImages = [];
         let imageCounter = 0;
 
         // Elements
         const clientNameInput = document.getElementById('client-name');
+        const customMessageInput = document.getElementById('custom-message');
         const artistSelect = document.getElementById('artist-select');
         const imageUpload = document.getElementById('image-upload');
         const imagesContainer = document.getElementById('images-container');
@@ -409,6 +423,10 @@
         // Event Listeners
         clientNameInput.addEventListener('input', (e) => {
             clientName = e.target.value.trim();
+        });
+
+        customMessageInput.addEventListener('input', (e) => {
+            customMessage = e.target.value.trim();
         });
 
         artistSelect.addEventListener('change', (e) => {
@@ -569,6 +587,65 @@
             return canvas.toDataURL('image/jpeg', 0.95);
         }
 
+        // Generate custom message page
+        async function generateCustomMessagePage(message) {
+            const canvas = document.createElement('canvas');
+            const size = 1654;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            try {
+                // Load and draw the Front Template
+                const templateImg = await loadImage('front-pages/Front Template.jpg');
+                ctx.drawImage(templateImg, 0, 0, size, size);
+            } catch (error) {
+                console.warn('Could not load Front Template, using plain background');
+                ctx.fillStyle = '#636568';
+                ctx.fillRect(0, 0, size, size);
+            }
+
+            // Text styling - DIN font in cream/beige color
+            ctx.fillStyle = '#f6f0e8';
+            ctx.font = '60px "DIN LightAlternate", Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Process the message
+            let lines = [];
+
+            // Check if message contains newlines (multiple lines entered by user)
+            if (message.includes('\n')) {
+                // Use the lines as entered by the user
+                lines = message.split('\n').filter(line => line.trim().length > 0);
+            } else {
+                // Single line - split into 3 equal parts
+                const words = message.split(' ');
+                const wordsPerLine = Math.ceil(words.length / 3);
+
+                for (let i = 0; i < 3; i++) {
+                    const start = i * wordsPerLine;
+                    const end = Math.min(start + wordsPerLine, words.length);
+                    if (start < words.length) {
+                        lines.push(words.slice(start, end).join(' '));
+                    }
+                }
+            }
+
+            // Calculate vertical centering
+            const lineHeight = 90; // Spacing between lines
+            const totalHeight = lines.length * lineHeight;
+            let startY = (size - totalHeight) / 2 + (lineHeight / 2);
+
+            // Draw each line centered
+            lines.forEach(line => {
+                ctx.fillText(line, size / 2, startY);
+                startY += lineHeight;
+            });
+
+            return canvas.toDataURL('image/jpeg', 0.95);
+        }
+
         async function loadImageAsDataURL(url) {
             return new Promise(async (resolve, reject) => {
                 try {
@@ -682,6 +759,14 @@
                     showStatus(`Adding product ${i + 1} of ${uploadedImages.length}...`, 'loading');
                     pdf.addPage([size, size]);
                     await addProductPage(pdf, uploadedImages[i], size);
+                }
+
+                // Custom Message Page (before last page if message exists)
+                if (customMessage) {
+                    showStatus('Adding custom message page...', 'loading');
+                    const customMessageData = await generateCustomMessagePage(customMessage);
+                    pdf.addPage([size, size]);
+                    pdf.addImage(customMessageData, 'JPEG', 0, 0, size, size);
                 }
 
                 // Last Page: YWOA
