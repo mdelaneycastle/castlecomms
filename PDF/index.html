@@ -67,6 +67,9 @@
             color: #636568;
             border-bottom: 2px solid #f6f0e8;
             padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .form-group {
@@ -241,6 +244,83 @@
             font-style: italic;
         }
 
+        /* Various Artists Specific Styles */
+        .various-mode-container {
+            border: 2px solid #636568;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            background: #fffcf9;
+        }
+
+        .various-mode-header {
+            background: #636568;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .add-section-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1.5rem;
+        }
+
+        .add-section-btn:hover {
+            background: #34495e;
+        }
+
+        .sections-list {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .section-item {
+            background: #f5f5f5;
+            border-left: 5px solid #636568;
+            padding: 1rem;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .section-info p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .delete-section-btn {
+            color: #ff4444;
+            background: none;
+            border: 1px solid #ff4444;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .delete-section-btn:hover {
+            background: #ff4444;
+            color: white;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 1rem;
@@ -281,72 +361,62 @@
                     This message will appear on a dedicated page before the final page
                 </small>
             </div>
+            
             <div class="form-group">
-                <label for="artist-select">Choose an artist:</label>
-                <select id="artist-select">
-                    <option value="">-- Select Artist --</option>
-                    <option value="billy-connolly">Billy Connolly</option>
-                    <option value="billy-schenck">Billy Schenck</option>
-                    <option value="bisaillon-brothers">Bisaillon Brothers</option>
-                    <option value="bob-barker">Bob Barker</option>
-                    <option value="boy-george">Boy George</option>
-                    <option value="dan-lane">Dan Lane</option>
-                    <option value="disney-vintage">Disney Vintage</option>
-                    <option value="dr-seuss">Dr. Seuss</option>
-                    <option value="duncan-mcafee">Duncan McAfee</option>
-                    <option value="eve-arnold">Eve Arnold</option>
-                    <option value="gary-james-mcqueen">Gary James McQueen</option>
-                    <option value="graceland-london">Graceland London</option>
-                    <option value="hanna-barbera">Hanna-Barbera</option>
-                    <option value="james-francis-gill">James Francis Gill</option>
-                    <option value="james-mcqueen">James McQueen</option>
-                    <option value="john-myatt">John Myatt</option>
-                    <option value="jon-jones">Jon Jones</option>
-                    <option value="johnny-depp">Johnny Depp</option>
-                    <option value="joseph-jones">Joseph Jones</option>
-                    <option value="lawrence-coulson">Lawrence Coulson</option>
-                    <option value="lorenzo-quinn">Lorenzo Quinn</option>
-                    <option value="marco-olivier">Marco Olivier</option>
-                    <option value="marvel">Marvel</option>
-                    <option value="nic-joly">Nic Joly</option>
-                    <option value="nigel-humphries">Nigel Humphries</option>
-                    <option value="pascale-taurua">Pascale Taurua</option>
-                    <option value="paul-corfield">Paul Corfield</option>
-                    <option value="paul-kenton">Paul Kenton</option>
-                    <option value="paulo-ferreira">Paulo Ferreira</option>
-                    <option value="peter-smith">Peter Smith</option>
-                    <option value="raphael-mazzucco">Raphael Mazzucco</option>
-                    <option value="rich-simmons">Rich Simmons</option>
-                    <option value="richard-hambleton">Richard Hambleton</option>
-                    <option value="richard-rowan">Richard Rowan</option>
-                    <option value="robert-bailey">Robert Bailey</option>
-                    <option value="robert-oxley">Robert Oxley</option>
-                    <option value="romero-britto">Romero Britto</option>
-                    <option value="ron-english">Ron English</option>
-                    <option value="ronnie-wood">Ronnie Wood</option>
-                    <option value="scarlett-raven">Scarlett Raven</option>
-                    <option value="shazia">Shazia</option>
-                    <option value="steve-winterburn">Steve Winterburn</option>
-                    <option value="whatshisname">Whatshisname</option>
+                <label for="main-artist-select">Mode Selection:</label>
+                <select id="main-artist-select">
+                    <option value="">-- Select Option --</option>
+                    <option value="various-artists">★ Various Artists (Compilation) ★</option>
+                    <!-- Artists will be populated here via JS -->
                 </select>
             </div>
         </div>
 
-        <div class="section">
-            <h2 class="section-title">2. Upload Product Images</h2>
-            <div class="form-group">
-                <div class="file-input-wrapper">
-                    <input type="file" id="image-upload" multiple accept="image/*">
-                    <div class="upload-text">
-                        <p style="font-size: 2rem; margin-bottom: 0.5rem;">📁</p>
-                        <p>Click or drag images here</p>
-                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">Select multiple images for your catalog</p>
-                    </div>
+        <!-- STAGING AREA FOR IMAGES -->
+        <div class="section" id="upload-section" style="display:none;">
+            
+            <!-- Added Groups Display (Visible only in Various Mode) -->
+            <div id="completed-sections-container" style="display:none; margin-bottom: 2rem;">
+                <h3 class="section-title">Compilation Order</h3>
+                <div id="sections-list" class="sections-list">
+                    <!-- Added sections go here -->
                 </div>
+                <div class="empty-state" id="no-sections-msg">No artist sections added yet.</div>
             </div>
 
-            <div id="images-container">
-                <div class="empty-state">No images uploaded yet</div>
+            <!-- Input Area -->
+            <div id="input-area-container">
+                <h2 class="section-title" id="input-area-title">2. Upload Product Images</h2>
+                
+                <!-- Sub Artist Select (Visible only in Various Mode) -->
+                <div class="form-group" id="sub-artist-group" style="display:none;">
+                    <div class="various-mode-header">CURRENT SECTION</div>
+                    <label for="sub-artist-select">Select Artist for this section:</label>
+                    <select id="sub-artist-select">
+                        <option value="">-- Select Artist --</option>
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="image-upload" multiple accept="image/*">
+                        <div class="upload-text">
+                            <p style="font-size: 2rem; margin-bottom: 0.5rem;">📁</p>
+                            <p>Click or drag images here</p>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Select multiple images for your catalog</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="images-container">
+                    <div class="empty-state">No images uploaded yet</div>
+                </div>
+
+                <!-- Add Section Button (Only for Various Mode) -->
+                <button id="add-section-btn" class="add-section-btn" style="display:none;">
+                    + Add Artist Section to PDF
+                </button>
             </div>
         </div>
 
@@ -405,72 +475,198 @@
         };
 
         // State
-        let selectedArtist = null;
+        let appMode = 'single'; // 'single' or 'various'
+        let selectedMainArtist = null; // For single mode
+        let selectedSubArtist = null; // For various mode (current selection)
+        
         let clientName = '';
         let customMessage = '';
+        
+        // Staging area (currently visible images)
         let uploadedImages = [];
         let imageCounter = 0;
+
+        // Compilation queue (for various artists mode)
+        let pdfSections = []; 
 
         // Elements
         const clientNameInput = document.getElementById('client-name');
         const customMessageInput = document.getElementById('custom-message');
-        const artistSelect = document.getElementById('artist-select');
+        const mainArtistSelect = document.getElementById('main-artist-select');
+        
+        const uploadSection = document.getElementById('upload-section');
+        const completedSectionsContainer = document.getElementById('completed-sections-container');
+        const sectionsList = document.getElementById('sections-list');
+        const noSectionsMsg = document.getElementById('no-sections-msg');
+        
+        const subArtistGroup = document.getElementById('sub-artist-group');
+        const subArtistSelect = document.getElementById('sub-artist-select');
+        
         const imageUpload = document.getElementById('image-upload');
         const imagesContainer = document.getElementById('images-container');
+        
+        const addSectionBtn = document.getElementById('add-section-btn');
         const generateBtn = document.getElementById('generate-btn');
         const statusMessage = document.getElementById('status-message');
 
+        // Initialization: Populate dropdowns
+        function populateDropdowns() {
+            const keys = Object.keys(ARTIST_DATA).sort();
+            
+            keys.forEach(key => {
+                // Populate Main Select
+                const option1 = document.createElement('option');
+                option1.value = key;
+                option1.textContent = ARTIST_DATA[key].name;
+                mainArtistSelect.appendChild(option1);
+
+                // Populate Sub Select
+                const option2 = document.createElement('option');
+                option2.value = key;
+                option2.textContent = ARTIST_DATA[key].name;
+                subArtistSelect.appendChild(option2);
+            });
+        }
+
         // Event Listeners
-        clientNameInput.addEventListener('input', (e) => {
-            clientName = e.target.value.trim();
-        });
-
-        customMessageInput.addEventListener('input', (e) => {
-            customMessage = e.target.value.trim();
-        });
-
-        artistSelect.addEventListener('change', (e) => {
-            selectedArtist = e.target.value;
-            updateGenerateButton();
-        });
-
+        clientNameInput.addEventListener('input', (e) => clientName = e.target.value.trim());
+        customMessageInput.addEventListener('input', (e) => customMessage = e.target.value.trim());
         imageUpload.addEventListener('change', handleImageUpload);
         generateBtn.addEventListener('click', generatePDF);
+        
+        mainArtistSelect.addEventListener('change', handleMainArtistChange);
+        subArtistSelect.addEventListener('change', (e) => {
+            selectedSubArtist = e.target.value;
+            updateUIState();
+        });
+        
+        addSectionBtn.addEventListener('click', addSectionToCompilation);
 
-        // Functions
+        // Initialize
+        populateDropdowns();
+
+        // UI Logic
+        function handleMainArtistChange(e) {
+            const val = e.target.value;
+            
+            // Reset staging
+            uploadedImages = [];
+            imageCounter = 0;
+            renderImages();
+            
+            // Reset Sections if switching modes
+            if ((val === 'various-artists' && appMode !== 'various') || (val !== 'various-artists' && appMode !== 'single')) {
+                pdfSections = [];
+                renderSectionsList();
+            }
+
+            if (val === 'various-artists') {
+                appMode = 'various';
+                selectedMainArtist = null;
+                uploadSection.style.display = 'block';
+                completedSectionsContainer.style.display = 'block';
+                subArtistGroup.style.display = 'block';
+                addSectionBtn.style.display = 'block';
+                
+                // Reset sub selection
+                subArtistSelect.value = "";
+                selectedSubArtist = null;
+                
+                document.getElementById('input-area-container').classList.add('various-mode-container');
+                document.getElementById('input-area-title').innerText = "2. Add Artist Section";
+                
+            } else if (val) {
+                appMode = 'single';
+                selectedMainArtist = val;
+                uploadSection.style.display = 'block';
+                completedSectionsContainer.style.display = 'none';
+                subArtistGroup.style.display = 'none';
+                addSectionBtn.style.display = 'none';
+                
+                document.getElementById('input-area-container').classList.remove('various-mode-container');
+                document.getElementById('input-area-title').innerText = "2. Upload Product Images";
+            } else {
+                uploadSection.style.display = 'none';
+                selectedMainArtist = null;
+            }
+            
+            updateUIState();
+        }
+
+        function addSectionToCompilation() {
+            if (!selectedSubArtist) return;
+            if (uploadedImages.length === 0) return;
+
+            const section = {
+                id: Date.now(),
+                artistKey: selectedSubArtist,
+                artistName: ARTIST_DATA[selectedSubArtist].name,
+                images: [...uploadedImages] // Clone array
+            };
+
+            pdfSections.push(section);
+            
+            // Reset Staging
+            uploadedImages = [];
+            imageCounter = 0;
+            subArtistSelect.value = "";
+            selectedSubArtist = null;
+            renderImages();
+            renderSectionsList();
+            updateUIState();
+        }
+
+        function removeSection(id) {
+            pdfSections = pdfSections.filter(s => s.id !== id);
+            renderSectionsList();
+            updateUIState();
+        }
+
+        function renderSectionsList() {
+            sectionsList.innerHTML = '';
+            
+            if (pdfSections.length === 0) {
+                noSectionsMsg.style.display = 'block';
+            } else {
+                noSectionsMsg.style.display = 'none';
+                pdfSections.forEach((section, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'section-item';
+                    div.innerHTML = `
+                        <div class="section-info">
+                            <h4>${index + 1}. ${section.artistName}</h4>
+                            <p>${section.images.length} image(s)</p>
+                        </div>
+                        <button class="delete-section-btn" onclick="removeSection(${section.id})">Remove</button>
+                    `;
+                    sectionsList.appendChild(div);
+                });
+            }
+        }
+
+        // Image Handling
         function handleImageUpload(event) {
             const files = Array.from(event.target.files);
-
             if (files.length === 0) return;
 
             files.forEach(file => {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
-                    reader.onload = (e) => {
-                        addImage(e.target.result, file.name);
-                    };
+                    reader.onload = (e) => addImage(e.target.result, file.name);
                     reader.readAsDataURL(file);
                 }
             });
-
             event.target.value = '';
         }
 
         function addImage(src, fileName) {
             const id = ++imageCounter;
-            const imageData = {
-                id,
-                src,
-                fileName,
-                title: '',
-                medium: '',
-                size: '',
-                price: ''
-            };
-
-            uploadedImages.push(imageData);
+            uploadedImages.push({
+                id, src, fileName,
+                title: '', medium: '', size: '', price: ''
+            });
             renderImages();
-            updateGenerateButton();
+            updateUIState();
         }
 
         function renderImages() {
@@ -503,19 +699,27 @@
 
         window.updateImageData = function(id, field, value) {
             const img = uploadedImages.find(i => i.id === id);
-            if (img) {
-                img[field] = value;
-            }
+            if (img) img[field] = value;
         };
 
         window.removeImage = function(id) {
             uploadedImages = uploadedImages.filter(i => i.id !== id);
             renderImages();
-            updateGenerateButton();
+            updateUIState();
         };
 
-        function updateGenerateButton() {
-            generateBtn.disabled = !selectedArtist || uploadedImages.length === 0;
+        function updateUIState() {
+            if (appMode === 'single') {
+                // Enable Generate if artist selected and images exist
+                generateBtn.disabled = !selectedMainArtist || uploadedImages.length === 0;
+            } else {
+                // Various Mode
+                // Enable "Add Section" if sub-artist selected and images exist
+                addSectionBtn.disabled = !selectedSubArtist || uploadedImages.length === 0;
+                
+                // Enable Generate if at least one section exists
+                generateBtn.disabled = pdfSections.length === 0;
+            }
         }
 
         function showStatus(message, type) {
@@ -528,6 +732,7 @@
             statusMessage.className = '';
         }
 
+        // PDF Helpers
         async function loadImage(src) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
@@ -535,115 +740,6 @@
                 img.onerror = reject;
                 img.src = src;
             });
-        }
-
-        // Generate front page with client name
-        async function generateFrontPage(artistName, clientName) {
-            const canvas = document.createElement('canvas');
-            const size = 1654;
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext('2d');
-
-            try {
-                // Load and draw the Front Template
-                const templateImg = await loadImage('front-pages/Front Template.jpg');
-                ctx.drawImage(templateImg, 0, 0, size, size);
-            } catch (error) {
-                console.warn('Could not load Front Template, using plain background');
-                ctx.fillStyle = '#636568';
-                ctx.fillRect(0, 0, size, size);
-            }
-
-            // Artist name in cream/beige color - ACTA font (bold italic)
-            ctx.fillStyle = '#f6f0e8';
-            ctx.font = 'italic bold 168px "Acta W01 Bold Italic", Georgia, serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            const lines = artistName.split(' ');
-            const lineHeight = 192;
-            let totalHeight = lines.length * lineHeight;
-
-            // Add client name height if provided
-            if (clientName && clientName.length > 0) {
-                totalHeight += 100; // Space for "For [Name]"
-            }
-
-            let startY = (size - totalHeight) / 2 + 96;
-
-            // Draw artist name
-            lines.forEach(line => {
-                ctx.fillText(line, size / 2, startY);
-                startY += lineHeight;
-            });
-
-            // Draw client name if provided - DIN font (light)
-            if (clientName && clientName.length > 0) {
-                ctx.font = '60px "DIN LightAlternate", Arial, sans-serif';
-                ctx.fillText(`For ${clientName}`, size / 2, startY + 50);
-            }
-
-            return canvas.toDataURL('image/jpeg', 0.95);
-        }
-
-        // Generate custom message page
-        async function generateCustomMessagePage(message) {
-            const canvas = document.createElement('canvas');
-            const size = 1654;
-            canvas.width = size;
-            canvas.height = size;
-            const ctx = canvas.getContext('2d');
-
-            try {
-                // Load and draw the Front Template
-                const templateImg = await loadImage('front-pages/Front Template.jpg');
-                ctx.drawImage(templateImg, 0, 0, size, size);
-            } catch (error) {
-                console.warn('Could not load Front Template, using plain background');
-                ctx.fillStyle = '#636568';
-                ctx.fillRect(0, 0, size, size);
-            }
-
-            // Text styling - DIN font in cream/beige color
-            ctx.fillStyle = '#f6f0e8';
-            ctx.font = '60px "DIN LightAlternate", Arial, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            // Process the message
-            let lines = [];
-
-            // Check if message contains newlines (multiple lines entered by user)
-            if (message.includes('\n')) {
-                // Use the lines as entered by the user
-                lines = message.split('\n').filter(line => line.trim().length > 0);
-            } else {
-                // Single line - split into 3 equal parts
-                const words = message.split(' ');
-                const wordsPerLine = Math.ceil(words.length / 3);
-
-                for (let i = 0; i < 3; i++) {
-                    const start = i * wordsPerLine;
-                    const end = Math.min(start + wordsPerLine, words.length);
-                    if (start < words.length) {
-                        lines.push(words.slice(start, end).join(' '));
-                    }
-                }
-            }
-
-            // Calculate vertical centering
-            const lineHeight = 90; // Spacing between lines
-            const totalHeight = lines.length * lineHeight;
-            let startY = (size - totalHeight) / 2 + (lineHeight / 2);
-
-            // Draw each line centered
-            lines.forEach(line => {
-                ctx.fillText(line, size / 2, startY);
-                startY += lineHeight;
-            });
-
-            return canvas.toDataURL('image/jpeg', 0.95);
         }
 
         async function loadImageAsDataURL(url) {
@@ -658,112 +754,196 @@
                 } catch (fetchError) {
                     const img = new Image();
                     img.crossOrigin = 'anonymous';
-
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         canvas.width = img.width;
                         canvas.height = img.height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0);
-
-                        try {
-                            const dataURL = canvas.toDataURL('image/jpeg', 0.95);
-                            resolve(dataURL);
-                        } catch (e) {
-                            reject(new Error('Failed to convert image'));
-                        }
+                        try { resolve(canvas.toDataURL('image/jpeg', 0.95)); } 
+                        catch (e) { reject(new Error('Failed to convert image')); }
                     };
-
                     img.onerror = () => reject(new Error(`Failed to load: ${url}`));
                     img.src = url;
                 }
             });
         }
 
-        async function generatePDF() {
-            if (!selectedArtist || uploadedImages.length === 0) {
-                showStatus('Please select an artist and add at least one product image', 'error');
-                return;
+        async function generateFrontPage(artistName, clientName) {
+            const canvas = document.createElement('canvas');
+            const size = 1654;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            try {
+                const templateImg = await loadImage('front-pages/Front Template.jpg');
+                ctx.drawImage(templateImg, 0, 0, size, size);
+            } catch (error) {
+                ctx.fillStyle = '#636568';
+                ctx.fillRect(0, 0, size, size);
             }
 
+            ctx.fillStyle = '#f6f0e8';
+            ctx.font = 'italic bold 168px "Acta W01 Bold Italic", Georgia, serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const lines = artistName.split(' ');
+            const lineHeight = 192;
+            let totalHeight = lines.length * lineHeight;
+
+            if (clientName && clientName.length > 0) totalHeight += 100;
+
+            let startY = (size - totalHeight) / 2 + 96;
+
+            lines.forEach(line => {
+                ctx.fillText(line, size / 2, startY);
+                startY += lineHeight;
+            });
+
+            if (clientName && clientName.length > 0) {
+                ctx.font = '60px "DIN LightAlternate", Arial, sans-serif';
+                ctx.fillText(`For ${clientName}`, size / 2, startY + 50);
+            }
+
+            return canvas.toDataURL('image/jpeg', 0.95);
+        }
+
+        async function generateCustomMessagePage(message) {
+            const canvas = document.createElement('canvas');
+            const size = 1654;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            try {
+                const templateImg = await loadImage('front-pages/Front Template.jpg');
+                ctx.drawImage(templateImg, 0, 0, size, size);
+            } catch (error) {
+                ctx.fillStyle = '#636568';
+                ctx.fillRect(0, 0, size, size);
+            }
+
+            ctx.fillStyle = '#f6f0e8';
+            ctx.font = '60px "DIN LightAlternate", Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            let lines = [];
+            if (message.includes('\n')) {
+                lines = message.split('\n').filter(line => line.trim().length > 0);
+            } else {
+                const words = message.split(' ');
+                const wordsPerLine = Math.ceil(words.length / 3);
+                for (let i = 0; i < 3; i++) {
+                    const start = i * wordsPerLine;
+                    const end = Math.min(start + wordsPerLine, words.length);
+                    if (start < words.length) lines.push(words.slice(start, end).join(' '));
+                }
+            }
+
+            const lineHeight = 90;
+            const totalHeight = lines.length * lineHeight;
+            let startY = (size - totalHeight) / 2 + (lineHeight / 2);
+
+            lines.forEach(line => {
+                ctx.fillText(line, size / 2, startY);
+                startY += lineHeight;
+            });
+
+            return canvas.toDataURL('image/jpeg', 0.95);
+        }
+
+        // Core Generation Function
+        async function generatePDF() {
             showStatus('Generating PDF... Please wait', 'loading');
             generateBtn.disabled = true;
 
             try {
                 const { jsPDF } = window.jspdf;
-
-                // Square dimensions: 1654x1654px at 200 DPI = 8.27" x 8.27"
                 const size = 8.27; // inches
-                const pdf = new jsPDF({
-                    orientation: 'portrait',
-                    unit: 'in',
-                    format: [size, size]
-                });
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: [size, size] });
 
-                const artist = ARTIST_DATA[selectedArtist];
-
-                // Page 1: Artist Front Page
-                showStatus('Loading artist front page...', 'loading');
-                let frontPageData;
-
-                if (artist.frontPage) {
-                    try {
-                        const baseImage = await loadImageAsDataURL(artist.frontPage);
-                        // If we have a client name, generate custom front page with client name overlay
-                        if (clientName && clientName.length > 0) {
-                            frontPageData = await generateFrontPage(artist.name, clientName);
-                        } else {
-                            // No client name - use the pre-made artist front page
-                            frontPageData = baseImage;
-                        }
-                    } catch (error) {
-                        console.warn('Front page not found, generating new one');
-                        frontPageData = await generateFrontPage(artist.name, '');
-                    }
+                // Determine sections to print
+                let sectionsToPrint = [];
+                
+                if (appMode === 'single') {
+                    sectionsToPrint = [{
+                        artistKey: selectedMainArtist,
+                        images: uploadedImages
+                    }];
                 } else {
-                    // No custom front page - always generate one
-                    frontPageData = await generateFrontPage(artist.name, clientName || '');
+                    sectionsToPrint = pdfSections;
                 }
 
-                pdf.addImage(frontPageData, 'JPEG', 0, 0, size, size);
+                // 1. Main Front Page
+                showStatus('Loading front page...', 'loading');
+                
+                // Determine front page title
+                let coverName = "";
+                let frontPageImage = null;
 
-                // Page 2: About Us page
+                if (appMode === 'single') {
+                    coverName = ARTIST_DATA[selectedMainArtist].name;
+                    // Use artist specific cover if available and NO client name (unless logic dictates otherwise)
+                    // Logic: Use Custom Front if exists, otherwise Generate. 
+                    // Note: If ClientName exists, we almost always want to Generate to overlay the name.
+                    const artistData = ARTIST_DATA[selectedMainArtist];
+                    
+                    if (artistData.frontPage && !clientName) {
+                        try {
+                             frontPageImage = await loadImageAsDataURL(artistData.frontPage);
+                        } catch(e) { console.warn('Front page load failed'); }
+                    }
+                } else {
+                    coverName = "Various Artists";
+                }
+
+                // If we don't have a pre-made image, or we have a client name, generate one
+                if (!frontPageImage) {
+                    frontPageImage = await generateFrontPage(coverName, clientName);
+                }
+
+                pdf.addImage(frontPageImage, 'JPEG', 0, 0, size, size);
+
+                // 2. About Us
                 showStatus('Loading about us page...', 'loading');
                 try {
                     const aboutUsData = await loadImageAsDataURL('aboutus.jpg');
                     pdf.addPage([size, size]);
                     pdf.addImage(aboutUsData, 'JPEG', 0, 0, size, size);
-                } catch (error) {
-                    console.warn('About us page not found');
-                }
+                } catch (error) { console.warn('About us page not found'); }
 
-                // Page 3+: Bio Pages (load pre-generated bio files)
-                if (artist.bioFiles && artist.bioFiles.length > 0) {
-                    showStatus('Loading bio pages...', 'loading');
-                    for (const bioFile of artist.bioFiles) {
-                        try {
-                            const bioPageData = await loadImageAsDataURL(bioFile);
-                            pdf.addPage([size, size]);
-                            pdf.addImage(bioPageData, 'JPEG', 0, 0, size, size);
-                        } catch (error) {
-                            console.warn(`Could not load bio file: ${bioFile}`);
+                // 3. Loop through Sections (Bio -> Images)
+                for (let sIndex = 0; sIndex < sectionsToPrint.length; sIndex++) {
+                    const section = sectionsToPrint[sIndex];
+                    const artistData = ARTIST_DATA[section.artistKey];
+
+                    showStatus(`Processing section: ${artistData.name}...`, 'loading');
+
+                    // A. Artist Bio Pages
+                    if (artistData.bioFiles && artistData.bioFiles.length > 0) {
+                        for (const bioFile of artistData.bioFiles) {
+                            try {
+                                const bioPageData = await loadImageAsDataURL(bioFile);
+                                pdf.addPage([size, size]);
+                                pdf.addImage(bioPageData, 'JPEG', 0, 0, size, size);
+                            } catch (error) { console.warn(`Could not load bio: ${bioFile}`); }
                         }
+                    } else {
+                        // Optional: Add placeholder bio if missing?
+                        // For now, skip if no bio.
                     }
-                } else {
-                    // No bio files, add placeholder
-                    pdf.addPage([size, size]);
-                    const placeholderData = await generateFrontPage(artist.name, '');
-                    pdf.addImage(placeholderData, 'JPEG', 0, 0, size, size);
+
+                    // B. Artist Product Pages
+                    for (let i = 0; i < section.images.length; i++) {
+                        pdf.addPage([size, size]);
+                        await addProductPage(pdf, section.images[i], size);
+                    }
                 }
 
-                // Product Pages
-                for (let i = 0; i < uploadedImages.length; i++) {
-                    showStatus(`Adding product ${i + 1} of ${uploadedImages.length}...`, 'loading');
-                    pdf.addPage([size, size]);
-                    await addProductPage(pdf, uploadedImages[i], size);
-                }
-
-                // Custom Message Page (before last page if message exists)
+                // 4. Custom Message
                 if (customMessage) {
                     showStatus('Adding custom message page...', 'loading');
                     const customMessageData = await generateCustomMessagePage(customMessage);
@@ -771,19 +951,18 @@
                     pdf.addImage(customMessageData, 'JPEG', 0, 0, size, size);
                 }
 
-                // Last Page: YWOA
+                // 5. Final Page
                 showStatus('Adding final page...', 'loading');
                 try {
                     const ywoaData = await loadImageAsDataURL('ywoa.jpg');
                     pdf.addPage([size, size]);
                     pdf.addImage(ywoaData, 'JPEG', 0, 0, size, size);
-                } catch (error) {
-                    console.warn('YWOA page not found');
-                }
+                } catch (error) { console.warn('YWOA page not found'); }
 
-                // Save PDF
+                // Save
+                let fileNameName = appMode === 'single' ? ARTIST_DATA[selectedMainArtist].name : "Various_Artists";
                 const clientSuffix = clientName ? `_${clientName.replace(/\s/g, '_')}` : '';
-                const fileName = `${artist.name.replace(/\s/g, '_')}${clientSuffix}_Catalog_${Date.now()}.pdf`;
+                const fileName = `${fileNameName.replace(/\s/g, '_')}${clientSuffix}_Catalog_${Date.now()}.pdf`;
                 pdf.save(fileName);
 
                 showStatus('PDF generated successfully!', 'success');
@@ -798,15 +977,12 @@
         }
 
         async function addProductPage(pdf, imageData, pageSize) {
-            // Background color
-            pdf.setFillColor(246, 240, 232); // #f6f0e8
+            pdf.setFillColor(246, 240, 232); 
             pdf.rect(0, 0, pageSize, pageSize, 'F');
 
-            // Load and add the product image
             const img = await loadImage(imageData.src);
             const imgAspectRatio = img.width / img.height;
-
-            // Calculate image size (60% of page width, centered)
+            
             const maxImgWidth = pageSize * 0.6;
             const maxImgHeight = pageSize * 0.5;
 
@@ -820,70 +996,51 @@
             }
 
             const imgX = (pageSize - imgWidth) / 2;
-            const imgY = 1.5; // Start 1.5 inches from top
+            const imgY = 1.5;
 
-            // Draw a single smooth shadow
-            const shadowOffset = 0.06; // Shadow offset in inches
-            
-            // Draw main shadow rectangle
-            pdf.setFillColor(0, 0, 0); // Black color
-            pdf.setGState(new pdf.GState({ opacity: 0.15 })); // Single shadow with 15% opacity
-            pdf.rect(imgX + shadowOffset, imgY + shadowOffset, imgWidth, imgHeight, 'F');
-            
-            // Reset opacity for the image
+            // Shadow
+            pdf.setFillColor(0, 0, 0);
+            pdf.setGState(new pdf.GState({ opacity: 0.15 }));
+            pdf.rect(imgX + 0.06, imgY + 0.06, imgWidth, imgHeight, 'F');
             pdf.setGState(new pdf.GState({ opacity: 1 }));
             
-            // Add the main image
+            // Image
             pdf.addImage(imageData.src, 'JPEG', imgX, imgY, imgWidth, imgHeight);
             
-            // Add a subtle border to define the edge
-            pdf.setDrawColor(200, 200, 200); // Light gray border
-            pdf.setLineWidth(0.01); // Thin line
-            pdf.rect(imgX, imgY, imgWidth, imgHeight, 'S'); // 'S' for stroke only
+            // Border
+            pdf.setDrawColor(200, 200, 200);
+            pdf.setLineWidth(0.01);
+            pdf.rect(imgX, imgY, imgWidth, imgHeight, 'S');
 
-            // Text styling
-            pdf.setTextColor(99, 101, 104); // #636568
-
-            // Fixed spacing for exactly 4 lines
+            // Text
+            pdf.setTextColor(99, 101, 104);
             const baseY = imgY + imgHeight + 0.5;
-            const lineSpacing = 0.3; // Fixed spacing between lines
+            const lineSpacing = 0.3;
 
-            // Line 1: Title (always on one line, adjust font size if needed)
+            // Title
             pdf.setFont('helvetica', 'bolditalic');
-            const title = imageData.title || 'Untitled';
-            
-            // Start with default size and reduce if title is too long
             let titleFontSize = 22;
+            const title = imageData.title || 'Untitled';
             pdf.setFontSize(titleFontSize);
-            
-            // Check if title fits and reduce font size if needed
             while (pdf.getTextWidth(title) > pageSize * 0.85 && titleFontSize > 12) {
                 titleFontSize -= 1;
                 pdf.setFontSize(titleFontSize);
             }
-            
             pdf.text(title, pageSize / 2, baseY, { align: 'center' });
 
-            // Line 2: Medium (always show, use dash if empty)
+            // Medium
             pdf.setFont('helvetica', 'normal');
             pdf.setFontSize(14);
-            const medium = imageData.medium || '—';
-            pdf.text(medium, pageSize / 2, baseY + lineSpacing, { align: 'center' });
+            pdf.text(imageData.medium || '—', pageSize / 2, baseY + lineSpacing, { align: 'center' });
 
-            // Line 3: Size (always show, use dash if empty)
-            pdf.setFontSize(14);
-            const size = imageData.size || '—';
-            pdf.text(size, pageSize / 2, baseY + (lineSpacing * 2), { align: 'center' });
+            // Size
+            pdf.text(imageData.size || '—', pageSize / 2, baseY + (lineSpacing * 2), { align: 'center' });
 
-            // Line 4: Price (always show)
+            // Price
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(18);
-            const price = imageData.price || 'Price on request';
-            pdf.text(price, pageSize / 2, baseY + (lineSpacing * 3), { align: 'center' });
+            pdf.text(imageData.price || 'Price on request', pageSize / 2, baseY + (lineSpacing * 3), { align: 'center' });
         }
-
-        // Initialize
-        updateGenerateButton();
     </script>
 </body>
 </html>
