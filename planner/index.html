@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduling Portal - Gallery Scheduling Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/main.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-calendar-alt"></i>
+                <h1>Scheduling Portal</h1>
+            </div>
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-view="calendar">
+                    <i class="fas fa-calendar"></i> Calendar
+                </button>
+                <button class="tab-btn" data-view="list">
+                    <i class="fas fa-list"></i> List View
+                </button>
+            </nav>
+            <button id="adminBtn" class="admin-btn">
+                <i class="fas fa-lock"></i> Admin Mode
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Sidebar Filters -->
+        <aside class="sidebar">
+            <div id="adminControls" class="admin-controls hidden">
+                <button id="createNewItemBtn" class="btn-primary" style="width: 100%; margin-bottom: 2rem;">
+                    <i class="fas fa-plus"></i> Create New Item
+                </button>
+            </div>
+
+            <div class="filters">
+                <h3>Filters</h3>
+
+                <div class="filter-group">
+                    <label>Event Type</label>
+                    <div class="event-types">
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="launch" checked>
+                            <span class="badge launch">Campaign Launch</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="release" checked>
+                            <span class="badge release">Digital Launch</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="exhibition" checked>
+                            <span class="badge exhibition">Digital Originals Program</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="preview" checked>
+                            <span class="badge preview">New Artist</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="event" checked>
+                            <span class="badge event">Staff Training / Sales</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="artistFilter">Artist</label>
+                    <select id="artistFilter" class="filter-select">
+                        <option value="">All Artists</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="galleryFilter">Gallery</label>
+                    <select id="galleryFilter" class="filter-select">
+                        <option value="">All Galleries</option>
+                    </select>
+                </div>
+
+                <button id="clearFilters" class="btn-secondary">Clear Filters</button>
+            </div>
+
+            <div class="sync-section">
+                <h3>Calendar Sync</h3>
+                <button id="downloadICS" class="btn-sync">
+                    <i class="fas fa-download"></i> Download Calendar
+                </button>
+                <button id="copySubscribeURL" class="btn-sync">
+                    <i class="fas fa-link"></i> Copy Subscribe URL
+                </button>
+                <p class="sync-info">Subscribe to get automatic updates in Outlook, Google Calendar, or Apple Calendar</p>
+            </div>
+        </aside>
+
+        <!-- Content Area -->
+        <div class="content">
+            <!-- Calendar View -->
+            <div id="calendarView" class="view-container active">
+                <div id="calendar"></div>
+            </div>
+
+            <!-- List View -->
+            <div id="listView" class="view-container">
+                <div class="list-header">
+                    <input type="text" id="searchInput" placeholder="Search items..." class="search-input">
+                    <div class="list-stats">
+                        <span id="eventCount">0 items</span>
+                    </div>
+                </div>
+                <div id="listViewContent"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Type Selection Modal -->
+    <div id="typeSelectionModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Item</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="type-selection-body">
+                <p>Select the type of item you want to create:</p>
+                <div class="type-cards">
+                    <button class="type-card" data-type="launch">
+                        <i class="fas fa-rocket"></i>
+                        <h3>Campaign Launch</h3>
+                        <p>Major artist campaign launch</p>
+                    </button>
+                    <button class="type-card" data-type="release">
+                        <i class="fas fa-compact-disc"></i>
+                        <h3>Digital Launch</h3>
+                        <p>Digital release with date and title</p>
+                    </button>
+                    <button class="type-card" data-type="exhibition">
+                        <i class="fas fa-palette"></i>
+                        <h3>Digital Originals Program</h3>
+                        <p>Digital originals program event</p>
+                    </button>
+                    <button class="type-card" data-type="preview">
+                        <i class="fas fa-eye"></i>
+                        <h3>New Artist</h3>
+                        <p>New artist introduction</p>
+                    </button>
+                    <button class="type-card" data-type="event">
+                        <i class="fas fa-calendar-day"></i>
+                        <h3>Staff Training / Sales</h3>
+                        <p>Training event or sales period</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Modal (Full Form) -->
+    <div id="eventModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Event</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="eventForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="eventType">Event Type *</label>
+                        <select id="eventType" required>
+                            <option value="launch">Campaign Launch</option>
+                            <option value="release">Digital Launch</option>
+                            <option value="exhibition">Digital Originals Program</option>
+                            <option value="preview">New Artist</option>
+                            <option value="event">Staff Training / Sales</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventDate">Date *</label>
+                        <input type="date" id="eventDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="allDay" checked> All Day Event
+                        </label>
+                    </div>
+
+                    <div id="timeFields" class="form-group full-width time-fields hidden">
+                        <div class="time-grid">
+                            <div>
+                                <label for="startTime">Start Time</label>
+                                <input type="time" id="startTime" value="09:00">
+                            </div>
+                            <div>
+                                <label for="endTime">End Time</label>
+                                <input type="time" id="endTime" value="17:00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventArtist">Artist *</label>
+                        <select id="eventArtist" required></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventGallery">Gallery *</label>
+                        <select id="eventGallery" required></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventStatus">Status</label>
+                        <select id="eventStatus">
+                            <option value="planned">Planned</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="eventDescription">Description</label>
+                        <textarea id="eventDescription" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Equipment Required</label>
+                        <div class="equipment-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="equipTV"> TV/Display
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="equipMic"> Microphones
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="equipLighting"> Custom Lighting
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="equipStage"> Stage
+                            </label>
+                        </div>
+                        <input type="text" id="equipOther" placeholder="Other equipment...">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Simple Item Modal (for Release, Exhibition, Preview, Launch) -->
+    <div id="simpleItemModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="simpleModalTitle">Add New Item</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="simpleItemForm">
+                <div class="form-grid">
+                    <input type="hidden" id="simpleItemType">
+
+                    <div class="form-group">
+                        <label for="simpleItemDate">Date *</label>
+                        <input type="date" id="simpleItemDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="simpleItemArtist">Artist *</label>
+                        <select id="simpleItemArtist" required></select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="simpleItemTitle">Title *</label>
+                        <input type="text" id="simpleItemTitle" placeholder="Enter release/item title" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="simpleItemNotes">Notes</label>
+                        <textarea id="simpleItemNotes" rows="4" placeholder="Additional notes or details..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div id="eventDetailsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="detailsTitle">Event Details</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div id="eventDetailsContent"></div>
+            <div class="modal-footer admin-only hidden">
+                <button id="editEventBtn" class="btn-secondary">Edit</button>
+                <button id="deleteEventBtn" class="btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
