@@ -1198,7 +1198,20 @@
             if (draft && confirm('A draft was found. Would you like to restore it?')) {
                 quill.root.innerHTML = draft;
             } else {
-                quill.root.innerHTML = currentSection.content || '';
+                // Extract inner HTML if content is wrapped in a div
+                let contentToLoad = currentSection.content || '';
+
+                // Parse the HTML to extract just the inner content
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = contentToLoad;
+
+                // If it's wrapped in artist-section or campaign-section div, get the innerHTML
+                const wrapper = tempDiv.querySelector('.artist-section, .campaign-section');
+                if (wrapper) {
+                    contentToLoad = wrapper.innerHTML;
+                }
+
+                quill.root.innerHTML = contentToLoad;
             }
 
             hasUnsavedChanges = false;
@@ -1432,7 +1445,14 @@
             saveButton.innerHTML = '<div style="width: 20px; height: 20px; border: 3px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div> Saving...';
 
             try {
-                const content = quill.root.innerHTML;
+                // Get the content from Quill
+                let content = quill.root.innerHTML;
+
+                // Determine the wrapper class based on section type
+                const wrapperClass = currentSection.section_id.includes('sale') || currentSection.section_id === 'christmas' || currentSection.section_id === 'cfa-anniversary' ? 'campaign-section' : 'artist-section';
+
+                // Wrap content in the appropriate div
+                content = `<div class="${wrapperClass}" id="${currentSection.section_id}">\n${content}\n</div>`;
 
                 const { data, error } = await supabase
                     .from('artist_sections')
