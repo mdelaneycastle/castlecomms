@@ -842,6 +842,16 @@
                         <div id="editor"></div>
                     </div>
 
+                    <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <p style="margin-bottom: 10px; font-weight: 600; color: #34495e;">📦 Insert Special Elements:</p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button onclick="insertInfoBox()" style="padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em;">ℹ️ Info Box</button>
+                            <button onclick="insertHighlight()" style="padding: 8px 16px; background: #f39c12; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em;">⭐ Highlight</button>
+                            <button onclick="insertRevenueBox()" style="padding: 8px 16px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em;">💰 Revenue</button>
+                            <button onclick="insertDateBadge()" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em;">📅 Date Badge</button>
+                        </div>
+                    </div>
+
                     <div class="editor-stats">
                         <div>
                             <span id="charCount">0</span> characters |
@@ -1021,21 +1031,13 @@
                 ['bold', 'italic', 'underline'],
                 [{ 'header': [2, 3, false] }],
                 [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                ['info-box', 'highlight', 'revenue-box', 'date-badge'],
+                ['link'],
                 ['clean']
             ];
 
             quill = new Quill('#editor', {
                 modules: {
-                    toolbar: {
-                        container: toolbarOptions,
-                        handlers: {
-                            'info-box': insertInfoBox,
-                            'highlight': insertHighlight,
-                            'revenue-box': insertRevenueBox,
-                            'date-badge': insertDateBadge
-                        }
-                    }
+                    toolbar: toolbarOptions
                 },
                 theme: 'snow',
                 placeholder: 'Start editing your content...'
