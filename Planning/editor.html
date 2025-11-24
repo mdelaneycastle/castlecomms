@@ -1203,6 +1203,9 @@
                 // Extract inner HTML if content is wrapped in a div
                 let contentToLoad = currentSection.content || '';
 
+                console.log('Raw content from DB:', contentToLoad);
+                console.log('Content length:', contentToLoad.length);
+
                 // Parse the HTML to extract just the inner content
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = contentToLoad;
@@ -1211,8 +1214,12 @@
                 const wrapper = tempDiv.querySelector('.artist-section, .campaign-section');
                 if (wrapper) {
                     contentToLoad = wrapper.innerHTML;
+                    console.log('Extracted inner HTML, new length:', contentToLoad.length);
+                } else {
+                    console.log('No wrapper found, using content as-is');
                 }
 
+                console.log('Content to load into Quill:', contentToLoad.substring(0, 500));
                 quill.root.innerHTML = contentToLoad;
             }
 
