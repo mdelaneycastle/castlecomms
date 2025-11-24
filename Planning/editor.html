@@ -1220,17 +1220,17 @@
                 console.log('Raw content from DB:', contentToLoad);
                 console.log('Content length:', contentToLoad.length);
 
-                // Parse the HTML to extract just the inner content
+                // Parse the HTML to check if the OUTER wrapper is artist-section or campaign-section
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = contentToLoad;
 
-                // If it's wrapped in artist-section or campaign-section div, get the innerHTML
-                const wrapper = tempDiv.querySelector('.artist-section, .campaign-section');
-                if (wrapper) {
-                    contentToLoad = wrapper.innerHTML;
-                    console.log('Extracted inner HTML, new length:', contentToLoad.length);
+                // Check if the FIRST CHILD is the wrapper (not nested ones)
+                const firstChild = tempDiv.firstElementChild;
+                if (firstChild && (firstChild.classList.contains('artist-section') || firstChild.classList.contains('campaign-section'))) {
+                    contentToLoad = firstChild.innerHTML;
+                    console.log('Unwrapped outer div, new length:', contentToLoad.length);
                 } else {
-                    console.log('No wrapper found, using content as-is');
+                    console.log('No outer wrapper found, using content as-is');
                 }
 
                 console.log('Content to load into Quill:', contentToLoad.substring(0, 500));
