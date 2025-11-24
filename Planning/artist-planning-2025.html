@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Artist Program Planning</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 20px;
+            margin-bottom: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+        }
+
+        .edit-buttons {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            color: white;
+        }
+
+        .admin-btn {
+            background: #667eea;
+        }
+
+        .admin-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        h1 {
+            color: #262626;
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #4472c4;
+            font-size: 1.2em;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .nav-card {
+            position: relative;
+            padding: 30px 15px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .nav-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .nav-card:hover::before {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-card h3 {
+            color: white;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 2;
+            font-size: 1.1em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .nav-card p {
+            font-size: 0.85em;
+            color: white;
+            position: relative;
+            z-index: 2;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .artist-section {
+            background: white;
+            padding: 40px;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .artist-section h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .artist-section h3 {
+            color: #764ba2;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+        }
+
+        .artist-section h4 {
+            color: #4472c4;
+            font-size: 1.3em;
+            margin: 20px 0 10px 0;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .revenue-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .revenue-box h3 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        ul {
+            margin: 15px 0 15px 25px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .top-nav-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            z-index: 1000;
+            display: none;
+        }
+
+        .top-nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .top-nav-button.visible {
+            display: block;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            color: white;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        strong {
+            color: #667eea;
+        }
+
+        .date-badge {
+            display: inline-block;
+            background: #4472c4;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+
+        .performance-section {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .campaign-section {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        /* Loading indicator */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            background: white;
+            border-radius: 15px;
+            margin: 20px 0;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .artist-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header id="top">
+            <div class="edit-buttons">
+                <a href="editor.html" class="edit-btn admin-btn">✏️ Edit Content</a>
+            </div>
+            <h1>2025 Artist Program Planning Summary</h1>
+            <p class="subtitle">Comprehensive Overview of Artist Programs, Campaigns & Sales Performance</p>
+            <p style="margin-top: 10px; color: #666;">Last Updated: September 24, 2025 | Author: James Shepherd</p>
+        </header>
+
+        <div class="nav-grid" id="nav-grid">
+            <!-- Navigation will be loaded dynamically -->
+        </div>
+
+        <div id="content-container">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+
+        <a href="#top" class="back-to-top">↑ Back to Top</a>
+        <a href="#top" class="top-nav-button">↑ Back to Top</a>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://wdnpazkzejvnwiryxohl.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkbnBhemt6ZWp2bndpcnl4b2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5ODg1ODcsImV4cCI6MjA3OTU2NDU4N30.JCk80Gu2TdQhf5w_OMHxMdGbYjWahU-jrl4FuG6oZYM';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Load content from Supabase
+        async function loadContent() {
+            try {
+                // Fetch all sections ordered by id
+                const { data, error } = await supabase
+                    .from('artist_sections')
+                    .select('*')
+                    .order('id', { ascending: true });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    document.getElementById('content-container').innerHTML =
+                        '<div class="error-message">No content found in database.</div>';
+                    return;
+                }
+
+                // Clear loading indicator
+                document.getElementById('content-container').innerHTML = '';
+
+                // Render each section
+                data.forEach(section => {
+                    const sectionDiv = document.createElement('section');
+                    sectionDiv.id = section.section_id;
+                    sectionDiv.className = 'artist-section';
+                    sectionDiv.innerHTML = section.content;
+                    document.getElementById('content-container').appendChild(sectionDiv);
+                });
+
+                // Build navigation based on loaded sections
+                buildNavigation(data);
+
+                // Initialize scroll animations
+                initScrollAnimations();
+
+            } catch (error) {
+                console.error('Error loading content:', error);
+                document.getElementById('content-container').innerHTML =
+                    `<div class="error-message">
+                        <strong>Error loading content:</strong> ${error.message}
+                    </div>`;
+            }
+        }
+
+        // Build navigation grid
+        function buildNavigation(sections) {
+            const navGrid = document.getElementById('nav-grid');
+            navGrid.innerHTML = '';
+
+            sections.forEach(section => {
+                const navCard = document.createElement('div');
+                navCard.className = 'nav-card';
+                navCard.onclick = () => location.href = `#${section.section_id}`;
+
+                // Extract title and subtitle from content if available
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = section.content;
+                const h2 = tempDiv.querySelector('h2');
+                const title = h2 ? h2.textContent : section.section_name;
+
+                navCard.innerHTML = `
+                    <h3>${title}</h3>
+                    <p>${section.section_name}</p>
+                `;
+
+                navGrid.appendChild(navCard);
+            });
+        }
+
+        // Initialize scroll animations
+        function initScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.artist-section').forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(section);
+            });
+        }
+
+        // Smooth scrolling for navigation
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' && e.target.getAttribute('href')?.startsWith('#')) {
+                e.preventDefault();
+                const target = document.querySelector(e.target.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+
+        // Show/hide back to top buttons
+        window.addEventListener('scroll', function() {
+            const backToTop = document.querySelector('.back-to-top');
+            const topNavButton = document.querySelector('.top-nav-button');
+
+            if (window.pageYOffset > 300) {
+                backToTop.style.display = 'block';
+                topNavButton.classList.add('visible');
+            } else {
+                backToTop.style.display = 'none';
+                topNavButton.classList.remove('visible');
+            }
+        });
+
+        // Load content on page load
+        loadContent();
+    </script>
+</body>
+</html>
