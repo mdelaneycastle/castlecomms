@@ -1234,7 +1234,24 @@
                 }
 
                 console.log('Content to load into Quill:', contentToLoad.substring(0, 500));
-                quill.root.innerHTML = contentToLoad;
+
+                // Quill can't handle complex nested divs, so use textarea instead
+                quill.root.innerHTML = '<p>Loading content...</p>';
+
+                // Use textarea for editing instead
+                const editorDiv = document.getElementById('editor');
+                editorDiv.style.display = 'none';
+
+                let textarea = document.getElementById('htmlTextarea');
+                if (!textarea) {
+                    textarea = document.createElement('textarea');
+                    textarea.id = 'htmlTextarea';
+                    textarea.style.cssText = 'width: 100%; min-height: 500px; padding: 15px; font-family: monospace; font-size: 14px; border: 2px solid #e0e6ed; border-radius: 8px; resize: vertical;';
+                    editorDiv.parentNode.insertBefore(textarea, editorDiv);
+                }
+
+                textarea.value = contentToLoad;
+                textarea.style.display = 'block';
             }
 
             hasUnsavedChanges = false;
@@ -1468,8 +1485,9 @@
             saveButton.innerHTML = '<div style="width: 20px; height: 20px; border: 3px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div> Saving...';
 
             try {
-                // Get the content from Quill
-                let content = quill.root.innerHTML;
+                // Get the content from textarea (not Quill)
+                const textarea = document.getElementById('htmlTextarea');
+                let content = textarea ? textarea.value : quill.root.innerHTML;
 
                 // Determine the wrapper class based on section type
                 const wrapperClass = currentSection.section_id.includes('sale') || currentSection.section_id === 'christmas' || currentSection.section_id === 'cfa-anniversary' ? 'campaign-section' : 'artist-section';
