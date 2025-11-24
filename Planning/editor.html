@@ -1124,12 +1124,18 @@
         // Load all sections
         async function loadSections() {
             try {
+                console.log('Loading sections from Supabase...');
                 const { data, error } = await supabase
                     .from('artist_sections')
                     .select('*')
                     .order('id', { ascending: true });
 
                 if (error) throw error;
+
+                console.log('Loaded sections:', data.length);
+                if (data.length > 0) {
+                    console.log('First section:', data[0].section_name, 'Content length:', data[0].content.length);
+                }
 
                 sections = data;
                 renderSections(sections);
@@ -1185,8 +1191,16 @@
 
         // Open editor modal
         function openEditor(sectionId, tab = 'edit') {
+            console.log('Opening editor for section ID:', sectionId);
             currentSection = sections.find(s => s.id === sectionId);
-            if (!currentSection) return;
+
+            if (!currentSection) {
+                console.error('Section not found!', sectionId);
+                return;
+            }
+
+            console.log('Found section:', currentSection.section_name);
+            console.log('Section has content length:', currentSection.content ? currentSection.content.length : 0);
 
             document.getElementById('modalTitle').textContent = currentSection.section_name;
 
