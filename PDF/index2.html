@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Artist Catalog Maker</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <style>
+        /* --- FONTS --- */
+        @font-face {
+            font-family: 'Acta W01 Bold Italic';
+            src: url('fonts/Acta W01 Bold Italic.ttf') format('truetype');
+            font-weight: bold;
+            font-style: italic;
+        }
+        @font-face {
+            font-family: 'DIN LightAlternate';
+            src: url('fonts/DIN LightAlternate.ttf') format('truetype');
+            font-weight: 300;
+        }
+
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --primary: #636568;
+            --primary-dark: #4a4d50;
+            --accent: #2c3e50;
+            --bg: #f6f0e8;
+            --white: #ffffff;
+            --border: #e0e0e0;
+            --danger: #ff4444;
+            --success: #388e3c;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--primary);
+            padding: 2rem;
+            min-height: 100vh;
+            padding-bottom: 100px; /* Space for sticky footer */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 3rem;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1 { text-align: center; font-size: 2.5rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .subtitle { text-align: center; font-size: 1.1rem; color: #888; margin-bottom: 3rem; }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- FORMS --- */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        select, input[type="text"], textarea {
+            width: 100%; padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--primary); }
+        textarea { min-height: 100px; resize: vertical; }
+
+        /* --- UPLOAD ZONE --- */
+        .file-input-wrapper {
+            position: relative;
+            border: 3px dashed var(--border);
+            border-radius: 8px;
+            padding: 3rem;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-input-wrapper.drag-over {
+            border-color: var(--primary);
+            background: #eef2f5;
+            transform: scale(1.01);
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer;
+        }
+
+        .upload-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; }
+
+        /* --- IMAGE GRID (SORTABLE) --- */
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .image-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: move; /* Indicates draggable */
+        }
+
+        .image-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+        
+        /* SortableJS Ghost State */
+        .sortable-ghost { opacity: 0.4; background: #e0e0e0; border: 2px dashed var(--primary); }
+
+        .image-preview {
+            width: 100%; aspect-ratio: 1; object-fit: contain;
+            border-radius: 4px; margin-bottom: 1rem;
+            background: #f9f9f9;
+        }
+
+        .card-badge {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(0,0,0,0.6); color: white;
+            padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;
+        }
+
+        .remove-btn {
+            width: 100%; padding: 0.5rem; margin-top: 0.5rem;
+            background: var(--white); border: 1px solid var(--danger);
+            color: var(--danger); border-radius: 4px; cursor: pointer;
+            transition: 0.2s;
+        }
+        .remove-btn:hover { background: var(--danger); color: white; }
+
+        /* --- ACTION BAR --- */
+        .sticky-actions {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--white);
+            padding: 1.5rem;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
+        }
+
+        .settings-group { display: flex; gap: 1rem; align-items: center; }
+        .btn-group { display: flex; gap: 1rem; }
+
+        .btn {
+            padding: 0.8rem 1.5rem; border: none; border-radius: 6px;
+            font-weight: 600; cursor: pointer; font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .btn-secondary { background: white; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-secondary:hover { background: #f0f0f0; }
+
+        /* --- PREVIEW MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000;
+            display: none; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            width: 90%; height: 90%; background: white;
+            border-radius: 8px; position: relative; display: flex; flex-direction: column;
+        }
+        .modal-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { flex: 1; padding: 0; background: #525659; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+
+        /* --- VARIOUS MODE STYLES --- */
+        .various-mode-container { border: 2px solid var(--primary); padding: 1.5rem; border-radius: 8px; background: #fffcf9; }
+        .section-item { 
+            background: #f8f9fa; padding: 1rem; margin-bottom: 0.5rem; 
+            border-radius: 6px; display: flex; justify-content: space-between; align-items: center;
+            border-left: 4px solid var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .sticky-actions { flex-direction: column; gap: 1rem; }
+            .btn-group { width: 100%; }
+            .btn { flex: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Artist Catalog Maker</h1>
+        <p class="subtitle">Generate professional, high-resolution PDFs</p>
+
+        <div class="section">
+            <h2 class="section-title">1. Catalog Details</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Mode Selection</label>
+                    <select id="main-artist-select">
+                        <option value="">-- Select Mode --</option>
+                        <option value="various-artists">★ Various Artists (Compilation) ★</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label>Client Name (Optional)</label>
+                    <input type="text" id="client-name" placeholder="e.g., Marc Delaney">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Custom Introduction Message</label>
+                <textarea id="custom-message" placeholder="Appears on a dedicated page before the final page..."></textarea>
+            </div>
+        </div>
+
+        <div class="section" id="upload-section" style="display:none;">
+            
+            <div id="completed-sections-container" style="display:none; margin-bottom: 2rem;">
+                <h3 class="section-title">Compilation Order</h3>
+                <div id="sections-list"></div>
+                <div class="empty-state" id="no-sections-msg" style="text-align:center; color:#999; padding:1rem;">No artist sections added yet.</div>
+            </div>
+
+            <div id="input-area-container">
+                <h2 class="section-title" id="input-area-title">2. Upload Images</h2>
+
+                <div class="form-group" id="sub-artist-group" style="display:none;">
+                    <label style="background: var(--primary); color: white; display: inline-block; padding: 4px 8px; border-radius: 4px; margin-bottom: 10px;">Current Artist Section</label>
+                    <select id="sub-artist-select">
+                        <option value="">-- Select Artist --</option>
+                        </select>
+                </div>
+
+                <div class="file-input-wrapper" id="drop-zone">
+                    <input type="file" id="image-upload" multiple accept="image/*">
+                    <div class="upload-icon">📁</div>
+                    <h3 style="margin-bottom: 0.5rem">Click or Drag Images Here</h3>
+                    <p style="color: #888; font-size: 0.9rem;">Supports JPG, PNG (High Res recommended)</p>
+                </div>
+
+                <div id="images-container">
+                    <div style="text-align: center; padding: 3rem; color: #ccc; font-style: italic;">
+                        Images will appear here. Drag to reorder.
+                    </div>
+                </div>
+
+                <button id="add-section-btn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; display:none;">
+                    + Add This Artist Section
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sticky-actions">
+        <div class="settings-group">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="margin-bottom: 0.2rem; font-size: 0.7rem;">Quality</label>
+                <select id="quality-select" style="padding: 0.4rem; font-size: 0.9rem; min-width: 150px;">
+                    <option value="print">High (Print - 300dpi)</option>
+                    <option value="web">Medium (Email/Web)</option>
+                </select>
+            </div>
+            <div id="status-message" style="font-weight: 600; color: var(--primary);"></div>
+        </div>
+        <div class="btn-group">
+            <button id="preview-btn" class="btn btn-secondary" disabled>👁 Preview PDF</button>
+            <button id="generate-btn" class="btn btn-primary" disabled>⬇ Download PDF</button>
+        </div>
+    </div>
+
+    <div id="preview-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>PDF Preview</h3>
+                <button class="close-modal" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <iframe id="preview-frame"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const ARTIST_DATA = {
+            'billy-connolly': { name: 'Billy Connolly', frontPage: 'front-pages/BCO-PDF-Front.jpg', bioFiles: ['bios/billy-connolly-page1-bio.jpg', 'bios/billy-connolly-page2-bio.jpg'] },
+            'billy-schenck': { name: 'Billy Schenck', bioFiles: ['bios/billy-schenck-bio.jpg'] },
+            'bisaillon-brothers': { name: 'Bisaillon Brothers', bioFiles: ['bios/bisaillon-brothers-page1-bio.jpg', 'bios/bisaillon-brothers-page2-bio.jpg'] },
+            'bob-barker': { name: 'Bob Barker', bioFiles: ['bios/bob-barker-bio.jpg'] },
+            'boy-george': { name: 'Boy George', frontPage: 'front-pages/BGE-PDF-Front.jpg', bioFiles: ['bios/boy-george-bio.jpg'] },
+            'dan-lane': { name: 'Dan Lane', bioFiles: ['bios/dan-lane-bio.jpg'] },
+            'disney-vintage': { name: 'Disney Vintage', bioFiles: [] },
+            'dr-seuss': { name: 'Dr. Seuss', bioFiles: ['bios/dr-seuss-bio.jpg'] },
+            'duncan-mcafee': { name: 'Duncan McAfee', bioFiles: ['bios/duncan-mcafee-bio.jpg'] },
+            'eve-arnold': { name: 'Eve Arnold', bioFiles: ['bios/eve-arnold-bio.jpg'] },
+            'gary-james-mcqueen': { name: 'Gary James McQueen', bioFiles: ['bios/gary-james-mcqueen-bio.jpg'] },
+            'graceland-london': { name: 'Graceland London', bioFiles: ['bios/graceland-london-bio.jpg'] },
+            'hanna-barbera': { name: 'Hanna-Barbera', bioFiles: [] },
+            'james-francis-gill': { name: 'James Francis Gill', bioFiles: ['bios/james-francis-gill-page1-bio.jpg', 'bios/james-francis-gill-page2-bio.jpg'] },
+            'james-mcqueen': { name: 'James McQueen', bioFiles: ['bios/james-mcqueen-page1-bio.jpg', 'bios/james-mcqueen-page2-bio.jpg'] },
+            'john-myatt': { name: 'John Myatt', bioFiles: ['bios/john-myatt-page1-bio.jpg', 'bios/john-myatt-page2-bio.jpg'] },
+            'jon-jones': { name: 'Jon Jones', bioFiles: ['bios/jon-jones-page1-bio.jpg', 'bios/jon-jones-page2-bio.jpg'] },
+            'johnny-depp': { name: 'Johnny Depp', frontPage: 'front-pages/JDE-PDF-Front.jpg', bioFiles: ['bios/johnny-depp-bio.jpg'] },
+            'joseph-jones': { name: 'Joseph Jones', bioFiles: ['bios/joseph-jones-bio.jpg'] },
+            'lawrence-coulson': { name: 'Lawrence Coulson', bioFiles: ['bios/lawrence-coulson-page1-bio.jpg', 'bios/lawrence-coulson-page2-bio.jpg'] },
+            'lorenzo-quinn': { name: 'Lorenzo Quinn', bioFiles: ['bios/lorenzo-quinn-bio.jpg'] },
+            'marco-olivier': { name: 'Marco Olivier', bioFiles: [] },
+            'marvel': { name: 'Marvel', bioFiles: ['bios/marvel-page1-bio.jpg', 'bios/marvel-page2-bio.jpg'] },
+            'nic-joly': { name: 'Nic Joly', bioFiles: ['bios/nic-joly-page1-bio.jpg', 'bios/nic-joly-page2-bio.jpg'] },
+            'nigel-humphries': { name: 'Nigel Humphries', bioFiles: ['bios/nigel-humphries-bio.jpg'] },
+            'pascale-taurua': { name: 'Pascale Taurua', bioFiles: ['bios/pascale-taurua-bio.jpg'] },
+            'paul-corfield': { name: 'Paul Corfield', bioFiles: ['bios/paul-corfield-page1-bio.jpg', 'bios/paul-corfield-page2-bio.jpg'] },
+            'paul-kenton': { name: 'Paul Kenton', bioFiles: ['bios/paul-kenton-bio.jpg'] },
+            'paulo-ferreira': { name: 'Paulo Ferreira', bioFiles: ['bios/paulo-ferreira-bio.jpg'] },
+            'peter-smith': { name: 'Peter Smith', bioFiles: ['bios/peter-smith-bio.jpg'] },
+            'raphael-mazzucco': { name: 'Raphael Mazzucco', bioFiles: ['bios/raphael-mazzucco-bio.jpg'] },
+            'rich-simmons': { name: 'Rich Simmons', bioFiles: [] },
+            'richard-hambleton': { name: 'Richard Hambleton', bioFiles: ['bios/richard-hambleton-page1-bio.jpg', 'bios/richard-hambleton-page2-bio.jpg'] },
+            'richard-rowan': { name: 'Richard Rowan', bioFiles: ['bios/richard-rowan-page1-bio.jpg', 'bios/richard-rowan-page2-bio.jpg'] },
+            'robert-bailey': { name: 'Robert Bailey', bioFiles: ['bios/robert-bailey-bio.jpg'] },
+            'robert-oxley': { name: 'Robert Oxley', bioFiles: ['bios/robert-oxley-bio.jpg'] },
+            'romero-britto': { name: 'Romero Britto', bioFiles: ['bios/romero-britto-bio.jpg'] },
+            'ron-english': { name: 'Ron English', bioFiles: ['bios/ron-english-page1-bio.jpg', 'bios/ron-english-page2-bio.jpg'] },
+            'ronnie-wood': { name: 'Ronnie Wood', bioFiles: ['bios/ronnie-wood-bio.jpg'] },
+            'scarlett-raven': { name: 'Scarlett Raven', bioFiles: ['bios/scarlett-raven-bio.jpg'] },
+            'shazia': { name: 'Shazia', bioFiles: ['bios/shazia-page1-bio.jpg', 'bios/shazia-page2-bio.jpg'] },
+            'steve-winterburn': { name: 'Steve Winterburn', bioFiles: ['bios/steve-winterburn-page1-bio.jpg', 'bios/steve-winterburn-page2-bio.jpg'] },
+            'whatshisname': { name: 'Whatshisname', bioFiles: ['bios/whatshisname-page1-bio.jpg', 'bios/whatshisname-page2-bio.jpg'] }
+        };
+
+        // --- STATE ---
+        let appMode = 'single';
+        let selectedMainArtist = null;
+        let selectedSubArtist = null;
+        let uploadedImages = []; // Staging array
+        let pdfSections = []; // Compilation array
+        let sortableInstance = null;
+
+        // --- ELEMENTS ---
+        const els = {
+            mainSelect: document.getElementById('main-artist-select'),
+            subSelect: document.getElementById('sub-artist-select'),
+            subGroup: document.getElementById('sub-artist-group'),
+            clientInput: document.getElementById('client-name'),
+            msgInput: document.getElementById('custom-message'),
+            uploadSection: document.getElementById('upload-section'),
+            dropZone: document.getElementById('drop-zone'),
+            fileInput: document.getElementById('image-upload'),
+            imgContainer: document.getElementById('images-container'),
+            sectionsList: document.getElementById('sections-list'),
+            noSectionsMsg: document.getElementById('no-sections-msg'),
+            completedContainer: document.getElementById('completed-sections-container'),
+            inputArea: document.getElementById('input-area-container'),
+            inputTitle: document.getElementById('input-area-title'),
+            addSectionBtn: document.getElementById('add-section-btn'),
+            generateBtn: document.getElementById('generate-btn'),
+            previewBtn: document.getElementById('preview-btn'),
+            status: document.getElementById('status-message'),
+            quality: document.getElementById('quality-select'),
+            modal: document.getElementById('preview-modal'),
+            iframe: document.getElementById('preview-frame')
+        };
+
+        // --- INIT ---
+        function init() {
+            // Populate Dropdowns
+            const keys = Object.keys(ARTIST_DATA).sort();
+            keys.forEach(key => {
+                const opt1 = new Option(ARTIST_DATA[key].name, key);
+                const opt2 = new Option(ARTIST_DATA[key].name, key);
+                els.mainSelect.add(opt1);
+                els.subSelect.add(opt2);
+            });
+
+            // Listeners
+            els.mainSelect.addEventListener('change', handleModeChange);
+            els.subSelect.addEventListener('change', (e) => {
+                selectedSubArtist = e.target.value;
+                updateUI();
+            });
+            
+            // Upload & Drag Drop
+            els.fileInput.addEventListener('change', handleFiles);
+            setupDragDrop();
+
+            // Actions
+            els.addSectionBtn.addEventListener('click', addSection);
+            els.generateBtn.addEventListener('click', () => runPDFProcess('download'));
+            els.previewBtn.addEventListener('click', () => runPDFProcess('preview'));
+            
+            // Inputs
+            window.removeImage = removeImage; // Global scope for onclick
+            window.updateData = updateData;
+        }
+
+        // --- LOGIC ---
+
+        function handleModeChange(e) {
+            const val = e.target.value;
+            
+            // Reset Staging
+            uploadedImages = [];
+            renderImages();
+            
+            if (val === 'various-artists') {
+                appMode = 'various';
+                selectedMainArtist = null;
+                els.subGroup.style.display = 'block';
+                els.completedContainer.style.display = 'block';
+                els.addSectionBtn.style.display = 'block';
+                els.inputArea.classList.add('various-mode-container');
+                els.inputTitle.innerText = "2. Add Artist Section";
+                els.uploadSection.style.display = 'block';
+                // Reset sub
+                els.subSelect.value = "";
+                selectedSubArtist = null;
+            } else if (val) {
+                appMode = 'single';
+                selectedMainArtist = val;
+                els.subGroup.style.display = 'none';
+                els.completedContainer.style.display = 'none';
+                els.addSectionBtn.style.display = 'none';
+                els.inputArea.classList.remove('various-mode-container');
+                els.inputTitle.innerText = "2. Upload Images";
+                els.uploadSection.style.display = 'block';
+                // Clear previous compilation
+                pdfSections = [];
+                renderSections();
+            } else {
+                els.uploadSection.style.display = 'none';
+            }
+            updateUI();
+        }
+
+        function setupDragDrop() {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                els.dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            els.dropZone.addEventListener('dragover', () => els.dropZone.classList.add('drag-over'));
+            els.dropZone.addEventListener('dragleave', () => els.dropZone.classList.remove('drag-over'));
+            els.dropZone.addEventListener('drop', (e) => {
+                els.dropZone.classList.remove('drag-over');
+                handleFiles({ target: { files: e.dataTransfer.files } });
+            });
+        }
+
+        function handleFiles(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+            
+            let loaded = 0;
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        uploadedImages.push({
+                            id: Date.now() + Math.random(),
+                            src: evt.target.result,
+                            title: '', medium: '', size: '', price: ''
+                        });
+                        loaded++;
+                        if(loaded === files.length) {
+                            renderImages();
+                            updateUI();
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            els.fileInput.value = ''; // Reset
+        }
+
+        function renderImages() {
+            if (uploadedImages.length === 0) {
+                els.imgContainer.innerHTML = `<div style="text-align: center; padding: 3rem; color: #ccc; font-style: italic;">Images will appear here. Drag to reorder.</div>`;
+                return;
+            }
+
+            els.imgContainer.innerHTML = uploadedImages.map((img, index) => `
+                <div class="image-card" data-id="${img.id}">
+                    <div class="card-badge">${index + 1}</div>
+                    <img src="${img.src}" class="image-preview">
+                    <input type="text" placeholder="Title" value="${img.title}" onchange="updateData('${img.id}', 'title', this.value)">
+                    <input type="text" placeholder="Medium" value="${img.medium}" onchange="updateData('${img.id}', 'medium', this.value)" style="margin-top:0.5rem">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem">
+                        <input type="text" placeholder="Size" value="${img.size}" onchange="updateData('${img.id}', 'size', this.value)">
+                        <input type="text" placeholder="Price" value="${img.price}" onchange="updateData('${img.id}', 'price', this.value)">
+                    </div>
+                    <button class="remove-btn" onclick="removeImage('${img.id}')">Remove</button>
+                </div>
+            `).join('');
+
+            // Initialize Sortable
+            if (sortableInstance) sortableInstance.destroy();
+            sortableInstance = new Sortable(els.imgContainer, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function(evt) {
+                    // Reorder array based on DOM
+                    const item = uploadedImages.splice(evt.oldIndex, 1)[0];
+                    uploadedImages.splice(evt.newIndex, 0, item);
+                    // Re-render to update index badges
+                    renderImages(); 
+                }
+            });
+        }
+
+        function updateData(id, field, value) {
+            const img = uploadedImages.find(i => i.id == id);
+            if(img) img[field] = value;
+        }
+
+        function removeImage(id) {
+            uploadedImages = uploadedImages.filter(i => i.id != id);
+            renderImages();
+            updateUI();
+        }
+
+        // --- COMPILATION LOGIC (VARIOUS MODE) ---
+        function addSection() {
+            if(!selectedSubArtist || !uploadedImages.length) return;
+            
+            pdfSections.push({
+                id: Date.now(),
+                artistKey: selectedSubArtist,
+                artistName: ARTIST_DATA[selectedSubArtist].name,
+                images: [...uploadedImages]
+            });
+
+            // Reset Staging
+            uploadedImages = [];
+            els.subSelect.value = "";
+            selectedSubArtist = null;
+            renderImages();
+            renderSections();
+            updateUI();
+        }
+
+        function renderSections() {
+            els.sectionsList.innerHTML = '';
+            if(!pdfSections.length) {
+                els.noSectionsMsg.style.display = 'block';
+                return;
+            }
+            els.noSectionsMsg.style.display = 'none';
+            
+            pdfSections.forEach((section, idx) => {
+                const div = document.createElement('div');
+                div.className = 'section-item';
+                div.innerHTML = `
+                    <div><strong>${idx + 1}. ${section.artistName}</strong> <span style="color:#888">(${section.images.length} images)</span></div>
+                    <button class="remove-btn" style="width:auto; margin:0" onclick="removeSection(${section.id})">Delete</button>
+                `;
+                els.sectionsList.appendChild(div);
+            });
+        }
+
+        window.removeSection = function(id) {
+            pdfSections = pdfSections.filter(s => s.id !== id);
+            renderSections();
+            updateUI();
+        };
+
+        function updateUI() {
+            let ready = false;
+            if (appMode === 'single') {
+                ready = selectedMainArtist && uploadedImages.length > 0;
+            } else {
+                ready = pdfSections.length > 0;
+                els.addSectionBtn.disabled = !(selectedSubArtist && uploadedImages.length > 0);
+            }
+            els.generateBtn.disabled = !ready;
+            els.previewBtn.disabled = !ready;
+        }
+
+        // --- PDF GENERATION ENGINE ---
+        async function runPDFProcess(action) {
+            els.status.textContent = "⏳ Generating pages...";
+            els.generateBtn.disabled = true;
+            els.previewBtn.disabled = true;
+
+            try {
+                const pdf = await createPDF();
+                
+                if (action === 'download') {
+                    let name = appMode === 'single' ? ARTIST_DATA[selectedMainArtist].name : "Compilation";
+                    if(els.clientInput.value) name += `_For_${els.clientInput.value}`;
+                    name = name.replace(/\s+/g, '_') + '.pdf';
+                    pdf.save(name);
+                    els.status.textContent = "✅ Download Started";
+                    els.status.style.color = "var(--success)";
+                } else {
+                    const blob = pdf.output('bloburl');
+                    els.iframe.src = blob;
+                    els.modal.style.display = 'flex';
+                    els.status.textContent = "";
+                }
+            } catch (err) {
+                console.error(err);
+                els.status.textContent = "❌ Error: " + err.message;
+                els.status.style.color = "var(--danger)";
+            } finally {
+                updateUI(); // Re-enable buttons
+                setTimeout(() => els.status.textContent = "", 4000);
+            }
+        }
+
+        async function createPDF() {
+            const { jsPDF } = window.jspdf;
+            const size = 8.27; // Square inches
+            const pdf = new jsPDF({ unit: 'in', format: [size, size] });
+            
+            // Get Data to print
+            const sections = appMode === 'single' 
+                ? [{ artistKey: selectedMainArtist, images: uploadedImages }]
+                : pdfSections;
+
+            // Image Compression Settings
+            const quality = els.quality.value === 'web' ? 0.6 : 0.95;
+
+            // 1. Cover
+            const coverName = appMode === 'single' ? ARTIST_DATA[selectedMainArtist].name : "Selected Works";
+            let coverImg = null;
+            
+            // Try to load custom cover if exists and no client name
+            if (appMode === 'single' && !els.clientInput.value.trim() && ARTIST_DATA[selectedMainArtist].frontPage) {
+                try { coverImg = await loadImageData(ARTIST_DATA[selectedMainArtist].frontPage, quality); } catch(e){}
+            }
+            // Else generate
+            if (!coverImg) coverImg = await generateCoverCanvas(coverName, els.clientInput.value, quality);
+            
+            pdf.addImage(coverImg, 'JPEG', 0, 0, size, size);
+
+            // 2. About Us
+            try {
+                const aboutImg = await loadImageData('aboutus.jpg', quality);
+                pdf.addPage();
+                pdf.addImage(aboutImg, 'JPEG', 0, 0, size, size);
+            } catch(e) {} // Skip if missing
+
+            // 3. Sections
+            for (const section of sections) {
+                const artist = ARTIST_DATA[section.artistKey];
+                
+                // Bios
+                if (artist.bioFiles) {
+                    for (const bio of artist.bioFiles) {
+                        try {
+                            const bioImg = await loadImageData(bio, quality);
+                            pdf.addPage();
+                            pdf.addImage(bioImg, 'JPEG', 0, 0, size, size);
+                        } catch(e){}
+                    }
+                }
+
+                // Products
+                for (const imgData of section.images) {
+                    pdf.addPage();
+                    // Background
+                    pdf.setFillColor(246, 240, 232);
+                    pdf.rect(0, 0, size, size, 'F');
+                    
+                    // Product Image logic
+                    const imgObj = await loadImage(imgData.src);
+                    const ratio = imgObj.width / imgObj.height;
+                    let w, h;
+                    const maxW = size * 0.6;
+                    const maxH = size * 0.5;
+
+                    if (ratio > 1) { w = maxW; h = maxW / ratio; }
+                    else { h = maxH; w = maxH * ratio; }
+
+                    const x = (size - w) / 2;
+                    const y = 1.5;
+
+                    // Shadow
+                    pdf.setFillColor(0,0,0);
+                    pdf.setGState(new pdf.GState({ opacity: 0.15 }));
+                    pdf.rect(x + 0.05, y + 0.05, w, h, 'F');
+                    pdf.setGState(new pdf.GState({ opacity: 1 }));
+
+                    // Image
+                    pdf.addImage(imgData.src, 'JPEG', x, y, w, h);
+                    
+                    // Border
+                    pdf.setDrawColor(200,200,200);
+                    pdf.setLineWidth(0.01);
+                    pdf.rect(x, y, w, h, 'S');
+
+                    // Text
+                    pdf.setTextColor(99, 101, 104);
+                    const textY = y + h + 0.5;
+                    const spacing = 0.3;
+
+                    pdf.setFont('helvetica', 'bolditalic');
+                    pdf.setFontSize(22);
+                    pdf.text(imgData.title || '', size/2, textY, { align: 'center' });
+
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(14);
+                    pdf.text(imgData.medium || '', size/2, textY + spacing, { align: 'center' });
+                    pdf.text(imgData.size || '', size/2, textY + (spacing*2), { align: 'center' });
+
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(18);
+                    pdf.text(imgData.price || '', size/2, textY + (spacing*3), { align: 'center' });
+                }
+            }
+
+            // 4. Custom Message
+            if (els.msgInput.value.trim()) {
+                const msgImg = await generateMessageCanvas(els.msgInput.value, quality);
+                pdf.addPage();
+                pdf.addImage(msgImg, 'JPEG', 0, 0, size, size);
+            }
+
+            // 5. Final Page
+            try {
+                const finalImg = await loadImageData('ywoa.jpg', quality);
+                pdf.addPage();
+                pdf.addImage(finalImg, 'JPEG', 0, 0, size, size);
+            } catch(e){}
+
+            return pdf;
+        }
+
+        // --- HELPERS ---
+        function closeModal() { els.modal.style.display = 'none'; }
+        
+        async function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        async function loadImageData(url, quality) {
+            // Helper to get DataURL with specific compression
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = reject;
+                img.src = url;
+            });
+        }
+
+        async function generateCoverCanvas(title, subtitle, quality) {
+            const size = 1654; // High res
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Bg
+            try {
+                const tpl = await loadImage('front-pages/Front Template.jpg');
+                ctx.drawImage(tpl, 0, 0, size, size);
+            } catch(e) {
+                ctx.fillStyle = "#636568"; ctx.fillRect(0,0,size,size);
+            }
+
+            ctx.fillStyle = '#f6f0e8';
+            ctx.textAlign = 'center'; 
+            ctx.textBaseline = 'middle';
+            
+            // Title (Fallback font if Acta not loaded)
+            ctx.font = 'italic bold 168px "Acta W01 Bold Italic", Georgia, serif';
+            
+            const lines = title.split(' ');
+            let y = size/2;
+            if(subtitle) y -= 100;
+            
+            lines.forEach((line, i) => {
+                // Simple centering adjustment for multiple lines
+                const offset = (i - (lines.length-1)/2) * 180;
+                ctx.fillText(line, size/2, y + offset);
+            });
+
+            if (subtitle) {
+                ctx.font = '300 60px "DIN LightAlternate", Arial, sans-serif';
+                ctx.fillText(`For ${subtitle}`, size/2, y + (lines.length * 90) + 120);
+            }
+
+            return canvas.toDataURL('image/jpeg', quality);
+        }
+
+        async function generateMessageCanvas(msg, quality) {
+            const size = 1654;
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            try {
+                const tpl = await loadImage('front-pages/Front Template.jpg');
+                ctx.drawImage(tpl, 0, 0, size, size);
+            } catch(e) {
+                ctx.fillStyle = "#636568"; ctx.fillRect(0,0,size,size);
+            }
+
+            ctx.fillStyle = '#f6f0e8';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = '300 60px "DIN LightAlternate", Arial, sans-serif';
+
+            const lines = msg.split('\n');
+            const lineHeight = 100;
+            const startY = (size - (lines.length * lineHeight)) / 2;
+
+            lines.forEach((line, i) => {
+                ctx.fillText(line, size/2, startY + (i * lineHeight));
+            });
+
+            return canvas.toDataURL('image/jpeg', quality);
+        }
+
+        // Run
+        init();
+    </script>
+</body>
+</html>
