@@ -347,13 +347,23 @@
 
         <div class="section">
             <h2 class="section-title">1. Client & Artist Details</h2>
+            
             <div class="form-group">
                 <label for="client-name">Client Name (optional):</label>
                 <input type="text" id="client-name" placeholder="e.g., Marc Delaney">
                 <small style="color: #888; font-size: 0.9rem; margin-top: 0.5rem; display: block;">
-                    If provided, will appear as "For [Name]" on the front page
+                    If provided, will appear as "For [Name]" on the front page.
                 </small>
             </div>
+
+            <div class="form-group">
+                <label for="alt-cover-text">Alternative Cover Text (optional):</label>
+                <input type="text" id="alt-cover-text" placeholder="e.g., Spring Collection">
+                <small style="color: #888; font-size: 0.9rem; margin-top: 0.5rem; display: block;">
+                    Used only if Client Name is blank. Appears exactly as written.
+                </small>
+            </div>
+
             <div class="form-group">
                 <label for="custom-message">Custom Message (optional):</label>
                 <textarea id="custom-message" placeholder="Enter your custom message here. If you enter one line, it will be split into 3 equal parts. If you enter multiple lines, they will be preserved as-is."></textarea>
@@ -367,35 +377,28 @@
                 <select id="main-artist-select">
                     <option value="">-- Select Option --</option>
                     <option value="various-artists">★ Various Artists (Compilation) ★</option>
-                    <!-- Artists will be populated here via JS -->
-                </select>
+                    </select>
             </div>
         </div>
 
-        <!-- STAGING AREA FOR IMAGES -->
         <div class="section" id="upload-section" style="display:none;">
             
-            <!-- Added Groups Display (Visible only in Various Mode) -->
             <div id="completed-sections-container" style="display:none; margin-bottom: 2rem;">
                 <h3 class="section-title">Compilation Order</h3>
                 <div id="sections-list" class="sections-list">
-                    <!-- Added sections go here -->
-                </div>
+                    </div>
                 <div class="empty-state" id="no-sections-msg">No artist sections added yet.</div>
             </div>
 
-            <!-- Input Area -->
             <div id="input-area-container">
                 <h2 class="section-title" id="input-area-title">2. Upload Product Images</h2>
                 
-                <!-- Sub Artist Select (Visible only in Various Mode) -->
                 <div class="form-group" id="sub-artist-group" style="display:none;">
                     <div class="various-mode-header">CURRENT SECTION</div>
                     <label for="sub-artist-select">Select Artist for this section:</label>
                     <select id="sub-artist-select">
                         <option value="">-- Select Artist --</option>
-                        <!-- Populated via JS -->
-                    </select>
+                        </select>
                 </div>
 
                 <div class="form-group">
@@ -413,7 +416,6 @@
                     <div class="empty-state">No images uploaded yet</div>
                 </div>
 
-                <!-- Add Section Button (Only for Various Mode) -->
                 <button id="add-section-btn" class="add-section-btn" style="display:none;">
                     + Add Artist Section to PDF
                 </button>
@@ -480,6 +482,7 @@
         let selectedSubArtist = null; // For various mode (current selection)
         
         let clientName = '';
+        let altCoverText = ''; // New variable for alt text
         let customMessage = '';
         
         // Staging area (currently visible images)
@@ -491,6 +494,7 @@
 
         // Elements
         const clientNameInput = document.getElementById('client-name');
+        const altCoverTextInput = document.getElementById('alt-cover-text'); // New Element
         const customMessageInput = document.getElementById('custom-message');
         const mainArtistSelect = document.getElementById('main-artist-select');
         
@@ -530,6 +534,7 @@
 
         // Event Listeners
         clientNameInput.addEventListener('input', (e) => clientName = e.target.value.trim());
+        altCoverTextInput.addEventListener('input', (e) => altCoverText = e.target.value.trim()); // New Listener
         customMessageInput.addEventListener('input', (e) => customMessage = e.target.value.trim());
         imageUpload.addEventListener('change', handleImageUpload);
         generateBtn.addEventListener('click', generatePDF);
@@ -769,7 +774,8 @@
             });
         }
 
-        async function generateFrontPage(artistName, clientName) {
+        // Updated function to accept altText
+        async function generateFrontPage(artistName, clientName, altText) {
             const canvas = document.createElement('canvas');
             const size = 1654;
             canvas.width = size;
@@ -793,7 +799,15 @@
             const lineHeight = 192;
             let totalHeight = lines.length * lineHeight;
 
-            if (clientName && clientName.length > 0) totalHeight += 100;
+            // Determine if there is subtitle text (Client Name takes priority)
+            let subtitleText = "";
+            if (clientName && clientName.length > 0) {
+                subtitleText = `For ${clientName}`;
+            } else if (altText && altText.length > 0) {
+                subtitleText = altText;
+            }
+
+            if (subtitleText.length > 0) totalHeight += 100;
 
             let startY = (size - totalHeight) / 2 + 96;
 
@@ -802,9 +816,9 @@
                 startY += lineHeight;
             });
 
-            if (clientName && clientName.length > 0) {
+            if (subtitleText.length > 0) {
                 ctx.font = '60px "DIN LightAlternate", Arial, sans-serif';
-                ctx.fillText(`For ${clientName}`, size / 2, startY + 50);
+                ctx.fillText(subtitleText, size / 2, startY + 50);
             }
 
             return canvas.toDataURL('image/jpeg', 0.95);
@@ -886,12 +900,11 @@
 
                 if (appMode === 'single') {
                     coverName = ARTIST_DATA[selectedMainArtist].name;
-                    // Use artist specific cover if available and NO client name (unless logic dictates otherwise)
-                    // Logic: Use Custom Front if exists, otherwise Generate. 
-                    // Note: If ClientName exists, we almost always want to Generate to overlay the name.
                     const artistData = ARTIST_DATA[selectedMainArtist];
                     
-                    if (artistData.frontPage && !clientName) {
+                    // Use artist specific cover if available, AND no client name AND no alt text
+                    // If client name or alt text exists, we force generation to show it.
+                    if (artistData.frontPage && !clientName && !altCoverText) {
                         try {
                              frontPageImage = await loadImageAsDataURL(artistData.frontPage);
                         } catch(e) { console.warn('Front page load failed'); }
@@ -900,9 +913,10 @@
                     coverName = "Various Artists";
                 }
 
-                // If we don't have a pre-made image, or we have a client name, generate one
+                // If we don't have a pre-made image, or we have a client name/alt text, generate one
                 if (!frontPageImage) {
-                    frontPageImage = await generateFrontPage(coverName, clientName);
+                    // Added altCoverText param
+                    frontPageImage = await generateFrontPage(coverName, clientName, altCoverText);
                 }
 
                 pdf.addImage(frontPageImage, 'JPEG', 0, 0, size, size);
@@ -931,9 +945,6 @@
                                 pdf.addImage(bioPageData, 'JPEG', 0, 0, size, size);
                             } catch (error) { console.warn(`Could not load bio: ${bioFile}`); }
                         }
-                    } else {
-                        // Optional: Add placeholder bio if missing?
-                        // For now, skip if no bio.
                     }
 
                     // B. Artist Product Pages
