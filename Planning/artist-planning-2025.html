@@ -455,6 +455,33 @@
             }
         }
 
+        // Image mapping for nav cards
+        const sectionImages = {
+            'james-mcqueen': 'buttonimages/JamesMcQueen.png',
+            'bob-dylan': 'buttonimages/BobDylan.png',
+            'billy-connolly': 'buttonimages/Billy Connolly.png',
+            'johnny-depp': 'buttonimages/JohnnyDepp.png',
+            'boy-george': 'buttonimages/BoyGeorge.png',
+            'nic-joly': 'buttonimages/NicJoly.png',
+            'dan-lane': 'buttonimages/DanLane.png',
+            'bob-barker': 'buttonimages/BobBarker.png',
+            'raphael-mazzucco': 'buttonimages/Mazucco.png',
+            'john-myatt': 'buttonimages/JohnMyatt.png',
+            'paul-corfield': 'buttonimages/PaulCorfield.png',
+            'lawrence-coulson': 'buttonimages/LaurenceCoulson.png',
+            'whatshisname': 'buttonimages/Whatshisname.png',
+            'bob-oxley': 'buttonimages/Robert Oxley.png',
+            'richard-rowan': 'buttonimages/Richard Rowan.png',
+            'peter-smith': 'buttonimages/PeterSmith.png',
+            'jon-jones': 'buttonimages/JonJones.png',
+            'marco-olivier': 'buttonimages/MarcoOlivier.png',
+            'james-gill': 'buttonimages/JamesGill.png',
+            'rich-simmons': 'buttonimages/Rich Simmons.png',
+            'alan-somers': 'buttonimages/AlanSommers.png',
+            'paulo-ferreira': 'buttonimages/Paulo.png',
+            'marvel-legacy': 'buttonimages/Marvel.png'
+        };
+
         // Build navigation grid
         function buildNavigation(sections) {
             const navGrid = document.getElementById('nav-grid');
@@ -464,6 +491,14 @@
                 const navCard = document.createElement('div');
                 navCard.className = 'nav-card';
                 navCard.onclick = () => location.href = `#${section.section_id}`;
+
+                // Check if there's an image for this section
+                const imageUrl = sectionImages[section.section_id];
+                if (imageUrl) {
+                    navCard.style.backgroundImage = `url('${imageUrl}')`;
+                    navCard.style.backgroundSize = 'cover';
+                    navCard.style.backgroundPosition = 'center';
+                }
 
                 // Extract title and subtitle from content if available
                 const tempDiv = document.createElement('div');
