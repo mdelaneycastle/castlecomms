@@ -529,37 +529,78 @@
                 if (!data || data.length === 0) {
                     contentArea.innerHTML = `
                         <div class="empty-state">
-                            <h3>No Artist Data Available</h3>
-                            <p>Please add artist updates through the admin panel.</p>
+                            <h3>No Data Available</h3>
+                            <p>Please add updates through the admin panel.</p>
                         </div>
                     `;
                     return;
                 }
 
-                // Create navigation cards
-                data.forEach(artist => {
-                    const navCard = document.createElement('div');
-                    navCard.className = 'nav-card';
-                    
-                    // Set background image if available
-                    const imagePath = sectionImages[artist.artist_slug];
-                    if (imagePath) {
-                        navCard.style.backgroundImage = `url('${imagePath}')`;
+                // Separate artists from business sections
+                const artists = [];
+                const businessSections = [];
+
+                data.forEach(item => {
+                    if (isBusinessSection(item.artist_slug)) {
+                        businessSections.push(item);
+                    } else {
+                        artists.push(item);
                     }
-                    
-                    navCard.innerHTML = `
-                        <h3>${artist.artist_name}</h3>
-                        <p>${artist.revenue_amount || 'View Details'}</p>
-                    `;
-                    navCard.onclick = () => scrollToArtist(artist.artist_slug);
-                    navGrid.appendChild(navCard);
                 });
 
-                // Create artist cards
-                data.forEach(artist => {
-                    const card = createArtistCard(artist);
-                    contentArea.appendChild(card);
-                });
+                // Create navigation sections
+                if (artists.length > 0) {
+                    const artistsHeader = document.createElement('h2');
+                    artistsHeader.textContent = '🎨 Artists';
+                    artistsHeader.style.color = 'white';
+                    artistsHeader.style.marginBottom = '20px';
+                    artistsHeader.style.textAlign = 'center';
+                    navGrid.appendChild(artistsHeader);
+
+                    artists.forEach(artist => {
+                        const navCard = createNavCard(artist, true);
+                        navGrid.appendChild(navCard);
+                    });
+                }
+
+                if (businessSections.length > 0) {
+                    const businessHeader = document.createElement('h2');
+                    businessHeader.textContent = '📊 Business & Strategy';
+                    businessHeader.style.color = 'white';
+                    businessHeader.style.marginBottom = '20px';
+                    businessHeader.style.marginTop = '40px';
+                    businessHeader.style.textAlign = 'center';
+                    businessHeader.style.gridColumn = '1 / -1';
+                    navGrid.appendChild(businessHeader);
+
+                    businessSections.forEach(section => {
+                        const navCard = createNavCard(section, false);
+                        navGrid.appendChild(navCard);
+                    });
+                }
+
+                // Create content sections
+                if (artists.length > 0) {
+                    const artistsSection = document.createElement('div');
+                    artistsSection.innerHTML = '<h2 style="color: white; text-align: center; margin: 40px 0 30px 0;">🎨 Artists</h2>';
+                    contentArea.appendChild(artistsSection);
+
+                    artists.forEach(artist => {
+                        const card = createArtistCard(artist);
+                        contentArea.appendChild(card);
+                    });
+                }
+
+                if (businessSections.length > 0) {
+                    const businessSectionHeader = document.createElement('div');
+                    businessSectionHeader.innerHTML = '<h2 style="color: white; text-align: center; margin: 40px 0 30px 0;">📊 Business & Strategy</h2>';
+                    contentArea.appendChild(businessSectionHeader);
+
+                    businessSections.forEach(section => {
+                        const card = createBusinessCard(section);
+                        contentArea.appendChild(card);
+                    });
+                }
 
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -570,6 +611,64 @@
                     </div>
                 `;
             }
+        }
+
+        function isBusinessSection(slug) {
+            const businessSlugs = [
+                'performance-review',
+                'hai-nyc-shadowman', 
+                'christmas-winter-sale-2025',
+                'art-miami',
+                'icc-gallery-strategy',
+                'strategic-client-acquisition',
+                'campaign-marketing-strategy',
+                'operational-improvements',
+                'cfa-rewards-scheme',
+                'marvel-legacy'
+            ];
+            return businessSlugs.includes(slug);
+        }
+
+        function createNavCard(item, isArtist) {
+            const navCard = document.createElement('div');
+            navCard.className = 'nav-card';
+            
+            if (isArtist) {
+                // Set background image if available for artists
+                const imagePath = sectionImages[item.artist_slug];
+                if (imagePath) {
+                    navCard.style.backgroundImage = `url('${imagePath}')`;
+                }
+            } else {
+                // Business sections get icon-based styling
+                navCard.style.background = 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
+            }
+            
+            const icon = getBusinessIcon(item.artist_slug);
+            navCard.innerHTML = `
+                ${!isArtist && icon ? `<div style="font-size: 2em; margin-bottom: 10px;">${icon}</div>` : ''}
+                <h3>${item.artist_name}</h3>
+                <p>${item.revenue_amount || 'View Details'}</p>
+            `;
+            navCard.onclick = () => scrollToSection(item.artist_slug);
+            
+            return navCard;
+        }
+
+        function getBusinessIcon(slug) {
+            const icons = {
+                'performance-review': '📈',
+                'hai-nyc-shadowman': '🎭',
+                'christmas-winter-sale-2025': '🎄',
+                'art-miami': '🌴',
+                'icc-gallery-strategy': '🏛️',
+                'strategic-client-acquisition': '🎯',
+                'campaign-marketing-strategy': '📱',
+                'operational-improvements': '⚙️',
+                'cfa-rewards-scheme': '🏆',
+                'marvel-legacy': '⚡'
+            };
+            return icons[slug] || '📋';
         }
 
         function createArtistCard(artist) {
@@ -639,8 +738,75 @@
             return card;
         }
 
-        function scrollToArtist(slug) {
-            const element = document.getElementById(`artist-${slug}`);
+        function createBusinessCard(section) {
+            const card = document.createElement('div');
+            card.className = 'artist-card';
+            card.id = `section-${section.artist_slug}`;
+
+            const icon = getBusinessIcon(section.artist_slug);
+            const lastUpdated = new Date(section.last_updated).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            // Parse dates and actions from JSON
+            const dates = section.key_dates || [];
+            const actions = section.action_items || [];
+
+            // Create dates HTML
+            let datesHtml = '';
+            if (dates.length > 0) {
+                datesHtml = `
+                    <div class="dates-box">
+                        <h4>📅 Key Dates</h4>
+                        ${dates.map(date => `<div class="date-item">${date}</div>`).join('')}
+                    </div>
+                `;
+            }
+
+            // Create actions HTML
+            let actionsHtml = '';
+            if (actions.length > 0) {
+                actionsHtml = `
+                    <div class="action-box">
+                        <h4>⚡ Action Items</h4>
+                        ${actions.map(action => `<div class="action-item">${action}</div>`).join('')}
+                    </div>
+                `;
+            }
+
+            // Build the card HTML
+            card.innerHTML = `
+                <div class="card-header">
+                    <h2>${icon} ${section.artist_name}</h2>
+                    <div class="last-updated">Last updated: ${lastUpdated}</div>
+                </div>
+                <div class="card-body">
+                    <div class="content-section">
+                        <div class="focus-section">
+                            <div class="focus-text">${section.current_focus || 'No current updates available.'}</div>
+                        </div>
+                        ${actionsHtml}
+                    </div>
+                    <div class="stats-container">
+                        ${section.revenue_amount ? `
+                            <div class="stat-box">
+                                <div class="stat-icon">💼</div>
+                                <div class="stat-val">${section.revenue_amount}</div>
+                                <div class="stat-label">${section.revenue_context || 'Business Metric'}</div>
+                            </div>
+                        ` : ''}
+                        ${datesHtml}
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function scrollToSection(slug) {
+            const element = document.getElementById(`artist-${slug}`) || document.getElementById(`section-${slug}`);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 // Add a highlight effect
@@ -649,6 +815,11 @@
                     element.style.transform = 'scale(1)';
                 }, 300);
             }
+        }
+
+        // Keep old function for backward compatibility
+        function scrollToArtist(slug) {
+            scrollToSection(slug);
         }
 
         // Initialize on page load
