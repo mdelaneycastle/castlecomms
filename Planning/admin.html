@@ -453,7 +453,7 @@
         let currentDates = [];
         let currentActions = [];
 
-        // Load all artists on page load
+        // Load all artists and business sections on page load
         async function loadArtists() {
             const { data, error } = await supabase
                 .from('artist_updates')
@@ -461,18 +461,65 @@
                 .order('artist_name');
 
             const select = document.getElementById('artistSelect');
-            select.innerHTML = '<option value="">-- Choose Artist --</option>';
+            select.innerHTML = '<option value="">-- Choose Section --</option>';
             
             if (data && data.length > 0) {
-                data.forEach(artist => {
-                    const option = document.createElement('option');
-                    option.value = artist.artist_slug;
-                    option.textContent = artist.artist_name;
-                    select.appendChild(option);
+                // Separate artists and business sections
+                const artists = [];
+                const businessSections = [];
+                
+                data.forEach(item => {
+                    if (isBusinessSection(item.artist_slug)) {
+                        businessSections.push(item);
+                    } else {
+                        artists.push(item);
+                    }
                 });
+                
+                // Add artists group
+                if (artists.length > 0) {
+                    const artistsGroup = document.createElement('optgroup');
+                    artistsGroup.label = '🎨 Artists';
+                    artists.forEach(artist => {
+                        const option = document.createElement('option');
+                        option.value = artist.artist_slug;
+                        option.textContent = artist.artist_name;
+                        artistsGroup.appendChild(option);
+                    });
+                    select.appendChild(artistsGroup);
+                }
+                
+                // Add business sections group
+                if (businessSections.length > 0) {
+                    const businessGroup = document.createElement('optgroup');
+                    businessGroup.label = '📊 Business & Strategy';
+                    businessSections.forEach(section => {
+                        const option = document.createElement('option');
+                        option.value = section.artist_slug;
+                        option.textContent = section.artist_name;
+                        businessGroup.appendChild(option);
+                    });
+                    select.appendChild(businessGroup);
+                }
             } else if (data && data.length === 0) {
-                select.innerHTML = '<option value="">-- No artists found. Create one! --</option>';
+                select.innerHTML = '<option value="">-- No sections found. Create one! --</option>';
             }
+        }
+        
+        function isBusinessSection(slug) {
+            const businessSlugs = [
+                'performance-review',
+                'hai-nyc-shadowman', 
+                'christmas-winter-sale-2025',
+                'art-miami',
+                'icc-gallery-strategy',
+                'strategic-client-acquisition',
+                'campaign-marketing-strategy',
+                'operational-improvements',
+                'cfa-rewards-scheme',
+                'marvel-legacy'
+            ];
+            return businessSlugs.includes(slug);
         }
 
         async function loadArtistData() {
