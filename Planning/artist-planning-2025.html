@@ -106,12 +106,14 @@
 
         .nav-card {
             position: relative;
-            padding: 35px 20px;
+            padding: 30px 15px;
             border-radius: 15px;
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-align: center;
-            background: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
             min-height: 180px;
             display: flex;
             flex-direction: column;
@@ -128,14 +130,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            background: rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
             z-index: 1;
         }
 
         .nav-card:hover::before {
-            opacity: 1;
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .nav-card:hover {
@@ -146,38 +147,20 @@
         .nav-card h3 {
             position: relative;
             z-index: 2;
-            color: #667eea;
-            font-size: 1.3em;
-            margin-bottom: 8px;
-            transition: color 0.3s ease;
-        }
-
-        .nav-card:hover h3 {
             color: white;
-        }
-
-        .nav-card .icon {
-            position: relative;
-            z-index: 2;
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 1.2em;
+            margin-bottom: 8px;
             transition: all 0.3s ease;
-        }
-
-        .nav-card:hover .icon {
-            transform: scale(1.2) rotate(10deg);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
 
         .nav-card p {
             position: relative;
             z-index: 2;
-            font-size: 0.9em;
-            color: #666;
-            transition: color 0.3s ease;
-        }
-
-        .nav-card:hover p {
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85em;
+            color: white;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
         }
 
         /* Artist Cards */
@@ -474,7 +457,34 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkbnBhemt6ZWp2bndpcnl4b2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5ODg1ODcsImV4cCI6MjA3OTU2NDU4N30.JCk80Gu2TdQhf5w_OMHxMdGbYjWahU-jrl4FuG6oZYM';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Artist icons/emojis for visual appeal
+        // Image mapping for nav cards (same as old page)
+        const sectionImages = {
+            'james-mcqueen': 'buttonimages/JamesMcQueen.png',
+            'bob-dylan': 'buttonimages/BobDylan.png',
+            'billy-connolly': 'buttonimages/Billy Connolly.png',
+            'johnny-depp': 'buttonimages/JohnnyDepp.png',
+            'boy-george': 'buttonimages/BoyGeorge.png',
+            'nic-joly': 'buttonimages/NicJoly.png',
+            'dan-lane': 'buttonimages/DanLane.png',
+            'bob-barker': 'buttonimages/BobBarker.png',
+            'raphael-mazzucco': 'buttonimages/Mazucco.png',
+            'john-myatt': 'buttonimages/JohnMyatt.png',
+            'paul-corfield': 'buttonimages/PaulCorfield.png',
+            'lawrence-coulson': 'buttonimages/LaurenceCoulson.png',
+            'whatshisname': 'buttonimages/Whatshisname.png',
+            'bob-oxley': 'buttonimages/Robert Oxley.png',
+            'richard-rowan': 'buttonimages/Richard Rowan.png',
+            'peter-smith': 'buttonimages/PeterSmith.png',
+            'jon-jones': 'buttonimages/JonJones.png',
+            'marco-olivier': 'buttonimages/MarcoOlivier.png',
+            'james-gill': 'buttonimages/JamesGill.png',
+            'rich-simmons': 'buttonimages/Rich Simmons.png',
+            'alan-somers': 'buttonimages/AlanSommers.png',
+            'paulo-ferreira': 'buttonimages/Paulo.png',
+            'nigel-humphries': 'buttonimages/NigelHumphries.png' // fallback if needed
+        };
+
+        // Artist icons/emojis as fallback
         const artistIcons = {
             'james-mcqueen': '👑',
             'bob-dylan': '🎸',
@@ -528,11 +538,16 @@
 
                 // Create navigation cards
                 data.forEach(artist => {
-                    const icon = artistIcons[artist.artist_slug] || '🎨';
                     const navCard = document.createElement('div');
                     navCard.className = 'nav-card';
+                    
+                    // Set background image if available
+                    const imagePath = sectionImages[artist.artist_slug];
+                    if (imagePath) {
+                        navCard.style.backgroundImage = `url('${imagePath}')`;
+                    }
+                    
                     navCard.innerHTML = `
-                        <div class="icon">${icon}</div>
                         <h3>${artist.artist_name}</h3>
                         <p>${artist.revenue_amount || 'View Details'}</p>
                     `;
