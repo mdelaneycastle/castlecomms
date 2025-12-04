@@ -104,6 +104,19 @@
             margin-bottom: 50px;
         }
 
+        .nav-section-header {
+            grid-column: 1 / -1;
+            color: white;
+            text-align: center;
+            font-size: 2.2em;
+            margin: 30px 0 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-section-header:first-child {
+            margin-top: 0;
+        }
+
         .nav-card {
             position: relative;
             padding: 30px 15px;
@@ -236,12 +249,37 @@
             padding: 25px;
             border-radius: 12px;
             border-left: 4px solid #667eea;
+            margin-bottom: 20px;
         }
 
         .focus-text {
             font-size: 1.1em;
             line-height: 1.8;
             color: #4a5568;
+            white-space: pre-wrap;
+        }
+
+        .additional-section {
+            background: #f0f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #0ea5e9;
+            margin-bottom: 20px;
+        }
+
+        .additional-section h4 {
+            color: #0369a1;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .additional-text {
+            font-size: 1.05em;
+            line-height: 1.7;
+            color: #475569;
             white-space: pre-wrap;
         }
 
@@ -551,10 +589,8 @@
                 // Create navigation sections
                 if (artists.length > 0) {
                     const artistsHeader = document.createElement('h2');
+                    artistsHeader.className = 'nav-section-header';
                     artistsHeader.textContent = '🎨 Artists';
-                    artistsHeader.style.color = 'white';
-                    artistsHeader.style.marginBottom = '20px';
-                    artistsHeader.style.textAlign = 'center';
                     navGrid.appendChild(artistsHeader);
 
                     artists.forEach(artist => {
@@ -565,12 +601,11 @@
 
                 if (businessSections.length > 0) {
                     const businessHeader = document.createElement('h2');
+                    businessHeader.className = 'nav-section-header';
                     businessHeader.textContent = '📊 Business & Strategy';
-                    businessHeader.style.color = 'white';
-                    businessHeader.style.marginBottom = '20px';
-                    businessHeader.style.marginTop = '40px';
-                    businessHeader.style.textAlign = 'center';
-                    businessHeader.style.gridColumn = '1 / -1';
+                    if (artists.length > 0) {
+                        businessHeader.style.marginTop = '40px';
+                    }
                     navGrid.appendChild(businessHeader);
 
                     businessSections.forEach(section => {
@@ -709,6 +744,17 @@
                 `;
             }
 
+            // Create additional updates HTML
+            let additionalHtml = '';
+            if (artist.additional_updates && artist.additional_updates.trim()) {
+                additionalHtml = `
+                    <div class="additional-section">
+                        <h4>📄 Additional Information</h4>
+                        <div class="additional-text">${artist.additional_updates}</div>
+                    </div>
+                `;
+            }
+
             // Build the card HTML
             card.innerHTML = `
                 <div class="card-header">
@@ -720,6 +766,7 @@
                         <div class="focus-section">
                             <div class="focus-text">${artist.current_focus || 'No current updates available.'}</div>
                         </div>
+                        ${additionalHtml}
                         ${actionsHtml}
                     </div>
                     <div class="stats-container">
@@ -776,6 +823,17 @@
                 `;
             }
 
+            // Create additional updates HTML for business sections
+            let additionalHtml = '';
+            if (section.additional_updates && section.additional_updates.trim()) {
+                additionalHtml = `
+                    <div class="additional-section">
+                        <h4>📄 Additional Information</h4>
+                        <div class="additional-text">${section.additional_updates}</div>
+                    </div>
+                `;
+            }
+
             // Build the card HTML
             card.innerHTML = `
                 <div class="card-header">
@@ -787,6 +845,7 @@
                         <div class="focus-section">
                             <div class="focus-text">${section.current_focus || 'No current updates available.'}</div>
                         </div>
+                        ${additionalHtml}
                         ${actionsHtml}
                     </div>
                     <div class="stats-container">
