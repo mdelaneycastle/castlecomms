@@ -362,7 +362,7 @@
         <div class="header">
             <h1>🎨 Artist Planning Admin Panel</h1>
             <p class="subtitle">Update artist information and campaign details</p>
-            <a href="artist-planning-2025.html" class="dashboard-link">📊 View Dashboard</a>
+            <a href="artist-planning-2025-enhanced.html" class="dashboard-link">📊 View Dashboard</a>
         </div>
 
         <div class="form-container">
@@ -398,6 +398,12 @@
                     <label>📝 Current Focus / Main Update</label>
                     <textarea id="currentFocus" placeholder="What's the current status? What are the main updates? Write naturally - no HTML needed."></textarea>
                     <p class="help">This appears as the main content for this artist. Keep it concise and informative.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>📄 Additional Updates / Information</label>
+                    <textarea id="additionalUpdates" placeholder="Any additional details, secondary information, or follow-up updates..."></textarea>
+                    <p class="help">Optional secondary information box. Only appears if content is added. Good for supplementary details or recent developments.</p>
                 </div>
 
                 <div class="form-group">
@@ -543,6 +549,7 @@
                 document.getElementById('revenueAmount').value = data.revenue_amount || '';
                 document.getElementById('revenueContext').value = data.revenue_context || '';
                 document.getElementById('currentFocus').value = data.current_focus || '';
+                document.getElementById('additionalUpdates').value = data.additional_updates || '';
                 
                 // Load dates
                 currentDates = data.key_dates || [];
@@ -556,6 +563,7 @@
                 document.getElementById('revenueAmount').value = '';
                 document.getElementById('revenueContext').value = '';
                 document.getElementById('currentFocus').value = '';
+                document.getElementById('additionalUpdates').value = '';
                 currentDates = [];
                 currentActions = [];
                 renderDates();
@@ -644,6 +652,7 @@
                 revenue_amount: document.getElementById('revenueAmount').value || null,
                 revenue_context: document.getElementById('revenueContext').value || null,
                 current_focus: document.getElementById('currentFocus').value || null,
+                additional_updates: document.getElementById('additionalUpdates').value || null,
                 key_dates: cleanDates,
                 action_items: cleanActions,
                 last_updated: new Date().toISOString()
