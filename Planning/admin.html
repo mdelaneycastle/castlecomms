@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Planning Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f4f6f8; color: #333; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { color: #667eea; text-align: center; }
+        
+        /* Form Styling */
+        .form-group { margin-bottom: 25px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #4a5568; }
+        input, textarea, select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; transition: 0.2s; }
+        input:focus, textarea:focus { border-color: #667eea; outline: none; }
+        textarea { min-height: 150px; resize: vertical; }
+        
+        .row { display: flex; gap: 20px; }
+        .col { flex: 1; }
+
+        button.save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none; padding: 15px 30px; border-radius: 8px;
+            font-size: 18px; font-weight: bold; cursor: pointer; width: 100%;
+            transition: transform 0.2s;
+        }
+        button.save-btn:hover { transform: translateY(-2px); }
+        
+        .status { padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; text-align: center; }
+        .success { background: #c6f6d5; color: #276749; }
+        .error { background: #fed7d7; color: #c53030; }
+
+        /* Helper text */
+        .help { font-size: 0.85em; color: #718096; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Weekly Planning Update</h1>
+        
+        <div id="statusMessage" class="status"></div>
+
+        <div class="form-group">
+            <label>Select Artist / Campaign</label>
+            <select id="artistSelect" onchange="loadArtistData()">
+                <option value="">-- Choose Context --</option>
+                <option value="james-mcqueen">James McQueen</option>
+                <option value="bob-dylan">Bob Dylan</option>
+                <option value="marvel-legacy">Marvel Legacy</option>
+                </select>
+        </div>
+
+        <div id="formContainer" style="display:none;">
+            <div class="row">
+                <div class="col form-group">
+                    <label>💰 Revenue Figure</label>
+                    <input type="text" id="revenueAmount" placeholder="e.g. £1.2m">
+                </div>
+                <div class="col form-group">
+                    <label>Context (Period)</label>
+                    <input type="text" id="revenueContext" placeholder="e.g. Q1-Q3 2025">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>📝 Main Update / Strategy</label>
+                <textarea id="currentFocus" placeholder="What is the current status? Write normally, no code needed."></textarea>
+                <p class="help">This text will appear in the main white box.</p>
+            </div>
+
+            <div class="form-group">
+                <label>🚨 Top Action Item (Urgent)</label>
+                <input type="text" id="topAction" placeholder="e.g. Sign off on proofs by Friday">
+            </div>
+
+            <button class="save-btn" onclick="saveData()">Update Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://wdnpazkzejvnwiryxohl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkbnBhemt6ZWp2bndpcnl4b2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5ODg1ODcsImV4cCI6MjA3OTU2NDU4N30.JCk80Gu2TdQhf5w_OMHxMdGbYjWahU-jrl4FuG6oZYM';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function loadArtistData() {
+            const slug = document.getElementById('artistSelect').value;
+            const container = document.getElementById('formContainer');
+            
+            if (!slug) { container.style.display = 'none'; return; }
+
+            // Loading state
+            container.style.opacity = '0.5';
+            
+            const { data, error } = await supabase
+                .from('artist_updates')
+                .select('*')
+                .eq('artist_slug', slug)
+                .single();
+
+            if (data) {
+                document.getElementById('revenueAmount').value = data.revenue_amount || '';
+                document.getElementById('revenueContext').value = data.revenue_context || '';
+                document.getElementById('currentFocus').value = data.current_focus || '';
+                // Simple handling for action item - assuming single item for simplicity
+                const actions = data.action_items || {};
+                document.getElementById('topAction').value = actions.top || '';
+            } else {
+                // clear form if new
+                document.getElementById('revenueAmount').value = '';
+                document.getElementById('revenueContext').value = '';
+                document.getElementById('currentFocus').value = '';
+                document.getElementById('topAction').value = '';
+            }
+
+            container.style.display = 'block';
+            container.style.opacity = '1';
+        }
+
+        async function saveData() {
+            const slug = document.getElementById('artistSelect').value;
+            const name = document.getElementById('artistSelect').options[document.getElementById('artistSelect').selectedIndex].text;
+            
+            const updates = {
+                artist_slug: slug,
+                artist_name: name,
+                revenue_amount: document.getElementById('revenueAmount').value,
+                revenue_context: document.getElementById('revenueContext').value,
+                current_focus: document.getElementById('currentFocus').value,
+                action_items: { top: document.getElementById('topAction').value },
+                last_updated: new Date().toISOString()
+            };
+
+            const { data, error } = await supabase
+                .from('artist_updates')
+                .upsert(updates, { onConflict: 'artist_slug' });
+
+            const msgDiv = document.getElementById('statusMessage');
+            if (error) {
+                msgDiv.className = 'status error';
+                msgDiv.innerHTML = 'Error saving: ' + error.message;
+            } else {
+                msgDiv.className = 'status success';
+                msgDiv.innerHTML = '✅ Saved successfully! The dashboard is updated.';
+            }
+            msgDiv.style.display = 'block';
+            setTimeout(() => msgDiv.style.display = 'none', 3000);
+        }
+    </script>
+</body>
+</html>
