@@ -3,79 +3,445 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artist Planning Manager</title>
+    <title>Artist Planning Admin Panel</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f4f6f8; color: #333; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h1 { color: #667eea; text-align: center; }
-        
-        /* Form Styling */
-        .form-group { margin-bottom: 25px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; color: #4a5568; }
-        input, textarea, select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; transition: 0.2s; }
-        input:focus, textarea:focus { border-color: #667eea; outline: none; }
-        textarea { min-height: 150px; resize: vertical; }
-        
-        .row { display: flex; gap: 20px; }
-        .col { flex: 1; }
-
-        button.save-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; border: none; padding: 15px 30px; border-radius: 8px;
-            font-size: 18px; font-weight: bold; cursor: pointer; width: 100%;
-            transition: transform 0.2s;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        button.save-btn:hover { transform: translateY(-2px); }
-        
-        .status { padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; text-align: center; }
-        .success { background: #c6f6d5; color: #276749; }
-        .error { background: #fed7d7; color: #c53030; }
 
-        /* Helper text */
-        .help { font-size: 0.85em; color: #718096; margin-top: 5px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 1.1em;
+        }
+
+        /* Main Form Container */
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Artist Selector */
+        .artist-selector {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            background: white;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        /* Two Column Layout */
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Date and Action Items */
+        .list-input {
+            margin-bottom: 15px;
+        }
+
+        .list-container {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .list-item input {
+            flex: 1;
+            padding: 8px;
+            margin-bottom: 0;
+        }
+
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #dc2626;
+        }
+
+        .add-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .add-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        /* Save Button */
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .save-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* Status Messages */
+        .status {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #276749;
+            border: 1px solid #9ae6b4;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #fc8181;
+        }
+
+        /* Helper Text */
+        .help {
+            font-size: 0.85em;
+            color: #718096;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* View Dashboard Link */
+        .dashboard-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #667eea;
+        }
+
+        .dashboard-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+
+        /* New Artist Button */
+        .new-artist-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .new-artist-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        /* Modal for new artist */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #718096;
+        }
+
+        .close-modal:hover {
+            color: #4a5568;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📅 Weekly Planning Update</h1>
-        
-        <div id="statusMessage" class="status"></div>
-
-        <div class="form-group">
-            <label>Select Artist / Campaign</label>
-            <select id="artistSelect" onchange="loadArtistData()">
-                <option value="">-- Choose Context --</option>
-                <option value="james-mcqueen">James McQueen</option>
-                <option value="bob-dylan">Bob Dylan</option>
-                <option value="marvel-legacy">Marvel Legacy</option>
-                </select>
+        <div class="header">
+            <h1>🎨 Artist Planning Admin Panel</h1>
+            <p class="subtitle">Update artist information and campaign details</p>
+            <a href="artist-planning-2025-enhanced.html" class="dashboard-link">📊 View Dashboard</a>
         </div>
 
-        <div id="formContainer" style="display:none;">
-            <div class="row">
-                <div class="col form-group">
-                    <label>💰 Revenue Figure</label>
-                    <input type="text" id="revenueAmount" placeholder="e.g. £1.2m">
+        <div class="form-container">
+            <div id="statusMessage" class="status"></div>
+
+            <div class="artist-selector">
+                <div class="form-group">
+                    <label>Select Artist / Campaign</label>
+                    <div style="display: flex; align-items: center;">
+                        <select id="artistSelect" onchange="loadArtistData()" style="flex: 1;">
+                            <option value="">-- Loading Artists... --</option>
+                        </select>
+                        <button class="new-artist-btn" onclick="showNewArtistModal()">+ New Artist</button>
+                    </div>
                 </div>
-                <div class="col form-group">
-                    <label>Context (Period)</label>
-                    <input type="text" id="revenueContext" placeholder="e.g. Q1-Q3 2025">
+            </div>
+
+            <div id="formContainer" style="display:none;">
+                <div class="row">
+                    <div class="form-group">
+                        <label>💰 Revenue Amount</label>
+                        <input type="text" id="revenueAmount" placeholder="e.g. £1.2m, £500k">
+                        <p class="help">Current revenue or target amount</p>
+                    </div>
+                    <div class="form-group">
+                        <label>📊 Revenue Context</label>
+                        <input type="text" id="revenueContext" placeholder="e.g. Q1-Q3 2025, YTD Revenue">
+                        <p class="help">Time period or context for the revenue</p>
+                    </div>
                 </div>
-            </div>
 
+                <div class="form-group">
+                    <label>📝 Current Focus / Main Update</label>
+                    <textarea id="currentFocus" placeholder="What's the current status? What are the main updates? Write naturally - no HTML needed."></textarea>
+                    <p class="help">This appears as the main content for this artist. Keep it concise and informative.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>📅 Key Dates</label>
+                    <div class="list-container">
+                        <div id="datesList"></div>
+                        <button class="add-btn" onclick="addDate()">+ Add Date</button>
+                    </div>
+                    <p class="help">Important dates, launches, events, etc.</p>
+                </div>
+
+                <div class="form-group">
+                    <label>⚡ Action Items</label>
+                    <div class="list-container">
+                        <div id="actionsList"></div>
+                        <button class="add-btn" onclick="addAction()">+ Add Action Item</button>
+                    </div>
+                    <p class="help">Tasks, to-dos, and items requiring attention</p>
+                </div>
+
+                <button class="save-btn" onclick="saveData()">
+                    💾 Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Artist Modal -->
+    <div id="newArtistModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add New Artist</h2>
+                <button class="close-modal" onclick="hideNewArtistModal()">&times;</button>
+            </div>
             <div class="form-group">
-                <label>📝 Main Update / Strategy</label>
-                <textarea id="currentFocus" placeholder="What is the current status? Write normally, no code needed."></textarea>
-                <p class="help">This text will appear in the main white box.</p>
+                <label>Artist Name</label>
+                <input type="text" id="newArtistName" placeholder="e.g. John Smith">
             </div>
-
             <div class="form-group">
-                <label>🚨 Top Action Item (Urgent)</label>
-                <input type="text" id="topAction" placeholder="e.g. Sign off on proofs by Friday">
+                <label>Artist Slug (URL-friendly)</label>
+                <input type="text" id="newArtistSlug" placeholder="e.g. john-smith">
+                <p class="help">Lowercase, no spaces, use hyphens</p>
             </div>
-
-            <button class="save-btn" onclick="saveData()">Update Dashboard</button>
+            <button class="save-btn" onclick="createNewArtist()">Create Artist</button>
         </div>
     </div>
 
@@ -84,14 +450,41 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkbnBhemt6ZWp2bndpcnl4b2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5ODg1ODcsImV4cCI6MjA3OTU2NDU4N30.JCk80Gu2TdQhf5w_OMHxMdGbYjWahU-jrl4FuG6oZYM';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let currentDates = [];
+        let currentActions = [];
+
+        // Load all artists on page load
+        async function loadArtists() {
+            const { data, error } = await supabase
+                .from('artist_updates')
+                .select('artist_slug, artist_name')
+                .order('artist_name');
+
+            const select = document.getElementById('artistSelect');
+            select.innerHTML = '<option value="">-- Choose Artist --</option>';
+            
+            if (data && data.length > 0) {
+                data.forEach(artist => {
+                    const option = document.createElement('option');
+                    option.value = artist.artist_slug;
+                    option.textContent = artist.artist_name;
+                    select.appendChild(option);
+                });
+            } else if (data && data.length === 0) {
+                select.innerHTML = '<option value="">-- No artists found. Create one! --</option>';
+            }
+        }
+
         async function loadArtistData() {
             const slug = document.getElementById('artistSelect').value;
             const container = document.getElementById('formContainer');
             
-            if (!slug) { container.style.display = 'none'; return; }
+            if (!slug) {
+                container.style.display = 'none';
+                return;
+            }
 
-            // Loading state
-            container.style.opacity = '0.5';
+            container.classList.add('loading');
             
             const { data, error } = await supabase
                 .from('artist_updates')
@@ -103,32 +496,109 @@
                 document.getElementById('revenueAmount').value = data.revenue_amount || '';
                 document.getElementById('revenueContext').value = data.revenue_context || '';
                 document.getElementById('currentFocus').value = data.current_focus || '';
-                // Simple handling for action item - assuming single item for simplicity
-                const actions = data.action_items || {};
-                document.getElementById('topAction').value = actions.top || '';
+                
+                // Load dates
+                currentDates = data.key_dates || [];
+                renderDates();
+                
+                // Load actions
+                currentActions = data.action_items || [];
+                renderActions();
             } else {
-                // clear form if new
+                // Clear form for new entry
                 document.getElementById('revenueAmount').value = '';
                 document.getElementById('revenueContext').value = '';
                 document.getElementById('currentFocus').value = '';
-                document.getElementById('topAction').value = '';
+                currentDates = [];
+                currentActions = [];
+                renderDates();
+                renderActions();
             }
 
             container.style.display = 'block';
-            container.style.opacity = '1';
+            container.classList.remove('loading');
+        }
+
+        function renderDates() {
+            const container = document.getElementById('datesList');
+            container.innerHTML = '';
+            
+            currentDates.forEach((date, index) => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <input type="text" value="${date}" onchange="updateDate(${index}, this.value)" placeholder="e.g. 15th March 2025">
+                    <button class="remove-btn" onclick="removeDate(${index})">Remove</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderActions() {
+            const container = document.getElementById('actionsList');
+            container.innerHTML = '';
+            
+            currentActions.forEach((action, index) => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `
+                    <input type="text" value="${action}" onchange="updateAction(${index}, this.value)" placeholder="e.g. Review pricing strategy">
+                    <button class="remove-btn" onclick="removeAction(${index})">Remove</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addDate() {
+            currentDates.push('');
+            renderDates();
+        }
+
+        function removeDate(index) {
+            currentDates.splice(index, 1);
+            renderDates();
+        }
+
+        function updateDate(index, value) {
+            currentDates[index] = value;
+        }
+
+        function addAction() {
+            currentActions.push('');
+            renderActions();
+        }
+
+        function removeAction(index) {
+            currentActions.splice(index, 1);
+            renderActions();
+        }
+
+        function updateAction(index, value) {
+            currentActions[index] = value;
         }
 
         async function saveData() {
             const slug = document.getElementById('artistSelect').value;
-            const name = document.getElementById('artistSelect').options[document.getElementById('artistSelect').selectedIndex].text;
+            if (!slug) {
+                showStatus('Please select an artist', 'error');
+                return;
+            }
+
+            const select = document.getElementById('artistSelect');
+            const name = select.options[select.selectedIndex].text;
+            
+            // Filter out empty dates and actions
+            const cleanDates = currentDates.filter(d => d.trim() !== '');
+            const cleanActions = currentActions.filter(a => a.trim() !== '');
             
             const updates = {
                 artist_slug: slug,
                 artist_name: name,
-                revenue_amount: document.getElementById('revenueAmount').value,
-                revenue_context: document.getElementById('revenueContext').value,
-                current_focus: document.getElementById('currentFocus').value,
-                action_items: { top: document.getElementById('topAction').value },
+                revenue_amount: document.getElementById('revenueAmount').value || null,
+                revenue_context: document.getElementById('revenueContext').value || null,
+                current_focus: document.getElementById('currentFocus').value || null,
+                key_dates: cleanDates,
+                action_items: cleanActions,
                 last_updated: new Date().toISOString()
             };
 
@@ -136,17 +606,80 @@
                 .from('artist_updates')
                 .upsert(updates, { onConflict: 'artist_slug' });
 
-            const msgDiv = document.getElementById('statusMessage');
             if (error) {
-                msgDiv.className = 'status error';
-                msgDiv.innerHTML = 'Error saving: ' + error.message;
+                showStatus('Error saving: ' + error.message, 'error');
             } else {
-                msgDiv.className = 'status success';
-                msgDiv.innerHTML = '✅ Saved successfully! The dashboard is updated.';
+                showStatus('✅ Saved successfully! Dashboard updated.', 'success');
             }
-            msgDiv.style.display = 'block';
-            setTimeout(() => msgDiv.style.display = 'none', 3000);
         }
+
+        function showStatus(message, type) {
+            const msgDiv = document.getElementById('statusMessage');
+            msgDiv.className = 'status ' + type;
+            msgDiv.innerHTML = message;
+            msgDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 4000);
+        }
+
+        function showNewArtistModal() {
+            document.getElementById('newArtistModal').style.display = 'flex';
+        }
+
+        function hideNewArtistModal() {
+            document.getElementById('newArtistModal').style.display = 'none';
+            document.getElementById('newArtistName').value = '';
+            document.getElementById('newArtistSlug').value = '';
+        }
+
+        async function createNewArtist() {
+            const name = document.getElementById('newArtistName').value;
+            const slug = document.getElementById('newArtistSlug').value;
+            
+            if (!name || !slug) {
+                alert('Please fill in both fields');
+                return;
+            }
+            
+            // Validate slug format
+            if (!/^[a-z0-9-]+$/.test(slug)) {
+                alert('Slug must be lowercase letters, numbers, and hyphens only');
+                return;
+            }
+            
+            const { data, error } = await supabase
+                .from('artist_updates')
+                .insert({
+                    artist_slug: slug,
+                    artist_name: name,
+                    current_focus: 'New artist - details coming soon',
+                    last_updated: new Date().toISOString()
+                });
+            
+            if (error) {
+                alert('Error creating artist: ' + error.message);
+            } else {
+                hideNewArtistModal();
+                await loadArtists();
+                document.getElementById('artistSelect').value = slug;
+                await loadArtistData();
+                showStatus('✅ New artist created successfully!', 'success');
+            }
+        }
+
+        // Auto-generate slug from name
+        document.getElementById('newArtistName')?.addEventListener('input', function(e) {
+            const slug = e.target.value
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            document.getElementById('newArtistSlug').value = slug;
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', loadArtists);
     </script>
 </body>
 </html>
