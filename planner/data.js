@@ -61,34 +61,36 @@ let eventsData = [];
 function toSnakeCase(obj) {
     return {
         id: obj.id,
-        type: obj.type,
-        date: obj.date,
+        event_type: obj.type,
+        event_date: obj.date,
+        end_date: obj.endDate,
         all_day: obj.allDay,
         start_time: obj.startTime,
         end_time: obj.endTime,
-        artist: obj.artist,
+        artist_name: obj.artist,
         gallery: obj.gallery,
         status: obj.status,
         title: obj.title,
         description: obj.description,
-        equipment: obj.equipment
+        equipment_required: obj.equipment
     };
 }
 
 function toCamelCase(obj) {
     return {
         id: obj.id,
-        type: obj.type,
-        date: obj.date,
+        type: obj.event_type,
+        date: obj.event_date,
+        endDate: obj.end_date,
         allDay: obj.all_day,
         startTime: obj.start_time,
         endTime: obj.end_time,
-        artist: obj.artist,
+        artist: obj.artist_name,
         gallery: obj.gallery,
         status: obj.status,
         title: obj.title,
         description: obj.description,
-        equipment: obj.equipment
+        equipment: obj.equipment_required
     };
 }
 
@@ -114,7 +116,7 @@ async function loadEventsFromDatabase() {
         const { data, error } = await supabase
             .from('events')
             .select('*')
-            .order('date', { ascending: true });
+            .order('event_date', { ascending: true });
 
         if (error) throw error;
         eventsData = (data || []).map(toCamelCase);
