@@ -974,11 +974,13 @@
                     const x = (size - w) / 2;
                     const y = 1.5;
 
-                    // Shadow
-                    pdf.setFillColor(0,0,0);
-                    pdf.setGState(new pdf.GState({ opacity: 0.15 }));
-                    pdf.rect(x + 0.05, y + 0.05, w, h, 'F');
-                    pdf.setGState(new pdf.GState({ opacity: 1 }));
+                    // Shadow (only if background is not #dadada)
+                    if (bgColor.toLowerCase() !== '#dadada') {
+                        pdf.setFillColor(0,0,0);
+                        pdf.setGState(new pdf.GState({ opacity: 0.15 }));
+                        pdf.rect(x + 0.05, y + 0.05, w, h, 'F');
+                        pdf.setGState(new pdf.GState({ opacity: 1 }));
+                    }
 
                     // Image
                     pdf.addImage(imgData.src, 'JPEG', x, y, w, h);
