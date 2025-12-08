@@ -4,380 +4,329 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artist PDF Maker - Castle Fine Art</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
     <style>
+        /* --- FONTS --- */
         @font-face {
             font-family: 'Acta W01 Bold Italic';
             src: url('fonts/Acta W01 Bold Italic.ttf') format('truetype');
             font-weight: bold;
             font-style: italic;
         }
-
         @font-face {
             font-family: 'DIN LightAlternate';
             src: url('fonts/DIN LightAlternate.ttf') format('truetype');
             font-weight: 300;
-            font-style: normal;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --primary: #636568;
+            --primary-dark: #4a4d50;
+            --accent: #2c3e50;
+            --bg: #f6f0e8;
+            --white: #ffffff;
+            --border: #e0e0e0;
+            --danger: #ff4444;
+            --success: #388e3c;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f6f0e8;
-            color: #636568;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--primary);
             padding: 2rem;
             min-height: 100vh;
+            padding-bottom: 100px; /* Space for sticky footer */
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            background: var(--white);
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
             padding: 3rem;
         }
 
-        h1 {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #636568;
-        }
-
-        .subtitle {
-            text-align: center;
-            font-size: 1.1rem;
-            margin-bottom: 3rem;
-            color: #888;
-        }
-
-        .section {
-            margin-bottom: 3rem;
-        }
-
+        /* --- TYPOGRAPHY --- */
+        h1 { text-align: center; font-size: 2.5rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .subtitle { text-align: center; font-size: 1.1rem; color: #888; margin-bottom: 3rem; }
+        
         .section-title {
             font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #636568;
-            border-bottom: 2px solid #f6f0e8;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--bg);
             padding-bottom: 0.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #636568;
-        }
-
-        select, input[type="text"], input[type="file"], textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e0e0e0;
+        /* --- FORMS --- */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        select, input[type="text"], textarea {
+            width: 100%; padding: 0.75rem;
+            border: 2px solid var(--border);
             border-radius: 6px;
             font-size: 1rem;
-            font-family: inherit;
-            color: #636568;
-            background: white;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
+        
+        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--primary); }
+        textarea { min-height: 100px; resize: vertical; }
 
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: #636568;
-        }
-
+        /* --- UPLOAD ZONE --- */
         .file-input-wrapper {
             position: relative;
-            border: 3px dashed #e0e0e0;
-            border-radius: 6px;
-            padding: 2rem;
+            border: 3px dashed var(--border);
+            border-radius: 8px;
+            padding: 3rem;
             text-align: center;
             background: #fafafa;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             cursor: pointer;
         }
 
-        .file-input-wrapper:hover {
-            border-color: #636568;
-            background: #f0f0f0;
+        .file-input-wrapper.drag-over {
+            border-color: var(--primary);
+            background: #eef2f5;
+            transform: scale(1.01);
         }
 
         .file-input-wrapper input[type="file"] {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            cursor: pointer;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer;
         }
 
-        .upload-text {
-            font-size: 1.1rem;
-            color: #888;
-        }
+        .upload-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; }
 
-        .images-grid {
+        /* --- IMAGE GRID (SORTABLE) --- */
+        #images-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .image-card {
-            background: #fafafa;
-            border-radius: 8px;
-            padding: 1.5rem;
-            border: 2px solid #e0e0e0;
-        }
-
-        .image-preview {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 6px;
-            margin-bottom: 1rem;
-            background: white;
-        }
-
-        .image-inputs {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .image-inputs input {
-            padding: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .remove-btn {
-            width: 100%;
-            padding: 0.5rem;
-            background: #ff4444;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-top: 0.5rem;
-            transition: background 0.3s;
-        }
-
-        .remove-btn:hover {
-            background: #cc0000;
-        }
-
-        .generate-btn {
-            width: 100%;
-            padding: 1.25rem;
-            background: #636568;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .generate-btn:hover:not(:disabled) {
-            background: #4a4d50;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .generate-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .status-message {
-            text-align: center;
-            padding: 1rem;
-            margin-top: 1rem;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .status-message.loading {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .status-message.success {
-            background: #e8f5e9;
-            color: #388e3c;
-        }
-
-        .status-message.error {
-            background: #ffebee;
-            color: #d32f2f;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #999;
-            font-style: italic;
-        }
-
-        /* Various Artists Specific Styles */
-        .various-mode-container {
-            border: 2px solid #636568;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            background: #fffcf9;
-        }
-
-        .various-mode-header {
-            background: #636568;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .add-section-btn {
-            width: 100%;
-            padding: 1rem;
-            background: #2c3e50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
             margin-top: 1.5rem;
         }
 
-        .add-section-btn:hover {
-            background: #34495e;
+        .image-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.75rem;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: move; /* Indicates draggable */
         }
 
-        .sections-list {
-            margin-top: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
+        .image-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+
+        .image-card input[type="text"] {
+            font-size: 0.8rem;
+            padding: 0.4rem;
         }
 
-        .section-item {
-            background: #f5f5f5;
-            border-left: 5px solid #636568;
-            padding: 1rem;
-            border-radius: 4px;
+        .image-card .image-preview {
+            max-height: 120px;
+        }
+        
+        /* Color picker styles */
+        .color-selector {
             display: flex;
-            justify-content: space-between;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
             align-items: center;
         }
-
-        .section-info h4 {
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
+        
+        .color-selector label {
+            font-size: 0.7rem;
+            margin-bottom: 0;
+            font-weight: normal;
+            text-transform: none;
+            letter-spacing: 0;
         }
-
-        .section-info p {
-            color: #888;
-            font-size: 0.9rem;
+        
+        .color-presets {
+            display: flex;
+            gap: 0.3rem;
         }
-
-        .delete-section-btn {
-            color: #ff4444;
-            background: none;
-            border: 1px solid #ff4444;
-            padding: 0.5rem 1rem;
+        
+        .color-preset {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
             border-radius: 4px;
             cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .color-preset:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+        }
+        
+        .color-preset.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+        
+        .color-custom {
+            width: 60px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        /* SortableJS Ghost State */
+        .sortable-ghost { opacity: 0.4; background: #e0e0e0; border: 2px dashed var(--primary); }
+
+        .image-preview {
+            width: 100%; aspect-ratio: 1; object-fit: contain;
+            border-radius: 4px; margin-bottom: 1rem;
+            background: #f9f9f9;
         }
 
-        .delete-section-btn:hover {
-            background: #ff4444;
-            color: white;
+        .card-badge {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(0,0,0,0.6); color: white;
+            padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;
+        }
+
+        .remove-btn {
+            width: 100%; padding: 0.5rem; margin-top: 0.5rem;
+            background: var(--white); border: 1px solid var(--danger);
+            color: var(--danger); border-radius: 4px; cursor: pointer;
+            transition: 0.2s;
+        }
+        .remove-btn:hover { background: var(--danger); color: white; }
+
+        /* --- ACTION BAR --- */
+        .sticky-actions {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--white);
+            padding: 1.5rem;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
+        }
+
+        .settings-group { display: flex; gap: 1rem; align-items: center; }
+        .btn-group { display: flex; gap: 1rem; }
+
+        .btn {
+            padding: 0.8rem 1.5rem; border: none; border-radius: 6px;
+            font-weight: 600; cursor: pointer; font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .btn-secondary { background: white; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-secondary:hover { background: #f0f0f0; }
+
+        /* --- PREVIEW MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000;
+            display: none; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            width: 90%; height: 90%; background: white;
+            border-radius: 8px; position: relative; display: flex; flex-direction: column;
+        }
+        .modal-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { flex: 1; padding: 0; background: #525659; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+
+        /* --- VARIOUS MODE STYLES --- */
+        .various-mode-container { border: 2px solid var(--primary); padding: 1.5rem; border-radius: 8px; background: #fffcf9; }
+        .section-item {
+            background: #f8f9fa; padding: 1rem; margin-bottom: 0.5rem;
+            border-radius: 6px; display: flex; justify-content: space-between; align-items: center;
+            border-left: 4px solid var(--primary);
+        }
+        .section-item.editing {
+            background: #fff8e6;
+            border-left-color: #f0ad4e;
+        }
+        .section-item-buttons { display: flex; gap: 0.5rem; }
+        .edit-btn {
+            padding: 0.3rem 0.8rem;
+            background: var(--white); border: 1px solid var(--primary);
+            color: var(--primary); border-radius: 4px; cursor: pointer;
+            transition: 0.2s; font-size: 0.85rem;
+        }
+        .edit-btn:hover { background: var(--primary); color: white; }
+        .artist-name-input {
+            padding: 0.3rem 0.5rem; border: 1px solid var(--border);
+            border-radius: 4px; font-size: 0.9rem; margin-left: 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            #images-container { grid-template-columns: repeat(3, 1fr); }
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
+            .form-row { grid-template-columns: 1fr; }
+            .sticky-actions { flex-direction: column; gap: 1rem; }
+            .btn-group { width: 100%; }
+            .btn { flex: 1; }
+            #images-container { grid-template-columns: repeat(2, 1fr); }
+        }
 
-            .container {
-                padding: 1.5rem;
-            }
-
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            .images-grid {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 480px) {
+            #images-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Artist PDF Maker</h1>
-        <p class="subtitle">Create professional square PDFs with artist bios and product pages</p>
+        <h1>Artist Catalog Maker</h1>
+        <p class="subtitle">Generate professional, high-resolution PDFs</p>
 
         <div class="section">
-            <h2 class="section-title">1. Client & Artist Details</h2>
+            <h2 class="section-title">1. Catalog Details</h2>
             
-            <div class="form-group">
-                <label for="client-name">Client Name (optional):</label>
-                <input type="text" id="client-name" placeholder="e.g., Marc Delaney">
-                <small style="color: #888; font-size: 0.9rem; margin-top: 0.5rem; display: block;">
-                    If provided, will appear as "For [Name]" on the front page.
-                </small>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Mode Selection</label>
+                    <select id="main-artist-select">
+                        <option value="">-- Select Mode --</option>
+                        <option value="various-artists">★ Various Artists (Compilation) ★</option>
+                        <option value="various-no-artist">★ Various Artists (No Artist - Free Form) ★</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label>Client Name (Optional)</label>
+                    <input type="text" id="client-name" placeholder="e.g., Marc Delaney">
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="alt-cover-text">Alternative Cover Text (optional):</label>
-                <input type="text" id="alt-cover-text" placeholder="e.g., Spring Collection">
-                <small style="color: #888; font-size: 0.9rem; margin-top: 0.5rem; display: block;">
-                    Used only if Client Name is blank. Appears exactly as written.
-                </small>
+                <label>Custom Cover Title (Optional)</label>
+                <input type="text" id="custom-cover-title" placeholder="Leave blank to use artist name or 'Selected Works'">
+                <p style="color: #888; font-size: 0.85rem; margin-top: 0.5rem;">Override the default cover page text with your own title.</p>
             </div>
 
             <div class="form-group">
-                <label for="custom-message">Custom Message (optional):</label>
-                <textarea id="custom-message" placeholder="Enter your custom message here. If you enter one line, it will be split into 3 equal parts. If you enter multiple lines, they will be preserved as-is."></textarea>
-                <small style="color: #888; font-size: 0.9rem; margin-top: 0.5rem; display: block;">
-                    This message will appear on a dedicated page before the final page
-                </small>
-            </div>
-            
-            <div class="form-group">
-                <label for="main-artist-select">Mode Selection:</label>
-                <select id="main-artist-select">
-                    <option value="">-- Select Option --</option>
-                    <option value="various-artists">★ Various Artists (Compilation) ★</option>
-                    </select>
+                <label>Custom Final Message</label>
+                <textarea id="custom-message" placeholder="Appears on a dedicated page before the final page..."></textarea>
             </div>
         </div>
 
@@ -385,51 +334,76 @@
             
             <div id="completed-sections-container" style="display:none; margin-bottom: 2rem;">
                 <h3 class="section-title">Compilation Order</h3>
-                <div id="sections-list" class="sections-list">
-                    </div>
-                <div class="empty-state" id="no-sections-msg">No artist sections added yet.</div>
+                <div id="sections-list"></div>
+                <div class="empty-state" id="no-sections-msg" style="text-align:center; color:#999; padding:1rem;">No artist sections added yet.</div>
             </div>
 
             <div id="input-area-container">
-                <h2 class="section-title" id="input-area-title">2. Upload Product Images</h2>
-                
+                <h2 class="section-title" id="input-area-title">2. Upload Images</h2>
+
                 <div class="form-group" id="sub-artist-group" style="display:none;">
-                    <div class="various-mode-header">CURRENT SECTION</div>
-                    <label for="sub-artist-select">Select Artist for this section:</label>
+                    <label style="background: var(--primary); color: white; display: inline-block; padding: 4px 8px; border-radius: 4px; margin-bottom: 10px;">Current Artist Section</label>
                     <select id="sub-artist-select">
                         <option value="">-- Select Artist --</option>
                         </select>
                 </div>
+                <div class="form-group" id="custom-artist-group" style="display:none;">
+                    <label style="background: #f0ad4e; color: white; display: inline-block; padding: 4px 8px; border-radius: 4px; margin-bottom: 10px;">Artist Name (Optional)</label>
+                    <input type="text" id="custom-artist-name" placeholder="Enter artist name or leave blank...">
+                    <p style="color: #888; font-size: 0.85rem; margin-top: 0.5rem;">You can add images without an artist, or type an artist name for grouping.</p>
+                </div>
 
-                <div class="form-group">
-                    <div class="file-input-wrapper">
-                        <input type="file" id="image-upload" multiple accept="image/*">
-                        <div class="upload-text">
-                            <p style="font-size: 2rem; margin-bottom: 0.5rem;">📁</p>
-                            <p>Click or drag images here</p>
-                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Select multiple images for your catalog</p>
-                        </div>
-                    </div>
+                <div class="file-input-wrapper" id="drop-zone">
+                    <input type="file" id="image-upload" multiple accept="image/*">
+                    <div class="upload-icon">📁</div>
+                    <h3 style="margin-bottom: 0.5rem">Click or Drag Images Here</h3>
+                    <p style="color: #888; font-size: 0.9rem;">Supports JPG, PNG (High Res recommended)</p>
                 </div>
 
                 <div id="images-container">
-                    <div class="empty-state">No images uploaded yet</div>
+                    <div style="text-align: center; padding: 3rem; color: #ccc; font-style: italic;">
+                        Images will appear here. Drag to reorder.
+                    </div>
                 </div>
 
-                <button id="add-section-btn" class="add-section-btn" style="display:none;">
-                    + Add Artist Section to PDF
+                <button id="add-section-btn" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; display:none;">
+                    + Add This Artist Section
                 </button>
             </div>
         </div>
+    </div>
 
-        <div class="section">
-            <button id="generate-btn" class="generate-btn" disabled>Generate PDF</button>
-            <div id="status-message"></div>
+    <div class="sticky-actions">
+        <div class="settings-group">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="margin-bottom: 0.2rem; font-size: 0.7rem;">Quality</label>
+                <select id="quality-select" style="padding: 0.4rem; font-size: 0.9rem; min-width: 150px;">
+                    <option value="print">High (Print - 300dpi)</option>
+                    <option value="web">Medium (Email/Web)</option>
+                </select>
+            </div>
+            <div id="status-message" style="font-weight: 600; color: var(--primary);"></div>
+        </div>
+        <div class="btn-group">
+            <button id="preview-btn" class="btn btn-secondary" disabled>👁 Preview PDF</button>
+            <button id="generate-btn" class="btn btn-primary" disabled>⬇ Download PDF</button>
+        </div>
+    </div>
+
+    <div id="preview-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>PDF Preview</h3>
+                <button class="close-modal" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <iframe id="preview-frame"></iframe>
+            </div>
         </div>
     </div>
 
     <script>
-        // Configuration - All Artists with bio file mappings
+        // --- DATA ---
         const ARTIST_DATA = {
             'billy-connolly': { name: 'Billy Connolly', frontPage: 'front-pages/BCO-PDF-Front.jpg', bioFiles: ['bios/billy-connolly-page1-bio.jpg', 'bios/billy-connolly-page2-bio.jpg'] },
             'billy-schenck': { name: 'Billy Schenck', bioFiles: ['bios/billy-schenck-bio.jpg'] },
@@ -476,268 +450,594 @@
             'whatshisname': { name: 'Whatshisname', bioFiles: ['bios/whatshisname-page1-bio.jpg', 'bios/whatshisname-page2-bio.jpg'] }
         };
 
-        // State
-        let appMode = 'single'; // 'single' or 'various'
-        let selectedMainArtist = null; // For single mode
-        let selectedSubArtist = null; // For various mode (current selection)
-        
-        let clientName = '';
-        let altCoverText = ''; // New variable for alt text
-        let customMessage = '';
-        
-        // Staging area (currently visible images)
-        let uploadedImages = [];
-        let imageCounter = 0;
+        // --- STATE ---
+        let appMode = 'single'; // 'single', 'various', 'various-no-artist'
+        let selectedMainArtist = null;
+        let selectedSubArtist = null;
+        let uploadedImages = []; // Staging array
+        let pdfSections = []; // Compilation array
+        let sortableInstance = null;
+        let editingSectionId = null; // Track which section is being edited
 
-        // Compilation queue (for various artists mode)
-        let pdfSections = []; 
+        // --- ELEMENTS ---
+        const els = {
+            mainSelect: document.getElementById('main-artist-select'),
+            subSelect: document.getElementById('sub-artist-select'),
+            subGroup: document.getElementById('sub-artist-group'),
+            customArtistGroup: document.getElementById('custom-artist-group'),
+            customArtistName: document.getElementById('custom-artist-name'),
+            clientInput: document.getElementById('client-name'),
+            customCoverTitle: document.getElementById('custom-cover-title'),
+            msgInput: document.getElementById('custom-message'),
+            uploadSection: document.getElementById('upload-section'),
+            dropZone: document.getElementById('drop-zone'),
+            fileInput: document.getElementById('image-upload'),
+            imgContainer: document.getElementById('images-container'),
+            sectionsList: document.getElementById('sections-list'),
+            noSectionsMsg: document.getElementById('no-sections-msg'),
+            completedContainer: document.getElementById('completed-sections-container'),
+            inputArea: document.getElementById('input-area-container'),
+            inputTitle: document.getElementById('input-area-title'),
+            addSectionBtn: document.getElementById('add-section-btn'),
+            generateBtn: document.getElementById('generate-btn'),
+            previewBtn: document.getElementById('preview-btn'),
+            status: document.getElementById('status-message'),
+            quality: document.getElementById('quality-select'),
+            modal: document.getElementById('preview-modal'),
+            iframe: document.getElementById('preview-frame')
+        };
 
-        // Elements
-        const clientNameInput = document.getElementById('client-name');
-        const altCoverTextInput = document.getElementById('alt-cover-text'); // New Element
-        const customMessageInput = document.getElementById('custom-message');
-        const mainArtistSelect = document.getElementById('main-artist-select');
-        
-        const uploadSection = document.getElementById('upload-section');
-        const completedSectionsContainer = document.getElementById('completed-sections-container');
-        const sectionsList = document.getElementById('sections-list');
-        const noSectionsMsg = document.getElementById('no-sections-msg');
-        
-        const subArtistGroup = document.getElementById('sub-artist-group');
-        const subArtistSelect = document.getElementById('sub-artist-select');
-        
-        const imageUpload = document.getElementById('image-upload');
-        const imagesContainer = document.getElementById('images-container');
-        
-        const addSectionBtn = document.getElementById('add-section-btn');
-        const generateBtn = document.getElementById('generate-btn');
-        const statusMessage = document.getElementById('status-message');
-
-        // Initialization: Populate dropdowns
-        function populateDropdowns() {
+        // --- INIT ---
+        function init() {
+            // Populate Dropdowns
             const keys = Object.keys(ARTIST_DATA).sort();
-            
             keys.forEach(key => {
-                // Populate Main Select
-                const option1 = document.createElement('option');
-                option1.value = key;
-                option1.textContent = ARTIST_DATA[key].name;
-                mainArtistSelect.appendChild(option1);
-
-                // Populate Sub Select
-                const option2 = document.createElement('option');
-                option2.value = key;
-                option2.textContent = ARTIST_DATA[key].name;
-                subArtistSelect.appendChild(option2);
+                const opt1 = new Option(ARTIST_DATA[key].name, key);
+                const opt2 = new Option(ARTIST_DATA[key].name, key);
+                els.mainSelect.add(opt1);
+                els.subSelect.add(opt2);
             });
+
+            // Listeners
+            els.mainSelect.addEventListener('change', handleModeChange);
+            els.subSelect.addEventListener('change', (e) => {
+                selectedSubArtist = e.target.value;
+                updateUI();
+            });
+            
+            // Upload & Drag Drop
+            els.fileInput.addEventListener('change', handleFiles);
+            setupDragDrop();
+
+            // Actions
+            els.addSectionBtn.addEventListener('click', addSection);
+            els.generateBtn.addEventListener('click', () => runPDFProcess('download'));
+            els.previewBtn.addEventListener('click', () => runPDFProcess('preview'));
+            
+            // Inputs
+            window.removeImage = removeImage; // Global scope for onclick
+            window.updateData = updateData;
+            window.updatePageColor = updatePageColor;
         }
 
-        // Event Listeners
-        clientNameInput.addEventListener('input', (e) => clientName = e.target.value.trim());
-        altCoverTextInput.addEventListener('input', (e) => altCoverText = e.target.value.trim()); // New Listener
-        customMessageInput.addEventListener('input', (e) => customMessage = e.target.value.trim());
-        imageUpload.addEventListener('change', handleImageUpload);
-        generateBtn.addEventListener('click', generatePDF);
-        
-        mainArtistSelect.addEventListener('change', handleMainArtistChange);
-        subArtistSelect.addEventListener('change', (e) => {
-            selectedSubArtist = e.target.value;
-            updateUIState();
-        });
-        
-        addSectionBtn.addEventListener('click', addSectionToCompilation);
+        // --- LOGIC ---
 
-        // Initialize
-        populateDropdowns();
-
-        // UI Logic
-        function handleMainArtistChange(e) {
+        function handleModeChange(e) {
             const val = e.target.value;
-            
-            // Reset staging
+
+            // Reset Staging
             uploadedImages = [];
-            imageCounter = 0;
+            editingSectionId = null;
             renderImages();
-            
-            // Reset Sections if switching modes
-            if ((val === 'various-artists' && appMode !== 'various') || (val !== 'various-artists' && appMode !== 'single')) {
-                pdfSections = [];
-                renderSectionsList();
-            }
 
             if (val === 'various-artists') {
                 appMode = 'various';
                 selectedMainArtist = null;
-                uploadSection.style.display = 'block';
-                completedSectionsContainer.style.display = 'block';
-                subArtistGroup.style.display = 'block';
-                addSectionBtn.style.display = 'block';
-                
-                // Reset sub selection
-                subArtistSelect.value = "";
+                els.subGroup.style.display = 'block';
+                els.customArtistGroup.style.display = 'none';
+                els.completedContainer.style.display = 'block';
+                els.addSectionBtn.style.display = 'block';
+                els.addSectionBtn.textContent = '+ Add This Artist Section';
+                els.inputArea.classList.add('various-mode-container');
+                els.inputTitle.innerText = "2. Add Artist Section";
+                els.uploadSection.style.display = 'block';
+                // Reset sub
+                els.subSelect.value = "";
                 selectedSubArtist = null;
-                
-                document.getElementById('input-area-container').classList.add('various-mode-container');
-                document.getElementById('input-area-title').innerText = "2. Add Artist Section";
-                
+            } else if (val === 'various-no-artist') {
+                appMode = 'various-no-artist';
+                selectedMainArtist = null;
+                els.subGroup.style.display = 'none';
+                els.customArtistGroup.style.display = 'block';
+                els.customArtistName.value = '';
+                els.completedContainer.style.display = 'block';
+                els.addSectionBtn.style.display = 'block';
+                els.addSectionBtn.textContent = '+ Add Images to PDF';
+                els.inputArea.classList.add('various-mode-container');
+                els.inputTitle.innerText = "2. Add Images (Free Form)";
+                els.uploadSection.style.display = 'block';
             } else if (val) {
                 appMode = 'single';
                 selectedMainArtist = val;
-                uploadSection.style.display = 'block';
-                completedSectionsContainer.style.display = 'none';
-                subArtistGroup.style.display = 'none';
-                addSectionBtn.style.display = 'none';
-                
-                document.getElementById('input-area-container').classList.remove('various-mode-container');
-                document.getElementById('input-area-title').innerText = "2. Upload Product Images";
+                els.subGroup.style.display = 'none';
+                els.customArtistGroup.style.display = 'none';
+                els.completedContainer.style.display = 'none';
+                els.addSectionBtn.style.display = 'none';
+                els.inputArea.classList.remove('various-mode-container');
+                els.inputTitle.innerText = "2. Upload Images";
+                els.uploadSection.style.display = 'block';
+                // Clear previous compilation
+                pdfSections = [];
+                renderSections();
             } else {
-                uploadSection.style.display = 'none';
-                selectedMainArtist = null;
+                els.uploadSection.style.display = 'none';
             }
-            
-            updateUIState();
+            updateUI();
         }
 
-        function addSectionToCompilation() {
-            if (!selectedSubArtist) return;
-            if (uploadedImages.length === 0) return;
+        function setupDragDrop() {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                els.dropZone.addEventListener(eventName, preventDefaults, false);
+            });
 
-            const section = {
-                id: Date.now(),
-                artistKey: selectedSubArtist,
-                artistName: ARTIST_DATA[selectedSubArtist].name,
-                images: [...uploadedImages] // Clone array
-            };
-
-            pdfSections.push(section);
-            
-            // Reset Staging
-            uploadedImages = [];
-            imageCounter = 0;
-            subArtistSelect.value = "";
-            selectedSubArtist = null;
-            renderImages();
-            renderSectionsList();
-            updateUIState();
-        }
-
-        function removeSection(id) {
-            pdfSections = pdfSections.filter(s => s.id !== id);
-            renderSectionsList();
-            updateUIState();
-        }
-
-        function renderSectionsList() {
-            sectionsList.innerHTML = '';
-            
-            if (pdfSections.length === 0) {
-                noSectionsMsg.style.display = 'block';
-            } else {
-                noSectionsMsg.style.display = 'none';
-                pdfSections.forEach((section, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'section-item';
-                    div.innerHTML = `
-                        <div class="section-info">
-                            <h4>${index + 1}. ${section.artistName}</h4>
-                            <p>${section.images.length} image(s)</p>
-                        </div>
-                        <button class="delete-section-btn" onclick="removeSection(${section.id})">Remove</button>
-                    `;
-                    sectionsList.appendChild(div);
-                });
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
+
+            els.dropZone.addEventListener('dragover', () => els.dropZone.classList.add('drag-over'));
+            els.dropZone.addEventListener('dragleave', () => els.dropZone.classList.remove('drag-over'));
+            els.dropZone.addEventListener('drop', (e) => {
+                els.dropZone.classList.remove('drag-over');
+                handleFiles({ target: { files: e.dataTransfer.files } });
+            });
         }
 
-        // Image Handling
-        function handleImageUpload(event) {
-            const files = Array.from(event.target.files);
-            if (files.length === 0) return;
-
+        function handleFiles(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+            
+            let loaded = 0;
             files.forEach(file => {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
-                    reader.onload = (e) => addImage(e.target.result, file.name);
+                    reader.onload = (evt) => {
+                        uploadedImages.push({
+                            id: Date.now() + Math.random(),
+                            src: evt.target.result,
+                            title: '', medium: '', size: '', price: '',
+                            pageColor: '#f6f0e8' // Default to cream color
+                        });
+                        loaded++;
+                        if(loaded === files.length) {
+                            renderImages();
+                            updateUI();
+                        }
+                    };
                     reader.readAsDataURL(file);
                 }
             });
-            event.target.value = '';
-        }
-
-        function addImage(src, fileName) {
-            const id = ++imageCounter;
-            uploadedImages.push({
-                id, src, fileName,
-                title: '', medium: '', size: '', price: ''
-            });
-            renderImages();
-            updateUIState();
+            els.fileInput.value = ''; // Reset
         }
 
         function renderImages() {
             if (uploadedImages.length === 0) {
-                imagesContainer.innerHTML = '<div class="empty-state">No images uploaded yet</div>';
+                els.imgContainer.innerHTML = `<div style="text-align: center; padding: 3rem; color: #ccc; font-style: italic;">Images will appear here. Drag to reorder.</div>`;
                 return;
             }
 
-            imagesContainer.innerHTML = `
-                <div class="images-grid">
-                    ${uploadedImages.map(img => `
-                        <div class="image-card" data-id="${img.id}">
-                            <img src="${img.src}" class="image-preview" alt="${img.fileName}">
-                            <div class="image-inputs">
-                                <input type="text" placeholder="Title" value="${img.title}"
-                                       onchange="updateImageData(${img.id}, 'title', this.value)">
-                                <input type="text" placeholder="Medium (e.g., Acrylic on Canvas)" value="${img.medium}"
-                                       onchange="updateImageData(${img.id}, 'medium', this.value)">
-                                <input type="text" placeholder="Size (e.g., 60 x 80 cm)" value="${img.size}"
-                                       onchange="updateImageData(${img.id}, 'size', this.value)">
-                                <input type="text" placeholder="Price (e.g., £2,500)" value="${img.price}"
-                                       onchange="updateImageData(${img.id}, 'price', this.value)">
-                                <button class="remove-btn" onclick="removeImage(${img.id})">Remove</button>
-                            </div>
+            els.imgContainer.innerHTML = uploadedImages.map((img, index) => `
+                <div class="image-card" data-id="${img.id}">
+                    <div class="card-badge">${index + 1}</div>
+                    <img src="${img.src}" class="image-preview">
+                    <input type="text" placeholder="Title" value="${img.title}" onchange="updateData('${img.id}', 'title', this.value)">
+                    <input type="text" placeholder="Medium" value="${img.medium}" onchange="updateData('${img.id}', 'medium', this.value)" style="margin-top:0.5rem">
+                    <div style="display:flex; gap:0.5rem; margin-top:0.5rem">
+                        <input type="text" placeholder="Size" value="${img.size}" onchange="updateData('${img.id}', 'size', this.value)">
+                        <input type="text" placeholder="Price" value="${img.price}" onchange="updateData('${img.id}', 'price', this.value)">
+                    </div>
+                    <div class="color-selector">
+                        <label>Page color:</label>
+                        <div class="color-presets">
+                            <div class="color-preset ${img.pageColor === '#525659' ? 'active' : ''}" style="background-color: #525659;" onclick="updatePageColor('${img.id}', '#525659', this)" title="Grey"></div>
+                            <div class="color-preset ${img.pageColor === '#f6f0e8' ? 'active' : ''}" style="background-color: #f6f0e8;" onclick="updatePageColor('${img.id}', '#f6f0e8', this)" title="Cream"></div>
+                            <div class="color-preset ${img.pageColor === '#dadada' ? 'active' : ''}" style="background-color: #dadada;" onclick="updatePageColor('${img.id}', '#dadada', this)" title="Light Grey"></div>
                         </div>
-                    `).join('')}
+                        <input type="color" class="color-custom" value="${img.pageColor || '#f6f0e8'}" onchange="updatePageColor('${img.id}', this.value)" title="Custom color">
+                    </div>
+                    <button class="remove-btn" onclick="removeImage('${img.id}')">Remove</button>
                 </div>
-            `;
+            `).join('');
+
+            // Initialize Sortable
+            if (sortableInstance) sortableInstance.destroy();
+            sortableInstance = new Sortable(els.imgContainer, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function(evt) {
+                    // Reorder array based on DOM
+                    const item = uploadedImages.splice(evt.oldIndex, 1)[0];
+                    uploadedImages.splice(evt.newIndex, 0, item);
+                    // Re-render to update index badges
+                    renderImages(); 
+                }
+            });
         }
 
-        window.updateImageData = function(id, field, value) {
-            const img = uploadedImages.find(i => i.id === id);
-            if (img) img[field] = value;
-        };
-
-        window.removeImage = function(id) {
-            uploadedImages = uploadedImages.filter(i => i.id !== id);
-            renderImages();
-            updateUIState();
-        };
-
-        function updateUIState() {
-            if (appMode === 'single') {
-                // Enable Generate if artist selected and images exist
-                generateBtn.disabled = !selectedMainArtist || uploadedImages.length === 0;
-            } else {
-                // Various Mode
-                // Enable "Add Section" if sub-artist selected and images exist
-                addSectionBtn.disabled = !selectedSubArtist || uploadedImages.length === 0;
+        function updateData(id, field, value) {
+            const img = uploadedImages.find(i => i.id == id);
+            if(img) img[field] = value;
+        }
+        
+        function updatePageColor(id, color, element) {
+            const img = uploadedImages.find(i => i.id == id);
+            if(img) {
+                img.pageColor = color;
                 
-                // Enable Generate if at least one section exists
-                generateBtn.disabled = pdfSections.length === 0;
+                // Update UI if color preset was clicked
+                if (element && element.classList.contains('color-preset')) {
+                    // Remove active class from siblings
+                    const parent = element.parentElement;
+                    parent.querySelectorAll('.color-preset').forEach(p => p.classList.remove('active'));
+                    // Add active class to clicked element
+                    element.classList.add('active');
+                    // Update color input value
+                    const colorInput = parent.nextElementSibling;
+                    if (colorInput && colorInput.type === 'color') {
+                        colorInput.value = color;
+                    }
+                } else if (element && element.type === 'color') {
+                    // Color input was changed, remove active class from all presets
+                    const presets = element.previousElementSibling;
+                    if (presets) {
+                        presets.querySelectorAll('.color-preset').forEach(p => p.classList.remove('active'));
+                    }
+                }
             }
         }
 
-        function showStatus(message, type) {
-            statusMessage.textContent = message;
-            statusMessage.className = `status-message ${type}`;
+        function removeImage(id) {
+            uploadedImages = uploadedImages.filter(i => i.id != id);
+            renderImages();
+            updateUI();
         }
 
-        function hideStatus() {
-            statusMessage.textContent = '';
-            statusMessage.className = '';
+        // --- COMPILATION LOGIC (VARIOUS MODE) ---
+        function addSection() {
+            if (!uploadedImages.length) return;
+
+            if (appMode === 'various') {
+                // Standard various artists mode - require artist selection
+                if (!selectedSubArtist) return;
+
+                if (editingSectionId) {
+                    // Update existing section
+                    const section = pdfSections.find(s => s.id === editingSectionId);
+                    if (section) {
+                        section.artistKey = selectedSubArtist;
+                        section.artistName = ARTIST_DATA[selectedSubArtist].name;
+                        section.images = [...uploadedImages];
+                    }
+                    editingSectionId = null;
+                    els.addSectionBtn.textContent = '+ Add This Artist Section';
+                } else {
+                    // Add new section
+                    pdfSections.push({
+                        id: Date.now(),
+                        artistKey: selectedSubArtist,
+                        artistName: ARTIST_DATA[selectedSubArtist].name,
+                        images: [...uploadedImages]
+                    });
+                }
+
+                // Reset Staging
+                uploadedImages = [];
+                els.subSelect.value = "";
+                selectedSubArtist = null;
+
+            } else if (appMode === 'various-no-artist') {
+                // Free form mode - artist is optional
+                const customName = els.customArtistName.value.trim();
+
+                if (editingSectionId) {
+                    // Update existing section
+                    const section = pdfSections.find(s => s.id === editingSectionId);
+                    if (section) {
+                        section.artistKey = null;
+                        section.artistName = customName || null;
+                        section.images = [...uploadedImages];
+                    }
+                    editingSectionId = null;
+                    els.addSectionBtn.textContent = '+ Add Images to PDF';
+                } else {
+                    // Add new section
+                    pdfSections.push({
+                        id: Date.now(),
+                        artistKey: null,
+                        artistName: customName || null,
+                        images: [...uploadedImages]
+                    });
+                }
+
+                // Reset Staging
+                uploadedImages = [];
+                els.customArtistName.value = '';
+            }
+
+            renderImages();
+            renderSections();
+            updateUI();
         }
 
-        // PDF Helpers
+        function editSection(id) {
+            const section = pdfSections.find(s => s.id === id);
+            if (!section) return;
+
+            // Load section data into staging area
+            editingSectionId = id;
+            uploadedImages = [...section.images];
+
+            if (appMode === 'various') {
+                els.subSelect.value = section.artistKey || '';
+                selectedSubArtist = section.artistKey;
+                els.addSectionBtn.textContent = '✓ Save Changes';
+            } else if (appMode === 'various-no-artist') {
+                els.customArtistName.value = section.artistName || '';
+                els.addSectionBtn.textContent = '✓ Save Changes';
+            }
+
+            renderImages();
+            renderSections();
+            updateUI();
+
+            // Scroll to upload area
+            els.inputArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingSectionId = null;
+            uploadedImages = [];
+
+            if (appMode === 'various') {
+                els.subSelect.value = '';
+                selectedSubArtist = null;
+                els.addSectionBtn.textContent = '+ Add This Artist Section';
+            } else if (appMode === 'various-no-artist') {
+                els.customArtistName.value = '';
+                els.addSectionBtn.textContent = '+ Add Images to PDF';
+            }
+
+            renderImages();
+            renderSections();
+            updateUI();
+        }
+
+        function renderSections() {
+            els.sectionsList.innerHTML = '';
+            if (!pdfSections.length) {
+                els.noSectionsMsg.style.display = 'block';
+                return;
+            }
+            els.noSectionsMsg.style.display = 'none';
+
+            pdfSections.forEach((section, idx) => {
+                const div = document.createElement('div');
+                div.className = 'section-item' + (editingSectionId === section.id ? ' editing' : '');
+
+                const displayName = section.artistName || '(No Artist)';
+                const isEditing = editingSectionId === section.id;
+
+                div.innerHTML = `
+                    <div><strong>${idx + 1}. ${displayName}</strong> <span style="color:#888">(${section.images.length} images)</span>${isEditing ? ' <span style="color:#f0ad4e; font-weight:bold;">[EDITING]</span>' : ''}</div>
+                    <div class="section-item-buttons">
+                        ${isEditing
+                            ? `<button class="edit-btn" onclick="cancelEdit()">Cancel</button>`
+                            : `<button class="edit-btn" onclick="editSection(${section.id})">Edit</button>`
+                        }
+                        <button class="remove-btn" style="width:auto; margin:0" onclick="removeSection(${section.id})">Delete</button>
+                    </div>
+                `;
+                els.sectionsList.appendChild(div);
+            });
+        }
+
+        window.removeSection = function(id) {
+            // If we're editing this section, cancel the edit
+            if (editingSectionId === id) {
+                cancelEdit();
+            }
+            pdfSections = pdfSections.filter(s => s.id !== id);
+            renderSections();
+            updateUI();
+        };
+
+        window.editSection = editSection;
+        window.cancelEdit = cancelEdit;
+
+        function updateUI() {
+            let ready = false;
+            if (appMode === 'single') {
+                ready = selectedMainArtist && uploadedImages.length > 0;
+            } else if (appMode === 'various') {
+                ready = pdfSections.length > 0;
+                els.addSectionBtn.disabled = !(selectedSubArtist && uploadedImages.length > 0);
+            } else if (appMode === 'various-no-artist') {
+                ready = pdfSections.length > 0;
+                // In no-artist mode, just need images (artist name is optional)
+                els.addSectionBtn.disabled = uploadedImages.length === 0;
+            }
+            els.generateBtn.disabled = !ready;
+            els.previewBtn.disabled = !ready;
+        }
+
+        // --- PDF GENERATION ENGINE ---
+        async function runPDFProcess(action) {
+            els.status.textContent = "⏳ Generating pages...";
+            els.generateBtn.disabled = true;
+            els.previewBtn.disabled = true;
+
+            try {
+                const pdf = await createPDF();
+                
+                if (action === 'download') {
+                    let name = appMode === 'single' ? ARTIST_DATA[selectedMainArtist].name : "Various_Artists";
+                    if(els.clientInput.value) name += `_For_${els.clientInput.value}`;
+                    name = name.replace(/\s+/g, '_') + '.pdf';
+                    pdf.save(name);
+                    els.status.textContent = "✅ Download Started";
+                    els.status.style.color = "var(--success)";
+                } else {
+                    const blob = pdf.output('bloburl');
+                    els.iframe.src = blob;
+                    els.modal.style.display = 'flex';
+                    els.status.textContent = "";
+                }
+            } catch (err) {
+                console.error(err);
+                els.status.textContent = "❌ Error: " + err.message;
+                els.status.style.color = "var(--danger)";
+            } finally {
+                updateUI(); // Re-enable buttons
+                setTimeout(() => els.status.textContent = "", 4000);
+            }
+        }
+
+        async function createPDF() {
+            const { jsPDF } = window.jspdf;
+            const size = 8.27; // Square inches
+            const pdf = new jsPDF({ unit: 'in', format: [size, size] });
+            
+            // Get Data to print
+            const sections = appMode === 'single' 
+                ? [{ artistKey: selectedMainArtist, images: uploadedImages }]
+                : pdfSections;
+
+            // Image Compression Settings
+            const quality = els.quality.value === 'web' ? 0.6 : 0.95;
+
+            // 1. Cover
+            const customTitle = els.customCoverTitle.value.trim();
+            const defaultCoverName = appMode === 'single' ? ARTIST_DATA[selectedMainArtist].name : "Selected Works";
+            const coverName = customTitle || defaultCoverName;
+            let coverImg = null;
+
+            // Try to load custom cover if exists and no client name AND no custom title
+            if (appMode === 'single' && !els.clientInput.value.trim() && !customTitle && ARTIST_DATA[selectedMainArtist].frontPage) {
+                try { coverImg = await loadImageData(ARTIST_DATA[selectedMainArtist].frontPage, quality); } catch(e){}
+            }
+            // Else generate
+            if (!coverImg) coverImg = await generateCoverCanvas(coverName, els.clientInput.value, quality);
+            
+            pdf.addImage(coverImg, 'JPEG', 0, 0, size, size);
+
+            // 2. About Us
+            try {
+                const aboutImg = await loadImageData('aboutus.jpg', quality);
+                pdf.addPage();
+                pdf.addImage(aboutImg, 'JPEG', 0, 0, size, size);
+            } catch(e) {} // Skip if missing
+
+            // 3. Sections
+            for (const section of sections) {
+                const artist = section.artistKey ? ARTIST_DATA[section.artistKey] : null;
+
+                // Bios (only if we have an artist with bio files)
+                if (artist && artist.bioFiles) {
+                    for (const bio of artist.bioFiles) {
+                        try {
+                            const bioImg = await loadImageData(bio, quality);
+                            pdf.addPage();
+                            pdf.addImage(bioImg, 'JPEG', 0, 0, size, size);
+                        } catch(e){}
+                    }
+                }
+
+                // Products
+                for (const imgData of section.images) {
+                    pdf.addPage();
+                    // Background with selected color
+                    const bgColor = imgData.pageColor || '#f6f0e8';
+                    const rgb = hexToRgb(bgColor);
+                    pdf.setFillColor(rgb.r, rgb.g, rgb.b);
+                    pdf.rect(0, 0, size, size, 'F');
+                    
+                    // Product Image logic
+                    const imgObj = await loadImage(imgData.src);
+                    const ratio = imgObj.width / imgObj.height;
+                    let w, h;
+                    const maxW = size * 0.6;
+                    const maxH = size * 0.5;
+
+                    if (ratio > 1) { w = maxW; h = maxW / ratio; }
+                    else { h = maxH; w = maxH * ratio; }
+
+                    const x = (size - w) / 2;
+                    const y = 1.5;
+
+                    // Shadow
+                    pdf.setFillColor(0,0,0);
+                    pdf.setGState(new pdf.GState({ opacity: 0.15 }));
+                    pdf.rect(x + 0.05, y + 0.05, w, h, 'F');
+                    pdf.setGState(new pdf.GState({ opacity: 1 }));
+
+                    // Image
+                    pdf.addImage(imgData.src, 'JPEG', x, y, w, h);
+                    
+                    // Border
+                    pdf.setDrawColor(200,200,200);
+                    pdf.setLineWidth(0.01);
+                    pdf.rect(x, y, w, h, 'S');
+
+                    // Text
+                    pdf.setTextColor(99, 101, 104);
+                    const textY = y + h + 0.5;
+                    const spacing = 0.3;
+
+                    pdf.setFont('helvetica', 'bolditalic');
+                    pdf.setFontSize(22);
+                    pdf.text(imgData.title || '', size/2, textY, { align: 'center' });
+
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(14);
+                    pdf.text(imgData.medium || '', size/2, textY + spacing, { align: 'center' });
+                    pdf.text(imgData.size || '', size/2, textY + (spacing*2), { align: 'center' });
+
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(18);
+                    pdf.text(imgData.price || '', size/2, textY + (spacing*3), { align: 'center' });
+                }
+            }
+
+            // 4. Custom Message
+            if (els.msgInput.value.trim()) {
+                const msgImg = await generateMessageCanvas(els.msgInput.value, quality);
+                pdf.addPage();
+                pdf.addImage(msgImg, 'JPEG', 0, 0, size, size);
+            }
+
+            // 5. Final Page
+            try {
+                const finalImg = await loadImageData('ywoa.jpg', quality);
+                pdf.addPage();
+                pdf.addImage(finalImg, 'JPEG', 0, 0, size, size);
+            } catch(e){}
+
+            return pdf;
+        }
+
+        // --- HELPERS ---
+        function closeModal() { els.modal.style.display = 'none'; }
+        
+        function hexToRgb(hex) {
+            // Remove # if present
+            hex = hex.replace('#', '');
+            // Parse the hex values
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return { r, g, b };
+        }
+        
         async function loadImage(src) {
             return new Promise((resolve, reject) => {
                 const img = new Image();
@@ -747,311 +1047,94 @@
             });
         }
 
-        async function loadImageAsDataURL(url) {
-            return new Promise(async (resolve, reject) => {
-                try {
-                    const response = await fetch(url);
-                    const blob = await response.blob();
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                } catch (fetchError) {
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        try { resolve(canvas.toDataURL('image/jpeg', 0.95)); } 
-                        catch (e) { reject(new Error('Failed to convert image')); }
-                    };
-                    img.onerror = () => reject(new Error(`Failed to load: ${url}`));
-                    img.src = url;
-                }
+        async function loadImageData(url, quality) {
+            // Helper to get DataURL with specific compression
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = reject;
+                img.src = url;
             });
         }
 
-        // Updated function to accept altText
-        async function generateFrontPage(artistName, clientName, altText) {
+        async function generateCoverCanvas(title, subtitle, quality) {
+            const size = 1654; // High res
             const canvas = document.createElement('canvas');
-            const size = 1654;
-            canvas.width = size;
-            canvas.height = size;
+            canvas.width = size; canvas.height = size;
             const ctx = canvas.getContext('2d');
-
+            
+            // Bg
             try {
-                const templateImg = await loadImage('front-pages/Front Template.jpg');
-                ctx.drawImage(templateImg, 0, 0, size, size);
-            } catch (error) {
-                ctx.fillStyle = '#636568';
-                ctx.fillRect(0, 0, size, size);
+                const tpl = await loadImage('front-pages/Front Template.jpg');
+                ctx.drawImage(tpl, 0, 0, size, size);
+            } catch(e) {
+                ctx.fillStyle = "#636568"; ctx.fillRect(0,0,size,size);
             }
 
             ctx.fillStyle = '#f6f0e8';
+            ctx.textAlign = 'center'; 
+            ctx.textBaseline = 'middle';
+            
+            // Title (Fallback font if Acta not loaded)
             ctx.font = 'italic bold 168px "Acta W01 Bold Italic", Georgia, serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            const lines = artistName.split(' ');
-            const lineHeight = 192;
-            let totalHeight = lines.length * lineHeight;
-
-            // Determine if there is subtitle text (Client Name takes priority)
-            let subtitleText = "";
-            if (clientName && clientName.length > 0) {
-                subtitleText = `For ${clientName}`;
-            } else if (altText && altText.length > 0) {
-                subtitleText = altText;
-            }
-
-            if (subtitleText.length > 0) totalHeight += 100;
-
-            let startY = (size - totalHeight) / 2 + 96;
-
-            lines.forEach(line => {
-                ctx.fillText(line, size / 2, startY);
-                startY += lineHeight;
+            
+            const lines = title.split(' ');
+            let y = size/2;
+            if(subtitle) y -= 100;
+            
+            lines.forEach((line, i) => {
+                // Simple centering adjustment for multiple lines
+                const offset = (i - (lines.length-1)/2) * 180;
+                ctx.fillText(line, size/2, y + offset);
             });
 
-            if (subtitleText.length > 0) {
-                ctx.font = '60px "DIN LightAlternate", Arial, sans-serif';
-                ctx.fillText(subtitleText, size / 2, startY + 50);
+            if (subtitle) {
+                ctx.font = '300 60px "DIN LightAlternate", Arial, sans-serif';
+                ctx.fillText(`For ${subtitle}`, size/2, y + (lines.length * 90) + 120);
             }
 
-            return canvas.toDataURL('image/jpeg', 0.95);
+            return canvas.toDataURL('image/jpeg', quality);
         }
 
-        async function generateCustomMessagePage(message) {
-            const canvas = document.createElement('canvas');
+        async function generateMessageCanvas(msg, quality) {
             const size = 1654;
-            canvas.width = size;
-            canvas.height = size;
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
             const ctx = canvas.getContext('2d');
 
             try {
-                const templateImg = await loadImage('front-pages/Front Template.jpg');
-                ctx.drawImage(templateImg, 0, 0, size, size);
-            } catch (error) {
-                ctx.fillStyle = '#636568';
-                ctx.fillRect(0, 0, size, size);
+                const tpl = await loadImage('front-pages/Front Template.jpg');
+                ctx.drawImage(tpl, 0, 0, size, size);
+            } catch(e) {
+                ctx.fillStyle = "#636568"; ctx.fillRect(0,0,size,size);
             }
 
             ctx.fillStyle = '#f6f0e8';
-            ctx.font = '60px "DIN LightAlternate", Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            ctx.font = '300 60px "DIN LightAlternate", Arial, sans-serif';
 
-            let lines = [];
-            if (message.includes('\n')) {
-                lines = message.split('\n').filter(line => line.trim().length > 0);
-            } else {
-                const words = message.split(' ');
-                const wordsPerLine = Math.ceil(words.length / 3);
-                for (let i = 0; i < 3; i++) {
-                    const start = i * wordsPerLine;
-                    const end = Math.min(start + wordsPerLine, words.length);
-                    if (start < words.length) lines.push(words.slice(start, end).join(' '));
-                }
-            }
+            const lines = msg.split('\n');
+            const lineHeight = 100;
+            const startY = (size - (lines.length * lineHeight)) / 2;
 
-            const lineHeight = 90;
-            const totalHeight = lines.length * lineHeight;
-            let startY = (size - totalHeight) / 2 + (lineHeight / 2);
-
-            lines.forEach(line => {
-                ctx.fillText(line, size / 2, startY);
-                startY += lineHeight;
+            lines.forEach((line, i) => {
+                ctx.fillText(line, size/2, startY + (i * lineHeight));
             });
 
-            return canvas.toDataURL('image/jpeg', 0.95);
+            return canvas.toDataURL('image/jpeg', quality);
         }
 
-        // Core Generation Function
-        async function generatePDF() {
-            showStatus('Generating PDF... Please wait', 'loading');
-            generateBtn.disabled = true;
-
-            try {
-                const { jsPDF } = window.jspdf;
-                const size = 8.27; // inches
-                const pdf = new jsPDF({ orientation: 'portrait', unit: 'in', format: [size, size] });
-
-                // Determine sections to print
-                let sectionsToPrint = [];
-                
-                if (appMode === 'single') {
-                    sectionsToPrint = [{
-                        artistKey: selectedMainArtist,
-                        images: uploadedImages
-                    }];
-                } else {
-                    sectionsToPrint = pdfSections;
-                }
-
-                // 1. Main Front Page
-                showStatus('Loading front page...', 'loading');
-                
-                // Determine front page title
-                let coverName = "";
-                let frontPageImage = null;
-
-                if (appMode === 'single') {
-                    coverName = ARTIST_DATA[selectedMainArtist].name;
-                    const artistData = ARTIST_DATA[selectedMainArtist];
-                    
-                    // Use artist specific cover if available, AND no client name AND no alt text
-                    // If client name or alt text exists, we force generation to show it.
-                    if (artistData.frontPage && !clientName && !altCoverText) {
-                        try {
-                             frontPageImage = await loadImageAsDataURL(artistData.frontPage);
-                        } catch(e) { console.warn('Front page load failed'); }
-                    }
-                } else {
-                    coverName = "Various Artists";
-                }
-
-                // If we don't have a pre-made image, or we have a client name/alt text, generate one
-                if (!frontPageImage) {
-                    // Added altCoverText param
-                    frontPageImage = await generateFrontPage(coverName, clientName, altCoverText);
-                }
-
-                pdf.addImage(frontPageImage, 'JPEG', 0, 0, size, size);
-
-                // 2. About Us
-                showStatus('Loading about us page...', 'loading');
-                try {
-                    const aboutUsData = await loadImageAsDataURL('aboutus.jpg');
-                    pdf.addPage([size, size]);
-                    pdf.addImage(aboutUsData, 'JPEG', 0, 0, size, size);
-                } catch (error) { console.warn('About us page not found'); }
-
-                // 3. Loop through Sections (Bio -> Images)
-                for (let sIndex = 0; sIndex < sectionsToPrint.length; sIndex++) {
-                    const section = sectionsToPrint[sIndex];
-                    const artistData = ARTIST_DATA[section.artistKey];
-
-                    showStatus(`Processing section: ${artistData.name}...`, 'loading');
-
-                    // A. Artist Bio Pages
-                    if (artistData.bioFiles && artistData.bioFiles.length > 0) {
-                        for (const bioFile of artistData.bioFiles) {
-                            try {
-                                const bioPageData = await loadImageAsDataURL(bioFile);
-                                pdf.addPage([size, size]);
-                                pdf.addImage(bioPageData, 'JPEG', 0, 0, size, size);
-                            } catch (error) { console.warn(`Could not load bio: ${bioFile}`); }
-                        }
-                    }
-
-                    // B. Artist Product Pages
-                    for (let i = 0; i < section.images.length; i++) {
-                        pdf.addPage([size, size]);
-                        await addProductPage(pdf, section.images[i], size);
-                    }
-                }
-
-                // 4. Custom Message
-                if (customMessage) {
-                    showStatus('Adding custom message page...', 'loading');
-                    const customMessageData = await generateCustomMessagePage(customMessage);
-                    pdf.addPage([size, size]);
-                    pdf.addImage(customMessageData, 'JPEG', 0, 0, size, size);
-                }
-
-                // 5. Final Page
-                showStatus('Adding final page...', 'loading');
-                try {
-                    const ywoaData = await loadImageAsDataURL('ywoa.jpg');
-                    pdf.addPage([size, size]);
-                    pdf.addImage(ywoaData, 'JPEG', 0, 0, size, size);
-                } catch (error) { console.warn('YWOA page not found'); }
-
-                // Save
-                let fileNameName = appMode === 'single' ? ARTIST_DATA[selectedMainArtist].name : "Various_Artists";
-                const clientSuffix = clientName ? `_${clientName.replace(/\s/g, '_')}` : '';
-                const fileName = `${fileNameName.replace(/\s/g, '_')}${clientSuffix}_Catalog_${Date.now()}.pdf`;
-                pdf.save(fileName);
-
-                showStatus('PDF generated successfully!', 'success');
-                setTimeout(() => hideStatus(), 3000);
-
-            } catch (error) {
-                console.error('Error generating PDF:', error);
-                showStatus('Error generating PDF. Please try again.', 'error');
-            } finally {
-                generateBtn.disabled = false;
-            }
-        }
-
-        async function addProductPage(pdf, imageData, pageSize) {
-            pdf.setFillColor(246, 240, 232); 
-            pdf.rect(0, 0, pageSize, pageSize, 'F');
-
-            const img = await loadImage(imageData.src);
-            const imgAspectRatio = img.width / img.height;
-            
-            const maxImgWidth = pageSize * 0.6;
-            const maxImgHeight = pageSize * 0.5;
-
-            let imgWidth, imgHeight;
-            if (imgAspectRatio > 1) {
-                imgWidth = maxImgWidth;
-                imgHeight = maxImgWidth / imgAspectRatio;
-            } else {
-                imgHeight = maxImgHeight;
-                imgWidth = maxImgHeight * imgAspectRatio;
-            }
-
-            const imgX = (pageSize - imgWidth) / 2;
-            const imgY = 1.5;
-
-            // Shadow
-            pdf.setFillColor(0, 0, 0);
-            pdf.setGState(new pdf.GState({ opacity: 0.15 }));
-            pdf.rect(imgX + 0.06, imgY + 0.06, imgWidth, imgHeight, 'F');
-            pdf.setGState(new pdf.GState({ opacity: 1 }));
-            
-            // Image
-            pdf.addImage(imageData.src, 'JPEG', imgX, imgY, imgWidth, imgHeight);
-            
-            // Border
-            pdf.setDrawColor(200, 200, 200);
-            pdf.setLineWidth(0.01);
-            pdf.rect(imgX, imgY, imgWidth, imgHeight, 'S');
-
-            // Text
-            pdf.setTextColor(99, 101, 104);
-            const baseY = imgY + imgHeight + 0.5;
-            const lineSpacing = 0.3;
-
-            // Title
-            pdf.setFont('helvetica', 'bolditalic');
-            let titleFontSize = 22;
-            const title = imageData.title || 'Untitled';
-            pdf.setFontSize(titleFontSize);
-            while (pdf.getTextWidth(title) > pageSize * 0.85 && titleFontSize > 12) {
-                titleFontSize -= 1;
-                pdf.setFontSize(titleFontSize);
-            }
-            pdf.text(title, pageSize / 2, baseY, { align: 'center' });
-
-            // Medium
-            pdf.setFont('helvetica', 'normal');
-            pdf.setFontSize(14);
-            pdf.text(imageData.medium || '—', pageSize / 2, baseY + lineSpacing, { align: 'center' });
-
-            // Size
-            pdf.text(imageData.size || '—', pageSize / 2, baseY + (lineSpacing * 2), { align: 'center' });
-
-            // Price
-            pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(18);
-            pdf.text(imageData.price || 'Price on request', pageSize / 2, baseY + (lineSpacing * 3), { align: 'center' });
-        }
+        // Run
+        init();
     </script>
 </body>
 </html>
