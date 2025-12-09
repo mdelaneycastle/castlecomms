@@ -879,8 +879,10 @@
                         });
                         loaded++;
                         if(loaded === files.length) {
+                            console.log('All images loaded, rendering and saving state');
                             renderImages();
                             updateUI();
+                            saveState();
                         }
                     };
                     reader.readAsDataURL(file);
@@ -934,7 +936,16 @@
 
         function updateData(id, field, value) {
             const img = uploadedImages.find(i => i.id == id);
-            if(img) img[field] = value;
+            if(img) {
+                img[field] = value;
+                console.log('Image data updated:', {
+                    id,
+                    field,
+                    value,
+                    totalImages: uploadedImages.length
+                });
+                saveState();
+            }
         }
         
         function updatePageColor(id, color, element) {
