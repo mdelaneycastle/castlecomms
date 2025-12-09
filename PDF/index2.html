@@ -180,14 +180,6 @@
             box-shadow: 0 0 0 2px var(--primary);
         }
         
-        .color-custom {
-            width: 60px;
-            height: 24px;
-            border: 2px solid var(--border);
-            border-radius: 4px;
-            cursor: pointer;
-            padding: 0;
-        }
         
         /* SortableJS Ghost State */
         .sortable-ghost { opacity: 0.4; background: #e0e0e0; border: 2px dashed var(--primary); }
@@ -461,6 +453,7 @@
         
         // Local Storage Keys
         const STORAGE_KEY = 'pdfMakerState';
+        let isRestoringState = false; // Flag to prevent saving during restore
 
         // --- ELEMENTS ---
         const els = {
@@ -535,6 +528,7 @@
 
         // --- LOCAL STORAGE FUNCTIONS ---
         function saveState() {
+            if (isRestoringState) return; // Don't save during restore
             try {
                 const state = {
                     appMode,
@@ -596,6 +590,7 @@
                 const savedState = localStorage.getItem(STORAGE_KEY);
                 if (!savedState) return;
                 
+                isRestoringState = true; // Set flag to prevent saving during restore
                 const state = JSON.parse(savedState);
                 
                 // Restore basic state
@@ -639,7 +634,7 @@
                                       appMode === 'various-no-artist' ? 'various-no-artist' : '';
                 
                 if (els.mainSelect.value) {
-                    handleModeChange({ target: els.mainSelect });
+                    handleModeChange({ target: els.mainSelect }, true);  // Pass isRestoring flag
                     
                     // Restore sub-selections after mode change
                     if (selectedSubArtist && appMode === 'various') {
@@ -655,6 +650,8 @@
                 console.log('State restored from localStorage');
             } catch (e) {
                 console.warn('Could not restore state from localStorage:', e);
+            } finally {
+                isRestoringState = false; // Always reset the flag
             }
         }
         
@@ -702,12 +699,14 @@
 
         // --- LOGIC ---
 
-        function handleModeChange(e) {
+        function handleModeChange(e, isRestoring = false) {
             const val = e.target.value;
 
-            // Reset Staging
-            uploadedImages = [];
-            editingSectionId = null;
+            // Reset Staging (but not when restoring)
+            if (!isRestoring) {
+                uploadedImages = [];
+                editingSectionId = null;
+            }
             renderImages();
 
             if (val === 'various-artists') {
@@ -746,8 +745,10 @@
                 els.inputArea.classList.remove('various-mode-container');
                 els.inputTitle.innerText = "2. Upload Images";
                 els.uploadSection.style.display = 'block';
-                // Clear previous compilation
-                pdfSections = [];
+                // Clear previous compilation (but not when restoring)
+                if (!isRestoring) {
+                    pdfSections = [];
+                }
                 renderSections();
             } else {
                 els.uploadSection.style.display = 'none';
@@ -824,7 +825,6 @@
                             <div class="color-preset ${img.pageColor === '#f6f0e8' ? 'active' : ''}" style="background-color: #f6f0e8;" onclick="updatePageColor('${img.id}', '#f6f0e8', this)" title="Cream"></div>
                             <div class="color-preset ${img.pageColor === '#dadada' ? 'active' : ''}" style="background-color: #dadada;" onclick="updatePageColor('${img.id}', '#dadada', this)" title="Light Grey"></div>
                         </div>
-                        <input type="color" class="color-custom" value="${img.pageColor || '#f6f0e8'}" onchange="updatePageColor('${img.id}', this.value)" title="Custom color">
                     </div>
                     <button class="remove-btn" onclick="removeImage('${img.id}')">Remove</button>
                 </div>
@@ -862,18 +862,9 @@
                     parent.querySelectorAll('.color-preset').forEach(p => p.classList.remove('active'));
                     // Add active class to clicked element
                     element.classList.add('active');
-                    // Update color input value
-                    const colorInput = parent.nextElementSibling;
-                    if (colorInput && colorInput.type === 'color') {
-                        colorInput.value = color;
-                    }
-                } else if (element && element.type === 'color') {
-                    // Color input was changed, remove active class from all presets
-                    const presets = element.previousElementSibling;
-                    if (presets) {
-                        presets.querySelectorAll('.color-preset').forEach(p => p.classList.remove('active'));
-                    }
                 }
+                
+                saveState();
             }
         }
 
