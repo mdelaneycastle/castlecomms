@@ -573,6 +573,7 @@
                 els.uploadSection.style.display = 'none';
             }
             updateUI();
+            saveState();
         }
 
         function setupDragDrop() {
@@ -789,6 +790,7 @@
             renderImages();
             renderSections();
             updateUI();
+            saveState();
 
             // Scroll to upload area
             els.inputArea.scrollIntoView({ behavior: 'smooth' });
@@ -810,6 +812,7 @@
             renderImages();
             renderSections();
             updateUI();
+            saveState();
         }
 
         function renderSections() {
