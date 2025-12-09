@@ -518,6 +518,183 @@
             window.removeImage = removeImage; // Global scope for onclick
             window.updateData = updateData;
             window.updatePageColor = updatePageColor;
+            window.clearAllData = clearAllData;
+            
+            // Add listeners for auto-save
+            els.clientInput.addEventListener('change', saveState);
+            els.customCoverTitle.addEventListener('change', saveState);
+            els.msgInput.addEventListener('change', saveState);
+            els.customArtistName.addEventListener('change', saveState);
+            
+            // Restore saved state
+            restoreState();
+        }
+
+        // --- LOCAL STORAGE FUNCTIONS ---
+        function saveState() {
+            try {
+                const state = {
+                    appMode,
+                    selectedMainArtist,
+                    selectedSubArtist,
+                    uploadedImages: uploadedImages.map(img => ({
+                        ...img,
+                        // Store image data separately to avoid localStorage limits
+                        src: img.src.length > 50000 ? '' : img.src // Skip very large images
+                    })),
+                    pdfSections: pdfSections.map(section => ({
+                        ...section,
+                        images: section.images.map(img => ({
+                            ...img,
+                            src: img.src.length > 50000 ? '' : img.src
+                        }))
+                    })),
+                    editingSectionId,
+                    formData: {
+                        clientName: els.clientInput.value,
+                        customCoverTitle: els.customCoverTitle.value,
+                        customMessage: els.msgInput.value,
+                        customArtistName: els.customArtistName.value,
+                        quality: els.quality.value
+                    }
+                };
+                
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                
+                // Store large images separately
+                uploadedImages.forEach(img => {
+                    if (img.src.length > 50000) {
+                        try {
+                            localStorage.setItem(`${STORAGE_KEY}_img_${img.id}`, img.src);
+                        } catch(e) {
+                            console.warn('Could not save large image to localStorage');
+                        }
+                    }
+                });
+                
+                pdfSections.forEach(section => {
+                    section.images.forEach(img => {
+                        if (img.src.length > 50000) {
+                            try {
+                                localStorage.setItem(`${STORAGE_KEY}_img_${img.id}`, img.src);
+                            } catch(e) {
+                                console.warn('Could not save large image to localStorage');
+                            }
+                        }
+                    });
+                });
+            } catch (e) {
+                console.warn('Could not save state to localStorage:', e);
+            }
+        }
+        
+        function restoreState() {
+            try {
+                const savedState = localStorage.getItem(STORAGE_KEY);
+                if (!savedState) return;
+                
+                const state = JSON.parse(savedState);
+                
+                // Restore basic state
+                appMode = state.appMode || 'single';
+                selectedMainArtist = state.selectedMainArtist;
+                selectedSubArtist = state.selectedSubArtist;
+                editingSectionId = state.editingSectionId;
+                
+                // Restore form data
+                if (state.formData) {
+                    els.clientInput.value = state.formData.clientName || '';
+                    els.customCoverTitle.value = state.formData.customCoverTitle || '';
+                    els.msgInput.value = state.formData.customMessage || '';
+                    els.customArtistName.value = state.formData.customArtistName || '';
+                    els.quality.value = state.formData.quality || 'print';
+                }
+                
+                // Restore images with large image recovery
+                uploadedImages = (state.uploadedImages || []).map(img => {
+                    if (!img.src && img.id) {
+                        const largeImg = localStorage.getItem(`${STORAGE_KEY}_img_${img.id}`);
+                        if (largeImg) img.src = largeImg;
+                    }
+                    return img;
+                }).filter(img => img.src); // Remove images that couldn't be restored
+                
+                pdfSections = (state.pdfSections || []).map(section => ({
+                    ...section,
+                    images: section.images.map(img => {
+                        if (!img.src && img.id) {
+                            const largeImg = localStorage.getItem(`${STORAGE_KEY}_img_${img.id}`);
+                            if (largeImg) img.src = largeImg;
+                        }
+                        return img;
+                    }).filter(img => img.src)
+                }));
+                
+                // Restore UI state
+                els.mainSelect.value = appMode === 'single' ? selectedMainArtist : 
+                                      appMode === 'various' ? 'various-artists' : 
+                                      appMode === 'various-no-artist' ? 'various-no-artist' : '';
+                
+                if (els.mainSelect.value) {
+                    handleModeChange({ target: els.mainSelect });
+                    
+                    // Restore sub-selections after mode change
+                    if (selectedSubArtist && appMode === 'various') {
+                        els.subSelect.value = selectedSubArtist;
+                    }
+                    
+                    // Render restored data
+                    renderImages();
+                    renderSections();
+                    updateUI();
+                }
+                
+                console.log('State restored from localStorage');
+            } catch (e) {
+                console.warn('Could not restore state from localStorage:', e);
+            }
+        }
+        
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                // Clear state
+                appMode = 'single';
+                selectedMainArtist = null;
+                selectedSubArtist = null;
+                uploadedImages = [];
+                pdfSections = [];
+                editingSectionId = null;
+                
+                // Clear form inputs
+                els.mainSelect.value = '';
+                els.subSelect.value = '';
+                els.clientInput.value = '';
+                els.customCoverTitle.value = '';
+                els.msgInput.value = '';
+                els.customArtistName.value = '';
+                els.quality.value = 'print';
+                
+                // Clear localStorage
+                localStorage.removeItem(STORAGE_KEY);
+                // Clear any stored large images
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (key.startsWith(`${STORAGE_KEY}_img_`)) {
+                        localStorage.removeItem(key);
+                    }
+                });
+                
+                // Reset UI
+                els.uploadSection.style.display = 'none';
+                renderImages();
+                renderSections();
+                updateUI();
+                
+                // Show confirmation
+                els.status.textContent = '✅ All data cleared';
+                els.status.style.color = 'var(--success)';
+                setTimeout(() => els.status.textContent = '', 3000);
+            }
         }
 
         // --- LOGIC ---
