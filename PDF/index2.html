@@ -528,7 +528,15 @@
 
         // --- LOCAL STORAGE FUNCTIONS ---
         function saveState() {
-            if (isRestoringState) return; // Don't save during restore
+            if (isRestoringState) {
+                console.log('Skipping save - currently restoring state');
+                return; // Don't save during restore
+            }
+            console.log('Saving state...', {
+                uploadedImages: uploadedImages.length,
+                pdfSections: pdfSections.length,
+                appMode
+            });
             try {
                 const state = {
                     appMode,
@@ -557,6 +565,11 @@
                 };
                 
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                console.log('State saved to localStorage:', {
+                    stateSize: JSON.stringify(state).length,
+                    uploadedImagesCount: state.uploadedImages.length,
+                    sectionsCount: state.pdfSections.length
+                });
                 
                 // Store large images separately
                 uploadedImages.forEach(img => {
@@ -588,10 +601,18 @@
         function restoreState() {
             try {
                 const savedState = localStorage.getItem(STORAGE_KEY);
-                if (!savedState) return;
+                if (!savedState) {
+                    console.log('No saved state found in localStorage');
+                    return;
+                }
                 
                 isRestoringState = true; // Set flag to prevent saving during restore
                 const state = JSON.parse(savedState);
+                console.log('Restoring state from localStorage:', {
+                    uploadedImages: state.uploadedImages?.length || 0,
+                    pdfSections: state.pdfSections?.length || 0,
+                    appMode: state.appMode
+                });
                 
                 // Restore basic state
                 appMode = state.appMode || 'single';
@@ -609,24 +630,42 @@
                 }
                 
                 // Restore images with large image recovery
-                uploadedImages = (state.uploadedImages || []).map(img => {
+                const restoredImages = (state.uploadedImages || []).map(img => {
                     if (!img.src && img.id) {
                         const largeImg = localStorage.getItem(`${STORAGE_KEY}_img_${img.id}`);
-                        if (largeImg) img.src = largeImg;
+                        if (largeImg) {
+                            console.log(`Restored large image ${img.id} from separate storage`);
+                            img.src = largeImg;
+                        } else {
+                            console.warn(`Could not restore image ${img.id} - data not found`);
+                        }
                     }
                     return img;
                 }).filter(img => img.src); // Remove images that couldn't be restored
                 
-                pdfSections = (state.pdfSections || []).map(section => ({
-                    ...section,
-                    images: section.images.map(img => {
-                        if (!img.src && img.id) {
-                            const largeImg = localStorage.getItem(`${STORAGE_KEY}_img_${img.id}`);
-                            if (largeImg) img.src = largeImg;
-                        }
-                        return img;
-                    }).filter(img => img.src)
-                }));
+                uploadedImages = restoredImages;
+                console.log(`Restored ${uploadedImages.length} uploaded images`);
+                
+                pdfSections = (state.pdfSections || []).map(section => {
+                    const restoredSection = {
+                        ...section,
+                        images: section.images.map(img => {
+                            if (!img.src && img.id) {
+                                const largeImg = localStorage.getItem(`${STORAGE_KEY}_img_${img.id}`);
+                                if (largeImg) {
+                                    console.log(`Restored large image ${img.id} in section ${section.id}`);
+                                    img.src = largeImg;
+                                } else {
+                                    console.warn(`Could not restore image ${img.id} in section ${section.id}`);
+                                }
+                            }
+                            return img;
+                        }).filter(img => img.src)
+                    };
+                    console.log(`Restored section ${section.artistName || 'unnamed'} with ${restoredSection.images.length} images`);
+                    return restoredSection;
+                });
+                console.log(`Total sections restored: ${pdfSections.length}`);
                 
                 // Restore UI state
                 els.mainSelect.value = appMode === 'single' ? selectedMainArtist : 
@@ -647,11 +686,18 @@
                     updateUI();
                 }
                 
-                console.log('State restored from localStorage');
+                console.log('State restoration complete:', {
+                    uploadedImages: uploadedImages.length,
+                    pdfSections: pdfSections.length,
+                    appMode,
+                    selectedMainArtist,
+                    selectedSubArtist
+                });
             } catch (e) {
                 console.warn('Could not restore state from localStorage:', e);
             } finally {
                 isRestoringState = false; // Always reset the flag
+                console.log('Restore process completed, isRestoringState reset to false');
             }
         }
         
@@ -784,11 +830,17 @@
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = (evt) => {
-                        uploadedImages.push({
+                        const newImage = {
                             id: Date.now() + Math.random(),
                             src: evt.target.result,
                             title: '', medium: '', size: '', price: '',
                             pageColor: '#f6f0e8' // Default to cream color
+                        };
+                        uploadedImages.push(newImage);
+                        console.log('Image uploaded:', {
+                            id: newImage.id,
+                            size: evt.target.result.length,
+                            totalImages: uploadedImages.length
                         });
                         loaded++;
                         if(loaded === files.length) {
@@ -869,9 +921,15 @@
         }
 
         function removeImage(id) {
+            const removedImg = uploadedImages.find(i => i.id == id);
             uploadedImages = uploadedImages.filter(i => i.id != id);
+            console.log('Image removed:', {
+                id,
+                remainingImages: uploadedImages.length
+            });
             renderImages();
             updateUI();
+            saveState();
         }
 
         // --- COMPILATION LOGIC (VARIOUS MODE) ---
@@ -894,11 +952,17 @@
                     els.addSectionBtn.textContent = '+ Add This Artist Section';
                 } else {
                     // Add new section
-                    pdfSections.push({
+                    const newSection = {
                         id: Date.now(),
                         artistKey: selectedSubArtist,
                         artistName: ARTIST_DATA[selectedSubArtist].name,
                         images: [...uploadedImages]
+                    };
+                    pdfSections.push(newSection);
+                    console.log('Added new artist section:', {
+                        artistName: newSection.artistName,
+                        imageCount: newSection.images.length,
+                        totalSections: pdfSections.length
                     });
                 }
 
@@ -923,11 +987,17 @@
                     els.addSectionBtn.textContent = '+ Add Images to PDF';
                 } else {
                     // Add new section
-                    pdfSections.push({
+                    const newSection = {
                         id: Date.now(),
                         artistKey: null,
                         artistName: customName || null,
                         images: [...uploadedImages]
+                    };
+                    pdfSections.push(newSection);
+                    console.log('Added new section (no-artist mode):', {
+                        artistName: newSection.artistName || '(No Artist)',
+                        imageCount: newSection.images.length,
+                        totalSections: pdfSections.length
                     });
                 }
 
@@ -1020,9 +1090,16 @@
             if (editingSectionId === id) {
                 cancelEdit();
             }
+            const removedSection = pdfSections.find(s => s.id === id);
             pdfSections = pdfSections.filter(s => s.id !== id);
+            console.log('Section removed:', {
+                id,
+                artistName: removedSection?.artistName || '(No Artist)',
+                remainingSections: pdfSections.length
+            });
             renderSections();
             updateUI();
+            saveState();
         };
 
         window.editSection = editSection;
