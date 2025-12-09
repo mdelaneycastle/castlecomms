@@ -571,14 +571,37 @@
                     sectionsCount: state.pdfSections.length
                 });
                 
+                // Verify the save by immediately reading it back
+                const verification = localStorage.getItem(STORAGE_KEY);
+                if (verification) {
+                    const parsedVerification = JSON.parse(verification);
+                    console.log('Verification - data actually saved:', {
+                        uploadedImages: parsedVerification.uploadedImages?.length || 0,
+                        pdfSections: parsedVerification.pdfSections?.length || 0,
+                        appMode: parsedVerification.appMode
+                    });
+                } else {
+                    console.error('Verification failed - no data found in localStorage after save');
+                }
+                
                 // Store large images separately
                 uploadedImages.forEach(img => {
                     if (img.src.length > 50000) {
                         try {
                             localStorage.setItem(`${STORAGE_KEY}_img_${img.id}`, img.src);
+                            console.log('Large image stored separately:', {
+                                id: img.id,
+                                size: img.src.length,
+                                key: `${STORAGE_KEY}_img_${img.id}`
+                            });
                         } catch(e) {
-                            console.warn('Could not save large image to localStorage');
+                            console.error('Could not save large image to localStorage:', e);
                         }
+                    } else {
+                        console.log('Small image stored inline:', {
+                            id: img.id,
+                            size: img.src.length
+                        });
                     }
                 });
                 
@@ -587,9 +610,21 @@
                         if (img.src.length > 50000) {
                             try {
                                 localStorage.setItem(`${STORAGE_KEY}_img_${img.id}`, img.src);
+                                console.log('Large section image stored separately:', {
+                                    sectionId: section.id,
+                                    imageId: img.id,
+                                    size: img.src.length,
+                                    key: `${STORAGE_KEY}_img_${img.id}`
+                                });
                             } catch(e) {
-                                console.warn('Could not save large image to localStorage');
+                                console.error('Could not save large section image to localStorage:', e);
                             }
+                        } else {
+                            console.log('Small section image stored inline:', {
+                                sectionId: section.id,
+                                imageId: img.id,
+                                size: img.src.length
+                            });
                         }
                     });
                 });
