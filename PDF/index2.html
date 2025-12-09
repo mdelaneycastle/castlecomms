@@ -515,6 +515,8 @@
             window.updateData = updateData;
             window.updatePageColor = updatePageColor;
             window.clearAllData = clearAllData;
+            window.parseProductInfo = parseProductInfo;
+            window.clearProductInfo = clearProductInfo;
             
             // Add listeners for auto-save
             els.clientInput.addEventListener('change', saveState);
@@ -545,13 +547,15 @@
                     uploadedImages: uploadedImages.map(img => ({
                         ...img,
                         // Store image data separately to avoid localStorage limits
-                        src: img.src.length > 50000 ? '' : img.src // Skip very large images
+                        src: img.src.length > 50000 ? '' : img.src, // Skip very large images
+                        originalSrc: '' // Never store original in main state (too large)
                     })),
                     pdfSections: pdfSections.map(section => ({
                         ...section,
                         images: section.images.map(img => ({
                             ...img,
-                            src: img.src.length > 50000 ? '' : img.src
+                            src: img.src.length > 50000 ? '' : img.src,
+                            originalSrc: '' // Never store original in main state (too large)
                         }))
                     })),
                     editingSectionId,
@@ -595,7 +599,17 @@
                                 key: `${STORAGE_KEY}_img_${img.id}`
                             });
                         } catch(e) {
-                            console.error('Could not save large image to localStorage:', e);
+                            if (e.name === 'QuotaExceededError') {
+                                console.warn('localStorage quota exceeded for image', img.id, '. Image will not be saved.');
+                                // Show user notification
+                                if (els.status) {
+                                    els.status.textContent = '⚠️ Storage full - some images may not be saved';
+                                    els.status.style.color = 'orange';
+                                    setTimeout(() => els.status.textContent = '', 5000);
+                                }
+                            } else {
+                                console.error('Could not save large image to localStorage:', e);
+                            }
                         }
                     } else {
                         console.log('Small image stored inline:', {
@@ -617,7 +631,11 @@
                                     key: `${STORAGE_KEY}_img_${img.id}`
                                 });
                             } catch(e) {
-                                console.error('Could not save large section image to localStorage:', e);
+                                if (e.name === 'QuotaExceededError') {
+                                    console.warn('localStorage quota exceeded for section image', img.id, '. Image will not be saved.');
+                                } else {
+                                    console.error('Could not save large section image to localStorage:', e);
+                                }
                             }
                         } else {
                             console.log('Small section image stored inline:', {
@@ -864,17 +882,33 @@
             files.forEach(file => {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
-                    reader.onload = (evt) => {
+                    reader.onload = async (evt) => {
+                        let imageSrc = evt.target.result;
+                        
+                        // Compress large images for localStorage storage
+                        if (imageSrc.length > 2000000) { // 2MB threshold
+                            console.log('Compressing large image for storage...');
+                            try {
+                                imageSrc = await compressImageForStorage(imageSrc, 0.7); // 70% quality
+                                console.log('Image compressed from', evt.target.result.length, 'to', imageSrc.length);
+                            } catch (e) {
+                                console.warn('Could not compress image, using original:', e);
+                                imageSrc = evt.target.result;
+                            }
+                        }
+                        
                         const newImage = {
                             id: Date.now() + Math.random(),
-                            src: evt.target.result,
+                            src: imageSrc,
+                            originalSrc: evt.target.result, // Keep original for PDF generation
                             title: '', medium: '', size: '', price: '',
                             pageColor: '#f6f0e8' // Default to cream color
                         };
                         uploadedImages.push(newImage);
                         console.log('Image uploaded:', {
                             id: newImage.id,
-                            size: evt.target.result.length,
+                            originalSize: evt.target.result.length,
+                            compressedSize: imageSrc.length,
                             totalImages: uploadedImages.length
                         });
                         loaded++;
@@ -901,6 +935,10 @@
                 <div class="image-card" data-id="${img.id}">
                     <div class="card-badge">${index + 1}</div>
                     <img src="${img.src}" class="image-preview">
+                    <div style="margin-bottom:0.5rem;">
+                        <textarea placeholder="Paste full product info here to auto-fill (optional)" style="width:100%; height:60px; font-size:0.8rem; padding:0.3rem; border:1px solid #ddd; border-radius:3px;" onchange="parseProductInfo('${img.id}', this.value)"></textarea>
+                        <button type="button" onclick="clearProductInfo('${img.id}')" style="font-size:0.7rem; padding:2px 6px; margin-top:2px; background:#f0f0f0; border:1px solid #ccc; border-radius:3px; cursor:pointer;">Clear</button>
+                    </div>
                     <input type="text" placeholder="Title" value="${img.title}" onchange="updateData('${img.id}', 'title', this.value)">
                     <input type="text" placeholder="Medium" value="${img.medium}" onchange="updateData('${img.id}', 'medium', this.value)" style="margin-top:0.5rem">
                     <div style="display:flex; gap:0.5rem; margin-top:0.5rem">
@@ -975,6 +1013,93 @@
             });
             renderImages();
             updateUI();
+            saveState();
+        }
+        
+        function parseProductInfo(id, text) {
+            if (!text.trim()) return;
+            
+            console.log('Parsing product info for image:', id);
+            const img = uploadedImages.find(i => i.id == id);
+            if (!img) return;
+            
+            try {
+                // Extract title (first line)
+                const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+                if (lines.length > 0) {
+                    img.title = lines[0];
+                }
+                
+                // Extract price (look for £ symbol)
+                const priceMatch = text.match(/£([\d,]+(?:\.\d{2})?)/);
+                if (priceMatch) {
+                    img.price = '£' + priceMatch[1];
+                }
+                
+                // Extract medium (look for common art mediums)
+                const mediumPatterns = [
+                    /Mixed Media/i,
+                    /Oil on Canvas/i,
+                    /Acrylic/i,
+                    /Watercolor/i,
+                    /Watercolour/i,
+                    /Digital Print/i,
+                    /Giclée/i,
+                    /Giclee/i,
+                    /Screen Print/i,
+                    /Silkscreen/i,
+                    /Lithograph/i,
+                    /Sculpture/i,
+                    /Photography/i,
+                    /Charcoal/i,
+                    /Pastel/i,
+                    /Ink/i,
+                    /Pencil/i
+                ];
+                
+                for (const pattern of mediumPatterns) {
+                    const mediumMatch = text.match(pattern);
+                    if (mediumMatch) {
+                        img.medium = mediumMatch[0];
+                        break;
+                    }
+                }
+                
+                // Extract size (look for cm measurements - prefer second set if two sets exist)
+                const sizeMatches = text.match(/(\d+(?:\.\d+)?)\s*cm\s*x\s*(\d+(?:\.\d+)?)\s*cm/g);
+                if (sizeMatches) {
+                    // Use the second set if available (framed option), otherwise use the first
+                    const sizeToUse = sizeMatches.length > 1 ? sizeMatches[1] : sizeMatches[0];
+                    img.size = sizeToUse.replace(/(\d+(?:\.\d+)?)\s*cm\s*x\s*(\d+(?:\.\d+)?)\s*cm/, '$1cm x $2cm');
+                }
+                
+                console.log('Parsed product info:', {
+                    title: img.title,
+                    medium: img.medium,
+                    size: img.size,
+                    price: img.price
+                });
+                
+                // Re-render to show the updated values
+                renderImages();
+                saveState();
+                
+            } catch (e) {
+                console.warn('Error parsing product info:', e);
+            }
+        }
+        
+        function clearProductInfo(id) {
+            const img = uploadedImages.find(i => i.id == id);
+            if (!img) return;
+            
+            img.title = '';
+            img.medium = '';
+            img.size = '';
+            img.price = '';
+            
+            console.log('Cleared product info for image:', id);
+            renderImages();
             saveState();
         }
 
@@ -1259,8 +1384,9 @@
                     pdf.setFillColor(rgb.r, rgb.g, rgb.b);
                     pdf.rect(0, 0, size, size, 'F');
                     
-                    // Product Image logic
-                    const imgObj = await loadImage(imgData.src);
+                    // Product Image logic - use original high-quality image for PDF
+                    const imageSource = imgData.originalSrc || imgData.src;
+                    const imgObj = await loadImage(imageSource);
                     const ratio = imgObj.width / imgObj.height;
                     let w, h;
                     const maxW = size * 0.6;
@@ -1281,7 +1407,7 @@
                     }
 
                     // Image
-                    pdf.addImage(imgData.src, 'JPEG', x, y, w, h);
+                    pdf.addImage(imageSource, 'JPEG', x, y, w, h);
                     
                     // Border
                     pdf.setDrawColor(200,200,200);
@@ -1336,6 +1462,34 @@
             const g = parseInt(hex.substring(2, 4), 16);
             const b = parseInt(hex.substring(4, 6), 16);
             return { r, g, b };
+        }
+        
+        async function compressImageForStorage(dataUrl, quality) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Reduce dimensions if image is very large
+                    let { width, height } = img;
+                    const maxDimension = 1200; // Max width or height for storage
+                    
+                    if (width > maxDimension || height > maxDimension) {
+                        const ratio = Math.min(maxDimension / width, maxDimension / height);
+                        width = Math.floor(width * ratio);
+                        height = Math.floor(height * ratio);
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = reject;
+                img.src = dataUrl;
+            });
         }
         
         async function loadImage(src) {
