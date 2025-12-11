@@ -1402,39 +1402,44 @@
                     const x = (size - w) / 2;
                     const y = 1.5;
 
-                    // Shadow (only if background is not #dadada)
-                    if (bgColor.toLowerCase() !== '#dadada') {
-                        pdf.setFillColor(0,0,0);
-                        pdf.setGState(new pdf.GState({ opacity: 0.15 }));
-                        pdf.rect(x + 0.05, y + 0.05, w, h, 'F');
-                        pdf.setGState(new pdf.GState({ opacity: 1 }));
-                    }
-
-                    // Image
+                    // Image (no shadow or border effects)
                     pdf.addImage(imageSource, 'JPEG', x, y, w, h);
-                    
-                    // Border
-                    pdf.setDrawColor(200,200,200);
-                    pdf.setLineWidth(0.01);
-                    pdf.rect(x, y, w, h, 'S');
 
-                    // Text
-                    pdf.setTextColor(99, 101, 104);
-                    const textY = y + h + 0.5;
+                    // Text color based on background
+                    const textColor = bgColor.toLowerCase() === '#525659' ? [245, 245, 245] : [99, 101, 104]; // Light color for dark grey, dark for others
+                    pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
+                    const textY = y + h + 0.8; // Moved text lower (was 0.5)
                     const spacing = 0.3;
 
                     pdf.setFont('helvetica', 'bolditalic');
-                    pdf.setFontSize(22);
-                    pdf.text(imgData.title || '', size/2, textY, { align: 'center' });
+                    pdf.setFontSize(13); // Reduced by 40% (was 22, now ~13)
+                    
+                    // Split title into lines if it's too long
+                    const title = imgData.title || '';
+                    const maxWidth = size * 0.8; // 80% of page width
+                    const titleLines = pdf.splitTextToSize(title, maxWidth);
+                    
+                    // Adjust Y position based on number of lines
+                    let currentY = textY;
+                    if (titleLines.length > 1) {
+                        currentY -= (titleLines.length - 1) * spacing * 0.5; // Move up slightly for multi-line titles
+                    }
+                    
+                    titleLines.forEach((line, index) => {
+                        pdf.text(line, size/2, currentY + (index * spacing), { align: 'center' });
+                    });
 
                     pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(14);
-                    pdf.text(imgData.medium || '', size/2, textY + spacing, { align: 'center' });
-                    pdf.text(imgData.size || '', size/2, textY + (spacing*2), { align: 'center' });
+                    pdf.setFontSize(8); // Reduced by 40% (was 14, now ~8)
+                    
+                    // Adjust text positions based on title lines
+                    const titleOffset = titleLines.length > 1 ? (titleLines.length - 1) * spacing : 0;
+                    pdf.text(imgData.medium || '', size/2, textY + spacing + titleOffset, { align: 'center' });
+                    pdf.text(imgData.size || '', size/2, textY + (spacing*2) + titleOffset, { align: 'center' });
 
                     pdf.setFont('helvetica', 'bold');
-                    pdf.setFontSize(18);
-                    pdf.text(imgData.price || '', size/2, textY + (spacing*3), { align: 'center' });
+                    pdf.setFontSize(11); // Reduced by 40% (was 18, now ~11)
+                    pdf.text(imgData.price || '', size/2, textY + (spacing*3) + titleOffset, { align: 'center' });
                 }
             }
 
