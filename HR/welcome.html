@@ -108,6 +108,17 @@
         .director-quote p {
             margin-bottom: 12px;
         }
+        
+        @media (max-width: 600px) {
+            .director-content h3 {
+                font-size: 1.1rem;
+            }
+            
+            .director-quote {
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+        }
 
         .director-signature {
             text-align: right;
@@ -117,17 +128,100 @@
         }
 
         @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 25px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
             .director-message {
                 flex-direction: column;
                 text-align: center;
+                padding: 20px;
+                gap: 20px;
             }
             
             .director-photo {
                 margin: 0 auto;
+                width: 120px;
+                height: 120px;
             }
             
             .director-signature {
                 text-align: center;
+            }
+            
+            .welcome-message h2 {
+                font-size: 1.5rem;
+            }
+            
+            .info-section {
+                padding: 20px;
+            }
+            
+            .info-label {
+                font-size: 0.85rem;
+            }
+            
+            .info-value {
+                font-size: 1rem;
+            }
+            
+            .vcard-button {
+                padding: 10px 20px;
+                font-size: 0.95rem;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .gallery-section {
+                margin-top: 30px;
+            }
+            
+            /* Adjust important information section for mobile */
+            .info-section div p {
+                font-size: 0.95rem;
+                line-height: 1.6;
+                margin-bottom: 12px;
+            }
+            
+            .info-section h3 {
+                font-size: 1.2rem;
+            }
+            
+            /* Make the layout more compact on mobile */
+            .info-grid {
+                gap: 15px;
+            }
+            
+            .welcome-message {
+                margin-bottom: 25px;
+            }
+            
+            .director-message {
+                margin-bottom: 25px;
+            }
+            
+            .info-section {
+                margin-bottom: 25px;
             }
         }
 
