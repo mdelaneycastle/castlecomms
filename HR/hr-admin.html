@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Admin - New Starter Entry</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h2 {
+            color: #555;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="time"],
+        textarea,
+        select {
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="tel"]:focus,
+        input[type="date"]:focus,
+        input[type="time"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .url-display {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .url-text {
+            flex: 1;
+            font-family: monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            color: #495057;
+        }
+
+        .copy-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .copy-button:hover {
+            background-color: #0056b3;
+        }
+
+        .copy-button.copied {
+            background-color: #28a745;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .required::after {
+            content: ' *';
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>New Starter Registration</h1>
+        
+        <div class="success-message" id="successMessage">
+            <div>New starter successfully added to the system!</div>
+            <div class="url-display">
+                <span class="url-text" id="generatedUrl"></span>
+                <button class="copy-button" onclick="copyUrl()">Copy Link</button>
+            </div>
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            Error adding new starter. Please check all fields and try again.
+        </div>
+        
+        <form id="newStarterForm">
+            <div class="form-section">
+                <h2>Basic Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="full_name" class="required">Full Name</label>
+                        <input type="text" id="full_name" name="full_name" required placeholder="First and Last Name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="job_title" class="required">Job Title</label>
+                        <input type="text" id="job_title" name="job_title" required placeholder="e.g., Marketing Executive">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gallery" class="required">Gallery</label>
+                        <select id="gallery" name="gallery" required>
+                            <option value="">Select a gallery...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Work Details</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="manager_name" class="required">Manager Name</label>
+                        <input type="text" id="manager_name" name="manager_name" required placeholder="Direct Manager's Name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="workplace_contact_num" class="required">Workplace Contact Number</label>
+                        <input type="tel" id="workplace_contact_num" name="workplace_contact_num" required placeholder="e.g., 01234 567890">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="workplace_address" class="required">Workplace Address</label>
+                        <textarea id="workplace_address" name="workplace_address" required placeholder="Full workplace address including postcode"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Start Details</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="start_date" class="required">Start Date</label>
+                        <input type="date" id="start_date" name="start_date" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="start_time" class="required">Start Time</label>
+                        <input type="time" id="start_time" name="start_time" required value="09:00">
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Submitting...</p>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn-secondary" onclick="resetForm()">Clear Form</button>
+                <button type="submit" class="btn-primary">Add New Starter</button>
+            </div>
+        </form>
+    </div>
+
+    <script type="module">
+        const SUPABASE_URL = 'https://aghwuzowjhdtdqdvfjrj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnaHd1em93amhkdGRxZHZmanJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NjY1OTksImV4cCI6MjA4MTA0MjU5OX0.w8cGh4Imb3CjbMe32-g0S6VUknOfglxh28Pi59E4KE4';
+
+        const form = document.getElementById('newStarterForm');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const loading = document.getElementById('loading');
+        const generatedUrlSpan = document.getElementById('generatedUrl');
+        
+        let currentUniqueCode = '';
+
+        // Gallery data - extracted from file names
+        const galleries = [
+            'Bath', 'Birmingham ICC', 'Birmingham Mailbox', 'Brighton', 'Bristol',
+            'Cambridge', 'Canterbury', 'Cardiff', 'Cheltenham', 'Chester',
+            'Derby', 'Edinburgh', 'Exeter', 'Glasgow', 'Guildford',
+            'Harrogate', 'Kent Bluewater', 'Leamington', 'Leeds', 'Liverpool',
+            'London Covent Garden', 'London SCP', 'London SMS', 'Manchester', 'Marlow',
+            'Milton Keynes', 'Newcastle', 'Norwich', 'Nottingham', 'Oxford',
+            'Reading', 'Sheffield Meadowhall', 'Stamford', 'Stratford', 'Tunbridge Wells',
+            'Winchester', 'Windsor', 'York'
+        ];
+
+        // Populate gallery dropdown
+        const gallerySelect = document.getElementById('gallery');
+        galleries.forEach(gallery => {
+            const option = document.createElement('option');
+            option.value = gallery;
+            option.textContent = gallery;
+            gallerySelect.appendChild(option);
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide messages
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            loading.style.display = 'block';
+
+            // Get form data
+            const formData = new FormData(form);
+            const data = {};
+            
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            // Generate unique 7-character code
+            function generateUniqueCode() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let code = '';
+                for (let i = 0; i < 7; i++) {
+                    code += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return code;
+            }
+            
+            currentUniqueCode = generateUniqueCode();
+            data.unique_code = currentUniqueCode;
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/new_starters`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                loading.style.display = 'none';
+
+                if (response.ok) {
+                    // Generate and display URL
+                    const url = `https://mdelaneycastle.github.io/castlecomms/HR/welcome.html?code=${currentUniqueCode}`;
+                    generatedUrlSpan.textContent = url;
+                    
+                    successMessage.style.display = 'block';
+                    form.reset();
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const error = await response.text();
+                    console.error('Error:', error);
+                    errorMessage.textContent = `Error: ${error || 'Failed to add new starter'}`;
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                console.error('Error:', error);
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // Reset form function
+        window.resetForm = function() {
+            form.reset();
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+        }
+        
+        // Copy URL function
+        window.copyUrl = function() {
+            const url = generatedUrlSpan.textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                const copyButton = document.querySelector('.copy-button');
+                copyButton.textContent = 'Copied!';
+                copyButton.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyButton.textContent = 'Copy Link';
+                    copyButton.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const copyButton = document.querySelector('.copy-button');
+                copyButton.textContent = 'Copied!';
+                copyButton.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyButton.textContent = 'Copy Link';
+                    copyButton.classList.remove('copied');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
