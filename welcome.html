@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Your New Role</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: url('Images/Background/HR recruitment images 07.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(245, 245, 245, 0.85);
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .director-message {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            align-items: flex-start;
+        }
+
+        .director-photo {
+            flex-shrink: 0;
+            width: 150px;
+            height: 150px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .director-content {
+            flex: 1;
+        }
+
+        .director-content h3 {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .director-quote {
+            font-style: italic;
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        .director-quote p {
+            margin-bottom: 12px;
+        }
+
+        .director-signature {
+            text-align: right;
+            color: #666;
+            font-weight: 500;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .director-message {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .director-photo {
+                margin: 0 auto;
+            }
+            
+            .director-signature {
+                text-align: center;
+            }
+        }
+
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .welcome-message h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .gallery-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .gallery-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #34495e;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .vcard-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vcard-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .vcard-button svg {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to the Team!</h1>
+            <p>Everything you need to know for your first day</p>
+        </div>
+        
+        <div id="content" class="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading your information...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const SUPABASE_URL = 'https://aghwuzowjhdtdqdvfjrj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnaHd1em93amhkdGRxZHZmanJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NjY1OTksImV4cCI6MjA4MTA0MjU5OX0.w8cGh4Imb3CjbMe32-g0S6VUknOfglxh28Pi59E4KE4';
+
+        const contentDiv = document.getElementById('content');
+
+        // Get code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+
+        if (!code) {
+            contentDiv.innerHTML = '<div class="error">No access code provided in URL. Please use the link sent to you by HR.</div>';
+        } else {
+            fetchStarterData(code);
+        }
+
+        async function fetchStarterData(code) {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/new_starters?unique_code=eq.${code}`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    contentDiv.innerHTML = '<div class="error">No information found. Please check your link or contact HR.</div>';
+                } else {
+                    displayStarterInfo(data[0]);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                contentDiv.innerHTML = '<div class="error">Error loading your information. Please try again or contact HR.</div>';
+            }
+        }
+
+        function displayStarterInfo(starter) {
+            const startDate = new Date(starter.start_date).toLocaleDateString('en-GB', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const startTime = starter.start_time ? starter.start_time.substring(0, 5) : '09:00';
+
+            contentDiv.innerHTML = `
+                <div class="welcome-message">
+                    <h2>Welcome, ${starter.full_name}!</h2>
+                    <p>We're excited to have you join us as our new ${starter.job_title}</p>
+                </div>
+
+                <div class="director-message">
+                    <img src="Images/Ian.png" alt="Ian Weatherby-Blythe" class="director-photo">
+                    <div class="director-content">
+                        <h3>A Message from our Group Managing Director</h3>
+                        <div class="director-quote">
+                            <p>Firstly, congratulations on your appointment as our new ${starter.job_title} in ${starter.gallery}!</p>
+                            <p>This is the best job in the world – we get to work with art for a living! We could be in the industry or double glazing, mobile phones, life insurance, jewellery, but we're not – we sell art, which I believe, is humanity's greatest achievement. Art speaks to our souls and enriches our lives, it never wears out, it never breaks down, and its value is often greater than its cost. It is the most unique, emotional, thought-provoking product in the world and we have the great privilege of selling it for a living!</p>
+                        </div>
+                        <div class="director-signature">~Ian Weatherby-Blythe, Castle Group Director</div>
+                    </div>
+                </div>
+
+                ${starter.gallery ? `
+                    <div class="gallery-section">
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">Your Workplace</h3>
+                        <img src="Images/Gallery/Google Ads gallery square ${starter.gallery}.jpg" 
+                             alt="${starter.gallery} Gallery" 
+                             class="gallery-image"
+                             onerror="this.style.display='none'; this.previousElementSibling.style.display='none';">
+                    </div>
+                ` : ''}
+
+                <div class="info-section">
+                    <h3 style="margin-bottom: 20px; color: #2c3e50;">Your First Day Details</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">📅 Start Date</span>
+                            <span class="info-value">${startDate}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">⏰ Start Time</span>
+                            <span class="info-value">${startTime}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">👤 Your Manager</span>
+                            <span class="info-value">${starter.manager_name}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">📍 Workplace Location</span>
+                            <span class="info-value">${starter.workplace_address}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">📞 Workplace Contact</span>
+                            <span class="info-value">${starter.workplace_contact_num}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">🏢 Your Gallery</span>
+                            <span class="info-value">${starter.gallery}</span>
+                        </div>
+                    </div>
+                    
+                    <button class="vcard-button" onclick="downloadVCard('${starter.gallery.replace(/'/g, "\\'")}', '${starter.workplace_address.replace(/'/g, "\\'")}', '${starter.workplace_contact_num}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Add Gallery Contact to Phone
+                    </button>
+                </div>
+
+                
+            `;
+        }
+
+        // Function to generate and download vCard
+        window.downloadVCard = function(galleryName, address, phone) {
+            const vCardData = `BEGIN:VCARD
+VERSION:3.0
+FN:${galleryName} Gallery
+ORG:Castle Fine Art - ${galleryName}
+TEL;TYPE=WORK:${phone}
+ADR;TYPE=WORK:;;${address.replace(/,/g, ';')};;;;
+NOTE:Castle Fine Art Gallery Location
+END:VCARD`;
+
+            // Create blob and download link
+            const blob = new Blob([vCardData], { type: 'text/vcard;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${galleryName}_Gallery.vcf`;
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
