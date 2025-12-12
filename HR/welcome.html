@@ -342,6 +342,136 @@
             width: 20px;
             height: 20px;
         }
+
+        /* Cards section */
+        .cards-section {
+            margin: 40px 0;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .cards-section {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 1px solid #e9ecef;
+        }
+
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .info-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .info-card h4 {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .info-card p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: modalFadeIn 0.3s;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 25px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+            opacity: 0.8;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .cards-section {
+                gap: 15px;
+                margin: 25px 0;
+            }
+            
+            .info-card {
+                padding: 20px;
+            }
+            
+            .info-card-icon {
+                font-size: 2rem;
+            }
+            
+            .modal-content {
+                margin: 20px auto;
+                width: 95%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -440,6 +570,26 @@
                     </div>
                 </div>
 
+                <div class="cards-section">
+                    <div class="info-card" onclick="openModal('teamModal')">
+                        <div class="info-card-icon">👥</div>
+                        <h4>Meet The Team At Head Office</h4>
+                        <p>Get to know the people supporting you</p>
+                    </div>
+                    
+                    <div class="info-card" onclick="openModal('firstDayModal')">
+                        <div class="info-card-icon">📋</div>
+                        <h4>What You Need To Know For Your First Day</h4>
+                        <p>Everything to prepare for day one</p>
+                    </div>
+                    
+                    <div class="info-card" onclick="openModal('documentsModal')">
+                        <div class="info-card-icon">📄</div>
+                        <h4>Important Documents & Links</h4>
+                        <p>Forms and resources you'll need</p>
+                    </div>
+                </div>
+
                 ${starter.gallery ? `
                     <div class="gallery-section">
                         <h3 style="margin-bottom: 20px; color: #2c3e50;">Your Workplace</h3>
@@ -522,6 +672,62 @@ END:VCARD`;
             // Clean up
             URL.revokeObjectURL(url);
         }
+
+        // Modal functions
+        window.openModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let i = 0; i < modals.length; i++) {
+                if (event.target == modals[i]) {
+                    modals[i].style.display = 'none';
+                }
+            }
+        }
     </script>
+
+    <!-- Modals -->
+    <div id="teamModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('teamModal')">&times;</span>
+                <h3>Meet The Team At Head Office</h3>
+            </div>
+            <div class="modal-body">
+                <p>Content about the head office team will go here...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="firstDayModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('firstDayModal')">&times;</span>
+                <h3>What You Need To Know For Your First Day</h3>
+            </div>
+            <div class="modal-body">
+                <p>First day preparation information will go here...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="documentsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('documentsModal')">&times;</span>
+                <h3>Important Documents & Links</h3>
+            </div>
+            <div class="modal-body">
+                <p>Documents and links will be added here...</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
