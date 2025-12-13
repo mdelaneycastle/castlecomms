@@ -464,6 +464,102 @@
             color: #718096;
             font-size: 1.2em;
         }
+
+        /* Image Styles */
+        .featured-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 20px 20px 0 0;
+            margin-top: -1px;
+        }
+
+        .gallery-section {
+            padding: 30px;
+            background: #f7fafc;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .gallery-section h4 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .gallery-item {
+            position: relative;
+            padding-top: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        .lightbox-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .lightbox img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .lightbox-close:hover {
+            color: #ddd;
+        }
     </style>
 </head>
 <body>
@@ -755,8 +851,26 @@
                 `;
             }
 
+            // Create gallery HTML
+            let galleryHtml = '';
+            if (artist.gallery_images && artist.gallery_images.length > 0) {
+                galleryHtml = `
+                    <div class="gallery-section">
+                        <h4>🎨 Gallery</h4>
+                        <div class="gallery-grid">
+                            ${artist.gallery_images.map((url, index) => `
+                                <div class="gallery-item" onclick="openLightbox('${url}')">
+                                    <img src="${url}" alt="Gallery image ${index + 1}" loading="lazy">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
             // Build the card HTML
             card.innerHTML = `
+                ${artist.featured_image ? `<img src="${artist.featured_image}" alt="${artist.artist_name}" class="featured-image" loading="lazy">` : ''}
                 <div class="card-header">
                     <h2>${icon} ${artist.artist_name}</h2>
                     <div class="last-updated">Last updated: ${lastUpdated}</div>
@@ -767,6 +881,7 @@
                             <div class="focus-text">${artist.current_focus || 'No current updates available.'}</div>
                         </div>
                         ${additionalHtml}
+                        ${galleryHtml}
                         ${actionsHtml}
                     </div>
                     <div class="stats-container">
@@ -881,11 +996,31 @@
             scrollToSection(slug);
         }
 
+        // Lightbox functions
+        function openLightbox(imageUrl) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            lightboxImg.src = imageUrl;
+            lightbox.style.display = 'block';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').style.display = 'none';
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', loadDashboard);
 
         // Auto-refresh every 30 seconds
         setInterval(loadDashboard, 30000);
     </script>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-content">
+            <img id="lightbox-img" src="" alt="Enlarged view">
+        </div>
+    </div>
 </body>
 </html>
