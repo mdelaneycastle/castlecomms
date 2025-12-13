@@ -111,6 +111,175 @@
             gap: 20px;
         }
 
+        /* Content Editor Styles */
+        .content-editor {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .btn-add-text, .btn-add-image {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add-text:hover, .btn-add-image:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        .content-blocks {
+            min-height: 100px;
+        }
+
+        .content-block {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .content-block:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .content-block-header {
+            background: #f7fafc;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            border-radius: 7px 7px 0 0;
+        }
+
+        .content-block-type {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .content-block-controls {
+            display: flex;
+            gap: 5px;
+            margin-left: auto;
+        }
+
+        .btn-move, .btn-remove {
+            background: none;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .btn-move:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-remove:hover {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .content-block-body {
+            padding: 15px;
+        }
+
+        .text-block textarea {
+            width: 100%;
+            min-height: 100px;
+            border: none;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .text-block textarea:focus {
+            outline: none;
+        }
+
+        .image-block {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .image-upload-area:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .image-upload-area.has-image {
+            border-style: solid;
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .image-caption {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .upload-progress {
+            margin-top: 10px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            transition: width 0.3s ease;
+        }
+
         /* Date and Action Items */
         .list-input {
             margin-bottom: 15px;
@@ -313,105 +482,6 @@
             transform: translateY(-2px);
         }
 
-        /* Image Upload Styles */
-        .image-upload-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-        }
-
-        .image-preview {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-top: 15px;
-        }
-
-        .image-item {
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .image-item img {
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
-        }
-
-        .image-remove {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s ease;
-        }
-
-        .image-remove:hover {
-            background: #dc2626;
-        }
-
-        .upload-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .upload-btn:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .upload-progress {
-            margin-top: 10px;
-            display: none;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: #3b82f6;
-            transition: width 0.3s ease;
-        }
-
         /* Modal for new artist */
         .modal {
             display: none;
@@ -494,9 +564,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label>📝 Current Focus / Main Update</label>
-                    <textarea id="currentFocus" placeholder="What's the current status? What are the main updates? Write naturally - no HTML needed."></textarea>
-                    <p class="help">This appears as the main content for this artist. Keep it concise and informative.</p>
+                    <label>📝 Rich Content Editor</label>
+                    <div class="content-editor">
+                        <div class="editor-toolbar">
+                            <button type="button" class="btn-add-text" onclick="addContentBlock('text')">📝 Add Text</button>
+                            <button type="button" class="btn-add-image" onclick="addContentBlock('image')">🖼️ Add Image</button>
+                        </div>
+                        <div id="contentBlocks" class="content-blocks"></div>
+                    </div>
+                    <p class="help">Build your content using text blocks and images. You can reorder them by dragging.</p>
                 </div>
 
                 <div class="form-group">
@@ -521,44 +597,6 @@
                         <button class="add-btn" onclick="addAction()">+ Add Action Item</button>
                     </div>
                     <p class="help">Tasks, to-dos, and items requiring attention</p>
-                </div>
-
-                <div class="form-group">
-                    <label>🖼️ Featured Image</label>
-                    <div class="image-upload-section">
-                        <div class="file-input-wrapper">
-                            <button class="upload-btn">
-                                📤 Upload Featured Image
-                            </button>
-                            <input type="file" id="featuredImageInput" accept="image/*" onchange="handleFeaturedImage(event)">
-                        </div>
-                        <div id="featuredImagePreview" class="image-preview"></div>
-                        <div class="upload-progress" id="featuredProgress">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="featuredProgressFill"></div>
-                            </div>
-                        </div>
-                        <p class="help">Main image that appears at the top of the artist section</p>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>🎨 Gallery Images</label>
-                    <div class="image-upload-section">
-                        <div class="file-input-wrapper">
-                            <button class="upload-btn">
-                                📤 Upload Gallery Images
-                            </button>
-                            <input type="file" id="galleryImagesInput" accept="image/*" multiple onchange="handleGalleryImages(event)">
-                        </div>
-                        <div id="galleryImagesPreview" class="image-preview"></div>
-                        <div class="upload-progress" id="galleryProgress">
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="galleryProgressFill"></div>
-                            </div>
-                        </div>
-                        <p class="help">Additional images for the artist's gallery (multiple selection allowed)</p>
-                    </div>
                 </div>
 
                 <button class="save-btn" onclick="saveData()">
@@ -595,8 +633,8 @@
 
         let currentDates = [];
         let currentActions = [];
-        let featuredImageUrl = '';
-        let galleryImageUrls = [];
+        let contentBlocks = [];
+        let blockIdCounter = 0;
 
         // Load all artists and business sections on page load
         async function loadArtists() {
@@ -687,7 +725,6 @@
             if (data) {
                 document.getElementById('revenueAmount').value = data.revenue_amount || '';
                 document.getElementById('revenueContext').value = data.revenue_context || '';
-                document.getElementById('currentFocus').value = data.current_focus || '';
                 document.getElementById('additionalUpdates').value = data.additional_updates || '';
                 
                 // Load dates
@@ -698,23 +735,20 @@
                 currentActions = data.action_items || [];
                 renderActions();
                 
-                // Load images
-                featuredImageUrl = data.featured_image || '';
-                galleryImageUrls = data.gallery_images || [];
-                renderImages();
+                // Load content blocks
+                contentBlocks = data.content_blocks || [];
+                renderContentBlocks();
             } else {
                 // Clear form for new entry
                 document.getElementById('revenueAmount').value = '';
                 document.getElementById('revenueContext').value = '';
-                document.getElementById('currentFocus').value = '';
                 document.getElementById('additionalUpdates').value = '';
                 currentDates = [];
                 currentActions = [];
-                featuredImageUrl = '';
-                galleryImageUrls = [];
+                contentBlocks = [];
                 renderDates();
                 renderActions();
-                renderImages();
+                renderContentBlocks();
             }
 
             container.style.display = 'block';
@@ -798,12 +832,10 @@
                 artist_name: name,
                 revenue_amount: document.getElementById('revenueAmount').value || null,
                 revenue_context: document.getElementById('revenueContext').value || null,
-                current_focus: document.getElementById('currentFocus').value || null,
                 additional_updates: document.getElementById('additionalUpdates').value || null,
                 key_dates: cleanDates,
                 action_items: cleanActions,
-                featured_image: featuredImageUrl || null,
-                gallery_images: galleryImageUrls.length > 0 ? galleryImageUrls : null,
+                content_blocks: contentBlocks.length > 0 ? contentBlocks : null,
                 last_updated: new Date().toISOString()
             };
 
@@ -883,36 +915,113 @@
             document.getElementById('newArtistSlug').value = slug;
         });
 
-        // Image handling functions
-        function renderImages() {
-            // Render featured image
-            const featuredPreview = document.getElementById('featuredImagePreview');
-            featuredPreview.innerHTML = '';
-            if (featuredImageUrl) {
-                const div = document.createElement('div');
-                div.className = 'image-item';
-                div.innerHTML = `
-                    <img src="${featuredImageUrl}" alt="Featured">
-                    <button class="image-remove" onclick="removeFeaturedImage()">&times;</button>
-                `;
-                featuredPreview.appendChild(div);
-            }
+        // Content Block System
+        function addContentBlock(type) {
+            const block = {
+                id: ++blockIdCounter,
+                type: type,
+                content: type === 'text' ? '' : null,
+                url: type === 'image' ? null : null,
+                caption: type === 'image' ? '' : null
+            };
             
-            // Render gallery images
-            const galleryPreview = document.getElementById('galleryImagesPreview');
-            galleryPreview.innerHTML = '';
-            galleryImageUrls.forEach((url, index) => {
-                const div = document.createElement('div');
-                div.className = 'image-item';
-                div.innerHTML = `
-                    <img src="${url}" alt="Gallery ${index + 1}">
-                    <button class="image-remove" onclick="removeGalleryImage(${index})">&times;</button>
-                `;
-                galleryPreview.appendChild(div);
-            });
+            contentBlocks.push(block);
+            renderContentBlocks();
         }
 
-        async function handleFeaturedImage(event) {
+        function renderContentBlocks() {
+            const container = document.getElementById('contentBlocks');
+            container.innerHTML = '';
+            
+            contentBlocks.forEach((block, index) => {
+                const blockDiv = document.createElement('div');
+                blockDiv.className = 'content-block';
+                blockDiv.innerHTML = createContentBlockHTML(block, index);
+                container.appendChild(blockDiv);
+            });
+            
+            if (contentBlocks.length === 0) {
+                container.innerHTML = '<p style="color: #718096; text-align: center; padding: 40px;">No content blocks added yet. Click "Add Text" or "Add Image" to start building your content.</p>';
+            }
+        }
+
+        function createContentBlockHTML(block, index) {
+            const typeLabel = block.type === 'text' ? '📝 Text Block' : '🖼️ Image Block';
+            
+            if (block.type === 'text') {
+                return `
+                    <div class="content-block-header">
+                        <span class="content-block-type">${typeLabel}</span>
+                        <div class="content-block-controls">
+                            ${index > 0 ? `<button class="btn-move" onclick="moveBlock(${index}, -1)">↑</button>` : ''}
+                            ${index < contentBlocks.length - 1 ? `<button class="btn-move" onclick="moveBlock(${index}, 1)">↓</button>` : ''}
+                            <button class="btn-remove" onclick="removeBlock(${index})">✕</button>
+                        </div>
+                    </div>
+                    <div class="content-block-body">
+                        <div class="text-block">
+                            <textarea placeholder="Enter your content here..." onchange="updateTextBlock(${index}, this.value)">${block.content || ''}</textarea>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="content-block-header">
+                        <span class="content-block-type">${typeLabel}</span>
+                        <div class="content-block-controls">
+                            ${index > 0 ? `<button class="btn-move" onclick="moveBlock(${index}, -1)">↑</button>` : ''}
+                            ${index < contentBlocks.length - 1 ? `<button class="btn-move" onclick="moveBlock(${index}, 1)">↓</button>` : ''}
+                            <button class="btn-remove" onclick="removeBlock(${index})">✕</button>
+                        </div>
+                    </div>
+                    <div class="content-block-body">
+                        <div class="image-block">
+                            <div class="image-upload-area ${block.url ? 'has-image' : ''}" onclick="triggerImageUpload(${index})">
+                                ${block.url ? 
+                                    `<img src="${block.url}" class="image-preview" alt="Content image">` :
+                                    '<div style="color: #718096;">📤 Click to upload an image<br><small>Charts, tables, figures, etc.</small></div>'
+                                }
+                                <input type="file" accept="image/*" style="display: none;" onchange="handleImageUpload(${index}, event)">
+                            </div>
+                            <input type="text" class="image-caption" placeholder="Add a caption (optional)" value="${block.caption || ''}" onchange="updateImageCaption(${index}, this.value)">
+                            <div class="upload-progress" id="progress-${index}">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="progress-fill-${index}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function updateTextBlock(index, content) {
+            contentBlocks[index].content = content;
+        }
+
+        function updateImageCaption(index, caption) {
+            contentBlocks[index].caption = caption;
+        }
+
+        function moveBlock(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= contentBlocks.length) return;
+            
+            [contentBlocks[index], contentBlocks[newIndex]] = [contentBlocks[newIndex], contentBlocks[index]];
+            renderContentBlocks();
+        }
+
+        function removeBlock(index) {
+            contentBlocks.splice(index, 1);
+            renderContentBlocks();
+        }
+
+        function triggerImageUpload(index) {
+            const input = document.querySelector(`#contentBlocks .content-block:nth-child(${index + 1}) input[type="file"]`);
+            input.click();
+        }
+
+        async function handleImageUpload(index, event) {
             const file = event.target.files[0];
             if (!file) return;
             
@@ -922,95 +1031,46 @@
                 return;
             }
             
-            await uploadImage(file, 'featured', slug);
-        }
+            const progressContainer = document.getElementById(`progress-${index}`);
+            const progressFill = document.getElementById(`progress-fill-${index}`);
+            
+            progressContainer.style.display = 'block';
+            progressFill.style.width = '0%';
 
-        async function handleGalleryImages(event) {
-            const files = event.target.files;
-            if (!files.length) return;
-            
-            const slug = document.getElementById('artistSelect').value;
-            if (!slug) {
-                showStatus('Please select an artist first', 'error');
-                return;
-            }
-            
-            for (const file of files) {
-                await uploadImage(file, 'gallery', slug);
-            }
-        }
-
-        async function uploadImage(file, type, artistSlug) {
-            const progressId = type === 'featured' ? 'featuredProgress' : 'galleryProgress';
-            const progressFillId = type === 'featured' ? 'featuredProgressFill' : 'galleryProgressFill';
-            
-            document.getElementById(progressId).style.display = 'block';
-            document.getElementById(progressFillId).style.width = '0%';
-            
             try {
-                // Create unique filename
                 const timestamp = Date.now();
                 const fileExt = file.name.split('.').pop();
-                const fileName = `${artistSlug}_${type}_${timestamp}.${fileExt}`;
+                const fileName = `${slug}_content_${timestamp}.${fileExt}`;
                 
-                // Upload to Supabase Storage
                 const { data, error } = await supabase.storage
                     .from('artist-images')
                     .upload(fileName, file, {
                         upsert: false,
                         onProgress: (progress) => {
                             const percent = (progress.loaded / progress.total) * 100;
-                            document.getElementById(progressFillId).style.width = percent + '%';
+                            progressFill.style.width = percent + '%';
                         }
                     });
                 
                 if (error) throw error;
                 
-                // Get public URL
                 const { data: { publicUrl } } = supabase.storage
                     .from('artist-images')
                     .getPublicUrl(fileName);
                 
-                // Update URLs
-                if (type === 'featured') {
-                    featuredImageUrl = publicUrl;
-                } else {
-                    galleryImageUrls.push(publicUrl);
-                }
+                contentBlocks[index].url = publicUrl;
+                renderContentBlocks();
                 
-                renderImages();
-                
-                // Hide progress after delay
                 setTimeout(() => {
-                    document.getElementById(progressId).style.display = 'none';
+                    progressContainer.style.display = 'none';
                 }, 1000);
                 
             } catch (error) {
                 console.error('Upload error:', error);
                 showStatus('Error uploading image: ' + error.message, 'error');
-                document.getElementById(progressId).style.display = 'none';
+                progressContainer.style.display = 'none';
             }
         }
-
-        function removeFeaturedImage() {
-            featuredImageUrl = '';
-            renderImages();
-        }
-
-        function removeGalleryImage(index) {
-            galleryImageUrls.splice(index, 1);
-            renderImages();
-        }
-
-        // Make upload buttons trigger file inputs
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.file-input-wrapper .upload-btn')) {
-                e.preventDefault();
-                const wrapper = e.target.closest('.file-input-wrapper');
-                const input = wrapper.querySelector('input[type="file"]');
-                input.click();
-            }
-        });
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', loadArtists);
