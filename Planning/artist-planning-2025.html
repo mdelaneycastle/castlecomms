@@ -653,6 +653,9 @@
                     .order('artist_name', { ascending: true });
 
                 if (error) throw error;
+                
+                // Debug: Log the data to see if images are included
+                console.log('Loaded artist data:', data);
 
                 const navGrid = document.getElementById('nav-grid');
                 const contentArea = document.getElementById('content-area');
