@@ -560,6 +560,55 @@
         .lightbox-close:hover {
             color: #ddd;
         }
+
+        /* Rich Content Styles */
+        .rich-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .content-text-block {
+            background: #f8f9fc;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #4a5568;
+        }
+
+        .content-image-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .content-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .content-image:hover {
+            transform: scale(1.02);
+        }
+
+        .image-caption {
+            text-align: center;
+            font-style: italic;
+            color: #718096;
+            font-size: 0.95em;
+            max-width: 600px;
+        }
     </style>
 </head>
 <body>
@@ -854,37 +903,52 @@
                 `;
             }
 
-            // Create gallery HTML
-            let galleryHtml = '';
-            if (artist.gallery_images && artist.gallery_images.length > 0) {
-                galleryHtml = `
-                    <div class="gallery-section">
-                        <h4>🎨 Gallery</h4>
-                        <div class="gallery-grid">
-                            ${artist.gallery_images.map((url, index) => `
-                                <div class="gallery-item" onclick="openLightbox('${url}')">
-                                    <img src="${url}" alt="Gallery image ${index + 1}" loading="lazy">
-                                </div>
-                            `).join('')}
-                        </div>
+            // Create content blocks HTML (new system)
+            let contentBlocksHtml = '';
+            if (artist.content_blocks && artist.content_blocks.length > 0) {
+                contentBlocksHtml = artist.content_blocks.map(block => {
+                    if (block.type === 'text') {
+                        return `<div class="content-text-block">${block.content.replace(/\n/g, '<br>')}</div>`;
+                    } else if (block.type === 'image') {
+                        return `
+                            <div class="content-image-block">
+                                <img src="${block.url}" alt="${block.caption || 'Content image'}" onclick="openLightbox('${block.url}')" class="content-image" loading="lazy">
+                                ${block.caption ? `<div class="image-caption">${block.caption}</div>` : ''}
+                            </div>
+                        `;
+                    }
+                    return '';
+                }).join('');
+            }
+
+            // Fallback to legacy content if no content blocks
+            let mainContentHtml = '';
+            if (contentBlocksHtml) {
+                mainContentHtml = `<div class="rich-content">${contentBlocksHtml}</div>`;
+            } else if (artist.current_focus) {
+                mainContentHtml = `
+                    <div class="focus-section">
+                        <div class="focus-text">${artist.current_focus}</div>
+                    </div>
+                `;
+            } else {
+                mainContentHtml = `
+                    <div class="focus-section">
+                        <div class="focus-text">No current updates available.</div>
                     </div>
                 `;
             }
 
             // Build the card HTML
             card.innerHTML = `
-                ${artist.featured_image ? `<img src="${artist.featured_image}" alt="${artist.artist_name}" class="featured-image" loading="lazy">` : ''}
                 <div class="card-header">
                     <h2>${icon} ${artist.artist_name}</h2>
                     <div class="last-updated">Last updated: ${lastUpdated}</div>
                 </div>
                 <div class="card-body">
                     <div class="content-section">
-                        <div class="focus-section">
-                            <div class="focus-text">${artist.current_focus || 'No current updates available.'}</div>
-                        </div>
+                        ${mainContentHtml}
                         ${additionalHtml}
-                        ${galleryHtml}
                         ${actionsHtml}
                     </div>
                     <div class="stats-container">
@@ -952,37 +1016,52 @@
                 `;
             }
 
-            // Create gallery HTML for business sections too
-            let galleryHtml = '';
-            if (section.gallery_images && section.gallery_images.length > 0) {
-                galleryHtml = `
-                    <div class="gallery-section">
-                        <h4>🎨 Gallery</h4>
-                        <div class="gallery-grid">
-                            ${section.gallery_images.map((url, index) => `
-                                <div class="gallery-item" onclick="openLightbox('${url}')">
-                                    <img src="${url}" alt="Gallery image ${index + 1}" loading="lazy">
-                                </div>
-                            `).join('')}
-                        </div>
+            // Create content blocks HTML (new system) for business sections
+            let contentBlocksHtml = '';
+            if (section.content_blocks && section.content_blocks.length > 0) {
+                contentBlocksHtml = section.content_blocks.map(block => {
+                    if (block.type === 'text') {
+                        return `<div class="content-text-block">${block.content.replace(/\n/g, '<br>')}</div>`;
+                    } else if (block.type === 'image') {
+                        return `
+                            <div class="content-image-block">
+                                <img src="${block.url}" alt="${block.caption || 'Content image'}" onclick="openLightbox('${block.url}')" class="content-image" loading="lazy">
+                                ${block.caption ? `<div class="image-caption">${block.caption}</div>` : ''}
+                            </div>
+                        `;
+                    }
+                    return '';
+                }).join('');
+            }
+
+            // Fallback to legacy content if no content blocks
+            let mainContentHtml = '';
+            if (contentBlocksHtml) {
+                mainContentHtml = `<div class="rich-content">${contentBlocksHtml}</div>`;
+            } else if (section.current_focus) {
+                mainContentHtml = `
+                    <div class="focus-section">
+                        <div class="focus-text">${section.current_focus}</div>
+                    </div>
+                `;
+            } else {
+                mainContentHtml = `
+                    <div class="focus-section">
+                        <div class="focus-text">No current updates available.</div>
                     </div>
                 `;
             }
 
             // Build the card HTML
             card.innerHTML = `
-                ${section.featured_image ? `<img src="${section.featured_image}" alt="${section.artist_name}" class="featured-image" loading="lazy">` : ''}
                 <div class="card-header">
                     <h2>${icon} ${section.artist_name}</h2>
                     <div class="last-updated">Last updated: ${lastUpdated}</div>
                 </div>
                 <div class="card-body">
                     <div class="content-section">
-                        <div class="focus-section">
-                            <div class="focus-text">${section.current_focus || 'No current updates available.'}</div>
-                        </div>
+                        ${mainContentHtml}
                         ${additionalHtml}
-                        ${galleryHtml}
                         ${actionsHtml}
                     </div>
                     <div class="stats-container">
