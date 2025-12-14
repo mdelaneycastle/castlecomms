@@ -1428,7 +1428,12 @@
                 `;
                 
                 navItem.onclick = () => {
-                    const targetElement = document.getElementById(section.artist_slug);
+                    // Try both artist and section prefixes
+                    let targetElement = document.getElementById(`artist-${section.artist_slug}`);
+                    if (!targetElement) {
+                        targetElement = document.getElementById(`section-${section.artist_slug}`);
+                    }
+                    
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         // Add highlight effect
