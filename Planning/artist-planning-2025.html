@@ -609,6 +609,38 @@
             font-size: 0.95em;
             max-width: 600px;
         }
+
+        /* Link Block Styles */
+        .content-link-block {
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        .content-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.05em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .content-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            color: white;
+            text-decoration: none;
+        }
+
+        .content-link-icon {
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
@@ -917,6 +949,15 @@
                                 ${block.caption ? `<div class="image-caption">${block.caption}</div>` : ''}
                             </div>
                         `;
+                    } else if (block.type === 'link') {
+                        return `
+                            <div class="content-link-block">
+                                <a href="${block.url}" class="content-link" ${block.linkTarget || 'target="_blank"'}>
+                                    <span class="content-link-icon">🔗</span>
+                                    <span>${block.linkText || 'View Link'}</span>
+                                </a>
+                            </div>
+                        `;
                     }
                     return '';
                 }).join('');
@@ -1028,6 +1069,15 @@
                             <div class="content-image-block">
                                 <img src="${block.url}" alt="${block.caption || 'Content image'}" onclick="openLightbox('${block.url}')" class="content-image" loading="lazy">
                                 ${block.caption ? `<div class="image-caption">${block.caption}</div>` : ''}
+                            </div>
+                        `;
+                    } else if (block.type === 'link') {
+                        return `
+                            <div class="content-link-block">
+                                <a href="${block.url}" class="content-link" ${block.linkTarget || 'target="_blank"'}>
+                                    <span class="content-link-icon">🔗</span>
+                                    <span>${block.linkText || 'View Link'}</span>
+                                </a>
                             </div>
                         `;
                     }
