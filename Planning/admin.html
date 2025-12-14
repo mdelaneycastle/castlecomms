@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artist Planning Admin Panel</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -1033,7 +1034,11 @@
                     </div>
                     <div class="content-block-body">
                         <div class="text-block">
-                            <textarea placeholder="Enter your content here..." onchange="updateTextBlock(${index}, this.value)">${block.content || ''}</textarea>
+                            <textarea placeholder="Enter your content here... 
+Supports Markdown:
+**Bold Text** | *Italic Text*
+### Headers | - List items
+[Links](url) | > Blockquotes" onchange="updateTextBlock(${index}, this.value)">${block.content || ''}</textarea>
                         </div>
                     </div>
                 `;
