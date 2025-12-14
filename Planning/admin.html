@@ -127,7 +127,7 @@
             border-bottom: 1px solid #e2e8f0;
         }
 
-        .btn-add-text, .btn-add-image {
+        .btn-add-text, .btn-add-image, .btn-add-link {
             background: #667eea;
             color: white;
             border: none;
@@ -139,7 +139,7 @@
             transition: all 0.3s ease;
         }
 
-        .btn-add-text:hover, .btn-add-image:hover {
+        .btn-add-text:hover, .btn-add-image:hover, .btn-add-link:hover {
             background: #5568d3;
             transform: translateY(-1px);
         }
@@ -278,6 +278,34 @@
             height: 100%;
             background: #667eea;
             transition: width 0.3s ease;
+        }
+
+        /* Link Block Styles */
+        .link-block {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .link-block input {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .link-preview {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #f0f4f8;
+            border-radius: 6px;
+            border: 1px solid #cbd5e0;
+        }
+
+        .link-icon {
+            font-size: 20px;
         }
 
         /* Date and Action Items */
@@ -575,6 +603,7 @@
                         <div class="editor-toolbar">
                             <button type="button" class="btn-add-text" onclick="addContentBlock('text')">📝 Add Text</button>
                             <button type="button" class="btn-add-image" onclick="addContentBlock('image')">🖼️ Add Image</button>
+                            <button type="button" class="btn-add-link" onclick="addContentBlock('link')">🔗 Add Link</button>
                             <button type="button" class="btn-migrate" onclick="migrateFromLegacy()" style="background: #f59e0b; margin-left: 10px;">🔄 Migrate Legacy Content</button>
                         </div>
                         <div id="contentBlocks" class="content-blocks"></div>
@@ -946,8 +975,10 @@
                 id: ++blockIdCounter,
                 type: type,
                 content: type === 'text' ? '' : null,
-                url: type === 'image' ? null : null,
-                caption: type === 'image' ? '' : null
+                url: type === 'image' || type === 'link' ? '' : null,
+                caption: type === 'image' ? '' : null,
+                linkText: type === 'link' ? '' : null,
+                linkTarget: type === 'link' ? '_blank' : null
             };
             
             contentBlocks.push(block);
@@ -971,7 +1002,14 @@
         }
 
         function createContentBlockHTML(block, index) {
-            const typeLabel = block.type === 'text' ? '📝 Text Block' : '🖼️ Image Block';
+            let typeLabel;
+            if (block.type === 'text') {
+                typeLabel = '📝 Text Block';
+            } else if (block.type === 'image') {
+                typeLabel = '🖼️ Image Block';
+            } else if (block.type === 'link') {
+                typeLabel = '🔗 Link Block';
+            }
             
             if (block.type === 'text') {
                 return `
@@ -1017,6 +1055,33 @@
                         </div>
                     </div>
                 `;
+            } else if (block.type === 'link') {
+                return `
+                    <div class="content-block-header">
+                        <span class="content-block-type">${typeLabel}</span>
+                        <div class="content-block-controls">
+                            ${index > 0 ? `<button class="btn-move" onclick="moveBlock(${index}, -1)">↑</button>` : ''}
+                            ${index < contentBlocks.length - 1 ? `<button class="btn-move" onclick="moveBlock(${index}, 1)">↓</button>` : ''}
+                            <button class="btn-remove" onclick="removeBlock(${index})">✕</button>
+                        </div>
+                    </div>
+                    <div class="content-block-body">
+                        <div class="link-block">
+                            <input type="text" placeholder="Link text (e.g. View Report)" value="${block.linkText || ''}" onchange="updateLinkText(${index}, this.value)">
+                            <input type="url" placeholder="URL (e.g. https://example.com/report.pdf)" value="${block.url || ''}" onchange="updateLinkUrl(${index}, this.value)">
+                            <label style="font-size: 12px; color: #718096;">
+                                <input type="checkbox" ${block.linkTarget === '_blank' ? 'checked' : ''} onchange="updateLinkTarget(${index}, this.checked)">
+                                Open in new tab
+                            </label>
+                            ${block.url && block.linkText ? `
+                                <div class="link-preview">
+                                    <span class="link-icon">🔗</span>
+                                    <span>${block.linkText}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
             }
         }
 
@@ -1026,6 +1091,20 @@
 
         function updateImageCaption(index, caption) {
             contentBlocks[index].caption = caption;
+        }
+
+        function updateLinkText(index, text) {
+            contentBlocks[index].linkText = text;
+            renderContentBlocks();
+        }
+
+        function updateLinkUrl(index, url) {
+            contentBlocks[index].url = url;
+            renderContentBlocks();
+        }
+
+        function updateLinkTarget(index, newTab) {
+            contentBlocks[index].linkTarget = newTab ? '_blank' : '_self';
         }
 
         function migrateFromLegacy() {
