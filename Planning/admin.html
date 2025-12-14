@@ -1027,7 +1027,7 @@
                         </div>
                     </div>
                 `;
-            } else {
+            } else if (block.type === 'image') {
                 return `
                     <div class="content-block-header">
                         <span class="content-block-type">${typeLabel}</span>
