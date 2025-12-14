@@ -727,7 +727,7 @@
                 const businessSections = [];
 
                 data.forEach(item => {
-                    if (isBusinessSection(item.artist_slug)) {
+                    if (isBusinessSection(item.artist_slug) || item.section_type === 'business') {
                         businessSections.push(item);
                     } else {
                         artists.push(item);
@@ -807,8 +807,7 @@
                 'campaign-marketing-strategy',
                 'operational-improvements',
                 'cfa-rewards-scheme',
-                'marvel-legacy',
-                'spring-fair-2026'
+                'marvel-legacy'
             ];
             return businessSlugs.includes(slug);
         }
@@ -850,8 +849,7 @@
                 'campaign-marketing-strategy': '📱',
                 'operational-improvements': '⚙️',
                 'cfa-rewards-scheme': '🏆',
-                'marvel-legacy': '⚡',
-                'spring-fair-2026': '🌸' // <--- Added value here
+                'marvel-legacy': '⚡'
             };
             return icons[slug] || '📋';
         }
