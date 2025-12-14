@@ -1396,25 +1396,51 @@
             const quickNavItems = document.getElementById('quick-nav-items');
             quickNavItems.innerHTML = '';
 
-            data.forEach((section) => {
+            // Separate artists and business sections
+            const artists = data.filter(item => !isBusinessSection(item.artist_slug))
+                               .sort((a, b) => a.artist_name.localeCompare(b.artist_name));
+            
+            const businessSections = data.filter(item => isBusinessSection(item.artist_slug))
+                                        .sort((a, b) => a.artist_name.localeCompare(b.artist_name));
+
+            // Create nav items for artists first
+            artists.forEach((section) => {
                 const navItem = document.createElement('div');
                 navItem.className = 'quick-nav-item';
-                
-                // Use the full name, let CSS handle the width
                 navItem.textContent = section.artist_name;
                 
                 navItem.onclick = () => {
-                    // Find target (handles both artist and business sections)
                     let targetElement = document.getElementById(`artist-${section.artist_slug}`);
                     if (!targetElement) {
                         targetElement = document.getElementById(`section-${section.artist_slug}`);
                     }
                     
                     if (targetElement) {
-                        // Smooth scroll to the section
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        
-                        // Add a momentary flash effect to the card
+                        targetElement.style.transition = 'transform 0.3s ease';
+                        targetElement.style.transform = 'scale(1.02)';
+                        setTimeout(() => {
+                            targetElement.style.transform = 'scale(1)';
+                        }, 400);
+                    }
+                };
+                quickNavItems.appendChild(navItem);
+            });
+
+            // Then create nav items for business sections
+            businessSections.forEach((section) => {
+                const navItem = document.createElement('div');
+                navItem.className = 'quick-nav-item';
+                navItem.textContent = section.artist_name;
+                
+                navItem.onclick = () => {
+                    let targetElement = document.getElementById(`artist-${section.artist_slug}`);
+                    if (!targetElement) {
+                        targetElement = document.getElementById(`section-${section.artist_slug}`);
+                    }
+                    
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         targetElement.style.transition = 'transform 0.3s ease';
                         targetElement.style.transform = 'scale(1.02)';
                         setTimeout(() => {
