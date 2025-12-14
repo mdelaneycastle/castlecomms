@@ -563,6 +563,91 @@
         .close-modal:hover {
             color: #4a5568;
         }
+
+        /* Markdown Guide Styling */
+        .markdown-guide {
+            background: linear-gradient(135deg, #f8f9fc 0%, #e8f2ff 100%);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .markdown-guide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+        }
+
+        .markdown-guide h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            text-align: center;
+        }
+
+        .markdown-guide > p {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .markdown-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .markdown-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .markdown-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .markdown-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+        }
+
+        .markdown-item strong {
+            color: #4a5568;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .markdown-item code {
+            background: #edf2f7;
+            color: #667eea;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            display: inline-block;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .markdown-row {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -620,6 +705,54 @@
                         <div id="contentBlocks" class="content-blocks"></div>
                     </div>
                     <p class="help">Build your content using text blocks and images. Click "Migrate Legacy Content" to automatically move the old content here.</p>
+                </div>
+
+                <!-- Markdown Formatting Guide -->
+                <div class="markdown-guide">
+                    <h3>📝 Text Formatting Guide</h3>
+                    <p>Text blocks support Markdown formatting for rich content:</p>
+                    <div class="markdown-examples">
+                        <div class="markdown-row">
+                            <div class="markdown-item">
+                                <strong>Bold Text:</strong>
+                                <code>**Bold Text**</code>
+                            </div>
+                            <div class="markdown-item">
+                                <strong>Italic Text:</strong>
+                                <code>*Italic Text*</code>
+                            </div>
+                        </div>
+                        <div class="markdown-row">
+                            <div class="markdown-item">
+                                <strong>Headers:</strong>
+                                <code>### Header Text</code>
+                            </div>
+                            <div class="markdown-item">
+                                <strong>Lists:</strong>
+                                <code>- List item</code>
+                            </div>
+                        </div>
+                        <div class="markdown-row">
+                            <div class="markdown-item">
+                                <strong>Links:</strong>
+                                <code>[Link Text](https://url.com)</code>
+                            </div>
+                            <div class="markdown-item">
+                                <strong>Quotes:</strong>
+                                <code>> Quote text</code>
+                            </div>
+                        </div>
+                        <div class="markdown-row">
+                            <div class="markdown-item">
+                                <strong>Line Break:</strong>
+                                <code>Two spaces + Enter</code>
+                            </div>
+                            <div class="markdown-item">
+                                <strong>Code:</strong>
+                                <code>`inline code`</code>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-group">
