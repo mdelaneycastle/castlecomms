@@ -570,18 +570,27 @@
             display: none;
         }
 
-        /* Quick Nav Sticky Sidebar - Redesigned */
+        /* Quick Nav - Floating Smart Pills */
         .quick-nav {
             position: fixed;
-            right: 0; /* Sticked to the very right edge */
+            right: 20px; /* Spaced slightly off the edge */
             top: 50%;
             transform: translateY(-50%);
             z-index: 1000;
+            max-height: 85vh; /* Prevents it from going off-screen */
+            overflow-y: auto; /* scrollable if you have too many artists */
+            padding: 10px 5px; /* Breathing room for shadows */
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 0;
             visibility: hidden;
-            /* Create a hover zone so it doesn't flicker */
-            padding-left: 50px; 
+            
+            /* Hide scrollbar but keep functionality */
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+
+        .quick-nav::-webkit-scrollbar { 
+            display: none; 
         }
 
         .quick-nav.visible {
@@ -592,80 +601,56 @@
         .quick-nav-items {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            /* Glassmorphism Container */
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 20px 15px 20px 20px;
-            border-radius: 20px 0 0 20px; /* Round left corners only */
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-right: none;
-            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
-            
-            max-height: 80vh;
-            overflow-y: auto;
-            scrollbar-width: none;
-        }
-
-        .quick-nav-items::-webkit-scrollbar {
-            display: none;
+            gap: 12px; /* More space between buttons */
+            align-items: flex-end; /* Aligns buttons to the right */
         }
 
         .quick-nav-item {
-            position: relative;
-            /* Auto width allows names to fit */
-            width: auto; 
-            min-width: 140px;
-            max-width: 200px;
-            padding: 12px 20px;
-            
-            /* Default State: Clean White */
+            /* Glass Effect & Base Style */
             background: rgba(255, 255, 255, 0.95);
-            color: #667eea; /* Theme Purple Text */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy transition */
+            /* Sizing & Shape */
+            padding: 12px 24px; /* Much larger clickable area */
+            border-radius: 30px; /* Perfect pill shape */
             
-            font-size: 0.95em;
+            /* Typography */
+            color: #4a5568;
             font-weight: 700;
-            text-align: left; /* Align text for better reading */
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            
+            /* Interaction properties */
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            
+            /* Text Handling - Fixes truncation issues */
             white-space: nowrap;
+            max-width: 260px; /* Allows longer names like "Operational Improvements" */
             overflow: hidden;
             text-overflow: ellipsis;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: right;
         }
 
-        /* Hover Effect: Pop out and change color */
+        /* Hover State - The "Pop" effect */
         .quick-nav-item:hover {
-            transform: translateX(-10px) scale(1.05);
+            transform: translateX(-5px) scale(1.05); /* Slides left and grows */
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-            z-index: 10;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            border-color: transparent;
         }
 
-        /* Optional: Add a small indicator line to the left of active/hovered items */
-        .quick-nav-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: #764ba2;
-            border-radius: 4px 0 0 4px;
-            opacity: 0;
-            transition: opacity 0.3s;
+        /* Optional: Active State */
+        .quick-nav-item:active {
+            transform: scale(0.98);
         }
 
-        .quick-nav-item:hover::before {
-            opacity: 1;
-            background: white; /* Change to white on hover since bg becomes purple */
-        }
-
-        /* Mobile check */
+        /* Hide on mobile */
         @media (max-width: 1100px) {
             .quick-nav { display: none; }
         }
@@ -1411,34 +1396,30 @@
             const quickNavItems = document.getElementById('quick-nav-items');
             quickNavItems.innerHTML = '';
 
-            data.forEach((section, index) => {
+            data.forEach((section) => {
                 const navItem = document.createElement('div');
                 navItem.className = 'quick-nav-item';
                 
-                // Update: Allow fuller names, but keep them clean
-                // If the name is extremely long (over 25 chars), truncate it slightly better
-                let displayText = section.artist_name;
-                if (displayText.length > 25) {
-                    displayText = displayText.substring(0, 22) + '...';
-                }
-                
-                navItem.textContent = displayText;
-                navItem.title = section.artist_name; // Tooltip shows full name
+                // Use the full name, let CSS handle the width
+                navItem.textContent = section.artist_name;
                 
                 navItem.onclick = () => {
-                    // Logic remains the same
+                    // Find target (handles both artist and business sections)
                     let targetElement = document.getElementById(`artist-${section.artist_slug}`);
                     if (!targetElement) {
                         targetElement = document.getElementById(`section-${section.artist_slug}`);
                     }
                     
                     if (targetElement) {
-                        targetElement.style.transition = 'none';
-                        targetElement.style.transform = 'none';
-                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Smooth scroll to the section
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        // Add a momentary flash effect to the card
+                        targetElement.style.transition = 'transform 0.3s ease';
+                        targetElement.style.transform = 'scale(1.02)';
                         setTimeout(() => {
-                            targetElement.style.transition = '';
-                        }, 100);
+                            targetElement.style.transform = 'scale(1)';
+                        }, 400);
                     }
                 };
                 quickNavItems.appendChild(navItem);
