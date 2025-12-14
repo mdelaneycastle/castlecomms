@@ -609,9 +609,9 @@
 
         .quick-nav-item {
             position: relative;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
+            width: 85px;
+            height: 35px;
+            border-radius: 18px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: 2px solid white;
             cursor: pointer;
@@ -619,11 +619,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9em;
+            font-size: 0.7em;
             color: white;
             font-weight: 600;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 0 8px;
+            text-align: center;
+            line-height: 1.2;
         }
 
         .quick-nav-item:hover {
@@ -1414,16 +1417,21 @@
 
             // Create nav items for each section
             data.forEach((section, index) => {
-                const initials = section.artist_name.split(' ')
-                    .map(word => word[0])
-                    .join('')
-                    .substring(0, 2)
-                    .toUpperCase();
+                const words = section.artist_name.split(' ');
+                let displayText;
+                
+                if (words.length <= 2) {
+                    // If 2 words or less, show all
+                    displayText = section.artist_name;
+                } else {
+                    // If more than 2 words, show first 2 + ".."
+                    displayText = words.slice(0, 2).join(' ') + '..';
+                }
                 
                 const navItem = document.createElement('div');
                 navItem.className = 'quick-nav-item';
                 navItem.innerHTML = `
-                    ${initials}
+                    ${displayText}
                     <div class="quick-nav-tooltip">${section.artist_name}</div>
                 `;
                 
