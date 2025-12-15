@@ -111,13 +111,21 @@
             padding: 20px 0;
             margin-bottom: 30px;
             border-bottom: 1px solid #e9ecef;
+            text-align: center;
+        }
+
+        .quick-access h2 {
+            font-family: 'Acta Bold Italic', sans-serif;
+            color: #282828;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
         }
 
         .quick-links {
             display: flex;
             flex-wrap: wrap;
             gap: 30px;
-            justify-content: flex-start;
+            justify-content: center;
         }
 
         .quick-link {
@@ -171,10 +179,9 @@
             cursor: pointer;
             user-select: none;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
             transition: background 0.3s;
-            text-align: center;
         }
 
         .category-header:hover {
@@ -408,6 +415,7 @@
     <div class="container">
         <!-- Quick Access Section -->
         <div class="quick-access">
+            <h2>Quick Links</h2>
             <div class="quick-links">
                 <a href="#" class="quick-link" data-policy="absence-policy">
                     Report Absence
