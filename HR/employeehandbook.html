@@ -27,7 +27,7 @@
 
         body {
             font-family: 'DIN LightAlternate', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background-color: #D8D1C5;
+            background-color: #F1EDEC;
             line-height: 1.6;
             color: #333;
             padding-top: 140px; /* Space for fixed header */
@@ -43,7 +43,7 @@
             top: 0;
             left: 0;
             right: 0;
-            background: #575554;
+            background: #282828;
             color: white;
             z-index: 1000;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -72,14 +72,14 @@
             flex: 1;
             padding: 12px 15px;
             border: none;
-            border-radius: 25px;
+            border-radius: 0;
             font-size: 1rem;
             outline: none;
             background: rgba(255,255,255,0.9);
         }
 
         .search-box::placeholder {
-            color: #666;
+            color: #282828;
         }
 
         .clear-search {
@@ -87,7 +87,7 @@
             border: none;
             color: white;
             padding: 12px 15px;
-            border-radius: 25px;
+            border-radius: 0;
             cursor: pointer;
             font-size: 0.9rem;
             display: none;
@@ -107,14 +107,14 @@
         /* Quick Access */
         .quick-access {
             background: white;
-            border-radius: 12px;
+            border-radius: 0;
             padding: 25px;
             margin-bottom: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .quick-access h2 {
-            color: #575554;
+            color: #282828;
             margin-bottom: 20px;
             font-size: 1.5rem;
         }
@@ -128,16 +128,16 @@
         .quick-link {
             background: #f8f9fa;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 0;
             text-decoration: none;
-            color: #575554;
+            color: #282828;
             border: 1px solid #e9ecef;
             transition: all 0.2s;
             text-align: center;
         }
 
         .quick-link:hover {
-            background: #575554;
+            background: #282828;
             color: white;
             transform: translateY(-2px);
         }
@@ -151,14 +151,14 @@
         /* Category Sections */
         .category {
             background: white;
-            border-radius: 12px;
+            border-radius: 0;
             margin-bottom: 25px;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .category-header {
-            background: linear-gradient(135deg, #575554 0%, #6a6664 100%);
+            background: linear-gradient(135deg, #282828 0%, #282828 100%);
             color: white;
             padding: 20px;
             cursor: pointer;
@@ -170,7 +170,7 @@
         }
 
         .category-header:hover {
-            background: linear-gradient(135deg, #4a4544 0%, #5d5a59 100%);
+            background: linear-gradient(135deg, #282828 0%, #282828 100%);
         }
 
         .category-header h3 {
@@ -225,18 +225,18 @@
 
         .policy-title {
             font-weight: 600;
-            color: #575554;
+            color: #282828;
             font-size: 1.1rem;
         }
 
         .policy-summary {
-            color: #666;
+            color: #282828;
             font-size: 0.9rem;
             margin-top: 5px;
         }
 
         .expand-icon {
-            color: #575554;
+            color: #282828;
             font-size: 1rem;
             transition: transform 0.3s;
         }
@@ -257,13 +257,13 @@
         }
 
         .policy-content h4 {
-            color: #575554;
+            color: #282828;
             margin: 20px 0 10px 0;
             font-size: 1.1rem;
         }
 
         .policy-content h5 {
-            color: #575554;
+            color: #282828;
             margin: 15px 0 8px 0;
             font-size: 1rem;
         }
@@ -290,7 +290,7 @@
             border: 1px solid #ffeaa7;
             color: #856404;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 0;
             margin: 15px 0;
         }
 
@@ -305,21 +305,21 @@
         .search-results {
             display: none;
             background: white;
-            border-radius: 12px;
+            border-radius: 0;
             padding: 25px;
             margin-bottom: 30px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .search-results h3 {
-            color: #575554;
+            color: #282828;
             margin-bottom: 15px;
         }
 
         .search-result-item {
             padding: 15px;
             border: 1px solid #e9ecef;
-            border-radius: 8px;
+            border-radius: 0;
             margin-bottom: 10px;
             cursor: pointer;
             transition: background 0.2s;
@@ -331,19 +331,19 @@
 
         .result-title {
             font-weight: 600;
-            color: #575554;
+            color: #282828;
             margin-bottom: 5px;
         }
 
         .result-category {
-            color: #666;
+            color: #282828;
             font-size: 0.9rem;
         }
 
         /* No Results */
         .no-results {
             text-align: center;
-            color: #666;
+            color: #282828;
             padding: 20px;
             font-style: italic;
         }
@@ -402,27 +402,27 @@
             <h2>Quick Access</h2>
             <div class="quick-links">
                 <a href="#" class="quick-link" data-policy="absence-policy">
-                    <span class="quick-link-icon">🏥</span>
+                    <span class="quick-link-icon"></span>
                     Report Absence
                 </a>
                 <a href="#" class="quick-link" data-policy="holiday-policy">
-                    <span class="quick-link-icon">🏖️</span>
+                    <span class="quick-link-icon"></span>
                     Holiday Request
                 </a>
                 <a href="#" class="quick-link" data-policy="grievance-procedure">
-                    <span class="quick-link-icon">📢</span>
+                    <span class="quick-link-icon"></span>
                     Grievance
                 </a>
                 <a href="#" class="quick-link" data-policy="health-safety">
-                    <span class="quick-link-icon">⚠️</span>
+                    <span class="quick-link-icon"></span>
                     Health & Safety
                 </a>
                 <a href="#" class="quick-link" data-policy="expenses">
-                    <span class="quick-link-icon">💳</span>
+                    <span class="quick-link-icon"></span>
                     Expenses
                 </a>
                 <a href="#" class="quick-link" data-policy="dress-code">
-                    <span class="quick-link-icon">👔</span>
+                    <span class="quick-link-icon"></span>
                     Dress Code
                 </a>
             </div>
@@ -440,7 +440,7 @@
         <div class="category" data-category="contractual">
             <div class="category-header" onclick="toggleCategory(this)">
                 <div>
-                    <span class="category-icon">📋</span>
+                    <span class="category-icon"></span>
                     <h3>Contractual Terms</h3>
                 </div>
                 <span class="collapse-icon">▼</span>
@@ -709,7 +709,7 @@
         <div class="category" data-category="hr-policies">
             <div class="category-header" onclick="toggleCategory(this)">
                 <div>
-                    <span class="category-icon">👥</span>
+                    <span class="category-icon"></span>
                     <h3>HR Policies & Procedures</h3>
                 </div>
                 <span class="collapse-icon">▼</span>
@@ -1017,7 +1017,7 @@
         <div class="category" data-category="safety">
             <div class="category-header" onclick="toggleCategory(this)">
                 <div>
-                    <span class="category-icon">🛡️</span>
+                    <span class="category-icon"></span>
                     <h3>Workplace Safety & Security</h3>
                 </div>
                 <span class="collapse-icon">▼</span>
@@ -1142,7 +1142,7 @@
         <div class="category" data-category="benefits">
             <div class="category-header" onclick="toggleCategory(this)">
                 <div>
-                    <span class="category-icon">💰</span>
+                    <span class="category-icon"></span>
                     <h3>Benefits & Compensation</h3>
                 </div>
                 <span class="collapse-icon">▼</span>
@@ -1269,7 +1269,7 @@
         <div class="category" data-category="conduct">
             <div class="category-header" onclick="toggleCategory(this)">
                 <div>
-                    <span class="category-icon">⚖️</span>
+                    <span class="category-icon"></span>
                     <h3>Conduct & Compliance</h3>
                 </div>
                 <span class="collapse-icon">▼</span>
@@ -1414,7 +1414,7 @@
         <div class="category" data-category="support">
             <div class="category-header" onclick="toggleCategory(this)">
                 <div>
-                    <span class="category-icon">🤝</span>
+                    <span class="category-icon"></span>
                     <h3>Support & Resources</h3>
                 </div>
                 <span class="collapse-icon">▼</span>
@@ -1734,9 +1734,27 @@
 
         // Initialize with first category expanded
         document.addEventListener('DOMContentLoaded', function() {
-            const firstCategory = document.querySelector('.category');
-            if (firstCategory) {
-                firstCategory.classList.add('expanded');
+            // Check if there's a hash in the URL
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                // Try to navigate to the policy specified in the hash
+                setTimeout(() => {
+                    goToPolicy(hash);
+                }, 100);
+            } else {
+                // Otherwise expand first category
+                const firstCategory = document.querySelector('.category');
+                if (firstCategory) {
+                    firstCategory.classList.add('expanded');
+                }
+            }
+        });
+        
+        // Handle hash changes
+        window.addEventListener('hashchange', function() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                goToPolicy(hash);
             }
         });
     </script>
