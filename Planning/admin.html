@@ -907,7 +907,6 @@
             if (data) {
                 document.getElementById('revenueAmount').value = data.revenue_amount || '';
                 document.getElementById('revenueContext').value = data.revenue_context || '';
-                document.getElementById('currentFocus').value = data.current_focus || '';
                 document.getElementById('additionalUpdates').value = data.additional_updates || '';
                 
                 // Load dates
@@ -1015,7 +1014,7 @@
                 artist_name: name,
                 revenue_amount: document.getElementById('revenueAmount').value || null,
                 revenue_context: document.getElementById('revenueContext').value || null,
-                current_focus: document.getElementById('currentFocus').value || null,
+                current_focus: null,
                 additional_updates: document.getElementById('additionalUpdates').value || null,
                 key_dates: cleanDates,
                 action_items: cleanActions,
