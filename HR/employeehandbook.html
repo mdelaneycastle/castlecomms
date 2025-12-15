@@ -102,50 +102,57 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            text-align: left;
         }
 
         /* Quick Access */
         .quick-access {
-            background: white;
-            border-radius: 0;
-            padding: 25px;
+            background: transparent;
+            padding: 20px 0;
             margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .quick-access h2 {
-            color: #282828;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
         }
 
         .quick-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: flex-start;
         }
 
         .quick-link {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 0;
+            font-family: 'DIN LightAlternate', sans-serif;
+            background: none;
+            border: none;
+            padding: 0;
             text-decoration: none;
-            color: #282828;
-            border: 1px solid #e9ecef;
-            transition: all 0.2s;
-            text-align: center;
+            color: #333;
+            font-size: 1rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .quick-link::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #282828;
+            transition: width 0.4s ease;
         }
 
         .quick-link:hover {
-            background: #282828;
-            color: white;
-            transform: translateY(-2px);
+            color: #282828;
+        }
+
+        .quick-link:hover::after {
+            width: 100%;
         }
 
         .quick-link-icon {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-            display: block;
+            display: none;
         }
 
         /* Category Sections */
@@ -164,9 +171,10 @@
             cursor: pointer;
             user-select: none;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             transition: background 0.3s;
+            text-align: center;
         }
 
         .category-header:hover {
@@ -375,7 +383,8 @@
             }
 
             .quick-links {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+                gap: 15px;
             }
         }
     </style>
@@ -399,30 +408,23 @@
     <div class="container">
         <!-- Quick Access Section -->
         <div class="quick-access">
-            <h2>Quick Access</h2>
             <div class="quick-links">
                 <a href="#" class="quick-link" data-policy="absence-policy">
-                    <span class="quick-link-icon"></span>
                     Report Absence
                 </a>
                 <a href="#" class="quick-link" data-policy="holiday-policy">
-                    <span class="quick-link-icon"></span>
                     Holiday Request
                 </a>
                 <a href="#" class="quick-link" data-policy="grievance-procedure">
-                    <span class="quick-link-icon"></span>
                     Grievance
                 </a>
                 <a href="#" class="quick-link" data-policy="health-safety">
-                    <span class="quick-link-icon"></span>
                     Health & Safety
                 </a>
                 <a href="#" class="quick-link" data-policy="expenses">
-                    <span class="quick-link-icon"></span>
                     Expenses
                 </a>
                 <a href="#" class="quick-link" data-policy="dress-code">
-                    <span class="quick-link-icon"></span>
                     Dress Code
                 </a>
             </div>
