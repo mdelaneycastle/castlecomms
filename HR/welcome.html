@@ -5,14 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Your New Role</title>
     <style>
+        @font-face {
+            font-family: 'Acta Bold Italic';
+            src: url('/fonts/Acta W01 Bold Italic.ttf') format('truetype');
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        @font-face {
+            font-family: 'DIN LightAlternate';
+            src: url('/fonts/DIN LightAlternate.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-family: 'DIN LightAlternate', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -56,6 +74,7 @@
         }
 
         .header h1 {
+            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             font-size: 2.5rem;
             margin-bottom: 10px;
         }
@@ -93,6 +112,7 @@
         }
 
         .director-content h3 {
+            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             color: #2c3e50;
             font-size: 1.3rem;
             margin-bottom: 15px;
@@ -231,6 +251,7 @@
         }
 
         .welcome-message h2 {
+            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             color: #2c3e50;
             font-size: 1.8rem;
             margin-bottom: 10px;
@@ -378,6 +399,7 @@
         }
 
         .info-card h4 {
+            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             color: #2c3e50;
             font-size: 1.1rem;
             margin-bottom: 10px;
@@ -431,6 +453,7 @@
         }
 
         .modal-header h3 {
+            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             margin: 0;
             font-size: 1.5rem;
         }
