@@ -687,24 +687,18 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>📝 Current Focus (Legacy - Copy to Rich Editor below)</label>
-                    <textarea id="currentFocus" placeholder="This is the old content field - copy this content to the Rich Content Editor below, then clear this field." style="background: #fff8dc; border: 2px dashed #ffa500;"></textarea>
-                    <p class="help">⚠️ This is your existing content. Copy this text to the Rich Content Editor below, then clear this field to complete the migration.</p>
-                </div>
 
                 <div class="form-group">
-                    <label>📝 Rich Content Editor (New System)</label>
+                    <label>📝 Rich Content Editor</label>
                     <div class="content-editor">
                         <div class="editor-toolbar">
                             <button type="button" class="btn-add-text" onclick="addContentBlock('text')">📝 Add Text</button>
                             <button type="button" class="btn-add-image" onclick="addContentBlock('image')">🖼️ Add Image</button>
                             <button type="button" class="btn-add-link" onclick="addContentBlock('link')">🔗 Add Link</button>
-                            <button type="button" class="btn-migrate" onclick="migrateFromLegacy()" style="background: #f59e0b; margin-left: 10px;">🔄 Migrate Legacy Content</button>
                         </div>
                         <div id="contentBlocks" class="content-blocks"></div>
                     </div>
-                    <p class="help">Build your content using text blocks and images. Click "Migrate Legacy Content" to automatically move the old content here.</p>
+                    <p class="help">Build your content using text blocks, images, and links. Drag to reorder blocks.</p>
                 </div>
 
                 <!-- Markdown Formatting Guide -->
@@ -1255,30 +1249,6 @@ Supports Markdown:
             contentBlocks[index].linkTarget = newTab ? '_blank' : '_self';
         }
 
-        function migrateFromLegacy() {
-            const legacyContent = document.getElementById('currentFocus').value;
-            if (!legacyContent || legacyContent.trim() === '') {
-                showStatus('No legacy content to migrate', 'error');
-                return;
-            }
-
-            // Create a text block with the legacy content
-            const block = {
-                id: ++blockIdCounter,
-                type: 'text',
-                content: legacyContent,
-                url: null,
-                caption: null
-            };
-            
-            contentBlocks.push(block);
-            renderContentBlocks();
-            
-            // Clear the legacy field
-            document.getElementById('currentFocus').value = '';
-            
-            showStatus('✅ Legacy content migrated! Remember to save your changes.', 'success');
-        }
 
         function moveBlock(index, direction) {
             const newIndex = index + direction;
