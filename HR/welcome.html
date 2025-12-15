@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Your New Role</title>
+    <title>Employee Handbook - Castle Fine Art</title>
     <style>
         @font-face {
             font-family: 'Acta Bold Italic';
@@ -32,788 +32,1742 @@
             box-sizing: border-box;
         }
 
+        body {
+            font-family: 'DIN LightAlternate', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #F1EDEC;
+            line-height: 1.6;
+            color: #333;
+            padding-top: 140px; /* Space for fixed header */
+        }
+
         h1, h2, h3, h4, h5, h6 {
             font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
         }
 
-        body {
-            font-family: 'DIN LightAlternate', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background-color: #F1EDEC;
-            position: relative;
-        }
-        
-
-        .container {
-            max-width: 700px;
-            width: 100%;
-            background: white;
-            border-radius: 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-            position: relative;
-            z-index: 2;
-        }
-
+        /* Header */
         .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             background: #282828;
             color: white;
-            padding: 40px;
-            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
         .header h1 {
-            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .director-message {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
-            padding: 30px;
-            background: #f8f9fa;
-            border-radius: 0;
-            align-items: flex-start;
-        }
-
-        .director-photo {
-            flex-shrink: 0;
-            width: 150px;
-            height: 150px;
-            border-radius: 0;
-            object-fit: cover;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .director-content {
-            flex: 1;
-        }
-
-        .director-content h3 {
-            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            color: #282828;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-        }
-
-        .director-quote {
-            font-style: italic;
-            line-height: 1.8;
-            color: #444;
-            margin-bottom: 15px;
-        }
-
-        .director-quote p {
-            margin-bottom: 12px;
-        }
-        
-        @media (max-width: 600px) {
-            .director-content h3 {
-                font-size: 1.1rem;
-            }
-            
-            .director-quote {
-                font-size: 0.95rem;
-                line-height: 1.6;
-            }
-        }
-
-        .director-signature {
-            text-align: right;
-            color: #282828;
-            font-weight: 500;
-            margin-top: 20px;
-        }
-
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                border-radius: 0;
-            }
-            
-            .header {
-                padding: 25px 20px;
-            }
-            
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            
-            .header p {
-                font-size: 1rem;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .director-message {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px;
-                gap: 20px;
-            }
-            
-            .director-photo {
-                margin: 0 auto;
-                width: 120px;
-                height: 120px;
-            }
-            
-            .director-signature {
-                text-align: center;
-            }
-            
-            .welcome-message h2 {
-                font-size: 1.5rem;
-            }
-            
-            .info-section {
-                padding: 20px;
-            }
-            
-            .info-label {
-                font-size: 0.85rem;
-            }
-            
-            .info-value {
-                font-size: 1rem;
-            }
-            
-            .vcard-button {
-                padding: 10px 20px;
-                font-size: 0.95rem;
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .gallery-section {
-                margin-top: 30px;
-            }
-            
-            /* Adjust important information section for mobile */
-            .info-section div p {
-                font-size: 0.95rem;
-                line-height: 1.6;
-                margin-bottom: 12px;
-            }
-            
-            .info-section h3 {
-                font-size: 1.2rem;
-            }
-            
-            /* Make the layout more compact on mobile */
-            .info-grid {
-                gap: 15px;
-            }
-            
-            .welcome-message {
-                margin-bottom: 25px;
-            }
-            
-            .director-message {
-                margin-bottom: 25px;
-            }
-            
-            .info-section {
-                margin-bottom: 25px;
-            }
-        }
-
-        .welcome-message {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .welcome-message h2 {
-            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            color: #282828;
             font-size: 1.8rem;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: center;
         }
 
-        .info-section {
-            background: #f8f9fa;
-            border-radius: 0;
-            padding: 30px;
-            margin-bottom: 30px;
-        }
-
-        .info-grid {
-            display: grid;
-            gap: 20px;
-        }
-
-        .info-item {
+        /* Search Bar */
+        .search-container {
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            gap: 10px;
+            align-items: center;
         }
 
-        .info-label {
-            font-family: 'DIN Alternate Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            font-size: 0.9rem;
-            color: #282828;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info-value {
-            font-family: 'DIN LightAlternate', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            font-size: 1.1rem;
-            color: #282828;
-            font-weight: 500;
-        }
-
-        .gallery-section {
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        .gallery-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px;
-        }
-
-        .error {
-            background: #fee;
-            color: #c33;
-            padding: 20px;
-            border-radius: 0;
-            text-align: center;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #282828;
-            border-radius: 0;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .icon {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        .vcard-button {
-            background-color: #4CAF50;
-            color: white;
+        .search-box {
+            flex: 1;
+            padding: 12px 15px;
             border: none;
-            padding: 12px 24px;
             border-radius: 0;
             font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            outline: none;
+            background: rgba(255,255,255,0.9);
         }
 
-        .vcard-button:hover {
-            background-color: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-
-        .vcard-button svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Cards section */
-        .cards-section {
-            margin: 40px 0;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        @media (min-width: 768px) {
-            .cards-section {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .info-card {
-            background: #f8f9fa;
-            border-radius: 0;
-            padding: 25px;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            border: 1px solid #e9ecef;
-        }
-
-        .info-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .info-card-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-        }
-
-        .info-card h4 {
-            font-family: 'DIN LightAlternate', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        .search-box::placeholder {
             color: #282828;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
         }
 
-        .info-card p {
-            color: #282828;
-            font-size: 0.95rem;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            overflow-y: auto;
-        }
-
-        .modal-content {
-            background-color: #fff;
-            margin: 50px auto;
-            padding: 0;
-            border-radius: 0;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            animation: modalFadeIn 0.3s;
-        }
-
-        @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            padding: 25px;
-            background: linear-gradient(135deg, #282828 0%, #282828 100%);
+        .clear-search {
+            background: rgba(255,255,255,0.2);
+            border: none;
             color: white;
+            padding: 12px 15px;
             border-radius: 0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: none;
         }
 
-        .modal-header h3 {
-            font-family: 'Acta Bold Italic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            margin: 0;
+        .clear-search:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: left;
+        }
+
+        /* Quick Access */
+        .quick-access {
+            background: transparent;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #e9ecef;
+            text-align: center;
+        }
+
+        .quick-access h2 {
+            font-family: 'Acta Bold Italic', sans-serif;
+            color: #282828;
+            margin-bottom: 20px;
             font-size: 1.5rem;
         }
 
-        .modal-body {
-            padding: 25px;
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
         }
 
-        .modal-close {
+        .quick-link {
+            font-family: 'DIN LightAlternate', sans-serif;
+            background: none;
+            border: none;
+            padding: 0;
+            text-decoration: none;
+            color: #333;
+            font-size: 1rem;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .quick-link::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #282828;
+            transition: width 0.4s ease;
+        }
+
+        .quick-link:hover {
+            color: #282828;
+        }
+
+        .quick-link:hover::after {
+            width: 100%;
+        }
+
+        .quick-link-icon {
+            display: none;
+        }
+
+        /* Category Sections */
+        .category {
+            background: white;
+            border-radius: 0;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #282828 0%, #282828 100%);
             color: white;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+            padding: 20px;
             cursor: pointer;
-            line-height: 20px;
-            opacity: 0.8;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
         }
 
-        .modal-close:hover {
-            opacity: 1;
+        .category-header:hover {
+            background: linear-gradient(135deg, #282828 0%, #282828 100%);
         }
 
-        @media (max-width: 600px) {
-            .cards-section {
+        .category-header h3 {
+            font-family: 'DIN Alternate Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            font-size: 1.3rem;
+            margin: 0;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+        }
+
+
+        .collapse-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .category.expanded .collapse-icon {
+            transform: rotate(180deg);
+        }
+
+        .category-content {
+            display: none;
+            padding: 0;
+        }
+
+        .category.expanded .category-content {
+            display: block;
+        }
+
+        /* Policy Items */
+        .policy-item {
+            border-bottom: 1px solid #e9ecef;
+            transition: background 0.2s;
+        }
+
+        .policy-item:last-child {
+            border-bottom: none;
+        }
+
+        .policy-item:hover {
+            background: #f8f9fa;
+        }
+
+        .policy-header {
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .policy-title {
+            font-weight: 600;
+            color: #282828;
+            font-size: 1.1rem;
+        }
+
+        .policy-summary {
+            color: #282828;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .expand-icon {
+            color: #282828;
+            font-size: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .policy-item.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .policy-content {
+            display: none;
+            padding: 0 25px 25px 25px;
+            color: #444;
+            line-height: 1.8;
+        }
+
+        .policy-item.expanded .policy-content {
+            display: block;
+        }
+
+        .policy-content h4 {
+            color: #282828;
+            margin: 20px 0 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .policy-content h5 {
+            color: #282828;
+            margin: 15px 0 8px 0;
+            font-size: 1rem;
+        }
+
+        .policy-content ul {
+            margin: 10px 0 10px 20px;
+        }
+
+        .policy-content ol {
+            margin: 10px 0 10px 20px;
+        }
+
+        .policy-content li {
+            margin: 5px 0;
+        }
+
+        .policy-content p {
+            margin: 10px 0;
+        }
+
+        /* Important notices */
+        .important-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 0;
+            margin: 15px 0;
+        }
+
+        .procedure-steps {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        /* Search Results */
+        .search-results {
+            display: none;
+            background: white;
+            border-radius: 0;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .search-results h3 {
+            color: #282828;
+            margin-bottom: 15px;
+        }
+
+        .search-result-item {
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 0;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: #282828;
+            margin-bottom: 5px;
+        }
+
+        .result-category {
+            color: #282828;
+            font-size: 0.9rem;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            color: #282828;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 160px;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .category-header h3 {
+                font-size: 1.1rem;
+            }
+
+            .policy-header {
+                padding: 15px 20px;
+            }
+
+            .policy-content {
+                padding: 0 20px 20px 20px;
+            }
+
+            .quick-links {
+                flex-direction: column;
                 gap: 15px;
-                margin: 25px 0;
-            }
-            
-            .info-card {
-                padding: 20px;
-            }
-            
-            .info-card-icon {
-                font-size: 2rem;
-            }
-            
-            .modal-content {
-                margin: 20px auto;
-                width: 95%;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Fixed Header -->
+    <div class="header">
+        <div class="header-content">
+            <h1>Employee Handbook - Complete</h1>
+            <div class="search-container">
+                <input type="text" 
+                       class="search-box" 
+                       placeholder="Search policies, procedures, and information..." 
+                       id="searchInput">
+                <button class="clear-search" id="clearSearch">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
     <div class="container">
-        <div class="header">
-            <img src="/castlecomms/HR/CFAWG.png" alt="Castle Fine Art Logo" style="max-width: 500px; height: auto; margin-bottom: 30px;">
-            <h1>Welcome to the Team!</h1>
-            <p>Everything you need to know for your first day</p>
+        <!-- Quick Access Section -->
+        <div class="quick-access">
+            <h2>Quick Links</h2>
+            <div class="quick-links">
+                <a href="#" class="quick-link" data-policy="absence-policy">
+                    Report Absence
+                </a>
+                <a href="#" class="quick-link" data-policy="holiday-policy">
+                    Holiday Request
+                </a>
+                <a href="#" class="quick-link" data-policy="grievance-procedure">
+                    Grievance
+                </a>
+                <a href="#" class="quick-link" data-policy="health-safety">
+                    Health & Safety
+                </a>
+                <a href="#" class="quick-link" data-policy="expenses">
+                    Expenses
+                </a>
+                <a href="#" class="quick-link" data-policy="dress-code">
+                    Dress Code
+                </a>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div class="search-results" id="searchResults">
+            <h3>Search Results</h3>
+            <div id="resultsContainer">
+                <div class="no-results">No results found. Try different keywords.</div>
+            </div>
+        </div>
+
+        <!-- CONTRACTUAL CLAUSES -->
+        <div class="category" data-category="contractual">
+            <div class="category-header" onclick="toggleCategory(this)">
+                <div>
+                    <h3>Contractual Terms</h3>
+                </div>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="category-content">
+                
+                <!-- CONFIDENTIALITY -->
+                <div class="policy-item" data-policy="confidentiality">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Confidentiality</div>
+                            <div class="policy-summary">Protection of company and client information</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Confidential Information Includes:</h4>
+                        <ol>
+                            <li>Any information relating to the trading position, business, products, services, affairs and finances of the Company including (but not limited to) marketing information and plans, market opportunities, product lists, the Company's financial information, results and forecasts, manpower or expansion plans, the remuneration and benefits paid to the Company's employees and officers, lists of suppliers, agents, consultants, distributors, clients or customers and their needs and requirements, the terms of business with them and the fees and commissions charged to or by them, information relating to prospects and tenders contemplated, offered or undertaken by the Company and any other matters connected with the products or services manufactured, marketed, provided or obtained by the Company.</li>
+                            <li>Any information relating to clients of the Company.</li>
+                            <li>Technical data and know-how relating to the business of the Company or any of its suppliers, agents, consultants, distributors, clients or customers including (but not limited to) product designs and specifications, product lists, ideas, inventions, drawings and plans, research and development, manufacturing processes, techniques, formulae, trade secrets, computer systems and software, costs, margins, prices, production and business methods, business plans and forecasts and any other technical matters connected with the products or services manufactured, marketed, provided or obtained by the Company.</li>
+                            <li>Details of any other employees of the Company.</li>
+                            <li>Any other information concerning the business and affairs of the Company which is not generally known to the public.</li>
+                        </ol>
+
+                        <h4>Your Obligations</h4>
+                        <p>You must not (except in the proper performance of your duties or as authorised by the Company) during or at any time after the termination of your employment use or disclose to any person confidential information. This restriction shall continue to apply after the termination of your employment without limit in time but shall cease to apply to information or knowledge which becomes public knowledge other than through unauthorised disclosure by you.</p>
+
+                        <h4>Document Handling</h4>
+                        <p>You acknowledge that all documents, papers, disks or other media containing confidential information and all copies thereof made by you shall remain the property of the Company and upon termination of your employment (or upon demand by the Company) you shall return the same to the Company.</p>
+                    </div>
+                </div>
+
+                <!-- CONFLICTS OF INTEREST -->
+                <div class="policy-item" data-policy="conflicts-interest">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Conflicts of Interest and Other Employment</div>
+                            <div class="policy-summary">Declaration requirements for outside employment</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <p>You must devote your whole time and attention during normal working hours to the business of the Company and must not without the prior written consent of the Company undertake or be engaged in any other business or employment whether paid or unpaid.</p>
+
+                        <h4>Declaration Requirements</h4>
+                        <p>You must declare to the Company any financial or other interest that you may have in any firm, company or business which has dealings with the Company where such interest might reasonably be seen to compromise your position or conflict with the interests of the Company.</p>
+
+                        <h4>Working Time Regulations</h4>
+                        <p>Should you wish to work elsewhere during your employment with the Company, you must ensure that in doing so, you do not exceed your maximum working hours under the Working Time Regulations. Under no circumstances should your alternative employment affect your ability to perform your role with the Company.</p>
+                    </div>
+                </div>
+
+                <!-- COPYRIGHT/INVENTIONS -->
+                <div class="policy-item" data-policy="copyright-inventions">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Copyright/Inventions/Discoveries</div>
+                            <div class="policy-summary">Company ownership of intellectual property</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <p>All inventions, discoveries, designs, plans, processes, improvements and know-how conceived, made or developed by you (whether or not capable of protection by patent or registration) during the course of your employment shall belong to the Company and you hereby assign to the Company (to the extent legally possible) all rights in the same. You shall give all reasonable assistance to enable the Company to obtain protection for the same including the execution of any documents and the giving of evidence.</p>
+                    </div>
+                </div>
+
+                <!-- DRIVING AT WORK -->
+                <div class="policy-item" data-policy="driving-work">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Driving at Work</div>
+                            <div class="policy-summary">Company vehicle requirements and insurance</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <p>If your job requires you to drive a Company vehicle or your own vehicle on Company business, you must:</p>
+                        <ul>
+                            <li>Hold a current, valid driving licence appropriate to the vehicle you are driving</li>
+                            <li>Inform the Company immediately of any endorsements, disqualifications, or medical conditions that might affect your driving</li>
+                            <li>Ensure you are properly insured for business use when using your own vehicle</li>
+                            <li>Drive in accordance with traffic laws and Company policies</li>
+                        </ul>
+
+                        <h4>Company Vehicles</h4>
+                        <p>Company vehicles must be used responsibly and maintained according to manufacturer guidelines. Unauthorized use is prohibited.</p>
+
+                        <h4>Insurance Claims</h4>
+                        <p>In the event of an accident while driving on Company business, you must report it immediately to your manager and may be liable for insurance excess payments if at fault.</p>
+                    </div>
+                </div>
+
+                <!-- FINANCIAL TRANSACTIONS -->
+                <div class="policy-item" data-policy="financial-transactions">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Financial Transactions</div>
+                            <div class="policy-summary">Cash handling and financial compliance</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <p>All employees who handle cash, credit card transactions, or other financial instruments must:</p>
+                        <ul>
+                            <li>Follow all cash handling procedures exactly as trained</li>
+                            <li>Ensure all transactions are properly recorded</li>
+                            <li>Report any discrepancies immediately</li>
+                            <li>Never use Company funds for personal purposes</li>
+                        </ul>
+
+                        <h4>Till Procedures</h4>
+                        <p>Gallery staff must balance tills daily and report any shortages or overages to management immediately.</p>
+
+                        <h4>Card Payments</h4>
+                        <p>All card payments must be processed through authorized terminals with proper receipt confirmation.</p>
+                    </div>
+                </div>
+
+                <!-- GARDEN LEAVE -->
+                <div class="policy-item" data-policy="garden-leave">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Garden Leave</div>
+                            <div class="policy-summary">Notice period requirements and obligations</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <p>The Company reserves the right to place you on garden leave during your notice period. During garden leave you:</p>
+                        <ul>
+                            <li>Must not attend the workplace unless specifically requested</li>
+                            <li>Must remain available to work if required</li>
+                            <li>Must not contact clients, suppliers, or other employees</li>
+                            <li>Must continue to observe all employment obligations</li>
+                            <li>Will continue to receive normal pay and benefits</li>
+                        </ul>
+
+                        <h4>Company Property</h4>
+                        <p>You must return all Company property including keys, equipment, and documents at the start of garden leave.</p>
+                    </div>
+                </div>
+
+                <!-- SECURITY CHECKS -->
+                <div class="policy-item" data-policy="security-checks">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Security Checks</div>
+                            <div class="policy-summary">Search procedures and security compliance</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <p>As a condition of employment, you consent to reasonable security searches of:</p>
+                        <ul>
+                            <li>Your personal belongings</li>
+                            <li>Any bags, cases, or containers</li>
+                            <li>Company lockers or storage assigned to you</li>
+                            <li>Vehicles on Company premises</li>
+                        </ul>
+
+                        <h4>Search Procedures</h4>
+                        <p>Searches will be conducted respectfully by authorized personnel. Refusal to consent to a search may result in disciplinary action.</p>
+
+                        <h4>Investigation Rights</h4>
+                        <p>The Company reserves the right to investigate any suspected theft, fraud, or security breaches.</p>
+                    </div>
+                </div>
+
+                <!-- THIRD PARTY OPERATING POLICIES -->
+                <div class="policy-item" data-policy="third-party-policies">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Third Party Operating Policies</div>
+                            <div class="policy-summary">Compliance with mall and partner requirements</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <p>When working in locations operated by third parties (shopping malls, department stores), you must comply with:</p>
+                        <ul>
+                            <li>All third party operating policies and regulations</li>
+                            <li>Required induction training programs</li>
+                            <li>Health and safety procedures specific to the location</li>
+                            <li>Security requirements and access procedures</li>
+                        </ul>
+
+                        <h4>Compliance Requirements</h4>
+                        <p>Failure to comply with third party requirements may result in removal from the premises and disciplinary action.</p>
+                    </div>
+                </div>
+
+                <!-- WASTAGE AND DAMAGE -->
+                <div class="policy-item" data-policy="wastage-damage">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Wastage and Damage</div>
+                            <div class="policy-summary">Cost recovery and damage liability</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Minimizing Waste</h4>
+                        <p>We aim to work as efficiently and cost-effectively as possible. You can promote this by:</p>
+                        <ul>
+                            <li>Handling all equipment, artwork, and stock with utmost care</li>
+                            <li>Turning off unnecessary lighting, heating, and equipment</li>
+                            <li>Asking for additional work if your tasks are completed</li>
+                            <li>Starting work promptly after arrival and breaks</li>
+                        </ul>
+
+                        <div class="important-note">
+                            <strong>Express Contractual Terms:</strong>
+                            <ul>
+                                <li>Any damage to vehicles, stock, or property resulting from carelessness, negligence, or deliberate vandalism will render you liable for full or partial repair/replacement costs</li>
+                                <li>Any loss resulting from failure to observe rules, procedures, or instructions may require you to reimburse the Company</li>
+                                <li>At-fault accidents in Company vehicles may require you to pay insurance excess costs</li>
+                            </ul>
+                            <p>The Company has the contractual right to deduct such costs from your pay if not paid voluntarily.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WORKING HOURS -->
+                <div class="policy-item" data-policy="working-hours">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Working Hours</div>
+                            <div class="policy-summary">Contracted hours, flexibility, and punctuality</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Contracted Hours</h4>
+                        <p>Your contracted hours are detailed in your Statement of Main Terms of Employment. These represent the guaranteed minimum hours you will work each week.</p>
+
+                        <h4>Schedule Changes</h4>
+                        <p>If you need to change your scheduled working days, speak with your manager as soon as possible. We will accommodate requests where operationally possible.</p>
+
+                        <h4>Working Additional Hours</h4>
+                        <p>You may be asked to work extra hours during:</p>
+                        <ul>
+                            <li>Peak trading periods</li>
+                            <li>Holiday periods when colleagues are absent</li>
+                            <li>Times when additional coverage is needed for sickness</li>
+                        </ul>
+                        <p>Flexibility with working hours is a condition of employment.</p>
+
+                        <h4>Punctuality</h4>
+                        <div class="procedure-steps">
+                            <p>Customers and colleagues rely on you being at work on time. If you expect to be late:</p>
+                            <ul>
+                                <li>Call your manager as soon as possible</li>
+                                <li>Provide an expected arrival time</li>
+                                <li>Text messages are not sufficient</li>
+                            </ul>
+                            <p>Repeated lateness may lead to disciplinary action.</p>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- HR POLICIES & PROCEDURES -->
+        <div class="category" data-category="hr-policies">
+            <div class="category-header" onclick="toggleCategory(this)">
+                <div>
+                    <h3>HR Policies & Procedures</h3>
+                </div>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="category-content">
+                
+                <!-- ABSENCE POLICY -->
+                <div class="policy-item" data-policy="absence-policy">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Absence Policy</div>
+                            <div class="policy-summary">Comprehensive absence management procedures</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <div class="important-note">
+                            <strong>Important:</strong> This policy applies to all employees and includes formal procedures that may affect your employment.
+                        </div>
+
+                        <h4>1. Overview</h4>
+                        <p>The Company is committed to promoting good attendance whilst providing appropriate support for employees who are unable to attend work due to sickness or other legitimate reasons. This policy sets out the standards expected and the procedures to follow.</p>
+
+                        <h4>2. If You Know You Will Be Absent</h4>
+                        <p>If you know in advance that you will be absent from work, you must notify your manager as soon as possible, ideally giving at least 24 hours' notice. You must provide:</p>
+                        <ul>
+                            <li>The reason for your absence</li>
+                            <li>The expected duration</li>
+                            <li>Any urgent work that needs to be covered</li>
+                        </ul>
+
+                        <h4>3. If You Are Sick or Injured</h4>
+                        <div class="procedure-steps">
+                            <strong>Procedure to follow:</strong>
+                            <ul>
+                                <li>Contact your immediate manager by telephone on the first day of absence before your normal start time</li>
+                                <li>If you cannot make the call yourself, arrange for someone to call on your behalf</li>
+                                <li>Provide details of your illness and expected return date if known</li>
+                                <li>Keep in regular contact during extended periods of absence</li>
+                                <li>Contact your manager immediately if your return date changes</li>
+                            </ul>
+                        </div>
+
+                        <h4>4. Evidence of Sickness or Injury</h4>
+                        <p><strong>Self-certification:</strong> For absences of 7 calendar days or less, you must complete a self-certification form upon your return to work.</p>
+                        <p><strong>Medical certificate:</strong> For absences longer than 7 calendar days, you must provide a medical certificate from your doctor. Additional medical certificates must be provided for continued absence.</p>
+
+                        <h4>5. Payment for Sickness or Injury</h4>
+                        <p>Statutory Sick Pay (SSP) is payable in accordance with current legislation. Company sick pay may be available at the company's discretion and as detailed in your contract of employment.</p>
+
+                        <h4>6. Returning to Work</h4>
+                        <p>All employees must participate in a return-to-work interview with their manager following any period of absence. This meeting will:</p>
+                        <ul>
+                            <li>Confirm your fitness to return to work</li>
+                            <li>Identify any support needed</li>
+                            <li>Discuss any patterns of absence</li>
+                            <li>Update absence records</li>
+                        </ul>
+
+                        <h4>7. Long-term or Persistent Absence</h4>
+                        <p>The Company will monitor absence levels and may take formal action where:</p>
+                        <ul>
+                            <li>Absence levels are unacceptable</li>
+                            <li>There is a pattern of absence</li>
+                            <li>There are concerns about the genuineness of absences</li>
+                        </ul>
+                        
+                        <div class="important-note">
+                            <strong>Absence Triggers:</strong> The Company uses an absence scoring system. Certain scores may trigger formal absence management procedures including capability meetings.
+                        </div>
+
+                        <h4>8. Other Types of Absence</h4>
+                        <h5>Jury Service</h5>
+                        <p>Time off for jury service is granted as required by law. You must provide the jury summons as soon as possible and any payment certificates.</p>
+
+                        <h5>Public Duties</h5>
+                        <p>Reasonable time off may be granted for certain public duties such as serving as a magistrate, councillor, or school governor. This is usually unpaid unless specified in your contract.</p>
+
+                        <h5>Emergency Leave</h5>
+                        <p>Reasonable unpaid time off may be granted for genuine emergencies involving dependants. This should be used only for unexpected situations that require your immediate attention.</p>
+                    </div>
+                </div>
+
+                <!-- HOLIDAY POLICY -->
+                <div class="policy-item" data-policy="holiday-policy">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Holiday Policy</div>
+                            <div class="policy-summary">Annual leave entitlement and booking procedures</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Annual Entitlement</h4>
+                        <p>Full-time employees receive 25 days annual leave plus statutory bank holidays. Entitlement increases with length of service as detailed in your contract.</p>
+
+                        <h4>Booking Process</h4>
+                        <div class="procedure-steps">
+                            <p>To request holiday:</p>
+                            <ul>
+                                <li>Submit requests to your manager in advance</li>
+                                <li>Peak trading periods may have booking restrictions</li>
+                                <li>Christmas period bookings allocated by lottery system</li>
+                                <li>Maximum 2 weeks consecutive leave without special approval</li>
+                            </ul>
+                        </div>
+
+                        <h4>Holiday Year</h4>
+                        <p>Runs from January 1st to December 31st. Unused holiday may be carried over with manager approval, subject to business needs.</p>
+
+                        <h4>Emergency Holiday</h4>
+                        <p>Emergency holiday requests will be considered but cannot be guaranteed during busy periods or with insufficient notice.</p>
+                    </div>
+                </div>
+
+                <!-- DISCIPLINARY POLICY -->
+                <div class="policy-item" data-policy="disciplinary-policy">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Disciplinary Policy</div>
+                            <div class="policy-summary">Formal procedures for addressing conduct and performance</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Informal Resolution</h4>
+                        <p>Minor issues should first be addressed through informal discussion, coaching, and support.</p>
+
+                        <h4>Formal Procedure</h4>
+                        <div class="procedure-steps">
+                            <strong>Steps in formal disciplinary process:</strong>
+                            <ol>
+                                <li><strong>Investigation:</strong> Gather facts and evidence</li>
+                                <li><strong>Disciplinary Meeting:</strong> Employee invited with right to representation</li>
+                                <li><strong>Decision:</strong> Outcome communicated in writing within 5 working days</li>
+                                <li><strong>Appeal:</strong> Right to appeal within 5 working days of decision</li>
+                            </ol>
+                        </div>
+
+                        <h4>Possible Outcomes</h4>
+                        <ul>
+                            <li>No action required</li>
+                            <li>Verbal warning</li>
+                            <li>Written warning</li>
+                            <li>Final written warning</li>
+                            <li>Dismissal (with or without notice)</li>
+                        </ul>
+
+                        <h4>Gross Misconduct</h4>
+                        <div class="important-note">
+                            Examples of gross misconduct that may lead to summary dismissal:
+                            <ul>
+                                <li>Theft or fraud</li>
+                                <li>Serious breach of confidentiality</li>
+                                <li>Violence or threatening behavior</li>
+                                <li>Serious breach of health and safety rules</li>
+                                <li>Serious negligence causing loss or damage</li>
+                            </ul>
+                        </div>
+
+                        <h4>Right to Representation</h4>
+                        <p>You have the right to be accompanied by a colleague or trade union representative at formal disciplinary hearings.</p>
+                    </div>
+                </div>
+
+                <!-- GRIEVANCE PROCEDURE -->
+                <div class="policy-item" data-policy="grievance-procedure">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Grievance Procedure</div>
+                            <div class="policy-summary">Process for raising and resolving workplace concerns</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>When to Use This Procedure</h4>
+                        <p>Use this procedure if you have concerns about work, working conditions, or relationships with colleagues that cannot be resolved informally.</p>
+
+                        <h4>Informal Resolution</h4>
+                        <p>Try to resolve issues informally first by speaking directly with the person involved or your immediate manager.</p>
+
+                        <h4>Formal Grievance Process</h4>
+                        <div class="procedure-steps">
+                            <strong>Formal process steps:</strong>
+                            <ol>
+                                <li><strong>Step 1:</strong> Submit grievance in writing to your manager</li>
+                                <li><strong>Step 2:</strong> Grievance meeting held within 5 working days</li>
+                                <li><strong>Step 3:</strong> Written response provided within 5 working days</li>
+                                <li><strong>Step 4:</strong> Right to appeal to senior management</li>
+                            </ol>
+                        </div>
+
+                        <h4>Support Available</h4>
+                        <ul>
+                            <li>Right to be accompanied by a colleague or trade union representative</li>
+                            <li>Confidential handling of all grievances</li>
+                            <li>Protection against retaliation for raising legitimate concerns</li>
+                        </ul>
+
+                        <h4>Appeal Process</h4>
+                        <p>If you're not satisfied with the outcome, you can appeal to a more senior manager within 5 working days of receiving the decision.</p>
+                    </div>
+                </div>
+
+                <!-- HEALTH AND SAFETY -->
+                <div class="policy-item" data-policy="health-safety">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Health and Safety at Work</div>
+                            <div class="policy-summary">Maintaining a safe working environment for all</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Employee Responsibilities</h4>
+                        <p>All employees have a legal duty to:</p>
+                        <ul>
+                            <li>Take reasonable care for your own health and safety</li>
+                            <li>Take care for the health and safety of others</li>
+                            <li>Cooperate with health and safety procedures</li>
+                            <li>Report hazards, accidents, and near misses immediately</li>
+                            <li>Use equipment safely and as instructed</li>
+                            <li>Not interfere with safety equipment</li>
+                        </ul>
+
+                        <h4>Emergency Procedures</h4>
+                        <div class="procedure-steps">
+                            <p>Familiarize yourself with:</p>
+                            <ul>
+                                <li>Fire evacuation routes and assembly points</li>
+                                <li>Location of first aid equipment</li>
+                                <li>Emergency contact numbers</li>
+                                <li>Location of your nearest first aider</li>
+                            </ul>
+                        </div>
+
+                        <h4>Incident Reporting</h4>
+                        <div class="important-note">
+                            <strong>All accidents must be reported:</strong>
+                            <ul>
+                                <li>Record in the accident book immediately</li>
+                                <li>Notify your manager as soon as possible</li>
+                                <li>Seek medical attention if required</li>
+                                <li>Cooperate with any investigation</li>
+                            </ul>
+                        </div>
+
+                        <h4>Risk Assessments</h4>
+                        <p>Risk assessments are regularly conducted for all work activities. You must follow the control measures identified and report any new hazards.</p>
+
+                        <h4>Personal Protective Equipment (PPE)</h4>
+                        <p>Where PPE is provided, it must be worn correctly, maintained properly, and reported if damaged or missing.</p>
+                    </div>
+                </div>
+
+                <!-- EXPENSES -->
+                <div class="policy-item" data-policy="expenses">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Expenses</div>
+                            <div class="policy-summary">Business expense claims and reimbursement</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Claimable Expenses</h4>
+                        <p>You can claim reasonable business expenses for:</p>
+                        <ul>
+                            <li>Business travel (pre-approved mileage or public transport)</li>
+                            <li>Accommodation for business trips</li>
+                            <li>Client entertainment (within set limits)</li>
+                            <li>Training course fees (approved in advance)</li>
+                            <li>Business phone calls and internet usage</li>
+                        </ul>
+
+                        <h4>Claiming Process</h4>
+                        <div class="procedure-steps">
+                            <p>To claim expenses:</p>
+                            <ul>
+                                <li>Submit expense forms with original receipts</li>
+                                <li>Claims must be submitted within 30 days</li>
+                                <li>All claims require manager approval</li>
+                                <li>VAT receipts required for amounts over £25</li>
+                                <li>Mileage claims require journey details</li>
+                            </ul>
+                        </div>
+
+                        <h4>Company Credit Cards</h4>
+                        <p>Company credit cards are available for senior staff. All purchases must be for legitimate business purposes and properly documented with receipts.</p>
+
+                        <h4>Non-Claimable Expenses</h4>
+                        <ul>
+                            <li>Personal travel or entertainment</li>
+                            <li>Fines or penalties</li>
+                            <li>Excessive meal costs</li>
+                            <li>Personal phone calls</li>
+                        </ul>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- WORKPLACE SAFETY & SECURITY -->
+        <div class="category" data-category="safety">
+            <div class="category-header" onclick="toggleCategory(this)">
+                <div>
+                    <h3>Workplace Safety & Security</h3>
+                </div>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="category-content">
+                
+                <!-- LONE WORKING POLICY -->
+                <div class="policy-item" data-policy="lone-working">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Lone Working Policy</div>
+                            <div class="policy-summary">Safety protocols for working alone</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>When Does This Apply?</h4>
+                        <p>This policy applies when gallery staff work alone during:</p>
+                        <ul>
+                            <li>Opening or closing the gallery</li>
+                            <li>Extended periods without customers or colleagues</li>
+                            <li>Evening events or late working</li>
+                            <li>Weekend or holiday coverage</li>
+                        </ul>
+
+                        <h4>Safety Requirements</h4>
+                        <div class="procedure-steps">
+                            <p>When working alone, you must:</p>
+                            <ul>
+                                <li>Maintain regular contact with management</li>
+                                <li>Keep mobile phone charged and accessible</li>
+                                <li>Know emergency procedures and contact numbers</li>
+                                <li>Never admit unauthorized persons to the gallery</li>
+                                <li>Ensure doors remain locked when alone</li>
+                            </ul>
+                        </div>
+
+                        <h4>Check-in Procedures</h4>
+                        <p>Lone workers must check in with their manager at agreed intervals and confirm safe departure from the premises.</p>
+
+                        <h4>Emergency Procedures</h4>
+                        <div class="important-note">
+                            <p>In an emergency while working alone:</p>
+                            <ul>
+                                <li>Call 999 if immediate danger</li>
+                                <li>Activate alarm system if available</li>
+                                <li>Contact your manager as soon as safe to do so</li>
+                                <li>Do not attempt to handle dangerous situations alone</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DRUGS AND ALCOHOL POLICY -->
+                <div class="policy-item" data-policy="drugs-alcohol">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Drugs and Alcohol Policy</div>
+                            <div class="policy-summary">Zero tolerance policy and testing procedures</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Zero Tolerance Policy</h4>
+                        <div class="important-note">
+                            <p>The Company operates a zero tolerance policy regarding:</p>
+                            <ul>
+                                <li>Being under the influence of alcohol at work</li>
+                                <li>Being under the influence of illegal drugs at work</li>
+                                <li>Consuming alcohol or drugs during working hours</li>
+                                <li>Bringing alcohol or illegal drugs onto company premises</li>
+                            </ul>
+                        </div>
+
+                        <h4>Testing Procedures</h4>
+                        <p>The Company reserves the right to conduct drug and alcohol testing:</p>
+                        <ul>
+                            <li>Where there is reasonable suspicion of impairment</li>
+                            <li>Following workplace accidents</li>
+                            <li>As part of return-to-work procedures</li>
+                            <li>Random testing may be implemented</li>
+                        </ul>
+
+                        <h4>Prescription Medications</h4>
+                        <p>If taking prescription medication that may affect your ability to work safely, you must inform your manager and may need to provide medical certification.</p>
+
+                        <h4>Consequences</h4>
+                        <p>Violation of this policy will result in disciplinary action up to and including dismissal for gross misconduct.</p>
+                    </div>
+                </div>
+
+                <!-- SMOKING POLICY -->
+                <div class="policy-item" data-policy="smoking-policy">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Smoking Policy</div>
+                            <div class="policy-summary">Smoke-free workplace provisions</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Smoke-Free Workplace</h4>
+                        <p>All Company premises are designated as smoke-free environments. This includes:</p>
+                        <ul>
+                            <li>All indoor areas including galleries, offices, and storage</li>
+                            <li>Company vehicles</li>
+                            <li>Covered outdoor areas</li>
+                            <li>E-cigarettes and vaping devices</li>
+                        </ul>
+
+                        <h4>Designated Smoking Areas</h4>
+                        <p>Where provided, designated outdoor smoking areas must be used. Smoking breaks are unpaid and should be taken at appropriate times that don't disrupt customer service.</p>
+
+                        <h4>Compliance</h4>
+                        <p>Employees found smoking in prohibited areas may face disciplinary action. Customers should be politely asked to extinguish cigarettes when entering the gallery.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BENEFITS & COMPENSATION -->
+        <div class="category" data-category="benefits">
+            <div class="category-header" onclick="toggleCategory(this)">
+                <div>
+                    <h3>Benefits & Compensation</h3>
+                </div>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="category-content">
+                
+                <!-- PENSION SCHEME -->
+                <div class="policy-item" data-policy="pension">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Pension Scheme</div>
+                            <div class="policy-summary">Auto-enrollment and contribution details</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Auto-Enrollment</h4>
+                        <p>Eligible employees are automatically enrolled in the company pension scheme within 3 months of employment or when becoming eligible.</p>
+
+                        <h4>Eligibility Criteria</h4>
+                        <p>You are eligible if you:</p>
+                        <ul>
+                            <li>Are aged between 22 and State Pension age</li>
+                            <li>Earn more than £10,000 per year</li>
+                            <li>Work in the UK</li>
+                        </ul>
+
+                        <h4>Contribution Rates</h4>
+                        <div class="procedure-steps">
+                            <p>Current contribution rates:</p>
+                            <ul>
+                                <li>Employee minimum contribution: 5% of qualifying earnings</li>
+                                <li>Employer contribution: 3% of qualifying earnings</li>
+                                <li>Government tax relief automatically added</li>
+                            </ul>
+                        </div>
+
+                        <h4>Opting Out</h4>
+                        <p>You can opt out within the first month after enrollment, but we encourage participation for your future financial security. You can opt back in at any time.</p>
+
+                        <h4>Additional Contributions</h4>
+                        <p>You may make additional voluntary contributions above the minimum rate. Contact HR for details about increasing your contributions.</p>
+                    </div>
+                </div>
+
+                <!-- EMPLOYEE ART PURCHASING SCHEME -->
+                <div class="policy-item" data-policy="employee-schemes">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Employee Art Purchasing Scheme</div>
+                            <div class="policy-summary">Staff discounts and payment options for artwork</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Discount Entitlement</h4>
+                        <p>All employees receive a discount on artwork purchases:</p>
+                        <ul>
+                            <li>Standard staff discount applies to most artwork</li>
+                            <li>Discount rates may vary by employee level and length of service</li>
+                            <li>Some limited editions may have restricted discounts</li>
+                        </ul>
+
+                        <h4>Payment Options</h4>
+                        <div class="procedure-steps">
+                            <p>Choose from the following payment methods:</p>
+                            <ul>
+                                <li>Full payment on purchase</li>
+                                <li>Payroll deduction over agreed period (interest-free)</li>
+                                <li>Extended payment plans available for higher-value items</li>
+                            </ul>
+                        </div>
+
+                        <h4>Restrictions</h4>
+                        <div class="important-note">
+                            <p>Important restrictions:</p>
+                            <ul>
+                                <li>Artwork purchased under this scheme cannot be resold for profit within 2 years</li>
+                                <li>Some limited edition or high-value items may be excluded</li>
+                                <li>Purchases must be for personal collection, not commercial purposes</li>
+                                <li>Manager approval required for high-value purchases</li>
+                            </ul>
+                        </div>
+
+                        <h4>Application Process</h4>
+                        <p>Complete the Employee Art Purchase form and submit to your manager for approval. Payroll deductions will commence the following month if approved.</p>
+                    </div>
+                </div>
+
+                <!-- SALARY AND PAYMENTS -->
+                <div class="policy-item" data-policy="salary-payments">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Salary and Remuneration Payments</div>
+                            <div class="policy-summary">Payment procedures and deduction rights</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Payment Schedule</h4>
+                        <p>Salaries are paid monthly by bank transfer on or around the last working day of each month. Your payslip shows gross pay, deductions, and net pay.</p>
+
+                        <h4>Authorized Deductions</h4>
+                        <p>The Company may make deductions from your salary for:</p>
+                        <ul>
+                            <li>Income tax and National Insurance contributions</li>
+                            <li>Pension contributions</li>
+                            <li>Overpayments of salary or expenses</li>
+                            <li>Damage or loss as detailed in employment contracts</li>
+                            <li>Employee Art Purchase scheme payments</li>
+                        </ul>
+
+                        <h4>Expense Reimbursements</h4>
+                        <p>Approved expenses are reimbursed with the next salary payment following approval. Submit expense claims promptly to avoid delays.</p>
+
+                        <h4>Pay Queries</h4>
+                        <p>Any queries about your pay should be raised with HR immediately. We aim to resolve pay issues within 5 working days.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONDUCT & COMPLIANCE -->
+        <div class="category" data-category="conduct">
+            <div class="category-header" onclick="toggleCategory(this)">
+                <div>
+                    <h3>Conduct & Compliance</h3>
+                </div>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="category-content">
+                
+                <!-- CODE OF CONDUCT -->
+                <div class="policy-item" data-policy="code-conduct">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Code of Conduct Policy</div>
+                            <div class="policy-summary">Expected standards of behavior and professionalism</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Professional Standards</h4>
+                        <p>All employees must maintain high standards of professional conduct:</p>
+                        <ul>
+                            <li>Treat all colleagues, customers, and suppliers with respect and courtesy</li>
+                            <li>Maintain professional appearance and demeanor at all times</li>
+                            <li>Act with honesty and integrity in all business dealings</li>
+                            <li>Respect confidentiality and data protection requirements</li>
+                            <li>Follow all company policies and legal requirements</li>
+                        </ul>
+
+                        <h4>Customer Service Excellence</h4>
+                        <p>Always provide excellent customer service that represents Castle Fine Art's values and reputation positively. This includes being knowledgeable about our products, helpful, and courteous.</p>
+
+                        <h4>Workplace Relationships</h4>
+                        <p>Personal relationships between employees should not interfere with work performance or create conflicts of interest. Disclosure may be required for relationships involving reporting lines.</p>
+
+                        <h4>Use of Company Resources</h4>
+                        <p>Company equipment, time, and resources must be used responsibly and primarily for business purposes. Limited personal use of phones and internet may be permitted during breaks.</p>
+
+                        <h4>Compliance</h4>
+                        <div class="important-note">
+                            <p>Failure to meet conduct standards may result in:</p>
+                            <ul>
+                                <li>Informal coaching and guidance</li>
+                                <li>Formal disciplinary action</li>
+                                <li>Training requirements</li>
+                                <li>Dismissal for serious breaches</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DRESS CODE -->
+                <div class="policy-item" data-policy="dress-code">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Gallery Dress Code</div>
+                            <div class="policy-summary">Professional appearance standards for gallery staff</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>General Requirements</h4>
+                        <p>All gallery staff must maintain a smart, professional appearance that reflects our premium brand image and creates confidence with clients.</p>
+
+                        <h4>Acceptable Attire</h4>
+                        <div class="procedure-steps">
+                            <p>Appropriate clothing includes:</p>
+                            <ul>
+                                <li>Business formal or smart casual clothing</li>
+                                <li>Clean, well-fitted garments in good condition</li>
+                                <li>Conservative colors and patterns</li>
+                                <li>Closed-toe shoes with low to medium heels</li>
+                                <li>Minimal, tasteful jewelry</li>
+                                <li>Well-groomed appearance</li>
+                            </ul>
+                        </div>
+
+                        <h4>Not Acceptable</h4>
+                        <ul>
+                            <li>Jeans, shorts, or casual sportswear</li>
+                            <li>Revealing, tight-fitting, or provocative clothing</li>
+                            <li>Flip-flops, trainers, or overly casual footwear</li>
+                            <li>Excessive jewelry, visible piercings, or prominent tattoos</li>
+                            <li>Strong perfumes, aftershaves, or body sprays</li>
+                            <li>Unkempt or unprofessional appearance</li>
+                        </ul>
+
+                        <h4>Special Events</h4>
+                        <p>Gallery openings and special events may require formal business attire. You will be notified in advance of any specific dress requirements.</p>
+
+                        <h4>Uniform Allowance</h4>
+                        <p>Where provided, uniform allowances should be used to maintain appropriate work clothing. Uniforms must be kept clean and in good condition.</p>
+                    </div>
+                </div>
+
+                <!-- SOCIAL MEDIA POLICY -->
+                <div class="policy-item" data-policy="social-media">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Social Media Policy</div>
+                            <div class="policy-summary">Guidelines for social media use and company representation</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Personal Social Media Guidelines</h4>
+                        <p>When using personal social media accounts:</p>
+                        <ul>
+                            <li>Do not post content that could damage the company's reputation</li>
+                            <li>Make it clear that views expressed are your own, not the company's</li>
+                            <li>Respect confidentiality - never share internal information or client details</li>
+                            <li>Be mindful that your online presence may be associated with the company</li>
+                            <li>Use privacy settings appropriately</li>
+                        </ul>
+
+                        <h4>Business Use of Social Media</h4>
+                        <p>Only authorized personnel may post on behalf of Castle Fine Art. All business social media content must be:</p>
+                        <ul>
+                            <li>Approved by management before posting</li>
+                            <li>Professional and aligned with brand values</li>
+                            <li>Compliant with advertising and data protection laws</li>
+                            <li>Respectful of copyright and intellectual property</li>
+                        </ul>
+
+                        <h4>Prohibited Content</h4>
+                        <div class="important-note">
+                            <p>The following content is strictly prohibited:</p>
+                            <ul>
+                                <li>Discriminatory, harassing, or offensive material</li>
+                                <li>Defamatory comments about the company, colleagues, or competitors</li>
+                                <li>Confidential business information</li>
+                                <li>Inappropriate images or comments about workplace</li>
+                                <li>Illegal activities or content</li>
+                            </ul>
+                        </div>
+
+                        <h4>Monitoring and Consequences</h4>
+                        <p>The company reserves the right to monitor public social media posts that reference the company. Violations may result in disciplinary action up to dismissal.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUPPORT & RESOURCES -->
+        <div class="category" data-category="support">
+            <div class="category-header" onclick="toggleCategory(this)">
+                <div>
+                    <h3>Support & Resources</h3>
+                </div>
+                <span class="collapse-icon">▼</span>
+            </div>
+            <div class="category-content">
+                
+                <!-- WHISTLEBLOWING POLICY -->
+                <div class="policy-item" data-policy="whistleblowing">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Whistleblowing Policy</div>
+                            <div class="policy-summary">Reporting serious wrongdoing or illegal activities</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>What to Report</h4>
+                        <p>You should report concerns about:</p>
+                        <ul>
+                            <li>Criminal offenses or fraud</li>
+                            <li>Health and safety violations putting people at risk</li>
+                            <li>Financial irregularities or misuse of funds</li>
+                            <li>Regulatory breaches</li>
+                            <li>Environmental damage</li>
+                            <li>Cover-up of any wrongdoing</li>
+                            <li>Abuse of authority or serious misconduct</li>
+                        </ul>
+
+                        <h4>How to Report</h4>
+                        <div class="procedure-steps">
+                            <p>Report concerns through:</p>
+                            <ul>
+                                <li>Your immediate manager (if appropriate)</li>
+                                <li>HR Director directly</li>
+                                <li>Managing Director</li>
+                                <li>External confidential hotline</li>
+                                <li>Anonymous reports are accepted</li>
+                            </ul>
+                        </div>
+
+                        <h4>Protection for Whistleblowers</h4>
+                        <div class="important-note">
+                            <p>Legal protection against victimization includes:</p>
+                            <ul>
+                                <li>Protection from dismissal or disciplinary action</li>
+                                <li>Protection from harassment or bullying</li>
+                                <li>Confidential handling of reports</li>
+                                <li>Right to be accompanied during meetings</li>
+                            </ul>
+                        </div>
+
+                        <h4>Investigation Process</h4>
+                        <p>All reports will be investigated promptly and thoroughly by appropriate personnel. You will be kept informed of progress where possible and appropriate.</p>
+
+                        <h4>False Allegations</h4>
+                        <p>Protection applies only to genuine concerns raised in good faith. False or malicious allegations may result in disciplinary action.</p>
+                    </div>
+                </div>
+
+                <!-- EQUAL OPPORTUNITIES -->
+                <div class="policy-item" data-policy="equal-opportunities">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Equal Opportunities Policy</div>
+                            <div class="policy-summary">Commitment to fair treatment and non-discrimination</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Our Commitment</h4>
+                        <p>Castle Fine Art is committed to providing equal opportunities for all employees and ensuring fair treatment regardless of:</p>
+                        <ul>
+                            <li>Age</li>
+                            <li>Disability</li>
+                            <li>Gender or gender reassignment</li>
+                            <li>Marriage and civil partnership status</li>
+                            <li>Pregnancy and maternity</li>
+                            <li>Race, nationality, or ethnic origin</li>
+                            <li>Religion or belief</li>
+                            <li>Sexual orientation</li>
+                        </ul>
+
+                        <h4>Discrimination Prevention</h4>
+                        <p>We prohibit all forms of discrimination, harassment, and victimization. This applies to:</p>
+                        <ul>
+                            <li>Recruitment and selection</li>
+                            <li>Terms and conditions of employment</li>
+                            <li>Opportunities for promotion and training</li>
+                            <li>Disciplinary and grievance procedures</li>
+                            <li>Termination of employment</li>
+                        </ul>
+
+                        <h4>Reasonable Adjustments</h4>
+                        <p>We will make reasonable adjustments for employees with disabilities to ensure they can perform their roles effectively. This may include:</p>
+                        <ul>
+                            <li>Modifications to work arrangements</li>
+                            <li>Physical adjustments to the workplace</li>
+                            <li>Provision of special equipment</li>
+                            <li>Modified working hours or duties</li>
+                        </ul>
+
+                        <h4>Reporting Discrimination</h4>
+                        <div class="important-note">
+                            <p>If you experience or witness discrimination:</p>
+                            <ul>
+                                <li>Report incidents to your manager or HR immediately</li>
+                                <li>All reports will be investigated promptly and confidentially</li>
+                                <li>No retaliation will be tolerated against those making reports</li>
+                                <li>Support will be provided throughout the process</li>
+                            </ul>
+                        </div>
+
+                        <h4>Training and Awareness</h4>
+                        <p>All employees receive equal opportunities training to understand their responsibilities and rights under this policy.</p>
+                    </div>
+                </div>
+
+                <!-- HARASSMENT AND BULLYING -->
+                <div class="policy-item" data-policy="harassment-bullying">
+                    <div class="policy-header" onclick="togglePolicy(this)">
+                        <div>
+                            <div class="policy-title">Harassment and Bullying Policy</div>
+                            <div class="policy-summary">Prevention measures and reporting procedures</div>
+                        </div>
+                        <span class="expand-icon">▶</span>
+                    </div>
+                    <div class="policy-content">
+                        <h4>Definition of Harassment</h4>
+                        <p>Harassment is unwanted conduct related to protected characteristics that has the purpose or effect of violating dignity or creating an intimidating, hostile, degrading, humiliating, or offensive environment.</p>
+
+                        <h4>Definition of Bullying</h4>
+                        <p>Bullying is offensive, intimidating, malicious, or insulting behavior involving the misuse of power that can make a person feel vulnerable, upset, humiliated, undermined, or threatened.</p>
+
+                        <h4>Examples of Unacceptable Behavior</h4>
+                        <ul>
+                            <li>Offensive jokes, comments, or gestures</li>
+                            <li>Unwanted physical contact or invasion of personal space</li>
+                            <li>Displaying or circulating offensive material</li>
+                            <li>Exclusion from workplace social activities</li>
+                            <li>Verbal or written abuse</li>
+                            <li>Threats or intimidation</li>
+                            <li>Unfair criticism or impossible deadlines</li>
+                        </ul>
+
+                        <h4>Reporting Procedure</h4>
+                        <div class="procedure-steps">
+                            <p>If you experience harassment or bullying:</p>
+                            <ol>
+                                <li>Tell the person their behavior is unwelcome (if you feel safe to do so)</li>
+                                <li>Keep records of incidents (dates, witnesses, details)</li>
+                                <li>Report to your manager, HR, or senior management</li>
+                                <li>Formal investigation will be conducted</li>
+                                <li>Support will be provided throughout the process</li>
+                            </ol>
+                        </div>
+
+                        <h4>Investigation and Action</h4>
+                        <p>All complaints will be investigated promptly, fairly, and confidentially. Proven cases of harassment or bullying will result in disciplinary action up to and including dismissal.</p>
+
+                        <h4>Support Available</h4>
+                        <p>Support includes counseling services, adjustments to working arrangements, and protection from retaliation. External support agencies can also be accessed.</p>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <div id="content" class="content">
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>Loading your information...</p>
-            </div>
-        </div>
     </div>
 
-    <script type="module">
-        const SUPABASE_URL = 'https://aghwuzowjhdtdqdvfjrj.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnaHd1em93amhkdGRxZHZmanJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0NjY1OTksImV4cCI6MjA4MTA0MjU5OX0.w8cGh4Imb3CjbMe32-g0S6VUknOfglxh28Pi59E4KE4';
+    <script>
+        // Search functionality and all existing JavaScript
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+        const searchResults = document.getElementById('searchResults');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const categories = document.querySelectorAll('.category');
 
-        const contentDiv = document.getElementById('content');
+        // Comprehensive search data with all policies
+        const searchableContent = [
+            // Contractual Terms
+            { title: 'Confidentiality', category: 'Contractual Terms', keywords: ['confidential', 'privacy', 'information', 'data', 'secret'], element: 'confidentiality' },
+            { title: 'Conflicts of Interest and Other Employment', category: 'Contractual Terms', keywords: ['conflict', 'interest', 'outside employment', 'business', 'declare'], element: 'conflicts-interest' },
+            { title: 'Copyright/Inventions/Discoveries', category: 'Contractual Terms', keywords: ['copyright', 'invention', 'discovery', 'intellectual property'], element: 'copyright-inventions' },
+            { title: 'Driving at Work', category: 'Contractual Terms', keywords: ['driving', 'vehicle', 'license', 'insurance', 'company car'], element: 'driving-work' },
+            { title: 'Financial Transactions', category: 'Contractual Terms', keywords: ['financial', 'cash', 'money', 'till', 'transactions'], element: 'financial-transactions' },
+            { title: 'Garden Leave', category: 'Contractual Terms', keywords: ['garden leave', 'notice period', 'leaving', 'resignation'], element: 'garden-leave' },
+            { title: 'Security Checks', category: 'Contractual Terms', keywords: ['security', 'search', 'investigation', 'theft'], element: 'security-checks' },
+            { title: 'Third Party Operating Policies', category: 'Contractual Terms', keywords: ['third party', 'mall', 'department store', 'compliance'], element: 'third-party-policies' },
+            { title: 'Wastage and Damage', category: 'Contractual Terms', keywords: ['wastage', 'damage', 'cost recovery', 'liability'], element: 'wastage-damage' },
+            { title: 'Working Hours', category: 'Contractual Terms', keywords: ['hours', 'overtime', 'breaks', 'shifts', 'schedule', 'punctuality'], element: 'working-hours' },
+            
+            // HR Policies
+            { title: 'Absence Policy', category: 'HR Policies & Procedures', keywords: ['sick', 'absence', 'illness', 'time off', 'report', 'sickness'], element: 'absence-policy' },
+            { title: 'Holiday Policy', category: 'HR Policies & Procedures', keywords: ['holiday', 'vacation', 'annual leave', 'time off', 'booking'], element: 'holiday-policy' },
+            { title: 'Disciplinary Policy', category: 'HR Policies & Procedures', keywords: ['disciplinary', 'warning', 'misconduct', 'performance'], element: 'disciplinary-policy' },
+            { title: 'Grievance Procedure', category: 'HR Policies & Procedures', keywords: ['grievance', 'complaint', 'concern', 'problem', 'issue'], element: 'grievance-procedure' },
+            { title: 'Health and Safety at Work', category: 'HR Policies & Procedures', keywords: ['health', 'safety', 'emergency', 'accident', 'hazard'], element: 'health-safety' },
+            { title: 'Expenses', category: 'HR Policies & Procedures', keywords: ['expenses', 'claims', 'travel', 'reimbursement'], element: 'expenses' },
+            
+            // Workplace Safety & Security
+            { title: 'Lone Working Policy', category: 'Workplace Safety & Security', keywords: ['lone', 'working', 'alone', 'single', 'solo'], element: 'lone-working' },
+            { title: 'Drugs and Alcohol Policy', category: 'Workplace Safety & Security', keywords: ['drugs', 'alcohol', 'testing', 'zero tolerance'], element: 'drugs-alcohol' },
+            { title: 'Smoking Policy', category: 'Workplace Safety & Security', keywords: ['smoking', 'smoke free', 'cigarettes', 'vaping'], element: 'smoking-policy' },
+            
+            // Benefits & Compensation
+            { title: 'Pension Scheme', category: 'Benefits & Compensation', keywords: ['pension', 'retirement', 'contributions', 'savings'], element: 'pension' },
+            { title: 'Employee Art Purchasing Scheme', category: 'Benefits & Compensation', keywords: ['art', 'purchase', 'employee', 'discount', 'scheme'], element: 'employee-schemes' },
+            { title: 'Salary and Remuneration Payments', category: 'Benefits & Compensation', keywords: ['salary', 'pay', 'payment', 'deductions'], element: 'salary-payments' },
+            
+            // Conduct & Compliance
+            { title: 'Code of Conduct Policy', category: 'Conduct & Compliance', keywords: ['conduct', 'behavior', 'standards', 'professional'], element: 'code-conduct' },
+            { title: 'Gallery Dress Code', category: 'Conduct & Compliance', keywords: ['dress', 'appearance', 'uniform', 'attire', 'clothing'], element: 'dress-code' },
+            { title: 'Social Media Policy', category: 'Conduct & Compliance', keywords: ['social', 'media', 'facebook', 'twitter', 'online'], element: 'social-media' },
+            
+            // Support & Resources
+            { title: 'Whistleblowing Policy', category: 'Support & Resources', keywords: ['whistleblowing', 'report', 'wrongdoing', 'fraud'], element: 'whistleblowing' },
+            { title: 'Equal Opportunities Policy', category: 'Support & Resources', keywords: ['equal', 'opportunities', 'discrimination', 'diversity'], element: 'equal-opportunities' },
+            { title: 'Harassment and Bullying Policy', category: 'Support & Resources', keywords: ['harassment', 'bullying', 'abuse', 'offensive'], element: 'harassment-bullying' }
+        ];
 
-        // Get code from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            
+            if (query.length > 2) {
+                performSearch(query);
+                clearSearch.style.display = 'block';
+            } else {
+                hideSearchResults();
+                clearSearch.style.display = 'none';
+            }
+        });
 
-        if (!code) {
-            contentDiv.innerHTML = '<div class="error">No access code provided in URL. Please use the link sent to you by HR.</div>';
-        } else {
-            fetchStarterData(code);
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            hideSearchResults();
+            this.style.display = 'none';
+        });
+
+        function performSearch(query) {
+            const results = searchableContent.filter(item => 
+                item.title.toLowerCase().includes(query) ||
+                item.keywords.some(keyword => keyword.includes(query))
+            );
+
+            displaySearchResults(results);
         }
 
-        async function fetchStarterData(code) {
-            try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/new_starters?unique_code=eq.${code}`, {
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    }
-                });
+        function displaySearchResults(results) {
+            searchResults.style.display = 'block';
+            categories.forEach(cat => cat.style.display = 'none');
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
-                }
-
-                const data = await response.json();
-
-                if (data.length === 0) {
-                    contentDiv.innerHTML = '<div class="error">No information found. Please check your link or contact HR.</div>';
-                } else {
-                    displayStarterInfo(data[0]);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                contentDiv.innerHTML = '<div class="error">Error loading your information. Please try again or contact HR.</div>';
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<div class="no-results">No results found. Try different keywords.</div>';
+            } else {
+                resultsContainer.innerHTML = results.map(result => `
+                    <div class="search-result-item" onclick="goToPolicy('${result.element}')">
+                        <div class="result-title">${result.title}</div>
+                        <div class="result-category">${result.category}</div>
+                    </div>
+                `).join('');
             }
         }
 
-        function displayStarterInfo(starter) {
-            const startDate = new Date(starter.start_date).toLocaleDateString('en-GB', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+        function hideSearchResults() {
+            searchResults.style.display = 'none';
+            categories.forEach(cat => cat.style.display = 'block');
+        }
+
+        function goToPolicy(policyId) {
+            searchInput.value = '';
+            clearSearch.style.display = 'none';
+
+            const policyElement = document.querySelector(`.policy-item[data-policy="${policyId}"]`);
+            
+            if (policyElement) {
+                const category = policyElement.closest('.category');
+                if (category && !category.classList.contains('expanded')) {
+                    category.classList.add('expanded');
+                }
+
+                setTimeout(() => {
+                    if (!policyElement.classList.contains('expanded')) {
+                        policyElement.classList.add('expanded');
+                    }
+                    
+                    hideSearchResults();
+                    
+                    setTimeout(() => {
+                        policyElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                }, 50);
+            } else {
+                hideSearchResults();
+                alert('Policy section not found.');
+            }
+        }
+
+        // Category and policy toggle functionality
+        function toggleCategory(header) {
+            const category = header.parentElement;
+            category.classList.toggle('expanded');
+        }
+
+        function togglePolicy(header) {
+            const policy = header.parentElement;
+            policy.classList.toggle('expanded');
+        }
+
+        // Quick link functionality
+        document.querySelectorAll('.quick-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const policyId = this.getAttribute('data-policy');
+                goToPolicy(policyId);
             });
+        });
 
-            const startTime = starter.start_time ? starter.start_time.substring(0, 5) : '09:00';
-
-            contentDiv.innerHTML = `
-                <div class="welcome-message">
-                    <h2>Welcome, ${starter.full_name}!</h2>
-                    <p>We're excited to have you join us as our new ${starter.job_title}</p>
-                </div>
-
-                <div class="director-message">
-                    <img src="Images/Ian.png" alt="Ian Weatherby-Blythe" class="director-photo">
-                    <div class="director-content">
-                        <h3>A Message from our Group Managing Director</h3>
-                        <div class="director-quote">
-                            <p>Firstly, congratulations on your appointment as our new ${starter.job_title} in ${starter.gallery}!</p>
-                            <p>This is the best job in the world – we get to work with art for a living! We could be in the industry or double glazing, mobile phones, life insurance, jewellery, but we're not – we sell art, which I believe, is humanity's greatest achievement. Art speaks to our souls and enriches our lives, it never wears out, it never breaks down, and its value is often greater than its cost. It is the most unique, emotional, thought-provoking product in the world and we have the great privilege of selling it for a living!</p>
-                        </div>
-                        <div class="director-signature">~Ian Weatherby-Blythe, Castle Group Director</div>
-                    </div>
-                </div>
-
-                <div class="info-section">
-                    <h3 style="margin-bottom: 20px; color: #282828;">Important Information</h3>
-                    <div style="line-height: 1.8; color: #444;">
-                        <p style="margin-bottom: 15px;">In this document, you'll find everything you need before you start your first day working at Castle Fine Art. There are important documents that you'll need to complete such as your contract, legal Right To Work forms, and reference forms – please use the links provided.</p>
-                        
-                        <p style="margin-bottom: 15px;">You'll also find information to make your induction into the company easier – including our Employee Handbook – this handbook details our key policies and procedures you'll need to know while working.</p>
-                        
-                        <p style="margin-bottom: 15px;">There's also a page with the relevant information for your first day, including the manager's name, gallery contact information and what to bring with you to have a productive first day! If you need anything else, you can always contact us at <a href="mailto:HR@washingtongreen.co.uk" style="color: #4CAF50; text-decoration: none;">HR@washingtongreen.co.uk</a> before you start.</p>
-                    </div>
-                </div>
-
-                <div class="cards-section">
-                    <div class="info-card" onclick="openModal('teamModal')">
-                        <div class="info-card-icon"></div>
-                        <h4>Meet The Team At Head Office</h4>
-                        <p>Get to know the people supporting you</p>
-                    </div>
-                    
-                    <div class="info-card" onclick="openModal('firstDayModal')">
-                        <div class="info-card-icon"></div>
-                        <h4>What You Need To Know For Your First Day</h4>
-                        <p>Everything to prepare for day one</p>
-                    </div>
-                    
-                    <div class="info-card" onclick="openModal('documentsModal')">
-                        <div class="info-card-icon">📄</div>
-                        <h4>Important Documents & Links</h4>
-                        <p>Forms and resources you'll need</p>
-                    </div>
-                </div>
-
-                ${starter.gallery ? `
-                    <div class="gallery-section">
-                        <h3 style="margin-bottom: 20px; color: #282828;">Your Workplace</h3>
-                        <img src="Images/Gallery/Google Ads gallery square ${starter.gallery}.jpg" 
-                             alt="${starter.gallery} Gallery" 
-                             class="gallery-image"
-                             onerror="this.style.display='none'; this.previousElementSibling.style.display='none';">
-                    </div>
-                ` : ''}
-
-                <div class="info-section">
-                    <h3 style="margin-bottom: 20px; color: #282828;">Your First Day Details</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Start Date</span>
-                            <span class="info-value">${startDate}</span>
-                        </div>
-                        
-                        <div class="info-item">
-                            <span class="info-label">Start Time</span>
-                            <span class="info-value">${startTime}</span>
-                        </div>
-                        
-                        <div class="info-item">
-                            <span class="info-label">Your Manager</span>
-                            <span class="info-value">${starter.manager_name}</span>
-                        </div>
-                        
-                        <div class="info-item">
-                            <span class="info-label">Workplace Location</span>
-                            <span class="info-value">${starter.workplace_address}</span>
-                        </div>
-                        
-                        <div class="info-item">
-                            <span class="info-label">Workplace Contact</span>
-                            <span class="info-value">${starter.workplace_contact_num}</span>
-                        </div>
-                        
-                        <div class="info-item">
-                            <span class="info-label">Your Gallery</span>
-                            <span class="info-value">${starter.gallery}</span>
-                        </div>
-                    </div>
-                    
-                    <button class="vcard-button" onclick="downloadVCard('${starter.gallery.replace(/'/g, "\\'")}', '${starter.workplace_address.replace(/'/g, "\\'")}', '${starter.workplace_contact_num}')">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                        </svg>
-                        Add Gallery Contact to Phone
-                    </button>
-                </div>
-
-                
-            `;
-        }
-
-        // Function to generate and download vCard
-        window.downloadVCard = function(galleryName, address, phone) {
-            const vCardData = `BEGIN:VCARD
-VERSION:3.0
-FN:${galleryName} Gallery
-ORG:Castle Fine Art - ${galleryName}
-TEL;TYPE=WORK:${phone}
-ADR;TYPE=WORK:;;${address.replace(/,/g, ';')};;;;
-NOTE:Castle Fine Art Gallery Location
-END:VCARD`;
-
-            // Create blob and download link
-            const blob = new Blob([vCardData], { type: 'text/vcard;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${galleryName}_Gallery.vcf`;
-            
-            // Trigger download
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Clean up
-            URL.revokeObjectURL(url);
-        }
-
-        // Modal functions
-        window.openModal = function(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-        }
-
-        window.closeModal = function(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            const modals = document.getElementsByClassName('modal');
-            for (let i = 0; i < modals.length; i++) {
-                if (event.target == modals[i]) {
-                    modals[i].style.display = 'none';
+        // Initialize with first category expanded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there's a hash in the URL
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                // Try to navigate to the policy specified in the hash
+                setTimeout(() => {
+                    goToPolicy(hash);
+                }, 100);
+            } else {
+                // Otherwise expand first category
+                const firstCategory = document.querySelector('.category');
+                if (firstCategory) {
+                    firstCategory.classList.add('expanded');
                 }
             }
-        }
+        });
+        
+        // Handle hash changes
+        window.addEventListener('hashchange', function() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                goToPolicy(hash);
+            }
+        });
     </script>
-
-    <!-- Modals -->
-    <div id="teamModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-close" onclick="closeModal('teamModal')">&times;</span>
-                <h3>Meet The Team At Head Office</h3>
-            </div>
-            <div class="modal-body">
-                <p>Content about the head office team will go here...</p>
-            </div>
-        </div>
-    </div>
-
-    <div id="firstDayModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-close" onclick="closeModal('firstDayModal')">&times;</span>
-                <h3>What You Need To Know For Your First Day</h3>
-            </div>
-            <div class="modal-body">
-                <div style="margin-bottom: 30px;">
-                    <h4 style="color: #282828; margin-bottom: 15px;">What You'll Need To Bring With You:</h4>
-                    <ul style="line-height: 1.8; color: #444; list-style-position: inside;">
-                        <li>A Notebook</li>
-                        <li>Passion and Enthusiasm</li>
-                        <li>A Mug (If you prefer to use your own)</li>
-                        <li>Your P45 (If you haven't submitted it to HR)</li>
-                    </ul>
-                </div>
-                
-                <div style="margin-bottom: 30px;">
-                    <h4 style="color: #282828; margin-bottom: 15px;">Dress Code</h4>
-                    <p style="line-height: 1.8; color: #444; margin-bottom: 15px;">Make sure you're dressed appropriately for your first day:</p>
-                    <a href="https://mdelaneycastle.github.io/castlecomms/HR/employeehandbook.html#dress-code" 
-                       target="_blank" 
-                       style="display: inline-block; background: #282828; color: white; padding: 10px 20px; text-decoration: none; border-radius: 0; transition: all 0.3s;">
-                        View Gallery Dress Code Policy →
-                    </a>
-                </div>
-                
-                <div>
-                    <h4 style="color: #282828; margin-bottom: 15px;">Why not come in and introduce yourself before your first day?</h4>
-                    <p style="line-height: 1.8; color: #444; margin-bottom: 15px;">We know the first day can be nerve-wracking, so why not take the pressure off! You are hereby invited to come in and:</p>
-                    <ul style="line-height: 1.8; color: #444; list-style-position: inside;">
-                        <li>Have a cuppa with the team to introduce yourself</li>
-                        <li>Learn more about the gallery/head office</li>
-                        <li>Familiarise yourself with the town/city – it's great if you already do!</li>
-                        <li>See a small snippet of what your day will be like</li>
-                    </ul>
-                </div>
-                
-                <style>
-                    #firstDayModal a:hover {
-                        background: #6a6664 !important;
-                        transform: translateY(-2px);
-                        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-                    }
-                </style>
-            </div>
-        </div>
-    </div>
-
-    <div id="documentsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-close" onclick="closeModal('documentsModal')">&times;</span>
-                <h3>Important Documents & Links</h3>
-            </div>
-            <div class="modal-body">
-                <h4 style="color: #282828; margin-bottom: 20px;">Complete These Important Documents</h4>
-                
-                <div style="margin-bottom: 25px;">
-                    <a href="https://everwelloh-charm.co.uk/Assessment/Start/WASH3052M9N99N99PPQ" 
-                       target="_blank" 
-                       style="display: block; background: #282828; color: white; padding: 15px 20px; text-decoration: none; border-radius: 0; text-align: center; margin-bottom: 15px; transition: background 0.3s;">
-                        <strong style="font-size: 1.1rem;">Occupational Health Questionnaire</strong>
-                        <p style="margin-top: 5px; font-size: 0.9rem; opacity: 0.9;">Complete your health assessment form</p>
-                    </a>
-                    
-                    <a href="https://mdelaneycastle.github.io/castlecomms/HR/employeehandbook.html" 
-                       target="_blank" 
-                       style="display: block; background: #282828; color: white; padding: 15px 20px; text-decoration: none; border-radius: 0; text-align: center; transition: background 0.3s;">
-                        <strong style="font-size: 1.1rem;">📚 Employee Handbook</strong>
-                        <p style="margin-top: 5px; font-size: 0.9rem; opacity: 0.9;">Review company policies and procedures</p>
-                    </a>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 0; margin-top: 20px;">
-                    <p style="color: #282828; font-size: 0.95rem; line-height: 1.6; margin: 0;">
-                        <strong>Important:</strong> Please complete the Occupational Health Questionnaire before your first day. The Employee Handbook contains all company policies and is your reference guide for working at Castle Fine Art.
-                    </p>
-                </div>
-                
-                <style>
-                    .modal-body a:hover {
-                        background: #6a6664 !important;
-                        transform: translateY(-2px);
-                        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-                    }
-                </style>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
