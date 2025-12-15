@@ -19,6 +19,13 @@
             font-style: normal;
         }
 
+        @font-face {
+            font-family: 'DIN Alternate Bold';
+            src: url('/castlecomms/HR/fonts/DIN Alternate Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -189,8 +196,12 @@
         }
 
         .category-header h3 {
+            font-family: 'DIN Alternate Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             font-size: 1.3rem;
             margin: 0;
+            line-height: 1;
+            display: flex;
+            align-items: center;
         }
 
         .category-icon {
