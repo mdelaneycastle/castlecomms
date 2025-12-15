@@ -19,6 +19,13 @@
             font-style: normal;
         }
 
+        @font-face {
+            font-family: 'DIN Alternate Bold';
+            src: url('/castlecomms/HR/fonts/DIN Alternate Bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -36,7 +43,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            background-color: #D8D1C5;
+            background-color: #F1EDEC;
             position: relative;
         }
         
@@ -128,7 +135,7 @@
 
         .director-signature {
             text-align: right;
-            color: #666;
+            color: #282828;
             font-weight: 500;
             margin-top: 20px;
         }
@@ -262,14 +269,16 @@
         }
 
         .info-label {
+            font-family: 'DIN Alternate Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             font-size: 0.9rem;
-            color: #666;
+            color: #282828;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .info-value {
+            font-family: 'DIN Alternate Bold', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             font-size: 1.1rem;
             color: #2c3e50;
             font-weight: 500;
@@ -392,7 +401,7 @@
         }
 
         .info-card p {
-            color: #666;
+            color: #282828;
             font-size: 0.95rem;
         }
 
@@ -486,7 +495,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="/castlecomms/HR/CFAWG.png" alt="Castle Fine Art Logo" style="max-width: 500px; height: auto; margin-bottom: 20px;">
+            <img src="/castlecomms/HR/CFAWG.png" alt="Castle Fine Art Logo" style="max-width: 500px; height: auto; margin-bottom: 30px;">
             <h1>Welcome to the Team!</h1>
             <p>Everything you need to know for your first day</p>
         </div>
@@ -582,13 +591,13 @@
 
                 <div class="cards-section">
                     <div class="info-card" onclick="openModal('teamModal')">
-                        <div class="info-card-icon">👥</div>
+                        <div class="info-card-icon"></div>
                         <h4>Meet The Team At Head Office</h4>
                         <p>Get to know the people supporting you</p>
                     </div>
                     
                     <div class="info-card" onclick="openModal('firstDayModal')">
-                        <div class="info-card-icon">📋</div>
+                        <div class="info-card-icon"></div>
                         <h4>What You Need To Know For Your First Day</h4>
                         <p>Everything to prepare for day one</p>
                     </div>
@@ -614,32 +623,32 @@
                     <h3 style="margin-bottom: 20px; color: #2c3e50;">Your First Day Details</h3>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">📅 Start Date</span>
+                            <span class="info-label">Start Date</span>
                             <span class="info-value">${startDate}</span>
                         </div>
                         
                         <div class="info-item">
-                            <span class="info-label">⏰ Start Time</span>
+                            <span class="info-label">Start Time</span>
                             <span class="info-value">${startTime}</span>
                         </div>
                         
                         <div class="info-item">
-                            <span class="info-label">👤 Your Manager</span>
+                            <span class="info-label">Your Manager</span>
                             <span class="info-value">${starter.manager_name}</span>
                         </div>
                         
                         <div class="info-item">
-                            <span class="info-label">📍 Workplace Location</span>
+                            <span class="info-label">Workplace Location</span>
                             <span class="info-value">${starter.workplace_address}</span>
                         </div>
                         
                         <div class="info-item">
-                            <span class="info-label">📞 Workplace Contact</span>
+                            <span class="info-label">Workplace Contact</span>
                             <span class="info-value">${starter.workplace_contact_num}</span>
                         </div>
                         
                         <div class="info-item">
-                            <span class="info-label">🏢 Your Gallery</span>
+                            <span class="info-label">Your Gallery</span>
                             <span class="info-value">${starter.gallery}</span>
                         </div>
                     </div>
@@ -778,7 +787,7 @@ END:VCARD`;
                     <a href="https://everwelloh-charm.co.uk/Assessment/Start/WASH3052M9N99N99PPQ" 
                        target="_blank" 
                        style="display: block; background: #575554; color: white; padding: 15px 20px; text-decoration: none; border-radius: 0; text-align: center; margin-bottom: 15px; transition: background 0.3s;">
-                        <strong style="font-size: 1.1rem;">📋 Occupational Health Questionnaire</strong>
+                        <strong style="font-size: 1.1rem;">Occupational Health Questionnaire</strong>
                         <p style="margin-top: 5px; font-size: 0.9rem; opacity: 0.9;">Complete your health assessment form</p>
                     </a>
                     
@@ -791,7 +800,7 @@ END:VCARD`;
                 </div>
                 
                 <div style="background: #f8f9fa; padding: 15px; border-radius: 0; margin-top: 20px;">
-                    <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin: 0;">
+                    <p style="color: #282828; font-size: 0.95rem; line-height: 1.6; margin: 0;">
                         <strong>Important:</strong> Please complete the Occupational Health Questionnaire before your first day. The Employee Handbook contains all company policies and is your reference guide for working at Castle Fine Art.
                     </p>
                 </div>
