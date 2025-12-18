@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift of Art Generator - Castle Fine Art</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /* --- FONTS --- */
+        @font-face {
+            font-family: 'Acta W01 Bold Italic';
+            src: url('fonts/Acta W01 Bold Italic.ttf') format('truetype');
+            font-weight: bold;
+            font-style: italic;
+        }
+        @font-face {
+            font-family: 'DIN LightAlternate';
+            src: url('fonts/DIN LightAlternate.ttf') format('truetype');
+            font-weight: 300;
+        }
+
+        /* --- RESET & VARIABLES --- */
+        :root {
+            --primary: #636568;
+            --primary-dark: #4a4d50;
+            --accent: #2c3e50;
+            --bg: #f6f0e8;
+            --white: #ffffff;
+            --border: #e0e0e0;
+            --danger: #ff4444;
+            --success: #388e3c;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--primary);
+            padding: 2rem;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 3rem;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1 { text-align: center; font-size: 2.5rem; color: var(--primary); margin-bottom: 0.5rem; }
+        .subtitle { text-align: center; font-size: 1.1rem; color: #888; margin-bottom: 3rem; }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 0.5rem;
+        }
+
+        /* --- FORMS --- */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        select, input[type="text"], textarea {
+            width: 100%; padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        select:focus, input:focus, textarea:focus { outline: none; border-color: var(--primary); }
+        textarea { min-height: 150px; resize: vertical; }
+
+        /* --- UPLOAD ZONE --- */
+        .file-input-wrapper {
+            position: relative;
+            border: 3px dashed var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-input-wrapper.drag-over {
+            border-color: var(--primary);
+            background: #eef2f5;
+            transform: scale(1.01);
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0; cursor: pointer;
+        }
+
+        .upload-icon { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5; }
+
+        .image-preview-container {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .image-preview-container img {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        /* --- TEMPLATE TOGGLE --- */
+        .template-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .template-option {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .template-option:hover {
+            border-color: var(--primary);
+        }
+
+        .template-option.active {
+            border-color: var(--primary);
+            background: var(--bg);
+        }
+
+        .template-option input {
+            display: none;
+        }
+
+        /* --- ACTION BAR --- */
+        .sticky-actions {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--white);
+            padding: 1.5rem;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
+        }
+
+        .btn-group { display: flex; gap: 1rem; }
+
+        .btn {
+            padding: 0.8rem 1.5rem; border: none; border-radius: 6px;
+            font-weight: 600; cursor: pointer; font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+
+        .btn-secondary { background: white; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-secondary:hover { background: #f0f0f0; }
+
+        /* --- PREVIEW MODAL --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000;
+            display: none; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            width: 90%; height: 90%; background: white;
+            border-radius: 8px; position: relative; display: flex; flex-direction: column;
+        }
+        .modal-header { padding: 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { flex: 1; padding: 0; background: #525659; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+
+        #status-message { font-weight: 600; color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .sticky-actions { flex-direction: column; gap: 1rem; }
+            .btn-group { width: 100%; }
+            .btn { flex: 1; }
+            .template-toggle { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Gift of Art Generator</h1>
+        <p class="subtitle">Create personalised Gift of Art documents</p>
+
+        <div class="section">
+            <h2 class="section-title">1. Recipient Details</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Recipient Name</label>
+                    <input type="text" id="recipient-name" placeholder="e.g., John Smith">
+                </div>
+                <div class="form-group">
+                    <label>Artist</label>
+                    <select id="artist-select">
+                        <option value="">-- Select Artist --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Artwork Title</label>
+                    <input type="text" id="artwork-title" placeholder="e.g., You'll Do">
+                </div>
+                <div class="form-group">
+                    <label>Edition Type</label>
+                    <input type="text" id="edition-type" placeholder="e.g., Hand-signed limited edition">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">2. Artwork Image</h2>
+
+            <div class="file-input-wrapper" id="drop-zone">
+                <input type="file" id="image-upload" accept="image/*">
+                <div class="upload-icon">📁</div>
+                <h3 style="margin-bottom: 0.5rem">Click or Drag Image Here</h3>
+                <p style="color: #888; font-size: 0.9rem;">Supports JPG, PNG</p>
+            </div>
+
+            <div class="image-preview-container" id="preview-container" style="display: none;">
+                <img id="artwork-preview" src="" alt="Artwork preview">
+                <br>
+                <button class="btn btn-secondary" style="margin-top: 1rem;" onclick="clearImage()">Remove Image</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">3. Artwork Description</h2>
+
+            <div class="form-group">
+                <label>Description Text</label>
+                <textarea id="description-text" placeholder="Enter a description about the artwork..."></textarea>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">4. Template Type</h2>
+
+            <div class="template-toggle">
+                <label class="template-option active" id="email-option">
+                    <input type="radio" name="template" value="email" checked>
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📧</div>
+                    <strong>Email Template</strong>
+                    <p style="color: #888; font-size: 0.85rem; margin-top: 0.5rem;">Includes coloured bars at top and bottom</p>
+                </label>
+                <label class="template-option" id="print-option">
+                    <input type="radio" name="template" value="print">
+                    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🖨️</div>
+                    <strong>Print Template</strong>
+                    <p style="color: #888; font-size: 0.85rem; margin-top: 0.5rem;">Clean design without coloured bars</p>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="sticky-actions">
+        <div id="status-message"></div>
+        <div class="btn-group">
+            <button id="preview-btn" class="btn btn-secondary">Preview</button>
+            <button id="generate-btn" class="btn btn-primary">Download PDF</button>
+        </div>
+    </div>
+
+    <div id="preview-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>PDF Preview</h3>
+                <button class="close-modal" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <iframe id="preview-frame"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA ---
+        const ARTIST_DATA = {
+            'billy-connolly': { name: 'Billy Connolly' },
+            'billy-schenck': { name: 'Billy Schenck' },
+            'bisaillon-brothers': { name: 'Bisaillon Brothers' },
+            'bob-barker': { name: 'Bob Barker' },
+            'boy-george': { name: 'Boy George' },
+            'dan-lane': { name: 'Dan Lane' },
+            'disney-vintage': { name: 'Disney Vintage' },
+            'dr-seuss': { name: 'Dr. Seuss' },
+            'duncan-mcafee': { name: 'Duncan McAfee' },
+            'eve-arnold': { name: 'Eve Arnold' },
+            'gary-james-mcqueen': { name: 'Gary James McQueen' },
+            'graceland-london': { name: 'Graceland London' },
+            'hanna-barbera': { name: 'Hanna-Barbera' },
+            'james-francis-gill': { name: 'James Francis Gill' },
+            'james-mcqueen': { name: 'James McQueen' },
+            'john-myatt': { name: 'John Myatt' },
+            'jon-jones': { name: 'Jon Jones' },
+            'johnny-depp': { name: 'Johnny Depp' },
+            'joseph-jones': { name: 'Joseph Jones' },
+            'lawrence-coulson': { name: 'Lawrence Coulson' },
+            'lorenzo-quinn': { name: 'Lorenzo Quinn' },
+            'marco-olivier': { name: 'Marco Olivier' },
+            'marvel': { name: 'Marvel' },
+            'nic-joly': { name: 'Nic Joly' },
+            'nigel-humphries': { name: 'Nigel Humphries' },
+            'pascale-taurua': { name: 'Pascale Taurua' },
+            'paul-corfield': { name: 'Paul Corfield' },
+            'paul-kenton': { name: 'Paul Kenton' },
+            'paulo-ferreira': { name: 'Paulo Ferreira' },
+            'peter-smith': { name: 'Peter Smith' },
+            'raphael-mazzucco': { name: 'Raphael Mazzucco' },
+            'rich-simmons': { name: 'Rich Simmons' },
+            'richard-hambleton': { name: 'Richard Hambleton' },
+            'richard-rowan': { name: 'Richard Rowan' },
+            'robert-bailey': { name: 'Robert Bailey' },
+            'robert-oxley': { name: 'Robert Oxley' },
+            'romero-britto': { name: 'Romero Britto' },
+            'ron-english': { name: 'Ron English' },
+            'ronnie-wood': { name: 'Ronnie Wood' },
+            'scarlett-raven': { name: 'Scarlett Raven' },
+            'shazia': { name: 'Shazia' },
+            'steve-winterburn': { name: 'Steve Winterburn' },
+            'whatshisname': { name: 'Whatshisname' }
+        };
+
+        // --- STATE ---
+        let uploadedImage = null;
+        let templateType = 'email';
+
+        // --- ELEMENTS ---
+        const els = {
+            artistSelect: document.getElementById('artist-select'),
+            recipientName: document.getElementById('recipient-name'),
+            artworkTitle: document.getElementById('artwork-title'),
+            editionType: document.getElementById('edition-type'),
+            descriptionText: document.getElementById('description-text'),
+            dropZone: document.getElementById('drop-zone'),
+            fileInput: document.getElementById('image-upload'),
+            previewContainer: document.getElementById('preview-container'),
+            artworkPreview: document.getElementById('artwork-preview'),
+            emailOption: document.getElementById('email-option'),
+            printOption: document.getElementById('print-option'),
+            generateBtn: document.getElementById('generate-btn'),
+            previewBtn: document.getElementById('preview-btn'),
+            status: document.getElementById('status-message'),
+            modal: document.getElementById('preview-modal'),
+            iframe: document.getElementById('preview-frame')
+        };
+
+        // --- INIT ---
+        function init() {
+            // Populate artist dropdown
+            const keys = Object.keys(ARTIST_DATA).sort();
+            keys.forEach(key => {
+                const opt = new Option(ARTIST_DATA[key].name, key);
+                els.artistSelect.add(opt);
+            });
+
+            // Template toggle
+            els.emailOption.addEventListener('click', () => {
+                templateType = 'email';
+                els.emailOption.classList.add('active');
+                els.printOption.classList.remove('active');
+            });
+
+            els.printOption.addEventListener('click', () => {
+                templateType = 'print';
+                els.printOption.classList.add('active');
+                els.emailOption.classList.remove('active');
+            });
+
+            // File upload
+            els.fileInput.addEventListener('change', handleFileUpload);
+            setupDragDrop();
+
+            // Actions
+            els.generateBtn.addEventListener('click', () => generatePDF('download'));
+            els.previewBtn.addEventListener('click', () => generatePDF('preview'));
+        }
+
+        function setupDragDrop() {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                els.dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            els.dropZone.addEventListener('dragover', () => els.dropZone.classList.add('drag-over'));
+            els.dropZone.addEventListener('dragleave', () => els.dropZone.classList.remove('drag-over'));
+            els.dropZone.addEventListener('drop', (e) => {
+                els.dropZone.classList.remove('drag-over');
+                handleFileUpload({ target: { files: e.dataTransfer.files } });
+            });
+        }
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                uploadedImage = evt.target.result;
+                els.artworkPreview.src = uploadedImage;
+                els.previewContainer.style.display = 'block';
+                els.dropZone.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearImage() {
+            uploadedImage = null;
+            els.artworkPreview.src = '';
+            els.previewContainer.style.display = 'none';
+            els.dropZone.style.display = 'block';
+            els.fileInput.value = '';
+        }
+
+        async function generatePDF(action) {
+            els.status.textContent = "Generating PDF...";
+            els.generateBtn.disabled = true;
+            els.previewBtn.disabled = true;
+
+            try {
+                const { jsPDF } = window.jspdf;
+                // A4 size in inches
+                const pdf = new jsPDF({ unit: 'in', format: 'a4' });
+                const pageWidth = 8.27;
+                const pageHeight = 11.69;
+
+                // Get form values
+                const recipientName = els.recipientName.value.trim() || 'NAME';
+                const artistKey = els.artistSelect.value;
+                const artistName = artistKey ? ARTIST_DATA[artistKey].name : '';
+                const artworkTitle = els.artworkTitle.value.trim() || '';
+                const editionType = els.editionType.value.trim() || '';
+                const description = els.descriptionText.value.trim() || '';
+
+                // White background
+                pdf.setFillColor(255, 255, 255);
+                pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+
+                let yPos = 0;
+
+                // Add coloured bars for email template
+                if (templateType === 'email') {
+                    try {
+                        const barImg = await loadImageData('CastleBar.png', 0.95);
+                        // Top bar
+                        pdf.addImage(barImg, 'PNG', 0, 0, pageWidth, 0.3);
+                        yPos = 0.3;
+                    } catch(e) {
+                        console.log('Could not load CastleBar.png', e);
+                        yPos = 0.3;
+                    }
+                } else {
+                    yPos = 0.5;
+                }
+
+                // Add Gift of Art logo
+                try {
+                    const logoImg = await loadImageData('GiftOfArt.png', 0.95);
+                    const logoWidth = 3;
+                    const logoHeight = 1.2;
+                    const logoX = (pageWidth - logoWidth) / 2;
+                    pdf.addImage(logoImg, 'PNG', logoX, yPos + 0.3, logoWidth, logoHeight);
+                    yPos += logoHeight + 0.5;
+                } catch(e) {
+                    console.log('Could not load GiftOfArt.png', e);
+                    // Fallback text
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(24);
+                    pdf.setTextColor(99, 101, 104);
+                    pdf.text('CASTLE FINE ART', pageWidth / 2, yPos + 0.5, { align: 'center' });
+                    pdf.setFontSize(16);
+                    pdf.text('GIFT OF ART', pageWidth / 2, yPos + 0.8, { align: 'center' });
+                    yPos += 1.2;
+                }
+
+                // "To NAME,"
+                pdf.setFont('helvetica', 'bolditalic');
+                pdf.setFontSize(16);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text(`To ${recipientName},`, pageWidth / 2, yPos + 0.5, { align: 'center' });
+                yPos += 0.7;
+
+                // "You have a fantastic Gift of Art on order for you"
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(14);
+                pdf.text('You have a fantastic Gift of Art on order for you', pageWidth / 2, yPos + 0.3, { align: 'center' });
+                yPos += 0.6;
+
+                // Edition type line
+                if (editionType && artistName) {
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(11);
+                    pdf.text(`${editionType} by ${artistName}`, pageWidth / 2, yPos + 0.2, { align: 'center' });
+                    yPos += 0.5;
+                }
+
+                // Artwork image
+                if (uploadedImage) {
+                    const img = await loadImage(uploadedImage);
+                    const ratio = img.width / img.height;
+
+                    const maxImgWidth = 4.5;
+                    const maxImgHeight = 4;
+
+                    let imgWidth, imgHeight;
+                    if (ratio > maxImgWidth / maxImgHeight) {
+                        imgWidth = maxImgWidth;
+                        imgHeight = maxImgWidth / ratio;
+                    } else {
+                        imgHeight = maxImgHeight;
+                        imgWidth = maxImgHeight * ratio;
+                    }
+
+                    const imgX = (pageWidth - imgWidth) / 2;
+
+                    // Add subtle frame effect
+                    const frameMargin = 0.15;
+                    pdf.setFillColor(200, 195, 185);
+                    pdf.rect(imgX - frameMargin, yPos + 0.3 - frameMargin, imgWidth + frameMargin * 2, imgHeight + frameMargin * 2, 'F');
+
+                    pdf.addImage(uploadedImage, 'JPEG', imgX, yPos + 0.3, imgWidth, imgHeight);
+                    yPos += imgHeight + 0.8;
+                } else {
+                    yPos += 0.5;
+                }
+
+                // Title with artist name
+                if (artworkTitle && artistName) {
+                    pdf.setFont('helvetica', 'bolditalic');
+                    pdf.setFontSize(16);
+                    pdf.text(`'${artworkTitle}' by ${artistName}`, pageWidth / 2, yPos + 0.3, { align: 'center' });
+                    yPos += 0.7;
+                }
+
+                // Description
+                if (description) {
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(50, 50, 50);
+
+                    const maxWidth = pageWidth - 1.5;
+                    const lines = pdf.splitTextToSize(description, maxWidth);
+
+                    const lineHeight = 0.18;
+                    lines.forEach((line, index) => {
+                        pdf.text(line, pageWidth / 2, yPos + 0.2 + (index * lineHeight), { align: 'center' });
+                    });
+                    yPos += lines.length * lineHeight + 0.3;
+                }
+
+                // Bottom bar for email template
+                if (templateType === 'email') {
+                    try {
+                        const barImg = await loadImageData('CastleBar.png', 0.95);
+                        pdf.addImage(barImg, 'PNG', 0, pageHeight - 0.3, pageWidth, 0.3);
+                    } catch(e) {
+                        console.log('Could not load bottom CastleBar.png', e);
+                    }
+                }
+
+                // Output
+                if (action === 'download') {
+                    let filename = 'Gift_of_Art';
+                    if (recipientName && recipientName !== 'NAME') {
+                        filename += `_${recipientName.replace(/\s+/g, '_')}`;
+                    }
+                    if (artworkTitle) {
+                        filename += `_${artworkTitle.replace(/\s+/g, '_')}`;
+                    }
+                    filename += '.pdf';
+                    pdf.save(filename);
+                    els.status.textContent = "Download Started";
+                    els.status.style.color = "var(--success)";
+                } else {
+                    const blob = pdf.output('bloburl');
+                    els.iframe.src = blob;
+                    els.modal.style.display = 'flex';
+                    els.status.textContent = "";
+                }
+            } catch (err) {
+                console.error(err);
+                els.status.textContent = "Error: " + err.message;
+                els.status.style.color = "var(--danger)";
+            } finally {
+                els.generateBtn.disabled = false;
+                els.previewBtn.disabled = false;
+                setTimeout(() => els.status.textContent = "", 4000);
+            }
+        }
+
+        // --- HELPERS ---
+        function closeModal() {
+            els.modal.style.display = 'none';
+        }
+
+        async function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        async function loadImageData(url, quality) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png', quality));
+                };
+                img.onerror = reject;
+                img.src = url;
+            });
+        }
+
+        // Make clearImage available globally
+        window.clearImage = clearImage;
+
+        // Run
+        init();
+    </script>
+</body>
+</html>
