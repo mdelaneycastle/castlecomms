@@ -502,21 +502,21 @@
                         yPos += 1.2;
                     }
                 } else {
-                    // Print: giftonly.png top-right with 10% margin from top
+                    // Print: giftonly.png top-right
                     try {
                         const logoImg = await loadImageWithDimensions('giftonly.png');
-                        const logoWidth = 2;
+                        const logoWidth = 4; // Twice the size
                         const logoAspect = logoImg.width / logoImg.height;
                         const logoHeight = logoWidth / logoAspect;
-                        const topMargin = pageHeight * 0.1; // 10% from top
-                        const rightMargin = 0.5;
+                        const topMargin = pageHeight * 0.05; // 5% from top (half the distance)
+                        const rightMargin = pageWidth * 0.05 + 0.5; // 5% further in from right
                         const logoX = pageWidth - logoWidth - rightMargin;
                         pdf.addImage(logoImg.data, 'PNG', logoX, topMargin, logoWidth, logoHeight);
                         // Don't adjust yPos for print - logo is positioned absolutely
                         yPos = topMargin + logoHeight + 0.3;
                     } catch(e) {
                         console.log('Could not load giftonly.png', e);
-                        yPos = pageHeight * 0.1 + 1.2;
+                        yPos = pageHeight * 0.05 + 1.2;
                     }
                 }
 
