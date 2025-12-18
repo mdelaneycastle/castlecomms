@@ -505,18 +505,18 @@
                     // Print: giftonly.png top-right
                     try {
                         const logoImg = await loadImageWithDimensions('giftonly.png');
-                        const logoWidth = 3; // Twice the size
+                        const logoWidth = 4;
                         const logoAspect = logoImg.width / logoImg.height;
                         const logoHeight = logoWidth / logoAspect;
-                        const topMargin = pageHeight * 0.1; // 5% from top (half the distance)
-                        const rightMargin = pageWidth * 0.1 + 0.5; // 5% further in from right
+                        const topMargin = 0.98; // 2.5cm from top
+                        const rightMargin = 0.71; // 1.8cm from right edge
                         const logoX = pageWidth - logoWidth - rightMargin;
                         pdf.addImage(logoImg.data, 'PNG', logoX, topMargin, logoWidth, logoHeight);
                         // Don't adjust yPos for print - logo is positioned absolutely
                         yPos = topMargin + logoHeight + 0.3;
                     } catch(e) {
                         console.log('Could not load giftonly.png', e);
-                        yPos = pageHeight * 0.1 + 1.2;
+                        yPos = 0.98 + 1.2;
                     }
                 }
 
