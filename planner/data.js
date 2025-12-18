@@ -118,7 +118,7 @@ async function loadEventsFromDatabase() {
         const { data, error } = await supabaseClient
             .from('events')
             .select('*')
-            .order('date', { ascending: true });
+            .order('event_date', { ascending: true });
 
         if (error) throw error;
         eventsData = (data || []).map(toCamelCase);
