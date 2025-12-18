@@ -3,7 +3,7 @@ let calendar;
 let isAdminMode = false;
 let currentView = 'calendar';
 let currentFilters = {
-    types: ['event', 'release', 'exhibition', 'preview', 'launch'],
+    types: ['event', 'release', 'exhibition', 'preview', 'launch', 'product', 'promotion'],
     artist: '',
     gallery: '',
     search: ''
@@ -150,7 +150,9 @@ function getTextColor(eventType) {
         'release': '#1e5631',
         'exhibition': '#1e3a8a',
         'preview': '#7c5500',
-        'launch': '#1e3a8a'
+        'launch': '#1e3a8a',
+        'product': '#8b0000',
+        'promotion': '#8b4500'
     };
     return colors[eventType] || '#333';
 }
@@ -177,6 +179,20 @@ function initializeEventHandlers() {
 
     // Admin controls
     if (createNewItemBtn) createNewItemBtn.addEventListener('click', showTypeSelectionModal);
+
+    // Import JSON button
+    const importJsonBtn = document.getElementById('importJsonBtn');
+    if (importJsonBtn) importJsonBtn.addEventListener('click', showImportJsonModal);
+
+    // Import JSON modal handlers
+    const jsonFileInput = document.getElementById('jsonFileInput');
+    if (jsonFileInput) jsonFileInput.addEventListener('change', handleJsonFileSelect);
+
+    const previewJsonBtn = document.getElementById('previewJsonBtn');
+    if (previewJsonBtn) previewJsonBtn.addEventListener('click', previewJsonImport);
+
+    const confirmImportBtn = document.getElementById('confirmImportBtn');
+    if (confirmImportBtn) confirmImportBtn.addEventListener('click', confirmJsonImport);
 
     // Type selection cards
     document.querySelectorAll('.type-card').forEach(card => {
@@ -275,7 +291,7 @@ function updateFilters() {
 function clearAllFilters() {
     // Reset type checkboxes
     eventTypeCheckboxes.forEach(cb => cb.checked = true);
-    currentFilters.types = ['event', 'release', 'exhibition', 'preview', 'launch'];
+    currentFilters.types = ['event', 'release', 'exhibition', 'preview', 'launch', 'product', 'promotion'];
 
     // Reset select filters
     artistFilter.value = '';
@@ -316,7 +332,9 @@ function renderListView() {
         'release': [],
         'exhibition': [],
         'preview': [],
-        'event': []
+        'event': [],
+        'product': [],
+        'promotion': []
     };
 
     filtered.forEach(item => {
@@ -330,7 +348,9 @@ function renderListView() {
         'release': 'Digital Launch',
         'exhibition': 'Digital Originals Program',
         'preview': 'New Artist',
-        'event': 'Staff Training / Sales'
+        'event': 'Staff Training / Sales',
+        'product': 'Product Release',
+        'promotion': 'Promotion / Campaign'
     };
 
     // Render separate tables for each type
@@ -441,7 +461,9 @@ function showEventDetails(eventId) {
         'release': 'Digital Launch',
         'exhibition': 'Digital Originals Program',
         'preview': 'New Artist',
-        'event': 'Staff Training / Sales'
+        'event': 'Staff Training / Sales',
+        'product': 'Product Release',
+        'promotion': 'Promotion / Campaign'
     };
 
     let detailsHTML = `
@@ -532,7 +554,9 @@ function showSimpleItemModal(type, defaultDate = '') {
         'launch': 'Campaign Launch',
         'release': 'Digital Launch',
         'exhibition': 'Digital Originals Program',
-        'preview': 'New Artist'
+        'preview': 'New Artist',
+        'product': 'Product Release',
+        'promotion': 'Promotion / Campaign'
     };
     title.textContent = `Add New ${typeNames[type]}`;
 
@@ -639,7 +663,9 @@ function editEvent(eventId) {
             'release': 'Digital Launch',
             'exhibition': 'Digital Originals Program',
             'preview': 'New Artist',
-            'event': 'Staff Training / Sales'
+            'event': 'Staff Training / Sales',
+            'product': 'Product Release',
+            'promotion': 'Promotion / Campaign'
         };
         title.textContent = `Edit ${typeNames[event.type]}`;
 
@@ -996,6 +1022,184 @@ function debounce(func, wait) {
 function handleDownloadICS() {
     downloadICSFile();
     alert('Calendar file downloaded! Import this file into Outlook, Google Calendar, or Apple Calendar.');
+}
+
+// JSON Import functionality
+let pendingImportData = null;
+
+function showImportJsonModal() {
+    if (!isAdminMode) return;
+
+    const modal = document.getElementById('importJsonModal');
+    document.getElementById('jsonFileInput').value = '';
+    document.getElementById('jsonTextInput').value = '';
+    document.getElementById('importPreview').classList.add('hidden');
+    document.getElementById('importNotes').classList.add('hidden');
+    pendingImportData = null;
+
+    modal.classList.remove('hidden');
+}
+
+function handleJsonFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        document.getElementById('jsonTextInput').value = event.target.result;
+    };
+    reader.readAsText(file);
+}
+
+function previewJsonImport() {
+    const jsonText = document.getElementById('jsonTextInput').value.trim();
+    if (!jsonText) {
+        alert('Please enter or upload JSON data first.');
+        return;
+    }
+
+    try {
+        const data = JSON.parse(jsonText);
+        pendingImportData = data;
+
+        const previewDiv = document.getElementById('importPreview');
+        const previewContent = document.getElementById('importPreviewContent');
+        const notesDiv = document.getElementById('importNotes');
+        const notesContent = document.getElementById('importNotesContent');
+
+        // Handle events array
+        let events = [];
+        if (Array.isArray(data)) {
+            events = data;
+        } else if (data.events && Array.isArray(data.events)) {
+            events = data.events;
+        }
+
+        if (events.length === 0) {
+            alert('No events found in JSON data.');
+            return;
+        }
+
+        // Generate preview HTML
+        let html = `<p><strong>${events.length} event(s) to import:</strong></p><ul style="margin: 0.5rem 0; padding-left: 1.5rem;">`;
+        events.forEach(event => {
+            const typeLabels = {
+                'launch': 'Campaign Launch',
+                'release': 'Digital Launch',
+                'exhibition': 'Digital Originals Program',
+                'preview': 'New Artist',
+                'event': 'Staff Training / Sales',
+                'product': 'Product Release',
+                'promotion': 'Promotion / Campaign'
+            };
+            html += `<li><strong>${event.date}</strong> - ${event.artist}: ${event.title || 'No title'} <span class="badge ${event.type}" style="font-size: 0.75rem;">${typeLabels[event.type] || event.type}</span></li>`;
+        });
+        html += '</ul>';
+
+        previewContent.innerHTML = html;
+        previewDiv.classList.remove('hidden');
+
+        // Show notes if available
+        if (data.notes || data.meeting_summary) {
+            let notesHtml = '';
+            if (data.meeting_summary) {
+                notesHtml += `<p><strong>Summary:</strong> ${data.meeting_summary}</p>`;
+            }
+            if (data.notes) {
+                if (data.notes.key_insights) {
+                    notesHtml += '<p><strong>Key Insights:</strong></p><ul style="margin: 0.5rem 0; padding-left: 1.5rem;">';
+                    data.notes.key_insights.forEach(insight => {
+                        notesHtml += `<li>${insight}</li>`;
+                    });
+                    notesHtml += '</ul>';
+                }
+                if (data.notes.product_menu_2026) {
+                    notesHtml += '<p><strong>Product Menu 2026:</strong></p><ul style="margin: 0.5rem 0; padding-left: 1.5rem;">';
+                    data.notes.product_menu_2026.forEach(item => {
+                        notesHtml += `<li>${item}</li>`;
+                    });
+                    notesHtml += '</ul>';
+                }
+            }
+            if (notesHtml) {
+                notesContent.innerHTML = notesHtml;
+                notesDiv.classList.remove('hidden');
+            }
+        }
+
+    } catch (e) {
+        alert('Invalid JSON format: ' + e.message);
+    }
+}
+
+async function confirmJsonImport() {
+    if (!pendingImportData) {
+        alert('Please preview the data first.');
+        return;
+    }
+
+    // Extract events array
+    let events = [];
+    if (Array.isArray(pendingImportData)) {
+        events = pendingImportData;
+    } else if (pendingImportData.events && Array.isArray(pendingImportData.events)) {
+        events = pendingImportData.events;
+    }
+
+    if (events.length === 0) {
+        alert('No events to import.');
+        return;
+    }
+
+    let imported = 0;
+    let errors = 0;
+
+    for (const event of events) {
+        // Prepare event data
+        const eventData = {
+            id: generateId(),
+            type: event.type || 'product',
+            date: event.date,
+            artist: event.artist,
+            title: event.title || '',
+            description: event.description || event.notes || null,
+            allDay: true,
+            startTime: null,
+            endTime: null,
+            gallery: event.gallery || null,
+            status: event.status || 'planned',
+            equipment: null
+        };
+
+        // Validate
+        const validationErrors = validateEvent(eventData);
+        if (validationErrors.length > 0) {
+            console.warn(`Skipping event: ${validationErrors.join(', ')}`);
+            errors++;
+            continue;
+        }
+
+        // Save to database
+        const result = await saveEventToDatabase(eventData);
+        if (result.success) {
+            eventsData.push(eventData);
+            imported++;
+        } else {
+            console.error('Failed to save event:', result.error);
+            errors++;
+        }
+    }
+
+    // Refresh views
+    updateCalendar();
+    renderListView();
+    updateAnalytics();
+
+    // Close modal and show result
+    closeModals();
+    alert(`Import complete!\n\nImported: ${imported} event(s)\nErrors: ${errors}`);
+
+    pendingImportData = null;
 }
 
 // Handle copy subscribe URL
