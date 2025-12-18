@@ -60,37 +60,39 @@ const supabaseClient = window.supabase.createClient(
 let eventsData = [];
 
 // Helper functions to convert between camelCase (JS) and snake_case (DB)
+// Mapping: DB columns -> JS properties
+// event_date -> date, artist_name -> artist, event_type -> type, equipment_required -> equipment
 function toSnakeCase(obj) {
     return {
         id: obj.id,
-        type: obj.type,
-        date: obj.date,
+        event_type: obj.type,
+        event_date: obj.date,
         all_day: obj.allDay,
         start_time: obj.startTime,
         end_time: obj.endTime,
-        artist: obj.artist,
+        artist_name: obj.artist,
         gallery: obj.gallery,
         status: obj.status,
         title: obj.title,
         description: obj.description,
-        equipment: obj.equipment
+        equipment_required: obj.equipment
     };
 }
 
 function toCamelCase(obj) {
     return {
         id: obj.id,
-        type: obj.type,
-        date: obj.date,
+        type: obj.event_type,
+        date: obj.event_date,
         allDay: obj.all_day,
         startTime: obj.start_time,
         endTime: obj.end_time,
-        artist: obj.artist,
+        artist: obj.artist_name,
         gallery: obj.gallery,
         status: obj.status,
         title: obj.title,
         description: obj.description,
-        equipment: obj.equipment
+        equipment: obj.equipment_required
     };
 }
 
