@@ -486,26 +486,38 @@
                     yPos = 0.5;
                 }
 
-                // Add Gift of Art logo (maintaining aspect ratio)
-                try {
-                    const logoImg = await loadImageWithDimensions('GiftOfArt.png');
-                    const logoWidth = 3;
-                    // Calculate height based on actual aspect ratio
-                    const logoAspect = logoImg.width / logoImg.height;
-                    const logoHeight = logoWidth / logoAspect;
-                    const logoX = (pageWidth - logoWidth) / 2;
-                    pdf.addImage(logoImg.data, 'PNG', logoX, yPos + 0.3, logoWidth, logoHeight);
-                    yPos += logoHeight + 0.5;
-                } catch(e) {
-                    console.log('Could not load GiftOfArt.png', e);
-                    // Fallback text
-                    pdf.setFont('helvetica', 'normal');
-                    pdf.setFontSize(24);
-                    pdf.setTextColor(99, 101, 104);
-                    pdf.text('CASTLE FINE ART', pageWidth / 2, yPos + 0.5, { align: 'center' });
-                    pdf.setFontSize(16);
-                    pdf.text('GIFT OF ART', pageWidth / 2, yPos + 0.8, { align: 'center' });
-                    yPos += 1.2;
+                // Add Gift of Art logo (different for email vs print)
+                if (templateType === 'email') {
+                    // Email: GiftOfArt.png centered
+                    try {
+                        const logoImg = await loadImageWithDimensions('GiftOfArt.png');
+                        const logoWidth = 3;
+                        const logoAspect = logoImg.width / logoImg.height;
+                        const logoHeight = logoWidth / logoAspect;
+                        const logoX = (pageWidth - logoWidth) / 2;
+                        pdf.addImage(logoImg.data, 'PNG', logoX, yPos + 0.3, logoWidth, logoHeight);
+                        yPos += logoHeight + 0.5;
+                    } catch(e) {
+                        console.log('Could not load GiftOfArt.png', e);
+                        yPos += 1.2;
+                    }
+                } else {
+                    // Print: GiftOfArtlogo.png top-right with 10% margin from top
+                    try {
+                        const logoImg = await loadImageWithDimensions('GiftOfArtlogo.png');
+                        const logoWidth = 2;
+                        const logoAspect = logoImg.width / logoImg.height;
+                        const logoHeight = logoWidth / logoAspect;
+                        const topMargin = pageHeight * 0.1; // 10% from top
+                        const rightMargin = 0.5;
+                        const logoX = pageWidth - logoWidth - rightMargin;
+                        pdf.addImage(logoImg.data, 'PNG', logoX, topMargin, logoWidth, logoHeight);
+                        // Don't adjust yPos for print - logo is positioned absolutely
+                        yPos = topMargin + logoHeight + 0.3;
+                    } catch(e) {
+                        console.log('Could not load GiftOfArtlogo.png', e);
+                        yPos = pageHeight * 0.1 + 1.2;
+                    }
                 }
 
                 // "To NAME,"
