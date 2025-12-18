@@ -508,8 +508,8 @@
                         const logoWidth = 4;
                         const logoAspect = logoImg.width / logoImg.height;
                         const logoHeight = logoWidth / logoAspect;
-                        const topMargin = 0.98; // 2.5cm from top
-                        const rightMargin = 0.71; // 1.8cm from right edge
+                        const topMargin = 0.94; // 2.4cm from top
+                        const rightMargin = 0.63; // 1.6cm from right edge
                         const logoX = pageWidth - logoWidth - rightMargin;
                         pdf.addImage(logoImg.data, 'PNG', logoX, topMargin, logoWidth, logoHeight);
                         // Don't adjust yPos for print - logo is positioned absolutely
