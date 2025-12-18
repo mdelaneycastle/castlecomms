@@ -29,7 +29,9 @@ const eventTypeColors = {
     'release': '#b8e6b8',
     'exhibition': '#a8d8ea',
     'preview': '#fff2a8',
-    'launch': '#a8c8ff'
+    'launch': '#a8c8ff',
+    'product': '#ffb8b8',
+    'promotion': '#ffd4a8'
 };
 
 // Event status colors
@@ -49,7 +51,7 @@ const equipmentIcons = {
 };
 
 // Initialize Supabase client
-const supabase = window.supabase.createClient(
+const supabaseClient = window.supabase.createClient(
     SUPABASE_CONFIG.url,
     SUPABASE_CONFIG.anonKey
 );
@@ -61,36 +63,34 @@ let eventsData = [];
 function toSnakeCase(obj) {
     return {
         id: obj.id,
-        event_type: obj.type,
-        event_date: obj.date,
-        end_date: obj.endDate,
+        type: obj.type,
+        date: obj.date,
         all_day: obj.allDay,
         start_time: obj.startTime,
         end_time: obj.endTime,
-        artist_name: obj.artist,
+        artist: obj.artist,
         gallery: obj.gallery,
         status: obj.status,
         title: obj.title,
         description: obj.description,
-        equipment_required: obj.equipment
+        equipment: obj.equipment
     };
 }
 
 function toCamelCase(obj) {
     return {
         id: obj.id,
-        type: obj.event_type,
-        date: obj.event_date,
-        endDate: obj.end_date,
+        type: obj.type,
+        date: obj.date,
         allDay: obj.all_day,
         startTime: obj.start_time,
         endTime: obj.end_time,
-        artist: obj.artist_name,
+        artist: obj.artist,
         gallery: obj.gallery,
         status: obj.status,
         title: obj.title,
         description: obj.description,
-        equipment: obj.equipment_required
+        equipment: obj.equipment
     };
 }
 
@@ -98,7 +98,7 @@ function toCamelCase(obj) {
 async function saveEventToDatabase(eventData) {
     try {
         const dbData = toSnakeCase(eventData);
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('events')
             .upsert(dbData)
             .select();
@@ -113,10 +113,10 @@ async function saveEventToDatabase(eventData) {
 
 async function loadEventsFromDatabase() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('events')
             .select('*')
-            .order('event_date', { ascending: true });
+            .order('date', { ascending: true });
 
         if (error) throw error;
         eventsData = (data || []).map(toCamelCase);
@@ -130,7 +130,7 @@ async function loadEventsFromDatabase() {
 
 async function deleteEventFromDatabase(eventId) {
     try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('events')
             .delete()
             .eq('id', eventId);
