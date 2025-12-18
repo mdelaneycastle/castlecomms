@@ -488,9 +488,9 @@
 
                 // Add Gift of Art logo (different for email vs print)
                 if (templateType === 'email') {
-                    // Email: GiftOfArt.png centered
+                    // Email: NewGiftLogo.png centered
                     try {
-                        const logoImg = await loadImageWithDimensions('GiftOfArt.png');
+                        const logoImg = await loadImageWithDimensions('NewGiftLogo.png');
                         const logoWidth = 3;
                         const logoAspect = logoImg.width / logoImg.height;
                         const logoHeight = logoWidth / logoAspect;
@@ -498,13 +498,13 @@
                         pdf.addImage(logoImg.data, 'PNG', logoX, yPos + 0.3, logoWidth, logoHeight);
                         yPos += logoHeight + 0.5;
                     } catch(e) {
-                        console.log('Could not load GiftOfArt.png', e);
+                        console.log('Could not load NewGiftLogo.png', e);
                         yPos += 1.2;
                     }
                 } else {
-                    // Print: GiftOfArtlogo.png top-right with 10% margin from top
+                    // Print: giftonly.png top-right with 10% margin from top
                     try {
-                        const logoImg = await loadImageWithDimensions('GiftOfArtlogo.png');
+                        const logoImg = await loadImageWithDimensions('giftonly.png');
                         const logoWidth = 2;
                         const logoAspect = logoImg.width / logoImg.height;
                         const logoHeight = logoWidth / logoAspect;
@@ -515,7 +515,7 @@
                         // Don't adjust yPos for print - logo is positioned absolutely
                         yPos = topMargin + logoHeight + 0.3;
                     } catch(e) {
-                        console.log('Could not load GiftOfArtlogo.png', e);
+                        console.log('Could not load giftonly.png', e);
                         yPos = pageHeight * 0.1 + 1.2;
                     }
                 }
@@ -560,19 +560,6 @@
 
                     const imgX = (pageWidth - imgWidth) / 2;
                     const imgY = yPos + 0.3;
-
-                    // Add subtle drop shadow (bottom-right, blurred effect)
-                    const shadowOffset = 0.08;
-                    const shadowLayers = 4;
-                    for (let i = shadowLayers; i >= 1; i--) {
-                        const offset = shadowOffset * i;
-                        const opacity = 0.03 * (shadowLayers - i + 1);
-                        pdf.setGState(new pdf.GState({ opacity: opacity }));
-                        pdf.setFillColor(0, 0, 0);
-                        pdf.rect(imgX + offset, imgY + offset, imgWidth, imgHeight, 'F');
-                    }
-                    // Reset opacity
-                    pdf.setGState(new pdf.GState({ opacity: 1 }));
 
                     pdf.addImage(uploadedImage, 'JPEG', imgX, imgY, imgWidth, imgHeight);
                     yPos += imgHeight + 0.8;
