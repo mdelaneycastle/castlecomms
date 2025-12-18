@@ -35,8 +35,11 @@
         <!-- Sidebar Filters -->
         <aside class="sidebar">
             <div id="adminControls" class="admin-controls hidden">
-                <button id="createNewItemBtn" class="btn-primary" style="width: 100%; margin-bottom: 2rem;">
+                <button id="createNewItemBtn" class="btn-primary" style="width: 100%; margin-bottom: 1rem;">
                     <i class="fas fa-plus"></i> Create New Item
+                </button>
+                <button id="importJsonBtn" class="btn-secondary" style="width: 100%; margin-bottom: 2rem;">
+                    <i class="fas fa-file-import"></i> Import from JSON
                 </button>
             </div>
 
@@ -65,6 +68,14 @@
                         <label class="checkbox-label">
                             <input type="checkbox" value="event" checked>
                             <span class="badge event">Staff Training / Sales</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="product" checked>
+                            <span class="badge product">Product Release</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" value="promotion" checked>
+                            <span class="badge promotion">Promotion / Campaign</span>
                         </label>
                     </div>
                 </div>
@@ -154,6 +165,16 @@
                         <h3>Staff Training / Sales</h3>
                         <p>Training event or sales period</p>
                     </button>
+                    <button class="type-card" data-type="product">
+                        <i class="fas fa-print"></i>
+                        <h3>Product Release</h3>
+                        <p>Physical prints, sculptures, editions</p>
+                    </button>
+                    <button class="type-card" data-type="promotion">
+                        <i class="fas fa-bullhorn"></i>
+                        <h3>Promotion / Campaign</h3>
+                        <p>Sales push, marketing campaign</p>
+                    </button>
                 </div>
             </div>
         </div>
@@ -176,6 +197,8 @@
                             <option value="exhibition">Digital Originals Program</option>
                             <option value="preview">New Artist</option>
                             <option value="event">Staff Training / Sales</option>
+                            <option value="product">Product Release</option>
+                            <option value="promotion">Promotion / Campaign</option>
                         </select>
                     </div>
 
@@ -307,6 +330,44 @@
             <div class="modal-footer admin-only hidden">
                 <button id="editEventBtn" class="btn-secondary">Edit</button>
                 <button id="deleteEventBtn" class="btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import JSON Modal -->
+    <div id="importJsonModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>Import Events from JSON</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div style="padding: 2rem;">
+                <p style="margin-bottom: 1rem;">Upload a JSON file containing events extracted from transcriptions or paste JSON data below.</p>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="jsonFileInput" style="display: block; margin-bottom: 0.5rem;">Select JSON File</label>
+                    <input type="file" id="jsonFileInput" accept=".json" class="filter-select" style="width: 100%; padding: 0.5rem;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="jsonTextInput" style="display: block; margin-bottom: 0.5rem;">Or Paste JSON Data</label>
+                    <textarea id="jsonTextInput" rows="10" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;" placeholder='{"events": [{"type": "product", "date": "2026-03-13", "artist": "Billy Connolly", "title": "Spring Release"}]}'></textarea>
+                </div>
+
+                <div id="importPreview" class="hidden" style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                    <h4 style="margin-bottom: 0.5rem;">Preview</h4>
+                    <div id="importPreviewContent"></div>
+                </div>
+
+                <div id="importNotes" class="hidden" style="margin-bottom: 1.5rem; padding: 1rem; background: #fff3cd; border-radius: 4px; border-left: 4px solid #ffc107;">
+                    <h4 style="margin-bottom: 0.5rem;"><i class="fas fa-sticky-note"></i> Meeting Notes</h4>
+                    <div id="importNotesContent" style="font-size: 0.9rem;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+                <button type="button" id="previewJsonBtn" class="btn-secondary">Preview</button>
+                <button type="button" id="confirmImportBtn" class="btn-primary">Import Events</button>
             </div>
         </div>
     </div>
