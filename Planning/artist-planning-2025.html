@@ -872,7 +872,7 @@
     <script>
         const SUPABASE_URL = 'https://wdnpazkzejvnwiryxohl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkbnBhemt6ZWp2bndpcnl4b2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5ODg1ODcsImV4cCI6MjA3OTU2NDU4N30.JCk80Gu2TdQhf5w_OMHxMdGbYjWahU-jrl4FuG6oZYM';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Image mapping for nav cards (same as old page)
         const sectionImages = {
@@ -947,7 +947,7 @@
 
         async function loadDashboard() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('artist_updates')
                     .select('*')
                     .order('artist_name', { ascending: true });
