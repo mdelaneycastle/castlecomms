@@ -505,11 +505,11 @@
                     // Print: giftonly.png top-right
                     try {
                         const logoImg = await loadImageWithDimensions('giftonly.png');
-                        const logoWidth = 3.2;
+                        const logoWidth = 3.2; // 20% smaller
                         const logoAspect = logoImg.width / logoImg.height;
                         const logoHeight = logoWidth / logoAspect;
-                        const topMargin = 0.60; // 2.4cm from top
-                        const rightMargin = 0.4; // 1.2cm from right edge
+                        const topMargin = 0.94; // 2.4cm from top
+                        const rightMargin = 0.47; // 1.2cm from right edge
                         const logoX = pageWidth - logoWidth - rightMargin;
                         pdf.addImage(logoImg.data, 'PNG', logoX, topMargin, logoWidth, logoHeight);
                         // Don't adjust yPos for print - logo is positioned absolutely
@@ -567,12 +567,18 @@
                     yPos += 0.5;
                 }
 
-                // Title with artist name
-                if (artworkTitle && artistName) {
+                // Title with artist name below
+                if (artworkTitle) {
                     pdf.setFont('helvetica', 'bolditalic');
                     pdf.setFontSize(16);
-                    pdf.text(`'${artworkTitle}' by ${artistName}`, pageWidth / 2, yPos + 0.3, { align: 'center' });
-                    yPos += 0.7;
+                    pdf.text(`'${artworkTitle}'`, pageWidth / 2, yPos + 0.3, { align: 'center' });
+                    yPos += 0.4;
+                }
+                if (artistName) {
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setFontSize(14);
+                    pdf.text(artistName, pageWidth / 2, yPos + 0.3, { align: 'center' });
+                    yPos += 0.5;
                 }
 
                 // Description
