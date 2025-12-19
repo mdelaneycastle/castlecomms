@@ -648,6 +648,252 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* OneNote Importer Styles */
+        .onenote-importer {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 25px;
+        }
+
+        .onenote-importer.collapsed .importer-content {
+            display: none;
+        }
+
+        .onenote-toggle-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .onenote-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .onenote-toggle-btn .icon {
+            font-size: 18px;
+        }
+
+        .importer-content {
+            margin-top: 20px;
+        }
+
+        .paste-zone {
+            width: 100%;
+            min-height: 150px;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            resize: vertical;
+            background: white;
+        }
+
+        .paste-zone:focus {
+            border-color: #667eea;
+            background: #f0f4ff;
+            outline: none;
+        }
+
+        .paste-zone.has-content {
+            border-color: #48bb78;
+            border-style: solid;
+            background: #f0fff4;
+        }
+
+        .mapping-container {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .mapping-container h4 {
+            margin-bottom: 15px;
+            color: #4a5568;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mapping-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .mapping-row:last-child {
+            border-bottom: none;
+        }
+
+        .source-column {
+            flex: 1;
+            font-weight: 600;
+            color: #4a5568;
+            padding: 8px 12px;
+            background: #edf2f7;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .mapping-arrow {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .field-select {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .preview-container {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid #e2e8f0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .preview-container h4 {
+            margin-bottom: 15px;
+            color: #4a5568;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .preview-table th {
+            background: #667eea;
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .preview-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .preview-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .preview-table tr:hover {
+            background: #edf2f7;
+        }
+
+        .importer-actions {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .clear-importer-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .clear-importer-btn:hover {
+            background: #dc2626;
+        }
+
+        .append-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 12px;
+            background: #e0f2fe;
+            border-radius: 8px;
+            border: 1px solid #7dd3fc;
+        }
+
+        .append-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .append-option label {
+            font-weight: 500;
+            color: #0369a1;
+            margin: 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .import-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .import-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .import-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .no-data-message {
+            text-align: center;
+            color: #718096;
+            padding: 20px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -674,6 +920,51 @@
             </div>
 
             <div id="formContainer" style="display:none;">
+                <!-- OneNote Importer Section -->
+                <div class="onenote-importer collapsed" id="onenoteImporter">
+                    <button type="button" class="onenote-toggle-btn" onclick="toggleOneNoteImporter()">
+                        <span class="icon">📋</span>
+                        <span>Import from OneNote</span>
+                        <span id="importerToggleIcon">▼</span>
+                    </button>
+                    <div class="importer-content">
+                        <p style="color: #4a5568; margin-bottom: 15px;">
+                            Copy a table from OneNote (Ctrl+C) and paste it below. The system will parse and map columns automatically.
+                        </p>
+                        <textarea
+                            id="pasteZone"
+                            class="paste-zone"
+                            placeholder="Paste your OneNote table here (Ctrl+V)...
+
+Copy a table from OneNote and paste it here.
+The importer will detect columns and let you map them to the right fields."
+                        ></textarea>
+
+                        <div class="importer-actions">
+                            <button type="button" class="clear-importer-btn" onclick="clearOneNoteImporter()">Clear</button>
+                        </div>
+
+                        <div id="columnMapper" class="mapping-container" style="display: none;">
+                            <h4>Column Mapping</h4>
+                            <div id="mappingRows"></div>
+                        </div>
+
+                        <div id="previewContainer" class="preview-container" style="display: none;">
+                            <h4>Preview</h4>
+                            <div id="previewTable"></div>
+                        </div>
+
+                        <div class="append-option">
+                            <input type="checkbox" id="appendMode" checked>
+                            <label for="appendMode">Append to existing data (don't replace)</label>
+                        </div>
+
+                        <button type="button" class="import-btn" id="importBtn" onclick="importOneNoteData()" disabled>
+                            Import Data
+                        </button>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="form-group">
                         <label>💰 Revenue Amount</label>
@@ -1315,6 +1606,362 @@ Supports Markdown:
                 console.error('Upload error:', error);
                 showStatus('Error uploading image: ' + error.message, 'error');
                 progressContainer.style.display = 'none';
+            }
+        }
+
+        // ========================================
+        // OneNote Importer Functions
+        // ========================================
+
+        let parsedTableData = null;
+
+        function toggleOneNoteImporter() {
+            const importer = document.getElementById('onenoteImporter');
+            const icon = document.getElementById('importerToggleIcon');
+            importer.classList.toggle('collapsed');
+            icon.textContent = importer.classList.contains('collapsed') ? '▼' : '▲';
+        }
+
+        // Set up paste event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            const pasteZone = document.getElementById('pasteZone');
+            if (pasteZone) {
+                pasteZone.addEventListener('paste', handleOneNotePaste);
+            }
+        });
+
+        function handleOneNotePaste(event) {
+            event.preventDefault();
+
+            const htmlContent = event.clipboardData.getData('text/html');
+            const textContent = event.clipboardData.getData('text/plain');
+
+            // Try to parse the pasted content
+            if (htmlContent && htmlContent.includes('<table')) {
+                parsedTableData = parseHTMLTable(htmlContent);
+            } else if (textContent) {
+                parsedTableData = parseTextTable(textContent);
+            }
+
+            if (parsedTableData && parsedTableData.rows.length > 0) {
+                // Update paste zone appearance
+                const pasteZone = document.getElementById('pasteZone');
+                pasteZone.classList.add('has-content');
+                pasteZone.value = `✓ Parsed ${parsedTableData.rows.length} rows with ${parsedTableData.headers.length} columns`;
+
+                // Render mapping UI
+                renderColumnMapper(parsedTableData.headers);
+                renderPreviewTable(parsedTableData);
+
+                // Enable import button
+                document.getElementById('importBtn').disabled = false;
+            } else {
+                showStatus('Could not parse table data. Please copy a table from OneNote.', 'error');
+            }
+        }
+
+        function parseHTMLTable(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const table = doc.querySelector('table');
+
+            if (!table) return null;
+
+            const rows = [];
+            const tableRows = table.querySelectorAll('tr');
+
+            tableRows.forEach((tr) => {
+                const cells = tr.querySelectorAll('td, th');
+                const rowData = Array.from(cells).map(cell => normalizeText(cell.textContent));
+                if (rowData.some(cell => cell.trim() !== '')) {
+                    rows.push(rowData);
+                }
+            });
+
+            if (rows.length === 0) return null;
+
+            // First row is typically headers
+            const headers = rows.shift() || [];
+
+            return { headers, rows, format: 'html' };
+        }
+
+        function parseTextTable(text) {
+            const lines = text.trim().split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) return null;
+
+            const rows = lines.map(line =>
+                line.split('\t').map(cell => normalizeText(cell))
+            );
+
+            // First row is headers
+            const headers = rows.shift() || [];
+
+            return { headers, rows, format: 'text' };
+        }
+
+        function normalizeText(text) {
+            return (text || '').trim().replace(/\s+/g, ' ');
+        }
+
+        function guessFieldFromHeader(headerText) {
+            const normalized = headerText.toLowerCase().trim();
+
+            // Date patterns
+            if (/date|launch|deadline|when|schedule|due|start|end|event/i.test(normalized)) {
+                return 'key_dates';
+            }
+
+            // Action/Task patterns
+            if (/action|task|todo|item|step|follow|required|next|do|activity/i.test(normalized)) {
+                return 'action_items';
+            }
+
+            // Revenue patterns
+            if (/revenue|amount|sales|£|\$|money|value|total|target|income/i.test(normalized)) {
+                return 'revenue_amount';
+            }
+
+            // Context patterns
+            if (/context|period|quarter|year|time|q[1-4]|ytd|month/i.test(normalized)) {
+                return 'revenue_context';
+            }
+
+            // Notes patterns
+            if (/note|update|info|detail|comment|description|remark/i.test(normalized)) {
+                return 'additional_updates';
+            }
+
+            return 'skip';
+        }
+
+        function renderColumnMapper(headers) {
+            const container = document.getElementById('columnMapper');
+            const rowsContainer = document.getElementById('mappingRows');
+
+            rowsContainer.innerHTML = '';
+
+            headers.forEach((header, index) => {
+                const suggestedField = guessFieldFromHeader(header);
+
+                const row = document.createElement('div');
+                row.className = 'mapping-row';
+                row.innerHTML = `
+                    <span class="source-column">${header || '(Column ' + (index + 1) + ')'}</span>
+                    <span class="mapping-arrow">→</span>
+                    <select class="field-select" id="mapping-${index}" onchange="updatePreviewHighlights()">
+                        <option value="skip" ${suggestedField === 'skip' ? 'selected' : ''}>Skip this column</option>
+                        <option value="key_dates" ${suggestedField === 'key_dates' ? 'selected' : ''}>📅 Key Dates</option>
+                        <option value="action_items" ${suggestedField === 'action_items' ? 'selected' : ''}>⚡ Action Items</option>
+                        <option value="revenue_amount" ${suggestedField === 'revenue_amount' ? 'selected' : ''}>💰 Revenue Amount</option>
+                        <option value="revenue_context" ${suggestedField === 'revenue_context' ? 'selected' : ''}>📊 Revenue Context</option>
+                        <option value="additional_updates" ${suggestedField === 'additional_updates' ? 'selected' : ''}>📄 Additional Updates</option>
+                        <option value="content_block_text" ${suggestedField === 'content_block_text' ? 'selected' : ''}>📝 Add as Text Block</option>
+                    </select>
+                `;
+                rowsContainer.appendChild(row);
+            });
+
+            container.style.display = 'block';
+        }
+
+        function renderPreviewTable(data) {
+            const container = document.getElementById('previewContainer');
+            const tableDiv = document.getElementById('previewTable');
+
+            if (!data || !data.rows.length) {
+                tableDiv.innerHTML = '<p class="no-data-message">No data to preview</p>';
+                container.style.display = 'block';
+                return;
+            }
+
+            let html = '<table class="preview-table"><thead><tr>';
+            data.headers.forEach(header => {
+                html += `<th>${header || '—'}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            data.rows.forEach(row => {
+                html += '<tr>';
+                row.forEach(cell => {
+                    html += `<td>${cell || '—'}</td>`;
+                });
+                // Fill in missing cells
+                for (let i = row.length; i < data.headers.length; i++) {
+                    html += '<td>—</td>';
+                }
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            tableDiv.innerHTML = html;
+            container.style.display = 'block';
+        }
+
+        function updatePreviewHighlights() {
+            // Could add visual highlighting based on mapping selections
+            // For now, just ensure import button state is correct
+        }
+
+        function getColumnMappings() {
+            const mappings = [];
+            if (!parsedTableData) return mappings;
+
+            parsedTableData.headers.forEach((_, index) => {
+                const select = document.getElementById(`mapping-${index}`);
+                mappings.push(select ? select.value : 'skip');
+            });
+
+            return mappings;
+        }
+
+        function clearOneNoteImporter() {
+            parsedTableData = null;
+
+            const pasteZone = document.getElementById('pasteZone');
+            pasteZone.value = '';
+            pasteZone.classList.remove('has-content');
+
+            document.getElementById('columnMapper').style.display = 'none';
+            document.getElementById('previewContainer').style.display = 'none';
+            document.getElementById('mappingRows').innerHTML = '';
+            document.getElementById('previewTable').innerHTML = '';
+            document.getElementById('importBtn').disabled = true;
+        }
+
+        function mergeArrayData(existingArray, newItems) {
+            const merged = [...existingArray];
+
+            newItems.forEach(item => {
+                const processedItem = normalizeText(item);
+                if (!processedItem) return;
+
+                // Check for duplicates (case-insensitive)
+                const exists = merged.some(existing =>
+                    existing.toLowerCase().trim() === processedItem.toLowerCase().trim()
+                );
+
+                if (!exists) {
+                    merged.push(processedItem);
+                }
+            });
+
+            return merged;
+        }
+
+        function importOneNoteData() {
+            if (!parsedTableData || !parsedTableData.rows.length) {
+                showStatus('No data to import', 'error');
+                return;
+            }
+
+            const mappings = getColumnMappings();
+            const appendMode = document.getElementById('appendMode').checked;
+
+            // Collect data by field
+            const importData = {
+                key_dates: [],
+                action_items: [],
+                revenue_amount: null,
+                revenue_context: null,
+                additional_updates: [],
+                content_block_text: []
+            };
+
+            // Process each row
+            parsedTableData.rows.forEach(row => {
+                mappings.forEach((field, colIndex) => {
+                    const value = row[colIndex];
+                    if (!value || field === 'skip') return;
+
+                    if (field === 'key_dates') {
+                        importData.key_dates.push(value);
+                    } else if (field === 'action_items') {
+                        importData.action_items.push(value);
+                    } else if (field === 'revenue_amount') {
+                        // Take the first non-empty value for revenue
+                        if (!importData.revenue_amount) {
+                            importData.revenue_amount = value;
+                        }
+                    } else if (field === 'revenue_context') {
+                        if (!importData.revenue_context) {
+                            importData.revenue_context = value;
+                        }
+                    } else if (field === 'additional_updates') {
+                        importData.additional_updates.push(value);
+                    } else if (field === 'content_block_text') {
+                        importData.content_block_text.push(value);
+                    }
+                });
+            });
+
+            // Apply to form
+            applyImportedData(importData, appendMode);
+
+            // Clear the importer
+            clearOneNoteImporter();
+
+            // Collapse the importer
+            const importer = document.getElementById('onenoteImporter');
+            importer.classList.add('collapsed');
+            document.getElementById('importerToggleIcon').textContent = '▼';
+
+            showStatus('✅ Data imported successfully! Review the fields below and save when ready.', 'success');
+        }
+
+        function applyImportedData(importData, appendMode) {
+            // Key Dates
+            if (importData.key_dates.length > 0) {
+                if (appendMode) {
+                    currentDates = mergeArrayData(currentDates, importData.key_dates);
+                } else {
+                    currentDates = importData.key_dates;
+                }
+                renderDates();
+            }
+
+            // Action Items
+            if (importData.action_items.length > 0) {
+                if (appendMode) {
+                    currentActions = mergeArrayData(currentActions, importData.action_items);
+                } else {
+                    currentActions = importData.action_items;
+                }
+                renderActions();
+            }
+
+            // Revenue Amount (replace only - doesn't make sense to append)
+            if (importData.revenue_amount) {
+                document.getElementById('revenueAmount').value = importData.revenue_amount;
+            }
+
+            // Revenue Context (replace only)
+            if (importData.revenue_context) {
+                document.getElementById('revenueContext').value = importData.revenue_context;
+            }
+
+            // Additional Updates
+            if (importData.additional_updates.length > 0) {
+                const textarea = document.getElementById('additionalUpdates');
+                const existing = textarea.value;
+                const newContent = importData.additional_updates.join('\n');
+
+                if (appendMode && existing.trim()) {
+                    textarea.value = existing + '\n\n--- Imported from OneNote ---\n' + newContent;
+                } else {
+                    textarea.value = newContent;
+                }
+            }
+
+            // Content Blocks (as new text block)
+            if (importData.content_block_text.length > 0) {
+                const block = {
+                    id: ++blockIdCounter,
+                    type: 'text',
+                    content: '**Imported from OneNote:**\n\n' + importData.content_block_text.join('\n\n')
+                };
+                contentBlocks.push(block);
+                renderContentBlocks();
             }
         }
 
