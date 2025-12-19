@@ -1102,7 +1102,7 @@ The importer will detect columns and let you map them to the right fields."
     <script>
         const SUPABASE_URL = 'https://wdnpazkzejvnwiryxohl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkbnBhemt6ZWp2bndpcnl4b2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5ODg1ODcsImV4cCI6MjA3OTU2NDU4N30.JCk80Gu2TdQhf5w_OMHxMdGbYjWahU-jrl4FuG6oZYM';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentDates = [];
         let currentActions = [];
@@ -1111,7 +1111,7 @@ The importer will detect columns and let you map them to the right fields."
 
         // Load all artists and business sections on page load
         async function loadArtists() {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('artist_updates')
                 .select('artist_slug, artist_name')
                 .order('artist_name');
@@ -1189,7 +1189,7 @@ The importer will detect columns and let you map them to the right fields."
 
             container.classList.add('loading');
             
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('artist_updates')
                 .select('*')
                 .eq('artist_slug', slug)
@@ -1313,7 +1313,7 @@ The importer will detect columns and let you map them to the right fields."
                 last_updated: new Date().toISOString()
             };
 
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('artist_updates')
                 .upsert(updates, { onConflict: 'artist_slug' });
 
@@ -1367,7 +1367,7 @@ The importer will detect columns and let you map them to the right fields."
                 // We'll use a special field or naming convention
             }
             
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('artist_updates')
                 .insert({
                     artist_slug: slug,
@@ -1579,7 +1579,7 @@ Supports Markdown:
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${slug}_content_${timestamp}.${fileExt}`;
                 
-                const { data, error } = await supabase.storage
+                const { data, error } = await supabaseClient.storage
                     .from('artist-images')
                     .upload(fileName, file, {
                         upsert: false,
@@ -1591,7 +1591,7 @@ Supports Markdown:
                 
                 if (error) throw error;
                 
-                const { data: { publicUrl } } = supabase.storage
+                const { data: { publicUrl } } = supabaseClient.storage
                     .from('artist-images')
                     .getPublicUrl(fileName);
                 
