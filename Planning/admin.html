@@ -564,89 +564,56 @@
             color: #4a5568;
         }
 
-        /* Markdown Guide Styling */
-        .markdown-guide {
-            background: linear-gradient(135deg, #f8f9fc 0%, #e8f2ff 100%);
-            border: 2px solid #667eea;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .markdown-guide::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
-        }
-
-        .markdown-guide h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.4em;
-            text-align: center;
-        }
-
-        .markdown-guide > p {
-            text-align: center;
-            color: #4a5568;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .markdown-examples {
+        /* Formatting Toolbar Styles */
+        .formatting-toolbar {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 7px 7px 0 0;
         }
 
-        .markdown-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .markdown-item {
+        .format-btn {
             background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(102, 126, 234, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .markdown-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
-        }
-
-        .markdown-item strong {
-            color: #4a5568;
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.95em;
-        }
-
-        .markdown-item code {
-            background: #edf2f7;
-            color: #667eea;
+            border: 1px solid #e2e8f0;
             padding: 6px 10px;
-            border-radius: 6px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.9em;
-            display: inline-block;
-            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a5568;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        @media (max-width: 768px) {
-            .markdown-row {
-                grid-template-columns: 1fr;
-            }
+        .format-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+
+        .format-btn:active {
+            transform: translateY(0);
+        }
+
+        .format-btn .icon {
+            font-size: 14px;
+        }
+
+        .format-btn.bold { font-weight: 800; }
+        .format-btn.italic { font-style: italic; }
+
+        .formatting-info {
+            background: #f0f4ff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #d4e0ff;
         }
 
         /* OneNote Importer Styles */
@@ -992,52 +959,11 @@ The importer will detect columns and let you map them to the right fields."
                     <p class="help">Build your content using text blocks, images, and links. Drag to reorder blocks.</p>
                 </div>
 
-                <!-- Markdown Formatting Guide -->
-                <div class="markdown-guide">
-                    <h3>📝 Text Formatting Guide</h3>
-                    <p>Text blocks support Markdown formatting for rich content:</p>
-                    <div class="markdown-examples">
-                        <div class="markdown-row">
-                            <div class="markdown-item">
-                                <strong>Bold Text:</strong>
-                                <code>**Bold Text**</code>
-                            </div>
-                            <div class="markdown-item">
-                                <strong>Italic Text:</strong>
-                                <code>*Italic Text*</code>
-                            </div>
-                        </div>
-                        <div class="markdown-row">
-                            <div class="markdown-item">
-                                <strong>Headers:</strong>
-                                <code>### Header Text</code>
-                            </div>
-                            <div class="markdown-item">
-                                <strong>Lists:</strong>
-                                <code>- List item</code>
-                            </div>
-                        </div>
-                        <div class="markdown-row">
-                            <div class="markdown-item">
-                                <strong>Links:</strong>
-                                <code>[Link Text](https://url.com)</code>
-                            </div>
-                            <div class="markdown-item">
-                                <strong>Quotes:</strong>
-                                <code>> Quote text</code>
-                            </div>
-                        </div>
-                        <div class="markdown-row">
-                            <div class="markdown-item">
-                                <strong>Line Break:</strong>
-                                <code>Two spaces + Enter</code>
-                            </div>
-                            <div class="markdown-item">
-                                <strong>Highlight Text:</strong>
-                                <code>`important text`</code>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Formatting Toolbar Info -->
+                <div class="formatting-info">
+                    <p style="color: #4a5568; font-size: 14px; text-align: center;">
+                        💡 <strong>Tip:</strong> Each text block has formatting buttons above it. Select text and click a button to format, or click to insert at cursor.
+                    </p>
                 </div>
 
                 <div class="form-group">
@@ -1449,13 +1375,34 @@ The importer will detect columns and let you map them to the right fields."
                             <button class="btn-remove" onclick="removeBlock(${index})">✕</button>
                         </div>
                     </div>
-                    <div class="content-block-body">
+                    <div class="formatting-toolbar">
+                        <button type="button" class="format-btn bold" onclick="formatText(${index}, 'bold')" title="Bold">
+                            <span>B</span>
+                        </button>
+                        <button type="button" class="format-btn italic" onclick="formatText(${index}, 'italic')" title="Italic">
+                            <span>I</span>
+                        </button>
+                        <button type="button" class="format-btn" onclick="formatText(${index}, 'header')" title="Header">
+                            <span class="icon">H</span>
+                        </button>
+                        <button type="button" class="format-btn" onclick="formatText(${index}, 'list')" title="List Item">
+                            <span class="icon">•</span> List
+                        </button>
+                        <button type="button" class="format-btn" onclick="formatText(${index}, 'link')" title="Link">
+                            <span class="icon">🔗</span> Link
+                        </button>
+                        <button type="button" class="format-btn" onclick="formatText(${index}, 'quote')" title="Quote">
+                            <span class="icon">"</span> Quote
+                        </button>
+                        <button type="button" class="format-btn" onclick="formatText(${index}, 'highlight')" title="Highlight">
+                            <span class="icon">✦</span> Highlight
+                        </button>
+                    </div>
+                    <div class="content-block-body" style="padding-top: 0;">
                         <div class="text-block">
-                            <textarea placeholder="Enter your content here... 
-Supports Markdown:
-**Bold Text** | *Italic Text*
-### Headers | - List items
-[Links](url) | > Blockquotes" onchange="updateTextBlock(${index}, this.value)">${block.content || ''}</textarea>
+                            <textarea id="textarea-${index}" placeholder="Enter your content here...
+
+Select text and click a formatting button above, or click a button to insert at cursor." onchange="updateTextBlock(${index}, this.value)" oninput="updateTextBlock(${index}, this.value)">${block.content || ''}</textarea>
                         </div>
                     </div>
                 `;
@@ -1519,6 +1466,130 @@ Supports Markdown:
 
         function updateTextBlock(index, content) {
             contentBlocks[index].content = content;
+        }
+
+        // Format text with markdown syntax
+        function formatText(blockIndex, formatType) {
+            const textarea = document.getElementById(`textarea-${blockIndex}`);
+            if (!textarea) return;
+
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            const beforeText = textarea.value.substring(0, start);
+            const afterText = textarea.value.substring(end);
+
+            let newText = '';
+            let cursorOffset = 0;
+
+            switch (formatType) {
+                case 'bold':
+                    if (selectedText) {
+                        newText = beforeText + '**' + selectedText + '**' + afterText;
+                        cursorOffset = end + 4;
+                    } else {
+                        newText = beforeText + '**bold text**' + afterText;
+                        cursorOffset = start + 2;
+                    }
+                    break;
+
+                case 'italic':
+                    if (selectedText) {
+                        newText = beforeText + '*' + selectedText + '*' + afterText;
+                        cursorOffset = end + 2;
+                    } else {
+                        newText = beforeText + '*italic text*' + afterText;
+                        cursorOffset = start + 1;
+                    }
+                    break;
+
+                case 'header':
+                    if (selectedText) {
+                        newText = beforeText + '### ' + selectedText + afterText;
+                        cursorOffset = end + 4;
+                    } else {
+                        newText = beforeText + '### Header' + afterText;
+                        cursorOffset = start + 4;
+                    }
+                    break;
+
+                case 'list':
+                    if (selectedText) {
+                        // Convert each line to a list item
+                        const listItems = selectedText.split('\n').map(line => '- ' + line).join('\n');
+                        newText = beforeText + listItems + afterText;
+                        cursorOffset = start + listItems.length;
+                    } else {
+                        newText = beforeText + '- List item' + afterText;
+                        cursorOffset = start + 2;
+                    }
+                    break;
+
+                case 'link':
+                    if (selectedText) {
+                        newText = beforeText + '[' + selectedText + '](url)' + afterText;
+                        cursorOffset = end + 3; // Position cursor at 'url'
+                    } else {
+                        newText = beforeText + '[link text](https://url.com)' + afterText;
+                        cursorOffset = start + 1;
+                    }
+                    break;
+
+                case 'quote':
+                    if (selectedText) {
+                        // Convert each line to a quote
+                        const quoteLines = selectedText.split('\n').map(line => '> ' + line).join('\n');
+                        newText = beforeText + quoteLines + afterText;
+                        cursorOffset = start + quoteLines.length;
+                    } else {
+                        newText = beforeText + '> Quote text' + afterText;
+                        cursorOffset = start + 2;
+                    }
+                    break;
+
+                case 'highlight':
+                    if (selectedText) {
+                        newText = beforeText + '`' + selectedText + '`' + afterText;
+                        cursorOffset = end + 2;
+                    } else {
+                        newText = beforeText + '`highlighted`' + afterText;
+                        cursorOffset = start + 1;
+                    }
+                    break;
+
+                default:
+                    return;
+            }
+
+            // Update the textarea
+            textarea.value = newText;
+
+            // Update the content block
+            contentBlocks[blockIndex].content = newText;
+
+            // Set focus back to textarea and position cursor
+            textarea.focus();
+
+            // If text was selected, place cursor at end of formatted text
+            // If no text was selected, select the placeholder text
+            if (selectedText) {
+                textarea.setSelectionRange(cursorOffset, cursorOffset);
+            } else {
+                // Select the placeholder text so user can type over it
+                const placeholders = {
+                    'bold': { start: start + 2, end: start + 11 },
+                    'italic': { start: start + 1, end: start + 12 },
+                    'header': { start: start + 4, end: start + 10 },
+                    'list': { start: start + 2, end: start + 11 },
+                    'link': { start: start + 1, end: start + 10 },
+                    'quote': { start: start + 2, end: start + 12 },
+                    'highlight': { start: start + 1, end: start + 12 }
+                };
+                const p = placeholders[formatType];
+                if (p) {
+                    textarea.setSelectionRange(p.start, p.end);
+                }
+            }
         }
 
         function updateImageCaption(index, caption) {
