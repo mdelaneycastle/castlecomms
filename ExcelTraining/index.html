@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Essentials - Zero to Hero Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Excel Essentials Training</h1>
+            <div class="nav-links">
+                <span>Excel Training Hub</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Excel Zero to Hero</h1>
+        <p class="hero-subtitle">Master Excel from the basics to advanced analysis in 10 comprehensive modules</p>
+        <button onclick="startCourse()" class="btn-primary">Start Learning</button>
+    </div>
+
+    <div class="container">
+        <div class="course-overview">
+            <h2>Course Overview</h2>
+            <p>This comprehensive training program will take you from complete beginner to confident Excel user. Each module includes hands-on exercises and a quiz to test your knowledge.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>10</h3>
+                    <p>Modules</p>
+                </div>
+                <div class="stat-card">
+                    <h3>30-45</h3>
+                    <p>Minutes per Module</p>
+                </div>
+                <div class="stat-card">
+                    <h3>100+</h3>
+                    <p>Quiz Questions</p>
+                </div>
+                <div class="stat-card">
+                    <h3>10</h3>
+                    <p>Practical Exercises</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="modules-section">
+            <h2>Course Modules</h2>
+            
+            <div class="phase">
+                <h3 class="phase-title">Phase 1: The Foundations</h3>
+                <div class="module-grid">
+                    <div class="module-card" onclick="goToModule(1)">
+                        <div class="module-number">1</div>
+                        <h4>The Interface & The Grid</h4>
+                        <p>Understanding how Excel "thinks" - Rows, Columns, and Addresses</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="goToModule(2)">
+                        <div class="module-number">2</div>
+                        <h4>Data Entry & Basic Formatting</h4>
+                        <p>Getting data into the sheet and making it readable</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="goToModule(3)">
+                        <div class="module-number">3</div>
+                        <h4>Basic Math & AutoSum</h4>
+                        <p>Excel as a giant calculator - formulas and basic operations</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="phase">
+                <h3 class="phase-title">Phase 2: Functions & Logic</h3>
+                <div class="module-grid">
+                    <div class="module-card" onclick="goToModule(4)">
+                        <div class="module-number">4</div>
+                        <h4>The "Big 5" Aggregation Functions</h4>
+                        <p>SUM, AVERAGE, COUNT, MAX, MIN - Summarizing data instantly</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="goToModule(5)">
+                        <div class="module-number">5</div>
+                        <h4>Logic: The Simple IF Statement</h4>
+                        <p>Teaching Excel to make decisions for you</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="goToModule(6)">
+                        <div class="module-number">6</div>
+                        <h4>Conditional Formatting</h4>
+                        <p>Visualizing data patterns automatically based on rules</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="phase">
+                <h3 class="phase-title">Phase 3: Data Management & Analysis</h3>
+                <div class="module-grid">
+                    <div class="module-card" onclick="goToModule(7)">
+                        <div class="module-number">7</div>
+                        <h4>Sorting, Filtering & Freeze Panes</h4>
+                        <p>Managing large lists of data without getting lost</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="goToModule(8)">
+                        <div class="module-number">8</div>
+                        <h4>Basic Charts & Graphs</h4>
+                        <p>Visual storytelling with your data</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="goToModule(9)">
+                        <div class="module-number">9</div>
+                        <h4>The "Lookups" (VLOOKUP/XLOOKUP)</h4>
+                        <p>Connecting two different lists of data</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+
+                    <div class="module-card" onclick="goToModule(10)">
+                        <div class="module-number">10</div>
+                        <h4>Introduction to Pivot Tables</h4>
+                        <p>The most powerful tool for summarizing data</p>
+                        <div class="module-footer">
+                            <span class="module-duration">30-45 minutes</span>
+                            <span class="module-type">Interactive</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cheat-sheet">
+            <h2>Quick Reference Cheat Sheet</h2>
+            <div class="shortcuts-grid">
+                <div class="shortcut">
+                    <kbd>Ctrl+Z</kbd>
+                    <span>Undo</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>Ctrl+C/V</kbd>
+                    <span>Copy/Paste</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>F2</kbd>
+                    <span>Edit cell</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>Alt+=</kbd>
+                    <span>AutoSum</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>Ctrl+Arrow</kbd>
+                    <span>Jump to edge</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>ESC</kbd>
+                    <span>Cancel formula</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>F4</kbd>
+                    <span>Lock reference ($)</span>
+                </div>
+                <div class="shortcut">
+                    <kbd>Right-Click</kbd>
+                    <span>Context menu</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
