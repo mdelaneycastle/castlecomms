@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 9: The Lookups (VLOOKUP/XLOOKUP) - Excel Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Module 9: The Lookups (VLOOKUP/XLOOKUP)</h1>
+            <div class="nav-links">
+                <a href="index.html" style="color: var(--primary-color); text-decoration: none;">← Back to Course Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="module-header">
+            <h1>Module 9: The Lookups (VLOOKUP/XLOOKUP)</h1>
+            <p>Connecting two different lists of data</p>
+        </div>
+
+        <div class="module-content">
+            <h3>📚 Learning Objectives</h3>
+            <ul>
+                <li>Understand lookup concept and real-world use cases</li>
+                <li>Master VLOOKUP syntax and functionality</li>
+                <li>Learn modern XLOOKUP (Excel 365/2021+)</li>
+                <li>Handle errors in lookup formulas</li>
+                <li>Use exact vs approximate match effectively</li>
+            </ul>
+
+            <h3>🎯 Key Concepts</h3>
+            
+            <h4>1. What Are Lookup Functions?</h4>
+            <p>Lookup functions find information in one table based on a matching value:</p>
+            <ul>
+                <li>Like a phone book: look up a name, get the phone number</li>
+                <li>Connect related data from different sources</li>
+                <li>Eliminate manual searching and data duplication</li>
+                <li>Essential for database-like operations in Excel</li>
+                <li>Foundation for advanced data management</li>
+            </ul>
+
+            <h4>2. VLOOKUP Syntax</h4>
+            <p>=VLOOKUP(lookup_value, table_array, column_index, [range_lookup])</p>
+            <ul>
+                <li><strong>Lookup_value:</strong> What you're searching for (Product ID)</li>
+                <li><strong>Table_array:</strong> Where to search (Product table range)</li>
+                <li><strong>Column_index:</strong> Which column to return (count from left, starts at 1)</li>
+                <li><strong>Range_lookup:</strong> FALSE for exact match (almost always use FALSE)</li>
+            </ul>
+
+            <h4>3. VLOOKUP Step by Step</h4>
+            <ol>
+                <li>Identify what you're looking up (lookup value)</li>
+                <li>Find the table containing that value and the return value</li>
+                <li>Count columns from left to identify column index</li>
+                <li>Use FALSE for exact match (recommended)</li>
+                <li>Test with different lookup values</li>
+            </ol>
+
+            <h4>4. XLOOKUP - The Modern Alternative</h4>
+            <p>Available in Excel 365 and Excel 2021+:</p>
+            <ul>
+                <li><strong>Syntax:</strong> =XLOOKUP(lookup_value, lookup_array, return_array)</li>
+                <li><strong>Simpler:</strong> No column counting required</li>
+                <li><strong>Flexible:</strong> Can look left or right, up or down</li>
+                <li><strong>Built-in Error Handling:</strong> Custom error messages</li>
+                <li><strong>Defaults to Exact Match:</strong> No need for FALSE parameter</li>
+            </ul>
+
+            <h4>5. Common VLOOKUP Issues & Solutions</h4>
+            <ul>
+                <li><strong>Lookup column must be leftmost:</strong> VLOOKUP only looks right</li>
+                <li><strong>#N/A Error:</strong> Value not found - use IFERROR to handle</li>
+                <li><strong>Approximate vs Exact Match:</strong> Always use FALSE unless specific need</li>
+                <li><strong>Data Type Mismatch:</strong> Numbers vs text can cause lookup failures</li>
+                <li><strong>Leading/Trailing Spaces:</strong> TRIM function helps clean data</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>📋 Practical Exercise: "Product Invoice System"</h3>
+                <p>Create an automated invoice system using lookup functions:</p>
+                <ol>
+                    <li><strong>Create Product Database (Sheet1):</strong>
+                        <ul>
+                            <li>Column A: Product ID (P001, P002, P003, etc.)</li>
+                            <li>Column B: Product Name</li>
+                            <li>Column C: Unit Price</li>
+                            <li>Column D: Category</li>
+                            <li>Add 10-15 products with realistic data</li>
+                        </ul>
+                    </li>
+                    <li><strong>Create Invoice Sheet (Sheet2):</strong>
+                        <ul>
+                            <li>Column A: Product ID (user input)</li>
+                            <li>Column B: Product Name (VLOOKUP result)</li>
+                            <li>Column C: Unit Price (VLOOKUP result)</li>
+                            <li>Column D: Quantity (user input)</li>
+                            <li>Column E: Line Total (Price × Quantity)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Build VLOOKUP Formulas:</strong>
+                        <ul>
+                            <li><strong>Product Name:</strong> =VLOOKUP(A2,Sheet1!A:D,2,FALSE)</li>
+                            <li><strong>Unit Price:</strong> =VLOOKUP(A2,Sheet1!A:D,3,FALSE)</li>
+                            <li><strong>Line Total:</strong> =C2*D2</li>
+                        </ul>
+                    </li>
+                    <li><strong>Add Error Handling:</strong>
+                        <ul>
+                            <li>=IFERROR(VLOOKUP(A2,Sheet1!A:D,2,FALSE),"Product Not Found")</li>
+                            <li>Prevents #N/A errors for invalid Product IDs</li>
+                        </ul>
+                    </li>
+                    <li><strong>Create Invoice Summary:</strong>
+                        <ul>
+                            <li>Subtotal: =SUM(E:E)</li>
+                            <li>Tax (8%): =Subtotal*0.08</li>
+                            <li>Total: =Subtotal+Tax</li>
+                        </ul>
+                    </li>
+                    <li><strong>Test the System:</strong>
+                        <ul>
+                            <li>Enter various Product IDs and see auto-population</li>
+                            <li>Test invalid Product IDs to see error handling</li>
+                            <li>Add quantities and verify calculations</li>
+                        </ul>
+                    </li>
+                    <li><strong>Bonus Features:</strong>
+                        <ul>
+                            <li>Add customer lookup table</li>
+                            <li>Include discount lookup based on quantity</li>
+                            <li>Create dropdown lists for Product IDs</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li><strong>Use Named Ranges:</strong> Make formulas easier to read and maintain</li>
+                <li><strong>Absolute References:</strong> Use $ signs for table ranges when copying</li>
+                <li><strong>Data Validation:</strong> Create dropdowns to prevent lookup errors</li>
+                <li><strong>TRIM Function:</strong> Clean data before lookup to remove spaces</li>
+                <li><strong>Table Format:</strong> Use Excel tables for dynamic ranges</li>
+                <li><strong>Multiple Criteria:</strong> Combine INDEX/MATCH for complex lookups</li>
+            </ul>
+
+            <h3>🔍 Troubleshooting Lookups</h3>
+            <ul>
+                <li><strong>#N/A Error:</strong> Lookup value not found in first column</li>
+                <li><strong>#REF! Error:</strong> Column index exceeds table width</li>
+                <li><strong>#VALUE! Error:</strong> Data type mismatch (number vs text)</li>
+                <li><strong>Wrong Result:</strong> Check approximate vs exact match setting</li>
+                <li><strong>Inconsistent Results:</strong> Leading/trailing spaces or hidden characters</li>
+            </ul>
+
+            <h3>📊 VLOOKUP vs XLOOKUP Comparison</h3>
+            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                <tr style="background: var(--light-color);">
+                    <th style="border: 1px solid #ddd; padding: 0.5rem;">Feature</th>
+                    <th style="border: 1px solid #ddd; padding: 0.5rem;">VLOOKUP</th>
+                    <th style="border: 1px solid #ddd; padding: 0.5rem;">XLOOKUP</th>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Direction</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Only right</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Any direction</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Column Counting</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Required</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Not needed</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Default Match</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Approximate</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Exact</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Error Handling</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Requires IFERROR</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Built-in</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Availability</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">All Excel versions</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Excel 365/2021+</td>
+                </tr>
+            </table>
+
+            <h3>🚀 Advanced Lookup Techniques</h3>
+            <ul>
+                <li><strong>INDEX/MATCH:</strong> More flexible than VLOOKUP, works in any direction</li>
+                <li><strong>Multiple Criteria:</strong> Combine columns or use helper columns</li>
+                <li><strong>Approximate Match:</strong> For range lookups (tax brackets, grades)</li>
+                <li><strong>Two-Way Lookup:</strong> Find values using both row and column criteria</li>
+                <li><strong>Dynamic Arrays:</strong> Use FILTER function for multiple results</li>
+            </ul>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2>Ready to Test Your Knowledge?</h2>
+                <p>Take this quiz to check your understanding of Module 9</p>
+                <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Module 9 Quiz Questions
+        const module9Questions = [
+            {
+                question: "What does the 'V' in VLOOKUP stand for?",
+                options: ["Value", "Vertical", "Variable", "Vector"],
+                correct: 1
+            },
+            {
+                question: "What should range_lookup be set to for exact match?",
+                options: ["TRUE", "FALSE", "1", "EXACT"],
+                correct: 1
+            },
+            {
+                question: "What error appears when VLOOKUP can't find a value?",
+                options: ["#VALUE!", "#REF!", "#N/A", "#NAME?"],
+                correct: 2
+            },
+            {
+                question: "Which function can look both left and right?",
+                options: ["VLOOKUP", "HLOOKUP", "XLOOKUP", "LOOKUP"],
+                correct: 2
+            },
+            {
+                question: "In VLOOKUP, what does column_index_num represent?",
+                options: [
+                    "The column to search in",
+                    "The column number to return data from (counting from left)",
+                    "The number of columns in the table",
+                    "The row number"
+                ],
+                correct: 1
+            },
+            {
+                question: "What is required for VLOOKUP to work?",
+                options: [
+                    "Lookup value can be anywhere in the table",
+                    "Lookup value must be in the rightmost column",
+                    "Lookup value must be in the leftmost column of the table",
+                    "Lookup value must be in the middle column"
+                ],
+                correct: 2
+            },
+            {
+                question: "How do you handle #N/A errors in VLOOKUP?",
+                options: [
+                    "Use ISERROR function",
+                    "Use IFERROR function",
+                    "Use IF function",
+                    "Ignore them"
+                ],
+                correct: 1
+            },
+            {
+                question: "What is the main advantage of XLOOKUP over VLOOKUP?",
+                options: [
+                    "It's faster",
+                    "It can look in any direction and doesn't require column counting",
+                    "It's more accurate",
+                    "It uses less memory"
+                ],
+                correct: 1
+            },
+            {
+                question: "In which Excel versions is XLOOKUP available?",
+                options: [
+                    "All versions",
+                    "Excel 2016 and later",
+                    "Excel 365 and Excel 2021+",
+                    "Only Excel 365"
+                ],
+                correct: 2
+            },
+            {
+                question: "What happens if you use TRUE for range_lookup in VLOOKUP?",
+                options: [
+                    "It looks for an exact match",
+                    "It finds the closest match (approximate match)",
+                    "It returns an error",
+                    "It searches faster"
+                ],
+                correct: 1
+            }
+        ];
+
+        // Initialize quiz
+        function startQuiz() {
+            quiz = new Quiz(module9Questions, 9);
+            quiz.init();
+        }
+
+        // No progress tracking needed
+    </script>
+</body>
+</html>

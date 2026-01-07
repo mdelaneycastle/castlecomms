@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 6: Conditional Formatting - Excel Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Module 6: Conditional Formatting</h1>
+            <div class="nav-links">
+                <a href="index.html" style="color: var(--primary-color); text-decoration: none;">← Back to Course Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="module-header">
+            <h1>Module 6: Conditional Formatting</h1>
+            <p>Visualizing data patterns automatically based on rules</p>
+        </div>
+
+        <div class="module-content">
+            <h3>📚 Learning Objectives</h3>
+            <ul>
+                <li>Apply highlight cell rules effectively</li>
+                <li>Use data bars and color scales for visualization</li>
+                <li>Create custom formatting rules</li>
+                <li>Use icon sets for performance indicators</li>
+                <li>Manage and edit multiple formatting rules</li>
+            </ul>
+
+            <h3>🎯 Key Concepts</h3>
+            
+            <h4>1. What is Conditional Formatting?</h4>
+            <p>Conditional formatting automatically changes cell appearance based on cell values or conditions:</p>
+            <ul>
+                <li>Makes patterns in data instantly visible</li>
+                <li>No formulas needed - just point and click</li>
+                <li>Updates automatically when data changes</li>
+                <li>Found in Home tab → Conditional Formatting</li>
+            </ul>
+
+            <h4>2. Highlight Cell Rules</h4>
+            <ul>
+                <li><strong>Greater Than / Less Than:</strong> Highlight values above/below a threshold</li>
+                <li><strong>Between:</strong> Highlight values within a range</li>
+                <li><strong>Equal To:</strong> Highlight specific values or text</li>
+                <li><strong>Text that Contains:</strong> Find cells with specific text</li>
+                <li><strong>Duplicate Values:</strong> Spot repeated data instantly</li>
+                <li><strong>Date Occurring:</strong> Highlight dates (yesterday, today, this week, etc.)</li>
+            </ul>
+
+            <h4>3. Data Bars</h4>
+            <ul>
+                <li>Visual bars inside cells showing relative values</li>
+                <li>Great for quick comparisons without charts</li>
+                <li>Can be gradient or solid fill</li>
+                <li>Automatically scales to data range</li>
+                <li>Perfect for sales figures, budgets, performance metrics</li>
+            </ul>
+
+            <h4>4. Color Scales (Heat Maps)</h4>
+            <ul>
+                <li><strong>2-Color Scale:</strong> Min to Max gradient (red to green)</li>
+                <li><strong>3-Color Scale:</strong> Low-Mid-High gradient (red-yellow-green)</li>
+                <li>Creates instant heat maps</li>
+                <li>Perfect for spotting trends and patterns</li>
+                <li>Great for large datasets</li>
+            </ul>
+
+            <h4>5. Icon Sets</h4>
+            <ul>
+                <li><strong>Arrows:</strong> Up, down, sideways for trends</li>
+                <li><strong>Traffic Lights:</strong> Red, yellow, green for status</li>
+                <li><strong>Flags:</strong> Red, yellow, green flags</li>
+                <li><strong>Ratings:</strong> Stars, circles, bars for performance</li>
+                <li>Can customize thresholds (33%/67% or custom values)</li>
+            </ul>
+
+            <h4>6. Managing Rules</h4>
+            <ul>
+                <li>Access via <strong>Manage Rules</strong> option</li>
+                <li>Set rule priority order (rules can conflict)</li>
+                <li>Edit existing rules</li>
+                <li>"Stop if True" option prevents further rule processing</li>
+                <li>Apply to entire row based on one cell condition</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>💰 Practical Exercise: "Monthly Expense Tracker"</h3>
+                <p>Create a visual expense tracker using all conditional formatting types:</p>
+                <ol>
+                    <li><strong>Setup Your Expense Data:</strong>
+                        <ul>
+                            <li>Column A: Expense Category (Rent, Groceries, Gas, etc.)</li>
+                            <li>Column B: Budgeted Amount</li>
+                            <li>Column C: Actual Amount</li>
+                            <li>Column D: Difference (=C2-B2)</li>
+                            <li>Column E: Status (Over/Under/On Target)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Add Sample Data:</strong>
+                        <ul>
+                            <li>10-15 expense categories</li>
+                            <li>Include some over-budget and under-budget items</li>
+                            <li>Vary the amounts realistically</li>
+                        </ul>
+                    </li>
+                    <li><strong>Apply Conditional Formatting:</strong>
+                        <ul>
+                            <li><strong>Actual Amounts:</strong> Data bars to show spending levels</li>
+                            <li><strong>Over Budget:</strong> Highlight expenses over $100 in red</li>
+                            <li><strong>Under Budget:</strong> Highlight expenses under $50 in green</li>
+                            <li><strong>Difference Column:</strong> 3-color scale (negative=red, zero=yellow, positive=green)</li>
+                            <li><strong>Budget Status:</strong> Icon sets with traffic lights</li>
+                        </ul>
+                    </li>
+                    <li><strong>Advanced Rules:</strong>
+                        <ul>
+                            <li>Highlight duplicate categories</li>
+                            <li>Mark any expense over 150% of budget</li>
+                            <li>Use formula rule to highlight entire row if over budget</li>
+                        </ul>
+                    </li>
+                    <li><strong>Create Summary Section:</strong>
+                        <ul>
+                            <li>Total budgeted vs actual with color coding</li>
+                            <li>Percentage over/under budget</li>
+                            <li>Visual indicators for financial health</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li>Use subtle colors - too much highlighting defeats the purpose</li>
+                <li>Stick to green/red conventions (green=good, red=bad)</li>
+                <li>Data bars work great in dashboard reports</li>
+                <li>Color scales are perfect for large data tables</li>
+                <li>Use "Format Painter" to copy conditional formatting</li>
+                <li>Clear rules from Home → Clear → Clear Formats</li>
+            </ul>
+
+            <h3>🔍 Common Mistakes to Avoid</h3>
+            <ul>
+                <li>Over-formatting - too many colors make data hard to read</li>
+                <li>Using similar colors that are hard to distinguish</li>
+                <li>Not testing rules with different data values</li>
+                <li>Forgetting to adjust ranges when adding new data</li>
+                <li>Conflicting rules that override each other</li>
+            </ul>
+
+            <h3>🎨 Best Practices</h3>
+            <ul>
+                <li><strong>Purpose:</strong> Use formatting to highlight exceptions, not everything</li>
+                <li><strong>Consistency:</strong> Use same color scheme across related data</li>
+                <li><strong>Clarity:</strong> Make formatting obvious and meaningful</li>
+                <li><strong>Accessibility:</strong> Consider colorblind users (use patterns too)</li>
+                <li><strong>Performance:</strong> Too many rules can slow down large files</li>
+            </ul>
+
+            <h3>📊 Real-World Applications</h3>
+            <ul>
+                <li><strong>Sales Reports:</strong> Highlight top performers and underperformers</li>
+                <li><strong>Budget Tracking:</strong> Show variances and problem areas</li>
+                <li><strong>Project Status:</strong> Use traffic lights for task completion</li>
+                <li><strong>Data Quality:</strong> Highlight missing or duplicate values</li>
+                <li><strong>Performance Dashboards:</strong> Create visual KPI indicators</li>
+            </ul>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2>Ready to Test Your Knowledge?</h2>
+                <p>Take this quiz to check your understanding of Module 6</p>
+                <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Module 6 Quiz Questions
+        const module6Questions = [
+            {
+                question: "Where do you find Conditional Formatting in Excel?",
+                options: ["Data tab", "Insert tab", "Home tab", "View tab"],
+                correct: 2
+            },
+            {
+                question: "What do Data Bars show?",
+                options: [
+                    "Chart outside the cell",
+                    "Relative values as bars inside cells",
+                    "Error bars",
+                    "Menu bars"
+                ],
+                correct: 1
+            },
+            {
+                question: "How many colors are typically in a heat map color scale?",
+                options: ["Only 1", "Always 2", "2 or 3", "Unlimited"],
+                correct: 2
+            },
+            {
+                question: "What can Icon Sets display?",
+                options: [
+                    "Only arrows",
+                    "Only traffic lights",
+                    "Various symbols like arrows, flags, and ratings",
+                    "Custom images"
+                ],
+                correct: 2
+            },
+            {
+                question: "How do you edit an existing conditional formatting rule?",
+                options: [
+                    "Delete and recreate it",
+                    "Use Manage Rules option",
+                    "Double-click the cell",
+                    "Press F2"
+                ],
+                correct: 1
+            },
+            {
+                question: "What happens when conditional formatting rules conflict?",
+                options: [
+                    "Excel shows an error",
+                    "The first rule always wins",
+                    "The last rule always wins",
+                    "Rules are applied in priority order"
+                ],
+                correct: 3
+            },
+            {
+                question: "Which conditional formatting type is best for showing relative values across a large dataset?",
+                options: [
+                    "Highlight Cell Rules",
+                    "Data Bars",
+                    "Color Scales",
+                    "Icon Sets"
+                ],
+                correct: 2
+            },
+            {
+                question: "How do you remove conditional formatting from cells?",
+                options: [
+                    "Delete the cells",
+                    "Home → Clear → Clear Formats",
+                    "Right-click → Delete",
+                    "Ctrl+Z"
+                ],
+                correct: 1
+            },
+            {
+                question: "What does the 'Stop if True' option do?",
+                options: [
+                    "Stops Excel from running",
+                    "Prevents further rules from being applied to that cell",
+                    "Stops data entry",
+                    "Creates an error message"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which is the best practice for conditional formatting colors?",
+                options: [
+                    "Use as many colors as possible",
+                    "Always use bright colors",
+                    "Use subtle colors and stick to green/red conventions",
+                    "Only use blue colors"
+                ],
+                correct: 2
+            }
+        ];
+
+        // Initialize quiz
+        function startQuiz() {
+            quiz = new Quiz(module6Questions, 6);
+            quiz.init();
+        }
+
+        // No progress tracking needed
+    </script>
+</body>
+</html>

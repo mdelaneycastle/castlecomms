@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 10: Introduction to Pivot Tables - Excel Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Module 10: Introduction to Pivot Tables</h1>
+            <div class="nav-links">
+                <a href="index.html" style="color: var(--primary-color); text-decoration: none;">← Back to Course Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="module-header">
+            <h1>Module 10: Introduction to Pivot Tables</h1>
+            <p>The most powerful tool for summarizing data</p>
+        </div>
+
+        <div class="module-content">
+            <h3>📚 Learning Objectives</h3>
+            <ul>
+                <li>Understand what Pivot Tables do and when to use them</li>
+                <li>Create basic Pivot Tables from raw data</li>
+                <li>Use the four Pivot Table areas effectively</li>
+                <li>Summarize data in different ways (sum, count, average)</li>
+                <li>Format and refresh Pivot Tables</li>
+            </ul>
+
+            <h3>🎯 Key Concepts</h3>
+            
+            <h4>1. What Are Pivot Tables?</h4>
+            <p>Pivot Tables are Excel's most powerful data analysis tool:</p>
+            <ul>
+                <li><strong>Instant Summaries:</strong> Turn thousands of rows into meaningful reports</li>
+                <li><strong>Drag-and-Drop:</strong> No formulas needed - just drag fields around</li>
+                <li><strong>Dynamic:</strong> Change views instantly by moving fields</li>
+                <li><strong>Multiple Perspectives:</strong> See the same data in different ways</li>
+                <li><strong>Interactive:</strong> Drill down into details with double-click</li>
+            </ul>
+
+            <h4>2. Creating a Pivot Table</h4>
+            <p>Step-by-step process:</p>
+            <ol>
+                <li>Select your data range (including headers)</li>
+                <li>Go to Insert Tab → PivotTable</li>
+                <li>Choose location (new worksheet recommended)</li>
+                <li>PivotTable Fields pane appears on the right</li>
+                <li>Drag fields to different areas to build your report</li>
+            </ol>
+
+            <h4>3. The Four Pivot Table Areas</h4>
+            <ul>
+                <li><strong>Filters:</strong> Filter the entire pivot table (optional)</li>
+                <li><strong>Columns:</strong> Create column headers across the top</li>
+                <li><strong>Rows:</strong> Create row labels down the side</li>
+                <li><strong>Values:</strong> The data to be summarized (numbers)</li>
+            </ul>
+
+            <h4>4. Understanding Value Field Settings</h4>
+            <p>How to summarize your data:</p>
+            <ul>
+                <li><strong>Sum:</strong> Add up numbers (default for numeric data)</li>
+                <li><strong>Count:</strong> Count entries (default for text data)</li>
+                <li><strong>Average:</strong> Calculate mean values</li>
+                <li><strong>Max/Min:</strong> Find highest/lowest values</li>
+                <li><strong>Product:</strong> Multiply values together</li>
+                <li><strong>StdDev:</strong> Calculate standard deviation</li>
+            </ul>
+
+            <h4>5. Pivot Table Best Practices</h4>
+            <ul>
+                <li><strong>Clean Data:</strong> Remove blank rows, consistent headers</li>
+                <li><strong>Use Tables:</strong> Convert data range to Excel table first</li>
+                <li><strong>Descriptive Headers:</strong> Clear, meaningful column names</li>
+                <li><strong>One Data Type per Column:</strong> Don't mix text and numbers</li>
+                <li><strong>Regular Refresh:</strong> Update pivot when source data changes</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>📊 Practical Exercise: "Sales Manager's Dashboard"</h3>
+                <p>Create a comprehensive sales analysis using Pivot Tables:</p>
+                <ol>
+                    <li><strong>Setup Raw Sales Data:</strong>
+                        <ul>
+                            <li>Column A: Date (spread across 12 months)</li>
+                            <li>Column B: Salesperson (5-6 different names)</li>
+                            <li>Column C: Region (North, South, East, West)</li>
+                            <li>Column D: Product (Product A, B, C, D)</li>
+                            <li>Column E: Sales Amount ($)</li>
+                            <li>Column F: Units Sold</li>
+                            <li>Create 50+ rows of sample data</li>
+                        </ul>
+                    </li>
+                    <li><strong>Convert to Excel Table:</strong>
+                        <ul>
+                            <li>Select all data → Ctrl+T</li>
+                            <li>This makes pivot tables dynamic</li>
+                        </ul>
+                    </li>
+                    <li><strong>Create Pivot Table 1 - Sales by Person:</strong>
+                        <ul>
+                            <li>Insert → PivotTable → New Worksheet</li>
+                            <li>Drag Salesperson to Rows area</li>
+                            <li>Drag Sales Amount to Values area</li>
+                            <li>Result: Total sales per salesperson</li>
+                        </ul>
+                    </li>
+                    <li><strong>Enhance with Regions:</strong>
+                        <ul>
+                            <li>Drag Region to Columns area</li>
+                            <li>Now see sales by person AND region</li>
+                            <li>Add Grand Totals for comprehensive view</li>
+                        </ul>
+                    </li>
+                    <li><strong>Create Pivot Table 2 - Monthly Trends:</strong>
+                        <ul>
+                            <li>New PivotTable on another sheet</li>
+                            <li>Drag Date to Rows (Excel groups by month)</li>
+                            <li>Drag Sales Amount to Values</li>
+                            <li>See monthly sales trends</li>
+                        </ul>
+                    </li>
+                    <li><strong>Create Pivot Table 3 - Product Analysis:</strong>
+                        <ul>
+                            <li>Product in Rows, Region in Columns</li>
+                            <li>Both Sales Amount and Units Sold in Values</li>
+                            <li>Compare product performance across regions</li>
+                        </ul>
+                    </li>
+                    <li><strong>Advanced Features:</strong>
+                        <ul>
+                            <li>Add Slicers for interactive filtering</li>
+                            <li>Group dates by quarter or year</li>
+                            <li>Change value calculations to percentages</li>
+                            <li>Create calculated fields (average sale per unit)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Format and Polish:</strong>
+                        <ul>
+                            <li>Apply professional table styles</li>
+                            <li>Format numbers as currency</li>
+                            <li>Add descriptive pivot table names</li>
+                            <li>Remove field headers if not needed</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li><strong>Right-Click Power:</strong> Right-click any element for formatting options</li>
+                <li><strong>Double-Click Details:</strong> Double-click any value to see underlying data</li>
+                <li><strong>Field List Toggle:</strong> Use button on Analyze tab to show/hide field list</li>
+                <li><strong>Copy Pivot Tables:</strong> Copy entire sheet to create similar analyses</li>
+                <li><strong>Pivot Charts:</strong> Create charts directly from pivot tables</li>
+                <li><strong>Refresh Shortcuts:</strong> Alt+F5 refreshes selected pivot table</li>
+            </ul>
+
+            <h3>🔍 Common Pivot Table Issues</h3>
+            <ul>
+                <li><strong>Count instead of Sum:</strong> Check data types - text fields count, numbers sum</li>
+                <li><strong>Blank Cells:</strong> Appear as "(blank)" in pivot table</li>
+                <li><strong>Dates Not Grouping:</strong> Ensure date column is formatted as dates</li>
+                <li><strong>Old Data Showing:</strong> Remember to refresh when source data changes</li>
+                <li><strong>Fields Missing:</strong> Check for hidden columns in source data</li>
+            </ul>
+
+            <h3>📈 Advanced Pivot Table Features</h3>
+            <ul>
+                <li><strong>Slicers:</strong> Visual filters for easy interaction</li>
+                <li><strong>Timeline:</strong> Special slicer for date fields</li>
+                <li><strong>Calculated Fields:</strong> Create custom formulas within pivot tables</li>
+                <li><strong>Calculated Items:</strong> Add custom groupings</li>
+                <li><strong>Show Values As:</strong> Percentages, running totals, differences</li>
+                <li><strong>Grouping:</strong> Combine items into custom groups</li>
+            </ul>
+
+            <h3>📊 Pivot Table vs Regular Formulas</h3>
+            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                <tr style="background: var(--light-color);">
+                    <th style="border: 1px solid #ddd; padding: 0.5rem;">Aspect</th>
+                    <th style="border: 1px solid #ddd; padding: 0.5rem;">Pivot Tables</th>
+                    <th style="border: 1px solid #ddd; padding: 0.5rem;">Regular Formulas</th>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Speed to Create</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Very Fast</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Slower</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Flexibility</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Extremely Flexible</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">More Rigid</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Large Data</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Excellent</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Can be slow</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Customization</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Good</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Unlimited</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Learning Curve</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Moderate</td>
+                    <td style="border: 1px solid #ddd; padding: 0.5rem;">Steeper</td>
+                </tr>
+            </table>
+
+            <h3>🎯 When to Use Pivot Tables</h3>
+            <ul>
+                <li><strong>Large Datasets:</strong> Thousands of rows of raw data</li>
+                <li><strong>Multiple Perspectives:</strong> Need to see data many different ways</li>
+                <li><strong>Quick Analysis:</strong> Need answers fast</li>
+                <li><strong>Summarization:</strong> Rolling up detailed data</li>
+                <li><strong>Interactive Reports:</strong> Users need to explore data themselves</li>
+                <li><strong>Regular Reporting:</strong> Same analysis with updated data</li>
+            </ul>
+
+            <h3>🏆 Congratulations!</h3>
+            <p>You've completed all 10 modules of Excel Essentials! You now have the core skills to:</p>
+            <ul>
+                <li>Navigate Excel confidently</li>
+                <li>Format and enter data effectively</li>
+                <li>Use essential functions and formulas</li>
+                <li>Create logical decisions with IF statements</li>
+                <li>Visualize data with formatting and charts</li>
+                <li>Manage large datasets</li>
+                <li>Connect data sources with lookups</li>
+                <li>Create powerful data summaries with pivot tables</li>
+            </ul>
+            <p><strong>Keep practicing and exploring - Excel has much more to offer!</strong></p>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2>Ready for the Final Quiz?</h2>
+                <p>Test your understanding of Pivot Tables and complete your Excel journey!</p>
+                <button class="btn btn-primary" onclick="startQuiz()">Start Final Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Module 10 Quiz Questions
+        const module10Questions = [
+            {
+                question: "What is the main advantage of Pivot Tables?",
+                options: [
+                    "They look professional",
+                    "They summarize large data without formulas",
+                    "They are colorful",
+                    "They are faster than filters"
+                ],
+                correct: 1
+            },
+            {
+                question: "How many main areas does a Pivot Table have?",
+                options: ["2", "3", "4", "5"],
+                correct: 2
+            },
+            {
+                question: "What goes in the Values area of a Pivot Table?",
+                options: [
+                    "Column headers",
+                    "Row labels",
+                    "Data to be summarized",
+                    "Filters"
+                ],
+                correct: 2
+            },
+            {
+                question: "What happens when you double-click a value in a Pivot Table?",
+                options: [
+                    "It deletes the value",
+                    "It edits the value",
+                    "It shows the detailed data behind that value",
+                    "Nothing happens"
+                ],
+                correct: 2
+            },
+            {
+                question: "How do you update a Pivot Table after source data changes?",
+                options: [
+                    "Recreate it",
+                    "Right-click and select Refresh",
+                    "It updates automatically",
+                    "Press F5"
+                ],
+                correct: 1
+            },
+            {
+                question: "What should you do with your data before creating a Pivot Table?",
+                options: [
+                    "Sort it alphabetically",
+                    "Convert it to an Excel table",
+                    "Add colors",
+                    "Create formulas"
+                ],
+                correct: 1
+            },
+            {
+                question: "If a number field shows 'Count' instead of 'Sum' in Values area, what's likely wrong?",
+                options: [
+                    "The field contains text or blanks",
+                    "Excel is broken",
+                    "The numbers are too large",
+                    "Nothing is wrong"
+                ],
+                correct: 0
+            },
+            {
+                question: "What are Slicers in Pivot Tables?",
+                options: [
+                    "Tools to cut data",
+                    "Visual filters for easy interaction",
+                    "Chart elements",
+                    "Formula helpers"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which keyboard shortcut refreshes a selected Pivot Table?",
+                options: ["F5", "Alt+F5", "Ctrl+R", "Shift+F5"],
+                correct: 1
+            },
+            {
+                question: "What happens to dates in Pivot Tables by default?",
+                options: [
+                    "They stay as individual dates",
+                    "They are ignored",
+                    "They are automatically grouped by month/year",
+                    "They cause errors"
+                ],
+                correct: 2
+            }
+        ];
+
+        // Initialize quiz
+        function startQuiz() {
+            quiz = new Quiz(module10Questions, 10);
+            quiz.init();
+        }
+
+        // No progress tracking needed
+    </script>
+</body>
+</html>

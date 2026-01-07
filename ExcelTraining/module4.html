@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 4: The "Big 5" Aggregation Functions - Excel Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Module 4: The "Big 5" Aggregation Functions</h1>
+            <div class="nav-links">
+                <a href="index.html" style="color: var(--primary-color); text-decoration: none;">← Back to Course Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="module-header">
+            <h1>Module 4: The "Big 5" Aggregation Functions</h1>
+            <p>SUM, AVERAGE, COUNT, MAX, MIN - Summarizing data instantly</p>
+        </div>
+
+        <div class="module-content">
+            <h3>📚 Learning Objectives</h3>
+            <ul>
+                <li>Master the five essential aggregation functions</li>
+                <li>Understand when to use COUNT vs COUNTA</li>
+                <li>Apply functions to ranges of data</li>
+                <li>Combine multiple functions</li>
+                <li>Use functions with criteria</li>
+            </ul>
+
+            <h3>🎯 Key Concepts</h3>
+            
+            <h4>1. SUM - Adding It All Up</h4>
+            <ul>
+                <li>Syntax: =SUM(range)</li>
+                <li>Example: =SUM(A1:A10)</li>
+                <li>Can sum multiple ranges: =SUM(A1:A10, C1:C10)</li>
+                <li>Ignores text and blank cells</li>
+            </ul>
+
+            <h4>2. AVERAGE - Finding the Middle</h4>
+            <ul>
+                <li>Syntax: =AVERAGE(range)</li>
+                <li>Calculates arithmetic mean</li>
+                <li>Only includes cells with numbers</li>
+                <li>Blank cells are ignored, zeros are included</li>
+            </ul>
+
+            <h4>3. COUNT vs COUNTA - The Counting Functions</h4>
+            <ul>
+                <li><strong>COUNT</strong>: Counts cells containing numbers only</li>
+                <li><strong>COUNTA</strong>: Counts all non-empty cells</li>
+                <li><strong>COUNTBLANK</strong>: Counts empty cells</li>
+                <li>Essential for data validation</li>
+                <li>COUNT(A1:A10) vs COUNTA(A1:A10)</li>
+            </ul>
+
+            <h4>4. MAX & MIN - Finding Extremes</h4>
+            <ul>
+                <li><strong>MAX</strong>: Returns the largest value</li>
+                <li><strong>MIN</strong>: Returns the smallest value</li>
+                <li>Ignore text and blank cells</li>
+                <li>Useful for finding best/worst performers</li>
+                <li>Example: =MAX(A1:A10)</li>
+            </ul>
+
+            <h4>5. Pro Tips for Aggregation Functions</h4>
+            <ul>
+                <li>Functions automatically expand ranges when you add data</li>
+                <li>Use <kbd>Ctrl+Shift+End</kbd> to select to the last cell</li>
+                <li>Functions ignore hidden rows (useful with filters)</li>
+                <li>Combine with IF for conditional aggregation</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>📊 Practical Exercise: "Class Gradebook Analysis"</h3>
+                <p>Create a comprehensive gradebook to practice all aggregation functions:</p>
+                <ol>
+                    <li><strong>Setup the Gradebook:</strong>
+                        <ul>
+                            <li>Column A: Student names (10 students)</li>
+                            <li>Columns B-D: Test 1, Test 2, Test 3 scores</li>
+                            <li>Column E: Student Average</li>
+                        </ul>
+                    </li>
+                    <li><strong>Add Sample Data:</strong>
+                        <ul>
+                            <li>Enter various test scores (0-100)</li>
+                            <li>Leave some cells blank (absent students)</li>
+                            <li>Include some zeros (failed tests)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Calculate Student Averages:</strong>
+                        <ul>
+                            <li>Use AVERAGE to calculate each student's average</li>
+                            <li>Notice how blank cells are handled</li>
+                        </ul>
+                    </li>
+                    <li><strong>Class Statistics (below the data):</strong>
+                        <ul>
+                            <li>Class Average for each test using AVERAGE</li>
+                            <li>Highest score for each test using MAX</li>
+                            <li>Lowest score for each test using MIN</li>
+                            <li>Number of students who took each test using COUNT</li>
+                            <li>Total students enrolled using COUNTA</li>
+                        </ul>
+                    </li>
+                    <li><strong>Summary Section:</strong>
+                        <ul>
+                            <li>Overall class average across all tests</li>
+                            <li>Best performing student (highest average)</li>
+                            <li>Most improved (Test 3 - Test 1)</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li>Use <kbd>Alt + =</kbd> for quick SUM function</li>
+                <li>Double-click function names in formulas to see help</li>
+                <li>Functions update automatically when data changes</li>
+                <li>Use absolute references ($A$1) when copying formulas</li>
+                <li>COUNTA is perfect for counting survey responses</li>
+            </ul>
+
+            <h3>🔍 Common Mistakes to Avoid</h3>
+            <ul>
+                <li>Using COUNT when you need COUNTA (or vice versa)</li>
+                <li>Forgetting that AVERAGE ignores blank cells but includes zeros</li>
+                <li>Not understanding that MAX/MIN ignore text values</li>
+                <li>Selecting too small a range and missing data</li>
+                <li>Mixing data types in the same column</li>
+            </ul>
+
+            <h3>📈 When to Use Each Function</h3>
+            <ul>
+                <li><strong>SUM</strong>: Total sales, expenses, quantities</li>
+                <li><strong>AVERAGE</strong>: Mean performance, temperature, ratings</li>
+                <li><strong>COUNT</strong>: Number of test scores, sales transactions</li>
+                <li><strong>COUNTA</strong>: Survey responses, attendance records</li>
+                <li><strong>MAX/MIN</strong>: Best/worst performance, price ranges</li>
+            </ul>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2>Ready to Test Your Knowledge?</h2>
+                <p>Take this quiz to check your understanding of Module 4</p>
+                <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Module 4 Quiz Questions
+        const module4Questions = [
+            {
+                question: "Which function counts only cells containing numbers?",
+                options: ["COUNTA", "COUNT", "COUNTALL", "COUNTNUMS"],
+                correct: 1
+            },
+            {
+                question: "What does AVERAGE do with blank cells?",
+                options: ["Counts them as zero", "Ignores them", "Returns an error", "Counts them as 1"],
+                correct: 1
+            },
+            {
+                question: "Which function would you use to find the highest test score?",
+                options: ["HIGH", "TOP", "MAX", "BEST"],
+                correct: 2
+            },
+            {
+                question: "What's the difference between COUNT and COUNTA?",
+                options: [
+                    "No difference",
+                    "COUNT counts numbers, COUNTA counts all non-empty cells",
+                    "COUNTA counts numbers, COUNT counts text",
+                    "COUNT is faster"
+                ],
+                correct: 1
+            },
+            {
+                question: "How would you sum cells A1 through A10 and C1 through C10?",
+                options: [
+                    "=SUM(A1:C10)",
+                    "=SUM(A1:A10)+SUM(C1:C10)",
+                    "=SUM(A1:A10,C1:C10)",
+                    "Both B and C are correct"
+                ],
+                correct: 3
+            },
+            {
+                question: "What does MIN function do with text values?",
+                options: [
+                    "Converts them to numbers",
+                    "Returns an error",
+                    "Ignores them",
+                    "Counts them as zero"
+                ],
+                correct: 2
+            },
+            {
+                question: "Which function would count survey responses including 'Yes', 'No', and numbers?",
+                options: ["COUNT", "COUNTA", "COUNTIF", "SUM"],
+                correct: 1
+            },
+            {
+                question: "What happens to a zero in an AVERAGE calculation?",
+                options: [
+                    "It's ignored like a blank cell",
+                    "It's included in the calculation",
+                    "It causes an error",
+                    "It's converted to a blank"
+                ],
+                correct: 1
+            },
+            {
+                question: "If you have scores 80, 90, blank cell, 70, what does AVERAGE return?",
+                options: ["60", "80", "75", "Error"],
+                correct: 1
+            },
+            {
+                question: "Which keyboard shortcut quickly inserts a SUM function?",
+                options: ["Ctrl+S", "Alt+=", "Ctrl+A", "F9"],
+                correct: 1
+            }
+        ];
+
+        // Initialize quiz
+        function startQuiz() {
+            quiz = new Quiz(module4Questions, 4);
+            quiz.init();
+        }
+
+        // No progress tracking needed
+    </script>
+</body>
+</html>

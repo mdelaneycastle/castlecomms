@@ -1,0 +1,38 @@
+# GitHub Pages configuration
+title: "Excel Essentials Training - Zero to Hero"
+description: "A comprehensive, interactive Excel training course with quizzes and practical exercises"
+author: "Excel Training Team"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+# SEO
+url: "https://your-username.github.io"
+baseurl: "/ExcelTraining"
+
+# Site settings
+timezone: UTC
+lang: en-US
+
+# Collections
+collections_dir: modules
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+# Exclude from processing
+exclude:
+  - node_modules/
+  - .gitignore
+  - create-modules.js
+  - module-generator.js

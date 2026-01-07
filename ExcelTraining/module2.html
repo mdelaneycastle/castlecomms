@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 2: Data Entry & Basic Formatting - Excel Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Module 2: Data Entry & Basic Formatting</h1>
+            <div class="nav-links">
+                <a href="index.html" style="color: var(--primary-color); text-decoration: none;">← Back to Course Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="module-header">
+            <h1>Module 2: Data Entry & Basic Formatting</h1>
+            <p>Getting data into the sheet and making it readable</p>
+        </div>
+
+        <div class="module-content">
+            <h3>📚 Learning Objectives</h3>
+            <ul>
+                <li>Understand different data types in Excel</li>
+                <li>Master the Fill Handle for efficient data entry</li>
+                <li>Apply basic formatting to improve readability</li>
+                <li>Adjust column widths and row heights</li>
+                <li>Use keyboard shortcuts for faster data entry</li>
+            </ul>
+
+            <h3>🎯 Key Concepts</h3>
+            
+            <h4>1. Data Types in Excel</h4>
+            <p>Excel recognizes different types of data automatically:</p>
+            <ul>
+                <li><strong>Text</strong>: Any combination of letters, numbers, and symbols (left-aligned by default)</li>
+                <li><strong>Numbers</strong>: Numeric values for calculations (right-aligned by default)</li>
+                <li><strong>Dates</strong>: Recognized date formats (stored as numbers internally)</li>
+                <li><strong>Times</strong>: Hour and minute values (stored as decimal fractions)</li>
+                <li><strong>Formulas</strong>: Start with = sign and perform calculations</li>
+                <li><strong>Boolean</strong>: TRUE or FALSE values</li>
+            </ul>
+
+            <h4>2. The Magic Fill Handle</h4>
+            <p>The Fill Handle is the small square in the bottom-right corner of a selected cell:</p>
+            <ul>
+                <li><strong>Auto-fill Series</strong>: Drag to continue patterns (1, 2, 3... or Mon, Tue, Wed...)</li>
+                <li><strong>Copy Values</strong>: Ctrl+drag to copy the same value</li>
+                <li><strong>Custom Lists</strong>: Excel recognizes days, months, and custom patterns</li>
+                <li><strong>Double-click</strong>: Auto-fills down to match adjacent column length</li>
+            </ul>
+
+            <h4>3. Basic Formatting Tools</h4>
+            <ul>
+                <li><strong>Font Formatting</strong>: Bold (Ctrl+B), Italic (Ctrl+I), Underline (Ctrl+U)</li>
+                <li><strong>Alignment</strong>: Left, Center, Right, and Vertical alignment</li>
+                <li><strong>Number Formats</strong>: Currency ($), Percentage (%), Comma (,), Decimal places</li>
+                <li><strong>Borders</strong>: Add lines around cells for visual separation</li>
+                <li><strong>Fill Color</strong>: Background colors for cells</li>
+                <li><strong>Font Color</strong>: Change text color for emphasis</li>
+            </ul>
+
+            <h4>4. Adjusting Column Width & Row Height</h4>
+            <ul>
+                <li><strong>Manual Adjustment</strong>: Drag the border between column/row headers</li>
+                <li><strong>Auto-Fit</strong>: Double-click the border to fit content automatically</li>
+                <li><strong>Precise Size</strong>: Right-click header → Column Width or Row Height</li>
+                <li><strong>Multiple Selection</strong>: Select multiple columns/rows to adjust together</li>
+            </ul>
+
+            <h4>5. Data Entry Best Practices</h4>
+            <ul>
+                <li>Use consistent formatting for similar data types</li>
+                <li>Enter dates in recognized formats (MM/DD/YYYY or DD-MMM-YYYY)</li>
+                <li>Start text with apostrophe (') to force text format for numbers</li>
+                <li>Use Tab to move right, Enter to move down while entering data</li>
+                <li>Press F2 to edit cell contents without clearing</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>📅 Practical Exercise: "Weekly Schedule"</h3>
+                <p>Create a formatted weekly schedule to practice data entry and formatting:</p>
+                <ol>
+                    <li><strong>Create Headers:</strong>
+                        <ul>
+                            <li>In cell A1, type "Time"</li>
+                            <li>In B1, type "Monday"</li>
+                            <li>Select B1 and use the Fill Handle to drag to F1 (creating Mon-Fri)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Add Time Slots:</strong>
+                        <ul>
+                            <li>In A2, type "9:00 AM"</li>
+                            <li>In A3, type "10:00 AM"</li>
+                            <li>Select both cells and drag down to create hourly slots until 5:00 PM</li>
+                        </ul>
+                    </li>
+                    <li><strong>Format the Schedule:</strong>
+                        <ul>
+                            <li>Select row 1 and make it Bold (Ctrl+B)</li>
+                            <li>Center align all headers</li>
+                            <li>Add borders around all cells</li>
+                            <li>Make the header row a different color (fill color)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Add Activities:</strong>
+                        <ul>
+                            <li>Fill in some activities (e.g., "Meeting", "Lunch", "Project Work")</li>
+                            <li>Color-code different types of activities</li>
+                            <li>Use different colors for Work (blue), Break (green), Meeting (yellow)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Final Touches:</strong>
+                        <ul>
+                            <li>Auto-fit all columns to content</li>
+                            <li>Increase row height for better readability</li>
+                            <li>Add a title above the schedule in merged cells</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li>Hold <kbd>Ctrl</kbd> while clicking to select non-adjacent cells</li>
+                <li>Press <kbd>Ctrl+;</kbd> to insert today's date</li>
+                <li>Press <kbd>Ctrl+Shift+;</kbd> to insert current time</li>
+                <li>Use <kbd>Ctrl+D</kbd> to fill down from the cell above</li>
+                <li>Use <kbd>Ctrl+R</kbd> to fill right from the cell to the left</li>
+                <li>Press <kbd>Alt+Enter</kbd> to add a line break within a cell</li>
+                <li>Format Painter (paintbrush icon) copies all formatting from one cell to others</li>
+            </ul>
+
+            <h3>🔍 Common Mistakes to Avoid</h3>
+            <ul>
+                <li>Mixing data types in the same column (breaks sorting and formulas)</li>
+                <li>Using spaces for alignment (use proper alignment tools instead)</li>
+                <li>Forgetting that dates are actually numbers (important for calculations)</li>
+                <li>Over-formatting (too many colors and fonts make data hard to read)</li>
+                <li>Not using number formats (typing $ manually instead of currency format)</li>
+            </ul>
+
+            <h3>📊 Number Format Quick Reference</h3>
+            <ul>
+                <li><kbd>Ctrl+Shift+1</kbd> - Number format with commas</li>
+                <li><kbd>Ctrl+Shift+4</kbd> - Currency format</li>
+                <li><kbd>Ctrl+Shift+5</kbd> - Percentage format</li>
+                <li><kbd>Ctrl+Shift+6</kbd> - Scientific notation</li>
+            </ul>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2>Ready to Test Your Knowledge?</h2>
+                <p>Take this quiz to check your understanding of Module 2</p>
+                <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Module 2 Quiz Questions
+        const module2Questions = [
+            {
+                question: "Which data type is left-aligned by default in Excel?",
+                options: ["Numbers", "Text", "Dates", "Formulas"],
+                correct: 1
+            },
+            {
+                question: "What is the Fill Handle?",
+                options: [
+                    "A tool for coloring cells",
+                    "The small square in the bottom-right corner of a selected cell",
+                    "A formatting option",
+                    "The formula bar"
+                ],
+                correct: 1
+            },
+            {
+                question: "What keyboard shortcut inserts today's date?",
+                options: ["Ctrl+D", "Ctrl+T", "Ctrl+;", "Ctrl+Shift+D"],
+                correct: 2
+            },
+            {
+                question: "How do you auto-fit a column width to its content?",
+                options: [
+                    "Press Ctrl+W",
+                    "Right-click and select Auto-fit",
+                    "Double-click the border between column headers",
+                    "Use the Format menu"
+                ],
+                correct: 2
+            },
+            {
+                question: "What happens when you drag the Fill Handle with Monday in a cell?",
+                options: [
+                    "It copies Monday to all cells",
+                    "It creates a series: Tuesday, Wednesday, Thursday...",
+                    "It deletes the content",
+                    "Nothing happens"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which keyboard shortcut makes text bold?",
+                options: ["Ctrl+B", "Ctrl+Shift+B", "Alt+B", "Ctrl+Bold"],
+                correct: 0
+            },
+            {
+                question: "How are dates stored internally in Excel?",
+                options: [
+                    "As text strings",
+                    "As special date objects",
+                    "As numbers (serial numbers)",
+                    "As formulas"
+                ],
+                correct: 2
+            },
+            {
+                question: "What key adds a line break within a cell?",
+                options: ["Enter", "Shift+Enter", "Ctrl+Enter", "Alt+Enter"],
+                correct: 3
+            },
+            {
+                question: "What does the Format Painter do?",
+                options: [
+                    "Changes cell colors",
+                    "Copies formatting from one cell to apply to others",
+                    "Paints borders around cells",
+                    "Creates charts"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which keyboard shortcut applies currency format?",
+                options: ["Ctrl+$", "Ctrl+Shift+$", "Ctrl+Shift+4", "Alt+$"],
+                correct: 2
+            }
+        ];
+
+        // Initialize quiz
+        function startQuiz() {
+            quiz = new Quiz(module2Questions, 2);
+            quiz.init();
+        }
+
+        // No progress tracking needed
+    </script>
+</body>
+</html>

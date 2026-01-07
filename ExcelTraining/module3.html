@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 3: Basic Math & AutoSum - Excel Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Module 3: Basic Math & AutoSum</h1>
+            <div class="nav-links">
+                <a href="index.html" style="color: var(--primary-color); text-decoration: none;">← Back to Course Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="module-header">
+            <h1>Module 3: Basic Math & AutoSum</h1>
+            <p>Excel as a giant calculator - formulas and basic operations</p>
+        </div>
+
+        <div class="module-content">
+            <h3>📚 Learning Objectives</h3>
+            <ul>
+                <li>Understand that every formula starts with =</li>
+                <li>Use basic mathematical operators</li>
+                <li>Master the AutoSum function</li>
+                <li>Create simple calculations</li>
+                <li>Reference cells in formulas</li>
+            </ul>
+
+            <h3>🎯 Key Concepts</h3>
+            
+            <h4>1. The Golden Rule of Formulas</h4>
+            <p>EVERY formula in Excel must start with an equals sign (=)</p>
+            <ul>
+                <li>Without =, Excel treats it as text</li>
+                <li>= tells Excel to calculate something</li>
+                <li>You can start with + or - but Excel adds = automatically</li>
+            </ul>
+
+            <h4>2. Basic Mathematical Operators</h4>
+            <ul>
+                <li><strong>+ (Addition)</strong>: =A1+B1</li>
+                <li><strong>- (Subtraction)</strong>: =A1-B1</li>
+                <li><strong>* (Multiplication)</strong>: =A1*B1</li>
+                <li><strong>/ (Division)</strong>: =A1/B1</li>
+                <li><strong>^ (Exponent)</strong>: =A1^2 (A1 squared)</li>
+                <li><strong>() (Parentheses)</strong>: Control order of operations</li>
+            </ul>
+
+            <h4>3. The AutoSum Magic</h4>
+            <ul>
+                <li>Keyboard shortcut: <kbd>Alt + =</kbd></li>
+                <li>Automatically detects range to sum</li>
+                <li>Works with rows and columns</li>
+                <li>Can be edited after insertion</li>
+            </ul>
+
+            <h4>4. Cell References in Formulas</h4>
+            <ul>
+                <li><strong>Relative References</strong>: A1, B2 (change when copied)</li>
+                <li><strong>Absolute References</strong>: $A$1 (never change)</li>
+                <li><strong>Mixed References</strong>: $A1 or A$1</li>
+                <li>Press F4 to cycle through reference types</li>
+            </ul>
+
+            <h4>5. Order of Operations (PEMDAS)</h4>
+            <p>Excel follows standard mathematical order:</p>
+            <ol>
+                <li><strong>P</strong>arentheses</li>
+                <li><strong>E</strong>xponents</li>
+                <li><strong>M</strong>ultiplication and <strong>D</strong>ivision (left to right)</li>
+                <li><strong>A</strong>ddition and <strong>S</strong>ubtraction (left to right)</li>
+            </ol>
+
+            <div class="exercise-box">
+                <h3>🛒 Practical Exercise: "Grocery Receipt Calculator"</h3>
+                <p>Create a functional grocery receipt with automatic calculations:</p>
+                <ol>
+                    <li>Create headers: Item, Price, Quantity, Total</li>
+                    <li>List 5 grocery items (Milk, Bread, Eggs, Apple, Cheese)</li>
+                    <li>Enter prices for each item</li>
+                    <li>Enter quantities purchased</li>
+                    <li>In Total column, create formula: =Price*Quantity</li>
+                    <li>Copy the formula down for all items</li>
+                    <li>Use AutoSum to calculate Subtotal</li>
+                    <li>Add Tax row: =Subtotal*0.10 (10% tax)</li>
+                    <li>Calculate Grand Total: =Subtotal+Tax</li>
+                    <li>Format all prices as currency</li>
+                </ol>
+                <p><strong>Bonus:</strong> Add a discount row that calculates 5% off the subtotal before tax</p>
+            </div>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li>Use parentheses to make complex formulas clearer</li>
+                <li>Click cells instead of typing addresses when building formulas</li>
+                <li>Use <kbd>F9</kbd> to preview formula results before confirming</li>
+                <li>Color-code cells: Excel shows matching colors when editing formulas</li>
+                <li>Name important cells (like tax rate) for easier reference</li>
+            </ul>
+
+            <h3>🔍 Common Mistakes to Avoid</h3>
+            <ul>
+                <li>Forgetting the = sign at the beginning of formulas</li>
+                <li>Using x instead of * for multiplication</li>
+                <li>Not using parentheses for complex calculations</li>
+                <li>Circular references (a formula referring to itself)</li>
+                <li>Dividing by zero (results in #DIV/0! error)</li>
+            </ul>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2>Ready to Test Your Knowledge?</h2>
+                <p>Take this quiz to check your understanding of Module 3</p>
+                <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Module 3 Quiz Questions
+        const module3Questions = [
+            {
+                question: "What symbol must every Excel formula start with?",
+                options: ["#", "@", "=", "$"],
+                correct: 2
+            },
+            {
+                question: "What is the keyboard shortcut for AutoSum?",
+                options: ["Ctrl+S", "Alt+=", "Ctrl+A", "Shift+S"],
+                correct: 1
+            },
+            {
+                question: "Which operator is used for multiplication in Excel?",
+                options: ["x", "X", "*", "×"],
+                correct: 2
+            },
+            {
+                question: "What does $A$1 represent?",
+                options: ["A currency value", "An absolute reference", "A relative reference", "An error"],
+                correct: 1
+            },
+            {
+                question: "What is the correct formula to add cells A1 through A5?",
+                options: ["=A1+A2+A3+A4+A5", "=SUM(A1:A5)", "Both are correct", "=ADD(A1:A5)"],
+                correct: 2
+            },
+            {
+                question: "What happens when you press F4 while editing a cell reference?",
+                options: [
+                    "Deletes the reference",
+                    "Cycles through reference types (relative/absolute)",
+                    "Copies the reference",
+                    "Opens help"
+                ],
+                correct: 1
+            },
+            {
+                question: "In the order of operations, what is calculated first?",
+                options: ["Addition", "Multiplication", "Parentheses", "Subtraction"],
+                correct: 2
+            },
+            {
+                question: "What error appears when you divide by zero?",
+                options: ["#VALUE!", "#DIV/0!", "#REF!", "#NULL!"],
+                correct: 1
+            },
+            {
+                question: "How do you reference cell A1 from Sheet2 in a formula?",
+                options: ["=Sheet2.A1", "=Sheet2!A1", "=Sheet2-A1", "=[Sheet2]A1"],
+                correct: 1
+            },
+            {
+                question: "What formula calculates 10% of the value in cell B2?",
+                options: ["=B2*10%", "=B2*0.10", "=B2*0.1", "All are correct"],
+                correct: 3
+            }
+        ];
+
+        // Initialize quiz
+        function startQuiz() {
+            quiz = new Quiz(module3Questions, 3);
+            quiz.init();
+        }
+
+        // No progress tracking needed
+    </script>
+</body>
+</html>

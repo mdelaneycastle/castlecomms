@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 5: Logic - The Simple IF Statement - Excel Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Module 5: Logic - The Simple IF Statement</h1>
+            <div class="nav-links">
+                <a href="index.html" style="color: var(--primary-color); text-decoration: none;">← Back to Course Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="module-header">
+            <h1>Module 5: Logic - The Simple IF Statement</h1>
+            <p>Teaching Excel to make decisions for you</p>
+        </div>
+
+        <div class="module-content">
+            <h3>📚 Learning Objectives</h3>
+            <ul>
+                <li>Understand IF statement syntax and logic</li>
+                <li>Use comparison operators effectively</li>
+                <li>Create nested IF statements</li>
+                <li>Combine IF with other functions</li>
+                <li>Handle text and number comparisons</li>
+            </ul>
+
+            <h3>🎯 Key Concepts</h3>
+            
+            <h4>1. IF Statement Structure</h4>
+            <p>The IF function has three parts:</p>
+            <ul>
+                <li><strong>Syntax:</strong> =IF(logical_test, value_if_true, value_if_false)</li>
+                <li><strong>Logical test:</strong> The condition to check (A1>50)</li>
+                <li><strong>Value if true:</strong> What to return if condition is met ("Pass")</li>
+                <li><strong>Value if false:</strong> What to return if condition is not met ("Fail")</li>
+            </ul>
+
+            <h4>2. Comparison Operators</h4>
+            <ul>
+                <li><strong>=</strong> Equal to (A1=100)</li>
+                <li><strong>&lt;&gt;</strong> Not equal to (A1<>0)</li>
+                <li><strong>&gt;</strong> Greater than (A1>50)</li>
+                <li><strong>&lt;</strong> Less than (A1<100)</li>
+                <li><strong>&gt;=</strong> Greater than or equal to (A1>=70)</li>
+                <li><strong>&lt;=</strong> Less than or equal to (A1<=90)</li>
+            </ul>
+
+            <h4>3. Text Comparisons</h4>
+            <ul>
+                <li>Text must be in quotes: =IF(A1="Yes", "Approved", "Denied")</li>
+                <li>Not case-sensitive by default ("yes" = "YES")</li>
+                <li>Use EXACT function for case-sensitive comparison</li>
+                <li>Can compare partial text with wildcards</li>
+            </ul>
+
+            <h4>4. Nested IF Statements</h4>
+            <ul>
+                <li>Put IF inside another IF for multiple conditions</li>
+                <li>Example: =IF(A1>=90,"A",IF(A1>=80,"B",IF(A1>=70,"C","F")))</li>
+                <li>Can nest up to 64 IF functions (but keep it simple!)</li>
+                <li>Consider using IFS function in newer Excel versions</li>
+            </ul>
+
+            <h4>5. Combining IF with Other Functions</h4>
+            <ul>
+                <li>IF with AND: =IF(AND(A1>50, B1>60), "Pass", "Fail")</li>
+                <li>IF with OR: =IF(OR(A1="A", A1="B"), "Good", "Poor")</li>
+                <li>IF with ISBLANK: =IF(ISBLANK(A1), "Missing", A1)</li>
+                <li>IF with calculations: =IF(A1>100, A1*0.1, A1*0.05)</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>🎓 Practical Exercise: "Student Grade Management System"</h3>
+                <p>Create a comprehensive grading system using IF statements:</p>
+                <ol>
+                    <li><strong>Setup the Grade Sheet:</strong>
+                        <ul>
+                            <li>Column A: Student names</li>
+                            <li>Column B: Test score (0-100)</li>
+                            <li>Column C: Pass/Fail status</li>
+                            <li>Column D: Letter grade</li>
+                            <li>Column E: Comments</li>
+                        </ul>
+                    </li>
+                    <li><strong>Pass/Fail Column (Column C):</strong>
+                        <ul>
+                            <li>=IF(B2>=70,"Pass","Fail")</li>
+                            <li>70 or above = Pass, below 70 = Fail</li>
+                        </ul>
+                    </li>
+                    <li><strong>Letter Grade Column (Column D):</strong>
+                        <ul>
+                            <li>A: 90-100</li>
+                            <li>B: 80-89</li>
+                            <li>C: 70-79</li>
+                            <li>F: Below 70</li>
+                            <li>Use nested IF: =IF(B2>=90,"A",IF(B2>=80,"B",IF(B2>=70,"C","F")))</li>
+                        </ul>
+                    </li>
+                    <li><strong>Comments Column (Column E):</strong>
+                        <ul>
+                            <li>Excellent: 95+</li>
+                            <li>Good Job: 80-94</li>
+                            <li>Needs Improvement: 60-79</li>
+                            <li>Retake Required: Below 60</li>
+                        </ul>
+                    </li>
+                    <li><strong>Bonus Features:</strong>
+                        <ul>
+                            <li>Add "Star Student" for scores above 98</li>
+                            <li>Flag empty scores with "Missing"</li>
+                            <li>Create an "Honor Roll" indicator for A students</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li>Always test your IF statements with different values</li>
+                <li>Use parentheses to make complex conditions clear</li>
+                <li>Consider using dropdown lists for consistent text values</li>
+                <li>Break complex nested IFs into separate helper columns</li>
+                <li>Use IFERROR to handle potential errors gracefully</li>
+            </ul>
+
+            <h3>🔍 Common Mistakes to Avoid</h3>
+            <ul>
+                <li>Forgetting quotes around text values</li>
+                <li>Using = instead of == for comparison (Excel uses single =)</li>
+                <li>Nesting too many IFs (consider lookup tables instead)</li>
+                <li>Not testing all possible conditions</li>
+                <li>Case sensitivity issues with text comparisons</li>
+            </ul>
+
+            <h3>🚀 Advanced IF Techniques</h3>
+            <ul>
+                <li><strong>SUMIF:</strong> =SUMIF(range, criteria, sum_range)</li>
+                <li><strong>COUNTIF:</strong> =COUNTIF(range, criteria)</li>
+                <li><strong>AVERAGEIF:</strong> =AVERAGEIF(range, criteria, average_range)</li>
+                <li><strong>IFS (Excel 2016+):</strong> =IFS(test1,value1,test2,value2,...)</li>
+            </ul>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2>Ready to Test Your Knowledge?</h2>
+                <p>Take this quiz to check your understanding of Module 5</p>
+                <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Module 5 Quiz Questions
+        const module5Questions = [
+            {
+                question: "What are the three parts of an IF statement?",
+                options: [
+                    "Test, Result, Error",
+                    "Logical test, Value if true, Value if false",
+                    "Start, Middle, End",
+                    "If, Then, Else"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which operator means 'not equal to' in Excel?",
+                options: ["!=", "<>", "NOT=", "~="],
+                correct: 1
+            },
+            {
+                question: "What's the maximum number of IF functions you can nest?",
+                options: ["7", "32", "64", "Unlimited"],
+                correct: 2
+            },
+            {
+                question: "How do you check if cell A1 contains the text 'Yes'?",
+                options: [
+                    "=IF(A1=Yes,...)",
+                    '=IF(A1="Yes",...)',
+                    "=IF(A1='Yes',...)",
+                    "=IF(A1 IS Yes,...)"
+                ],
+                correct: 1
+            },
+            {
+                question: "What formula gives 'Pass' if A1 is 70 or above, otherwise 'Fail'?",
+                options: [
+                    '=IF(A1>=70,"Pass","Fail")',
+                    '=IF(A1>70,"Pass","Fail")',
+                    '=IF(A1=70,"Pass","Fail")',
+                    '=IF(70>=A1,"Pass","Fail")'
+                ],
+                correct: 0
+            },
+            {
+                question: "How do you check if A1 is greater than 50 AND B1 is less than 100?",
+                options: [
+                    '=IF(A1>50,B1<100,"True","False")',
+                    '=IF(AND(A1>50,B1<100),"True","False")',
+                    '=IF(A1>50 AND B1<100,"True","False")',
+                    '=IF(A1>50&B1<100,"True","False")'
+                ],
+                correct: 1
+            },
+            {
+                question: "What happens if you don't put quotes around text in an IF statement?",
+                options: [
+                    "Excel automatically adds them",
+                    "It works the same way",
+                    "Excel treats it as a cell reference",
+                    "Nothing happens"
+                ],
+                correct: 2
+            },
+            {
+                question: "Which function checks if a cell is empty?",
+                options: ["EMPTY", "ISBLANK", "ISNULL", "ISEMPTY"],
+                correct: 1
+            },
+            {
+                question: "What does this formula do: =IF(OR(A1='A',A1='B'),'Good','Poor')?",
+                options: [
+                    "Returns 'Good' if A1 is A and B",
+                    "Returns 'Good' if A1 is A or B",
+                    "Returns 'Poor' if A1 is A or B",
+                    "Returns an error"
+                ],
+                correct: 1
+            },
+            {
+                question: "How would you create grades A, B, C, F for scores 90+, 80+, 70+, below 70?",
+                options: [
+                    "Use four separate IF statements",
+                    "Use nested IF statements",
+                    "Use a lookup table",
+                    "All methods work"
+                ],
+                correct: 3
+            }
+        ];
+
+        // Initialize quiz
+        function startQuiz() {
+            quiz = new Quiz(module5Questions, 5);
+            quiz.init();
+        }
+
+        // No progress tracking needed
+    </script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 1: The Interface & The Grid - Excel Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Module 1: The Interface & The Grid</h1>
+            <div class="nav-links">
+                <a href="index.html" style="color: var(--primary-color); text-decoration: none;">← Back to Course Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="module-header">
+            <h1>Module 1: The Interface & The Grid</h1>
+            <p>Understanding how Excel "thinks" - Rows, Columns, and Addresses</p>
+        </div>
+
+        <div class="module-content">
+            <h3>📚 Learning Objectives</h3>
+            <ul>
+                <li>Navigate the Excel interface confidently</li>
+                <li>Understand the relationship between workbooks and worksheets</li>
+                <li>Master cell addressing and navigation</li>
+                <li>Use the Ribbon, Name Box, and Formula Bar effectively</li>
+            </ul>
+
+            <h3>🎯 Key Concepts</h3>
+            
+            <h4>1. The Excel Grid System</h4>
+            <p>Excel organizes data in a grid format:</p>
+            <ul>
+                <li><strong>Columns</strong> run vertically and are labeled with letters (A, B, C... Z, AA, AB...)</li>
+                <li><strong>Rows</strong> run horizontally and are numbered (1, 2, 3...)</li>
+                <li><strong>Cells</strong> are the intersection of rows and columns (A1, B2, C3...)</li>
+                <li>Each cell has a unique address that identifies its location</li>
+            </ul>
+
+            <h4>2. Workbook vs. Worksheet</h4>
+            <ul>
+                <li><strong>Workbook</strong>: The entire Excel file (.xlsx)</li>
+                <li><strong>Worksheet</strong>: Individual sheets within a workbook (Sheet1, Sheet2, etc.)</li>
+                <li>Think of a workbook as a binder and worksheets as individual pages</li>
+                <li>You can have multiple worksheets in one workbook</li>
+            </ul>
+
+            <h4>3. The Ribbon Interface</h4>
+            <p>The Ribbon is Excel's main command center, organized into tabs:</p>
+            <ul>
+                <li><strong>Home Tab</strong>: Common formatting and editing tools</li>
+                <li><strong>Insert Tab</strong>: Add charts, tables, pictures, and more</li>
+                <li><strong>Data Tab</strong>: Sort, filter, and analyze data</li>
+                <li><strong>Formulas Tab</strong>: Access all Excel functions</li>
+                <li><strong>View Tab</strong>: Change how you see your spreadsheet</li>
+            </ul>
+
+            <h4>4. Essential Interface Elements</h4>
+            <ul>
+                <li><strong>Name Box</strong>: Shows the current cell address or range name</li>
+                <li><strong>Formula Bar</strong>: Displays and edits cell contents and formulas</li>
+                <li><strong>Sheet Tabs</strong>: Navigate between worksheets at the bottom</li>
+                <li><strong>Status Bar</strong>: Shows calculations and sheet information at the bottom</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>🏢 Practical Exercise: "Office Seating Chart"</h3>
+                <p>Create a simple office layout to practice cell navigation and learn addresses:</p>
+                <ol>
+                    <li>Open a new Excel workbook</li>
+                    <li>Create headers: In <strong>A1</strong> type "Row", in <strong>B1</strong> type "Desk 1", in <strong>C1</strong> type "Desk 2", etc. through <strong>E1</strong></li>
+                    <li>In column A, add row numbers: <strong>A2</strong>="1", <strong>A3</strong>="2", <strong>A4</strong>="3"</li>
+                    <li>Add employee names in different desks:
+                        <ul>
+                            <li><strong>B2</strong>: "John Smith"</li>
+                            <li><strong>D3</strong>: "Sarah Johnson"</li>
+                            <li><strong>C4</strong>: "Mike Chen"</li>
+                            <li><strong>E2</strong>: "Lisa Davis"</li>
+                        </ul>
+                    </li>
+                    <li>Navigate to <strong>A6</strong> and create a legend: "Legend: Employee Locations"</li>
+                    <li>Practice jumping around: Click the Name Box (shows cell address), type <strong>D3</strong>, press Enter</li>
+                </ol>
+                <p><strong>Navigation Practice:</strong> Use these methods to move around your seating chart</p>
+                <ul>
+                    <li>Click directly on cells to select them</li>
+                    <li>Use arrow keys to move one cell at a time</li>
+                    <li>Press <kbd>Ctrl+Home</kbd> to jump to A1</li>
+                    <li>Press <kbd>F5</kbd> or <kbd>Ctrl+G</kbd> to "Go To" a specific cell</li>
+                    <li>Click the Name Box and type a cell address like "E2"</li>
+                </ul>
+            </div>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li>Press <kbd>Ctrl+Home</kbd> to quickly jump to cell A1</li>
+                <li>Press <kbd>Ctrl+End</kbd> to jump to the last used cell</li>
+                <li>Use <kbd>Tab</kbd> to move right and <kbd>Shift+Tab</kbd> to move left</li>
+                <li>Press <kbd>Enter</kbd> to move down and <kbd>Shift+Enter</kbd> to move up</li>
+                <li>Double-click the border between column headers to auto-fit column width</li>
+            </ul>
+
+            <h3>🔍 Common Mistakes to Avoid</h3>
+            <ul>
+                <li>Confusing rows and columns (remember: Rows are horizontal, Columns are vertical)</li>
+                <li>Not saving your work regularly (use Ctrl+S frequently)</li>
+                <li>Clicking randomly without understanding cell addresses</li>
+                <li>Ignoring the Formula Bar when editing cells</li>
+            </ul>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2>Ready to Test Your Knowledge?</h2>
+                <p>Take this quiz to check your understanding of Module 1</p>
+                <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Module 1 Quiz Questions
+        const module1Questions = [
+            {
+                question: "What is the cell address of the intersection between column C and row 5?",
+                options: ["5C", "C5", "Column C Row 5", "Cell 5C"],
+                correct: 1
+            },
+            {
+                question: "What is the difference between a workbook and a worksheet?",
+                options: [
+                    "They are the same thing",
+                    "A worksheet contains multiple workbooks",
+                    "A workbook is the entire file, worksheets are individual sheets within it",
+                    "A workbook is for Mac, worksheet is for PC"
+                ],
+                correct: 2
+            },
+            {
+                question: "Which tab in the Ribbon would you use to insert a chart?",
+                options: ["Home", "Insert", "Data", "View"],
+                correct: 1
+            },
+            {
+                question: "What does the Name Box show?",
+                options: [
+                    "The name of the Excel file",
+                    "The current cell address or range name",
+                    "Your username",
+                    "The worksheet name"
+                ],
+                correct: 1
+            },
+            {
+                question: "How are columns labeled in Excel?",
+                options: [
+                    "With numbers (1, 2, 3...)",
+                    "With Roman numerals (I, II, III...)",
+                    "With letters (A, B, C...)",
+                    "With symbols (#, $, %...)"
+                ],
+                correct: 2
+            },
+            {
+                question: "What keyboard shortcut takes you directly to cell A1?",
+                options: ["Ctrl+A", "Ctrl+Home", "Ctrl+1", "Alt+A1"],
+                correct: 1
+            },
+            {
+                question: "Where is the Formula Bar located?",
+                options: [
+                    "At the bottom of the screen",
+                    "On the right side",
+                    "Below the Ribbon, above the grid",
+                    "In the View tab"
+                ],
+                correct: 2
+            },
+            {
+                question: "What happens when you press the Tab key in Excel?",
+                options: [
+                    "Moves to the next worksheet",
+                    "Moves one cell to the right",
+                    "Opens a new tab",
+                    "Indents the text"
+                ],
+                correct: 1
+            },
+            {
+                question: "How are rows identified in Excel?",
+                options: [
+                    "With letters (A, B, C...)",
+                    "With numbers (1, 2, 3...)",
+                    "With colors",
+                    "With symbols"
+                ],
+                correct: 1
+            },
+            {
+                question: "What is the maximum number of worksheets you can have in a workbook?",
+                options: [
+                    "3",
+                    "10",
+                    "100",
+                    "Limited only by available memory"
+                ],
+                correct: 3
+            }
+        ];
+
+        // Initialize quiz
+        function startQuiz() {
+            quiz = new Quiz(module1Questions, 1);
+            quiz.init();
+        }
+
+        // No progress tracking needed
+    </script>
+</body>
+</html>

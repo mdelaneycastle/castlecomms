@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 7: Sorting, Filtering & Freeze Panes - Excel Training</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-title">Module 7: Sorting, Filtering & Freeze Panes</h1>
+            <div class="nav-links">
+                <a href="index.html" style="color: var(--primary-color); text-decoration: none;">← Back to Course Hub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="module-header">
+            <h1>Module 7: Sorting, Filtering & Freeze Panes</h1>
+            <p>Managing large lists of data without getting lost</p>
+        </div>
+
+        <div class="module-content">
+            <h3>📚 Learning Objectives</h3>
+            <ul>
+                <li>Sort data alphabetically and numerically</li>
+                <li>Apply and customize filters effectively</li>
+                <li>Use Freeze Panes to keep headers visible</li>
+                <li>Create custom sort orders</li>
+                <li>Filter by multiple criteria</li>
+            </ul>
+
+            <h3>🎯 Key Concepts</h3>
+            
+            <h4>1. Sorting Data</h4>
+            <p>Organizing your data in a meaningful order:</p>
+            <ul>
+                <li><strong>Quick Sort:</strong> A-Z or Z-A buttons (Home tab)</li>
+                <li><strong>Custom Sort:</strong> Data tab → Sort (multiple levels)</li>
+                <li><strong>Sort by:</strong> Values, cell color, font color, or icon</li>
+                <li><strong>Important:</strong> Always select entire data range including headers</li>
+                <li>Excel auto-detects headers if formatted differently</li>
+            </ul>
+
+            <h4>2. AutoFilter</h4>
+            <p>The most powerful tool for viewing subsets of your data:</p>
+            <ul>
+                <li>Click Filter button (funnel icon) on Data tab</li>
+                <li>Dropdown arrows appear in header row</li>
+                <li>Check/uncheck items to show/hide</li>
+                <li><strong>Text Filters:</strong> Contains, begins with, ends with</li>
+                <li><strong>Number Filters:</strong> Equals, greater than, top 10, etc.</li>
+                <li><strong>Date Filters:</strong> This week, last month, custom ranges</li>
+            </ul>
+
+            <h4>3. Advanced Filtering Techniques</h4>
+            <ul>
+                <li><strong>Multiple Criteria:</strong> Filter multiple columns simultaneously</li>
+                <li><strong>Custom AutoFilter:</strong> Complex conditions (AND/OR logic)</li>
+                <li><strong>Filter by Color:</strong> Show only red cells or specific icons</li>
+                <li><strong>Top/Bottom Filters:</strong> Show top 10 values, bottom 5%, etc.</li>
+                <li><strong>Search Box:</strong> Type to find specific items quickly</li>
+            </ul>
+
+            <h4>4. Freeze Panes</h4>
+            <p>Keep important rows and columns visible while scrolling:</p>
+            <ul>
+                <li><strong>Freeze Top Row:</strong> Most common - keeps headers visible</li>
+                <li><strong>Freeze First Column:</strong> Keeps labels visible when scrolling right</li>
+                <li><strong>Freeze Panes:</strong> Custom freeze - select cell, everything above and left freezes</li>
+                <li><strong>Unfreeze:</strong> Remove all frozen panes</li>
+                <li><strong>Split:</strong> Creates moveable dividers (different from freeze)</li>
+            </ul>
+
+            <h4>5. Working with Filtered Data</h4>
+            <ul>
+                <li>Copy/paste only shows visible (filtered) cells</li>
+                <li>Formulas like SUM automatically exclude hidden rows</li>
+                <li>Use SUBTOTAL function for calculations on filtered data</li>
+                <li>Row numbers turn blue to show filtering is active</li>
+                <li>Clear filters to show all data again</li>
+            </ul>
+
+            <div class="exercise-box">
+                <h3>🏢 Practical Exercise: "Employee Directory Management"</h3>
+                <p>Create and manage a comprehensive employee database:</p>
+                <ol>
+                    <li><strong>Create the Employee Database:</strong>
+                        <ul>
+                            <li>Column A: Employee ID (001, 002, etc.)</li>
+                            <li>Column B: Last Name</li>
+                            <li>Column C: First Name</li>
+                            <li>Column D: Department (Sales, Marketing, IT, HR)</li>
+                            <li>Column E: Position</li>
+                            <li>Column F: Hire Date</li>
+                            <li>Column G: Salary</li>
+                            <li>Column H: Performance Rating (1-5)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Add Sample Data:</strong>
+                        <ul>
+                            <li>Create 20-25 employee records</li>
+                            <li>Include various departments and positions</li>
+                            <li>Use realistic salary ranges</li>
+                            <li>Spread hire dates across different years</li>
+                        </ul>
+                    </li>
+                    <li><strong>Apply Data Management Features:</strong>
+                        <ul>
+                            <li><strong>Freeze the header row</strong> (View → Freeze Panes → Freeze Top Row)</li>
+                            <li><strong>Enable filtering</strong> (Data → Filter)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Practice Sorting:</strong>
+                        <ul>
+                            <li>Sort by Last Name alphabetically</li>
+                            <li>Sort by Department, then by Salary (highest to lowest)</li>
+                            <li>Sort by Hire Date (newest first)</li>
+                            <li>Try custom sort with multiple levels</li>
+                        </ul>
+                    </li>
+                    <li><strong>Practice Filtering:</strong>
+                        <ul>
+                            <li>Show only Sales department employees</li>
+                            <li>Filter for salaries between $50,000-$80,000</li>
+                            <li>Show employees hired in the last 2 years</li>
+                            <li>Display only top performers (rating 4-5)</li>
+                            <li>Combine filters: IT department with salary > $70k</li>
+                        </ul>
+                    </li>
+                    <li><strong>Advanced Tasks:</strong>
+                        <ul>
+                            <li>Create a summary showing count by department</li>
+                            <li>Find and highlight duplicate entries</li>
+                            <li>Use conditional formatting on performance ratings</li>
+                            <li>Add color coding by department</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <h3>💡 Pro Tips</h3>
+            <ul>
+                <li><strong>Select All Data:</strong> Use Ctrl+Shift+End to select to last row</li>
+                <li><strong>Headers:</strong> Always include headers for easier filtering</li>
+                <li><strong>Consistent Data:</strong> Standardize entries (same spelling/format)</li>
+                <li><strong>Clear Filters:</strong> Data → Clear to show all data</li>
+                <li><strong>Status Bar:</strong> Shows count of visible/selected cells when filtering</li>
+                <li><strong>Copy Visible:</strong> Alt+; selects only visible cells for copying</li>
+            </ul>
+
+            <h3>🔍 Common Mistakes to Avoid</h3>
+            <ul>
+                <li><strong>Partial Selection:</strong> Not selecting entire data range when sorting</li>
+                <li><strong>Mixed Data Types:</strong> Numbers stored as text break numeric sorting</li>
+                <li><strong>Blank Rows:</strong> Empty rows interrupt data range detection</li>
+                <li><strong>Merged Cells:</strong> Cause problems with sorting and filtering</li>
+                <li><strong>Forgetting Headers:</strong> Not identifying header row in sort dialog</li>
+            </ul>
+
+            <h3>📊 Sorting Best Practices</h3>
+            <ul>
+                <li><strong>Backup First:</strong> Save copy before major sorts</li>
+                <li><strong>Multiple Levels:</strong> Sort by main criteria, then sub-criteria</li>
+                <li><strong>Custom Lists:</strong> Create custom sort orders (High-Medium-Low)</li>
+                <li><strong>Date Sorting:</strong> Ensure dates are in date format, not text</li>
+                <li><strong>Case Sensitive:</strong> Use Options button for case-sensitive sorts</li>
+            </ul>
+
+            <h3>🔍 Filtering Power Techniques</h3>
+            <ul>
+                <li><strong>Search Filter:</strong> Type in filter box to find items quickly</li>
+                <li><strong>Select All/None:</strong> Quick way to clear or select all items</li>
+                <li><strong>Number Filters:</strong> Use "Between" for ranges</li>
+                <li><strong>Date Filters:</strong> "This Month," "Last Quarter" for time periods</li>
+                <li><strong>Text Filters:</strong> "Contains" is more flexible than "Equals"</li>
+            </ul>
+        </div>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-header">
+                <h2>Ready to Test Your Knowledge?</h2>
+                <p>Take this quiz to check your understanding of Module 7</p>
+                <button class="btn btn-primary" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Module 7 Quiz Questions
+        const module7Questions = [
+            {
+                question: "What icon represents the Filter feature?",
+                options: ["Magnifying glass", "Funnel", "Arrow", "Grid"],
+                correct: 1
+            },
+            {
+                question: "What does Freeze Panes do?",
+                options: [
+                    "Stops data from changing",
+                    "Keeps certain rows/columns visible while scrolling",
+                    "Locks cells from editing",
+                    "Freezes formulas"
+                ],
+                correct: 1
+            },
+            {
+                question: "How do you sort by multiple columns?",
+                options: [
+                    "Click sort twice",
+                    "Use Custom Sort dialog",
+                    "Hold Shift while sorting",
+                    "Not possible"
+                ],
+                correct: 1
+            },
+            {
+                question: "What happens to hidden rows when you filter?",
+                options: [
+                    "They are deleted",
+                    "They are temporarily hidden but still exist",
+                    "They move to another sheet",
+                    "They are permanently removed"
+                ],
+                correct: 1
+            },
+            {
+                question: "Where should you click to freeze both top row and first column?",
+                options: ["A1", "B2", "A2", "B1"],
+                correct: 1
+            },
+            {
+                question: "What happens if you don't select the entire data range when sorting?",
+                options: [
+                    "Excel automatically selects all data",
+                    "Only selected data is sorted, breaking relationships",
+                    "Excel shows an error",
+                    "Nothing happens"
+                ],
+                correct: 1
+            },
+            {
+                question: "How can you tell that filtering is active in your worksheet?",
+                options: [
+                    "Row numbers turn blue",
+                    "Cells turn yellow",
+                    "A message appears",
+                    "Column headers turn bold"
+                ],
+                correct: 0
+            },
+            {
+                question: "Which function should you use for calculations on filtered data?",
+                options: ["SUM", "SUBTOTAL", "TOTAL", "AVERAGE"],
+                correct: 1
+            },
+            {
+                question: "What's the keyboard shortcut to select only visible (filtered) cells?",
+                options: ["Ctrl+A", "Alt+;", "Ctrl+V", "Shift+F"],
+                correct: 1
+            },
+            {
+                question: "How do you clear all filters to show all data?",
+                options: [
+                    "Click each filter dropdown",
+                    "Data → Clear",
+                    "Delete the filter arrows",
+                    "Press Ctrl+Z"
+                ],
+                correct: 1
+            }
+        ];
+
+        // Initialize quiz
+        function startQuiz() {
+            quiz = new Quiz(module7Questions, 7);
+            quiz.init();
+        }
+
+        // No progress tracking needed
+    </script>
+</body>
+</html>
