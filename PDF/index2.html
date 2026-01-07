@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artist PDF Maker - Castle Fine Art</title>
     
@@ -336,6 +337,22 @@
 
             <div id="input-area-container">
                 <h2 class="section-title" id="input-area-title">2. Upload Images</h2>
+                
+                <div class="form-group" style="background: #f0f8ff; padding: 1rem; border-radius: 8px; border: 2px dashed #4a90e2; margin-bottom: 1.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.2em;">📊</span>
+                        Upload CSV with Product Info (Optional)
+                    </label>
+                    <input type="file" id="csv-upload" accept=".csv" style="margin-top: 0.5rem;">
+                    <p style="color: #666; font-size: 0.85rem; margin-top: 0.5rem;">
+                        CSV should contain columns: title, medium, price, dimensions (in any order).
+                        The data will be matched to images in the order they appear.
+                    </p>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem;">
+                        <div id="csv-status" style="font-weight: 600; flex: 1;"></div>
+                        <button type="button" id="clear-csv-btn" style="display: none; padding: 0.3rem 0.6rem; background: #fff; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-size: 0.85rem;" onclick="clearCSVData()">Clear CSV</button>
+                    </div>
+                </div>
 
                 <div class="form-group" id="sub-artist-group" style="display:none;">
                     <label style="background: var(--primary); color: white; display: inline-block; padding: 4px 8px; border-radius: 4px; margin-bottom: 10px;">Current Artist Section</label>
@@ -454,6 +471,7 @@
         let pdfSections = []; // Compilation array
         let sortableInstance = null;
         let editingSectionId = null; // Track which section is being edited
+        let csvData = []; // Store parsed CSV data
         
         // Local Storage Keys
         const STORAGE_KEY = 'pdfMakerState';
@@ -472,6 +490,8 @@
             uploadSection: document.getElementById('upload-section'),
             dropZone: document.getElementById('drop-zone'),
             fileInput: document.getElementById('image-upload'),
+            csvInput: document.getElementById('csv-upload'),
+            csvStatus: document.getElementById('csv-status'),
             imgContainer: document.getElementById('images-container'),
             sectionsList: document.getElementById('sections-list'),
             noSectionsMsg: document.getElementById('no-sections-msg'),
@@ -507,6 +527,7 @@
             
             // Upload & Drag Drop
             els.fileInput.addEventListener('change', handleFiles);
+            els.csvInput.addEventListener('change', handleCSVUpload);
             setupDragDrop();
 
             // Actions
@@ -521,6 +542,7 @@
             window.clearAllData = clearAllData;
             window.parseProductInfo = parseProductInfo;
             window.clearProductInfo = clearProductInfo;
+            window.clearCSVData = clearCSVData;
             
             // Add listeners for auto-save
             els.clientInput.addEventListener('change', saveState);
@@ -758,6 +780,14 @@
             }
         }
         
+        function clearCSVData() {
+            csvData = [];
+            els.csvInput.value = '';
+            els.csvStatus.textContent = '';
+            document.getElementById('clear-csv-btn').style.display = 'none';
+            console.log('CSV data cleared');
+        }
+        
         function clearAllData() {
             if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
                 // Clear state
@@ -767,6 +797,7 @@
                 uploadedImages = [];
                 pdfSections = [];
                 editingSectionId = null;
+                csvData = [];
                 
                 // Clear form inputs
                 els.mainSelect.value = '';
@@ -776,6 +807,9 @@
                 els.msgInput.value = '';
                 els.customArtistName.value = '';
                 els.quality.value = 'print';
+                els.csvInput.value = '';
+                els.csvStatus.textContent = '';
+                document.getElementById('clear-csv-btn').style.display = 'none';
                 
                 // Clear localStorage
                 localStorage.removeItem(STORAGE_KEY);
@@ -921,6 +955,11 @@
                             renderImages();
                             updateUI();
                             saveState();
+                            
+                            // Apply CSV data if available
+                            if (csvData.length > 0) {
+                                applyCSVDataToImages();
+                            }
                         }
                     };
                     reader.readAsDataURL(file);
@@ -1018,6 +1057,164 @@
             renderImages();
             updateUI();
             saveState();
+        }
+        
+        // --- CSV HANDLING ---
+        function handleCSVUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const csvText = evt.target.result;
+                    csvData = parseCSV(csvText);
+                    
+                    if (csvData.length > 0) {
+                        els.csvStatus.textContent = `✅ CSV loaded: ${csvData.length} rows found`;
+                        els.csvStatus.style.color = 'var(--success)';
+                        document.getElementById('clear-csv-btn').style.display = 'block';
+                        
+                        // Auto-apply to existing images if any
+                        if (uploadedImages.length > 0) {
+                            applyCSVDataToImages();
+                        }
+                    } else {
+                        els.csvStatus.textContent = '⚠️ No data found in CSV';
+                        els.csvStatus.style.color = 'orange';
+                    }
+                } catch (err) {
+                    console.error('CSV parsing error:', err);
+                    els.csvStatus.textContent = '❌ Error parsing CSV: ' + err.message;
+                    els.csvStatus.style.color = 'var(--danger)';
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+        
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim());
+            if (lines.length === 0) return [];
+            
+            // Parse header to find column indices
+            const headers = parseCSVLine(lines[0]);
+            const columnMap = {};
+            
+            // Find relevant columns (case-insensitive)
+            headers.forEach((header, index) => {
+                const h = header.toLowerCase().trim();
+                if (h.includes('title') || h.includes('name')) {
+                    columnMap.title = index;
+                } else if (h.includes('medium') || h.includes('material')) {
+                    columnMap.medium = index;
+                } else if (h.includes('price') || h.includes('cost')) {
+                    columnMap.price = index;
+                } else if (h.includes('dimension') || h.includes('size')) {
+                    columnMap.size = index;
+                }
+            });
+            
+            // Parse data rows
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length > 0) {
+                    const row = {
+                        title: columnMap.title !== undefined ? values[columnMap.title]?.trim() || '' : '',
+                        medium: columnMap.medium !== undefined ? values[columnMap.medium]?.trim() || '' : '',
+                        price: columnMap.price !== undefined ? formatPrice(values[columnMap.price]?.trim() || '') : '',
+                        size: columnMap.size !== undefined ? formatDimensions(values[columnMap.size]?.trim() || '') : ''
+                    };
+                    data.push(row);
+                }
+            }
+            
+            return data;
+        }
+        
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        // Escaped quote
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            values.push(current);
+            return values;
+        }
+        
+        function formatPrice(price) {
+            if (!price) return '';
+            
+            // Fix common encoding issues with £ symbol
+            price = price.replace(/Â£/g, '£'); // Fix UTF-8 double encoding
+            price = price.replace(/\ufffd/g, '£'); // Replace replacement character
+            price = price.replace(/[�]/g, '£'); // Replace question mark diamond
+            
+            // If price doesn't start with £, add it
+            if (!price.startsWith('£')) {
+                // Remove any existing currency symbols
+                price = price.replace(/[£$€¥]/g, '').trim();
+                if (price && !isNaN(price.replace(/,/g, ''))) {
+                    return '£' + price;
+                }
+            }
+            return price;
+        }
+        
+        function formatDimensions(dimensions) {
+            if (!dimensions) return '';
+            // Ensure dimensions have 'cm' units
+            if (dimensions.match(/\d+(?:\.\d+)?[\s]*x[\s]*\d+(?:\.\d+)?/)) {
+                if (!dimensions.toLowerCase().includes('cm')) {
+                    return dimensions.replace(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/g, '$1cm x $2cm');
+                }
+            }
+            return dimensions;
+        }
+        
+        function applyCSVDataToImages() {
+            if (csvData.length === 0) return;
+            
+            let appliedCount = 0;
+            uploadedImages.forEach((img, index) => {
+                if (index < csvData.length) {
+                    const data = csvData[index];
+                    
+                    // Only apply if fields are currently empty
+                    if (!img.title && data.title) img.title = data.title;
+                    if (!img.medium && data.medium) img.medium = data.medium;
+                    if (!img.price && data.price) img.price = data.price;
+                    if (!img.size && data.size) img.size = data.size;
+                    
+                    appliedCount++;
+                }
+            });
+            
+            if (appliedCount > 0) {
+                renderImages();
+                saveState();
+                
+                els.csvStatus.textContent = `✅ Applied CSV data to ${appliedCount} images`;
+                setTimeout(() => els.csvStatus.textContent = '', 3000);
+            }
         }
         
         function parseProductInfo(id, text) {
