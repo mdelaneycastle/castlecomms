@@ -7,11 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -24,18 +20,107 @@
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.75);
             z-index: -1;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* ====== LOGIN GATE (NEW) ====== */
+        body.locked .container {
+            filter: blur(10px);
+            transform: scale(0.995);
+            pointer-events: none;
+            user-select: none;
         }
+        body.locked { overflow: hidden; }
+
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        body.locked .login-overlay { display: flex; }
+
+        .login-card {
+            width: min(520px, 92vw);
+            border-radius: 18px;
+            padding: 28px;
+            background: rgba(255,255,255,0.92);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .login-title {
+            font-size: 1.6em;
+            color: #262626;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .login-subtitle {
+            color: #764ba2;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+        .login-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .login-input {
+            flex: 1;
+            padding: 14px 14px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            outline: none;
+            font-size: 1.05em;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .login-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.18);
+        }
+        .login-btn {
+            padding: 14px 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            color: white;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102,126,234,0.35);
+        }
+        .login-hint {
+            margin-top: 14px;
+            font-size: 0.95em;
+            color: #4a5568;
+            opacity: 0.9;
+        }
+        .login-error {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #fff5f5;
+            border-left: 4px solid #fc8181;
+            color: #742a2a;
+            display: none;
+            font-weight: 600;
+        }
+        .login-error.show { display: block; }
 
         /* Header Styling */
         header {
@@ -52,9 +137,7 @@
         header::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 5px;
             background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
             background-size: 200% 100%;
@@ -124,9 +207,7 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .nav-section-header:first-child {
-            margin-top: 0;
-        }
+        .nav-section-header:first-child { margin-top: 0; }
 
         .nav-card {
             position: relative;
@@ -150,18 +231,13 @@
         .nav-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: rgba(0, 0, 0, 0.5);
             transition: all 0.3s ease;
             z-index: 1;
         }
 
-        .nav-card:hover::before {
-            background: rgba(0, 0, 0, 0.3);
-        }
+        .nav-card:hover::before { background: rgba(0, 0, 0, 0.3); }
 
         .nav-card:hover {
             transform: translateY(-8px) scale(1.02);
@@ -199,19 +275,11 @@
             position: relative;
         }
 
-        .artist-card:hover {
-            transform: translateY(-5px);
-        }
+        .artist-card:hover { transform: translateY(-5px); }
 
         @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .card-header {
@@ -296,11 +364,7 @@
         }
 
         /* Stats & Metrics */
-        .stats-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+        .stats-container { display: flex; flex-direction: column; gap: 20px; }
 
         .stat-box {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -312,15 +376,9 @@
             transition: transform 0.3s ease;
         }
 
-        .stat-box:hover {
-            transform: scale(1.05);
-        }
+        .stat-box:hover { transform: scale(1.05); }
 
-        .stat-icon {
-            font-size: 2em;
-            margin-bottom: 10px;
-            opacity: 0.9;
-        }
+        .stat-icon { font-size: 2em; margin-bottom: 10px; opacity: 0.9; }
 
         .stat-val {
             font-size: 2.8em;
@@ -345,11 +403,7 @@
             margin-top: 20px;
         }
 
-        .dates-box h4 {
-            color: #764ba2;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
+        .dates-box h4 { color: #764ba2; margin-bottom: 15px; font-size: 1.2em; }
 
         .date-item {
             background: #f7fafc;
@@ -360,10 +414,7 @@
             transition: all 0.3s ease;
         }
 
-        .date-item:hover {
-            background: #eef2ff;
-            transform: translateX(5px);
-        }
+        .date-item:hover { background: #eef2ff; transform: translateX(5px); }
 
         /* Action Items */
         .action-box {
@@ -391,9 +442,7 @@
             gap: 10px;
         }
 
-        .action-item:last-child {
-            border-bottom: none;
-        }
+        .action-item:last-child { border-bottom: none; }
 
         .action-item::before {
             content: '▶';
@@ -428,17 +477,9 @@
 
         /* Responsive Design */
         @media (max-width: 968px) {
-            .card-body {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2.5em;
-            }
-            
-            .nav-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
+            .card-body { grid-template-columns: 1fr; }
+            h1 { font-size: 2.5em; }
+            .nav-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
         }
 
         @media (max-width: 640px) {
@@ -447,14 +488,10 @@
                 margin-top: 20px;
                 justify-content: center;
             }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .card-header h2 {
-                font-size: 1.8em;
-            }
+            h1 { font-size: 2em; }
+            .card-header h2 { font-size: 1.8em; }
+            .login-row { flex-direction: column; }
+            .login-btn { width: 100%; }
         }
 
         /* Empty state */
@@ -466,16 +503,9 @@
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
-        .empty-state h3 {
-            color: #667eea;
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
+        .empty-state h3 { color: #667eea; font-size: 2em; margin-bottom: 20px; }
 
-        .empty-state p {
-            color: #718096;
-            font-size: 1.2em;
-        }
+        .empty-state p { color: #718096; font-size: 1.2em; }
 
         /* Image Styles */
         .featured-image {
@@ -517,14 +547,11 @@
             transition: transform 0.3s ease;
         }
 
-        .gallery-item:hover {
-            transform: scale(1.05);
-        }
+        .gallery-item:hover { transform: scale(1.05); }
 
         .gallery-item img {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -534,10 +561,7 @@
         .lightbox {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background: rgba(0, 0, 0, 0.8);
             z-index: 2000;
             align-items: center;
@@ -545,9 +569,7 @@
             padding: 20px;
         }
 
-        .lightbox[style*="block"] {
-            display: flex !important;
-        }
+        .lightbox[style*="block"] { display: flex !important; }
 
         .lightbox-content {
             position: relative;
@@ -566,101 +588,72 @@
             object-fit: contain;
         }
 
-        .lightbox-close {
-            display: none;
-        }
+        .lightbox-close { display: none; }
 
-        /* Quick Nav - Floating Smart Pills */
+        /* Quick Nav */
         .quick-nav {
             position: fixed;
-            right: 20px; /* Spaced slightly off the edge */
+            right: 20px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 1000;
-            max-height: 85vh; /* Prevents it from going off-screen */
-            overflow-y: auto; /* scrollable if you have too many artists */
-            padding: 10px 5px; /* Breathing room for shadows */
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 10px 5px;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 0;
             visibility: hidden;
-            
-            /* Hide scrollbar but keep functionality */
-            scrollbar-width: none; 
+            scrollbar-width: none;
             -ms-overflow-style: none;
         }
 
-        .quick-nav::-webkit-scrollbar { 
-            display: none; 
-        }
+        .quick-nav::-webkit-scrollbar { display: none; }
 
-        .quick-nav.visible {
-            opacity: 1;
-            visibility: visible;
-        }
+        .quick-nav.visible { opacity: 1; visibility: visible; }
 
         .quick-nav-items {
             display: flex;
             flex-direction: column;
-            gap: 12px; /* More space between buttons */
-            align-items: flex-end; /* Aligns buttons to the right */
+            gap: 12px;
+            align-items: flex-end;
         }
 
         .quick-nav-item {
-            /* Glass Effect & Base Style */
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            
-            /* Sizing & Shape */
-            padding: 12px 24px; /* Much larger clickable area */
-            border-radius: 30px; /* Perfect pill shape */
-            
-            /* Typography */
+            padding: 12px 24px;
+            border-radius: 30px;
             color: #4a5568;
             font-weight: 700;
             font-size: 14px;
             letter-spacing: 0.5px;
             text-decoration: none;
-            
-            /* Interaction properties */
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.8);
-            
-            /* Text Handling - Fixes truncation issues */
             white-space: nowrap;
-            max-width: 260px; /* Allows longer names like "Operational Improvements" */
+            max-width: 260px;
             overflow: hidden;
             text-overflow: ellipsis;
             text-align: right;
         }
 
-        /* Hover State - The "Pop" effect */
         .quick-nav-item:hover {
-            transform: translateX(-5px) scale(1.05); /* Slides left and grows */
+            transform: translateX(-5px) scale(1.05);
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
             border-color: transparent;
         }
 
-        /* Optional: Active State */
-        .quick-nav-item:active {
-            transform: scale(0.98);
-        }
+        .quick-nav-item:active { transform: scale(0.98); }
 
-        /* Hide on mobile */
-        @media (max-width: 1100px) {
-            .quick-nav { display: none; }
-        }
+        @media (max-width: 1100px) { .quick-nav { display: none; } }
 
         /* Rich Content Styles */
-        .rich-content {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
+        .rich-content { display: flex; flex-direction: column; gap: 25px; }
 
         .content-text-block {
             background: #f8f9fc;
@@ -672,7 +665,6 @@
             color: #4a5568;
         }
 
-        /* Markdown styling within text blocks */
         .content-text-block h1,
         .content-text-block h2,
         .content-text-block h3,
@@ -692,39 +684,20 @@
         .content-text-block h5 { font-size: 1.1em; }
         .content-text-block h6 { font-size: 1em; }
 
-        .content-text-block p {
-            margin: 15px 0;
-        }
+        .content-text-block p { margin: 15px 0; }
 
-        .content-text-block strong {
-            color: #2d3748;
-            font-weight: 700;
-        }
+        .content-text-block strong { color: #2d3748; font-weight: 700; }
 
-        .content-text-block em {
-            color: #4a5568;
-            font-style: italic;
-        }
+        .content-text-block em { color: #4a5568; font-style: italic; }
 
         .content-text-block ul,
-        .content-text-block ol {
-            margin: 15px 0;
-            padding-left: 25px;
-        }
+        .content-text-block ol { margin: 15px 0; padding-left: 25px; }
 
-        .content-text-block li {
-            margin: 8px 0;
-            line-height: 1.6;
-        }
+        .content-text-block li { margin: 8px 0; line-height: 1.6; }
 
-        .content-text-block ul li::marker {
-            color: #667eea;
-        }
+        .content-text-block ul li::marker { color: #667eea; }
 
-        .content-text-block ol li::marker {
-            color: #667eea;
-            font-weight: 600;
-        }
+        .content-text-block ol li::marker { color: #667eea; font-weight: 600; }
 
         .content-text-block blockquote {
             border-left: 4px solid #e2e8f0;
@@ -755,11 +728,7 @@
             font-family: 'Consolas', 'Monaco', monospace;
         }
 
-        .content-text-block pre code {
-            background: none;
-            padding: 0;
-            color: inherit;
-        }
+        .content-text-block pre code { background: none; padding: 0; color: inherit; }
 
         .content-text-block hr {
             border: none;
@@ -800,9 +769,7 @@
             transition: transform 0.3s ease;
         }
 
-        .content-image:hover {
-            transform: scale(1.02);
-        }
+        .content-image:hover { transform: scale(1.02); }
 
         .image-caption {
             text-align: center;
@@ -812,11 +779,7 @@
             max-width: 600px;
         }
 
-        /* Link Block Styles */
-        .content-link-block {
-            display: inline-block;
-            margin: 20px 0;
-        }
+        .content-link-block { display: inline-block; margin: 20px 0; }
 
         .content-link {
             display: inline-flex;
@@ -840,12 +803,33 @@
             text-decoration: none;
         }
 
-        .content-link-icon {
-            font-size: 1.2em;
-        }
+        .content-link-icon { font-size: 1.2em; }
     </style>
 </head>
-<body>
+<body class="locked">
+    <!-- ====== LOGIN OVERLAY (NEW) ====== -->
+    <div class="login-overlay" id="login-overlay" aria-hidden="false">
+        <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="login-title">
+            <div id="login-title" class="login-title">🔒 Enter Password</div>
+            <div class="login-subtitle">2025 Artist Program Planning</div>
+
+            <div class="login-row">
+                <input
+                    id="password-input"
+                    class="login-input"
+                    type="password"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                    aria-label="Password"
+                />
+                <button id="login-btn" class="login-btn" type="button">Unlock</button>
+            </div>
+
+            <div id="login-error" class="login-error">Incorrect password. Try again.</div>
+            <div class="login-hint">Tip: press Enter to unlock.</div>
+        </div>
+    </div>
+
     <div class="container">
         <header>
             <div class="edit-buttons">
@@ -856,9 +840,7 @@
         </header>
 
         <!-- Navigation Grid -->
-        <div class="nav-grid" id="nav-grid">
-            <!-- Will be populated dynamically -->
-        </div>
+        <div class="nav-grid" id="nav-grid"></div>
 
         <!-- Content Area -->
         <div id="content-area">
@@ -870,6 +852,58 @@
     </div>
 
     <script>
+        /* ====== LOGIN GATE (NEW) ======
+           NOTE: This is a simple front-end lock (not true security).
+           It keeps the UI blurred/disabled until the correct password is entered.
+        */
+        const GATE_PASSWORD = "Castle123!!";
+        const AUTH_KEY = "castle_dashboard_unlocked_v1"; // localStorage flag
+
+        function setLocked(isLocked) {
+            document.body.classList.toggle("locked", isLocked);
+            const overlay = document.getElementById("login-overlay");
+            overlay.setAttribute("aria-hidden", String(!isLocked));
+        }
+
+        function showError(show) {
+            document.getElementById("login-error").classList.toggle("show", !!show);
+        }
+
+        function tryUnlock() {
+            const input = document.getElementById("password-input");
+            const val = input.value || "";
+            if (val === GATE_PASSWORD) {
+                localStorage.setItem(AUTH_KEY, "1");
+                showError(false);
+                setLocked(false);
+                input.value = "";
+            } else {
+                showError(true);
+                input.focus();
+                input.select();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // restore state
+            const unlocked = localStorage.getItem(AUTH_KEY) === "1";
+            setLocked(!unlocked);
+
+            // focus password if locked
+            if (!unlocked) {
+                setTimeout(() => document.getElementById("password-input").focus(), 50);
+            }
+
+            document.getElementById("login-btn").addEventListener("click", tryUnlock);
+            document.getElementById("password-input").addEventListener("keydown", (e) => {
+                if (e.key === "Enter") tryUnlock();
+            });
+
+            // Continue with normal app init
+            loadDashboard();
+        });
+
+        /* ====== EXISTING APP CODE (unchanged below) ====== */
         const SUPABASE_URL = 'https://wdnpazkzejvnwiryxohl.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndkbnBhemt6ZWp2bndpcnl4b2hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5ODg1ODcsImV4cCI6MjA3OTU2NDU4N30.JCk80Gu2TdQhf5w_OMHxMdGbYjWahU-jrl4FuG6oZYM';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -901,7 +935,7 @@
             'nigel-humphries': 'buttonimages/NigelHumphries.png',
             'ron-english': 'buttonimages/RonEnglish.png',
             'joseph-jones': 'buttonimages/JosephJones.png'
-// fallback if needed
+            // fallback if needed
         };
 
         // Artist icons/emojis as fallback
@@ -931,19 +965,14 @@
             'nigel-humphries': '🐾'
         };
 
-        // Markdown parser function for text blocks
         function parseMarkdown(text) {
             if (!text) return '';
-            
-            // Use marked.js for full markdown parsing
-            // Configure marked for security and performance
             marked.setOptions({
                 breaks: true,
-                sanitize: false, // We control the content
+                sanitize: false,
                 smartLists: true,
                 smartypants: false
             });
-            
             return marked.parse(text);
         }
 
@@ -955,13 +984,12 @@
                     .order('artist_name', { ascending: true });
 
                 if (error) throw error;
-                
-                // Debug: Log the data to see if images are included
+
                 console.log('Loaded artist data:', data);
 
                 const navGrid = document.getElementById('nav-grid');
                 const contentArea = document.getElementById('content-area');
-                
+
                 navGrid.innerHTML = '';
                 contentArea.innerHTML = '';
 
@@ -975,7 +1003,6 @@
                     return;
                 }
 
-                // Separate artists from business sections
                 const artists = [];
                 const businessSections = [];
 
@@ -987,7 +1014,6 @@
                     }
                 });
 
-                // Create navigation sections
                 if (artists.length > 0) {
                     const artistsHeader = document.createElement('h2');
                     artistsHeader.className = 'nav-section-header';
@@ -1004,9 +1030,7 @@
                     const businessHeader = document.createElement('h2');
                     businessHeader.className = 'nav-section-header';
                     businessHeader.textContent = '📊 Business & Strategy';
-                    if (artists.length > 0) {
-                        businessHeader.style.marginTop = '40px';
-                    }
+                    if (artists.length > 0) businessHeader.style.marginTop = '40px';
                     navGrid.appendChild(businessHeader);
 
                     businessSections.forEach(section => {
@@ -1015,7 +1039,6 @@
                     });
                 }
 
-                // Create content sections
                 if (artists.length > 0) {
                     const artistsSection = document.createElement('div');
                     artistsSection.innerHTML = '<h2 style="color: white; text-align: center; margin: 40px 0 30px 0;">🎨 Artists</h2>';
@@ -1038,10 +1061,7 @@
                     });
                 }
 
-                // Generate quick navigation sidebar
                 generateQuickNav(data);
-                
-                // Setup scroll detection for sidebar
                 setupScrollDetection();
 
             } catch (error) {
@@ -1058,7 +1078,7 @@
         function isBusinessSection(slug) {
             const businessSlugs = [
                 'performance-review',
-                'hai-nyc-shadowman', 
+                'hai-nyc-shadowman',
                 'christmas-winter-sale-2025',
                 'art-miami',
                 'icc-gallery-strategy',
@@ -1074,18 +1094,14 @@
         function createNavCard(item, isArtist) {
             const navCard = document.createElement('div');
             navCard.className = 'nav-card';
-            
+
             if (isArtist) {
-                // Set background image if available for artists
                 const imagePath = sectionImages[item.artist_slug];
-                if (imagePath) {
-                    navCard.style.backgroundImage = `url('${imagePath}')`;
-                }
+                if (imagePath) navCard.style.backgroundImage = `url('${imagePath}')`;
             } else {
-                // Business sections get icon-based styling
                 navCard.style.background = 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
             }
-            
+
             const icon = getBusinessIcon(item.artist_slug);
             navCard.innerHTML = `
                 ${!isArtist && icon ? `<div style="font-size: 2em; margin-bottom: 10px;">${icon}</div>` : ''}
@@ -1093,7 +1109,7 @@
                 <p>${item.revenue_amount || 'View Details'}</p>
             `;
             navCard.onclick = () => scrollToSection(item.artist_slug);
-            
+
             return navCard;
         }
 
@@ -1120,16 +1136,12 @@
 
             const icon = artistIcons[artist.artist_slug] || '🎨';
             const lastUpdated = new Date(artist.last_updated).toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
+                day: 'numeric', month: 'long', year: 'numeric'
             });
 
-            // Parse dates and actions from JSON
             const dates = artist.key_dates || [];
             const actions = artist.action_items || [];
 
-            // Create dates HTML
             let datesHtml = '';
             if (dates.length > 0) {
                 datesHtml = `
@@ -1140,7 +1152,6 @@
                 `;
             }
 
-            // Create actions HTML
             let actionsHtml = '';
             if (actions.length > 0) {
                 actionsHtml = `
@@ -1151,7 +1162,6 @@
                 `;
             }
 
-            // Create additional updates HTML
             let additionalHtml = '';
             if (artist.additional_updates && artist.additional_updates.trim()) {
                 additionalHtml = `
@@ -1162,7 +1172,6 @@
                 `;
             }
 
-            // Create content blocks HTML (new system)
             let contentBlocksHtml = '';
             if (artist.content_blocks && artist.content_blocks.length > 0) {
                 contentBlocksHtml = artist.content_blocks.map(block => {
@@ -1189,7 +1198,6 @@
                 }).join('');
             }
 
-            // Fallback to legacy content if no content blocks
             let mainContentHtml = '';
             if (contentBlocksHtml) {
                 mainContentHtml = `<div class="rich-content">${contentBlocksHtml}</div>`;
@@ -1207,7 +1215,6 @@
                 `;
             }
 
-            // Build the card HTML
             card.innerHTML = `
                 <div class="card-header">
                     <h2>${icon} ${artist.artist_name}</h2>
@@ -1242,16 +1249,12 @@
 
             const icon = getBusinessIcon(section.artist_slug);
             const lastUpdated = new Date(section.last_updated).toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
+                day: 'numeric', month: 'long', year: 'numeric'
             });
 
-            // Parse dates and actions from JSON
             const dates = section.key_dates || [];
             const actions = section.action_items || [];
 
-            // Create dates HTML
             let datesHtml = '';
             if (dates.length > 0) {
                 datesHtml = `
@@ -1262,7 +1265,6 @@
                 `;
             }
 
-            // Create actions HTML
             let actionsHtml = '';
             if (actions.length > 0) {
                 actionsHtml = `
@@ -1273,7 +1275,6 @@
                 `;
             }
 
-            // Create additional updates HTML for business sections
             let additionalHtml = '';
             if (section.additional_updates && section.additional_updates.trim()) {
                 additionalHtml = `
@@ -1284,7 +1285,6 @@
                 `;
             }
 
-            // Create content blocks HTML (new system) for business sections
             let contentBlocksHtml = '';
             if (section.content_blocks && section.content_blocks.length > 0) {
                 contentBlocksHtml = section.content_blocks.map(block => {
@@ -1311,7 +1311,6 @@
                 }).join('');
             }
 
-            // Fallback to legacy content if no content blocks
             let mainContentHtml = '';
             if (contentBlocksHtml) {
                 mainContentHtml = `<div class="rich-content">${contentBlocksHtml}</div>`;
@@ -1329,7 +1328,6 @@
                 `;
             }
 
-            // Build the card HTML
             card.innerHTML = `
                 <div class="card-header">
                     <h2>${icon} ${section.artist_name}</h2>
@@ -1361,20 +1359,13 @@
             const element = document.getElementById(`artist-${slug}`) || document.getElementById(`section-${slug}`);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Add a highlight effect
                 element.style.transform = 'scale(1.02)';
-                setTimeout(() => {
-                    element.style.transform = 'scale(1)';
-                }, 300);
+                setTimeout(() => { element.style.transform = 'scale(1)'; }, 300);
             }
         }
 
-        // Keep old function for backward compatibility
-        function scrollToArtist(slug) {
-            scrollToSection(slug);
-        }
+        function scrollToArtist(slug) { scrollToSection(slug); }
 
-        // Lightbox functions
         function openLightbox(imageUrl) {
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = document.getElementById('lightbox-img');
@@ -1383,7 +1374,6 @@
         }
 
         function closeLightbox(event) {
-            // Only close if clicking the background, not the content
             if (event.target === document.getElementById('lightbox')) {
                 document.getElementById('lightbox').style.display = 'none';
             }
@@ -1393,93 +1383,72 @@
             document.getElementById('lightbox').style.display = 'none';
         }
 
-        // Quick Nav Sidebar functionality
         function generateQuickNav(data) {
             const quickNavItems = document.getElementById('quick-nav-items');
             quickNavItems.innerHTML = '';
 
-            // Separate artists and business sections
             const artists = data.filter(item => !isBusinessSection(item.artist_slug))
                                .sort((a, b) => a.artist_name.localeCompare(b.artist_name));
-            
+
             const businessSections = data.filter(item => isBusinessSection(item.artist_slug))
                                         .sort((a, b) => a.artist_name.localeCompare(b.artist_name));
 
-            // Create nav items for artists first
             artists.forEach((section) => {
                 const navItem = document.createElement('div');
                 navItem.className = 'quick-nav-item';
                 navItem.textContent = section.artist_name;
-                
+
                 navItem.onclick = () => {
                     let targetElement = document.getElementById(`artist-${section.artist_slug}`);
-                    if (!targetElement) {
-                        targetElement = document.getElementById(`section-${section.artist_slug}`);
-                    }
-                    
+                    if (!targetElement) targetElement = document.getElementById(`section-${section.artist_slug}`);
+
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         targetElement.style.transition = 'transform 0.3s ease';
                         targetElement.style.transform = 'scale(1.02)';
-                        setTimeout(() => {
-                            targetElement.style.transform = 'scale(1)';
-                        }, 400);
+                        setTimeout(() => { targetElement.style.transform = 'scale(1)'; }, 400);
                     }
                 };
                 quickNavItems.appendChild(navItem);
             });
 
-            // Then create nav items for business sections
             businessSections.forEach((section) => {
                 const navItem = document.createElement('div');
                 navItem.className = 'quick-nav-item';
                 navItem.textContent = section.artist_name;
-                
+
                 navItem.onclick = () => {
                     let targetElement = document.getElementById(`artist-${section.artist_slug}`);
-                    if (!targetElement) {
-                        targetElement = document.getElementById(`section-${section.artist_slug}`);
-                    }
-                    
+                    if (!targetElement) targetElement = document.getElementById(`section-${section.artist_slug}`);
+
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         targetElement.style.transition = 'transform 0.3s ease';
                         targetElement.style.transform = 'scale(1.02)';
-                        setTimeout(() => {
-                            targetElement.style.transform = 'scale(1)';
-                        }, 400);
+                        setTimeout(() => { targetElement.style.transform = 'scale(1)'; }, 400);
                     }
                 };
                 quickNavItems.appendChild(navItem);
             });
         }
 
-        // Scroll detection for quick nav visibility
         function setupScrollDetection() {
             const quickNav = document.getElementById('quick-nav');
             const header = document.querySelector('header');
-            
+
             window.addEventListener('scroll', () => {
                 const headerBottom = header.offsetTop + header.offsetHeight;
                 const scrollPosition = window.scrollY;
-                
-                if (scrollPosition > headerBottom) {
-                    quickNav.classList.add('visible');
-                } else {
-                    quickNav.classList.remove('visible');
-                }
+
+                if (scrollPosition > headerBottom) quickNav.classList.add('visible');
+                else quickNav.classList.remove('visible');
             });
         }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', loadDashboard);
     </script>
 
     <!-- Sticky Quick Nav Sidebar -->
     <div id="quick-nav" class="quick-nav">
-        <div class="quick-nav-items" id="quick-nav-items">
-            <!-- Will be populated dynamically -->
-        </div>
+        <div class="quick-nav-items" id="quick-nav-items"></div>
     </div>
 
     <!-- Lightbox Modal -->
