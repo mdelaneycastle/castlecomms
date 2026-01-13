@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Image Overlay Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            font-weight: 400;
+            font-size: 24px;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .upload-box {
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-box:hover {
+            border-color: #1a1a1a;
+            background: #fafafa;
+        }
+
+        .upload-box.has-file {
+            border-style: solid;
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .upload-box h3 {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .upload-box p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .upload-box input {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .pdf-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 600px;
+            position: relative;
+            overflow: auto;
+        }
+
+        .pdf-viewer {
+            position: relative;
+            display: inline-block;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        #pdfCanvas {
+            display: block;
+        }
+
+        .image-overlay {
+            position: absolute;
+            cursor: move;
+            border: 2px solid #007bff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            background: white;
+        }
+
+        .image-overlay img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .image-overlay.selected {
+            border-color: #28a745;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #007bff;
+            border: 2px solid white;
+            border-radius: 2px;
+        }
+
+        .resize-handle.se {
+            bottom: -6px;
+            right: -6px;
+            cursor: se-resize;
+        }
+
+        .resize-handle.sw {
+            bottom: -6px;
+            left: -6px;
+            cursor: sw-resize;
+        }
+
+        .resize-handle.ne {
+            top: -6px;
+            right: -6px;
+            cursor: ne-resize;
+        }
+
+        .resize-handle.nw {
+            top: -6px;
+            left: -6px;
+            cursor: nw-resize;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .controls h3 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            font-weight: 500;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+        }
+
+        .range-value {
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #333;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .page-nav button {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-nav button:hover:not(:disabled) {
+            background: #f5f5f5;
+        }
+
+        .page-info {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 400px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .instructions strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 150px;
+            object-fit: contain;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 900px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>PDF Image Overlay Tool</h1>
+    </header>
+
+    <div class="container">
+        <div class="upload-section">
+            <div class="upload-box" id="pdfUploadBox">
+                <h3>Upload PDF</h3>
+                <p>Click or drag a PDF file here</p>
+                <input type="file" id="pdfInput" accept=".pdf">
+                <div class="file-name" id="pdfFileName"></div>
+            </div>
+            <div class="upload-box" id="imageUploadBox">
+                <h3>Upload Image</h3>
+                <p>Click or drag an image file here (PNG, JPG)</p>
+                <input type="file" id="imageInput" accept="image/*">
+                <div class="file-name" id="imageFileName"></div>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="pdf-container" id="pdfContainer">
+                <div class="empty-state" id="emptyState">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p>Upload a PDF to get started</p>
+                </div>
+                <div class="pdf-viewer" id="pdfViewer" style="display: none;">
+                    <canvas id="pdfCanvas"></canvas>
+                    <div class="image-overlay" id="imageOverlay" style="display: none;">
+                        <img id="overlayImage" src="" alt="Overlay">
+                        <div class="resize-handle nw"></div>
+                        <div class="resize-handle ne"></div>
+                        <div class="resize-handle sw"></div>
+                        <div class="resize-handle se"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <h3>Controls</h3>
+
+                <div class="page-nav">
+                    <button id="prevPage" disabled>Previous</button>
+                    <button id="nextPage" disabled>Next</button>
+                </div>
+                <div class="page-info" id="pageInfo">No PDF loaded</div>
+
+                <div class="instructions">
+                    <strong>How to use:</strong>
+                    1. Upload a PDF<br>
+                    2. Upload an image<br>
+                    3. Drag the image to position it<br>
+                    4. Resize using corner handles<br>
+                    5. Click Export to save
+                </div>
+
+                <div id="imageControls" style="display: none;">
+                    <h3 style="margin-top: 20px;">Image Settings</h3>
+
+                    <img id="imagePreview" class="image-preview" src="" alt="Preview">
+
+                    <div class="control-group">
+                        <label>Width (px)</label>
+                        <input type="number" id="imageWidth" min="10" max="2000" value="200">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Height (px)</label>
+                        <input type="number" id="imageHeight" min="10" max="2000" value="200">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Opacity</label>
+                        <input type="range" id="imageOpacity" min="0" max="100" value="100">
+                        <div class="range-value"><span id="opacityValue">100</span>%</div>
+                    </div>
+
+                    <button class="btn btn-danger" id="removeImage">Remove Image</button>
+                </div>
+
+                <button class="btn btn-primary" id="exportBtn" disabled>Export PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // State
+        let pdfDoc = null;
+        let pdfBytes = null;
+        let currentPage = 1;
+        let totalPages = 0;
+        let scale = 1.5;
+        let imageData = null;
+        let imagePosition = { x: 50, y: 50 };
+        let imageSize = { width: 200, height: 200 };
+        let originalImageSize = { width: 200, height: 200 };
+
+        // DOM Elements
+        const pdfInput = document.getElementById('pdfInput');
+        const imageInput = document.getElementById('imageInput');
+        const pdfUploadBox = document.getElementById('pdfUploadBox');
+        const imageUploadBox = document.getElementById('imageUploadBox');
+        const pdfFileName = document.getElementById('pdfFileName');
+        const imageFileName = document.getElementById('imageFileName');
+        const pdfCanvas = document.getElementById('pdfCanvas');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const emptyState = document.getElementById('emptyState');
+        const imageOverlay = document.getElementById('imageOverlay');
+        const overlayImage = document.getElementById('overlayImage');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const pageInfo = document.getElementById('pageInfo');
+        const exportBtn = document.getElementById('exportBtn');
+        const imageControls = document.getElementById('imageControls');
+        const imagePreview = document.getElementById('imagePreview');
+        const imageWidthInput = document.getElementById('imageWidth');
+        const imageHeightInput = document.getElementById('imageHeight');
+        const imageOpacityInput = document.getElementById('imageOpacity');
+        const opacityValue = document.getElementById('opacityValue');
+        const removeImageBtn = document.getElementById('removeImage');
+
+        // Upload box click handlers
+        pdfUploadBox.addEventListener('click', () => pdfInput.click());
+        imageUploadBox.addEventListener('click', () => imageInput.click());
+
+        // Drag and drop for PDF
+        pdfUploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            pdfUploadBox.style.borderColor = '#1a1a1a';
+        });
+        pdfUploadBox.addEventListener('dragleave', () => {
+            pdfUploadBox.style.borderColor = '#ccc';
+        });
+        pdfUploadBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            pdfUploadBox.style.borderColor = '#ccc';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                handlePdfUpload(file);
+            }
+        });
+
+        // Drag and drop for Image
+        imageUploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            imageUploadBox.style.borderColor = '#1a1a1a';
+        });
+        imageUploadBox.addEventListener('dragleave', () => {
+            imageUploadBox.style.borderColor = '#ccc';
+        });
+        imageUploadBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageUploadBox.style.borderColor = '#ccc';
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleImageUpload(file);
+            }
+        });
+
+        // File input handlers
+        pdfInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                handlePdfUpload(e.target.files[0]);
+            }
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                handleImageUpload(e.target.files[0]);
+            }
+        });
+
+        // Handle PDF upload
+        async function handlePdfUpload(file) {
+            pdfFileName.textContent = file.name;
+            pdfUploadBox.classList.add('has-file');
+
+            const arrayBuffer = await file.arrayBuffer();
+            pdfBytes = arrayBuffer.slice(0); // Store a copy of the original arrayBuffer
+
+            pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            totalPages = pdfDoc.numPages;
+            currentPage = 1;
+
+            emptyState.style.display = 'none';
+            pdfViewer.style.display = 'inline-block';
+
+            await renderPage(currentPage);
+            updatePageControls();
+            updateExportButton();
+        }
+
+        // Handle Image upload
+        function handleImageUpload(file) {
+            imageFileName.textContent = file.name;
+            imageUploadBox.classList.add('has-file');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imageData = e.target.result;
+
+                // Get original image dimensions
+                const img = new Image();
+                img.onload = () => {
+                    originalImageSize.width = img.width;
+                    originalImageSize.height = img.height;
+
+                    // Set initial size (max 200px, maintain aspect ratio)
+                    const maxSize = 200;
+                    if (img.width > img.height) {
+                        imageSize.width = Math.min(img.width, maxSize);
+                        imageSize.height = (img.height / img.width) * imageSize.width;
+                    } else {
+                        imageSize.height = Math.min(img.height, maxSize);
+                        imageSize.width = (img.width / img.height) * imageSize.height;
+                    }
+
+                    imageWidthInput.value = Math.round(imageSize.width);
+                    imageHeightInput.value = Math.round(imageSize.height);
+
+                    showImageOverlay();
+                };
+                img.src = imageData;
+
+                imagePreview.src = imageData;
+                overlayImage.src = imageData;
+                imageControls.style.display = 'block';
+                updateExportButton();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Render PDF page
+        async function renderPage(pageNum) {
+            const page = await pdfDoc.getPage(pageNum);
+            const viewport = page.getViewport({ scale: scale });
+
+            pdfCanvas.width = viewport.width;
+            pdfCanvas.height = viewport.height;
+
+            const ctx = pdfCanvas.getContext('2d');
+            await page.render({
+                canvasContext: ctx,
+                viewport: viewport
+            }).promise;
+
+            // Keep image overlay in bounds
+            if (imageData) {
+                constrainImagePosition();
+            }
+        }
+
+        // Show image overlay
+        function showImageOverlay() {
+            if (!pdfDoc) return;
+
+            imageOverlay.style.display = 'block';
+            imageOverlay.style.left = imagePosition.x + 'px';
+            imageOverlay.style.top = imagePosition.y + 'px';
+            imageOverlay.style.width = imageSize.width + 'px';
+            imageOverlay.style.height = imageSize.height + 'px';
+        }
+
+        // Constrain image position within PDF bounds
+        function constrainImagePosition() {
+            const maxX = pdfCanvas.width - imageSize.width;
+            const maxY = pdfCanvas.height - imageSize.height;
+
+            imagePosition.x = Math.max(0, Math.min(imagePosition.x, maxX));
+            imagePosition.y = Math.max(0, Math.min(imagePosition.y, maxY));
+
+            imageOverlay.style.left = imagePosition.x + 'px';
+            imageOverlay.style.top = imagePosition.y + 'px';
+        }
+
+        // Update page controls
+        function updatePageControls() {
+            prevPageBtn.disabled = currentPage <= 1;
+            nextPageBtn.disabled = currentPage >= totalPages;
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+        }
+
+        // Update export button state
+        function updateExportButton() {
+            exportBtn.disabled = !pdfDoc || !imageData;
+        }
+
+        // Page navigation
+        prevPageBtn.addEventListener('click', async () => {
+            if (currentPage > 1) {
+                currentPage--;
+                await renderPage(currentPage);
+                updatePageControls();
+            }
+        });
+
+        nextPageBtn.addEventListener('click', async () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                await renderPage(currentPage);
+                updatePageControls();
+            }
+        });
+
+        // Image dragging
+        let isDragging = false;
+        let isResizing = false;
+        let resizeHandle = null;
+        let startX, startY, startWidth, startHeight, startLeft, startTop;
+
+        imageOverlay.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('resize-handle')) {
+                isResizing = true;
+                resizeHandle = e.target;
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = imageSize.width;
+                startHeight = imageSize.height;
+                startLeft = imagePosition.x;
+                startTop = imagePosition.y;
+            } else {
+                isDragging = true;
+                startX = e.clientX - imagePosition.x;
+                startY = e.clientY - imagePosition.y;
+            }
+            imageOverlay.classList.add('selected');
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                imagePosition.x = e.clientX - startX;
+                imagePosition.y = e.clientY - startY;
+                constrainImagePosition();
+            } else if (isResizing) {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                if (resizeHandle.classList.contains('se')) {
+                    imageSize.width = Math.max(20, startWidth + dx);
+                    imageSize.height = Math.max(20, startHeight + dy);
+                } else if (resizeHandle.classList.contains('sw')) {
+                    const newWidth = Math.max(20, startWidth - dx);
+                    imagePosition.x = startLeft + (startWidth - newWidth);
+                    imageSize.width = newWidth;
+                    imageSize.height = Math.max(20, startHeight + dy);
+                } else if (resizeHandle.classList.contains('ne')) {
+                    imageSize.width = Math.max(20, startWidth + dx);
+                    const newHeight = Math.max(20, startHeight - dy);
+                    imagePosition.y = startTop + (startHeight - newHeight);
+                    imageSize.height = newHeight;
+                } else if (resizeHandle.classList.contains('nw')) {
+                    const newWidth = Math.max(20, startWidth - dx);
+                    const newHeight = Math.max(20, startHeight - dy);
+                    imagePosition.x = startLeft + (startWidth - newWidth);
+                    imagePosition.y = startTop + (startHeight - newHeight);
+                    imageSize.width = newWidth;
+                    imageSize.height = newHeight;
+                }
+
+                imageOverlay.style.width = imageSize.width + 'px';
+                imageOverlay.style.height = imageSize.height + 'px';
+                imageOverlay.style.left = imagePosition.x + 'px';
+                imageOverlay.style.top = imagePosition.y + 'px';
+
+                imageWidthInput.value = Math.round(imageSize.width);
+                imageHeightInput.value = Math.round(imageSize.height);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            isResizing = false;
+            resizeHandle = null;
+        });
+
+        // Size inputs
+        imageWidthInput.addEventListener('change', () => {
+            imageSize.width = parseInt(imageWidthInput.value) || 50;
+            imageOverlay.style.width = imageSize.width + 'px';
+            constrainImagePosition();
+        });
+
+        imageHeightInput.addEventListener('change', () => {
+            imageSize.height = parseInt(imageHeightInput.value) || 50;
+            imageOverlay.style.height = imageSize.height + 'px';
+            constrainImagePosition();
+        });
+
+        // Opacity control
+        imageOpacityInput.addEventListener('input', () => {
+            const opacity = imageOpacityInput.value / 100;
+            opacityValue.textContent = imageOpacityInput.value;
+            overlayImage.style.opacity = opacity;
+        });
+
+        // Remove image
+        removeImageBtn.addEventListener('click', () => {
+            imageData = null;
+            imageOverlay.style.display = 'none';
+            imageControls.style.display = 'none';
+            imageUploadBox.classList.remove('has-file');
+            imageFileName.textContent = '';
+            imageInput.value = '';
+            updateExportButton();
+        });
+
+        // Export PDF
+        exportBtn.addEventListener('click', async () => {
+            if (!pdfDoc || !imageData) return;
+
+            exportBtn.textContent = 'Exporting...';
+            exportBtn.disabled = true;
+
+            try {
+                const { PDFDocument } = PDFLib;
+
+                // Load the original PDF from stored bytes
+                const pdfDocLib = await PDFDocument.load(new Uint8Array(pdfBytes));
+
+                // Get the current page
+                const pages = pdfDocLib.getPages();
+                const page = pages[currentPage - 1];
+                const { width: pageWidth, height: pageHeight } = page.getSize();
+
+                // Convert canvas coordinates to PDF coordinates
+                const scaleX = pageWidth / pdfCanvas.width;
+                const scaleY = pageHeight / pdfCanvas.height;
+
+                // Convert base64 to bytes for embedding
+                const base64Data = imageData.split(',')[1];
+                const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+
+                // Embed the image
+                let embeddedImage;
+                if (imageData.includes('image/png')) {
+                    embeddedImage = await pdfDocLib.embedPng(imageBytes);
+                } else {
+                    embeddedImage = await pdfDocLib.embedJpg(imageBytes);
+                }
+
+                // Calculate position (PDF coordinates start from bottom-left)
+                const pdfX = imagePosition.x * scaleX;
+                const pdfY = pageHeight - (imagePosition.y * scaleY) - (imageSize.height * scaleY);
+                const pdfWidth = imageSize.width * scaleX;
+                const pdfHeight = imageSize.height * scaleY;
+
+                // Draw the image on the page
+                const opacity = parseInt(imageOpacityInput.value) / 100;
+                page.drawImage(embeddedImage, {
+                    x: pdfX,
+                    y: pdfY,
+                    width: pdfWidth,
+                    height: pdfHeight,
+                    opacity: opacity
+                });
+
+                // Save the PDF
+                const modifiedPdfBytes = await pdfDocLib.save();
+
+                // Download
+                const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'modified_document.pdf';
+                a.click();
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting PDF: ' + error.message);
+            }
+
+            exportBtn.textContent = 'Export PDF';
+            exportBtn.disabled = false;
+        });
+    </script>
+</body>
+</html>
