@@ -120,7 +120,6 @@
             cursor: move;
             border: 2px solid #007bff;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            background: white;
         }
 
         .image-overlay img {
@@ -134,6 +133,14 @@
             border-color: #28a745;
         }
 
+        .template-overlay {
+            border-color: #ff6b00;
+        }
+
+        .template-overlay.selected {
+            border-color: #ff9500;
+        }
+
         .resize-handle {
             position: absolute;
             width: 12px;
@@ -141,6 +148,10 @@
             background: #007bff;
             border: 2px solid white;
             border-radius: 2px;
+        }
+
+        .template-overlay .resize-handle {
+            background: #ff6b00;
         }
 
         .resize-handle.se {
@@ -171,6 +182,8 @@
             background: white;
             border-radius: 8px;
             padding: 20px;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
         }
 
         .controls h3 {
@@ -231,6 +244,15 @@
 
         .btn-primary:hover:not(:disabled) {
             background: #333;
+        }
+
+        .btn-secondary {
+            background: #ff6b00;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #e66000;
         }
 
         .btn-danger {
@@ -306,11 +328,32 @@
 
         .image-preview {
             width: 100%;
-            max-height: 150px;
+            max-height: 100px;
             object-fit: contain;
             border: 1px solid #eee;
             border-radius: 4px;
             margin-bottom: 15px;
+        }
+
+        .section-divider {
+            border-top: 2px solid #eee;
+            margin: 20px 0;
+            padding-top: 20px;
+        }
+
+        .overlay-label {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            font-size: 11px;
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .template-overlay .overlay-label {
+            background: #ff6b00;
         }
 
         @media (max-width: 900px) {
@@ -354,7 +397,18 @@
                 </div>
                 <div class="pdf-viewer" id="pdfViewer" style="display: none;">
                     <canvas id="pdfCanvas"></canvas>
+                    <!-- Template overlay (renders below image) -->
+                    <div class="image-overlay template-overlay" id="templateOverlay" style="display: none;">
+                        <span class="overlay-label">Template</span>
+                        <img id="templateImage" src="" alt="Template">
+                        <div class="resize-handle nw"></div>
+                        <div class="resize-handle ne"></div>
+                        <div class="resize-handle sw"></div>
+                        <div class="resize-handle se"></div>
+                    </div>
+                    <!-- Image overlay (renders above template) -->
                     <div class="image-overlay" id="imageOverlay" style="display: none;">
+                        <span class="overlay-label">Image</span>
                         <img id="overlayImage" src="" alt="Overlay">
                         <div class="resize-handle nw"></div>
                         <div class="resize-handle ne"></div>
@@ -376,14 +430,43 @@
                 <div class="instructions">
                     <strong>How to use:</strong>
                     1. Upload a PDF<br>
-                    2. Upload an image<br>
-                    3. Drag the image to position it<br>
-                    4. Resize using corner handles<br>
-                    5. Click Export to save
+                    2. Upload an image or add template<br>
+                    3. Drag to position, resize with corners<br>
+                    4. Click Export to save
+                </div>
+
+                <button class="btn btn-secondary" id="addTemplateBtn" disabled>Add Valuation Template</button>
+
+                <div id="templateControls" style="display: none;">
+                    <div class="section-divider">
+                        <h3 style="color: #ff6b00;">Template Settings</h3>
+                    </div>
+
+                    <img id="templatePreview" class="image-preview" src="" alt="Template Preview">
+
+                    <div class="control-group">
+                        <label>Width (px)</label>
+                        <input type="number" id="templateWidth" min="10" max="2000" value="400">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Height (px)</label>
+                        <input type="number" id="templateHeight" min="10" max="2000" value="400">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Opacity</label>
+                        <input type="range" id="templateOpacity" min="0" max="100" value="100">
+                        <div class="range-value"><span id="templateOpacityValue">100</span>%</div>
+                    </div>
+
+                    <button class="btn btn-danger" id="removeTemplate">Remove Template</button>
                 </div>
 
                 <div id="imageControls" style="display: none;">
-                    <h3 style="margin-top: 20px;">Image Settings</h3>
+                    <div class="section-divider">
+                        <h3 style="color: #007bff;">Image Settings</h3>
+                    </div>
 
                     <img id="imagePreview" class="image-preview" src="" alt="Preview">
 
@@ -406,6 +489,7 @@
                     <button class="btn btn-danger" id="removeImage">Remove Image</button>
                 </div>
 
+                <div class="section-divider"></div>
                 <button class="btn btn-primary" id="exportBtn" disabled>Export PDF</button>
             </div>
         </div>
@@ -421,10 +505,16 @@
         let currentPage = 1;
         let totalPages = 0;
         let scale = 1.5;
+
+        // Image state
         let imageData = null;
         let imagePosition = { x: 50, y: 50 };
         let imageSize = { width: 200, height: 200 };
-        let originalImageSize = { width: 200, height: 200 };
+
+        // Template state
+        let templateData = null;
+        let templatePosition = { x: 20, y: 20 };
+        let templateSize = { width: 400, height: 400 };
 
         // DOM Elements
         const pdfInput = document.getElementById('pdfInput');
@@ -436,12 +526,10 @@
         const pdfCanvas = document.getElementById('pdfCanvas');
         const pdfViewer = document.getElementById('pdfViewer');
         const emptyState = document.getElementById('emptyState');
+
+        // Image overlay elements
         const imageOverlay = document.getElementById('imageOverlay');
         const overlayImage = document.getElementById('overlayImage');
-        const prevPageBtn = document.getElementById('prevPage');
-        const nextPageBtn = document.getElementById('nextPage');
-        const pageInfo = document.getElementById('pageInfo');
-        const exportBtn = document.getElementById('exportBtn');
         const imageControls = document.getElementById('imageControls');
         const imagePreview = document.getElementById('imagePreview');
         const imageWidthInput = document.getElementById('imageWidth');
@@ -449,6 +537,24 @@
         const imageOpacityInput = document.getElementById('imageOpacity');
         const opacityValue = document.getElementById('opacityValue');
         const removeImageBtn = document.getElementById('removeImage');
+
+        // Template overlay elements
+        const templateOverlay = document.getElementById('templateOverlay');
+        const templateImage = document.getElementById('templateImage');
+        const templateControls = document.getElementById('templateControls');
+        const templatePreview = document.getElementById('templatePreview');
+        const templateWidthInput = document.getElementById('templateWidth');
+        const templateHeightInput = document.getElementById('templateHeight');
+        const templateOpacityInput = document.getElementById('templateOpacity');
+        const templateOpacityValue = document.getElementById('templateOpacityValue');
+        const removeTemplateBtn = document.getElementById('removeTemplate');
+        const addTemplateBtn = document.getElementById('addTemplateBtn');
+
+        // Other elements
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const pageInfo = document.getElementById('pageInfo');
+        const exportBtn = document.getElementById('exportBtn');
 
         // Upload box click handlers
         pdfUploadBox.addEventListener('click', () => pdfInput.click());
@@ -507,7 +613,7 @@
             pdfUploadBox.classList.add('has-file');
 
             const arrayBuffer = await file.arrayBuffer();
-            pdfBytes = arrayBuffer.slice(0); // Store a copy of the original arrayBuffer
+            pdfBytes = arrayBuffer.slice(0);
 
             pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             totalPages = pdfDoc.numPages;
@@ -515,6 +621,7 @@
 
             emptyState.style.display = 'none';
             pdfViewer.style.display = 'inline-block';
+            addTemplateBtn.disabled = false;
 
             await renderPage(currentPage);
             updatePageControls();
@@ -530,13 +637,8 @@
             reader.onload = (e) => {
                 imageData = e.target.result;
 
-                // Get original image dimensions
                 const img = new Image();
                 img.onload = () => {
-                    originalImageSize.width = img.width;
-                    originalImageSize.height = img.height;
-
-                    // Set initial size (max 200px, maintain aspect ratio)
                     const maxSize = 200;
                     if (img.width > img.height) {
                         imageSize.width = Math.min(img.width, maxSize);
@@ -561,6 +663,51 @@
             reader.readAsDataURL(file);
         }
 
+        // Add template button handler
+        addTemplateBtn.addEventListener('click', () => {
+            loadTemplate();
+        });
+
+        // Load template from file
+        function loadTemplate() {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                // Create canvas to convert to data URL
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                templateData = canvas.toDataURL('image/png');
+
+                // Set initial size to fit nicely
+                const maxSize = 500;
+                if (img.width > img.height) {
+                    templateSize.width = Math.min(img.width, maxSize);
+                    templateSize.height = (img.height / img.width) * templateSize.width;
+                } else {
+                    templateSize.height = Math.min(img.height, maxSize);
+                    templateSize.width = (img.width / img.height) * templateSize.height;
+                }
+
+                templateWidthInput.value = Math.round(templateSize.width);
+                templateHeightInput.value = Math.round(templateSize.height);
+
+                templatePreview.src = templateData;
+                templateImage.src = templateData;
+                templateControls.style.display = 'block';
+                addTemplateBtn.style.display = 'none';
+
+                showTemplateOverlay();
+                updateExportButton();
+            };
+            img.onerror = () => {
+                alert('Could not load template. Make sure valtemplate.png is in the same folder as index.html');
+            };
+            img.src = 'valtemplate.png';
+        }
+
         // Render PDF page
         async function renderPage(pageNum) {
             const page = await pdfDoc.getPage(pageNum);
@@ -575,33 +722,42 @@
                 viewport: viewport
             }).promise;
 
-            // Keep image overlay in bounds
-            if (imageData) {
-                constrainImagePosition();
-            }
+            if (imageData) constrainPosition(imageOverlay, imagePosition, imageSize);
+            if (templateData) constrainPosition(templateOverlay, templatePosition, templateSize);
         }
 
         // Show image overlay
         function showImageOverlay() {
             if (!pdfDoc) return;
-
             imageOverlay.style.display = 'block';
-            imageOverlay.style.left = imagePosition.x + 'px';
-            imageOverlay.style.top = imagePosition.y + 'px';
-            imageOverlay.style.width = imageSize.width + 'px';
-            imageOverlay.style.height = imageSize.height + 'px';
+            updateOverlayStyle(imageOverlay, imagePosition, imageSize);
         }
 
-        // Constrain image position within PDF bounds
-        function constrainImagePosition() {
-            const maxX = pdfCanvas.width - imageSize.width;
-            const maxY = pdfCanvas.height - imageSize.height;
+        // Show template overlay
+        function showTemplateOverlay() {
+            if (!pdfDoc) return;
+            templateOverlay.style.display = 'block';
+            updateOverlayStyle(templateOverlay, templatePosition, templateSize);
+        }
 
-            imagePosition.x = Math.max(0, Math.min(imagePosition.x, maxX));
-            imagePosition.y = Math.max(0, Math.min(imagePosition.y, maxY));
+        // Update overlay style
+        function updateOverlayStyle(overlay, position, size) {
+            overlay.style.left = position.x + 'px';
+            overlay.style.top = position.y + 'px';
+            overlay.style.width = size.width + 'px';
+            overlay.style.height = size.height + 'px';
+        }
 
-            imageOverlay.style.left = imagePosition.x + 'px';
-            imageOverlay.style.top = imagePosition.y + 'px';
+        // Constrain position within PDF bounds
+        function constrainPosition(overlay, position, size) {
+            const maxX = pdfCanvas.width - size.width;
+            const maxY = pdfCanvas.height - size.height;
+
+            position.x = Math.max(0, Math.min(position.x, maxX));
+            position.y = Math.max(0, Math.min(position.y, maxY));
+
+            overlay.style.left = position.x + 'px';
+            overlay.style.top = position.y + 'px';
         }
 
         // Update page controls
@@ -613,7 +769,7 @@
 
         // Update export button state
         function updateExportButton() {
-            exportBtn.disabled = !pdfDoc || !imageData;
+            exportBtn.disabled = !pdfDoc || (!imageData && !templateData);
         }
 
         // Page navigation
@@ -633,69 +789,91 @@
             }
         });
 
-        // Image dragging
+        // Dragging and resizing state
+        let activeOverlay = null;
+        let activePosition = null;
+        let activeSize = null;
         let isDragging = false;
         let isResizing = false;
         let resizeHandle = null;
         let startX, startY, startWidth, startHeight, startLeft, startTop;
 
-        imageOverlay.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('resize-handle')) {
-                isResizing = true;
-                resizeHandle = e.target;
-                startX = e.clientX;
-                startY = e.clientY;
-                startWidth = imageSize.width;
-                startHeight = imageSize.height;
-                startLeft = imagePosition.x;
-                startTop = imagePosition.y;
-            } else {
-                isDragging = true;
-                startX = e.clientX - imagePosition.x;
-                startY = e.clientY - imagePosition.y;
-            }
-            imageOverlay.classList.add('selected');
-            e.preventDefault();
-        });
+        // Setup overlay interactions
+        function setupOverlayInteraction(overlay, position, size, widthInput, heightInput) {
+            overlay.addEventListener('mousedown', (e) => {
+                activeOverlay = overlay;
+                activePosition = position;
+                activeSize = size;
+
+                // Deselect others
+                imageOverlay.classList.remove('selected');
+                templateOverlay.classList.remove('selected');
+                overlay.classList.add('selected');
+
+                if (e.target.classList.contains('resize-handle')) {
+                    isResizing = true;
+                    resizeHandle = e.target;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    startWidth = size.width;
+                    startHeight = size.height;
+                    startLeft = position.x;
+                    startTop = position.y;
+                } else if (e.target === overlay || e.target.tagName === 'IMG') {
+                    isDragging = true;
+                    startX = e.clientX - position.x;
+                    startY = e.clientY - position.y;
+                }
+                e.preventDefault();
+            });
+        }
+
+        setupOverlayInteraction(imageOverlay, imagePosition, imageSize, imageWidthInput, imageHeightInput);
+        setupOverlayInteraction(templateOverlay, templatePosition, templateSize, templateWidthInput, templateHeightInput);
 
         document.addEventListener('mousemove', (e) => {
+            if (!activeOverlay) return;
+
             if (isDragging) {
-                imagePosition.x = e.clientX - startX;
-                imagePosition.y = e.clientY - startY;
-                constrainImagePosition();
+                activePosition.x = e.clientX - startX;
+                activePosition.y = e.clientY - startY;
+                constrainPosition(activeOverlay, activePosition, activeSize);
             } else if (isResizing) {
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
 
                 if (resizeHandle.classList.contains('se')) {
-                    imageSize.width = Math.max(20, startWidth + dx);
-                    imageSize.height = Math.max(20, startHeight + dy);
+                    activeSize.width = Math.max(20, startWidth + dx);
+                    activeSize.height = Math.max(20, startHeight + dy);
                 } else if (resizeHandle.classList.contains('sw')) {
                     const newWidth = Math.max(20, startWidth - dx);
-                    imagePosition.x = startLeft + (startWidth - newWidth);
-                    imageSize.width = newWidth;
-                    imageSize.height = Math.max(20, startHeight + dy);
+                    activePosition.x = startLeft + (startWidth - newWidth);
+                    activeSize.width = newWidth;
+                    activeSize.height = Math.max(20, startHeight + dy);
                 } else if (resizeHandle.classList.contains('ne')) {
-                    imageSize.width = Math.max(20, startWidth + dx);
+                    activeSize.width = Math.max(20, startWidth + dx);
                     const newHeight = Math.max(20, startHeight - dy);
-                    imagePosition.y = startTop + (startHeight - newHeight);
-                    imageSize.height = newHeight;
+                    activePosition.y = startTop + (startHeight - newHeight);
+                    activeSize.height = newHeight;
                 } else if (resizeHandle.classList.contains('nw')) {
                     const newWidth = Math.max(20, startWidth - dx);
                     const newHeight = Math.max(20, startHeight - dy);
-                    imagePosition.x = startLeft + (startWidth - newWidth);
-                    imagePosition.y = startTop + (startHeight - newHeight);
-                    imageSize.width = newWidth;
-                    imageSize.height = newHeight;
+                    activePosition.x = startLeft + (startWidth - newWidth);
+                    activePosition.y = startTop + (startHeight - newHeight);
+                    activeSize.width = newWidth;
+                    activeSize.height = newHeight;
                 }
 
-                imageOverlay.style.width = imageSize.width + 'px';
-                imageOverlay.style.height = imageSize.height + 'px';
-                imageOverlay.style.left = imagePosition.x + 'px';
-                imageOverlay.style.top = imagePosition.y + 'px';
+                updateOverlayStyle(activeOverlay, activePosition, activeSize);
 
-                imageWidthInput.value = Math.round(imageSize.width);
-                imageHeightInput.value = Math.round(imageSize.height);
+                // Update the correct inputs
+                if (activeOverlay === imageOverlay) {
+                    imageWidthInput.value = Math.round(activeSize.width);
+                    imageHeightInput.value = Math.round(activeSize.height);
+                } else {
+                    templateWidthInput.value = Math.round(activeSize.width);
+                    templateHeightInput.value = Math.round(activeSize.height);
+                }
             }
         });
 
@@ -703,26 +881,46 @@
             isDragging = false;
             isResizing = false;
             resizeHandle = null;
+            activeOverlay = null;
         });
 
-        // Size inputs
+        // Image size inputs
         imageWidthInput.addEventListener('change', () => {
             imageSize.width = parseInt(imageWidthInput.value) || 50;
             imageOverlay.style.width = imageSize.width + 'px';
-            constrainImagePosition();
+            constrainPosition(imageOverlay, imagePosition, imageSize);
         });
 
         imageHeightInput.addEventListener('change', () => {
             imageSize.height = parseInt(imageHeightInput.value) || 50;
             imageOverlay.style.height = imageSize.height + 'px';
-            constrainImagePosition();
+            constrainPosition(imageOverlay, imagePosition, imageSize);
         });
 
-        // Opacity control
+        // Template size inputs
+        templateWidthInput.addEventListener('change', () => {
+            templateSize.width = parseInt(templateWidthInput.value) || 50;
+            templateOverlay.style.width = templateSize.width + 'px';
+            constrainPosition(templateOverlay, templatePosition, templateSize);
+        });
+
+        templateHeightInput.addEventListener('change', () => {
+            templateSize.height = parseInt(templateHeightInput.value) || 50;
+            templateOverlay.style.height = templateSize.height + 'px';
+            constrainPosition(templateOverlay, templatePosition, templateSize);
+        });
+
+        // Opacity controls
         imageOpacityInput.addEventListener('input', () => {
             const opacity = imageOpacityInput.value / 100;
             opacityValue.textContent = imageOpacityInput.value;
             overlayImage.style.opacity = opacity;
+        });
+
+        templateOpacityInput.addEventListener('input', () => {
+            const opacity = templateOpacityInput.value / 100;
+            templateOpacityValue.textContent = templateOpacityInput.value;
+            templateImage.style.opacity = opacity;
         });
 
         // Remove image
@@ -736,60 +934,83 @@
             updateExportButton();
         });
 
+        // Remove template
+        removeTemplateBtn.addEventListener('click', () => {
+            templateData = null;
+            templateOverlay.style.display = 'none';
+            templateControls.style.display = 'none';
+            addTemplateBtn.style.display = 'block';
+            updateExportButton();
+        });
+
         // Export PDF
         exportBtn.addEventListener('click', async () => {
-            if (!pdfDoc || !imageData) return;
+            if (!pdfDoc || (!imageData && !templateData)) return;
 
             exportBtn.textContent = 'Exporting...';
             exportBtn.disabled = true;
 
             try {
                 const { PDFDocument } = PDFLib;
-
-                // Load the original PDF from stored bytes
                 const pdfDocLib = await PDFDocument.load(new Uint8Array(pdfBytes));
 
-                // Get the current page
                 const pages = pdfDocLib.getPages();
                 const page = pages[currentPage - 1];
                 const { width: pageWidth, height: pageHeight } = page.getSize();
 
-                // Convert canvas coordinates to PDF coordinates
                 const scaleX = pageWidth / pdfCanvas.width;
                 const scaleY = pageHeight / pdfCanvas.height;
 
-                // Convert base64 to bytes for embedding
-                const base64Data = imageData.split(',')[1];
-                const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+                // Embed template first (so it's behind the image)
+                if (templateData) {
+                    const base64Data = templateData.split(',')[1];
+                    const templateBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+                    const embeddedTemplate = await pdfDocLib.embedPng(templateBytes);
 
-                // Embed the image
-                let embeddedImage;
-                if (imageData.includes('image/png')) {
-                    embeddedImage = await pdfDocLib.embedPng(imageBytes);
-                } else {
-                    embeddedImage = await pdfDocLib.embedJpg(imageBytes);
+                    const pdfX = templatePosition.x * scaleX;
+                    const pdfY = pageHeight - (templatePosition.y * scaleY) - (templateSize.height * scaleY);
+                    const pdfWidth = templateSize.width * scaleX;
+                    const pdfHeight = templateSize.height * scaleY;
+                    const opacity = parseInt(templateOpacityInput.value) / 100;
+
+                    page.drawImage(embeddedTemplate, {
+                        x: pdfX,
+                        y: pdfY,
+                        width: pdfWidth,
+                        height: pdfHeight,
+                        opacity: opacity
+                    });
                 }
 
-                // Calculate position (PDF coordinates start from bottom-left)
-                const pdfX = imagePosition.x * scaleX;
-                const pdfY = pageHeight - (imagePosition.y * scaleY) - (imageSize.height * scaleY);
-                const pdfWidth = imageSize.width * scaleX;
-                const pdfHeight = imageSize.height * scaleY;
+                // Embed image (on top of template)
+                if (imageData) {
+                    const base64Data = imageData.split(',')[1];
+                    const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
 
-                // Draw the image on the page
-                const opacity = parseInt(imageOpacityInput.value) / 100;
-                page.drawImage(embeddedImage, {
-                    x: pdfX,
-                    y: pdfY,
-                    width: pdfWidth,
-                    height: pdfHeight,
-                    opacity: opacity
-                });
+                    let embeddedImage;
+                    if (imageData.includes('image/png')) {
+                        embeddedImage = await pdfDocLib.embedPng(imageBytes);
+                    } else {
+                        embeddedImage = await pdfDocLib.embedJpg(imageBytes);
+                    }
 
-                // Save the PDF
+                    const pdfX = imagePosition.x * scaleX;
+                    const pdfY = pageHeight - (imagePosition.y * scaleY) - (imageSize.height * scaleY);
+                    const pdfWidth = imageSize.width * scaleX;
+                    const pdfHeight = imageSize.height * scaleY;
+                    const opacity = parseInt(imageOpacityInput.value) / 100;
+
+                    page.drawImage(embeddedImage, {
+                        x: pdfX,
+                        y: pdfY,
+                        width: pdfWidth,
+                        height: pdfHeight,
+                        opacity: opacity
+                    });
+                }
+
                 const modifiedPdfBytes = await pdfDocLib.save();
 
-                // Download
                 const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
