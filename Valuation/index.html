@@ -510,6 +510,7 @@
         let imageData = null;
         let imagePosition = { x: 50, y: 50 };
         let imageSize = { width: 200, height: 200 };
+        let imageAspectRatio = 1;
 
         // Template state
         let templateData = null;
@@ -639,13 +640,16 @@
 
                 const img = new Image();
                 img.onload = () => {
+                    // Store aspect ratio
+                    imageAspectRatio = img.width / img.height;
+
                     const maxSize = 200;
                     if (img.width > img.height) {
                         imageSize.width = Math.min(img.width, maxSize);
-                        imageSize.height = (img.height / img.width) * imageSize.width;
+                        imageSize.height = imageSize.width / imageAspectRatio;
                     } else {
                         imageSize.height = Math.min(img.height, maxSize);
-                        imageSize.width = (img.width / img.height) * imageSize.height;
+                        imageSize.width = imageSize.height * imageAspectRatio;
                     }
 
                     imageWidthInput.value = Math.round(imageSize.width);
@@ -842,26 +846,61 @@
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
 
+                // Check if this is the image overlay (needs aspect ratio lock)
+                const isImage = activeOverlay === imageOverlay;
+                const aspectRatio = isImage ? imageAspectRatio : null;
+
                 if (resizeHandle.classList.contains('se')) {
-                    activeSize.width = Math.max(20, startWidth + dx);
-                    activeSize.height = Math.max(20, startHeight + dy);
+                    if (isImage) {
+                        // Use the larger delta to determine size, maintain aspect ratio
+                        const newWidth = Math.max(20, startWidth + dx);
+                        activeSize.width = newWidth;
+                        activeSize.height = newWidth / aspectRatio;
+                    } else {
+                        activeSize.width = Math.max(20, startWidth + dx);
+                        activeSize.height = Math.max(20, startHeight + dy);
+                    }
                 } else if (resizeHandle.classList.contains('sw')) {
-                    const newWidth = Math.max(20, startWidth - dx);
-                    activePosition.x = startLeft + (startWidth - newWidth);
-                    activeSize.width = newWidth;
-                    activeSize.height = Math.max(20, startHeight + dy);
+                    if (isImage) {
+                        const newWidth = Math.max(20, startWidth - dx);
+                        activePosition.x = startLeft + (startWidth - newWidth);
+                        activeSize.width = newWidth;
+                        activeSize.height = newWidth / aspectRatio;
+                    } else {
+                        const newWidth = Math.max(20, startWidth - dx);
+                        activePosition.x = startLeft + (startWidth - newWidth);
+                        activeSize.width = newWidth;
+                        activeSize.height = Math.max(20, startHeight + dy);
+                    }
                 } else if (resizeHandle.classList.contains('ne')) {
-                    activeSize.width = Math.max(20, startWidth + dx);
-                    const newHeight = Math.max(20, startHeight - dy);
-                    activePosition.y = startTop + (startHeight - newHeight);
-                    activeSize.height = newHeight;
+                    if (isImage) {
+                        const newWidth = Math.max(20, startWidth + dx);
+                        const newHeight = newWidth / aspectRatio;
+                        activePosition.y = startTop + (startHeight - newHeight);
+                        activeSize.width = newWidth;
+                        activeSize.height = newHeight;
+                    } else {
+                        activeSize.width = Math.max(20, startWidth + dx);
+                        const newHeight = Math.max(20, startHeight - dy);
+                        activePosition.y = startTop + (startHeight - newHeight);
+                        activeSize.height = newHeight;
+                    }
                 } else if (resizeHandle.classList.contains('nw')) {
-                    const newWidth = Math.max(20, startWidth - dx);
-                    const newHeight = Math.max(20, startHeight - dy);
-                    activePosition.x = startLeft + (startWidth - newWidth);
-                    activePosition.y = startTop + (startHeight - newHeight);
-                    activeSize.width = newWidth;
-                    activeSize.height = newHeight;
+                    if (isImage) {
+                        const newWidth = Math.max(20, startWidth - dx);
+                        const newHeight = newWidth / aspectRatio;
+                        activePosition.x = startLeft + (startWidth - newWidth);
+                        activePosition.y = startTop + (startHeight - newHeight);
+                        activeSize.width = newWidth;
+                        activeSize.height = newHeight;
+                    } else {
+                        const newWidth = Math.max(20, startWidth - dx);
+                        const newHeight = Math.max(20, startHeight - dy);
+                        activePosition.x = startLeft + (startWidth - newWidth);
+                        activePosition.y = startTop + (startHeight - newHeight);
+                        activeSize.width = newWidth;
+                        activeSize.height = newHeight;
+                    }
                 }
 
                 updateOverlayStyle(activeOverlay, activePosition, activeSize);
@@ -884,15 +923,21 @@
             activeOverlay = null;
         });
 
-        // Image size inputs
+        // Image size inputs (maintain aspect ratio)
         imageWidthInput.addEventListener('change', () => {
             imageSize.width = parseInt(imageWidthInput.value) || 50;
+            imageSize.height = imageSize.width / imageAspectRatio;
+            imageHeightInput.value = Math.round(imageSize.height);
             imageOverlay.style.width = imageSize.width + 'px';
+            imageOverlay.style.height = imageSize.height + 'px';
             constrainPosition(imageOverlay, imagePosition, imageSize);
         });
 
         imageHeightInput.addEventListener('change', () => {
             imageSize.height = parseInt(imageHeightInput.value) || 50;
+            imageSize.width = imageSize.height * imageAspectRatio;
+            imageWidthInput.value = Math.round(imageSize.width);
+            imageOverlay.style.width = imageSize.width + 'px';
             imageOverlay.style.height = imageSize.height + 'px';
             constrainPosition(imageOverlay, imagePosition, imageSize);
         });
