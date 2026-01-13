@@ -134,11 +134,15 @@
         }
 
         .template-overlay {
-            border-color: #ff6b00;
+            position: absolute;
+            border: none;
+            pointer-events: none;
         }
 
-        .template-overlay.selected {
-            border-color: #ff9500;
+        .template-overlay img {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
         .resize-handle {
@@ -148,10 +152,6 @@
             background: #007bff;
             border: 2px solid white;
             border-radius: 2px;
-        }
-
-        .template-overlay .resize-handle {
-            background: #ff6b00;
         }
 
         .resize-handle.se {
@@ -352,10 +352,6 @@
             border-radius: 3px 3px 0 0;
         }
 
-        .template-overlay .overlay-label {
-            background: #ff6b00;
-        }
-
         @media (max-width: 900px) {
             .upload-section {
                 grid-template-columns: 1fr;
@@ -397,14 +393,9 @@
                 </div>
                 <div class="pdf-viewer" id="pdfViewer" style="display: none;">
                     <canvas id="pdfCanvas"></canvas>
-                    <!-- Template overlay (renders below image) -->
-                    <div class="image-overlay template-overlay" id="templateOverlay" style="display: none;">
-                        <span class="overlay-label">Template</span>
+                    <!-- Template overlay (renders below image) - fixed A4 size -->
+                    <div class="template-overlay" id="templateOverlay" style="display: none;">
                         <img id="templateImage" src="" alt="Template">
-                        <div class="resize-handle nw"></div>
-                        <div class="resize-handle ne"></div>
-                        <div class="resize-handle sw"></div>
-                        <div class="resize-handle se"></div>
                     </div>
                     <!-- Image overlay (renders above template) -->
                     <div class="image-overlay" id="imageOverlay" style="display: none;">
@@ -439,20 +430,10 @@
 
                 <div id="templateControls" style="display: none;">
                     <div class="section-divider">
-                        <h3 style="color: #ff6b00;">Template Settings</h3>
+                        <h3 style="color: #ff6b00;">Template (A4 Overlay)</h3>
                     </div>
 
-                    <img id="templatePreview" class="image-preview" src="" alt="Template Preview">
-
-                    <div class="control-group">
-                        <label>Width (px)</label>
-                        <input type="number" id="templateWidth" min="10" max="2000" value="400">
-                    </div>
-
-                    <div class="control-group">
-                        <label>Height (px)</label>
-                        <input type="number" id="templateHeight" min="10" max="2000" value="400">
-                    </div>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Template is locked to full page size</p>
 
                     <div class="control-group">
                         <label>Opacity</label>
@@ -514,8 +495,8 @@
 
         // Template state
         let templateData = null;
-        let templatePosition = { x: 20, y: 20 };
-        let templateSize = { width: 400, height: 400 };
+        let templatePosition = { x: 0, y: 0 };
+        let templateSize = { width: 0, height: 0 };
 
         // DOM Elements
         const pdfInput = document.getElementById('pdfInput');
@@ -543,9 +524,6 @@
         const templateOverlay = document.getElementById('templateOverlay');
         const templateImage = document.getElementById('templateImage');
         const templateControls = document.getElementById('templateControls');
-        const templatePreview = document.getElementById('templatePreview');
-        const templateWidthInput = document.getElementById('templateWidth');
-        const templateHeightInput = document.getElementById('templateHeight');
         const templateOpacityInput = document.getElementById('templateOpacity');
         const templateOpacityValue = document.getElementById('templateOpacityValue');
         const removeTemplateBtn = document.getElementById('removeTemplate');
@@ -685,20 +663,12 @@
                 ctx.drawImage(img, 0, 0);
                 templateData = canvas.toDataURL('image/png');
 
-                // Set initial size to fit nicely
-                const maxSize = 500;
-                if (img.width > img.height) {
-                    templateSize.width = Math.min(img.width, maxSize);
-                    templateSize.height = (img.height / img.width) * templateSize.width;
-                } else {
-                    templateSize.height = Math.min(img.height, maxSize);
-                    templateSize.width = (img.width / img.height) * templateSize.height;
-                }
+                // Set template to exact PDF canvas size (both are A4)
+                templateSize.width = pdfCanvas.width;
+                templateSize.height = pdfCanvas.height;
+                templatePosition.x = 0;
+                templatePosition.y = 0;
 
-                templateWidthInput.value = Math.round(templateSize.width);
-                templateHeightInput.value = Math.round(templateSize.height);
-
-                templatePreview.src = templateData;
                 templateImage.src = templateData;
                 templateControls.style.display = 'block';
                 addTemplateBtn.style.display = 'none';
@@ -726,8 +696,8 @@
                 viewport: viewport
             }).promise;
 
-            if (imageData) constrainPosition(imageOverlay, imagePosition, imageSize);
-            if (templateData) constrainPosition(templateOverlay, templatePosition, templateSize);
+            if (imageData) updateOverlayPosition(imageOverlay, imagePosition);
+            if (templateData) updateOverlayPosition(templateOverlay, templatePosition);
         }
 
         // Show image overlay
@@ -752,14 +722,8 @@
             overlay.style.height = size.height + 'px';
         }
 
-        // Constrain position within PDF bounds
-        function constrainPosition(overlay, position, size) {
-            const maxX = pdfCanvas.width - size.width;
-            const maxY = pdfCanvas.height - size.height;
-
-            position.x = Math.max(0, Math.min(position.x, maxX));
-            position.y = Math.max(0, Math.min(position.y, maxY));
-
+        // Update overlay position (free movement, no constraints)
+        function updateOverlayPosition(overlay, position) {
             overlay.style.left = position.x + 'px';
             overlay.style.top = position.y + 'px';
         }
@@ -833,7 +797,6 @@
         }
 
         setupOverlayInteraction(imageOverlay, imagePosition, imageSize, imageWidthInput, imageHeightInput);
-        setupOverlayInteraction(templateOverlay, templatePosition, templateSize, templateWidthInput, templateHeightInput);
 
         document.addEventListener('mousemove', (e) => {
             if (!activeOverlay) return;
@@ -841,78 +804,39 @@
             if (isDragging) {
                 activePosition.x = e.clientX - startX;
                 activePosition.y = e.clientY - startY;
-                constrainPosition(activeOverlay, activePosition, activeSize);
+                updateOverlayPosition(activeOverlay, activePosition);
             } else if (isResizing) {
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
 
-                // Check if this is the image overlay (needs aspect ratio lock)
-                const isImage = activeOverlay === imageOverlay;
-                const aspectRatio = isImage ? imageAspectRatio : null;
-
+                // Image resize with aspect ratio lock
                 if (resizeHandle.classList.contains('se')) {
-                    if (isImage) {
-                        // Use the larger delta to determine size, maintain aspect ratio
-                        const newWidth = Math.max(20, startWidth + dx);
-                        activeSize.width = newWidth;
-                        activeSize.height = newWidth / aspectRatio;
-                    } else {
-                        activeSize.width = Math.max(20, startWidth + dx);
-                        activeSize.height = Math.max(20, startHeight + dy);
-                    }
+                    const newWidth = Math.max(20, startWidth + dx);
+                    activeSize.width = newWidth;
+                    activeSize.height = newWidth / imageAspectRatio;
                 } else if (resizeHandle.classList.contains('sw')) {
-                    if (isImage) {
-                        const newWidth = Math.max(20, startWidth - dx);
-                        activePosition.x = startLeft + (startWidth - newWidth);
-                        activeSize.width = newWidth;
-                        activeSize.height = newWidth / aspectRatio;
-                    } else {
-                        const newWidth = Math.max(20, startWidth - dx);
-                        activePosition.x = startLeft + (startWidth - newWidth);
-                        activeSize.width = newWidth;
-                        activeSize.height = Math.max(20, startHeight + dy);
-                    }
+                    const newWidth = Math.max(20, startWidth - dx);
+                    activePosition.x = startLeft + (startWidth - newWidth);
+                    activeSize.width = newWidth;
+                    activeSize.height = newWidth / imageAspectRatio;
                 } else if (resizeHandle.classList.contains('ne')) {
-                    if (isImage) {
-                        const newWidth = Math.max(20, startWidth + dx);
-                        const newHeight = newWidth / aspectRatio;
-                        activePosition.y = startTop + (startHeight - newHeight);
-                        activeSize.width = newWidth;
-                        activeSize.height = newHeight;
-                    } else {
-                        activeSize.width = Math.max(20, startWidth + dx);
-                        const newHeight = Math.max(20, startHeight - dy);
-                        activePosition.y = startTop + (startHeight - newHeight);
-                        activeSize.height = newHeight;
-                    }
+                    const newWidth = Math.max(20, startWidth + dx);
+                    const newHeight = newWidth / imageAspectRatio;
+                    activePosition.y = startTop + (startHeight - newHeight);
+                    activeSize.width = newWidth;
+                    activeSize.height = newHeight;
                 } else if (resizeHandle.classList.contains('nw')) {
-                    if (isImage) {
-                        const newWidth = Math.max(20, startWidth - dx);
-                        const newHeight = newWidth / aspectRatio;
-                        activePosition.x = startLeft + (startWidth - newWidth);
-                        activePosition.y = startTop + (startHeight - newHeight);
-                        activeSize.width = newWidth;
-                        activeSize.height = newHeight;
-                    } else {
-                        const newWidth = Math.max(20, startWidth - dx);
-                        const newHeight = Math.max(20, startHeight - dy);
-                        activePosition.x = startLeft + (startWidth - newWidth);
-                        activePosition.y = startTop + (startHeight - newHeight);
-                        activeSize.width = newWidth;
-                        activeSize.height = newHeight;
-                    }
+                    const newWidth = Math.max(20, startWidth - dx);
+                    const newHeight = newWidth / imageAspectRatio;
+                    activePosition.x = startLeft + (startWidth - newWidth);
+                    activePosition.y = startTop + (startHeight - newHeight);
+                    activeSize.width = newWidth;
+                    activeSize.height = newHeight;
                 }
 
                 updateOverlayStyle(activeOverlay, activePosition, activeSize);
-
-                // Update the correct inputs
-                if (activeOverlay === imageOverlay) {
-                    imageWidthInput.value = Math.round(activeSize.width);
-                    imageHeightInput.value = Math.round(activeSize.height);
-                } else {
-                    templateWidthInput.value = Math.round(activeSize.width);
-                    templateHeightInput.value = Math.round(activeSize.height);
-                }
+                imageWidthInput.value = Math.round(activeSize.width);
+                imageHeightInput.value = Math.round(activeSize.height);
             }
         });
 
@@ -928,31 +852,14 @@
             imageSize.width = parseInt(imageWidthInput.value) || 50;
             imageSize.height = imageSize.width / imageAspectRatio;
             imageHeightInput.value = Math.round(imageSize.height);
-            imageOverlay.style.width = imageSize.width + 'px';
-            imageOverlay.style.height = imageSize.height + 'px';
-            constrainPosition(imageOverlay, imagePosition, imageSize);
+            updateOverlayStyle(imageOverlay, imagePosition, imageSize);
         });
 
         imageHeightInput.addEventListener('change', () => {
             imageSize.height = parseInt(imageHeightInput.value) || 50;
             imageSize.width = imageSize.height * imageAspectRatio;
             imageWidthInput.value = Math.round(imageSize.width);
-            imageOverlay.style.width = imageSize.width + 'px';
-            imageOverlay.style.height = imageSize.height + 'px';
-            constrainPosition(imageOverlay, imagePosition, imageSize);
-        });
-
-        // Template size inputs
-        templateWidthInput.addEventListener('change', () => {
-            templateSize.width = parseInt(templateWidthInput.value) || 50;
-            templateOverlay.style.width = templateSize.width + 'px';
-            constrainPosition(templateOverlay, templatePosition, templateSize);
-        });
-
-        templateHeightInput.addEventListener('change', () => {
-            templateSize.height = parseInt(templateHeightInput.value) || 50;
-            templateOverlay.style.height = templateSize.height + 'px';
-            constrainPosition(templateOverlay, templatePosition, templateSize);
+            updateOverlayStyle(imageOverlay, imagePosition, imageSize);
         });
 
         // Opacity controls
