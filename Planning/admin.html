@@ -1629,33 +1629,83 @@ Select text and click a formatting button above, or click a button to insert at 
             input.click();
         }
 
+        // Compress and resize images before upload
+        async function compressImage(file, maxWidth = 1200, quality = 0.8) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                img.onload = () => {
+                    let { width, height } = img;
+
+                    // Only resize if larger than maxWidth
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    // Draw image on canvas
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to blob
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob) {
+                                // Log compression results
+                                const originalSize = (file.size / 1024).toFixed(1);
+                                const newSize = (blob.size / 1024).toFixed(1);
+                                console.log(`Image compressed: ${originalSize}KB → ${newSize}KB (${Math.round((1 - blob.size / file.size) * 100)}% reduction)`);
+                                resolve(blob);
+                            } else {
+                                reject(new Error('Failed to compress image'));
+                            }
+                        },
+                        'image/jpeg',
+                        quality
+                    );
+                };
+
+                img.onerror = () => reject(new Error('Failed to load image'));
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
         async function handleImageUpload(index, event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const slug = document.getElementById('artistSelect').value;
             if (!slug) {
                 showStatus('Please select an artist first', 'error');
                 return;
             }
-            
+
             const progressContainer = document.getElementById(`progress-${index}`);
             const progressFill = document.getElementById(`progress-fill-${index}`);
-            
+
             progressContainer.style.display = 'block';
             progressFill.style.width = '0%';
 
             try {
+                // Compress image before upload
+                progressFill.style.width = '10%';
+                const compressedBlob = await compressImage(file, 1200, 0.8);
+                progressFill.style.width = '30%';
+
                 const timestamp = Date.now();
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${slug}_content_${timestamp}.${fileExt}`;
-                
+                const fileName = `${slug}_content_${timestamp}.jpg`; // Always save as jpg after compression
+
                 const { data, error } = await supabaseClient.storage
                     .from('artist-images')
-                    .upload(fileName, file, {
+                    .upload(fileName, compressedBlob, {
                         upsert: false,
+                        contentType: 'image/jpeg',
                         onProgress: (progress) => {
-                            const percent = (progress.loaded / progress.total) * 100;
+                            const percent = 30 + ((progress.loaded / progress.total) * 70);
                             progressFill.style.width = percent + '%';
                         }
                     });
