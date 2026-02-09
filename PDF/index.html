@@ -1543,9 +1543,9 @@ ${generateRichEmailBody(sections, mainTitle, clientName, customMessage)}
                         </div>
                         <div class="artwork-title">"${img.title || 'Untitled'}"</div>
                         ${section.artistName ? `<div class="artwork-artist">by ${section.artistName}</div>` : ''}
-                        <div class="artwork-details">
-                            ${img.medium ? `<span><strong>Medium:</strong> ${img.medium}</span>` : ''}
-                            ${img.size ? `<span><strong>Dimensions:</strong> ${img.size}</span>` : ''}
+                        <div class="artwork-details" style="text-align: center;">
+                            ${img.medium ? `<span style="display: inline-block; margin: 0 12px;"><strong>Medium:</strong> ${img.medium}</span>` : ''}
+                            ${img.size ? `<span style="display: inline-block; margin: 0 12px;"><strong>Dimensions:</strong> ${img.size}</span>` : ''}
                         </div>
                         ${formattedPrice ? `<div class="artwork-price">${formattedPrice}</div>` : ''}
                     </div>`;
@@ -1564,8 +1564,7 @@ ${generateRichEmailBody(sections, mainTitle, clientName, customMessage)}
 
             return `
             <div class="header">
-                <h1>CASTLE</h1>
-                <h2>FINE ART</h2>
+                <img src="logo_black.png" alt="Castle Fine Art" style="max-width: 280px; height: auto; margin-bottom: 20px;">
                 <div class="divider">─────── ✦ ───────</div>
                 <h3>${mainTitle}</h3>
             </div>
@@ -1791,99 +1790,49 @@ ${generateRichEmailBody(sections, mainTitle, clientName, customMessage)}
         }
 
         function generateFreshdeskHTML(sections, mainTitle, clientName, customMessage) {
-            const greeting = clientName ? `Dear ${clientName},` : 'Dear Collector,';
-            const totalPieces = sections.reduce((sum, s) => sum + s.images.length, 0);
-            const artistCount = new Set(sections.map(s => s.artistName).filter(Boolean)).size;
-
-            let artistsText = '';
-            if (artistCount > 1) {
-                artistsText = ` from ${artistCount} celebrated artists`;
-            } else if (artistCount === 1 && sections[0].artistName) {
-                artistsText = ` by ${sections[0].artistName}`;
-            }
-
-            // Build artwork rows
+            // Build simple artwork list
             let artworksHTML = '';
             let globalIdx = 1;
 
             sections.forEach((section, sectionIdx) => {
-                // Add artist divider for multi-artist compilations
+                // Simple artist header for multi-artist compilations
                 if (section.artistName && sections.length > 1) {
                     artworksHTML += `
                     <tr>
-                        <td style="padding: 30px 0 20px 0;">
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                                <tr>
-                                    <td style="border-top: 2px solid #d4af37; border-bottom: 2px solid #d4af37; padding: 15px 0; text-align: center; background-color: #f9f6f0;">
-                                        <span style="font-family: Georgia, 'Times New Roman', serif; font-size: 16px; letter-spacing: 3px; color: #1a1a2e; font-weight: bold;">${section.artistName.toUpperCase()}</span>
-                                    </td>
-                                </tr>
-                            </table>
+                        <td style="padding: 25px 0 15px 0; border-bottom: 1px solid #ccc;">
+                            <strong style="font-size: 15px; color: #333;">${section.artistName}</strong>
                         </td>
                     </tr>`;
                 }
 
                 section.images.forEach((img, idx) => {
-                    const pieceNum = sections.length > 1
-                        ? `${sectionIdx + 1}.${idx + 1}`
-                        : `${globalIdx}`;
-
                     // Format price
                     let formattedPrice = img.price || '';
                     if (formattedPrice && /^\d/.test(formattedPrice)) {
                         formattedPrice = '£' + formattedPrice;
                     }
 
+                    // Build details line
+                    let detailsParts = [];
+                    if (img.medium) detailsParts.push(img.medium);
+                    if (img.size) detailsParts.push(img.size);
+                    const detailsLine = detailsParts.join(' | ');
+
                     artworksHTML += `
                     <tr>
-                        <td style="padding: 15px 0;">
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border: 1px solid #e8e4de; border-left: 4px solid #d4af37;">
+                        <td style="padding: 20px 0; border-bottom: 1px solid #eee;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
-                                    <td style="padding: 25px;">
-                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                                            <!-- Number -->
-                                            <tr>
-                                                <td align="right" style="padding-bottom: 15px;">
-                                                    <span style="font-family: Georgia, serif; font-size: 12px; color: #999; letter-spacing: 2px;">№ ${pieceNum}</span>
-                                                </td>
-                                            </tr>
-                                            <!-- Image -->
-                                            <tr>
-                                                <td align="center" style="padding: 20px; background-color: #f9f9f9;">
-                                                    <img src="${img.src}" alt="${img.title || 'Artwork'}" style="max-width: 400px; max-height: 300px; border: 1px solid #ddd;">
-                                                </td>
-                                            </tr>
-                                            <!-- Title -->
-                                            <tr>
-                                                <td align="center" style="padding-top: 20px;">
-                                                    <span style="font-family: Georgia, serif; font-size: 20px; font-style: italic; color: #1a1a2e;">"${img.title || 'Untitled'}"</span>
-                                                </td>
-                                            </tr>
-                                            ${section.artistName ? `
-                                            <!-- Artist -->
-                                            <tr>
-                                                <td align="center" style="padding-top: 8px;">
-                                                    <span style="font-family: Arial, sans-serif; font-size: 14px; color: #666;">by ${section.artistName}</span>
-                                                </td>
-                                            </tr>` : ''}
-                                            <!-- Details -->
-                                            <tr>
-                                                <td align="center" style="padding-top: 15px;">
-                                                    <span style="font-family: Arial, sans-serif; font-size: 13px; color: #555;">
-                                                        ${img.medium ? `<strong>Medium:</strong> ${img.medium}` : ''}
-                                                        ${img.medium && img.size ? ' &nbsp;|&nbsp; ' : ''}
-                                                        ${img.size ? `<strong>Dimensions:</strong> ${img.size}` : ''}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            ${formattedPrice ? `
-                                            <!-- Price -->
-                                            <tr>
-                                                <td align="center" style="padding-top: 15px; border-top: 1px solid #eee; margin-top: 15px;">
-                                                    <span style="font-family: Georgia, serif; font-size: 18px; color: #1a1a2e; font-weight: bold; padding-top: 15px; display: inline-block;">${formattedPrice}</span>
-                                                </td>
-                                            </tr>` : ''}
-                                        </table>
+                                    <td align="center" style="padding-bottom: 15px;">
+                                        <img src="${img.src}" alt="${img.title || 'Artwork'}" style="max-width: 400px; max-height: 300px; border: 1px solid #ddd;">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="center">
+                                        <p style="margin: 0 0 5px 0; font-size: 16px; font-weight: bold; color: #333;">${img.title || ''}</p>
+                                        ${section.artistName ? `<p style="margin: 0 0 5px 0; font-size: 14px; color: #666;">by ${section.artistName}</p>` : ''}
+                                        ${detailsLine ? `<p style="margin: 0 0 5px 0; font-size: 13px; color: #666;">${detailsLine}</p>` : ''}
+                                        ${formattedPrice ? `<p style="margin: 10px 0 0 0; font-size: 15px; font-weight: bold; color: #333;">${formattedPrice}</p>` : ''}
                                     </td>
                                 </tr>
                             </table>
@@ -1893,122 +1842,11 @@ ${generateRichEmailBody(sections, mainTitle, clientName, customMessage)}
                 });
             });
 
-            // Personal note section
-            let personalNoteHTML = '';
-            if (customMessage) {
-                personalNoteHTML = `
-                <tr>
-                    <td style="padding: 30px 0;">
-                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #1a1a2e;">
-                            <tr>
-                                <td style="padding: 35px; text-align: center;">
-                                    <p style="font-family: Arial, sans-serif; font-size: 12px; letter-spacing: 3px; color: #d4af37; margin: 0 0 20px 0;">A PERSONAL NOTE</p>
-                                    <p style="font-family: Georgia, serif; font-size: 15px; line-height: 1.8; color: #f5f0e8; font-style: italic; margin: 0;">${customMessage.replace(/\n/g, '<br>')}</p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>`;
-            }
-
-            // Complete email
+            // Simple clean output - just the artwork cards
             return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-</head>
-<body style="margin: 0; padding: 0; background-color: #f6f0e8;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f6f0e8;">
-        <tr>
-            <td align="center" style="padding: 20px;">
-                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff;">
-
-                    <!-- HEADER -->
-                    <tr>
-                        <td style="background-color: #1a1a2e; padding: 40px 30px; text-align: center; border-bottom: 4px solid #d4af37;">
-                            <h1 style="font-family: Georgia, 'Times New Roman', serif; font-size: 28px; letter-spacing: 10px; color: #f5f0e8; margin: 0 0 5px 0; font-weight: normal;">CASTLE</h1>
-                            <h2 style="font-family: Georgia, 'Times New Roman', serif; font-size: 14px; letter-spacing: 5px; color: #f5f0e8; margin: 0 0 20px 0; font-weight: normal;">FINE ART</h2>
-                            <p style="color: #d4af37; font-size: 16px; margin: 15px 0;">─────── ✦ ───────</p>
-                            <h3 style="font-family: Georgia, 'Times New Roman', serif; font-size: 20px; font-style: italic; color: #d4af37; margin: 0; font-weight: normal;">${mainTitle}</h3>
-                        </td>
-                    </tr>
-
-                    <!-- GREETING -->
-                    <tr>
-                        <td style="padding: 35px 40px 15px 40px;">
-                            <p style="font-family: Georgia, serif; font-size: 18px; color: #2c2c2c; margin: 0;">${greeting}</p>
-                        </td>
-                    </tr>
-
-                    <!-- INTRO -->
-                    <tr>
-                        <td style="padding: 15px 40px 30px 40px;">
-                            <table cellpadding="0" cellspacing="0" border="0">
-                                <tr>
-                                    <td style="border-left: 3px solid #d4af37; padding-left: 20px;">
-                                        <p style="font-family: Georgia, serif; font-size: 15px; line-height: 1.8; color: #4a4a4a; margin: 0 0 15px 0;">
-                                            Thank you for your interest in Castle Fine Art. We are delighted to present this personally curated selection of exceptional artworks for your consideration.
-                                        </p>
-                                        <p style="font-family: Georgia, serif; font-size: 15px; line-height: 1.8; color: #4a4a4a; margin: 0;">
-                                            This collection features <strong>${totalPieces} distinguished piece${totalPieces !== 1 ? 's' : ''}</strong>${artistsText}, each representing the pinnacle of contemporary artistry.
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-
-                    <!-- SECTION TITLE -->
-                    <tr>
-                        <td style="padding: 20px 40px; text-align: center;">
-                            <p style="font-family: Arial, sans-serif; font-size: 12px; letter-spacing: 3px; color: #888; margin: 0;">─── CURATED COLLECTION ───</p>
-                        </td>
-                    </tr>
-
-                    <!-- ARTWORKS -->
-                    <tr>
-                        <td style="padding: 0 40px;">
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                                ${artworksHTML}
-                            </table>
-                        </td>
-                    </tr>
-
-                    ${personalNoteHTML}
-
-                    <!-- CLOSING -->
-                    <tr>
-                        <td style="padding: 30px 40px;">
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f9f6f0; border: 1px solid #e8e4de;">
-                                <tr>
-                                    <td style="padding: 30px; text-align: center;">
-                                        <p style="font-family: Georgia, serif; font-size: 15px; color: #555; margin: 0 0 10px 0;">We would be honoured to arrange a <strong>private viewing</strong> at your convenience,</p>
-                                        <p style="font-family: Georgia, serif; font-size: 15px; color: #555; margin: 0 0 10px 0;">where you can experience these remarkable works in person.</p>
-                                        <p style="font-family: Georgia, serif; font-size: 15px; color: #555; margin: 0 0 25px 0;">Please do not hesitate to contact us with any questions.</p>
-                                        <p style="font-family: Georgia, serif; font-size: 14px; font-style: italic; color: #888; margin: 0;">With warm regards,</p>
-                                        <p style="font-family: Georgia, serif; font-size: 15px; font-weight: bold; color: #555; margin: 10px 0 5px 0;">Your Art Consultant</p>
-                                        <p style="font-family: Georgia, serif; font-size: 14px; color: #888; margin: 0;">Castle Fine Art</p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-
-                    <!-- FOOTER -->
-                    <tr>
-                        <td style="padding: 25px 40px; text-align: center; border-top: 2px solid #d4af37;">
-                            <p style="font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 1px; color: #888; margin: 0 0 5px 0;">CASTLE FINE ART | EXCEPTIONAL ART FOR EXCEPTIONAL SPACES</p>
-                            <p style="font-family: Arial, sans-serif; font-size: 11px; color: #888; margin: 0;">www.castlefineart.com</p>
-                        </td>
-                    </tr>
-
-                </table>
-            </td>
-        </tr>
-    </table>
-</body>
-</html>`;
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif;">
+    ${artworksHTML}
+</table>`;
         }
 
         function showFreshdeskModal(subject) {
