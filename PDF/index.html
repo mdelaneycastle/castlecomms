@@ -218,6 +218,35 @@
         }
         .btn-email:disabled::before { display: none; }
 
+        .btn-freshdesk {
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+            color: #90EE90;
+            border: 2px solid #90EE90;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-freshdesk::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(144, 238, 144, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-freshdesk:hover::before { left: 100%; }
+        .btn-freshdesk:hover {
+            background: linear-gradient(135deg, #2d5a3d 0%, #1a472a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(144, 238, 144, 0.3);
+        }
+        .btn-freshdesk:disabled {
+            background: #444;
+            border-color: #666;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .btn-freshdesk:disabled::before { display: none; }
+
         /* --- PREVIEW MODAL --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -368,6 +397,7 @@
             <button id="preview-btn" class="btn btn-secondary" disabled>👁 Preview PDF</button>
             <button id="generate-btn" class="btn btn-primary" disabled>⬇ Download PDF</button>
             <button id="email-btn" class="btn btn-email" disabled>✉ Email via Outlook</button>
+            <button id="freshdesk-btn" class="btn btn-freshdesk" disabled>📋 Email for Freshdesk</button>
         </div>
     </div>
 
@@ -463,6 +493,7 @@
             generateBtn: document.getElementById('generate-btn'),
             previewBtn: document.getElementById('preview-btn'),
             emailBtn: document.getElementById('email-btn'),
+            freshdeskBtn: document.getElementById('freshdesk-btn'),
             status: document.getElementById('status-message'),
             quality: document.getElementById('quality-select'),
             modal: document.getElementById('preview-modal'),
@@ -496,6 +527,7 @@
             els.generateBtn.addEventListener('click', () => runPDFProcess('download'));
             els.previewBtn.addEventListener('click', () => runPDFProcess('preview'));
             els.emailBtn.addEventListener('click', openEmailInOutlook);
+            els.freshdeskBtn.addEventListener('click', copyFreshdeskEmail);
             
             // Inputs
             window.removeImage = removeImage; // Global scope for onclick
@@ -814,6 +846,7 @@
             els.generateBtn.disabled = !ready;
             els.previewBtn.disabled = !ready;
             els.emailBtn.disabled = !ready;
+            els.freshdeskBtn.disabled = !ready;
         }
 
         // --- PDF GENERATION ENGINE ---
@@ -1714,6 +1747,393 @@ ${generateRichEmailBody(sections, mainTitle, clientName, customMessage)}
             // Update status
             els.status.textContent = "✉ Email copied to clipboard!";
             els.status.style.color = "#d4af37";
+            setTimeout(() => els.status.textContent = "", 5000);
+        }
+
+        // --- FRESHDESK EMAIL GENERATION ---
+        function copyFreshdeskEmail() {
+            const sections = appMode === 'single'
+                ? [{ artistKey: selectedMainArtist, artistName: ARTIST_DATA[selectedMainArtist].name, images: uploadedImages }]
+                : pdfSections;
+
+            const clientName = els.clientInput.value.trim();
+            const customTitle = els.customCoverTitle.value.trim();
+            const customMessage = els.msgInput.value.trim();
+
+            // Determine the main title
+            let mainTitle = customTitle;
+            if (!mainTitle) {
+                mainTitle = appMode === 'single' ? ARTIST_DATA[selectedMainArtist].name : 'Selected Works';
+            }
+
+            // Create subject line
+            let subject = `Castle Fine Art | ${mainTitle}`;
+            if (clientName) subject += ` - Curated for ${clientName}`;
+
+            // Generate table-based HTML email
+            const emailHTML = generateFreshdeskHTML(sections, mainTitle, clientName, customMessage);
+
+            // Copy to clipboard
+            const blob = new Blob([emailHTML], { type: 'text/html' });
+            const clipboardItem = new ClipboardItem({
+                'text/html': blob,
+                'text/plain': new Blob([emailHTML], { type: 'text/plain' })
+            });
+
+            navigator.clipboard.write([clipboardItem]).then(() => {
+                showFreshdeskModal(subject);
+            }).catch(err => {
+                // Fallback
+                navigator.clipboard.writeText(emailHTML).then(() => {
+                    showFreshdeskModal(subject);
+                });
+            });
+        }
+
+        function generateFreshdeskHTML(sections, mainTitle, clientName, customMessage) {
+            const greeting = clientName ? `Dear ${clientName},` : 'Dear Collector,';
+            const totalPieces = sections.reduce((sum, s) => sum + s.images.length, 0);
+            const artistCount = new Set(sections.map(s => s.artistName).filter(Boolean)).size;
+
+            let artistsText = '';
+            if (artistCount > 1) {
+                artistsText = ` from ${artistCount} celebrated artists`;
+            } else if (artistCount === 1 && sections[0].artistName) {
+                artistsText = ` by ${sections[0].artistName}`;
+            }
+
+            // Build artwork rows
+            let artworksHTML = '';
+            let globalIdx = 1;
+
+            sections.forEach((section, sectionIdx) => {
+                // Add artist divider for multi-artist compilations
+                if (section.artistName && sections.length > 1) {
+                    artworksHTML += `
+                    <tr>
+                        <td style="padding: 30px 0 20px 0;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="border-top: 2px solid #d4af37; border-bottom: 2px solid #d4af37; padding: 15px 0; text-align: center; background-color: #f9f6f0;">
+                                        <span style="font-family: Georgia, 'Times New Roman', serif; font-size: 16px; letter-spacing: 3px; color: #1a1a2e; font-weight: bold;">${section.artistName.toUpperCase()}</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>`;
+                }
+
+                section.images.forEach((img, idx) => {
+                    const pieceNum = sections.length > 1
+                        ? `${sectionIdx + 1}.${idx + 1}`
+                        : `${globalIdx}`;
+
+                    // Format price
+                    let formattedPrice = img.price || '';
+                    if (formattedPrice && /^\d/.test(formattedPrice)) {
+                        formattedPrice = '£' + formattedPrice;
+                    }
+
+                    artworksHTML += `
+                    <tr>
+                        <td style="padding: 15px 0;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border: 1px solid #e8e4de; border-left: 4px solid #d4af37;">
+                                <tr>
+                                    <td style="padding: 25px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <!-- Number -->
+                                            <tr>
+                                                <td align="right" style="padding-bottom: 15px;">
+                                                    <span style="font-family: Georgia, serif; font-size: 12px; color: #999; letter-spacing: 2px;">№ ${pieceNum}</span>
+                                                </td>
+                                            </tr>
+                                            <!-- Image -->
+                                            <tr>
+                                                <td align="center" style="padding: 20px; background-color: #f9f9f9;">
+                                                    <img src="${img.src}" alt="${img.title || 'Artwork'}" style="max-width: 400px; max-height: 300px; border: 1px solid #ddd;">
+                                                </td>
+                                            </tr>
+                                            <!-- Title -->
+                                            <tr>
+                                                <td align="center" style="padding-top: 20px;">
+                                                    <span style="font-family: Georgia, serif; font-size: 20px; font-style: italic; color: #1a1a2e;">"${img.title || 'Untitled'}"</span>
+                                                </td>
+                                            </tr>
+                                            ${section.artistName ? `
+                                            <!-- Artist -->
+                                            <tr>
+                                                <td align="center" style="padding-top: 8px;">
+                                                    <span style="font-family: Arial, sans-serif; font-size: 14px; color: #666;">by ${section.artistName}</span>
+                                                </td>
+                                            </tr>` : ''}
+                                            <!-- Details -->
+                                            <tr>
+                                                <td align="center" style="padding-top: 15px;">
+                                                    <span style="font-family: Arial, sans-serif; font-size: 13px; color: #555;">
+                                                        ${img.medium ? `<strong>Medium:</strong> ${img.medium}` : ''}
+                                                        ${img.medium && img.size ? ' &nbsp;|&nbsp; ' : ''}
+                                                        ${img.size ? `<strong>Dimensions:</strong> ${img.size}` : ''}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            ${formattedPrice ? `
+                                            <!-- Price -->
+                                            <tr>
+                                                <td align="center" style="padding-top: 15px; border-top: 1px solid #eee; margin-top: 15px;">
+                                                    <span style="font-family: Georgia, serif; font-size: 18px; color: #1a1a2e; font-weight: bold; padding-top: 15px; display: inline-block;">${formattedPrice}</span>
+                                                </td>
+                                            </tr>` : ''}
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>`;
+                    globalIdx++;
+                });
+            });
+
+            // Personal note section
+            let personalNoteHTML = '';
+            if (customMessage) {
+                personalNoteHTML = `
+                <tr>
+                    <td style="padding: 30px 0;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #1a1a2e;">
+                            <tr>
+                                <td style="padding: 35px; text-align: center;">
+                                    <p style="font-family: Arial, sans-serif; font-size: 12px; letter-spacing: 3px; color: #d4af37; margin: 0 0 20px 0;">A PERSONAL NOTE</p>
+                                    <p style="font-family: Georgia, serif; font-size: 15px; line-height: 1.8; color: #f5f0e8; font-style: italic; margin: 0;">${customMessage.replace(/\n/g, '<br>')}</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>`;
+            }
+
+            // Complete email
+            return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f6f0e8;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f6f0e8;">
+        <tr>
+            <td align="center" style="padding: 20px;">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff;">
+
+                    <!-- HEADER -->
+                    <tr>
+                        <td style="background-color: #1a1a2e; padding: 40px 30px; text-align: center; border-bottom: 4px solid #d4af37;">
+                            <h1 style="font-family: Georgia, 'Times New Roman', serif; font-size: 28px; letter-spacing: 10px; color: #f5f0e8; margin: 0 0 5px 0; font-weight: normal;">CASTLE</h1>
+                            <h2 style="font-family: Georgia, 'Times New Roman', serif; font-size: 14px; letter-spacing: 5px; color: #f5f0e8; margin: 0 0 20px 0; font-weight: normal;">FINE ART</h2>
+                            <p style="color: #d4af37; font-size: 16px; margin: 15px 0;">─────── ✦ ───────</p>
+                            <h3 style="font-family: Georgia, 'Times New Roman', serif; font-size: 20px; font-style: italic; color: #d4af37; margin: 0; font-weight: normal;">${mainTitle}</h3>
+                        </td>
+                    </tr>
+
+                    <!-- GREETING -->
+                    <tr>
+                        <td style="padding: 35px 40px 15px 40px;">
+                            <p style="font-family: Georgia, serif; font-size: 18px; color: #2c2c2c; margin: 0;">${greeting}</p>
+                        </td>
+                    </tr>
+
+                    <!-- INTRO -->
+                    <tr>
+                        <td style="padding: 15px 40px 30px 40px;">
+                            <table cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="border-left: 3px solid #d4af37; padding-left: 20px;">
+                                        <p style="font-family: Georgia, serif; font-size: 15px; line-height: 1.8; color: #4a4a4a; margin: 0 0 15px 0;">
+                                            Thank you for your interest in Castle Fine Art. We are delighted to present this personally curated selection of exceptional artworks for your consideration.
+                                        </p>
+                                        <p style="font-family: Georgia, serif; font-size: 15px; line-height: 1.8; color: #4a4a4a; margin: 0;">
+                                            This collection features <strong>${totalPieces} distinguished piece${totalPieces !== 1 ? 's' : ''}</strong>${artistsText}, each representing the pinnacle of contemporary artistry.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- SECTION TITLE -->
+                    <tr>
+                        <td style="padding: 20px 40px; text-align: center;">
+                            <p style="font-family: Arial, sans-serif; font-size: 12px; letter-spacing: 3px; color: #888; margin: 0;">─── CURATED COLLECTION ───</p>
+                        </td>
+                    </tr>
+
+                    <!-- ARTWORKS -->
+                    <tr>
+                        <td style="padding: 0 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                ${artworksHTML}
+                            </table>
+                        </td>
+                    </tr>
+
+                    ${personalNoteHTML}
+
+                    <!-- CLOSING -->
+                    <tr>
+                        <td style="padding: 30px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f9f6f0; border: 1px solid #e8e4de;">
+                                <tr>
+                                    <td style="padding: 30px; text-align: center;">
+                                        <p style="font-family: Georgia, serif; font-size: 15px; color: #555; margin: 0 0 10px 0;">We would be honoured to arrange a <strong>private viewing</strong> at your convenience,</p>
+                                        <p style="font-family: Georgia, serif; font-size: 15px; color: #555; margin: 0 0 10px 0;">where you can experience these remarkable works in person.</p>
+                                        <p style="font-family: Georgia, serif; font-size: 15px; color: #555; margin: 0 0 25px 0;">Please do not hesitate to contact us with any questions.</p>
+                                        <p style="font-family: Georgia, serif; font-size: 14px; font-style: italic; color: #888; margin: 0;">With warm regards,</p>
+                                        <p style="font-family: Georgia, serif; font-size: 15px; font-weight: bold; color: #555; margin: 10px 0 5px 0;">Your Art Consultant</p>
+                                        <p style="font-family: Georgia, serif; font-size: 14px; color: #888; margin: 0;">Castle Fine Art</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td style="padding: 25px 40px; text-align: center; border-top: 2px solid #d4af37;">
+                            <p style="font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 1px; color: #888; margin: 0 0 5px 0;">CASTLE FINE ART | EXCEPTIONAL ART FOR EXCEPTIONAL SPACES</p>
+                            <p style="font-family: Arial, sans-serif; font-size: 11px; color: #888; margin: 0;">www.castlefineart.com</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+        }
+
+        function showFreshdeskModal(subject) {
+            const modal = document.createElement('div');
+            modal.id = 'freshdesk-modal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.85); z-index: 2000;
+                display: flex; justify-content: center; align-items: center;
+                animation: fadeIn 0.3s ease;
+            `;
+
+            modal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1a472a 0%, #2d5a3d 100%);
+                    color: #f5f0e8;
+                    padding: 50px;
+                    border-radius: 12px;
+                    max-width: 550px;
+                    text-align: center;
+                    box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+                    border: 2px solid #90EE90;
+                    position: relative;
+                ">
+                    <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+                        background: linear-gradient(135deg, #90EE90, #32CD32);
+                        color: #1a472a;
+                        width: 60px; height: 60px;
+                        border-radius: 50%;
+                        display: flex; align-items: center; justify-content: center;
+                        font-size: 28px;
+                        box-shadow: 0 4px 15px rgba(144, 238, 144, 0.4);
+                    ">📋</div>
+
+                    <h2 style="
+                        font-family: Georgia, serif;
+                        font-size: 24px;
+                        margin: 20px 0 10px 0;
+                        letter-spacing: 3px;
+                        color: #90EE90;
+                    ">FRESHDESK READY</h2>
+
+                    <p style="color: #90EE90; font-size: 14px; letter-spacing: 2px; margin-bottom: 30px;">
+                        ─────── ✦ ───────
+                    </p>
+
+                    <p style="font-size: 16px; line-height: 1.8; margin-bottom: 25px; color: #ccc;">
+                        Your email has been copied in a format optimized for Freshdesk!
+                    </p>
+
+                    <div style="
+                        background: rgba(255,255,255,0.05);
+                        padding: 20px;
+                        border-radius: 8px;
+                        margin-bottom: 25px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 15px;
+                    ">
+                        <div style="text-align: left; flex: 1;">
+                            <p style="font-size: 12px; color: #90EE90; margin-bottom: 8px; letter-spacing: 1px;">SUBJECT LINE:</p>
+                            <p style="font-size: 14px; color: #fff; font-style: italic; margin: 0;">${subject}</p>
+                        </div>
+                        <button onclick="copySubjectToClipboard('${subject.replace(/'/g, "\\'")}', this)" style="
+                            background: transparent;
+                            border: 1px solid #666;
+                            color: #ccc;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            cursor: pointer;
+                            white-space: nowrap;
+                            transition: all 0.2s;
+                        " onmouseover="this.style.borderColor='#90EE90'; this.style.color='#90EE90'"
+                           onmouseout="if(!this.classList.contains('copied')){this.style.borderColor='#666'; this.style.color='#ccc'}">
+                            Copy Subject
+                        </button>
+                    </div>
+
+                    <div style="
+                        background: rgba(144, 238, 144, 0.1);
+                        border: 1px solid rgba(144, 238, 144, 0.3);
+                        padding: 20px;
+                        border-radius: 8px;
+                        margin-bottom: 25px;
+                        text-align: left;
+                    ">
+                        <p style="font-size: 13px; color: #90EE90; margin-bottom: 12px; letter-spacing: 1px;">
+                            HOW TO USE:
+                        </p>
+                        <ol style="font-size: 14px; line-height: 2; color: #ccc; padding-left: 20px; margin: 0;">
+                            <li>Open your <strong>Freshdesk</strong> ticket/reply</li>
+                            <li>Click in the email body and paste <kbd style="background: #333; padding: 2px 8px; border-radius: 4px; font-family: monospace;">⌘V</kbd></li>
+                            <li>Copy the subject line above if needed</li>
+                            <li>Send!</li>
+                        </ol>
+                    </div>
+
+                    <button onclick="document.getElementById('freshdesk-modal').remove()" style="
+                        background: linear-gradient(135deg, #90EE90, #32CD32);
+                        border: none;
+                        color: #1a472a;
+                        padding: 12px 40px;
+                        border-radius: 6px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        letter-spacing: 1px;
+                        transition: all 0.3s;
+                    " onmouseover="this.style.transform='translateY(-2px)'"
+                       onmouseout="this.style.transform='translateY(0)'">
+                        Done
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+
+            els.status.textContent = "📋 Freshdesk email copied!";
+            els.status.style.color = "#32CD32";
             setTimeout(() => els.status.textContent = "", 5000);
         }
 
