@@ -189,6 +189,35 @@
         .btn-secondary { background: white; border: 2px solid var(--primary); color: var(--primary); }
         .btn-secondary:hover { background: #f0f0f0; }
 
+        .btn-email {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #d4af37;
+            border: 2px solid #d4af37;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-email::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        .btn-email:hover::before { left: 100%; }
+        .btn-email:hover {
+            background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+        .btn-email:disabled {
+            background: #444;
+            border-color: #666;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .btn-email:disabled::before { display: none; }
+
         /* --- PREVIEW MODAL --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -338,6 +367,7 @@
         <div class="btn-group">
             <button id="preview-btn" class="btn btn-secondary" disabled>👁 Preview PDF</button>
             <button id="generate-btn" class="btn btn-primary" disabled>⬇ Download PDF</button>
+            <button id="email-btn" class="btn btn-email" disabled>✉ Email via Outlook</button>
         </div>
     </div>
 
@@ -432,6 +462,7 @@
             addSectionBtn: document.getElementById('add-section-btn'),
             generateBtn: document.getElementById('generate-btn'),
             previewBtn: document.getElementById('preview-btn'),
+            emailBtn: document.getElementById('email-btn'),
             status: document.getElementById('status-message'),
             quality: document.getElementById('quality-select'),
             modal: document.getElementById('preview-modal'),
@@ -464,6 +495,7 @@
             els.addSectionBtn.addEventListener('click', addSection);
             els.generateBtn.addEventListener('click', () => runPDFProcess('download'));
             els.previewBtn.addEventListener('click', () => runPDFProcess('preview'));
+            els.emailBtn.addEventListener('click', openEmailInOutlook);
             
             // Inputs
             window.removeImage = removeImage; // Global scope for onclick
@@ -781,6 +813,7 @@
             }
             els.generateBtn.disabled = !ready;
             els.previewBtn.disabled = !ready;
+            els.emailBtn.disabled = !ready;
         }
 
         // --- PDF GENERATION ENGINE ---
@@ -1033,6 +1066,672 @@
 
             return canvas.toDataURL('image/jpeg', quality);
         }
+
+        // --- EMAIL GENERATION ---
+        function openEmailInOutlook() {
+            const sections = appMode === 'single'
+                ? [{ artistKey: selectedMainArtist, artistName: ARTIST_DATA[selectedMainArtist].name, images: uploadedImages }]
+                : pdfSections;
+
+            const clientName = els.clientInput.value.trim();
+            const customTitle = els.customCoverTitle.value.trim();
+            const customMessage = els.msgInput.value.trim();
+
+            // Determine the main title
+            let mainTitle = customTitle;
+            if (!mainTitle) {
+                mainTitle = appMode === 'single' ? ARTIST_DATA[selectedMainArtist].name : 'Selected Works';
+            }
+
+            // Build elegant HTML email
+            const emailHTML = generateEmailHTML(sections, mainTitle, clientName, customMessage);
+
+            // Create subject line
+            let subject = `Castle Fine Art | ${mainTitle}`;
+            if (clientName) subject += ` - Curated for ${clientName}`;
+
+            // Open in Outlook
+            // For better HTML support, we'll copy to clipboard and open mailto
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailHTML)}`;
+
+            // Check if the content is too long for mailto (typically ~2000 chars limit)
+            if (mailtoLink.length > 2000) {
+                // Copy HTML to clipboard and show instructions
+                copyEmailToClipboard(emailHTML, subject, sections, mainTitle, clientName, customMessage);
+            } else {
+                window.location.href = mailtoLink;
+                els.status.textContent = "✉ Opening Outlook...";
+                els.status.style.color = "var(--primary)";
+                setTimeout(() => els.status.textContent = "", 3000);
+            }
+        }
+
+        function generateEmailHTML(sections, mainTitle, clientName, customMessage) {
+            const greeting = clientName ? `Dear ${clientName},` : 'Dear Collector,';
+
+            // Build artwork sections
+            let artworkHTML = '';
+            sections.forEach((section, sectionIdx) => {
+                const artistName = section.artistName || '';
+
+                // Artist divider (only if we have an artist name and multiple sections)
+                if (artistName && sections.length > 1) {
+                    artworkHTML += `
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                    ${artistName.toUpperCase()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+`;
+                }
+
+                section.images.forEach((img, idx) => {
+                    const pieceNum = sections.length > 1
+                        ? `${sectionIdx + 1}.${idx + 1}`
+                        : `${idx + 1}`;
+
+                    // Format price - add £ if starts with a number
+                    let formattedPrice = img.price || '';
+                    if (formattedPrice && /^\d/.test(formattedPrice)) {
+                        formattedPrice = '£' + formattedPrice;
+                    }
+
+                    artworkHTML += `
+┌─────────────────────────────────────────┐
+│  № ${pieceNum}
+├─────────────────────────────────────────┤
+│
+│  "${img.title || 'Untitled'}"
+│                                         `;
+
+                    if (artistName) {
+                        artworkHTML += `
+│  by ${artistName}
+│                                         `;
+                    }
+
+                    if (img.medium) {
+                        artworkHTML += `
+│  Medium: ${img.medium}                  `;
+                    }
+
+                    if (img.size) {
+                        artworkHTML += `
+│  Dimensions: ${img.size}                `;
+                    }
+
+                    if (formattedPrice) {
+                        artworkHTML += `
+│
+│  ★ ${formattedPrice}                    `;
+                    }
+
+                    artworkHTML += `
+│
+└─────────────────────────────────────────┘
+
+`;
+                });
+            });
+
+            // Calculate total pieces
+            const totalPieces = sections.reduce((sum, s) => sum + s.images.length, 0);
+            const artistCount = new Set(sections.map(s => s.artistName).filter(Boolean)).size;
+
+            // Build the complete email
+            let email = `
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║                      C A S T L E                              ║
+║                     FINE ART                                  ║
+║                                                               ║
+║              ─────── ✦ ───────                                ║
+║                                                               ║
+║                  ${mainTitle.toUpperCase().padStart(20 + mainTitle.length/2).padEnd(40)}
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+${greeting}
+
+Thank you for your interest in Castle Fine Art. We are delighted to present this personally curated selection of exceptional artworks for your consideration.
+
+This collection features ${totalPieces} distinguished piece${totalPieces !== 1 ? 's' : ''}${artistCount > 1 ? ` from ${artistCount} artists` : artistCount === 1 ? ` by ${sections[0].artistName}` : ''}, each representing the pinnacle of contemporary artistry.
+
+
+═══════════════════════════════════════════════════════════════
+                    CURATED COLLECTION
+═══════════════════════════════════════════════════════════════
+
+${artworkHTML}`;
+
+            // Add custom message if provided
+            if (customMessage) {
+                email += `
+
+───────────────────────────────────────────────────────────────
+                    A PERSONAL NOTE
+───────────────────────────────────────────────────────────────
+
+${customMessage}
+
+`;
+            }
+
+            // Footer
+            email += `
+
+═══════════════════════════════════════════════════════════════
+
+
+We would be honoured to arrange a private viewing at your convenience,
+where you can experience these remarkable works in person.
+
+Please do not hesitate to contact us with any questions or to
+discuss these pieces further.
+
+
+With warm regards,
+
+
+
+Your Art Consultant
+Castle Fine Art
+
+───────────────────────────────────────────────────────────────
+Castle Fine Art | Exceptional Art for Exceptional Spaces
+www.castlefineart.com
+───────────────────────────────────────────────────────────────
+
+This email and any attachments are confidential and intended
+solely for the use of the individual to whom it is addressed.
+`;
+
+            return email;
+        }
+
+        function copyEmailToClipboard(emailHTML, subject, sections, mainTitle, clientName, customMessage) {
+            // Create a rich text version for clipboard
+            const richHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: linear-gradient(135deg, #faf8f5 0%, #f5f0e8 100%);
+    color: #2c2c2c;
+    line-height: 1.8;
+    padding: 40px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+.header {
+    text-align: center;
+    padding: 50px 30px;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    color: #f5f0e8;
+    margin: -40px -40px 40px -40px;
+    border-bottom: 4px solid #d4af37;
+}
+.header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 28px;
+    letter-spacing: 12px;
+    margin: 0 0 5px 0;
+    font-weight: 400;
+}
+.header h2 {
+    font-size: 14px;
+    letter-spacing: 6px;
+    margin: 0 0 20px 0;
+    font-weight: 300;
+}
+.header .divider {
+    color: #d4af37;
+    font-size: 18px;
+    margin: 15px 0;
+}
+.header h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-style: italic;
+    font-weight: 400;
+    margin: 0;
+    color: #d4af37;
+}
+.greeting {
+    font-size: 18px;
+    margin-bottom: 25px;
+}
+.intro {
+    font-size: 16px;
+    color: #4a4a4a;
+    margin-bottom: 35px;
+    border-left: 3px solid #d4af37;
+    padding-left: 20px;
+}
+.section-title {
+    text-align: center;
+    font-size: 14px;
+    letter-spacing: 4px;
+    color: #888;
+    margin: 40px 0 30px 0;
+    text-transform: uppercase;
+}
+.artwork {
+    background: white;
+    border: 1px solid #e8e4de;
+    padding: 30px;
+    margin-bottom: 25px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+.artwork::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(180deg, #d4af37, #b8860b);
+}
+.artwork-number {
+    position: absolute;
+    top: 15px; right: 20px;
+    font-size: 12px;
+    color: #999;
+    letter-spacing: 2px;
+}
+.artwork-image {
+    background: #f9f9f9;
+    padding: 20px;
+    margin: -30px -30px 30px -30px;
+    border-bottom: 1px solid #e8e4de;
+}
+.artwork-image img {
+    display: block;
+    margin: 0 auto;
+}
+.artwork-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-style: italic;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+    text-align: center;
+}
+.artwork-artist {
+    font-size: 14px;
+    color: #666;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+.artwork-details {
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+}
+.artwork-details span {
+    display: inline-block;
+    margin: 0 12px;
+    padding: 5px 0;
+}
+.artwork-price {
+    font-size: 20px;
+    color: #1a1a2e;
+    font-weight: 600;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+.personal-note {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #f5f0e8;
+    padding: 35px;
+    margin: 40px 0;
+    text-align: center;
+    font-style: italic;
+    line-height: 2;
+}
+.personal-note h4 {
+    color: #d4af37;
+    font-size: 12px;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+    font-weight: 400;
+}
+.closing {
+    margin-top: 40px;
+    padding: 30px;
+    background: #faf8f5;
+    border: 1px solid #e8e4de;
+    text-align: center;
+}
+.closing p {
+    margin: 10px 0;
+    color: #555;
+}
+.signature {
+    margin-top: 25px;
+    font-style: italic;
+    color: #888;
+}
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #d4af37;
+    font-size: 12px;
+    color: #888;
+    letter-spacing: 1px;
+}
+.artist-divider {
+    text-align: center;
+    margin: 40px 0 30px 0;
+    padding: 20px;
+    background: #f5f0e8;
+    border-top: 2px solid #d4af37;
+    border-bottom: 2px solid #d4af37;
+}
+.artist-divider h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    margin: 0;
+    color: #1a1a2e;
+}
+</style>
+</head>
+<body>
+${generateRichEmailBody(sections, mainTitle, clientName, customMessage)}
+</body>
+</html>`;
+
+            // Copy HTML to clipboard as rich text
+            const blob = new Blob([richHTML], { type: 'text/html' });
+            const clipboardItem = new ClipboardItem({
+                'text/html': blob,
+                'text/plain': new Blob([emailHTML], { type: 'text/plain' })
+            });
+
+            navigator.clipboard.write([clipboardItem]).then(() => {
+                showEmailInstructionsModal(subject, richHTML);
+            }).catch(err => {
+                // Fallback: try plain text
+                navigator.clipboard.writeText(emailHTML).then(() => {
+                    showEmailInstructionsModal(subject, richHTML);
+                }).catch(() => {
+                    showEmailInstructionsModal(subject, richHTML);
+                });
+            });
+        }
+
+        function generateRichEmailBody(sections, mainTitle, clientName, customMessage) {
+            const greeting = clientName ? `Dear ${clientName},` : 'Dear Collector,';
+            const totalPieces = sections.reduce((sum, s) => sum + s.images.length, 0);
+            const artistCount = new Set(sections.map(s => s.artistName).filter(Boolean)).size;
+
+            let artistsText = '';
+            if (artistCount > 1) {
+                artistsText = ` from ${artistCount} celebrated artists`;
+            } else if (artistCount === 1 && sections[0].artistName) {
+                artistsText = ` by ${sections[0].artistName}`;
+            }
+
+            let artworksHTML = '';
+            let globalIdx = 1;
+
+            sections.forEach((section, sectionIdx) => {
+                // Add artist divider for multi-artist compilations
+                if (section.artistName && sections.length > 1) {
+                    artworksHTML += `
+                    <div class="artist-divider">
+                        <h4>${section.artistName.toUpperCase()}</h4>
+                    </div>`;
+                }
+
+                section.images.forEach((img, idx) => {
+                    const pieceNum = sections.length > 1
+                        ? `${sectionIdx + 1}.${idx + 1}`
+                        : `${globalIdx}`;
+
+                    // Format price - add £ if starts with a number
+                    let formattedPrice = img.price || '';
+                    if (formattedPrice && /^\d/.test(formattedPrice)) {
+                        formattedPrice = '£' + formattedPrice;
+                    }
+
+                    artworksHTML += `
+                    <div class="artwork">
+                        <div class="artwork-number">№ ${pieceNum}</div>
+                        <div class="artwork-image" style="text-align: center; margin-bottom: 30px;">
+                            <img src="${img.src}" alt="${img.title || 'Artwork'}" style="max-width: 100%; max-height: 300px; object-fit: contain; border: 1px solid #e8e4de; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        </div>
+                        <div class="artwork-title">"${img.title || 'Untitled'}"</div>
+                        ${section.artistName ? `<div class="artwork-artist">by ${section.artistName}</div>` : ''}
+                        <div class="artwork-details">
+                            ${img.medium ? `<span><strong>Medium:</strong> ${img.medium}</span>` : ''}
+                            ${img.size ? `<span><strong>Dimensions:</strong> ${img.size}</span>` : ''}
+                        </div>
+                        ${formattedPrice ? `<div class="artwork-price">${formattedPrice}</div>` : ''}
+                    </div>`;
+                    globalIdx++;
+                });
+            });
+
+            let personalNoteHTML = '';
+            if (customMessage) {
+                personalNoteHTML = `
+                <div class="personal-note">
+                    <h4>A PERSONAL NOTE</h4>
+                    <p>${customMessage.replace(/\n/g, '<br>')}</p>
+                </div>`;
+            }
+
+            return `
+            <div class="header">
+                <h1>CASTLE</h1>
+                <h2>FINE ART</h2>
+                <div class="divider">─────── ✦ ───────</div>
+                <h3>${mainTitle}</h3>
+            </div>
+
+            <p class="greeting">${greeting}</p>
+
+            <p class="intro">
+                Thank you for your interest in Castle Fine Art. We are delighted to present this personally
+                curated selection of exceptional artworks for your consideration.<br><br>
+                This collection features <strong>${totalPieces} distinguished piece${totalPieces !== 1 ? 's' : ''}</strong>${artistsText},
+                each representing the pinnacle of contemporary artistry.
+            </p>
+
+            <div class="section-title">─── Curated Collection ───</div>
+
+            ${artworksHTML}
+
+            ${personalNoteHTML}
+
+            <div class="closing">
+                <p>We would be honoured to arrange a <strong>private viewing</strong> at your convenience,</p>
+                <p>where you can experience these remarkable works in person.</p>
+                <p>Please do not hesitate to contact us with any questions.</p>
+                <div class="signature">
+                    <p>With warm regards,</p>
+                    <p><strong>Your Art Consultant</strong></p>
+                    <p>Castle Fine Art</p>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>CASTLE FINE ART | EXCEPTIONAL ART FOR EXCEPTIONAL SPACES</p>
+                <p>www.castlefineart.com</p>
+            </div>`;
+        }
+
+        function showEmailInstructionsModal(subject, content) {
+            // Create modal for instructions
+            const modal = document.createElement('div');
+            modal.id = 'email-modal';
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.85); z-index: 2000;
+                display: flex; justify-content: center; align-items: center;
+                animation: fadeIn 0.3s ease;
+            `;
+
+            modal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                    color: #f5f0e8;
+                    padding: 50px;
+                    border-radius: 12px;
+                    max-width: 600px;
+                    text-align: center;
+                    box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+                    border: 2px solid #d4af37;
+                    position: relative;
+                ">
+                    <div style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+                        background: linear-gradient(135deg, #d4af37, #b8860b);
+                        color: #1a1a2e;
+                        width: 60px; height: 60px;
+                        border-radius: 50%;
+                        display: flex; align-items: center; justify-content: center;
+                        font-size: 28px;
+                        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+                    ">✉</div>
+
+                    <h2 style="
+                        font-family: Georgia, serif;
+                        font-size: 24px;
+                        margin: 20px 0 10px 0;
+                        letter-spacing: 3px;
+                    ">EMAIL READY</h2>
+
+                    <p style="color: #d4af37; font-size: 14px; letter-spacing: 2px; margin-bottom: 30px;">
+                        ─────── ✦ ───────
+                    </p>
+
+                    <p style="font-size: 16px; line-height: 1.8; margin-bottom: 15px; color: #ccc;">
+                        Your beautifully formatted email with images has been copied.
+                    </p>
+                    <p style="font-size: 12px; color: #888; margin-bottom: 25px;">
+                        Note: If images don't appear, Outlook may have blocked them.
+                        You can attach the images separately if needed.
+                    </p>
+
+                    <div style="
+                        background: rgba(255,255,255,0.05);
+                        padding: 20px;
+                        border-radius: 8px;
+                        margin-bottom: 30px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 15px;
+                    ">
+                        <div style="text-align: left; flex: 1;">
+                            <p style="font-size: 12px; color: #888; margin-bottom: 8px; letter-spacing: 1px;">SUBJECT LINE:</p>
+                            <p style="font-size: 15px; color: #d4af37; font-style: italic; margin: 0;">${subject}</p>
+                        </div>
+                        <button id="copy-subject-btn" onclick="copySubjectToClipboard('${subject.replace(/'/g, "\\'")}', this)" style="
+                            background: transparent;
+                            border: 1px solid #666;
+                            color: #ccc;
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            font-size: 12px;
+                            cursor: pointer;
+                            white-space: nowrap;
+                            transition: all 0.2s;
+                        " onmouseover="this.style.borderColor='#d4af37'; this.style.color='#d4af37'"
+                           onmouseout="if(!this.classList.contains('copied')){this.style.borderColor='#666'; this.style.color='#ccc'}">
+                            Copy Subject
+                        </button>
+                    </div>
+
+                    <div style="
+                        background: rgba(212, 175, 55, 0.1);
+                        border: 1px solid rgba(212, 175, 55, 0.3);
+                        padding: 25px;
+                        border-radius: 8px;
+                        margin-bottom: 30px;
+                        text-align: left;
+                    ">
+                        <p style="font-size: 13px; color: #d4af37; margin-bottom: 15px; letter-spacing: 1px;">
+                            HOW TO USE:
+                        </p>
+                        <ol style="font-size: 14px; line-height: 2.2; color: #ccc; padding-left: 20px;">
+                            <li>Open <strong>Outlook</strong> and create a new email</li>
+                            <li>Paste the email body first <kbd style="background: #333; padding: 2px 8px; border-radius: 4px; font-family: monospace;">⌘V</kbd></li>
+                            <li>Click <strong>"Copy Subject"</strong> above, then paste into subject line</li>
+                            <li>Add recipient and send!</li>
+                        </ol>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="window.location.href='mailto:'" style="
+                            background: transparent;
+                            border: 2px solid #d4af37;
+                            color: #d4af37;
+                            padding: 12px 30px;
+                            border-radius: 6px;
+                            font-size: 14px;
+                            cursor: pointer;
+                            letter-spacing: 1px;
+                            transition: all 0.3s;
+                        " onmouseover="this.style.background='rgba(212,175,55,0.1)'"
+                           onmouseout="this.style.background='transparent'">
+                            Open Outlook
+                        </button>
+                        <button onclick="document.getElementById('email-modal').remove()" style="
+                            background: linear-gradient(135deg, #d4af37, #b8860b);
+                            border: none;
+                            color: #1a1a2e;
+                            padding: 12px 30px;
+                            border-radius: 6px;
+                            font-size: 14px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            letter-spacing: 1px;
+                            transition: all 0.3s;
+                        " onmouseover="this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.transform='translateY(0)'">
+                            Done
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+
+            // Update status
+            els.status.textContent = "✉ Email copied to clipboard!";
+            els.status.style.color = "#d4af37";
+            setTimeout(() => els.status.textContent = "", 5000);
+        }
+
+        // Global function for copying subject
+        window.copySubjectToClipboard = function(subject, btn) {
+            navigator.clipboard.writeText(subject).then(() => {
+                btn.textContent = '✓ Copied!';
+                btn.style.borderColor = '#4ade80';
+                btn.style.color = '#4ade80';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy Subject';
+                    btn.style.borderColor = '#666';
+                    btn.style.color = '#ccc';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        };
 
         // Run
         init();
