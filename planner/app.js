@@ -28,7 +28,7 @@ const eventDetailsModal = document.getElementById('eventDetailsModal');
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', async function() {
-    loadCategories(); // Load categories first
+    await loadCategories(); // Load categories first from Supabase
     renderDynamicCategories(); // Render all category-dependent UI
     await loadEventsFromDatabase();
     initializeFilters();
@@ -1160,7 +1160,7 @@ function renderCategoryList() {
 }
 
 // Handle saving category changes
-function handleSaveCategory(categoryId) {
+async function handleSaveCategory(categoryId) {
     if (!isAdminMode) return;
 
     const item = document.querySelector(`.category-item[data-category-id="${categoryId}"]`);
@@ -1181,7 +1181,7 @@ function handleSaveCategory(categoryId) {
         return;
     }
 
-    const result = updateCategory(categoryId, updates);
+    const result = await updateCategory(categoryId, updates);
     if (result.success) {
         renderDynamicCategories();
         renderCategoryList();
@@ -1193,7 +1193,7 @@ function handleSaveCategory(categoryId) {
 }
 
 // Handle deleting a category
-function handleDeleteCategory(categoryId) {
+async function handleDeleteCategory(categoryId) {
     if (!isAdminMode) return;
 
     const cat = eventCategories[categoryId];
@@ -1203,7 +1203,7 @@ function handleDeleteCategory(categoryId) {
         return;
     }
 
-    const result = deleteCategory(categoryId);
+    const result = await deleteCategory(categoryId);
     if (result.success) {
         renderDynamicCategories();
         renderCategoryList();
@@ -1215,7 +1215,7 @@ function handleDeleteCategory(categoryId) {
 }
 
 // Handle adding a new category
-function handleAddCategory() {
+async function handleAddCategory() {
     if (!isAdminMode) return;
 
     const idInput = document.getElementById('newCategoryId');
@@ -1247,7 +1247,7 @@ function handleAddCategory() {
         return;
     }
 
-    const result = addCategory(id, name, name, 'fa-tag', bgColor, textColor);
+    const result = await addCategory(id, name, name, 'fa-tag', bgColor, textColor);
     if (result.success) {
         // Clear inputs
         idInput.value = '';
