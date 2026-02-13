@@ -121,6 +121,15 @@
         #pdfCanvas {
             display: block;
             position: relative;
+            cursor: grab;
+        }
+
+        #pdfCanvas:active {
+            cursor: grabbing;
+        }
+
+        #pdfCanvas.dragging {
+            cursor: grabbing;
         }
 
         .image-overlay {
@@ -430,19 +439,16 @@
 
                 <div id="pdfPositionControls" style="display: none;">
                     <div class="section-divider">
-                        <h3 style="color: #666;">PDF Position</h3>
-                    </div>
-                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Adjust the PDF position for alignment</p>
-
-                    <div class="control-group">
-                        <label>Horizontal Offset (px)</label>
-                        <input type="number" id="pdfOffsetX" value="0">
+                        <h3 style="color: #666;">PDF View</h3>
                     </div>
 
                     <div class="control-group">
-                        <label>Vertical Offset (px)</label>
-                        <input type="number" id="pdfOffsetY" value="0">
+                        <label>Zoom</label>
+                        <input type="range" id="pdfZoom" min="50" max="200" value="100">
+                        <div class="range-value"><span id="pdfZoomValue">100</span>%</div>
                     </div>
+
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Drag the PDF to reposition it for alignment</p>
 
                     <button class="btn" id="resetPdfPosition" style="background: #6c757d; color: white;">Reset Position</button>
                 </div>
@@ -564,9 +570,12 @@
         // PDF position elements
         const pdfCanvasWrapper = document.getElementById('pdfCanvasWrapper');
         const pdfPositionControls = document.getElementById('pdfPositionControls');
-        const pdfOffsetXInput = document.getElementById('pdfOffsetX');
-        const pdfOffsetYInput = document.getElementById('pdfOffsetY');
+        const pdfZoomInput = document.getElementById('pdfZoom');
+        const pdfZoomValue = document.getElementById('pdfZoomValue');
         const resetPdfPositionBtn = document.getElementById('resetPdfPosition');
+
+        // PDF zoom state
+        let pdfZoomLevel = 100;
 
         // Other elements
         const prevPageBtn = document.getElementById('prevPage');
@@ -649,8 +658,9 @@
 
         // Update PDF canvas position
         function updatePdfPosition() {
-            pdfCanvas.style.left = pdfOffset.x + 'px';
-            pdfCanvas.style.top = pdfOffset.y + 'px';
+            const zoomScale = pdfZoomLevel / 100;
+            pdfCanvas.style.transform = `translate(${pdfOffset.x}px, ${pdfOffset.y}px) scale(${zoomScale})`;
+            pdfCanvas.style.transformOrigin = 'top left';
         }
 
         // Handle Image upload
@@ -948,34 +958,56 @@
             updateExportButton();
         });
 
-        // PDF position controls
-        pdfOffsetXInput.addEventListener('change', () => {
-            pdfOffset.x = parseInt(pdfOffsetXInput.value) || 0;
-            updatePdfPosition();
+        // PDF zoom control
+        pdfZoomInput.addEventListener('input', () => {
+            pdfZoomLevel = parseInt(pdfZoomInput.value);
+            pdfZoomValue.textContent = pdfZoomLevel;
+            applyPdfZoom();
         });
 
-        pdfOffsetYInput.addEventListener('change', () => {
-            pdfOffset.y = parseInt(pdfOffsetYInput.value) || 0;
-            updatePdfPosition();
+        function applyPdfZoom() {
+            const zoomScale = pdfZoomLevel / 100;
+            pdfCanvas.style.transform = `translate(${pdfOffset.x}px, ${pdfOffset.y}px) scale(${zoomScale})`;
+            pdfCanvas.style.transformOrigin = 'top left';
+        }
+
+        // PDF canvas dragging
+        let isPdfDragging = false;
+        let pdfDragStartX, pdfDragStartY;
+
+        pdfCanvas.addEventListener('mousedown', (e) => {
+            // Don't start drag if clicking on overlays
+            if (e.target !== pdfCanvas) return;
+
+            isPdfDragging = true;
+            pdfCanvas.classList.add('dragging');
+            pdfDragStartX = e.clientX - pdfOffset.x;
+            pdfDragStartY = e.clientY - pdfOffset.y;
+            e.preventDefault();
         });
 
-        // Also update on input (live preview)
-        pdfOffsetXInput.addEventListener('input', () => {
-            pdfOffset.x = parseInt(pdfOffsetXInput.value) || 0;
-            updatePdfPosition();
+        document.addEventListener('mousemove', (e) => {
+            if (!isPdfDragging) return;
+
+            pdfOffset.x = e.clientX - pdfDragStartX;
+            pdfOffset.y = e.clientY - pdfDragStartY;
+            applyPdfZoom();
         });
 
-        pdfOffsetYInput.addEventListener('input', () => {
-            pdfOffset.y = parseInt(pdfOffsetYInput.value) || 0;
-            updatePdfPosition();
+        document.addEventListener('mouseup', () => {
+            if (isPdfDragging) {
+                isPdfDragging = false;
+                pdfCanvas.classList.remove('dragging');
+            }
         });
 
         resetPdfPositionBtn.addEventListener('click', () => {
             pdfOffset.x = 0;
             pdfOffset.y = 0;
-            pdfOffsetXInput.value = 0;
-            pdfOffsetYInput.value = 0;
-            updatePdfPosition();
+            pdfZoomLevel = 100;
+            pdfZoomInput.value = 100;
+            pdfZoomValue.textContent = 100;
+            applyPdfZoom();
         });
 
         // Export PDF
@@ -996,20 +1028,26 @@
                 const scaleX = pageWidth / pdfCanvas.width;
                 const scaleY = pageHeight / pdfCanvas.height;
 
+                // Calculate zoom factor for position adjustments
+                const zoomScale = pdfZoomLevel / 100;
+
                 // Embed template first (so it's behind the image)
-                // Account for PDF offset: overlays are positioned relative to the visible PDF
-                // So we need to adjust by subtracting the PDF offset
+                // Account for PDF offset and zoom: overlays are positioned relative to the visible PDF
                 if (templateData) {
                     const base64Data = templateData.split(',')[1];
                     const templateBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
                     const embeddedTemplate = await pdfDocLib.embedPng(templateBytes);
 
-                    const adjustedX = templatePosition.x - pdfOffset.x;
-                    const adjustedY = templatePosition.y - pdfOffset.y;
+                    // Convert visual position to actual PDF position (account for offset and zoom)
+                    const adjustedX = (templatePosition.x - pdfOffset.x) / zoomScale;
+                    const adjustedY = (templatePosition.y - pdfOffset.y) / zoomScale;
+                    const adjustedWidth = templateSize.width / zoomScale;
+                    const adjustedHeight = templateSize.height / zoomScale;
+
                     const pdfX = adjustedX * scaleX;
-                    const pdfY = pageHeight - (adjustedY * scaleY) - (templateSize.height * scaleY);
-                    const pdfWidth = templateSize.width * scaleX;
-                    const pdfHeight = templateSize.height * scaleY;
+                    const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
+                    const pdfWidth = adjustedWidth * scaleX;
+                    const pdfHeight = adjustedHeight * scaleY;
                     const opacity = parseInt(templateOpacityInput.value) / 100;
 
                     page.drawImage(embeddedTemplate, {
@@ -1022,7 +1060,7 @@
                 }
 
                 // Embed image (on top of template)
-                // Account for PDF offset
+                // Account for PDF offset and zoom
                 if (imageData) {
                     const base64Data = imageData.split(',')[1];
                     const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
@@ -1034,12 +1072,16 @@
                         embeddedImage = await pdfDocLib.embedJpg(imageBytes);
                     }
 
-                    const adjustedX = imagePosition.x - pdfOffset.x;
-                    const adjustedY = imagePosition.y - pdfOffset.y;
+                    // Convert visual position to actual PDF position (account for offset and zoom)
+                    const adjustedX = (imagePosition.x - pdfOffset.x) / zoomScale;
+                    const adjustedY = (imagePosition.y - pdfOffset.y) / zoomScale;
+                    const adjustedWidth = imageSize.width / zoomScale;
+                    const adjustedHeight = imageSize.height / zoomScale;
+
                     const pdfX = adjustedX * scaleX;
-                    const pdfY = pageHeight - (adjustedY * scaleY) - (imageSize.height * scaleY);
-                    const pdfWidth = imageSize.width * scaleX;
-                    const pdfHeight = imageSize.height * scaleY;
+                    const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
+                    const pdfWidth = adjustedWidth * scaleX;
+                    const pdfHeight = adjustedHeight * scaleY;
                     const opacity = parseInt(imageOpacityInput.value) / 100;
 
                     page.drawImage(embeddedImage, {
