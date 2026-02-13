@@ -35,8 +35,11 @@
         <!-- Sidebar Filters -->
         <aside class="sidebar">
             <div id="adminControls" class="admin-controls hidden">
-                <button id="createNewItemBtn" class="btn-primary" style="width: 100%; margin-bottom: 2rem;">
+                <button id="createNewItemBtn" class="btn-primary" style="width: 100%; margin-bottom: 1rem;">
                     <i class="fas fa-plus"></i> Create New Item
+                </button>
+                <button id="manageCategoriesBtn" class="btn-secondary" style="width: 100%; margin-top: 0; margin-bottom: 2rem;">
+                    <i class="fas fa-tags"></i> Manage Categories
                 </button>
             </div>
 
@@ -45,27 +48,8 @@
 
                 <div class="filter-group">
                     <label>Event Type</label>
-                    <div class="event-types">
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="launch" checked>
-                            <span class="badge launch">Campaign Launch</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="release" checked>
-                            <span class="badge release">Digital Launch</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="exhibition" checked>
-                            <span class="badge exhibition">Digital Originals Program</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="preview" checked>
-                            <span class="badge preview">New Artist</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" value="event" checked>
-                            <span class="badge event">Staff Training / Sales</span>
-                        </label>
+                    <div class="event-types" id="eventTypesFilter">
+                        <!-- Event type filters will be rendered dynamically -->
                     </div>
                 </div>
 
@@ -128,32 +112,8 @@
             </div>
             <div class="type-selection-body">
                 <p>Select the type of item you want to create:</p>
-                <div class="type-cards">
-                    <button class="type-card" data-type="launch">
-                        <i class="fas fa-rocket"></i>
-                        <h3>Campaign Launch</h3>
-                        <p>Major artist campaign launch</p>
-                    </button>
-                    <button class="type-card" data-type="release">
-                        <i class="fas fa-compact-disc"></i>
-                        <h3>Digital Launch</h3>
-                        <p>Digital release with date and title</p>
-                    </button>
-                    <button class="type-card" data-type="exhibition">
-                        <i class="fas fa-palette"></i>
-                        <h3>Digital Originals Program</h3>
-                        <p>Digital originals program event</p>
-                    </button>
-                    <button class="type-card" data-type="preview">
-                        <i class="fas fa-eye"></i>
-                        <h3>New Artist</h3>
-                        <p>New artist introduction</p>
-                    </button>
-                    <button class="type-card" data-type="event">
-                        <i class="fas fa-calendar-day"></i>
-                        <h3>Staff Training / Sales</h3>
-                        <p>Training event or sales period</p>
-                    </button>
+                <div class="type-cards" id="typeSelectionCards">
+                    <!-- Type cards will be rendered dynamically -->
                 </div>
             </div>
         </div>
@@ -171,11 +131,7 @@
                     <div class="form-group">
                         <label for="eventType">Event Type *</label>
                         <select id="eventType" required>
-                            <option value="launch">Campaign Launch</option>
-                            <option value="release">Digital Launch</option>
-                            <option value="exhibition">Digital Originals Program</option>
-                            <option value="preview">New Artist</option>
-                            <option value="event">Staff Training / Sales</option>
+                            <!-- Options will be rendered dynamically -->
                         </select>
                     </div>
 
@@ -309,6 +265,36 @@
             <div class="modal-footer admin-only hidden">
                 <button id="editEventBtn" class="btn-secondary">Edit</button>
                 <button id="deleteEventBtn" class="btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Management Modal (Admin Only) -->
+    <div id="categoryModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Categories</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="category-manager-body">
+                <div class="category-list" id="categoryList">
+                    <!-- Categories will be rendered here -->
+                </div>
+                <div class="add-category-section">
+                    <h4>Add New Category</h4>
+                    <div class="add-category-form">
+                        <input type="text" id="newCategoryId" placeholder="Category ID (e.g., workshop)" class="category-input">
+                        <input type="text" id="newCategoryName" placeholder="Display Name (e.g., Workshop)" class="category-input">
+                        <input type="color" id="newCategoryBgColor" value="#a8d8ea" title="Background Color">
+                        <input type="color" id="newCategoryTextColor" value="#1e3a8a" title="Text Color">
+                        <button id="addCategoryBtn" class="btn-primary btn-small">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary cancel-btn">Close</button>
             </div>
         </div>
     </div>
