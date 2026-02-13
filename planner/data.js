@@ -23,16 +23,134 @@ const galleries = [
     'Winchester', 'Windsor', 'Edinburgh', 'Glasgow', 'Cardiff'
 ];
 
-// Event type colors
-const eventTypeColors = {
-    'event': '#d4b5ff',
-    'release': '#b8e6b8',
-    'exhibition': '#a8d8ea',
-    'preview': '#fff2a8',
-    'launch': '#a8c8ff',
-    'product': '#ffb8b8',
-    'promotion': '#ffd4a8'
+// Default event categories configuration
+const defaultCategories = {
+    'launch': {
+        id: 'launch',
+        name: 'Campaign Launch',
+        description: 'Major artist campaign launch',
+        icon: 'fa-rocket',
+        bgColor: '#a8c8ff',
+        textColor: '#1e3a8a'
+    },
+    'release': {
+        id: 'release',
+        name: 'Digital Launch',
+        description: 'Digital release with date and title',
+        icon: 'fa-compact-disc',
+        bgColor: '#b8e6b8',
+        textColor: '#1e5631'
+    },
+    'exhibition': {
+        id: 'exhibition',
+        name: 'Digital Originals Program',
+        description: 'Digital originals program event',
+        icon: 'fa-palette',
+        bgColor: '#a8d8ea',
+        textColor: '#1e3a8a'
+    },
+    'preview': {
+        id: 'preview',
+        name: 'New Artist',
+        description: 'New artist introduction',
+        icon: 'fa-eye',
+        bgColor: '#fff2a8',
+        textColor: '#7c5500'
+    },
+    'event': {
+        id: 'event',
+        name: 'Staff Training / Sales',
+        description: 'Training event or sales period',
+        icon: 'fa-calendar-day',
+        bgColor: '#d4b5ff',
+        textColor: '#4a2c7a'
+    }
 };
+
+// Dynamic categories (loaded from localStorage or defaults)
+let eventCategories = {};
+
+// Load categories from localStorage or use defaults
+function loadCategories() {
+    const saved = localStorage.getItem('eventCategories');
+    if (saved) {
+        try {
+            eventCategories = JSON.parse(saved);
+        } catch (e) {
+            console.error('Error loading categories:', e);
+            eventCategories = { ...defaultCategories };
+        }
+    } else {
+        eventCategories = { ...defaultCategories };
+    }
+    return eventCategories;
+}
+
+// Save categories to localStorage
+function saveCategories() {
+    localStorage.setItem('eventCategories', JSON.stringify(eventCategories));
+}
+
+// Add a new category
+function addCategory(id, name, description, icon, bgColor, textColor) {
+    if (eventCategories[id]) {
+        return { success: false, error: 'Category ID already exists' };
+    }
+    eventCategories[id] = {
+        id,
+        name,
+        description: description || name,
+        icon: icon || 'fa-tag',
+        bgColor,
+        textColor
+    };
+    saveCategories();
+    return { success: true };
+}
+
+// Update a category
+function updateCategory(id, updates) {
+    if (!eventCategories[id]) {
+        return { success: false, error: 'Category not found' };
+    }
+    eventCategories[id] = { ...eventCategories[id], ...updates };
+    saveCategories();
+    return { success: true };
+}
+
+// Delete a category
+function deleteCategory(id) {
+    if (!eventCategories[id]) {
+        return { success: false, error: 'Category not found' };
+    }
+    // Check if any events use this category
+    const eventsUsingCategory = eventsData.filter(e => e.type === id);
+    if (eventsUsingCategory.length > 0) {
+        return { success: false, error: `Cannot delete: ${eventsUsingCategory.length} event(s) use this category` };
+    }
+    delete eventCategories[id];
+    saveCategories();
+    return { success: true };
+}
+
+// Get event type colors (for backward compatibility)
+function getEventTypeColors() {
+    const colors = {};
+    Object.keys(eventCategories).forEach(id => {
+        colors[id] = eventCategories[id].bgColor;
+    });
+    return colors;
+}
+
+// Legacy eventTypeColors getter for compatibility
+const eventTypeColors = new Proxy({}, {
+    get: function(target, prop) {
+        if (eventCategories[prop]) {
+            return eventCategories[prop].bgColor;
+        }
+        return '#cccccc';
+    }
+});
 
 // Event status colors
 const statusColors = {
