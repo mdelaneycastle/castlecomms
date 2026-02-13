@@ -15,7 +15,6 @@ const tabBtns = document.querySelectorAll('.tab-btn');
 const viewContainers = document.querySelectorAll('.view-container');
 const artistFilter = document.getElementById('artistFilter');
 const galleryFilter = document.getElementById('galleryFilter');
-const eventTypeCheckboxes = document.querySelectorAll('.event-types input[type="checkbox"]');
 const clearFiltersBtn = document.getElementById('clearFilters');
 const createNewItemBtn = document.getElementById('createNewItemBtn');
 const searchInput = document.getElementById('searchInput');
@@ -29,6 +28,8 @@ const eventDetailsModal = document.getElementById('eventDetailsModal');
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', async function() {
+    loadCategories(); // Load categories first
+    renderDynamicCategories(); // Render all category-dependent UI
     await loadEventsFromDatabase();
     initializeFilters();
     initializeCalendar();
@@ -163,14 +164,121 @@ function getCalendarEvents() {
 
 // Get appropriate text color for event type
 function getTextColor(eventType) {
-    const colors = {
-        'event': '#4a2c7a',
-        'release': '#1e5631',
-        'exhibition': '#1e3a8a',
-        'preview': '#7c5500',
-        'launch': '#1e3a8a'
-    };
-    return colors[eventType] || '#333';
+    if (eventCategories[eventType]) {
+        return eventCategories[eventType].textColor;
+    }
+    return '#333';
+}
+
+// Render all dynamic category UI elements
+function renderDynamicCategories() {
+    renderEventTypeFilters();
+    renderTypeSelectionCards();
+    renderEventTypeOptions();
+    applyDynamicCategoryStyles();
+}
+
+// Render event type filter checkboxes in sidebar
+function renderEventTypeFilters() {
+    const container = document.getElementById('eventTypesFilter');
+    if (!container) return;
+
+    container.innerHTML = '';
+    Object.values(eventCategories).forEach(cat => {
+        const label = document.createElement('label');
+        label.className = 'checkbox-label';
+        label.innerHTML = `
+            <input type="checkbox" value="${cat.id}" checked>
+            <span class="badge ${cat.id}">${cat.name}</span>
+        `;
+        container.appendChild(label);
+    });
+
+    // Re-attach event listeners
+    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateTypeFilter);
+    });
+
+    // Update currentFilters.types
+    currentFilters.types = Object.keys(eventCategories);
+}
+
+// Render type selection cards in modal
+function renderTypeSelectionCards() {
+    const container = document.getElementById('typeSelectionCards');
+    if (!container) return;
+
+    container.innerHTML = '';
+    Object.values(eventCategories).forEach(cat => {
+        const button = document.createElement('button');
+        button.className = 'type-card';
+        button.dataset.type = cat.id;
+        button.innerHTML = `
+            <i class="fas ${cat.icon}"></i>
+            <h3>${cat.name}</h3>
+            <p>${cat.description}</p>
+        `;
+        button.addEventListener('click', function() {
+            const type = this.dataset.type;
+            closeModals();
+            if (type === 'event') {
+                showAddEventModal();
+            } else {
+                showSimpleItemModal(type);
+            }
+        });
+        container.appendChild(button);
+    });
+}
+
+// Render event type options in form select
+function renderEventTypeOptions() {
+    const select = document.getElementById('eventType');
+    if (!select) return;
+
+    select.innerHTML = '';
+    Object.values(eventCategories).forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.id;
+        option.textContent = cat.name;
+        select.appendChild(option);
+    });
+}
+
+// Apply dynamic CSS for category badges
+function applyDynamicCategoryStyles() {
+    // Remove old dynamic styles
+    let styleEl = document.getElementById('dynamic-category-styles');
+    if (styleEl) {
+        styleEl.remove();
+    }
+
+    // Create new style element
+    styleEl = document.createElement('style');
+    styleEl.id = 'dynamic-category-styles';
+
+    let css = '';
+    Object.values(eventCategories).forEach(cat => {
+        css += `.badge.${cat.id} { background: ${cat.bgColor}; color: ${cat.textColor}; }\n`;
+    });
+
+    styleEl.textContent = css;
+    document.head.appendChild(styleEl);
+}
+
+// Get type labels for list view
+function getTypeLabels() {
+    const labels = {};
+    Object.values(eventCategories).forEach(cat => {
+        labels[cat.id] = cat.name;
+    });
+    return labels;
+}
+
+// Get type display names
+function getTypeDisplayNames() {
+    return getTypeLabels();
 }
 
 // Initialize event handlers
@@ -183,11 +291,7 @@ function initializeEventHandlers() {
         btn.addEventListener('click', () => switchView(btn.dataset.view));
     });
 
-    // Filter handlers
-    eventTypeCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateTypeFilter);
-    });
-
+    // Filter handlers (event type checkboxes are handled in renderEventTypeFilters)
     artistFilter.addEventListener('change', updateFilters);
     galleryFilter.addEventListener('change', updateFilters);
     clearFiltersBtn.addEventListener('click', clearAllFilters);
@@ -195,6 +299,14 @@ function initializeEventHandlers() {
 
     // Admin controls
     if (createNewItemBtn) createNewItemBtn.addEventListener('click', showTypeSelectionModal);
+
+    // Manage categories button (admin only)
+    const manageCategoriesBtn = document.getElementById('manageCategoriesBtn');
+    if (manageCategoriesBtn) manageCategoriesBtn.addEventListener('click', showCategoryModal);
+
+    // Add category button
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+    if (addCategoryBtn) addCategoryBtn.addEventListener('click', handleAddCategory);
 
     // Type selection cards
     document.querySelectorAll('.type-card').forEach(card => {
@@ -273,7 +385,8 @@ function switchView(view) {
 
 // Update type filter
 function updateTypeFilter() {
-    currentFilters.types = Array.from(eventTypeCheckboxes)
+    const checkboxes = document.querySelectorAll('#eventTypesFilter input[type="checkbox"]');
+    currentFilters.types = Array.from(checkboxes)
         .filter(cb => cb.checked)
         .map(cb => cb.value);
     updateFilters();
@@ -292,8 +405,9 @@ function updateFilters() {
 // Clear all filters
 function clearAllFilters() {
     // Reset type checkboxes
-    eventTypeCheckboxes.forEach(cb => cb.checked = true);
-    currentFilters.types = ['event', 'release', 'exhibition', 'preview', 'launch'];
+    const checkboxes = document.querySelectorAll('#eventTypesFilter input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = true);
+    currentFilters.types = Object.keys(eventCategories);
 
     // Reset select filters
     artistFilter.value = '';
@@ -328,28 +442,23 @@ function renderListView() {
     // Sort by date
     filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // Group by type
-    const grouped = {
-        'launch': [],
-        'release': [],
-        'exhibition': [],
-        'preview': [],
-        'event': []
-    };
+    // Group by type (dynamically based on categories)
+    const grouped = {};
+    Object.keys(eventCategories).forEach(typeId => {
+        grouped[typeId] = [];
+    });
 
     filtered.forEach(item => {
         if (grouped[item.type]) {
             grouped[item.type].push(item);
+        } else {
+            // Handle events with unknown types
+            if (!grouped['other']) grouped['other'] = [];
+            grouped['other'].push(item);
         }
     });
 
-    const typeLabels = {
-        'launch': 'Campaign Launch',
-        'release': 'Digital Launch',
-        'exhibition': 'Digital Originals Program',
-        'preview': 'New Artist',
-        'event': 'Staff Training / Sales'
-    };
+    const typeLabels = getTypeLabels();
 
     // Render separate tables for each type
     let html = '';
@@ -454,13 +563,7 @@ function showEventDetails(eventId) {
         title.textContent = event.title ? `${event.artist} - ${event.title}` : event.artist;
     }
 
-    const typeDisplayNames = {
-        'launch': 'Campaign Launch',
-        'release': 'Digital Launch',
-        'exhibition': 'Digital Originals Program',
-        'preview': 'New Artist',
-        'event': 'Staff Training / Sales'
-    };
+    const typeDisplayNames = getTypeDisplayNames();
 
     let detailsHTML = `
         <div style="padding: 2rem;">
@@ -546,13 +649,8 @@ function showSimpleItemModal(type, defaultDate = '') {
     const title = document.getElementById('simpleModalTitle');
 
     // Set title based on type
-    const typeNames = {
-        'launch': 'Campaign Launch',
-        'release': 'Digital Launch',
-        'exhibition': 'Digital Originals Program',
-        'preview': 'New Artist'
-    };
-    title.textContent = `Add New ${typeNames[type]}`;
+    const typeNames = getTypeLabels();
+    title.textContent = `Add New ${typeNames[type] || type}`;
 
     form.reset();
     document.getElementById('simpleItemType').value = type;
@@ -645,14 +743,8 @@ function editEvent(eventId) {
         const form = document.getElementById('simpleItemForm');
         const title = document.getElementById('simpleModalTitle');
 
-        const typeNames = {
-            'launch': 'Campaign Launch',
-            'release': 'Digital Launch',
-            'exhibition': 'Digital Originals Program',
-            'preview': 'New Artist',
-            'event': 'Staff Training / Sales'
-        };
-        title.textContent = `Edit ${typeNames[event.type]}`;
+        const typeNames = getTypeLabels();
+        title.textContent = `Edit ${typeNames[event.type] || event.type}`;
 
         // Populate artist datalist
         populateArtistDatalist('simpleArtistList');
@@ -1014,6 +1106,163 @@ function debounce(func, wait) {
 function handleDownloadICS() {
     downloadICSFile();
     alert('Calendar file downloaded! Import this file into Outlook, Google Calendar, or Apple Calendar.');
+}
+
+// Show category management modal (admin only)
+function showCategoryModal() {
+    if (!isAdminMode) return;
+
+    const modal = document.getElementById('categoryModal');
+    renderCategoryList();
+    modal.classList.remove('hidden');
+}
+
+// Render category list in modal
+function renderCategoryList() {
+    const container = document.getElementById('categoryList');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    Object.values(eventCategories).forEach(cat => {
+        const item = document.createElement('div');
+        item.className = 'category-item';
+        item.dataset.categoryId = cat.id;
+        item.innerHTML = `
+            <div class="category-preview">
+                <span class="badge ${cat.id}">${cat.name}</span>
+            </div>
+            <div class="category-info">
+                <span class="category-id">${cat.id}</span>
+                <input type="text" class="category-name-input" value="${cat.name}" data-field="name">
+            </div>
+            <div class="category-colors">
+                <div class="color-picker-group">
+                    <label>BG</label>
+                    <input type="color" value="${cat.bgColor}" data-field="bgColor" title="Background Color">
+                </div>
+                <div class="color-picker-group">
+                    <label>Text</label>
+                    <input type="color" value="${cat.textColor}" data-field="textColor" title="Text Color">
+                </div>
+            </div>
+            <div class="category-actions">
+                <button class="btn-icon save" onclick="handleSaveCategory('${cat.id}')" title="Save Changes">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="btn-icon delete" onclick="handleDeleteCategory('${cat.id}')" title="Delete Category">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+// Handle saving category changes
+function handleSaveCategory(categoryId) {
+    if (!isAdminMode) return;
+
+    const item = document.querySelector(`.category-item[data-category-id="${categoryId}"]`);
+    if (!item) return;
+
+    const nameInput = item.querySelector('input[data-field="name"]');
+    const bgColorInput = item.querySelector('input[data-field="bgColor"]');
+    const textColorInput = item.querySelector('input[data-field="textColor"]');
+
+    const updates = {
+        name: nameInput.value.trim(),
+        bgColor: bgColorInput.value,
+        textColor: textColorInput.value
+    };
+
+    if (!updates.name) {
+        alert('Category name cannot be empty');
+        return;
+    }
+
+    const result = updateCategory(categoryId, updates);
+    if (result.success) {
+        renderDynamicCategories();
+        renderCategoryList();
+        updateCalendar();
+        renderListView();
+    } else {
+        alert('Failed to update category: ' + result.error);
+    }
+}
+
+// Handle deleting a category
+function handleDeleteCategory(categoryId) {
+    if (!isAdminMode) return;
+
+    const cat = eventCategories[categoryId];
+    if (!cat) return;
+
+    if (!confirm(`Are you sure you want to delete the category "${cat.name}"?`)) {
+        return;
+    }
+
+    const result = deleteCategory(categoryId);
+    if (result.success) {
+        renderDynamicCategories();
+        renderCategoryList();
+        updateCalendar();
+        renderListView();
+    } else {
+        alert('Failed to delete category: ' + result.error);
+    }
+}
+
+// Handle adding a new category
+function handleAddCategory() {
+    if (!isAdminMode) return;
+
+    const idInput = document.getElementById('newCategoryId');
+    const nameInput = document.getElementById('newCategoryName');
+    const bgColorInput = document.getElementById('newCategoryBgColor');
+    const textColorInput = document.getElementById('newCategoryTextColor');
+
+    const id = idInput.value.trim().toLowerCase().replace(/\s+/g, '-');
+    const name = nameInput.value.trim();
+    const bgColor = bgColorInput.value;
+    const textColor = textColorInput.value;
+
+    if (!id) {
+        alert('Please enter a category ID');
+        idInput.focus();
+        return;
+    }
+
+    if (!name) {
+        alert('Please enter a category name');
+        nameInput.focus();
+        return;
+    }
+
+    // Validate ID format
+    if (!/^[a-z0-9-]+$/.test(id)) {
+        alert('Category ID can only contain lowercase letters, numbers, and hyphens');
+        idInput.focus();
+        return;
+    }
+
+    const result = addCategory(id, name, name, 'fa-tag', bgColor, textColor);
+    if (result.success) {
+        // Clear inputs
+        idInput.value = '';
+        nameInput.value = '';
+        bgColorInput.value = '#a8d8ea';
+        textColorInput.value = '#1e3a8a';
+
+        // Refresh UI
+        renderDynamicCategories();
+        renderCategoryList();
+        updateCalendar();
+        renderListView();
+    } else {
+        alert('Failed to add category: ' + result.error);
+    }
 }
 
 // Handle copy subscribe URL
