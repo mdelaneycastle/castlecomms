@@ -67,36 +67,68 @@ const defaultCategories = {
     }
 };
 
-// Dynamic categories (loaded from localStorage or defaults)
+// Dynamic categories (loaded from Supabase or defaults)
 let eventCategories = {};
 
-// Load categories from localStorage or use defaults
-function loadCategories() {
-    const saved = localStorage.getItem('eventCategories');
-    if (saved) {
-        try {
-            eventCategories = JSON.parse(saved);
-        } catch (e) {
-            console.error('Error loading categories:', e);
+// Helper to convert DB row to JS object
+function categoryFromDb(row) {
+    return {
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        icon: row.icon,
+        bgColor: row.bg_color,
+        textColor: row.text_color
+    };
+}
+
+// Helper to convert JS object to DB row
+function categoryToDb(cat) {
+    return {
+        id: cat.id,
+        name: cat.name,
+        description: cat.description || cat.name,
+        icon: cat.icon || 'fa-tag',
+        bg_color: cat.bgColor,
+        text_color: cat.textColor
+    };
+}
+
+// Load categories from Supabase (with fallback to defaults)
+async function loadCategories() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('categories')
+            .select('*')
+            .order('name', { ascending: true });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            eventCategories = {};
+            data.forEach(row => {
+                const cat = categoryFromDb(row);
+                eventCategories[cat.id] = cat;
+            });
+        } else {
+            // No categories in DB, use defaults
             eventCategories = { ...defaultCategories };
         }
-    } else {
+    } catch (error) {
+        console.error('Error loading categories from database:', error);
+        // Fallback to defaults on error
         eventCategories = { ...defaultCategories };
     }
     return eventCategories;
 }
 
-// Save categories to localStorage
-function saveCategories() {
-    localStorage.setItem('eventCategories', JSON.stringify(eventCategories));
-}
-
-// Add a new category
-function addCategory(id, name, description, icon, bgColor, textColor) {
+// Add a new category to Supabase
+async function addCategory(id, name, description, icon, bgColor, textColor) {
     if (eventCategories[id]) {
         return { success: false, error: 'Category ID already exists' };
     }
-    eventCategories[id] = {
+
+    const newCat = {
         id,
         name,
         description: description || name,
@@ -104,33 +136,79 @@ function addCategory(id, name, description, icon, bgColor, textColor) {
         bgColor,
         textColor
     };
-    saveCategories();
-    return { success: true };
+
+    try {
+        const { error } = await supabaseClient
+            .from('categories')
+            .insert(categoryToDb(newCat));
+
+        if (error) throw error;
+
+        eventCategories[id] = newCat;
+        return { success: true };
+    } catch (error) {
+        console.error('Error adding category:', error);
+        return { success: false, error: error.message };
+    }
 }
 
-// Update a category
-function updateCategory(id, updates) {
+// Update a category in Supabase
+async function updateCategory(id, updates) {
     if (!eventCategories[id]) {
         return { success: false, error: 'Category not found' };
     }
-    eventCategories[id] = { ...eventCategories[id], ...updates };
-    saveCategories();
-    return { success: true };
+
+    const updatedCat = { ...eventCategories[id], ...updates };
+
+    try {
+        const { error } = await supabaseClient
+            .from('categories')
+            .update({
+                name: updatedCat.name,
+                description: updatedCat.description,
+                icon: updatedCat.icon,
+                bg_color: updatedCat.bgColor,
+                text_color: updatedCat.textColor,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+        if (error) throw error;
+
+        eventCategories[id] = updatedCat;
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating category:', error);
+        return { success: false, error: error.message };
+    }
 }
 
-// Delete a category
-function deleteCategory(id) {
+// Delete a category from Supabase
+async function deleteCategory(id) {
     if (!eventCategories[id]) {
         return { success: false, error: 'Category not found' };
     }
+
     // Check if any events use this category
     const eventsUsingCategory = eventsData.filter(e => e.type === id);
     if (eventsUsingCategory.length > 0) {
         return { success: false, error: `Cannot delete: ${eventsUsingCategory.length} event(s) use this category` };
     }
-    delete eventCategories[id];
-    saveCategories();
-    return { success: true };
+
+    try {
+        const { error } = await supabaseClient
+            .from('categories')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        delete eventCategories[id];
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        return { success: false, error: error.message };
+    }
 }
 
 // Get event type colors (for backward compatibility)
