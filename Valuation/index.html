@@ -524,6 +524,75 @@
             font-size: 13px;
         }
 
+        .text-overlay {
+            position: absolute;
+            cursor: move;
+            border: 2px dashed #9c27b0;
+            padding: 4px 8px;
+            background: transparent;
+            min-width: 50px;
+            min-height: 24px;
+        }
+
+        .text-overlay.selected {
+            border-color: #7b1fa2;
+            border-style: solid;
+        }
+
+        .text-overlay .overlay-label {
+            background: #9c27b0;
+        }
+
+        .text-overlay .delete-btn {
+            background: #9c27b0;
+        }
+
+        .text-overlay .delete-btn:hover {
+            background: #7b1fa2;
+        }
+
+        .text-overlay-content {
+            outline: none;
+            min-width: 40px;
+            white-space: nowrap;
+        }
+
+        .textbox-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .textbox-row:last-child {
+            border-bottom: none;
+        }
+
+        .textbox-row:hover {
+            background: #f9f9f9;
+        }
+
+        .textbox-row.selected {
+            background: #f3e5f5;
+        }
+
+        .textbox-row .textbox-icon {
+            width: 36px;
+            height: 36px;
+            background: white;
+            border: 2px dashed #9c27b0;
+            border-radius: 3px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #9c27b0;
+            font-size: 16px;
+        }
+
         @media (max-width: 900px) {
             .upload-section {
                 grid-template-columns: 1fr;
@@ -617,6 +686,45 @@
                     <div class="empty-list">No white boxes added</div>
                 </div>
 
+                <!-- Text Boxes Section -->
+                <div class="section-divider">
+                    <h3 style="color: #9c27b0;">Text Boxes</h3>
+                </div>
+                <button class="btn" id="addTextBoxBtn" style="background: #9c27b0; color: white;" disabled>Add Text Box</button>
+                <div class="item-list" id="textboxList">
+                    <div class="empty-list">No text boxes added</div>
+                </div>
+
+                <!-- Selected Text Box Controls -->
+                <div id="selectedTextControls" style="display: none;">
+                    <div class="control-group">
+                        <label>Font Family</label>
+                        <select id="textFontFamily" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                            <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                            <option value="'Palatino Linotype', serif">Palatino</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Font Size (px)</label>
+                        <input type="number" id="textFontSize" min="8" max="72" value="16">
+                    </div>
+                    <div class="control-group">
+                        <label>Font Color</label>
+                        <input type="color" id="textColor" value="#000000" style="width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+                    </div>
+                    <div class="control-group">
+                        <label style="display: flex; align-items: center; gap: 10px; text-transform: none;">
+                            <input type="checkbox" id="textBold" style="width: 18px; height: 18px;">
+                            Bold
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Images Section -->
                 <div class="section-divider">
                     <h3 style="color: #007bff;">Images</h3>
@@ -681,6 +789,9 @@
         // White boxes state
         let whiteBoxes = []; // Array of { id, position: {x, y}, size: {width, height}, element }
 
+        // Text boxes state
+        let textBoxes = []; // Array of { id, text, position: {x, y}, fontFamily, fontSize, color, bold, element }
+
         // Template state
         let templateData = null;
         let templatePosition = { x: 0, y: 0 };
@@ -693,10 +804,11 @@
         // Selection state
         let selectedImageId = null;
         let selectedWhiteBoxId = null;
+        let selectedTextBoxId = null;
 
         // Dragging/resizing state
         let activeElement = null;
-        let activeType = null; // 'image' or 'whitebox'
+        let activeType = null; // 'image', 'whitebox', or 'textbox'
         let activeId = null;
         let isDragging = false;
         let isResizing = false;
@@ -738,6 +850,15 @@
         // White box controls
         const addWhiteBoxBtn = document.getElementById('addWhiteBoxBtn');
         const whiteboxListEl = document.getElementById('whiteboxList');
+
+        // Text box controls
+        const addTextBoxBtn = document.getElementById('addTextBoxBtn');
+        const textboxListEl = document.getElementById('textboxList');
+        const selectedTextControls = document.getElementById('selectedTextControls');
+        const textFontFamilySelect = document.getElementById('textFontFamily');
+        const textFontSizeInput = document.getElementById('textFontSize');
+        const textColorInput = document.getElementById('textColor');
+        const textBoldCheckbox = document.getElementById('textBold');
 
         // Image list and controls
         const imageListEl = document.getElementById('imageList');
@@ -817,6 +938,7 @@
             pdfViewer.style.display = 'inline-block';
             addTemplateBtn.disabled = false;
             addWhiteBoxBtn.disabled = false;
+            addTextBoxBtn.disabled = false;
             pdfPositionControls.style.display = 'block';
 
             await renderPage(currentPage);
@@ -931,6 +1053,65 @@
             whiteBox.element = overlay;
         }
 
+        // Add text box
+        addTextBoxBtn.addEventListener('click', () => {
+            const textBox = {
+                id: generateId(),
+                text: 'Manager Name',
+                position: { x: 100 + textBoxes.length * 20, y: 200 + textBoxes.length * 20 },
+                fontFamily: 'Arial, sans-serif',
+                fontSize: 16,
+                color: '#000000',
+                bold: false,
+                element: null
+            };
+            textBoxes.push(textBox);
+            createTextBoxOverlay(textBox);
+            renderTextBoxList();
+            selectTextBox(textBox.id);
+            updateExportButton();
+        });
+
+        // Create text box overlay element
+        function createTextBoxOverlay(textBox) {
+            const overlay = document.createElement('div');
+            overlay.className = 'text-overlay';
+            overlay.dataset.id = textBox.id;
+            overlay.innerHTML = `
+                <span class="overlay-label">Text</span>
+                <div class="delete-btn" data-action="delete">×</div>
+                <div class="text-overlay-content" contenteditable="true">${textBox.text}</div>
+            `;
+            overlay.style.left = textBox.position.x + 'px';
+            overlay.style.top = textBox.position.y + 'px';
+            applyTextStyle(overlay, textBox);
+
+            const contentEl = overlay.querySelector('.text-overlay-content');
+            contentEl.addEventListener('input', () => {
+                textBox.text = contentEl.textContent;
+                renderTextBoxList();
+            });
+            contentEl.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                selectTextBox(textBox.id);
+            });
+
+            overlay.addEventListener('mousedown', (e) => handleOverlayMouseDown(e, 'textbox', textBox.id));
+
+            overlaysContainer.appendChild(overlay);
+            textBox.element = overlay;
+        }
+
+        function applyTextStyle(overlay, textBox) {
+            const contentEl = overlay.querySelector('.text-overlay-content');
+            if (contentEl) {
+                contentEl.style.fontFamily = textBox.fontFamily;
+                contentEl.style.fontSize = textBox.fontSize + 'px';
+                contentEl.style.color = textBox.color;
+                contentEl.style.fontWeight = textBox.bold ? 'bold' : 'normal';
+            }
+        }
+
         // Handle overlay mousedown
         function handleOverlayMouseDown(e, type, id) {
             e.preventDefault();
@@ -940,8 +1121,10 @@
             if (e.target.dataset.action === 'delete') {
                 if (type === 'image') {
                     deleteImage(id);
-                } else {
+                } else if (type === 'whitebox') {
                     deleteWhiteBox(id);
+                } else if (type === 'textbox') {
+                    deleteTextBox(id);
                 }
                 return;
             }
@@ -949,11 +1132,16 @@
             // Select the item
             if (type === 'image') {
                 selectImage(id);
-            } else {
+            } else if (type === 'whitebox') {
                 selectWhiteBox(id);
+            } else if (type === 'textbox') {
+                selectTextBox(id);
             }
 
-            const item = type === 'image' ? images.find(i => i.id === id) : whiteBoxes.find(w => w.id === id);
+            let item;
+            if (type === 'image') item = images.find(i => i.id === id);
+            else if (type === 'whitebox') item = whiteBoxes.find(w => w.id === id);
+            else if (type === 'textbox') item = textBoxes.find(t => t.id === id);
             if (!item) return;
 
             activeElement = item.element;
@@ -980,7 +1168,10 @@
         document.addEventListener('mousemove', (e) => {
             if (!activeElement) return;
 
-            const item = activeType === 'image' ? images.find(i => i.id === activeId) : whiteBoxes.find(w => w.id === activeId);
+            let item;
+            if (activeType === 'image') item = images.find(i => i.id === activeId);
+            else if (activeType === 'whitebox') item = whiteBoxes.find(w => w.id === activeId);
+            else if (activeType === 'textbox') item = textBoxes.find(t => t.id === activeId);
             if (!item) return;
 
             if (isDragging) {
@@ -1066,10 +1257,12 @@
         function selectImage(id) {
             selectedImageId = id;
             selectedWhiteBoxId = null;
+            selectedTextBoxId = null;
 
             // Update visual selection
             document.querySelectorAll('.image-overlay').forEach(el => el.classList.remove('selected'));
             document.querySelectorAll('.white-box-overlay').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.text-overlay').forEach(el => el.classList.remove('selected'));
             const img = images.find(i => i.id === id);
             if (img && img.element) {
                 img.element.classList.add('selected');
@@ -1078,9 +1271,11 @@
             // Update list selection
             renderImageList();
             renderWhiteBoxList();
+            renderTextBoxList();
 
             // Show controls
             selectedImageControls.style.display = 'block';
+            selectedTextControls.style.display = 'none';
             if (img) {
                 imageWidthInput.value = Math.round(img.size.width);
                 imageHeightInput.value = Math.round(img.size.height);
@@ -1093,10 +1288,12 @@
         function selectWhiteBox(id) {
             selectedWhiteBoxId = id;
             selectedImageId = null;
+            selectedTextBoxId = null;
 
             // Update visual selection
             document.querySelectorAll('.image-overlay').forEach(el => el.classList.remove('selected'));
             document.querySelectorAll('.white-box-overlay').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.text-overlay').forEach(el => el.classList.remove('selected'));
             const wb = whiteBoxes.find(w => w.id === id);
             if (wb && wb.element) {
                 wb.element.classList.add('selected');
@@ -1105,9 +1302,42 @@
             // Update list selection
             renderImageList();
             renderWhiteBoxList();
+            renderTextBoxList();
 
-            // Hide image controls
+            // Hide controls
             selectedImageControls.style.display = 'none';
+            selectedTextControls.style.display = 'none';
+        }
+
+        // Select text box
+        function selectTextBox(id) {
+            selectedTextBoxId = id;
+            selectedImageId = null;
+            selectedWhiteBoxId = null;
+
+            // Update visual selection
+            document.querySelectorAll('.image-overlay').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.white-box-overlay').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.text-overlay').forEach(el => el.classList.remove('selected'));
+            const tb = textBoxes.find(t => t.id === id);
+            if (tb && tb.element) {
+                tb.element.classList.add('selected');
+            }
+
+            // Update list selection
+            renderImageList();
+            renderWhiteBoxList();
+            renderTextBoxList();
+
+            // Show text controls
+            selectedImageControls.style.display = 'none';
+            selectedTextControls.style.display = 'block';
+            if (tb) {
+                textFontFamilySelect.value = tb.fontFamily;
+                textFontSizeInput.value = tb.fontSize;
+                textColorInput.value = tb.color;
+                textBoldCheckbox.checked = tb.bold;
+            }
         }
 
         // Delete image
@@ -1142,6 +1372,23 @@
                 renderWhiteBoxList();
                 if (selectedWhiteBoxId === id) {
                     selectedWhiteBoxId = null;
+                }
+                updateExportButton();
+            }
+        }
+
+        // Delete text box
+        function deleteTextBox(id) {
+            const idx = textBoxes.findIndex(t => t.id === id);
+            if (idx !== -1) {
+                if (textBoxes[idx].element) {
+                    textBoxes[idx].element.remove();
+                }
+                textBoxes.splice(idx, 1);
+                renderTextBoxList();
+                if (selectedTextBoxId === id) {
+                    selectedTextBoxId = null;
+                    selectedTextControls.style.display = 'none';
                 }
                 updateExportButton();
             }
@@ -1204,6 +1451,69 @@
                 });
             });
         }
+
+        // Render text box list
+        function renderTextBoxList() {
+            if (textBoxes.length === 0) {
+                textboxListEl.innerHTML = '<div class="empty-list">No text boxes added</div>';
+                return;
+            }
+            textboxListEl.innerHTML = textBoxes.map((tb, idx) => `
+                <div class="textbox-row ${selectedTextBoxId === tb.id ? 'selected' : ''}" data-id="${tb.id}">
+                    <div class="textbox-icon">T</div>
+                    <div class="item-info">
+                        <div class="item-name">${tb.text.substring(0, 20)}${tb.text.length > 20 ? '...' : ''}</div>
+                        <div class="item-size">${tb.fontSize}px</div>
+                    </div>
+                    <button class="item-delete" data-id="${tb.id}">Delete</button>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            textboxListEl.querySelectorAll('.textbox-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('item-delete')) {
+                        deleteTextBox(e.target.dataset.id);
+                    } else {
+                        selectTextBox(row.dataset.id);
+                    }
+                });
+            });
+        }
+
+        // Text style controls
+        textFontFamilySelect.addEventListener('change', () => {
+            if (!selectedTextBoxId) return;
+            const tb = textBoxes.find(t => t.id === selectedTextBoxId);
+            if (!tb) return;
+            tb.fontFamily = textFontFamilySelect.value;
+            applyTextStyle(tb.element, tb);
+        });
+
+        textFontSizeInput.addEventListener('change', () => {
+            if (!selectedTextBoxId) return;
+            const tb = textBoxes.find(t => t.id === selectedTextBoxId);
+            if (!tb) return;
+            tb.fontSize = parseInt(textFontSizeInput.value) || 16;
+            applyTextStyle(tb.element, tb);
+            renderTextBoxList();
+        });
+
+        textColorInput.addEventListener('input', () => {
+            if (!selectedTextBoxId) return;
+            const tb = textBoxes.find(t => t.id === selectedTextBoxId);
+            if (!tb) return;
+            tb.color = textColorInput.value;
+            applyTextStyle(tb.element, tb);
+        });
+
+        textBoldCheckbox.addEventListener('change', () => {
+            if (!selectedTextBoxId) return;
+            const tb = textBoxes.find(t => t.id === selectedTextBoxId);
+            if (!tb) return;
+            tb.bold = textBoldCheckbox.checked;
+            applyTextStyle(tb.element, tb);
+        });
 
         // Image size inputs
         imageWidthInput.addEventListener('change', () => {
@@ -1276,7 +1586,7 @@
 
         // Update export button
         function updateExportButton() {
-            exportBtn.disabled = !pdfDoc || (images.length === 0 && whiteBoxes.length === 0 && !templateData);
+            exportBtn.disabled = !pdfDoc || (images.length === 0 && whiteBoxes.length === 0 && textBoxes.length === 0 && !templateData);
         }
 
         // Page navigation
@@ -1495,6 +1805,40 @@
                     });
                 }
 
+                // 4. Draw text boxes (on top of everything)
+                for (const tb of textBoxes) {
+                    const adjustedX = (tb.position.x - pdfOffset.x) / zoomScale;
+                    const adjustedY = (tb.position.y - pdfOffset.y) / zoomScale;
+
+                    const pdfX = adjustedX * scaleX;
+                    // Text needs to account for baseline - approximate by adding font size
+                    const pdfY = pageHeight - (adjustedY * scaleY) - (tb.fontSize * scaleY);
+
+                    // Parse color
+                    const hex = tb.color.replace('#', '');
+                    const r = parseInt(hex.substring(0, 2), 16) / 255;
+                    const g = parseInt(hex.substring(2, 4), 16) / 255;
+                    const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+                    // Get font - pdf-lib has limited built-in fonts
+                    let font;
+                    if (tb.fontFamily.includes('Times')) {
+                        font = await pdfDocLib.embedFont(tb.bold ? PDFLib.StandardFonts.TimesBold : PDFLib.StandardFonts.TimesRoman);
+                    } else if (tb.fontFamily.includes('Courier')) {
+                        font = await pdfDocLib.embedFont(tb.bold ? PDFLib.StandardFonts.CourierBold : PDFLib.StandardFonts.Courier);
+                    } else {
+                        font = await pdfDocLib.embedFont(tb.bold ? PDFLib.StandardFonts.HelveticaBold : PDFLib.StandardFonts.Helvetica);
+                    }
+
+                    page.drawText(tb.text, {
+                        x: pdfX,
+                        y: pdfY,
+                        size: tb.fontSize * scaleX,
+                        font: font,
+                        color: rgb(r, g, b)
+                    });
+                }
+
                 const modifiedPdfBytes = await pdfDocLib.save();
 
                 const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
@@ -1517,6 +1861,7 @@
         // Initialize lists
         renderImageList();
         renderWhiteBoxList();
+        renderTextBoxList();
     </script>
 </body>
 </html>
