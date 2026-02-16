@@ -92,7 +92,7 @@
 
         .workspace {
             display: grid;
-            grid-template-columns: 1fr 300px;
+            grid-template-columns: 1fr 320px;
             gap: 20px;
         }
 
@@ -150,6 +150,19 @@
             border-color: #28a745;
         }
 
+        .white-box-overlay {
+            position: absolute;
+            cursor: move;
+            border: 2px dashed #999;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .white-box-overlay.selected {
+            border-color: #dc3545;
+            border-style: solid;
+        }
+
         .template-overlay {
             position: absolute;
             border: none;
@@ -169,6 +182,10 @@
             background: #007bff;
             border: 2px solid white;
             border-radius: 2px;
+        }
+
+        .white-box-overlay .resize-handle {
+            background: #dc3545;
         }
 
         .resize-handle.se {
@@ -193,6 +210,44 @@
             top: -6px;
             left: -6px;
             cursor: nw-resize;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 24px;
+            height: 24px;
+            background: #dc3545;
+            border: 2px solid white;
+            border-radius: 50%;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .overlay-label {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            font-size: 11px;
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px 3px 0 0;
+            white-space: nowrap;
+        }
+
+        .white-box-overlay .overlay-label {
+            background: #dc3545;
         }
 
         .controls {
@@ -281,6 +336,15 @@
             background: #c82333;
         }
 
+        .btn-whitebox {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-whitebox:hover:not(:disabled) {
+            background: #5a6268;
+        }
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -343,30 +407,121 @@
             margin-bottom: 5px;
         }
 
-        .image-preview {
-            width: 100%;
-            max-height: 100px;
-            object-fit: contain;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-
         .section-divider {
             border-top: 2px solid #eee;
             margin: 20px 0;
             padding-top: 20px;
         }
 
-        .overlay-label {
-            position: absolute;
-            top: -24px;
-            left: 0;
+        /* Item lists */
+        .item-list {
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-row:hover {
+            background: #f9f9f9;
+        }
+
+        .item-row.selected {
+            background: #e3f2fd;
+        }
+
+        .item-row img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+
+        .item-row .item-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .item-row .item-name {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-row .item-size {
             font-size: 11px;
-            background: #007bff;
+            color: #888;
+        }
+
+        .item-row .item-delete {
+            padding: 4px 8px;
+            background: #dc3545;
             color: white;
-            padding: 2px 8px;
-            border-radius: 3px 3px 0 0;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .item-row .item-delete:hover {
+            background: #c82333;
+        }
+
+        .whitebox-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .whitebox-row:last-child {
+            border-bottom: none;
+        }
+
+        .whitebox-row:hover {
+            background: #f9f9f9;
+        }
+
+        .whitebox-row.selected {
+            background: #ffebee;
+        }
+
+        .whitebox-row .whitebox-icon {
+            width: 36px;
+            height: 36px;
+            background: white;
+            border: 2px dashed #999;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+
+        .whitebox-row .item-info {
+            flex: 1;
+        }
+
+        .empty-list {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
         }
 
         @media (max-width: 900px) {
@@ -393,9 +548,9 @@
                 <div class="file-name" id="pdfFileName"></div>
             </div>
             <div class="upload-box" id="imageUploadBox">
-                <h3>Upload Image</h3>
-                <p>Click or drag an image file here (PNG, JPG)</p>
-                <input type="file" id="imageInput" accept="image/*">
+                <h3>Upload Images</h3>
+                <p>Click or drag images here (PNG, JPG) - Multiple allowed</p>
+                <input type="file" id="imageInput" accept="image/*" multiple>
                 <div class="file-name" id="imageFileName"></div>
             </div>
         </div>
@@ -411,19 +566,12 @@
                 <div class="pdf-viewer" id="pdfViewer" style="display: none;">
                     <div class="pdf-canvas-wrapper" id="pdfCanvasWrapper">
                         <canvas id="pdfCanvas"></canvas>
+                        <!-- Overlays container -->
+                        <div id="overlaysContainer"></div>
                     </div>
-                    <!-- Template overlay (renders below image) - fixed A4 size -->
+                    <!-- Template overlay (renders below everything) -->
                     <div class="template-overlay" id="templateOverlay" style="display: none;">
                         <img id="templateImage" src="" alt="Template">
-                    </div>
-                    <!-- Image overlay (renders above template) -->
-                    <div class="image-overlay" id="imageOverlay" style="display: none;">
-                        <span class="overlay-label">Image</span>
-                        <img id="overlayImage" src="" alt="Overlay">
-                        <div class="resize-handle nw"></div>
-                        <div class="resize-handle ne"></div>
-                        <div class="resize-handle sw"></div>
-                        <div class="resize-handle se"></div>
                     </div>
                 </div>
             </div>
@@ -448,61 +596,66 @@
                         <div class="range-value"><span id="pdfZoomValue">100</span>%</div>
                     </div>
 
-                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Drag the PDF to reposition it for alignment</p>
-
                     <button class="btn" id="resetPdfPosition" style="background: #6c757d; color: white;">Reset Position</button>
                 </div>
 
                 <div class="instructions">
                     <strong>How to use:</strong>
                     1. Upload a PDF<br>
-                    2. Upload an image or add template<br>
-                    3. Drag to position, resize with corners<br>
-                    4. Click Export to save
+                    2. Add white boxes to cover unwanted areas<br>
+                    3. Upload images (photos, signatures)<br>
+                    4. Drag to position, resize with corners<br>
+                    5. Click Export to save
                 </div>
 
-                <button class="btn btn-secondary" id="addTemplateBtn" disabled>Add Valuation Template</button>
-
-                <div id="templateControls" style="display: none;">
-                    <div class="section-divider">
-                        <h3 style="color: #ff6b00;">Template (A4 Overlay)</h3>
-                    </div>
-
-                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Template is locked to full page size</p>
-
-                    <div class="control-group">
-                        <label>Opacity</label>
-                        <input type="range" id="templateOpacity" min="0" max="100" value="100">
-                        <div class="range-value"><span id="templateOpacityValue">100</span>%</div>
-                    </div>
-
-                    <button class="btn btn-danger" id="removeTemplate">Remove Template</button>
+                <!-- White Box Section -->
+                <div class="section-divider">
+                    <h3 style="color: #dc3545;">White Boxes (Cover-up)</h3>
+                </div>
+                <button class="btn btn-whitebox" id="addWhiteBoxBtn" disabled>Add White Box</button>
+                <div class="item-list" id="whiteboxList">
+                    <div class="empty-list">No white boxes added</div>
                 </div>
 
-                <div id="imageControls" style="display: none;">
-                    <div class="section-divider">
-                        <h3 style="color: #007bff;">Image Settings</h3>
-                    </div>
+                <!-- Images Section -->
+                <div class="section-divider">
+                    <h3 style="color: #007bff;">Images</h3>
+                </div>
+                <div class="item-list" id="imageList">
+                    <div class="empty-list">No images uploaded</div>
+                </div>
 
-                    <img id="imagePreview" class="image-preview" src="" alt="Preview">
-
+                <!-- Selected Image Controls -->
+                <div id="selectedImageControls" style="display: none;">
                     <div class="control-group">
                         <label>Width (px)</label>
                         <input type="number" id="imageWidth" min="10" max="2000" value="200">
                     </div>
-
                     <div class="control-group">
                         <label>Height (px)</label>
                         <input type="number" id="imageHeight" min="10" max="2000" value="200">
                     </div>
-
                     <div class="control-group">
                         <label>Opacity</label>
                         <input type="range" id="imageOpacity" min="0" max="100" value="100">
                         <div class="range-value"><span id="opacityValue">100</span>%</div>
                     </div>
+                </div>
 
-                    <button class="btn btn-danger" id="removeImage">Remove Image</button>
+                <!-- Template Section -->
+                <div class="section-divider">
+                    <h3 style="color: #ff6b00;">Template</h3>
+                </div>
+                <button class="btn btn-secondary" id="addTemplateBtn" disabled>Add Valuation Template</button>
+
+                <div id="templateControls" style="display: none;">
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Template is locked to full page size</p>
+                    <div class="control-group">
+                        <label>Opacity</label>
+                        <input type="range" id="templateOpacity" min="0" max="100" value="100">
+                        <div class="range-value"><span id="templateOpacityValue">100</span>%</div>
+                    </div>
+                    <button class="btn btn-danger" id="removeTemplate">Remove Template</button>
                 </div>
 
                 <div class="section-divider"></div>
@@ -522,11 +675,11 @@
         let totalPages = 0;
         let scale = 1.5;
 
-        // Image state
-        let imageData = null;
-        let imagePosition = { x: 50, y: 50 };
-        let imageSize = { width: 200, height: 200 };
-        let imageAspectRatio = 1;
+        // Multiple images state
+        let images = []; // Array of { id, data, name, position: {x, y}, size: {width, height}, aspectRatio, opacity, element }
+
+        // White boxes state
+        let whiteBoxes = []; // Array of { id, position: {x, y}, size: {width, height}, element }
 
         // Template state
         let templateData = null;
@@ -535,6 +688,20 @@
 
         // PDF position state
         let pdfOffset = { x: 0, y: 0 };
+        let pdfZoomLevel = 100;
+
+        // Selection state
+        let selectedImageId = null;
+        let selectedWhiteBoxId = null;
+
+        // Dragging/resizing state
+        let activeElement = null;
+        let activeType = null; // 'image' or 'whitebox'
+        let activeId = null;
+        let isDragging = false;
+        let isResizing = false;
+        let resizeHandle = null;
+        let startX, startY, startWidth, startHeight, startLeft, startTop;
 
         // DOM Elements
         const pdfInput = document.getElementById('pdfInput');
@@ -545,20 +712,11 @@
         const imageFileName = document.getElementById('imageFileName');
         const pdfCanvas = document.getElementById('pdfCanvas');
         const pdfViewer = document.getElementById('pdfViewer');
+        const pdfCanvasWrapper = document.getElementById('pdfCanvasWrapper');
         const emptyState = document.getElementById('emptyState');
+        const overlaysContainer = document.getElementById('overlaysContainer');
 
-        // Image overlay elements
-        const imageOverlay = document.getElementById('imageOverlay');
-        const overlayImage = document.getElementById('overlayImage');
-        const imageControls = document.getElementById('imageControls');
-        const imagePreview = document.getElementById('imagePreview');
-        const imageWidthInput = document.getElementById('imageWidth');
-        const imageHeightInput = document.getElementById('imageHeight');
-        const imageOpacityInput = document.getElementById('imageOpacity');
-        const opacityValue = document.getElementById('opacityValue');
-        const removeImageBtn = document.getElementById('removeImage');
-
-        // Template overlay elements
+        // Template elements
         const templateOverlay = document.getElementById('templateOverlay');
         const templateImage = document.getElementById('templateImage');
         const templateControls = document.getElementById('templateControls');
@@ -567,21 +725,33 @@
         const removeTemplateBtn = document.getElementById('removeTemplate');
         const addTemplateBtn = document.getElementById('addTemplateBtn');
 
-        // PDF position elements
-        const pdfCanvasWrapper = document.getElementById('pdfCanvasWrapper');
+        // Controls
         const pdfPositionControls = document.getElementById('pdfPositionControls');
         const pdfZoomInput = document.getElementById('pdfZoom');
         const pdfZoomValue = document.getElementById('pdfZoomValue');
         const resetPdfPositionBtn = document.getElementById('resetPdfPosition');
-
-        // PDF zoom state
-        let pdfZoomLevel = 100;
-
-        // Other elements
         const prevPageBtn = document.getElementById('prevPage');
         const nextPageBtn = document.getElementById('nextPage');
         const pageInfo = document.getElementById('pageInfo');
         const exportBtn = document.getElementById('exportBtn');
+
+        // White box controls
+        const addWhiteBoxBtn = document.getElementById('addWhiteBoxBtn');
+        const whiteboxListEl = document.getElementById('whiteboxList');
+
+        // Image list and controls
+        const imageListEl = document.getElementById('imageList');
+        const selectedImageControls = document.getElementById('selectedImageControls');
+        const imageWidthInput = document.getElementById('imageWidth');
+        const imageHeightInput = document.getElementById('imageHeight');
+        const imageOpacityInput = document.getElementById('imageOpacity');
+        const opacityValue = document.getElementById('opacityValue');
+
+        // Unique ID generator
+        let idCounter = 0;
+        function generateId() {
+            return 'item_' + (++idCounter);
+        }
 
         // Upload box click handlers
         pdfUploadBox.addEventListener('click', () => pdfInput.click());
@@ -604,7 +774,7 @@
             }
         });
 
-        // Drag and drop for Image
+        // Drag and drop for Images
         imageUploadBox.addEventListener('dragover', (e) => {
             e.preventDefault();
             imageUploadBox.style.borderColor = '#1a1a1a';
@@ -615,10 +785,8 @@
         imageUploadBox.addEventListener('drop', (e) => {
             e.preventDefault();
             imageUploadBox.style.borderColor = '#ccc';
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                handleImageUpload(file);
-            }
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            files.forEach(file => handleImageUpload(file));
         });
 
         // File input handlers
@@ -629,9 +797,8 @@
         });
 
         imageInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) {
-                handleImageUpload(e.target.files[0]);
-            }
+            const files = Array.from(e.target.files);
+            files.forEach(file => handleImageUpload(file));
         });
 
         // Handle PDF upload
@@ -649,6 +816,7 @@
             emptyState.style.display = 'none';
             pdfViewer.style.display = 'inline-block';
             addTemplateBtn.disabled = false;
+            addWhiteBoxBtn.disabled = false;
             pdfPositionControls.style.display = 'block';
 
             await renderPage(currentPage);
@@ -656,87 +824,428 @@
             updateExportButton();
         }
 
-        // Update PDF canvas position
-        function updatePdfPosition() {
-            const zoomScale = pdfZoomLevel / 100;
-            pdfCanvas.style.transform = `translate(${pdfOffset.x}px, ${pdfOffset.y}px) scale(${zoomScale})`;
-            pdfCanvas.style.transformOrigin = 'top left';
-        }
-
-        // Handle Image upload
+        // Handle Image upload (multiple)
         function handleImageUpload(file) {
-            imageFileName.textContent = file.name;
             imageUploadBox.classList.add('has-file');
+            imageFileName.textContent = images.length > 0 ? `${images.length + 1} images` : file.name;
 
             const reader = new FileReader();
             reader.onload = (e) => {
-                imageData = e.target.result;
-
+                const data = e.target.result;
                 const img = new Image();
                 img.onload = () => {
-                    // Store aspect ratio
-                    imageAspectRatio = img.width / img.height;
-
+                    const aspectRatio = img.width / img.height;
                     const maxSize = 200;
+                    let width, height;
                     if (img.width > img.height) {
-                        imageSize.width = Math.min(img.width, maxSize);
-                        imageSize.height = imageSize.width / imageAspectRatio;
+                        width = Math.min(img.width, maxSize);
+                        height = width / aspectRatio;
                     } else {
-                        imageSize.height = Math.min(img.height, maxSize);
-                        imageSize.width = imageSize.height * imageAspectRatio;
+                        height = Math.min(img.height, maxSize);
+                        width = height * aspectRatio;
                     }
 
-                    imageWidthInput.value = Math.round(imageSize.width);
-                    imageHeightInput.value = Math.round(imageSize.height);
+                    const imageObj = {
+                        id: generateId(),
+                        data: data,
+                        name: file.name,
+                        position: { x: 50 + images.length * 20, y: 50 + images.length * 20 },
+                        size: { width, height },
+                        aspectRatio: aspectRatio,
+                        opacity: 100,
+                        element: null
+                    };
 
-                    showImageOverlay();
+                    images.push(imageObj);
+                    createImageOverlay(imageObj);
+                    renderImageList();
+                    selectImage(imageObj.id);
+                    updateExportButton();
                 };
-                img.src = imageData;
-
-                imagePreview.src = imageData;
-                overlayImage.src = imageData;
-                imageControls.style.display = 'block';
-                updateExportButton();
+                img.src = data;
             };
             reader.readAsDataURL(file);
         }
 
-        // Add template button handler
-        addTemplateBtn.addEventListener('click', () => {
-            loadTemplate();
+        // Create image overlay element
+        function createImageOverlay(imageObj) {
+            const overlay = document.createElement('div');
+            overlay.className = 'image-overlay';
+            overlay.dataset.id = imageObj.id;
+            overlay.innerHTML = `
+                <span class="overlay-label">${imageObj.name}</span>
+                <img src="${imageObj.data}" alt="${imageObj.name}">
+                <div class="delete-btn" data-action="delete">×</div>
+                <div class="resize-handle nw"></div>
+                <div class="resize-handle ne"></div>
+                <div class="resize-handle sw"></div>
+                <div class="resize-handle se"></div>
+            `;
+            overlay.style.left = imageObj.position.x + 'px';
+            overlay.style.top = imageObj.position.y + 'px';
+            overlay.style.width = imageObj.size.width + 'px';
+            overlay.style.height = imageObj.size.height + 'px';
+
+            overlay.addEventListener('mousedown', (e) => handleOverlayMouseDown(e, 'image', imageObj.id));
+
+            overlaysContainer.appendChild(overlay);
+            imageObj.element = overlay;
+        }
+
+        // Add white box
+        addWhiteBoxBtn.addEventListener('click', () => {
+            const whiteBox = {
+                id: generateId(),
+                position: { x: 100 + whiteBoxes.length * 20, y: 100 + whiteBoxes.length * 20 },
+                size: { width: 150, height: 100 },
+                element: null
+            };
+            whiteBoxes.push(whiteBox);
+            createWhiteBoxOverlay(whiteBox);
+            renderWhiteBoxList();
+            selectWhiteBox(whiteBox.id);
+            updateExportButton();
         });
 
-        // Load template from file
-        function loadTemplate() {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-                // Create canvas to convert to data URL
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                templateData = canvas.toDataURL('image/png');
+        // Create white box overlay element
+        function createWhiteBoxOverlay(whiteBox) {
+            const overlay = document.createElement('div');
+            overlay.className = 'white-box-overlay';
+            overlay.dataset.id = whiteBox.id;
+            overlay.innerHTML = `
+                <span class="overlay-label">White Box</span>
+                <div class="delete-btn" data-action="delete">×</div>
+                <div class="resize-handle nw"></div>
+                <div class="resize-handle ne"></div>
+                <div class="resize-handle sw"></div>
+                <div class="resize-handle se"></div>
+            `;
+            overlay.style.left = whiteBox.position.x + 'px';
+            overlay.style.top = whiteBox.position.y + 'px';
+            overlay.style.width = whiteBox.size.width + 'px';
+            overlay.style.height = whiteBox.size.height + 'px';
 
-                // Set template to exact PDF canvas size (both are A4)
-                templateSize.width = pdfCanvas.width;
-                templateSize.height = pdfCanvas.height;
-                templatePosition.x = 0;
-                templatePosition.y = 0;
+            overlay.addEventListener('mousedown', (e) => handleOverlayMouseDown(e, 'whitebox', whiteBox.id));
 
-                templateImage.src = templateData;
-                templateControls.style.display = 'block';
-                addTemplateBtn.style.display = 'none';
-
-                showTemplateOverlay();
-                updateExportButton();
-            };
-            img.onerror = () => {
-                alert('Could not load template. Make sure valtemplate.png is in the same folder as index.html');
-            };
-            img.src = 'valtemplate.png';
+            overlaysContainer.appendChild(overlay);
+            whiteBox.element = overlay;
         }
+
+        // Handle overlay mousedown
+        function handleOverlayMouseDown(e, type, id) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Handle delete button
+            if (e.target.dataset.action === 'delete') {
+                if (type === 'image') {
+                    deleteImage(id);
+                } else {
+                    deleteWhiteBox(id);
+                }
+                return;
+            }
+
+            // Select the item
+            if (type === 'image') {
+                selectImage(id);
+            } else {
+                selectWhiteBox(id);
+            }
+
+            const item = type === 'image' ? images.find(i => i.id === id) : whiteBoxes.find(w => w.id === id);
+            if (!item) return;
+
+            activeElement = item.element;
+            activeType = type;
+            activeId = id;
+
+            if (e.target.classList.contains('resize-handle')) {
+                isResizing = true;
+                resizeHandle = e.target;
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = item.size.width;
+                startHeight = item.size.height;
+                startLeft = item.position.x;
+                startTop = item.position.y;
+            } else {
+                isDragging = true;
+                startX = e.clientX - item.position.x;
+                startY = e.clientY - item.position.y;
+            }
+        }
+
+        // Mouse move handler
+        document.addEventListener('mousemove', (e) => {
+            if (!activeElement) return;
+
+            const item = activeType === 'image' ? images.find(i => i.id === activeId) : whiteBoxes.find(w => w.id === activeId);
+            if (!item) return;
+
+            if (isDragging) {
+                item.position.x = e.clientX - startX;
+                item.position.y = e.clientY - startY;
+                activeElement.style.left = item.position.x + 'px';
+                activeElement.style.top = item.position.y + 'px';
+            } else if (isResizing) {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                if (activeType === 'image') {
+                    // Maintain aspect ratio for images
+                    const aspectRatio = item.aspectRatio;
+                    if (resizeHandle.classList.contains('se')) {
+                        const newWidth = Math.max(20, startWidth + dx);
+                        item.size.width = newWidth;
+                        item.size.height = newWidth / aspectRatio;
+                    } else if (resizeHandle.classList.contains('sw')) {
+                        const newWidth = Math.max(20, startWidth - dx);
+                        item.position.x = startLeft + (startWidth - newWidth);
+                        item.size.width = newWidth;
+                        item.size.height = newWidth / aspectRatio;
+                    } else if (resizeHandle.classList.contains('ne')) {
+                        const newWidth = Math.max(20, startWidth + dx);
+                        const newHeight = newWidth / aspectRatio;
+                        item.position.y = startTop + (startHeight - newHeight);
+                        item.size.width = newWidth;
+                        item.size.height = newHeight;
+                    } else if (resizeHandle.classList.contains('nw')) {
+                        const newWidth = Math.max(20, startWidth - dx);
+                        const newHeight = newWidth / aspectRatio;
+                        item.position.x = startLeft + (startWidth - newWidth);
+                        item.position.y = startTop + (startHeight - newHeight);
+                        item.size.width = newWidth;
+                        item.size.height = newHeight;
+                    }
+                    imageWidthInput.value = Math.round(item.size.width);
+                    imageHeightInput.value = Math.round(item.size.height);
+                } else {
+                    // Free resize for white boxes
+                    if (resizeHandle.classList.contains('se')) {
+                        item.size.width = Math.max(20, startWidth + dx);
+                        item.size.height = Math.max(20, startHeight + dy);
+                    } else if (resizeHandle.classList.contains('sw')) {
+                        const newWidth = Math.max(20, startWidth - dx);
+                        item.position.x = startLeft + (startWidth - newWidth);
+                        item.size.width = newWidth;
+                        item.size.height = Math.max(20, startHeight + dy);
+                    } else if (resizeHandle.classList.contains('ne')) {
+                        item.size.width = Math.max(20, startWidth + dx);
+                        const newHeight = Math.max(20, startHeight - dy);
+                        item.position.y = startTop + (startHeight - newHeight);
+                        item.size.height = newHeight;
+                    } else if (resizeHandle.classList.contains('nw')) {
+                        const newWidth = Math.max(20, startWidth - dx);
+                        const newHeight = Math.max(20, startHeight - dy);
+                        item.position.x = startLeft + (startWidth - newWidth);
+                        item.position.y = startTop + (startHeight - newHeight);
+                        item.size.width = newWidth;
+                        item.size.height = newHeight;
+                    }
+                }
+
+                activeElement.style.left = item.position.x + 'px';
+                activeElement.style.top = item.position.y + 'px';
+                activeElement.style.width = item.size.width + 'px';
+                activeElement.style.height = item.size.height + 'px';
+            }
+        });
+
+        // Mouse up handler
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            isResizing = false;
+            resizeHandle = null;
+            activeElement = null;
+            activeType = null;
+            activeId = null;
+        });
+
+        // Select image
+        function selectImage(id) {
+            selectedImageId = id;
+            selectedWhiteBoxId = null;
+
+            // Update visual selection
+            document.querySelectorAll('.image-overlay').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.white-box-overlay').forEach(el => el.classList.remove('selected'));
+            const img = images.find(i => i.id === id);
+            if (img && img.element) {
+                img.element.classList.add('selected');
+            }
+
+            // Update list selection
+            renderImageList();
+            renderWhiteBoxList();
+
+            // Show controls
+            selectedImageControls.style.display = 'block';
+            if (img) {
+                imageWidthInput.value = Math.round(img.size.width);
+                imageHeightInput.value = Math.round(img.size.height);
+                imageOpacityInput.value = img.opacity;
+                opacityValue.textContent = img.opacity;
+            }
+        }
+
+        // Select white box
+        function selectWhiteBox(id) {
+            selectedWhiteBoxId = id;
+            selectedImageId = null;
+
+            // Update visual selection
+            document.querySelectorAll('.image-overlay').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('.white-box-overlay').forEach(el => el.classList.remove('selected'));
+            const wb = whiteBoxes.find(w => w.id === id);
+            if (wb && wb.element) {
+                wb.element.classList.add('selected');
+            }
+
+            // Update list selection
+            renderImageList();
+            renderWhiteBoxList();
+
+            // Hide image controls
+            selectedImageControls.style.display = 'none';
+        }
+
+        // Delete image
+        function deleteImage(id) {
+            const idx = images.findIndex(i => i.id === id);
+            if (idx !== -1) {
+                if (images[idx].element) {
+                    images[idx].element.remove();
+                }
+                images.splice(idx, 1);
+                renderImageList();
+                if (selectedImageId === id) {
+                    selectedImageId = null;
+                    selectedImageControls.style.display = 'none';
+                }
+                updateExportButton();
+                if (images.length === 0) {
+                    imageUploadBox.classList.remove('has-file');
+                    imageFileName.textContent = '';
+                }
+            }
+        }
+
+        // Delete white box
+        function deleteWhiteBox(id) {
+            const idx = whiteBoxes.findIndex(w => w.id === id);
+            if (idx !== -1) {
+                if (whiteBoxes[idx].element) {
+                    whiteBoxes[idx].element.remove();
+                }
+                whiteBoxes.splice(idx, 1);
+                renderWhiteBoxList();
+                if (selectedWhiteBoxId === id) {
+                    selectedWhiteBoxId = null;
+                }
+                updateExportButton();
+            }
+        }
+
+        // Render image list
+        function renderImageList() {
+            if (images.length === 0) {
+                imageListEl.innerHTML = '<div class="empty-list">No images uploaded</div>';
+                return;
+            }
+            imageListEl.innerHTML = images.map(img => `
+                <div class="item-row ${selectedImageId === img.id ? 'selected' : ''}" data-id="${img.id}">
+                    <img src="${img.data}" alt="${img.name}">
+                    <div class="item-info">
+                        <div class="item-name">${img.name}</div>
+                        <div class="item-size">${Math.round(img.size.width)} × ${Math.round(img.size.height)}</div>
+                    </div>
+                    <button class="item-delete" data-id="${img.id}">Delete</button>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            imageListEl.querySelectorAll('.item-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('item-delete')) {
+                        deleteImage(e.target.dataset.id);
+                    } else {
+                        selectImage(row.dataset.id);
+                    }
+                });
+            });
+        }
+
+        // Render white box list
+        function renderWhiteBoxList() {
+            if (whiteBoxes.length === 0) {
+                whiteboxListEl.innerHTML = '<div class="empty-list">No white boxes added</div>';
+                return;
+            }
+            whiteboxListEl.innerHTML = whiteBoxes.map((wb, idx) => `
+                <div class="whitebox-row ${selectedWhiteBoxId === wb.id ? 'selected' : ''}" data-id="${wb.id}">
+                    <div class="whitebox-icon"></div>
+                    <div class="item-info">
+                        <div class="item-name">White Box ${idx + 1}</div>
+                        <div class="item-size">${Math.round(wb.size.width)} × ${Math.round(wb.size.height)}</div>
+                    </div>
+                    <button class="item-delete" data-id="${wb.id}">Delete</button>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            whiteboxListEl.querySelectorAll('.whitebox-row').forEach(row => {
+                row.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('item-delete')) {
+                        deleteWhiteBox(e.target.dataset.id);
+                    } else {
+                        selectWhiteBox(row.dataset.id);
+                    }
+                });
+            });
+        }
+
+        // Image size inputs
+        imageWidthInput.addEventListener('change', () => {
+            if (!selectedImageId) return;
+            const img = images.find(i => i.id === selectedImageId);
+            if (!img) return;
+            img.size.width = parseInt(imageWidthInput.value) || 50;
+            img.size.height = img.size.width / img.aspectRatio;
+            imageHeightInput.value = Math.round(img.size.height);
+            if (img.element) {
+                img.element.style.width = img.size.width + 'px';
+                img.element.style.height = img.size.height + 'px';
+            }
+            renderImageList();
+        });
+
+        imageHeightInput.addEventListener('change', () => {
+            if (!selectedImageId) return;
+            const img = images.find(i => i.id === selectedImageId);
+            if (!img) return;
+            img.size.height = parseInt(imageHeightInput.value) || 50;
+            img.size.width = img.size.height * img.aspectRatio;
+            imageWidthInput.value = Math.round(img.size.width);
+            if (img.element) {
+                img.element.style.width = img.size.width + 'px';
+                img.element.style.height = img.size.height + 'px';
+            }
+            renderImageList();
+        });
+
+        // Image opacity
+        imageOpacityInput.addEventListener('input', () => {
+            if (!selectedImageId) return;
+            const img = images.find(i => i.id === selectedImageId);
+            if (!img) return;
+            img.opacity = parseInt(imageOpacityInput.value);
+            opacityValue.textContent = img.opacity;
+            if (img.element) {
+                const imgEl = img.element.querySelector('img');
+                if (imgEl) imgEl.style.opacity = img.opacity / 100;
+            }
+        });
 
         // Render PDF page
         async function renderPage(pageNum) {
@@ -746,7 +1255,6 @@
             pdfCanvas.width = viewport.width;
             pdfCanvas.height = viewport.height;
 
-            // Set wrapper dimensions to match canvas
             pdfCanvasWrapper.style.width = viewport.width + 'px';
             pdfCanvasWrapper.style.height = viewport.height + 'px';
 
@@ -756,39 +1264,7 @@
                 viewport: viewport
             }).promise;
 
-            // Apply PDF position offset
-            updatePdfPosition();
-
-            if (imageData) updateOverlayPosition(imageOverlay, imagePosition);
-            if (templateData) updateOverlayPosition(templateOverlay, templatePosition);
-        }
-
-        // Show image overlay
-        function showImageOverlay() {
-            if (!pdfDoc) return;
-            imageOverlay.style.display = 'block';
-            updateOverlayStyle(imageOverlay, imagePosition, imageSize);
-        }
-
-        // Show template overlay
-        function showTemplateOverlay() {
-            if (!pdfDoc) return;
-            templateOverlay.style.display = 'block';
-            updateOverlayStyle(templateOverlay, templatePosition, templateSize);
-        }
-
-        // Update overlay style
-        function updateOverlayStyle(overlay, position, size) {
-            overlay.style.left = position.x + 'px';
-            overlay.style.top = position.y + 'px';
-            overlay.style.width = size.width + 'px';
-            overlay.style.height = size.height + 'px';
-        }
-
-        // Update overlay position (free movement, no constraints)
-        function updateOverlayPosition(overlay, position) {
-            overlay.style.left = position.x + 'px';
-            overlay.style.top = position.y + 'px';
+            applyPdfZoom();
         }
 
         // Update page controls
@@ -798,9 +1274,9 @@
             pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
         }
 
-        // Update export button state
+        // Update export button
         function updateExportButton() {
-            exportBtn.disabled = !pdfDoc || (!imageData && !templateData);
+            exportBtn.disabled = !pdfDoc || (images.length === 0 && whiteBoxes.length === 0 && !templateData);
         }
 
         // Page navigation
@@ -820,145 +1296,7 @@
             }
         });
 
-        // Dragging and resizing state
-        let activeOverlay = null;
-        let activePosition = null;
-        let activeSize = null;
-        let isDragging = false;
-        let isResizing = false;
-        let resizeHandle = null;
-        let startX, startY, startWidth, startHeight, startLeft, startTop;
-
-        // Setup overlay interactions
-        function setupOverlayInteraction(overlay, position, size, widthInput, heightInput) {
-            overlay.addEventListener('mousedown', (e) => {
-                activeOverlay = overlay;
-                activePosition = position;
-                activeSize = size;
-
-                // Deselect others
-                imageOverlay.classList.remove('selected');
-                templateOverlay.classList.remove('selected');
-                overlay.classList.add('selected');
-
-                if (e.target.classList.contains('resize-handle')) {
-                    isResizing = true;
-                    resizeHandle = e.target;
-                    startX = e.clientX;
-                    startY = e.clientY;
-                    startWidth = size.width;
-                    startHeight = size.height;
-                    startLeft = position.x;
-                    startTop = position.y;
-                } else if (e.target === overlay || e.target.tagName === 'IMG') {
-                    isDragging = true;
-                    startX = e.clientX - position.x;
-                    startY = e.clientY - position.y;
-                }
-                e.preventDefault();
-            });
-        }
-
-        setupOverlayInteraction(imageOverlay, imagePosition, imageSize, imageWidthInput, imageHeightInput);
-
-        document.addEventListener('mousemove', (e) => {
-            if (!activeOverlay) return;
-
-            if (isDragging) {
-                activePosition.x = e.clientX - startX;
-                activePosition.y = e.clientY - startY;
-                updateOverlayPosition(activeOverlay, activePosition);
-            } else if (isResizing) {
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-
-                // Image resize with aspect ratio lock
-                if (resizeHandle.classList.contains('se')) {
-                    const newWidth = Math.max(20, startWidth + dx);
-                    activeSize.width = newWidth;
-                    activeSize.height = newWidth / imageAspectRatio;
-                } else if (resizeHandle.classList.contains('sw')) {
-                    const newWidth = Math.max(20, startWidth - dx);
-                    activePosition.x = startLeft + (startWidth - newWidth);
-                    activeSize.width = newWidth;
-                    activeSize.height = newWidth / imageAspectRatio;
-                } else if (resizeHandle.classList.contains('ne')) {
-                    const newWidth = Math.max(20, startWidth + dx);
-                    const newHeight = newWidth / imageAspectRatio;
-                    activePosition.y = startTop + (startHeight - newHeight);
-                    activeSize.width = newWidth;
-                    activeSize.height = newHeight;
-                } else if (resizeHandle.classList.contains('nw')) {
-                    const newWidth = Math.max(20, startWidth - dx);
-                    const newHeight = newWidth / imageAspectRatio;
-                    activePosition.x = startLeft + (startWidth - newWidth);
-                    activePosition.y = startTop + (startHeight - newHeight);
-                    activeSize.width = newWidth;
-                    activeSize.height = newHeight;
-                }
-
-                updateOverlayStyle(activeOverlay, activePosition, activeSize);
-                imageWidthInput.value = Math.round(activeSize.width);
-                imageHeightInput.value = Math.round(activeSize.height);
-            }
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            isResizing = false;
-            resizeHandle = null;
-            activeOverlay = null;
-        });
-
-        // Image size inputs (maintain aspect ratio)
-        imageWidthInput.addEventListener('change', () => {
-            imageSize.width = parseInt(imageWidthInput.value) || 50;
-            imageSize.height = imageSize.width / imageAspectRatio;
-            imageHeightInput.value = Math.round(imageSize.height);
-            updateOverlayStyle(imageOverlay, imagePosition, imageSize);
-        });
-
-        imageHeightInput.addEventListener('change', () => {
-            imageSize.height = parseInt(imageHeightInput.value) || 50;
-            imageSize.width = imageSize.height * imageAspectRatio;
-            imageWidthInput.value = Math.round(imageSize.width);
-            updateOverlayStyle(imageOverlay, imagePosition, imageSize);
-        });
-
-        // Opacity controls
-        imageOpacityInput.addEventListener('input', () => {
-            const opacity = imageOpacityInput.value / 100;
-            opacityValue.textContent = imageOpacityInput.value;
-            overlayImage.style.opacity = opacity;
-        });
-
-        templateOpacityInput.addEventListener('input', () => {
-            const opacity = templateOpacityInput.value / 100;
-            templateOpacityValue.textContent = templateOpacityInput.value;
-            templateImage.style.opacity = opacity;
-        });
-
-        // Remove image
-        removeImageBtn.addEventListener('click', () => {
-            imageData = null;
-            imageOverlay.style.display = 'none';
-            imageControls.style.display = 'none';
-            imageUploadBox.classList.remove('has-file');
-            imageFileName.textContent = '';
-            imageInput.value = '';
-            updateExportButton();
-        });
-
-        // Remove template
-        removeTemplateBtn.addEventListener('click', () => {
-            templateData = null;
-            templateOverlay.style.display = 'none';
-            templateControls.style.display = 'none';
-            addTemplateBtn.style.display = 'block';
-            updateExportButton();
-        });
-
-        // PDF zoom control
+        // PDF zoom
         pdfZoomInput.addEventListener('input', () => {
             pdfZoomLevel = parseInt(pdfZoomInput.value);
             pdfZoomValue.textContent = pdfZoomLevel;
@@ -971,14 +1309,12 @@
             pdfCanvas.style.transformOrigin = 'top left';
         }
 
-        // PDF canvas dragging
+        // PDF dragging
         let isPdfDragging = false;
         let pdfDragStartX, pdfDragStartY;
 
         pdfCanvas.addEventListener('mousedown', (e) => {
-            // Don't start drag if clicking on overlays
             if (e.target !== pdfCanvas) return;
-
             isPdfDragging = true;
             pdfCanvas.classList.add('dragging');
             pdfDragStartX = e.clientX - pdfOffset.x;
@@ -988,7 +1324,6 @@
 
         document.addEventListener('mousemove', (e) => {
             if (!isPdfDragging) return;
-
             pdfOffset.x = e.clientX - pdfDragStartX;
             pdfOffset.y = e.clientY - pdfDragStartY;
             applyPdfZoom();
@@ -1010,15 +1345,67 @@
             applyPdfZoom();
         });
 
+        // Template handling
+        addTemplateBtn.addEventListener('click', () => {
+            loadTemplate();
+        });
+
+        function loadTemplate() {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                templateData = canvas.toDataURL('image/png');
+
+                templateSize.width = pdfCanvas.width;
+                templateSize.height = pdfCanvas.height;
+                templatePosition.x = 0;
+                templatePosition.y = 0;
+
+                templateImage.src = templateData;
+                templateOverlay.style.display = 'block';
+                templateOverlay.style.left = '0px';
+                templateOverlay.style.top = '0px';
+                templateOverlay.style.width = templateSize.width + 'px';
+                templateOverlay.style.height = templateSize.height + 'px';
+
+                templateControls.style.display = 'block';
+                addTemplateBtn.style.display = 'none';
+                updateExportButton();
+            };
+            img.onerror = () => {
+                alert('Could not load template. Make sure valtemplate.png is in the same folder.');
+            };
+            img.src = 'valtemplate.png';
+        }
+
+        templateOpacityInput.addEventListener('input', () => {
+            const opacity = templateOpacityInput.value / 100;
+            templateOpacityValue.textContent = templateOpacityInput.value;
+            templateImage.style.opacity = opacity;
+        });
+
+        removeTemplateBtn.addEventListener('click', () => {
+            templateData = null;
+            templateOverlay.style.display = 'none';
+            templateControls.style.display = 'none';
+            addTemplateBtn.style.display = 'block';
+            updateExportButton();
+        });
+
         // Export PDF
         exportBtn.addEventListener('click', async () => {
-            if (!pdfDoc || (!imageData && !templateData)) return;
+            if (!pdfDoc) return;
 
             exportBtn.textContent = 'Exporting...';
             exportBtn.disabled = true;
 
             try {
-                const { PDFDocument } = PDFLib;
+                const { PDFDocument, rgb } = PDFLib;
                 const pdfDocLib = await PDFDocument.load(new Uint8Array(pdfBytes));
 
                 const pages = pdfDocLib.getPages();
@@ -1027,18 +1414,35 @@
 
                 const scaleX = pageWidth / pdfCanvas.width;
                 const scaleY = pageHeight / pdfCanvas.height;
-
-                // Calculate zoom factor for position adjustments
                 const zoomScale = pdfZoomLevel / 100;
 
-                // Embed template first (so it's behind the image)
-                // Account for PDF offset and zoom: overlays are positioned relative to the visible PDF
+                // 1. Draw white boxes first (to cover original content)
+                for (const wb of whiteBoxes) {
+                    const adjustedX = (wb.position.x - pdfOffset.x) / zoomScale;
+                    const adjustedY = (wb.position.y - pdfOffset.y) / zoomScale;
+                    const adjustedWidth = wb.size.width / zoomScale;
+                    const adjustedHeight = wb.size.height / zoomScale;
+
+                    const pdfX = adjustedX * scaleX;
+                    const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
+                    const pdfWidth = adjustedWidth * scaleX;
+                    const pdfHeight = adjustedHeight * scaleY;
+
+                    page.drawRectangle({
+                        x: pdfX,
+                        y: pdfY,
+                        width: pdfWidth,
+                        height: pdfHeight,
+                        color: rgb(1, 1, 1),
+                    });
+                }
+
+                // 2. Draw template
                 if (templateData) {
                     const base64Data = templateData.split(',')[1];
                     const templateBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
                     const embeddedTemplate = await pdfDocLib.embedPng(templateBytes);
 
-                    // Convert visual position to actual PDF position (account for offset and zoom)
                     const adjustedX = (templatePosition.x - pdfOffset.x) / zoomScale;
                     const adjustedY = (templatePosition.y - pdfOffset.y) / zoomScale;
                     const adjustedWidth = templateSize.width / zoomScale;
@@ -1059,30 +1463,28 @@
                     });
                 }
 
-                // Embed image (on top of template)
-                // Account for PDF offset and zoom
-                if (imageData) {
-                    const base64Data = imageData.split(',')[1];
+                // 3. Draw images (on top)
+                for (const img of images) {
+                    const base64Data = img.data.split(',')[1];
                     const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
 
                     let embeddedImage;
-                    if (imageData.includes('image/png')) {
+                    if (img.data.includes('image/png')) {
                         embeddedImage = await pdfDocLib.embedPng(imageBytes);
                     } else {
                         embeddedImage = await pdfDocLib.embedJpg(imageBytes);
                     }
 
-                    // Convert visual position to actual PDF position (account for offset and zoom)
-                    const adjustedX = (imagePosition.x - pdfOffset.x) / zoomScale;
-                    const adjustedY = (imagePosition.y - pdfOffset.y) / zoomScale;
-                    const adjustedWidth = imageSize.width / zoomScale;
-                    const adjustedHeight = imageSize.height / zoomScale;
+                    const adjustedX = (img.position.x - pdfOffset.x) / zoomScale;
+                    const adjustedY = (img.position.y - pdfOffset.y) / zoomScale;
+                    const adjustedWidth = img.size.width / zoomScale;
+                    const adjustedHeight = img.size.height / zoomScale;
 
                     const pdfX = adjustedX * scaleX;
                     const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
                     const pdfWidth = adjustedWidth * scaleX;
                     const pdfHeight = adjustedHeight * scaleY;
-                    const opacity = parseInt(imageOpacityInput.value) / 100;
+                    const opacity = img.opacity / 100;
 
                     page.drawImage(embeddedImage, {
                         x: pdfX,
@@ -1111,6 +1513,10 @@
             exportBtn.textContent = 'Export PDF';
             exportBtn.disabled = false;
         });
+
+        // Initialize lists
+        renderImageList();
+        renderWhiteBoxList();
     </script>
 </body>
 </html>
