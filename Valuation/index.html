@@ -647,6 +647,7 @@
                     <h3 style="color: #ff6b00;">Template</h3>
                 </div>
                 <button class="btn btn-secondary" id="addTemplateBtn" disabled>Add Valuation Template</button>
+                <input type="file" id="templateInput" accept="image/*" style="display: none;">
 
                 <div id="templateControls" style="display: none;">
                     <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Template is locked to full page size</p>
@@ -1346,13 +1347,21 @@
         });
 
         // Template handling
+        const templateInput = document.getElementById('templateInput');
+
         addTemplateBtn.addEventListener('click', () => {
             loadTemplate();
         });
 
+        templateInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                loadTemplateFromFile(e.target.files[0]);
+            }
+        });
+
         function loadTemplate() {
             const img = new Image();
-            img.crossOrigin = 'anonymous';
+            // Don't set crossOrigin - it causes CORS issues with local files
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 canvas.width = img.width;
@@ -1378,9 +1387,34 @@
                 updateExportButton();
             };
             img.onerror = () => {
-                alert('Could not load template. Make sure valtemplate.png is in the same folder.');
+                // Fallback to file picker if auto-load fails
+                templateInput.click();
             };
             img.src = 'valtemplate.png';
+        }
+
+        function loadTemplateFromFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                templateData = e.target.result;
+
+                templateSize.width = pdfCanvas.width;
+                templateSize.height = pdfCanvas.height;
+                templatePosition.x = 0;
+                templatePosition.y = 0;
+
+                templateImage.src = templateData;
+                templateOverlay.style.display = 'block';
+                templateOverlay.style.left = '0px';
+                templateOverlay.style.top = '0px';
+                templateOverlay.style.width = templateSize.width + 'px';
+                templateOverlay.style.height = templateSize.height + 'px';
+
+                templateControls.style.display = 'block';
+                addTemplateBtn.style.display = 'none';
+                updateExportButton();
+            };
+            reader.readAsDataURL(file);
         }
 
         templateOpacityInput.addEventListener('input', () => {
