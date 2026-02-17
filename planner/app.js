@@ -611,7 +611,10 @@ function showEventDetails(eventId) {
     const editBtn = document.getElementById('editEventBtn');
     const deleteBtn = document.getElementById('deleteEventBtn');
 
-    if (editBtn) editBtn.onclick = () => editEvent(eventId);
+    if (editBtn) editBtn.onclick = () => {
+        modal.classList.add('hidden'); // Close details modal first
+        editEvent(eventId);
+    };
     if (deleteBtn) deleteBtn.onclick = () => {
         if (confirm('Are you sure you want to delete this item?')) {
             deleteEvent(eventId);
@@ -661,6 +664,12 @@ function showSimpleItemModal(type, defaultDate = '') {
 
     // Populate artist datalist
     populateArtistDatalist('simpleArtistList');
+
+    // Hide type selector for new items (type is already chosen)
+    const typeGroup = document.getElementById('simpleItemTypeGroup');
+    if (typeGroup) {
+        typeGroup.style.display = 'none';
+    }
 
     // Clear any edit state
     form.removeAttribute('data-edit-id');
@@ -748,6 +757,24 @@ function editEvent(eventId) {
 
         // Populate artist datalist
         populateArtistDatalist('simpleArtistList');
+
+        // Show and populate type selector for editing
+        const typeGroup = document.getElementById('simpleItemTypeGroup');
+        const typeSelect = document.getElementById('simpleItemTypeSelect');
+        if (typeGroup && typeSelect) {
+            typeGroup.style.display = 'block';
+            // Populate with all categories except 'event' (which uses the full form)
+            typeSelect.innerHTML = '';
+            Object.values(eventCategories).forEach(cat => {
+                if (cat.id !== 'event') {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    typeSelect.appendChild(option);
+                }
+            });
+            typeSelect.value = event.type;
+        }
 
         // Populate form
         document.getElementById('simpleItemType').value = event.type;
@@ -990,8 +1017,21 @@ async function handleSimpleItemSubmit(e) {
 
     if (!isAdminMode) return;
 
+    // Check if editing - use the type selector if visible
+    const editId = e.target.getAttribute('data-edit-id');
+    const typeGroup = document.getElementById('simpleItemTypeGroup');
+    const typeSelect = document.getElementById('simpleItemTypeSelect');
+
+    // Use type selector value when editing, hidden input when creating new
+    let itemType;
+    if (editId && typeGroup && typeGroup.style.display !== 'none' && typeSelect) {
+        itemType = typeSelect.value;
+    } else {
+        itemType = document.getElementById('simpleItemType').value;
+    }
+
     const itemData = {
-        type: document.getElementById('simpleItemType').value,
+        type: itemType,
         date: document.getElementById('simpleItemDate').value,
         artist: document.getElementById('simpleItemArtist').value,
         title: document.getElementById('simpleItemTitle').value,
@@ -1011,8 +1051,7 @@ async function handleSimpleItemSubmit(e) {
         return;
     }
 
-    // Check if editing
-    const editId = e.target.getAttribute('data-edit-id');
+    // Set ID (editId already declared above)
     if (editId) {
         // Update existing item
         itemData.id = editId;
@@ -1044,6 +1083,13 @@ async function handleSimpleItemSubmit(e) {
         // Reset form and close modal
         e.target.reset();
         e.target.removeAttribute('data-edit-id');
+
+        // Hide type selector
+        const typeGroupReset = document.getElementById('simpleItemTypeGroup');
+        if (typeGroupReset) {
+            typeGroupReset.style.display = 'none';
+        }
+
         closeModals();
     } else {
         alert('Failed to save item: ' + result.error);
