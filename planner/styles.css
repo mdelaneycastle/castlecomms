@@ -628,6 +628,10 @@ tr:hover {
     display: block;
 }
 
+.admin-mode .modal-footer.admin-only {
+    display: flex;
+}
+
 .admin-mode .admin-controls {
     display: block !important;
 }
