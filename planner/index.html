@@ -224,6 +224,13 @@
                 <div class="form-grid">
                     <input type="hidden" id="simpleItemType">
 
+                    <div class="form-group" id="simpleItemTypeGroup" style="display: none;">
+                        <label for="simpleItemTypeSelect">Category *</label>
+                        <select id="simpleItemTypeSelect">
+                            <!-- Options will be rendered dynamically -->
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label for="simpleItemDate">Date *</label>
                         <input type="date" id="simpleItemDate" required>
@@ -262,7 +269,7 @@
                 <button class="close-btn">&times;</button>
             </div>
             <div id="eventDetailsContent"></div>
-            <div class="modal-footer admin-only hidden">
+            <div class="modal-footer admin-only">
                 <button id="editEventBtn" class="btn-secondary">Edit</button>
                 <button id="deleteEventBtn" class="btn-danger">Delete</button>
             </div>
