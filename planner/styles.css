@@ -1098,14 +1098,17 @@ tr:hover {
 .print-calendar-page {
     margin-bottom: 3rem;
     page-break-inside: avoid;
+    break-inside: avoid;
 }
 
 .print-calendar-page.page-break {
     page-break-after: always;
+    break-after: page;
 }
 
 .print-calendar-page:not(:first-child) {
     page-break-before: always;
+    break-before: page;
 }
 
 .print-month-title {
@@ -1215,22 +1218,36 @@ tr:hover {
     .print-calendar-page {
         margin-bottom: 0;
         page-break-inside: avoid;
+        break-inside: avoid;
+        display: block;
+        min-height: 0;
     }
 
     .print-calendar-page:not(:first-child) {
         page-break-before: always;
+        break-before: page;
+        margin-top: 0;
     }
 
     .print-calendar-page.page-break {
         page-break-after: always;
+        break-after: page;
+    }
+
+    /* Force each month to be a separate page */
+    .print-calendar-page + .print-calendar-page {
+        page-break-before: always;
+        break-before: page;
     }
 
     .print-calendar-grid {
         page-break-inside: avoid;
+        break-inside: avoid;
     }
 
     .print-calendar-grid tr {
         page-break-inside: avoid;
+        break-inside: avoid;
     }
 
     .print-month-title {
