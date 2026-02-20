@@ -1129,6 +1129,10 @@ tr:hover {
     border: 2px solid #2c3e50;
 }
 
+.print-calendar-grid tr {
+    height: 100px;
+}
+
 .print-calendar-grid th {
     background: #2c3e50;
     color: white;
@@ -1142,8 +1146,8 @@ tr:hover {
 .print-calendar-cell {
     border: 1px solid #dee2e6;
     vertical-align: top;
+    height: 100px;
     min-height: 100px;
-    height: auto;
     padding: 0;
     background: white;
 }
@@ -1221,9 +1225,11 @@ tr:hover {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         display: block !important;
-        overflow: visible !important;
+        overflow: hidden !important;
         margin: 0 !important;
-        padding: 0.25in 0 !important;
+        padding: 0 !important;
+        height: 100vh !important; /* Fill entire page */
+        box-sizing: border-box !important;
     }
 
     /* Don't add page break after the last month */
@@ -1236,27 +1242,39 @@ tr:hover {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         width: 100% !important;
+        height: calc(100vh - 80pt) !important; /* Fill page minus title */
+        table-layout: fixed !important;
+    }
+
+    .print-calendar-grid tbody {
+        display: table-row-group;
     }
 
     .print-calendar-grid tr {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        height: 16.66% !important; /* 6 rows max per month = equal height */
     }
 
     .print-month-title {
         font-size: 24pt;
-        margin-bottom: 0.5rem;
-        padding: 0.5rem;
+        margin-bottom: 0.25rem;
+        padding: 0.25rem;
+        height: 50pt;
     }
 
     .print-calendar-grid th {
         font-size: 10pt;
-        padding: 0.4rem;
+        padding: 0.3rem;
+        height: 25pt !important;
     }
 
     .print-calendar-cell {
-        min-height: 0.9in;
-        height: auto;
+        height: 1.1in !important; /* Fixed height for all cells */
+        min-height: 1.1in !important;
+        max-height: 1.1in !important;
+        vertical-align: top !important;
+        overflow: hidden !important;
     }
 
     .print-day-number {
@@ -1266,7 +1284,8 @@ tr:hover {
 
     .print-day-events {
         padding: 2pt;
-        overflow: visible !important;
+        overflow: hidden !important;
+        height: calc(100% - 20pt) !important; /* Fill cell minus day number */
     }
 
     .print-calendar-event {
