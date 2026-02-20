@@ -1381,10 +1381,6 @@ function generatePrintView() {
         return;
     }
 
-    // Get options
-    const groupByType = document.getElementById('printGroupByType').checked;
-    const showNotes = document.getElementById('printShowNotes').checked;
-
     // Filter events by date range
     const filteredEvents = eventsData.filter(event => {
         const eventDate = new Date(event.date);
@@ -1394,8 +1390,8 @@ function generatePrintView() {
     // Sort by date
     filteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // Generate HTML
-    const printHTML = generatePrintHTML(filteredEvents, startDate, endDate, groupByType, showNotes);
+    // Generate calendar HTML
+    const printHTML = generatePrintHTML(filteredEvents, startDate, endDate);
 
     // Create print preview
     showPrintPreview(printHTML);
@@ -1404,129 +1400,122 @@ function generatePrintView() {
     closeModals();
 }
 
-function generatePrintHTML(events, startDate, endDate, groupByType, showNotes) {
-    const formatDateStr = (date) => {
-        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-    };
+function generatePrintHTML(events, startDate, endDate) {
+    // Generate calendar grid view - one month per page
+    let html = '<div class="print-content">';
 
-    let html = `
-        <div class="print-content">
-            <h1 class="print-title">Scheduling Portal - Calendar</h1>
-            <p class="print-date-range">${formatDateStr(startDate)} - ${formatDateStr(endDate)}</p>
-    `;
+    // Get all months in range
+    const months = [];
+    const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const endMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
 
-    if (events.length === 0) {
-        html += '<p style="text-align: center; color: #6c757d; padding: 2rem;">No events in this date range</p>';
-    } else if (groupByType) {
-        // Group events by type
-        const grouped = {};
-        Object.keys(eventCategories).forEach(typeId => {
-            grouped[typeId] = [];
-        });
-
-        events.forEach(event => {
-            if (grouped[event.type]) {
-                grouped[event.type].push(event);
-            } else {
-                if (!grouped['other']) grouped['other'] = [];
-                grouped['other'].push(event);
-            }
-        });
-
-        // Render each group
-        Object.keys(grouped).forEach(type => {
-            const items = grouped[type];
-            if (items.length === 0) return;
-
-            const cat = eventCategories[type] || { name: type, bgColor: '#ccc', textColor: '#333' };
-
-            html += `
-                <div class="print-section">
-                    <h3 class="print-section-title">${cat.name} (${items.length})</h3>
-                    <table class="print-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 100px;">Date</th>
-                                <th>Artist</th>
-                                ${type === 'event' ? '<th>Gallery</th><th>Status</th>' : '<th>Title</th>'}
-                                ${showNotes ? '<th>Notes</th>' : ''}
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            items.forEach(item => {
-                html += `
-                    <tr>
-                        <td>${formatDate(item.date)}</td>
-                        <td>${item.artist}</td>
-                `;
-
-                if (type === 'event') {
-                    html += `
-                        <td>${item.gallery || '-'}</td>
-                        <td>${item.status || '-'}</td>
-                    `;
-                } else {
-                    html += `<td>${item.title || '-'}</td>`;
-                }
-
-                if (showNotes) {
-                    html += `<td>${item.description || '-'}</td>`;
-                }
-
-                html += '</tr>';
-            });
-
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        });
-    } else {
-        // Single chronological list
-        html += `
-            <div class="print-section">
-                <h3 class="print-section-title">All Events (${events.length})</h3>
-                <table class="print-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 100px;">Date</th>
-                            <th>Type</th>
-                            <th>Artist</th>
-                            <th>Details</th>
-                            ${showNotes ? '<th>Notes</th>' : ''}
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        events.forEach(event => {
-            const cat = eventCategories[event.type] || { name: event.type, bgColor: '#ccc', textColor: '#333' };
-            const details = event.type === 'event'
-                ? (event.gallery || '-')
-                : (event.title || '-');
-
-            html += `
-                <tr>
-                    <td>${formatDate(event.date)}</td>
-                    <td><span class="print-badge" style="background: ${cat.bgColor}; color: ${cat.textColor};">${cat.name}</span></td>
-                    <td>${event.artist}</td>
-                    <td>${details}</td>
-                    ${showNotes ? `<td>${event.description || '-'}</td>` : ''}
-                </tr>
-            `;
-        });
-
-        html += `
-                    </tbody>
-                </table>
-            </div>
-        `;
+    while (current <= endMonth) {
+        months.push(new Date(current));
+        current.setMonth(current.getMonth() + 1);
     }
 
+    // Group events by date for quick lookup
+    const eventsByDate = {};
+    events.forEach(event => {
+        const dateKey = event.date;
+        if (!eventsByDate[dateKey]) {
+            eventsByDate[dateKey] = [];
+        }
+        eventsByDate[dateKey].push(event);
+    });
+
+    // Generate each month
+    months.forEach((monthDate, monthIndex) => {
+        html += generateMonthCalendar(monthDate, eventsByDate, monthIndex < months.length - 1);
+    });
+
     html += '</div>';
+    return html;
+}
+
+function generateMonthCalendar(monthDate, eventsByDate, addPageBreak) {
+    const year = monthDate.getFullYear();
+    const month = monthDate.getMonth();
+    const monthName = monthDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+    // Get first day of month and total days
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const totalDays = lastDay.getDate();
+    const startDayOfWeek = firstDay.getDay(); // 0 = Sunday
+
+    // Adjust for Monday start (0 = Monday, 6 = Sunday)
+    const adjustedStartDay = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+
+    let html = `
+        <div class="print-calendar-page${addPageBreak ? ' page-break' : ''}">
+            <h2 class="print-month-title">${monthName}</h2>
+            <table class="print-calendar-grid">
+                <thead>
+                    <tr>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                        <th>Sunday</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    let dayCount = 1;
+    let weekHTML = '<tr>';
+
+    // Empty cells before first day
+    for (let i = 0; i < adjustedStartDay; i++) {
+        weekHTML += '<td class="print-calendar-cell empty"></td>';
+    }
+
+    // Days of month
+    for (let day = 1; day <= totalDays; day++) {
+        const currentDayOfWeek = (adjustedStartDay + day - 1) % 7;
+
+        // Start new row on Monday
+        if (currentDayOfWeek === 0 && day > 1) {
+            weekHTML += '</tr><tr>';
+        }
+
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayEvents = eventsByDate[dateStr] || [];
+
+        weekHTML += `<td class="print-calendar-cell">`;
+        weekHTML += `<div class="print-day-number">${day}</div>`;
+        weekHTML += `<div class="print-day-events">`;
+
+        dayEvents.forEach(event => {
+            const cat = eventCategories[event.type] || { name: event.type, bgColor: '#ccc', textColor: '#333' };
+            const displayText = event.type === 'event'
+                ? `${event.artist} - ${event.gallery || ''}`
+                : `${event.artist}${event.title ? ' - ' + event.title : ''}`;
+
+            weekHTML += `<div class="print-calendar-event" style="background: ${cat.bgColor}; color: ${cat.textColor};">${displayText}</div>`;
+        });
+
+        weekHTML += `</div></td>`;
+    }
+
+    // Empty cells after last day
+    const lastDayOfWeek = (adjustedStartDay + totalDays - 1) % 7;
+    for (let i = lastDayOfWeek + 1; i < 7; i++) {
+        weekHTML += '<td class="print-calendar-cell empty"></td>';
+    }
+
+    weekHTML += '</tr>';
+    html += weekHTML;
+
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
     return html;
 }
 
