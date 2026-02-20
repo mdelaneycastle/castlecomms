@@ -145,8 +145,8 @@ function getCalendarEvents() {
         if (event.type === 'event') {
             displayTitle = `${event.artist} - ${event.gallery}`;
         } else {
-            // For releases, exhibitions, previews, launches - show title
-            displayTitle = event.title ? `${event.artist} - ${event.title}` : event.artist;
+            // For releases, exhibitions, previews, launches - show title only (title usually includes artist name)
+            displayTitle = event.title || event.artist;
         }
 
         return {
@@ -563,7 +563,7 @@ function showEventDetails(eventId) {
     if (event.type === 'event') {
         title.textContent = `${event.artist} - ${event.gallery}`;
     } else {
-        title.textContent = event.title ? `${event.artist} - ${event.title}` : event.artist;
+        title.textContent = event.title || event.artist;
     }
 
     const typeDisplayNames = getTypeDisplayNames();
@@ -1493,7 +1493,7 @@ function generateMonthCalendar(monthDate, eventsByDate, addPageBreak) {
             const cat = eventCategories[event.type] || { name: event.type, bgColor: '#ccc', textColor: '#333' };
             const displayText = event.type === 'event'
                 ? `${event.artist} - ${event.gallery || ''}`
-                : `${event.artist}${event.title ? ' - ' + event.title : ''}`;
+                : (event.title || event.artist);
 
             weekHTML += `<div class="print-calendar-event" style="background: ${cat.bgColor}; color: ${cat.textColor};">${displayText}</div>`;
         });
