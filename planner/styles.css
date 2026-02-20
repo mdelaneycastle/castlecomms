@@ -343,6 +343,23 @@ body {
     border-radius: 3px !important;
     padding: 2px 5px !important;
     font-weight: 500 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+}
+
+.fc-event-title {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-wrap: break-word !important;
+}
+
+.fc-daygrid-event {
+    white-space: normal !important;
+}
+
+.fc-daygrid-event-harness {
+    margin-bottom: 2px !important;
 }
 
 /* List View */
@@ -961,4 +978,219 @@ tr:hover {
 .category-item .category-name-input:focus {
     outline: none;
     border-color: #667eea;
+}
+
+/* Print Modal Styles */
+.print-modal-body {
+    padding: 2rem;
+}
+
+.print-option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #495057;
+}
+
+.radio-label input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.custom-date-range {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.custom-date-range.hidden {
+    display: none;
+}
+
+.date-range-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.date-range-inputs .form-group {
+    margin: 0;
+}
+
+.date-range-inputs label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.date-range-inputs input[type="date"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.print-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Print Preview Styles */
+.print-preview-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    z-index: 20000;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.print-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #2c3e50;
+}
+
+.print-preview-header h1 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.print-preview-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.print-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.print-content .print-title {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-size: 1.75rem;
+}
+
+.print-content .print-date-range {
+    text-align: center;
+    color: #6c757d;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.print-section {
+    margin-bottom: 2rem;
+    page-break-inside: avoid;
+}
+
+.print-section-title {
+    background: #2c3e50;
+    color: white;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    border-radius: 4px 4px 0 0;
+}
+
+.print-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.print-table th,
+.print-table td {
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    border: 1px solid #dee2e6;
+}
+
+.print-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.print-table tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.print-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Print Media Query */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .print-preview-container,
+    .print-preview-container * {
+        visibility: visible;
+    }
+
+    .print-preview-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        padding: 0;
+    }
+
+    .print-preview-header {
+        display: none !important;
+    }
+
+    .print-preview-actions {
+        display: none !important;
+    }
+
+    .print-content {
+        max-width: 100%;
+    }
+
+    .print-section {
+        page-break-inside: avoid;
+    }
+
+    .print-table {
+        font-size: 10pt;
+    }
+
+    .print-table th,
+    .print-table td {
+        padding: 4pt 6pt;
+    }
 }
