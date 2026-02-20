@@ -1097,10 +1097,15 @@ tr:hover {
 /* Calendar Grid Styles */
 .print-calendar-page {
     margin-bottom: 3rem;
+    page-break-inside: avoid;
 }
 
 .print-calendar-page.page-break {
     page-break-after: always;
+}
+
+.print-calendar-page:not(:first-child) {
+    page-break-before: always;
 }
 
 .print-month-title {
@@ -1134,7 +1139,8 @@ tr:hover {
 .print-calendar-cell {
     border: 1px solid #dee2e6;
     vertical-align: top;
-    height: 120px;
+    min-height: 100px;
+    height: auto;
     padding: 0;
     background: white;
 }
@@ -1155,20 +1161,19 @@ tr:hover {
 
 .print-day-events {
     padding: 0.25rem;
-    overflow: hidden;
-    max-height: 90px;
+    overflow: visible;
 }
 
 .print-calendar-event {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.35rem;
-    margin-bottom: 0.2rem;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.3rem;
+    margin-bottom: 0.15rem;
     border-radius: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
     font-weight: 500;
-    line-height: 1.3;
+    line-height: 1.2;
 }
 
 /* Print Media Query */
@@ -1209,10 +1214,23 @@ tr:hover {
 
     .print-calendar-page {
         margin-bottom: 0;
+        page-break-inside: avoid;
+    }
+
+    .print-calendar-page:not(:first-child) {
+        page-break-before: always;
     }
 
     .print-calendar-page.page-break {
         page-break-after: always;
+    }
+
+    .print-calendar-grid {
+        page-break-inside: avoid;
+    }
+
+    .print-calendar-grid tr {
+        page-break-inside: avoid;
     }
 
     .print-month-title {
@@ -1227,7 +1245,8 @@ tr:hover {
     }
 
     .print-calendar-cell {
-        height: 1in;
+        min-height: 0.9in;
+        height: auto;
     }
 
     .print-day-number {
@@ -1237,11 +1256,14 @@ tr:hover {
 
     .print-day-events {
         padding: 2pt;
+        overflow: visible;
     }
 
     .print-calendar-event {
         font-size: 7pt;
         padding: 1pt 3pt;
         margin-bottom: 1pt;
+        white-space: normal;
+        word-wrap: break-word;
     }
 }
