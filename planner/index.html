@@ -80,6 +80,14 @@
                 </button>
                 <p class="sync-info">Subscribe to get automatic updates in Outlook, Google Calendar, or Apple Calendar</p>
             </div>
+
+            <div class="sync-section">
+                <h3>Print / Export PDF</h3>
+                <button id="printCalendarBtn" class="btn-sync">
+                    <i class="fas fa-print"></i> Print Calendar
+                </button>
+                <p class="sync-info">Print the next 3 months or choose a custom date range</p>
+            </div>
         </aside>
 
         <!-- Content Area -->
@@ -302,6 +310,56 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-secondary cancel-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Options Modal -->
+    <div id="printModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Print Calendar</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="print-modal-body">
+                <div class="print-option-group">
+                    <label class="radio-label">
+                        <input type="radio" name="printRange" value="3months" checked>
+                        <span>Next 3 months</span>
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="printRange" value="custom">
+                        <span>Custom date range</span>
+                    </label>
+                </div>
+                <div id="customDateRange" class="custom-date-range hidden">
+                    <div class="date-range-inputs">
+                        <div class="form-group">
+                            <label for="printStartDate">Start Date</label>
+                            <input type="date" id="printStartDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="printEndDate">End Date</label>
+                            <input type="date" id="printEndDate">
+                        </div>
+                    </div>
+                </div>
+                <div class="print-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="printGroupByType" checked>
+                        <span>Group by category</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="printShowNotes">
+                        <span>Include notes/descriptions</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary cancel-btn">Cancel</button>
+                <button type="button" id="generatePrintBtn" class="btn-primary">
+                    <i class="fas fa-print"></i> Generate PDF
+                </button>
             </div>
         </div>
     </div>
