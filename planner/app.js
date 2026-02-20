@@ -330,6 +330,9 @@ function initializeEventHandlers() {
     // Calendar sync handlers
     document.getElementById('downloadICS').addEventListener('click', handleDownloadICS);
     document.getElementById('copySubscribeURL').addEventListener('click', handleCopySubscribeURL);
+
+    // Print handlers
+    initializePrintHandlers();
 }
 
 // Toggle time fields
@@ -1308,6 +1311,253 @@ async function handleAddCategory() {
         renderListView();
     } else {
         alert('Failed to add category: ' + result.error);
+    }
+}
+
+// Print Calendar functionality
+function showPrintModal() {
+    const modal = document.getElementById('printModal');
+
+    // Set default dates (today + 3 months)
+    const today = new Date();
+    const threeMonthsLater = new Date();
+    threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+
+    document.getElementById('printStartDate').value = today.toISOString().split('T')[0];
+    document.getElementById('printEndDate').value = threeMonthsLater.toISOString().split('T')[0];
+
+    modal.classList.remove('hidden');
+}
+
+function initializePrintHandlers() {
+    // Print button in sidebar
+    const printBtn = document.getElementById('printCalendarBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', showPrintModal);
+    }
+
+    // Toggle custom date range
+    const radioButtons = document.querySelectorAll('input[name="printRange"]');
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const customRange = document.getElementById('customDateRange');
+            if (this.value === 'custom') {
+                customRange.classList.remove('hidden');
+            } else {
+                customRange.classList.add('hidden');
+            }
+        });
+    });
+
+    // Generate print button
+    const generateBtn = document.getElementById('generatePrintBtn');
+    if (generateBtn) {
+        generateBtn.addEventListener('click', generatePrintView);
+    }
+}
+
+function generatePrintView() {
+    // Get date range
+    let startDate, endDate;
+    const rangeType = document.querySelector('input[name="printRange"]:checked').value;
+
+    if (rangeType === '3months') {
+        startDate = new Date();
+        endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 3);
+    } else {
+        startDate = new Date(document.getElementById('printStartDate').value);
+        endDate = new Date(document.getElementById('printEndDate').value);
+    }
+
+    // Validate dates
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        alert('Please select valid dates');
+        return;
+    }
+
+    if (startDate > endDate) {
+        alert('Start date must be before end date');
+        return;
+    }
+
+    // Get options
+    const groupByType = document.getElementById('printGroupByType').checked;
+    const showNotes = document.getElementById('printShowNotes').checked;
+
+    // Filter events by date range
+    const filteredEvents = eventsData.filter(event => {
+        const eventDate = new Date(event.date);
+        return eventDate >= startDate && eventDate <= endDate;
+    });
+
+    // Sort by date
+    filteredEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Generate HTML
+    const printHTML = generatePrintHTML(filteredEvents, startDate, endDate, groupByType, showNotes);
+
+    // Create print preview
+    showPrintPreview(printHTML);
+
+    // Close the modal
+    closeModals();
+}
+
+function generatePrintHTML(events, startDate, endDate, groupByType, showNotes) {
+    const formatDateStr = (date) => {
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    };
+
+    let html = `
+        <div class="print-content">
+            <h1 class="print-title">Scheduling Portal - Calendar</h1>
+            <p class="print-date-range">${formatDateStr(startDate)} - ${formatDateStr(endDate)}</p>
+    `;
+
+    if (events.length === 0) {
+        html += '<p style="text-align: center; color: #6c757d; padding: 2rem;">No events in this date range</p>';
+    } else if (groupByType) {
+        // Group events by type
+        const grouped = {};
+        Object.keys(eventCategories).forEach(typeId => {
+            grouped[typeId] = [];
+        });
+
+        events.forEach(event => {
+            if (grouped[event.type]) {
+                grouped[event.type].push(event);
+            } else {
+                if (!grouped['other']) grouped['other'] = [];
+                grouped['other'].push(event);
+            }
+        });
+
+        // Render each group
+        Object.keys(grouped).forEach(type => {
+            const items = grouped[type];
+            if (items.length === 0) return;
+
+            const cat = eventCategories[type] || { name: type, bgColor: '#ccc', textColor: '#333' };
+
+            html += `
+                <div class="print-section">
+                    <h3 class="print-section-title">${cat.name} (${items.length})</h3>
+                    <table class="print-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">Date</th>
+                                <th>Artist</th>
+                                ${type === 'event' ? '<th>Gallery</th><th>Status</th>' : '<th>Title</th>'}
+                                ${showNotes ? '<th>Notes</th>' : ''}
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            items.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${formatDate(item.date)}</td>
+                        <td>${item.artist}</td>
+                `;
+
+                if (type === 'event') {
+                    html += `
+                        <td>${item.gallery || '-'}</td>
+                        <td>${item.status || '-'}</td>
+                    `;
+                } else {
+                    html += `<td>${item.title || '-'}</td>`;
+                }
+
+                if (showNotes) {
+                    html += `<td>${item.description || '-'}</td>`;
+                }
+
+                html += '</tr>';
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        });
+    } else {
+        // Single chronological list
+        html += `
+            <div class="print-section">
+                <h3 class="print-section-title">All Events (${events.length})</h3>
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">Date</th>
+                            <th>Type</th>
+                            <th>Artist</th>
+                            <th>Details</th>
+                            ${showNotes ? '<th>Notes</th>' : ''}
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        events.forEach(event => {
+            const cat = eventCategories[event.type] || { name: event.type, bgColor: '#ccc', textColor: '#333' };
+            const details = event.type === 'event'
+                ? (event.gallery || '-')
+                : (event.title || '-');
+
+            html += `
+                <tr>
+                    <td>${formatDate(event.date)}</td>
+                    <td><span class="print-badge" style="background: ${cat.bgColor}; color: ${cat.textColor};">${cat.name}</span></td>
+                    <td>${event.artist}</td>
+                    <td>${details}</td>
+                    ${showNotes ? `<td>${event.description || '-'}</td>` : ''}
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    html += '</div>';
+    return html;
+}
+
+function showPrintPreview(contentHTML) {
+    // Create print preview container
+    const previewContainer = document.createElement('div');
+    previewContainer.className = 'print-preview-container';
+    previewContainer.id = 'printPreview';
+
+    previewContainer.innerHTML = `
+        <div class="print-preview-header">
+            <h1><i class="fas fa-print"></i> Print Preview</h1>
+            <div class="print-preview-actions">
+                <button class="btn-secondary" onclick="closePrintPreview()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+                <button class="btn-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print / Save PDF
+                </button>
+            </div>
+        </div>
+        ${contentHTML}
+    `;
+
+    document.body.appendChild(previewContainer);
+}
+
+function closePrintPreview() {
+    const preview = document.getElementById('printPreview');
+    if (preview) {
+        preview.remove();
     }
 }
 
