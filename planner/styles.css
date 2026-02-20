@@ -1186,68 +1186,61 @@ tr:hover {
         margin: 0.5in;
     }
 
-    body * {
-        visibility: hidden;
-    }
-
-    .print-preview-container,
-    .print-preview-container * {
-        visibility: visible;
-    }
-
-    .print-preview-container {
-        position: absolute;
-        left: 0;
-        top: 0;
-        padding: 0;
-        width: 100%;
-    }
-
-    .print-preview-header {
+    /* Hide everything except print content */
+    body > *:not(.print-preview-container) {
         display: none !important;
     }
 
+    body {
+        background: white !important;
+    }
+
+    .print-preview-container {
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0 !important;
+    }
+
+    .print-preview-header,
     .print-preview-actions {
         display: none !important;
     }
 
     .print-content {
-        max-width: 100%;
+        max-width: 100% !important;
+        width: 100% !important;
+        overflow: visible !important;
     }
 
+    /* CRITICAL: Force page break after each month */
     .print-calendar-page {
-        margin-bottom: 0;
-        page-break-inside: avoid;
-        break-inside: avoid;
-        display: block;
-        min-height: 0;
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        display: block !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0.25in 0 !important;
     }
 
-    .print-calendar-page:not(:first-child) {
-        page-break-before: always;
-        break-before: page;
-        margin-top: 0;
-    }
-
-    .print-calendar-page.page-break {
-        page-break-after: always;
-        break-after: page;
-    }
-
-    /* Force each month to be a separate page */
-    .print-calendar-page + .print-calendar-page {
-        page-break-before: always;
-        break-before: page;
+    /* Don't add page break after the last month */
+    .print-calendar-page:last-child {
+        page-break-after: auto !important;
+        break-after: auto !important;
     }
 
     .print-calendar-grid {
-        page-break-inside: avoid;
-        break-inside: avoid;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        width: 100% !important;
     }
 
     .print-calendar-grid tr {
-        page-break-inside: avoid;
-        break-inside: avoid;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
     .print-month-title {
@@ -1273,7 +1266,7 @@ tr:hover {
 
     .print-day-events {
         padding: 2pt;
-        overflow: visible;
+        overflow: visible !important;
     }
 
     .print-calendar-event {
