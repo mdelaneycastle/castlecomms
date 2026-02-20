@@ -1295,4 +1295,29 @@ tr:hover {
         white-space: normal;
         word-wrap: break-word;
     }
+
+@media print {
+
+  /* Force browsers to print colours */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  /* Ensure event colours stay visible */
+  .fc-event {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .badge {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+
 }
