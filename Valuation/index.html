@@ -1070,6 +1070,9 @@
                 </div>
                 <button class="btn btn-secondary" id="addTemplateBtn" disabled>Add Template (This Page)</button>
                 <button class="btn" id="addTemplateAllBtn" disabled style="background: #e66000; color: white;">Add Template (All Pages)</button>
+                <button class="btn" id="addManagerNameBtn" disabled style="background: #9c27b0; color: white;">Add Manager Name</button>
+                <button class="btn" id="uploadSignatureBtn" disabled style="background: #007bff; color: white;">Upload Signature</button>
+                <input type="file" id="signatureInput" accept="image/*" style="display: none;">
 
                 <div id="templateControls" style="display: none;">
                     <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Template is locked to full page size</p>
@@ -1340,6 +1343,9 @@
         const addTemplateAllBtn = document.getElementById('addTemplateAllBtn');
         const removeTemplateAllBtn = document.getElementById('removeTemplateAll');
         const templatePageInfoEl = document.getElementById('templatePageInfo');
+        const addManagerNameBtn = document.getElementById('addManagerNameBtn');
+        const uploadSignatureBtn = document.getElementById('uploadSignatureBtn');
+        const signatureFileInput = document.getElementById('signatureInput');
 
         // Controls
         const pdfPositionControls = document.getElementById('pdfPositionControls');
@@ -1463,6 +1469,8 @@
             pdfViewer.style.display = 'inline-block';
             addTemplateBtn.disabled = false;
             addTemplateAllBtn.disabled = false;
+            addManagerNameBtn.disabled = false;
+            uploadSignatureBtn.disabled = false;
             addWhiteBoxBtn.disabled = false;
             addTextBoxBtn.disabled = false;
             pdfPositionControls.style.display = 'block';
@@ -1607,8 +1615,9 @@
             const overlay = document.createElement('div');
             overlay.className = 'text-overlay';
             overlay.dataset.id = textBox.id;
+            const overlayLabel = textBox.type === 'managername' ? 'Manager Name' : 'Text';
             overlay.innerHTML = `
-                <span class="overlay-label">Text</span>
+                <span class="overlay-label">${overlayLabel}</span>
                 <div class="delete-btn" data-action="delete">×</div>
                 <div class="text-overlay-content" contenteditable="true">${textBox.text}</div>
             `;
@@ -2193,7 +2202,7 @@
                 } else {
                     addTemplateBtn.style.display = 'block';
                 }
-                addTemplateAllBtn.style.display = pageNums.length < totalPages ? 'block' : 'none';
+                addTemplateAllBtn.style.display = 'block';
             } else {
                 templateControls.style.display = 'none';
                 addTemplateBtn.style.display = 'block';
@@ -2288,6 +2297,64 @@
                     }
                 });
 
+                // If applying to multiple pages, carry across signature and manager name
+                if (pageNums.length > 1) {
+                    const currentSignatures = images.filter(i => i.page === currentPage && i.type === 'signature');
+                    const currentManagerNames = textBoxes.filter(t => t.page === currentPage && t.type === 'managername');
+
+                    pageNums.forEach(p => {
+                        if (p === currentPage) return;
+
+                        // Copy signatures if this page doesn't have one yet
+                        if (currentSignatures.length > 0) {
+                            const existingSigs = images.filter(i => i.page === p && i.type === 'signature');
+                            if (existingSigs.length === 0) {
+                                currentSignatures.forEach(sig => {
+                                    const newSig = {
+                                        id: generateId(),
+                                        data: sig.data,
+                                        name: sig.name,
+                                        page: p,
+                                        type: 'signature',
+                                        position: { x: sig.position.x, y: sig.position.y },
+                                        size: { width: sig.size.width, height: sig.size.height },
+                                        aspectRatio: sig.aspectRatio,
+                                        opacity: sig.opacity,
+                                        element: null
+                                    };
+                                    images.push(newSig);
+                                    createImageOverlay(newSig);
+                                    if (newSig.element) newSig.element.style.display = p === currentPage ? '' : 'none';
+                                });
+                            }
+                        }
+
+                        // Copy manager names if this page doesn't have one yet
+                        if (currentManagerNames.length > 0) {
+                            const existingNames = textBoxes.filter(t => t.page === p && t.type === 'managername');
+                            if (existingNames.length === 0) {
+                                currentManagerNames.forEach(mn => {
+                                    const newMn = {
+                                        id: generateId(),
+                                        page: p,
+                                        type: 'managername',
+                                        text: mn.text,
+                                        position: { x: mn.position.x, y: mn.position.y },
+                                        fontFamily: mn.fontFamily,
+                                        fontSize: mn.fontSize,
+                                        color: mn.color,
+                                        bold: mn.bold,
+                                        element: null
+                                    };
+                                    textBoxes.push(newMn);
+                                    createTextBoxOverlay(newMn);
+                                    if (newMn.element) newMn.element.style.display = p === currentPage ? '' : 'none';
+                                });
+                            }
+                        }
+                    });
+                }
+
                 templateSize.width = pdfCanvas.width;
                 templateSize.height = pdfCanvas.height;
                 templatePosition.x = 0;
@@ -2356,6 +2423,80 @@
             updateTemplateControls();
             updateExportButton();
         });
+
+        // Manager Name button
+        addManagerNameBtn.addEventListener('click', () => {
+            const textBox = {
+                id: generateId(),
+                page: currentPage,
+                type: 'managername',
+                text: 'Manager Name',
+                position: { x: 100, y: 200 },
+                fontFamily: 'Arial, sans-serif',
+                fontSize: 16,
+                color: '#000000',
+                bold: false,
+                element: null
+            };
+            textBoxes.push(textBox);
+            createTextBoxOverlay(textBox);
+            renderTextBoxList();
+            selectTextBox(textBox.id);
+            updateExportButton();
+        });
+
+        // Upload Signature button
+        uploadSignatureBtn.addEventListener('click', () => {
+            signatureFileInput.click();
+        });
+
+        signatureFileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                handleSignatureUpload(e.target.files[0]);
+                signatureFileInput.value = '';
+            }
+        });
+
+        function handleSignatureUpload(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = e.target.result;
+                const img = new Image();
+                img.onload = () => {
+                    const aspectRatio = img.width / img.height;
+                    const maxSize = 150;
+                    let width, height;
+                    if (img.width > img.height) {
+                        width = Math.min(img.width, maxSize);
+                        height = width / aspectRatio;
+                    } else {
+                        height = Math.min(img.height, maxSize);
+                        width = height * aspectRatio;
+                    }
+
+                    const imageObj = {
+                        id: generateId(),
+                        data: data,
+                        name: 'Signature',
+                        page: currentPage,
+                        type: 'signature',
+                        position: { x: 100, y: 300 },
+                        size: { width, height },
+                        aspectRatio: aspectRatio,
+                        opacity: 100,
+                        element: null
+                    };
+
+                    images.push(imageObj);
+                    createImageOverlay(imageObj);
+                    renderImageList();
+                    selectImage(imageObj.id);
+                    updateExportButton();
+                };
+                img.src = data;
+            };
+            reader.readAsDataURL(file);
+        }
 
         // Export PDF
         exportBtn.addEventListener('click', async () => {
