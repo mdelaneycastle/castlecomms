@@ -602,12 +602,160 @@
             font-size: 16px;
         }
 
-        @media (max-width: 900px) {
-            .upload-section {
+        /* ===== NEW 3-COLUMN LAYOUT ===== */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr 240px;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .side-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .center-panel {
+            min-width: 0;
+        }
+
+        .step-group {
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .step-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .step-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #999;
+            margin-bottom: 2px;
+            font-weight: 600;
+        }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .step-group .btn {
+            font-size: 13px;
+            padding: 9px 14px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #ccc;
+            border-radius: 6px;
+            padding: 20px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .upload-zone:hover {
+            border-color: #1a1a1a;
+            background: #fafafa;
+        }
+
+        .upload-zone.has-file {
+            border-style: solid;
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .upload-zone input {
+            display: none;
+        }
+
+        .pdf-nav-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border-radius: 8px;
+            padding: 8px 14px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #f5f5f5;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .zoom-label {
+            font-size: 12px;
+            color: #666;
+            margin-left: 8px;
+        }
+
+        .zoom-slider {
+            width: 80px;
+            vertical-align: middle;
+        }
+
+        .nav-separator {
+            color: #ddd;
+            font-size: 18px;
+            user-select: none;
+        }
+
+        .btn-sm {
+            font-size: 12px !important;
+            padding: 6px 10px !important;
+        }
+
+        .item-list.compact {
+            max-height: 100px;
+            margin-bottom: 6px;
+        }
+
+        .item-list.compact .empty-list {
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        @media (max-width: 1100px) {
+            .main-layout {
                 grid-template-columns: 1fr;
             }
-            .workspace {
-                grid-template-columns: 1fr;
+            .side-panel {
+                order: 1;
+            }
+            .center-panel {
+                order: 0;
             }
         }
 
@@ -995,157 +1143,108 @@
     </header>
 
     <div class="container">
-        <div class="upload-section">
-            <div class="upload-box" id="pdfUploadBox">
-                <h3>Upload PDF</h3>
-                <p>Click or drag a PDF file here</p>
-                <input type="file" id="pdfInput" accept=".pdf">
-                <div class="file-name" id="pdfFileName"></div>
-            </div>
-            <div class="upload-box" id="imageUploadBox">
-                <h3>Upload Images</h3>
-                <p>Click or drag images here (PNG, JPG) - Multiple allowed</p>
-                <input type="file" id="imageInput" accept="image/*" multiple>
-                <div class="file-name" id="imageFileName"></div>
-            </div>
-        </div>
-
-        <div class="workspace">
-            <div class="pdf-container" id="pdfContainer">
-                <div class="empty-state" id="emptyState">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <p>Upload a PDF to get started</p>
-                </div>
-                <div class="pdf-viewer" id="pdfViewer" style="display: none;">
-                    <div class="pdf-canvas-wrapper" id="pdfCanvasWrapper">
-                        <canvas id="pdfCanvas"></canvas>
-                        <!-- Overlays container -->
-                        <div id="overlaysContainer"></div>
+        <div class="main-layout">
+            <!-- LEFT PANEL -->
+            <div class="side-panel left-panel">
+                <div class="step-group">
+                    <div class="step-label">Step 1</div>
+                    <div class="step-title">Upload PDF</div>
+                    <div class="upload-zone" id="pdfUploadBox">
+                        <p style="margin: 0;">Click or drag PDF here</p>
+                        <input type="file" id="pdfInput" accept=".pdf">
                     </div>
-                    <!-- Template overlay (renders below everything) -->
-                    <div class="template-overlay" id="templateOverlay" style="display: none;">
-                        <img id="templateImage" src="" alt="Template">
-                    </div>
-                </div>
-            </div>
-
-            <div class="controls">
-                <h3>Controls</h3>
-
-                <div class="page-nav">
-                    <button id="prevPage" disabled>Previous</button>
-                    <button id="nextPage" disabled>Next</button>
-                </div>
-                <div class="page-info" id="pageInfo">No PDF loaded</div>
-
-                <div id="pdfPositionControls" style="display: none;">
-                    <div class="section-divider">
-                        <h3 style="color: #666;">PDF View</h3>
-                    </div>
-
-                    <div class="control-group">
-                        <label>Zoom</label>
-                        <input type="range" id="pdfZoom" min="50" max="200" value="100">
-                        <div class="range-value"><span id="pdfZoomValue">100</span>%</div>
-                    </div>
-
-                    <button class="btn" id="resetPdfPosition" style="background: #6c757d; color: white;">Reset Position</button>
+                    <div class="file-name" id="pdfFileName"></div>
                 </div>
 
-                <div class="instructions">
-                    <strong>How to use:</strong>
-                    1. Upload a PDF<br>
-                    2. Add valuation template first<br>
-                    3. Add white boxes to cover unwanted areas<br>
-                    4. Upload images (photos, signatures)<br>
-                    5. Drag to position, resize with corners<br>
-                    6. Click Export to save
+                <div class="step-group">
+                    <div class="step-label">Step 2</div>
+                    <div class="step-title">Template Setup</div>
+                    <button class="btn btn-secondary" id="addTemplateBtn" disabled>Add Template</button>
+                    <button class="btn" id="addManagerNameBtn" disabled style="background: #9c27b0; color: white;">Manager Name</button>
+                    <button class="btn" id="uploadSignatureBtn" disabled style="background: #007bff; color: white;">Upload Signature</button>
+                    <input type="file" id="signatureInput" accept="image/*" style="display: none;">
                 </div>
 
-                <!-- Template Section - MOVED TO TOP -->
-                <div class="section-divider">
-                    <h3 style="color: #ff6b00;">Template</h3>
+                <div class="step-group">
+                    <div class="step-label">Step 3</div>
+                    <div class="step-title">Apply to Document</div>
+                    <button class="btn" id="addTemplateAllBtn" disabled style="background: #e66000; color: white;">Apply to All Pages</button>
                 </div>
-                <button class="btn btn-secondary" id="addTemplateBtn" disabled>Add Template (This Page)</button>
-                <button class="btn" id="addTemplateAllBtn" disabled style="background: #e66000; color: white;">Add Template (All Pages)</button>
-                <button class="btn" id="addManagerNameBtn" disabled style="background: #9c27b0; color: white;">Add Manager Name</button>
-                <button class="btn" id="uploadSignatureBtn" disabled style="background: #007bff; color: white;">Upload Signature</button>
-                <input type="file" id="signatureInput" accept="image/*" style="display: none;">
 
                 <div id="templateControls" style="display: none;">
-                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Template is locked to full page size</p>
-                    <div id="templatePageInfo" style="font-size: 13px; color: #ff6b00; margin-bottom: 10px; font-weight: 500;"></div>
-                    <div class="control-group">
-                        <label>Opacity (This Page)</label>
-                        <input type="range" id="templateOpacity" min="0" max="100" value="100">
-                        <div class="range-value"><span id="templateOpacityValue">100</span>%</div>
+                    <div class="step-group">
+                        <div class="step-title" style="color: #ff6b00;">Template Settings</div>
+                        <div id="templatePageInfo" style="font-size: 12px; color: #ff6b00; margin-bottom: 8px; font-weight: 500;"></div>
+                        <div class="control-group">
+                            <label>Opacity</label>
+                            <input type="range" id="templateOpacity" min="0" max="100" value="100">
+                            <div class="range-value"><span id="templateOpacityValue">100</span>%</div>
+                        </div>
+                        <button class="btn btn-danger btn-sm" id="removeTemplate">Remove This Page</button>
+                        <button class="btn btn-danger btn-sm" id="removeTemplateAll">Remove All Pages</button>
                     </div>
-                    <button class="btn btn-danger" id="removeTemplate">Remove from This Page</button>
-                    <button class="btn btn-danger" id="removeTemplateAll" style="margin-top: 5px;">Remove from All Pages</button>
                 </div>
+            </div>
 
-                <!-- Signature Creator Button -->
-                <div class="section-divider">
-                    <h3 style="color: #17a2b8;">Signature</h3>
-                </div>
-                <button class="btn btn-signature" id="openSignatureBtn">Signature Creator</button>
-
-                <!-- White Box Section -->
-                <div class="section-divider">
-                    <h3 style="color: #dc3545;">White Boxes (Cover-up)</h3>
-                </div>
-                <button class="btn btn-whitebox" id="addWhiteBoxBtn" disabled>Add White Box</button>
-                <div class="item-list" id="whiteboxList">
-                    <div class="empty-list">No white boxes added</div>
-                </div>
-
-                <!-- Text Boxes Section -->
-                <div class="section-divider">
-                    <h3 style="color: #9c27b0;">Text Boxes</h3>
-                </div>
-                <button class="btn" id="addTextBoxBtn" style="background: #9c27b0; color: white;" disabled>Add Text Box</button>
-                <div class="item-list" id="textboxList">
-                    <div class="empty-list">No text boxes added</div>
-                </div>
-
-                <!-- Selected Text Box Controls -->
-                <div id="selectedTextControls" style="display: none;">
-                    <div class="control-group">
-                        <label>Font Family</label>
-                        <select id="textFontFamily" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="Arial, sans-serif">Arial</option>
-                            <option value="'Times New Roman', serif">Times New Roman</option>
-                            <option value="'Courier New', monospace">Courier New</option>
-                            <option value="Georgia, serif">Georgia</option>
-                            <option value="Verdana, sans-serif">Verdana</option>
-                            <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
-                            <option value="'Palatino Linotype', serif">Palatino</option>
-                        </select>
+            <!-- CENTER PANEL -->
+            <div class="center-panel">
+                <div class="pdf-nav-bar">
+                    <div class="nav-group">
+                        <button class="nav-btn" id="prevPage" disabled>&larr; Prev</button>
+                        <span class="page-info" id="pageInfo">No PDF loaded</span>
+                        <button class="nav-btn" id="nextPage" disabled>Next &rarr;</button>
                     </div>
-                    <div class="control-group">
-                        <label>Font Size (px)</label>
-                        <input type="number" id="textFontSize" min="8" max="72" value="16">
-                    </div>
-                    <div class="control-group">
-                        <label>Font Color</label>
-                        <input type="color" id="textColor" value="#000000" style="width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
-                    </div>
-                    <div class="control-group">
-                        <label style="display: flex; align-items: center; gap: 10px; text-transform: none;">
-                            <input type="checkbox" id="textBold" style="width: 18px; height: 18px;">
-                            Bold
-                        </label>
+                    <span class="nav-separator">|</span>
+                    <div class="nav-group" id="pdfPositionControls" style="display: none;">
+                        <span class="zoom-label">Zoom</span>
+                        <input type="range" id="pdfZoom" min="50" max="200" value="100" class="zoom-slider">
+                        <span id="pdfZoomValue" style="font-size: 12px; color: #666; min-width: 35px;">100</span>%
+                        <button class="nav-btn" id="resetPdfPosition">Reset</button>
                     </div>
                 </div>
 
-                <!-- Images Section -->
-                <div class="section-divider">
-                    <h3 style="color: #007bff;">Images</h3>
+                <div class="pdf-container" id="pdfContainer">
+                    <div class="empty-state" id="emptyState">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>Upload a PDF to get started</p>
+                    </div>
+                    <div class="pdf-viewer" id="pdfViewer" style="display: none;">
+                        <div class="pdf-canvas-wrapper" id="pdfCanvasWrapper">
+                            <canvas id="pdfCanvas"></canvas>
+                            <div id="overlaysContainer"></div>
+                        </div>
+                        <div class="template-overlay" id="templateOverlay" style="display: none;">
+                            <img id="templateImage" src="" alt="Template">
+                        </div>
+                    </div>
                 </div>
-                <div class="item-list" id="imageList">
-                    <div class="empty-list">No images uploaded</div>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="side-panel right-panel">
+                <div class="step-group">
+                    <div class="step-label">Step 4</div>
+                    <div class="step-title">Page Editing</div>
+                    <button class="btn btn-whitebox" id="addWhiteBoxBtn" disabled>Add White Box</button>
+                    <button class="btn" id="addTextBoxBtn" style="background: #9c27b0; color: white;" disabled>Add Text Box</button>
+                    <button class="btn" id="imageUploadBtn" style="background: #007bff; color: white;" disabled>Upload Images</button>
+                    <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
+                    <button class="btn btn-signature" id="openSignatureBtn">Signature Creator</button>
+                </div>
+
+                <div class="step-group">
+                    <div class="step-title">Items on This Page</div>
+                    <div class="item-list compact" id="whiteboxList">
+                        <div class="empty-list">No white boxes on this page</div>
+                    </div>
+                    <div class="item-list compact" id="textboxList">
+                        <div class="empty-list">No text boxes on this page</div>
+                    </div>
+                    <div class="item-list compact" id="imageList">
+                        <div class="empty-list">No images on this page</div>
+                    </div>
                 </div>
 
                 <!-- Selected Image Controls -->
@@ -1165,8 +1264,41 @@
                     </div>
                 </div>
 
-                <div class="section-divider"></div>
-                <button class="btn btn-primary" id="exportBtn" disabled>Export PDF</button>
+                <!-- Selected Text Box Controls -->
+                <div id="selectedTextControls" style="display: none;">
+                    <div class="control-group">
+                        <label>Font Family</label>
+                        <select id="textFontFamily" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px;">
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                            <option value="Georgia, serif">Georgia</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                            <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                            <option value="'Palatino Linotype', serif">Palatino</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Font Size (px)</label>
+                        <input type="number" id="textFontSize" min="8" max="72" value="16">
+                    </div>
+                    <div class="control-group">
+                        <label>Font Color</label>
+                        <input type="color" id="textColor" value="#000000" style="width: 100%; height: 36px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+                    </div>
+                    <div class="control-group">
+                        <label style="display: flex; align-items: center; gap: 8px; text-transform: none;">
+                            <input type="checkbox" id="textBold" style="width: 16px; height: 16px;">
+                            Bold
+                        </label>
+                    </div>
+                </div>
+
+                <div class="step-group">
+                    <div class="step-label">Step 5</div>
+                    <div class="step-title">Export</div>
+                    <button class="btn btn-primary" id="exportBtn" disabled>Export PDF</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1323,9 +1455,8 @@
         const pdfInput = document.getElementById('pdfInput');
         const imageInput = document.getElementById('imageInput');
         const pdfUploadBox = document.getElementById('pdfUploadBox');
-        const imageUploadBox = document.getElementById('imageUploadBox');
+        const imageUploadBtn = document.getElementById('imageUploadBtn');
         const pdfFileName = document.getElementById('pdfFileName');
-        const imageFileName = document.getElementById('imageFileName');
         const pdfCanvas = document.getElementById('pdfCanvas');
         const pdfViewer = document.getElementById('pdfViewer');
         const pdfCanvasWrapper = document.getElementById('pdfCanvasWrapper');
@@ -1389,9 +1520,9 @@
             return 'item_' + (++idCounter);
         }
 
-        // Upload box click handlers
+        // Upload handlers
         pdfUploadBox.addEventListener('click', () => pdfInput.click());
-        imageUploadBox.addEventListener('click', () => imageInput.click());
+        imageUploadBtn.addEventListener('click', () => imageInput.click());
 
         // Drag and drop for PDF
         pdfUploadBox.addEventListener('dragover', (e) => {
@@ -1408,21 +1539,6 @@
             if (file && file.type === 'application/pdf') {
                 handlePdfUpload(file);
             }
-        });
-
-        // Drag and drop for Images
-        imageUploadBox.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            imageUploadBox.style.borderColor = '#1a1a1a';
-        });
-        imageUploadBox.addEventListener('dragleave', () => {
-            imageUploadBox.style.borderColor = '#ccc';
-        });
-        imageUploadBox.addEventListener('drop', (e) => {
-            e.preventDefault();
-            imageUploadBox.style.borderColor = '#ccc';
-            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-            files.forEach(file => handleImageUpload(file));
         });
 
         // File input handlers
@@ -1473,7 +1589,8 @@
             uploadSignatureBtn.disabled = false;
             addWhiteBoxBtn.disabled = false;
             addTextBoxBtn.disabled = false;
-            pdfPositionControls.style.display = 'block';
+            imageUploadBtn.disabled = false;
+            pdfPositionControls.style.display = 'flex';
 
             await renderPage(currentPage);
             updatePageControls();
@@ -1483,8 +1600,7 @@
 
         // Handle Image upload (multiple)
         function handleImageUpload(file) {
-            imageUploadBox.classList.add('has-file');
-            imageFileName.textContent = images.length > 0 ? `${images.length + 1} images` : file.name;
+            // Image uploaded
 
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -1893,10 +2009,6 @@
                     selectedImageControls.style.display = 'none';
                 }
                 updateExportButton();
-                if (images.length === 0) {
-                    imageUploadBox.classList.remove('has-file');
-                    imageFileName.textContent = '';
-                }
             }
         }
 
