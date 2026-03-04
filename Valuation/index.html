@@ -110,22 +110,18 @@
             display: inline-block;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             background: white;
-            max-width: 100%;
         }
 
         .pdf-canvas-wrapper {
             position: relative;
             background: white;
             overflow: hidden;
-            max-width: 100%;
         }
 
         #pdfCanvas {
             display: block;
             position: relative;
             cursor: grab;
-            max-width: 100%;
-            height: auto;
         }
 
         #pdfCanvas:active {
@@ -1464,6 +1460,7 @@
         const pdfCanvas = document.getElementById('pdfCanvas');
         const pdfViewer = document.getElementById('pdfViewer');
         const pdfCanvasWrapper = document.getElementById('pdfCanvasWrapper');
+        const pdfContainer = document.getElementById('pdfContainer');
         const emptyState = document.getElementById('emptyState');
         const overlaysContainer = document.getElementById('overlaysContainer');
 
@@ -2227,6 +2224,12 @@
         // Render PDF page
         async function renderPage(pageNum) {
             const page = await pdfDoc.getPage(pageNum);
+
+            // Compute scale dynamically to fit available container width
+            const containerWidth = pdfContainer.clientWidth - 20; // subtract padding
+            const naturalViewport = page.getViewport({ scale: 1 });
+            scale = Math.min(1.5, containerWidth / naturalViewport.width);
+
             const viewport = page.getViewport({ scale: scale });
 
             pdfCanvas.width = viewport.width;
@@ -2679,9 +2682,12 @@
                     const page = pages[pageIdx];
                     const { width: pageWidth, height: pageHeight } = page.getSize();
 
-                    // Get viewport dimensions for this page at render scale
+                    // Compute the same scale used during rendering for this page
                     const pdfJsPage = await pdfDoc.getPage(pageNum);
-                    const viewport = pdfJsPage.getViewport({ scale: scale });
+                    const naturalVp = pdfJsPage.getViewport({ scale: 1 });
+                    const containerWidth = pdfContainer.clientWidth - 20;
+                    const renderScale = Math.min(1.5, containerWidth / naturalVp.width);
+                    const viewport = pdfJsPage.getViewport({ scale: renderScale });
                     const canvasWidth = viewport.width;
                     const canvasHeight = viewport.height;
 
