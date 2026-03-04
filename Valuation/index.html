@@ -99,7 +99,7 @@
         .pdf-container {
             background: white;
             border-radius: 8px;
-            padding: 20px;
+            padding: 10px;
             min-height: 600px;
             position: relative;
             overflow: auto;
@@ -110,18 +110,22 @@
             display: inline-block;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             background: white;
+            max-width: 100%;
         }
 
         .pdf-canvas-wrapper {
             position: relative;
             background: white;
             overflow: hidden;
+            max-width: 100%;
         }
 
         #pdfCanvas {
             display: block;
             position: relative;
             cursor: grab;
+            max-width: 100%;
+            height: auto;
         }
 
         #pdfCanvas:active {
