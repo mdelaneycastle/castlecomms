@@ -1068,16 +1068,19 @@
                 <div class="section-divider">
                     <h3 style="color: #ff6b00;">Template</h3>
                 </div>
-                <button class="btn btn-secondary" id="addTemplateBtn" disabled>Add Valuation Template</button>
+                <button class="btn btn-secondary" id="addTemplateBtn" disabled>Add Template (This Page)</button>
+                <button class="btn" id="addTemplateAllBtn" disabled style="background: #e66000; color: white;">Add Template (All Pages)</button>
 
                 <div id="templateControls" style="display: none;">
-                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Template is locked to full page size</p>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 10px;">Template is locked to full page size</p>
+                    <div id="templatePageInfo" style="font-size: 13px; color: #ff6b00; margin-bottom: 10px; font-weight: 500;"></div>
                     <div class="control-group">
-                        <label>Opacity</label>
+                        <label>Opacity (This Page)</label>
                         <input type="range" id="templateOpacity" min="0" max="100" value="100">
                         <div class="range-value"><span id="templateOpacityValue">100</span>%</div>
                     </div>
-                    <button class="btn btn-danger" id="removeTemplate">Remove Template</button>
+                    <button class="btn btn-danger" id="removeTemplate">Remove from This Page</button>
+                    <button class="btn btn-danger" id="removeTemplateAll" style="margin-top: 5px;">Remove from All Pages</button>
                 </div>
 
                 <!-- Signature Creator Button -->
@@ -1293,6 +1296,7 @@
         let templateData = null;
         let templatePosition = { x: 0, y: 0 };
         let templateSize = { width: 0, height: 0 };
+        let templatePages = {}; // { pageNum: { opacity: 100 } } - which pages have the template
 
         // PDF position state
         let pdfOffset = { x: 0, y: 0 };
@@ -1333,6 +1337,9 @@
         const templateOpacityValue = document.getElementById('templateOpacityValue');
         const removeTemplateBtn = document.getElementById('removeTemplate');
         const addTemplateBtn = document.getElementById('addTemplateBtn');
+        const addTemplateAllBtn = document.getElementById('addTemplateAllBtn');
+        const removeTemplateAllBtn = document.getElementById('removeTemplateAll');
+        const templatePageInfoEl = document.getElementById('templatePageInfo');
 
         // Controls
         const pdfPositionControls = document.getElementById('pdfPositionControls');
@@ -1436,15 +1443,33 @@
             totalPages = pdfDoc.numPages;
             currentPage = 1;
 
+            // Clear existing overlays from previous PDF
+            images.forEach(img => { if (img.element) img.element.remove(); });
+            images = [];
+            whiteBoxes.forEach(wb => { if (wb.element) wb.element.remove(); });
+            whiteBoxes = [];
+            textBoxes.forEach(tb => { if (tb.element) tb.element.remove(); });
+            textBoxes = [];
+            templateData = null;
+            templatePages = {};
+            templateOverlay.style.display = 'none';
+            selectedImageId = null;
+            selectedWhiteBoxId = null;
+            selectedTextBoxId = null;
+            selectedImageControls.style.display = 'none';
+            selectedTextControls.style.display = 'none';
+
             emptyState.style.display = 'none';
             pdfViewer.style.display = 'inline-block';
             addTemplateBtn.disabled = false;
+            addTemplateAllBtn.disabled = false;
             addWhiteBoxBtn.disabled = false;
             addTextBoxBtn.disabled = false;
             pdfPositionControls.style.display = 'block';
 
             await renderPage(currentPage);
             updatePageControls();
+            updateOverlayVisibility();
             updateExportButton();
         }
 
@@ -1473,7 +1498,8 @@
                         id: generateId(),
                         data: data,
                         name: file.name,
-                        position: { x: 50 + images.length * 20, y: 50 + images.length * 20 },
+                        page: currentPage,
+                        position: { x: 50 + images.filter(i => i.page === currentPage).length * 20, y: 50 + images.filter(i => i.page === currentPage).length * 20 },
                         size: { width, height },
                         aspectRatio: aspectRatio,
                         opacity: 100,
@@ -1520,7 +1546,8 @@
         addWhiteBoxBtn.addEventListener('click', () => {
             const whiteBox = {
                 id: generateId(),
-                position: { x: 100 + whiteBoxes.length * 20, y: 100 + whiteBoxes.length * 20 },
+                page: currentPage,
+                position: { x: 100 + whiteBoxes.filter(w => w.page === currentPage).length * 20, y: 100 + whiteBoxes.filter(w => w.page === currentPage).length * 20 },
                 size: { width: 150, height: 100 },
                 element: null
             };
@@ -1559,8 +1586,9 @@
         addTextBoxBtn.addEventListener('click', () => {
             const textBox = {
                 id: generateId(),
+                page: currentPage,
                 text: 'Manager Name',
-                position: { x: 100 + textBoxes.length * 20, y: 200 + textBoxes.length * 20 },
+                position: { x: 100 + textBoxes.filter(t => t.page === currentPage).length * 20, y: 200 + textBoxes.filter(t => t.page === currentPage).length * 20 },
                 fontFamily: 'Arial, sans-serif',
                 fontSize: 16,
                 color: '#000000',
@@ -1898,11 +1926,12 @@
 
         // Render image list
         function renderImageList() {
-            if (images.length === 0) {
-                imageListEl.innerHTML = '<div class="empty-list">No images uploaded</div>';
+            const pageImages = images.filter(i => i.page === currentPage);
+            if (pageImages.length === 0) {
+                imageListEl.innerHTML = '<div class="empty-list">No images on this page</div>';
                 return;
             }
-            imageListEl.innerHTML = images.map(img => `
+            imageListEl.innerHTML = pageImages.map(img => `
                 <div class="item-row ${selectedImageId === img.id ? 'selected' : ''}" data-id="${img.id}">
                     <img src="${img.data}" alt="${img.name}">
                     <div class="item-info">
@@ -1927,11 +1956,12 @@
 
         // Render white box list
         function renderWhiteBoxList() {
-            if (whiteBoxes.length === 0) {
-                whiteboxListEl.innerHTML = '<div class="empty-list">No white boxes added</div>';
+            const pageWhiteBoxes = whiteBoxes.filter(w => w.page === currentPage);
+            if (pageWhiteBoxes.length === 0) {
+                whiteboxListEl.innerHTML = '<div class="empty-list">No white boxes on this page</div>';
                 return;
             }
-            whiteboxListEl.innerHTML = whiteBoxes.map((wb, idx) => `
+            whiteboxListEl.innerHTML = pageWhiteBoxes.map((wb, idx) => `
                 <div class="whitebox-row ${selectedWhiteBoxId === wb.id ? 'selected' : ''}" data-id="${wb.id}">
                     <div class="whitebox-icon"></div>
                     <div class="item-info">
@@ -1956,11 +1986,12 @@
 
         // Render text box list
         function renderTextBoxList() {
-            if (textBoxes.length === 0) {
-                textboxListEl.innerHTML = '<div class="empty-list">No text boxes added</div>';
+            const pageTextBoxes = textBoxes.filter(t => t.page === currentPage);
+            if (pageTextBoxes.length === 0) {
+                textboxListEl.innerHTML = '<div class="empty-list">No text boxes on this page</div>';
                 return;
             }
-            textboxListEl.innerHTML = textBoxes.map((tb, idx) => `
+            textboxListEl.innerHTML = pageTextBoxes.map((tb, idx) => `
                 <div class="textbox-row ${selectedTextBoxId === tb.id ? 'selected' : ''}" data-id="${tb.id}">
                     <div class="textbox-icon">T</div>
                     <div class="item-info">
@@ -2088,7 +2119,86 @@
 
         // Update export button
         function updateExportButton() {
-            exportBtn.disabled = !pdfDoc || (images.length === 0 && whiteBoxes.length === 0 && textBoxes.length === 0 && !templateData);
+            exportBtn.disabled = !pdfDoc || (images.length === 0 && whiteBoxes.length === 0 && textBoxes.length === 0 && Object.keys(templatePages).length === 0);
+        }
+
+        // Show/hide overlays based on current page
+        function updateOverlayVisibility() {
+            images.forEach(img => {
+                if (img.element) img.element.style.display = img.page === currentPage ? '' : 'none';
+            });
+            whiteBoxes.forEach(wb => {
+                if (wb.element) wb.element.style.display = wb.page === currentPage ? '' : 'none';
+            });
+            textBoxes.forEach(tb => {
+                if (tb.element) tb.element.style.display = tb.page === currentPage ? '' : 'none';
+            });
+
+            // Template visibility
+            if (templateData && templatePages[currentPage]) {
+                templateOverlay.style.display = 'block';
+                templateSize.width = pdfCanvas.width;
+                templateSize.height = pdfCanvas.height;
+                templateOverlay.style.width = templateSize.width + 'px';
+                templateOverlay.style.height = templateSize.height + 'px';
+                templateOverlay.style.left = '0px';
+                templateOverlay.style.top = '0px';
+                templateImage.style.opacity = templatePages[currentPage].opacity / 100;
+                templateOpacityInput.value = templatePages[currentPage].opacity;
+                templateOpacityValue.textContent = templatePages[currentPage].opacity;
+            } else {
+                templateOverlay.style.display = 'none';
+            }
+
+            updateTemplateControls();
+            renderImageList();
+            renderWhiteBoxList();
+            renderTextBoxList();
+
+            // Deselect items not on current page
+            if (selectedImageId) {
+                const img = images.find(i => i.id === selectedImageId);
+                if (img && img.page !== currentPage) {
+                    selectedImageId = null;
+                    selectedImageControls.style.display = 'none';
+                }
+            }
+            if (selectedWhiteBoxId) {
+                const wb = whiteBoxes.find(w => w.id === selectedWhiteBoxId);
+                if (wb && wb.page !== currentPage) {
+                    selectedWhiteBoxId = null;
+                }
+            }
+            if (selectedTextBoxId) {
+                const tb = textBoxes.find(t => t.id === selectedTextBoxId);
+                if (tb && tb.page !== currentPage) {
+                    selectedTextBoxId = null;
+                    selectedTextControls.style.display = 'none';
+                }
+            }
+        }
+
+        // Update template controls visibility and info
+        function updateTemplateControls() {
+            const pageCount = Object.keys(templatePages).length;
+            const isOnCurrentPage = templatePages[currentPage] !== undefined;
+
+            if (pageCount > 0 && templateData) {
+                templateControls.style.display = 'block';
+                const pageNums = Object.keys(templatePages).map(Number).sort((a, b) => a - b);
+                templatePageInfoEl.textContent = 'Template on page' + (pageNums.length > 1 ? 's' : '') + ': ' + pageNums.join(', ');
+
+                if (isOnCurrentPage) {
+                    addTemplateBtn.style.display = 'none';
+                } else {
+                    addTemplateBtn.style.display = 'block';
+                }
+                addTemplateAllBtn.style.display = pageNums.length < totalPages ? 'block' : 'none';
+            } else {
+                templateControls.style.display = 'none';
+                addTemplateBtn.style.display = 'block';
+                addTemplateAllBtn.style.display = 'block';
+            }
         }
 
         // Page navigation
@@ -2097,6 +2207,7 @@
                 currentPage--;
                 await renderPage(currentPage);
                 updatePageControls();
+                updateOverlayVisibility();
             }
         });
 
@@ -2105,6 +2216,7 @@
                 currentPage++;
                 await renderPage(currentPage);
                 updatePageControls();
+                updateOverlayVisibility();
             }
         });
 
@@ -2159,10 +2271,48 @@
 
         // Template handling
         addTemplateBtn.addEventListener('click', () => {
-            loadTemplate();
+            loadTemplate([currentPage]);
         });
 
-        function loadTemplate() {
+        addTemplateAllBtn.addEventListener('click', () => {
+            const allPages = [];
+            for (let i = 1; i <= totalPages; i++) allPages.push(i);
+            loadTemplate(allPages);
+        });
+
+        function loadTemplate(pageNums) {
+            function applyTemplate() {
+                pageNums.forEach(p => {
+                    if (!templatePages[p]) {
+                        templatePages[p] = { opacity: 100 };
+                    }
+                });
+
+                templateSize.width = pdfCanvas.width;
+                templateSize.height = pdfCanvas.height;
+                templatePosition.x = 0;
+                templatePosition.y = 0;
+
+                templateImage.src = templateData;
+
+                if (templatePages[currentPage]) {
+                    templateOverlay.style.display = 'block';
+                    templateOverlay.style.left = '0px';
+                    templateOverlay.style.top = '0px';
+                    templateOverlay.style.width = templateSize.width + 'px';
+                    templateOverlay.style.height = templateSize.height + 'px';
+                    templateImage.style.opacity = templatePages[currentPage].opacity / 100;
+                }
+
+                updateTemplateControls();
+                updateExportButton();
+            }
+
+            if (templateData) {
+                applyTemplate();
+                return;
+            }
+
             const img = new Image();
             img.crossOrigin = 'anonymous';
             img.onload = () => {
@@ -2172,22 +2322,7 @@
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0);
                 templateData = canvas.toDataURL('image/png');
-
-                templateSize.width = pdfCanvas.width;
-                templateSize.height = pdfCanvas.height;
-                templatePosition.x = 0;
-                templatePosition.y = 0;
-
-                templateImage.src = templateData;
-                templateOverlay.style.display = 'block';
-                templateOverlay.style.left = '0px';
-                templateOverlay.style.top = '0px';
-                templateOverlay.style.width = templateSize.width + 'px';
-                templateOverlay.style.height = templateSize.height + 'px';
-
-                templateControls.style.display = 'block';
-                addTemplateBtn.style.display = 'none';
-                updateExportButton();
+                applyTemplate();
             };
             img.onerror = () => {
                 alert('Could not load template. Make sure valtemplate.png is in the same folder.');
@@ -2196,16 +2331,29 @@
         }
 
         templateOpacityInput.addEventListener('input', () => {
-            const opacity = templateOpacityInput.value / 100;
-            templateOpacityValue.textContent = templateOpacityInput.value;
-            templateImage.style.opacity = opacity;
+            const opacity = parseInt(templateOpacityInput.value);
+            templateOpacityValue.textContent = opacity;
+            templateImage.style.opacity = opacity / 100;
+            if (templatePages[currentPage]) {
+                templatePages[currentPage].opacity = opacity;
+            }
         });
 
         removeTemplateBtn.addEventListener('click', () => {
+            delete templatePages[currentPage];
+            if (Object.keys(templatePages).length === 0) {
+                templateData = null;
+            }
+            templateOverlay.style.display = 'none';
+            updateTemplateControls();
+            updateExportButton();
+        });
+
+        removeTemplateAllBtn.addEventListener('click', () => {
+            templatePages = {};
             templateData = null;
             templateOverlay.style.display = 'none';
-            templateControls.style.display = 'none';
-            addTemplateBtn.style.display = 'block';
+            updateTemplateControls();
             updateExportButton();
         });
 
@@ -2221,124 +2369,147 @@
                 const pdfDocLib = await PDFDocument.load(new Uint8Array(pdfBytes));
 
                 const pages = pdfDocLib.getPages();
-                const page = pages[currentPage - 1];
-                const { width: pageWidth, height: pageHeight } = page.getSize();
-
-                const scaleX = pageWidth / pdfCanvas.width;
-                const scaleY = pageHeight / pdfCanvas.height;
                 const zoomScale = pdfZoomLevel / 100;
 
-                // 1. Draw white boxes first (to cover original content)
-                for (const wb of whiteBoxes) {
-                    const adjustedX = (wb.position.x - pdfOffset.x) / zoomScale;
-                    const adjustedY = (wb.position.y - pdfOffset.y) / zoomScale;
-                    const adjustedWidth = wb.size.width / zoomScale;
-                    const adjustedHeight = wb.size.height / zoomScale;
-
-                    const pdfX = adjustedX * scaleX;
-                    const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
-                    const pdfWidth = adjustedWidth * scaleX;
-                    const pdfHeight = adjustedHeight * scaleY;
-
-                    page.drawRectangle({
-                        x: pdfX,
-                        y: pdfY,
-                        width: pdfWidth,
-                        height: pdfHeight,
-                        color: rgb(1, 1, 1),
-                    });
-                }
-
-                // 2. Draw template
-                if (templateData) {
+                // Embed template once if needed
+                let embeddedTemplate = null;
+                if (templateData && Object.keys(templatePages).length > 0) {
                     const base64Data = templateData.split(',')[1];
                     const templateBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-                    const embeddedTemplate = await pdfDocLib.embedPng(templateBytes);
-
-                    const adjustedX = (templatePosition.x - pdfOffset.x) / zoomScale;
-                    const adjustedY = (templatePosition.y - pdfOffset.y) / zoomScale;
-                    const adjustedWidth = templateSize.width / zoomScale;
-                    const adjustedHeight = templateSize.height / zoomScale;
-
-                    const pdfX = adjustedX * scaleX;
-                    const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
-                    const pdfWidth = adjustedWidth * scaleX;
-                    const pdfHeight = adjustedHeight * scaleY;
-                    const opacity = parseInt(templateOpacityInput.value) / 100;
-
-                    page.drawImage(embeddedTemplate, {
-                        x: pdfX,
-                        y: pdfY,
-                        width: pdfWidth,
-                        height: pdfHeight,
-                        opacity: opacity
-                    });
+                    embeddedTemplate = await pdfDocLib.embedPng(templateBytes);
                 }
 
-                // 3. Draw images (on top)
+                // Embed all images once
+                const embeddedImages = new Map();
                 for (const img of images) {
-                    const base64Data = img.data.split(',')[1];
-                    const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-
-                    let embeddedImage;
-                    if (img.data.includes('image/png')) {
-                        embeddedImage = await pdfDocLib.embedPng(imageBytes);
-                    } else {
-                        embeddedImage = await pdfDocLib.embedJpg(imageBytes);
+                    if (!embeddedImages.has(img.id)) {
+                        const base64Data = img.data.split(',')[1];
+                        const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+                        let embedded;
+                        if (img.data.includes('image/png')) {
+                            embedded = await pdfDocLib.embedPng(imageBytes);
+                        } else {
+                            embedded = await pdfDocLib.embedJpg(imageBytes);
+                        }
+                        embeddedImages.set(img.id, embedded);
                     }
-
-                    const adjustedX = (img.position.x - pdfOffset.x) / zoomScale;
-                    const adjustedY = (img.position.y - pdfOffset.y) / zoomScale;
-                    const adjustedWidth = img.size.width / zoomScale;
-                    const adjustedHeight = img.size.height / zoomScale;
-
-                    const pdfX = adjustedX * scaleX;
-                    const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
-                    const pdfWidth = adjustedWidth * scaleX;
-                    const pdfHeight = adjustedHeight * scaleY;
-                    const opacity = img.opacity / 100;
-
-                    page.drawImage(embeddedImage, {
-                        x: pdfX,
-                        y: pdfY,
-                        width: pdfWidth,
-                        height: pdfHeight,
-                        opacity: opacity
-                    });
                 }
 
-                // 4. Draw text boxes (on top of everything)
-                for (const tb of textBoxes) {
-                    const adjustedX = (tb.position.x - pdfOffset.x) / zoomScale;
-                    const adjustedY = (tb.position.y - pdfOffset.y) / zoomScale;
+                // Embed fonts once
+                const embeddedFonts = {};
+                async function getFont(fontFamily, bold) {
+                    const key = fontFamily + (bold ? '_bold' : '');
+                    if (!embeddedFonts[key]) {
+                        if (fontFamily.includes('Times')) {
+                            embeddedFonts[key] = await pdfDocLib.embedFont(bold ? PDFLib.StandardFonts.TimesBold : PDFLib.StandardFonts.TimesRoman);
+                        } else if (fontFamily.includes('Courier')) {
+                            embeddedFonts[key] = await pdfDocLib.embedFont(bold ? PDFLib.StandardFonts.CourierBold : PDFLib.StandardFonts.Courier);
+                        } else {
+                            embeddedFonts[key] = await pdfDocLib.embedFont(bold ? PDFLib.StandardFonts.HelveticaBold : PDFLib.StandardFonts.Helvetica);
+                        }
+                    }
+                    return embeddedFonts[key];
+                }
 
-                    const pdfX = adjustedX * scaleX;
-                    // Text needs to account for baseline - approximate by adding font size
-                    const pdfY = pageHeight - (adjustedY * scaleY) - (tb.fontSize * scaleY);
+                // Process each page
+                for (let pageIdx = 0; pageIdx < pages.length; pageIdx++) {
+                    const pageNum = pageIdx + 1;
+                    const page = pages[pageIdx];
+                    const { width: pageWidth, height: pageHeight } = page.getSize();
 
-                    // Parse color
-                    const hex = tb.color.replace('#', '');
-                    const r = parseInt(hex.substring(0, 2), 16) / 255;
-                    const g = parseInt(hex.substring(2, 4), 16) / 255;
-                    const b = parseInt(hex.substring(4, 6), 16) / 255;
+                    // Get viewport dimensions for this page at render scale
+                    const pdfJsPage = await pdfDoc.getPage(pageNum);
+                    const viewport = pdfJsPage.getViewport({ scale: scale });
+                    const canvasWidth = viewport.width;
+                    const canvasHeight = viewport.height;
 
-                    // Get font - pdf-lib has limited built-in fonts
-                    let font;
-                    if (tb.fontFamily.includes('Times')) {
-                        font = await pdfDocLib.embedFont(tb.bold ? PDFLib.StandardFonts.TimesBold : PDFLib.StandardFonts.TimesRoman);
-                    } else if (tb.fontFamily.includes('Courier')) {
-                        font = await pdfDocLib.embedFont(tb.bold ? PDFLib.StandardFonts.CourierBold : PDFLib.StandardFonts.Courier);
-                    } else {
-                        font = await pdfDocLib.embedFont(tb.bold ? PDFLib.StandardFonts.HelveticaBold : PDFLib.StandardFonts.Helvetica);
+                    const scaleX = pageWidth / canvasWidth;
+                    const scaleY = pageHeight / canvasHeight;
+
+                    // 1. Draw white boxes for this page
+                    const pageWhiteBoxes = whiteBoxes.filter(wb => wb.page === pageNum);
+                    for (const wb of pageWhiteBoxes) {
+                        const adjustedX = (wb.position.x - pdfOffset.x) / zoomScale;
+                        const adjustedY = (wb.position.y - pdfOffset.y) / zoomScale;
+                        const adjustedWidth = wb.size.width / zoomScale;
+                        const adjustedHeight = wb.size.height / zoomScale;
+
+                        const pdfX = adjustedX * scaleX;
+                        const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
+                        const pdfWidth = adjustedWidth * scaleX;
+                        const pdfHeight = adjustedHeight * scaleY;
+
+                        page.drawRectangle({
+                            x: pdfX,
+                            y: pdfY,
+                            width: pdfWidth,
+                            height: pdfHeight,
+                            color: rgb(1, 1, 1),
+                        });
                     }
 
-                    page.drawText(tb.text, {
-                        x: pdfX,
-                        y: pdfY,
-                        size: tb.fontSize * scaleX,
-                        font: font,
-                        color: rgb(r, g, b)
-                    });
+                    // 2. Draw template for this page
+                    if (embeddedTemplate && templatePages[pageNum]) {
+                        const opacity = templatePages[pageNum].opacity / 100;
+                        page.drawImage(embeddedTemplate, {
+                            x: 0,
+                            y: 0,
+                            width: pageWidth,
+                            height: pageHeight,
+                            opacity: opacity
+                        });
+                    }
+
+                    // 3. Draw images for this page
+                    const pageImages = images.filter(img => img.page === pageNum);
+                    for (const img of pageImages) {
+                        const embeddedImage = embeddedImages.get(img.id);
+                        if (!embeddedImage) continue;
+
+                        const adjustedX = (img.position.x - pdfOffset.x) / zoomScale;
+                        const adjustedY = (img.position.y - pdfOffset.y) / zoomScale;
+                        const adjustedWidth = img.size.width / zoomScale;
+                        const adjustedHeight = img.size.height / zoomScale;
+
+                        const pdfX = adjustedX * scaleX;
+                        const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
+                        const pdfWidth = adjustedWidth * scaleX;
+                        const pdfHeight = adjustedHeight * scaleY;
+                        const opacity = img.opacity / 100;
+
+                        page.drawImage(embeddedImage, {
+                            x: pdfX,
+                            y: pdfY,
+                            width: pdfWidth,
+                            height: pdfHeight,
+                            opacity: opacity
+                        });
+                    }
+
+                    // 4. Draw text boxes for this page
+                    const pageTextBoxes = textBoxes.filter(tb => tb.page === pageNum);
+                    for (const tb of pageTextBoxes) {
+                        const adjustedX = (tb.position.x - pdfOffset.x) / zoomScale;
+                        const adjustedY = (tb.position.y - pdfOffset.y) / zoomScale;
+
+                        const pdfX = adjustedX * scaleX;
+                        const pdfY = pageHeight - (adjustedY * scaleY) - (tb.fontSize * scaleY);
+
+                        const hex = tb.color.replace('#', '');
+                        const r = parseInt(hex.substring(0, 2), 16) / 255;
+                        const g = parseInt(hex.substring(2, 4), 16) / 255;
+                        const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+                        const font = await getFont(tb.fontFamily, tb.bold);
+
+                        page.drawText(tb.text, {
+                            x: pdfX,
+                            y: pdfY,
+                            size: tb.fontSize * scaleX,
+                            font: font,
+                            color: rgb(r, g, b)
+                        });
+                    }
                 }
 
                 const modifiedPdfBytes = await pdfDocLib.save();
