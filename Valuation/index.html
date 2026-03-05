@@ -829,18 +829,11 @@
         /* Signature Tool Styles (scoped) */
         .sig-tool .sig-input-options {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 20px;
         }
 
-        @media (max-width: 500px) {
-            .sig-tool .sig-input-options {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .sig-tool .sig-upload-area,
-        .sig-tool .sig-camera-area {
+        .sig-tool .sig-upload-area {
             border: 2px dashed #ccc;
             border-radius: 8px;
             padding: 40px 20px;
@@ -850,8 +843,7 @@
             transition: border-color 0.2s;
         }
 
-        .sig-tool .sig-upload-area:hover,
-        .sig-tool .sig-camera-area:hover {
+        .sig-tool .sig-upload-area:hover {
             border-color: #666;
         }
 
@@ -860,31 +852,6 @@
             margin-bottom: 10px;
         }
 
-        .sig-tool .sig-camera-container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            text-align: center;
-            display: none;
-        }
-
-        .sig-tool .sig-camera-container.visible {
-            display: block;
-        }
-
-        .sig-tool #sigCameraVideo {
-            max-width: 100%;
-            border-radius: 8px;
-            background: #000;
-        }
-
-        .sig-tool .sig-camera-controls {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
 
         .sig-tool .sig-controls {
             background: #fff;
@@ -1163,6 +1130,7 @@
                     <button class="btn" id="addManagerNameBtn" disabled style="background: #9c27b0; color: white;">Manager Name</button>
                     <button class="btn" id="uploadSignatureBtn" disabled style="background: #007bff; color: white;">Upload Signature</button>
                     <input type="file" id="signatureInput" accept="image/*" style="display: none;">
+                    <button class="btn btn-signature" id="openSignatureBtn">Signature Creator</button>
                 </div>
 
                 <div class="step-group">
@@ -1231,7 +1199,6 @@
                     <button class="btn" id="addTextBoxBtn" style="background: #9c27b0; color: white;" disabled>Add Text Box</button>
                     <button class="btn" id="imageUploadBtn" style="background: #007bff; color: white;" disabled>Upload Images</button>
                     <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
-                    <button class="btn btn-signature" id="openSignatureBtn">Signature Creator</button>
                 </div>
 
                 <div class="step-group">
@@ -1319,21 +1286,8 @@
                             <small>Click or drag & drop</small>
                             <input type="file" id="sigFileInput" accept="image/*">
                         </div>
-                        <div class="sig-camera-area" id="sigCameraArea">
-                            <div class="sig-input-icon">📷</div>
-                            <p>Use Camera</p>
-                            <small>Take a photo</small>
-                        </div>
                     </div>
 
-                    <div class="sig-camera-container" id="sigCameraContainer">
-                        <video id="sigCameraVideo" autoplay playsinline></video>
-                        <div class="sig-camera-controls">
-                            <button id="sigCaptureBtn" class="sig-btn success">Capture Photo</button>
-                            <button id="sigCancelCameraBtn" class="sig-btn secondary">Cancel</button>
-                        </div>
-                        <div class="sig-error-msg" id="sigCameraError"></div>
-                    </div>
 
                     <div class="sig-crop-container" id="sigCropContainer">
                         <h3>Step 1: Crop your image (optional)</h3>
@@ -2826,19 +2780,12 @@
         function closeSignatureModal() {
             signatureModal.classList.remove('active');
             document.body.style.overflow = '';
-            sigStopCamera();
         }
 
         // Signature tool elements
         const sigInputOptions = document.getElementById('sigInputOptions');
         const sigUploadArea = document.getElementById('sigUploadArea');
-        const sigCameraArea = document.getElementById('sigCameraArea');
         const sigFileInput = document.getElementById('sigFileInput');
-        const sigCameraContainer = document.getElementById('sigCameraContainer');
-        const sigCameraVideo = document.getElementById('sigCameraVideo');
-        const sigCaptureBtn = document.getElementById('sigCaptureBtn');
-        const sigCancelCameraBtn = document.getElementById('sigCancelCameraBtn');
-        const sigCameraError = document.getElementById('sigCameraError');
         const sigCropContainer = document.getElementById('sigCropContainer');
         const sigCropCanvas = document.getElementById('sigCropCanvas');
         const sigCropCtx = sigCropCanvas.getContext('2d');
@@ -2866,8 +2813,6 @@
         let sigOriginalImage = null;
         let sigCroppedImage = null;
         let sigScale = 1;
-        let sigCameraStream = null;
-
         // Crop box state
         let sigCropBox = { x: 0, y: 0, w: 0, h: 0 };
         let sigIsDragging = false;
@@ -2888,56 +2833,6 @@
             if (e.target.files[0]) {
                 sigHandleFile(e.target.files[0]);
             }
-        });
-
-        // Camera
-        sigCameraArea.addEventListener('click', sigStartCamera);
-
-        async function sigStartCamera() {
-            try {
-                sigCameraError.classList.remove('visible');
-                sigCameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' },
-                    audio: false
-                });
-                sigCameraVideo.srcObject = sigCameraStream;
-                sigInputOptions.style.display = 'none';
-                sigCameraContainer.classList.add('visible');
-            } catch (err) {
-                sigCameraError.textContent = 'Could not access camera: ' + err.message;
-                sigCameraError.classList.add('visible');
-            }
-        }
-
-        function sigStopCamera() {
-            if (sigCameraStream) {
-                sigCameraStream.getTracks().forEach(track => track.stop());
-                sigCameraStream = null;
-            }
-            sigCameraVideo.srcObject = null;
-            sigCameraContainer.classList.remove('visible');
-        }
-
-        sigCancelCameraBtn.addEventListener('click', () => {
-            sigStopCamera();
-            sigInputOptions.style.display = 'grid';
-        });
-
-        sigCaptureBtn.addEventListener('click', () => {
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = sigCameraVideo.videoWidth;
-            tempCanvas.height = sigCameraVideo.videoHeight;
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.drawImage(sigCameraVideo, 0, 0);
-
-            sigStopCamera();
-
-            const img = new Image();
-            img.onload = () => {
-                sigOriginalImage = img;
-                sigShowCropUI();
-            };
-            img.src = tempCanvas.toDataURL();
         });
 
         function sigHandleFile(file) {
@@ -3326,8 +3221,6 @@
             sigControls.classList.remove('visible');
             sigPreviewContainer.style.display = 'none';
             sigCropContainer.classList.remove('visible');
-            sigCameraContainer.classList.remove('visible');
-            sigStopCamera();
             sigInputOptions.style.display = 'grid';
             sigFileInput.value = '';
             sigThresholdSlider.value = 50;
