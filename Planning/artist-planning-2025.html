@@ -1118,7 +1118,7 @@
                 <h3>${item.artist_name}</h3>
                 <p>${item.revenue_amount || 'View Details'}</p>
             `;
-            navCard.onclick = () => scrollToSection(item.artist_slug);
+            navCard.onclick = () => scrollToSection(item.id);
 
             return navCard;
         }
@@ -1142,7 +1142,7 @@
         function createArtistCard(artist) {
             const card = document.createElement('div');
             card.className = 'artist-card';
-            card.id = `artist-${artist.artist_slug}`;
+            card.id = `card-${artist.id}`;
 
             const icon = artistIcons[artist.artist_slug] || '🎨';
             const lastUpdated = new Date(artist.last_updated).toLocaleDateString('en-GB', {
@@ -1255,7 +1255,7 @@
         function createBusinessCard(section) {
             const card = document.createElement('div');
             card.className = 'artist-card';
-            card.id = `section-${section.artist_slug}`;
+            card.id = `card-${section.id}`;
 
             const icon = getBusinessIcon(section.artist_slug);
             const lastUpdated = new Date(section.last_updated).toLocaleDateString('en-GB', {
@@ -1365,8 +1365,8 @@
             return card;
         }
 
-        function scrollToSection(slug) {
-            const element = document.getElementById(`artist-${slug}`) || document.getElementById(`section-${slug}`);
+        function scrollToSection(recordId) {
+            const element = document.getElementById(`card-${recordId}`);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 element.style.transform = 'scale(1.02)';
@@ -1374,7 +1374,7 @@
             }
         }
 
-        function scrollToArtist(slug) { scrollToSection(slug); }
+        function scrollToArtist(recordId) { scrollToSection(recordId); }
 
         function openLightbox(imageUrl) {
             const lightbox = document.getElementById('lightbox');
@@ -1409,9 +1409,7 @@
                 navItem.textContent = section.artist_name;
 
                 navItem.onclick = () => {
-                    let targetElement = document.getElementById(`artist-${section.artist_slug}`);
-                    if (!targetElement) targetElement = document.getElementById(`section-${section.artist_slug}`);
-
+                    const targetElement = document.getElementById(`card-${section.id}`);
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         targetElement.style.transition = 'transform 0.3s ease';
@@ -1428,9 +1426,7 @@
                 navItem.textContent = section.artist_name;
 
                 navItem.onclick = () => {
-                    let targetElement = document.getElementById(`artist-${section.artist_slug}`);
-                    if (!targetElement) targetElement = document.getElementById(`section-${section.artist_slug}`);
-
+                    const targetElement = document.getElementById(`card-${section.id}`);
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         targetElement.style.transition = 'transform 0.3s ease';
