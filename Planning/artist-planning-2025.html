@@ -1367,11 +1367,26 @@
 
         function scrollToSection(recordId) {
             const element = document.getElementById(`card-${recordId}`);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                element.style.transform = 'scale(1.02)';
-                setTimeout(() => { element.style.transform = 'scale(1)'; }, 300);
-            }
+            if (!element) return;
+
+            // Scroll, then re-scroll to correct for lazy-loaded image layout shifts
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            let checks = 0;
+            const correctionInterval = setInterval(() => {
+                const rect = element.getBoundingClientRect();
+                // If element isn't near the top of the viewport, re-scroll
+                if (Math.abs(rect.top) > 30) {
+                    window.scrollTo({ top: window.scrollY + rect.top - 20, behavior: 'smooth' });
+                }
+                checks++;
+                if (checks >= 5) {
+                    clearInterval(correctionInterval);
+                    // Final highlight pulse
+                    element.style.transform = 'scale(1.02)';
+                    setTimeout(() => { element.style.transform = 'scale(1)'; }, 300);
+                }
+            }, 400);
         }
 
         function scrollToArtist(recordId) { scrollToSection(recordId); }
@@ -1407,16 +1422,7 @@
                 const navItem = document.createElement('div');
                 navItem.className = 'quick-nav-item';
                 navItem.textContent = section.artist_name;
-
-                navItem.onclick = () => {
-                    const targetElement = document.getElementById(`card-${section.id}`);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        targetElement.style.transition = 'transform 0.3s ease';
-                        targetElement.style.transform = 'scale(1.02)';
-                        setTimeout(() => { targetElement.style.transform = 'scale(1)'; }, 400);
-                    }
-                };
+                navItem.onclick = () => scrollToSection(section.id);
                 quickNavItems.appendChild(navItem);
             });
 
@@ -1424,16 +1430,7 @@
                 const navItem = document.createElement('div');
                 navItem.className = 'quick-nav-item';
                 navItem.textContent = section.artist_name;
-
-                navItem.onclick = () => {
-                    const targetElement = document.getElementById(`card-${section.id}`);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        targetElement.style.transition = 'transform 0.3s ease';
-                        targetElement.style.transform = 'scale(1.02)';
-                        setTimeout(() => { targetElement.style.transform = 'scale(1)'; }, 400);
-                    }
-                };
+                navItem.onclick = () => scrollToSection(section.id);
                 quickNavItems.appendChild(navItem);
             });
         }
