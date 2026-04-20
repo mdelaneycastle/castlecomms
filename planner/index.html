@@ -53,13 +53,6 @@
                 <h3>Filters</h3>
 
                 <div class="filter-group">
-                    <label>Event Type</label>
-                    <div class="event-types" id="eventTypesFilter">
-                        <!-- Event type filters will be rendered dynamically -->
-                    </div>
-                </div>
-
-                <div class="filter-group">
                     <label for="artistFilter">Artist</label>
                     <select id="artistFilter" class="filter-select">
                         <option value="">All Artists</option>
@@ -101,6 +94,12 @@
             <!-- Calendar View -->
             <div id="calendarView" class="view-container active">
                 <div id="calendar"></div>
+                <div class="event-type-key">
+                    <span class="event-type-key-label">Event Types</span>
+                    <div class="event-types" id="eventTypesFilter">
+                        <!-- Event type filters will be rendered dynamically -->
+                    </div>
+                </div>
             </div>
 
             <!-- List View -->
