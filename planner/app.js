@@ -120,7 +120,7 @@ function initializeCalendar() {
         eventClick: function(info) {
             showEventDetails(info.event.id);
         },
-        height: 'auto',
+        height: 700,
         eventDisplay: 'block',
         dayMaxEvents: 3,
         displayEventTime: false
