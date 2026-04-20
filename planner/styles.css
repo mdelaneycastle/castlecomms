@@ -187,66 +187,29 @@ body {
 .badge.preview { background: #fff2a8; color: #7c5500; }
 .badge.launch { background: #a8c8ff; color: #1e3a8a; }
 
-/* Event Type color key (below calendar) */
-.event-type-key {
-    margin-top: 0.5rem;
-    padding: 0.6rem 1rem;
-    background: #ffffff;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.event-type-key-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: #6c757d;
-    white-space: nowrap;
-}
-
-.event-type-key .event-types {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.75rem 1.25rem;
-    flex: 1;
-}
-
-.event-type-key .checkbox-label {
-    gap: 0.4rem;
-}
-
-.event-type-key .badge {
-    font-size: 0.8rem;
-}
-
-/* Hoverable info icon + tooltip */
-.event-type-key .checkbox-label {
-    position: relative;
-}
-
-.event-type-key .key-info-icon {
+/* Sidebar event-type key — info icon + hover tooltip (opens to the right) */
+#eventTypesFilter .key-info-icon {
     font-size: 0.8rem;
     color: #adb5bd;
+    margin-left: auto;
     transition: color 0.15s ease;
     cursor: help;
 }
 
-.event-type-key .checkbox-label:hover .key-info-icon {
+#eventTypesFilter .checkbox-label {
+    position: relative;
+}
+
+#eventTypesFilter .checkbox-label:hover .key-info-icon {
     color: #2c3e50;
 }
 
-/* Tooltip itself — pure CSS, driven by data-description attr */
-.event-type-key .checkbox-label[data-description]::after {
+#eventTypesFilter .checkbox-label[data-description]::after {
     content: attr(data-description);
     position: absolute;
-    left: 50%;
-    bottom: calc(100% + 10px);
-    transform: translateX(-50%) translateY(4px);
+    left: calc(100% + 14px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
     width: 320px;
     max-width: 85vw;
     padding: 0.85rem 1rem;
@@ -266,27 +229,26 @@ body {
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-/* Little arrow */
-.event-type-key .checkbox-label[data-description]::before {
+#eventTypesFilter .checkbox-label[data-description]::before {
     content: '';
     position: absolute;
-    left: 50%;
-    bottom: calc(100% + 4px);
-    transform: translateX(-50%) translateY(4px);
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-4px);
     border: 6px solid transparent;
-    border-top-color: #2c3e50;
+    border-right-color: #2c3e50;
     opacity: 0;
     pointer-events: none;
     z-index: 500;
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.event-type-key .checkbox-label[data-description]:hover::after,
-.event-type-key .checkbox-label[data-description]:focus-within::after,
-.event-type-key .checkbox-label[data-description]:hover::before,
-.event-type-key .checkbox-label[data-description]:focus-within::before {
+#eventTypesFilter .checkbox-label[data-description]:hover::after,
+#eventTypesFilter .checkbox-label[data-description]:focus-within::after,
+#eventTypesFilter .checkbox-label[data-description]:hover::before,
+#eventTypesFilter .checkbox-label[data-description]:focus-within::before {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(-50%) translateX(0);
 }
 
 .btn-primary {
