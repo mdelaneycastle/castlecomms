@@ -189,8 +189,8 @@ body {
 
 /* Event Type color key (below calendar) */
 .event-type-key {
-    margin-top: 1.25rem;
-    padding: 1rem 1.25rem;
+    margin-top: 0.5rem;
+    padding: 0.6rem 1rem;
     background: #ffffff;
     border: 1px solid #e9ecef;
     border-radius: 8px;
