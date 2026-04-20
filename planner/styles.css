@@ -187,6 +187,43 @@ body {
 .badge.preview { background: #fff2a8; color: #7c5500; }
 .badge.launch { background: #a8c8ff; color: #1e3a8a; }
 
+/* Event Type color key (below calendar) */
+.event-type-key {
+    margin-top: 1.25rem;
+    padding: 1rem 1.25rem;
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.event-type-key-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #6c757d;
+    white-space: nowrap;
+}
+
+.event-type-key .event-types {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    flex: 1;
+}
+
+.event-type-key .checkbox-label {
+    gap: 0.4rem;
+}
+
+.event-type-key .badge {
+    font-size: 0.8rem;
+}
+
 .btn-primary {
     background: #2c3e50;
     color: white;
