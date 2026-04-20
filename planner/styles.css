@@ -122,6 +122,7 @@ body {
     height: fit-content;
     position: sticky;
     top: 120px;
+    z-index: 20; /* keep hover tooltips above the calendar's stacking context */
 }
 
 .filters h3 {
@@ -225,7 +226,7 @@ body {
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
     opacity: 0;
     pointer-events: none;
-    z-index: 500;
+    z-index: 9999;
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
@@ -239,7 +240,7 @@ body {
     border-right-color: #2c3e50;
     opacity: 0;
     pointer-events: none;
-    z-index: 500;
+    z-index: 9999;
     transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
@@ -1491,28 +1492,19 @@ tr:hover {
         word-wrap: break-word;
     }
 
-@media print {
+    /* Force browsers to print colours */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 
-  /* Force browsers to print colours */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
+    .fc-event {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 
-  body {
-    background: white;
-  }
-
-  /* Ensure event colours stay visible */
-  .fc-event {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  .badge {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-
+    .badge {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 }
