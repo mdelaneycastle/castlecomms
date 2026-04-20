@@ -1,27 +1,7 @@
-// Artists data
-const artists = [
-    'Billy Connolly', 'Billy Schenck', 'Bisaillon Brothers', 'Bob Barker', 'Bob Dylan',
-    'Boy George', 'Dan Lane', 'Disney Vintage', 'Dr. Seuss', 'Duncan McAfee',
-    'Eve Arnold', 'Gary James McQueen', 'Graceland', 'Graceland London', 'Hanna-Barbera',
-    'James Francis Gill', 'James McQueen', 'John Myatt', 'Jon Jones', 'Johnny Depp',
-    'Joseph Jones', 'Lawrence Coulson', 'Lorenzo Quinn', 'Marco Olivier', 'Marvel',
-    'Multiple Artists', 'Nic Joly', 'Nigel Humphries', 'Paolo Ferrara', 'Pascale Taurua', 'Paul Corfield', 'Paul Kenton',
-    'Paulo Ferreira', 'Peter Smith', 'Raphael Mazzucco', 'Rich Simmons',
-    'Richard Hambleton', 'Richard Rowan', 'Robert Bailey', 'Robert Oxley',
-    'Romero Britto', 'Ron English', 'Ronnie Wood', 'Scarlett Raven', 'Shazia',
-    'Steve Winterburn', 'Various Artists', 'Whatshisname'
-];
-
-// Galleries data
-const galleries = [
-    'Birmingham - ICC', 'Birmingham - Mailbox', 'Cheltenham', 'Derby', 'Leamington Spa',
-    'Milton Keynes', 'Nottingham', 'Stamford', 'Stratford-upon-Avon', 'Chester',
-    'Harrogate', 'Leeds', 'Manchester', 'Newcastle', 'Sheffield Meadowhall', 'York',
-    'London Covent Garden', 'London South Molton Street', 'London St Christopher\'s Place',
-    'Bath', 'Brighton', 'Bristol', 'Cambridge', 'Canterbury', 'Exeter', 'Guildford',
-    'Kent - Bluewater', 'Marlow', 'Norwich', 'Oxford', 'Reading', 'Tunbridge Wells',
-    'Winchester', 'Windsor', 'Edinburgh', 'Glasgow', 'Cardiff'
-];
+// Artists and galleries are loaded from Supabase at boot — arrays of names (strings).
+// The DB enforces uniqueness on name, so we read/update/delete by name (no id juggling needed in the UI).
+let artists = [];
+let galleries = [];
 
 // Default event categories configuration
 const defaultCategories = {
@@ -207,6 +187,161 @@ async function deleteCategory(id) {
         return { success: true };
     } catch (error) {
         console.error('Error deleting category:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ============================================================
+// Galleries CRUD
+// ============================================================
+async function loadGalleries() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('galleries')
+            .select('name')
+            .order('name', { ascending: true });
+        if (error) throw error;
+        galleries = (data || []).map(r => r.name);
+    } catch (error) {
+        console.error('Error loading galleries:', error);
+        galleries = [];
+    }
+    return galleries;
+}
+
+async function addGallery(name) {
+    const trimmed = (name || '').trim();
+    if (!trimmed) return { success: false, error: 'Gallery name cannot be empty' };
+    if (galleries.includes(trimmed)) return { success: false, error: 'Gallery already exists' };
+    try {
+        const { error } = await supabaseClient.from('galleries').insert({ name: trimmed });
+        if (error) throw error;
+        galleries.push(trimmed);
+        galleries.sort((a, b) => a.localeCompare(b));
+        return { success: true };
+    } catch (error) {
+        console.error('Error adding gallery:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function updateGallery(oldName, newName) {
+    const trimmed = (newName || '').trim();
+    if (!trimmed) return { success: false, error: 'Gallery name cannot be empty' };
+    if (trimmed === oldName) return { success: true };
+    if (galleries.includes(trimmed)) return { success: false, error: 'A gallery with that name already exists' };
+    try {
+        const { error } = await supabaseClient
+            .from('galleries')
+            .update({ name: trimmed, updated_at: new Date().toISOString() })
+            .eq('name', oldName);
+        if (error) throw error;
+
+        // Cascade rename to any events that reference the old name
+        const { error: eventsError } = await supabaseClient
+            .from('events')
+            .update({ gallery: trimmed })
+            .eq('gallery', oldName);
+        if (eventsError) throw eventsError;
+
+        galleries = galleries.map(g => g === oldName ? trimmed : g).sort((a, b) => a.localeCompare(b));
+        eventsData.forEach(e => { if (e.gallery === oldName) e.gallery = trimmed; });
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating gallery:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function deleteGallery(name) {
+    const inUse = eventsData.filter(e => e.gallery === name).length;
+    if (inUse > 0) {
+        return { success: false, error: `Cannot delete: ${inUse} event(s) use this gallery` };
+    }
+    try {
+        const { error } = await supabaseClient.from('galleries').delete().eq('name', name);
+        if (error) throw error;
+        galleries = galleries.filter(g => g !== name);
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting gallery:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ============================================================
+// Artists CRUD
+// ============================================================
+async function loadArtists() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('artists')
+            .select('name')
+            .order('name', { ascending: true });
+        if (error) throw error;
+        artists = (data || []).map(r => r.name);
+    } catch (error) {
+        console.error('Error loading artists:', error);
+        artists = [];
+    }
+    return artists;
+}
+
+async function addArtist(name) {
+    const trimmed = (name || '').trim();
+    if (!trimmed) return { success: false, error: 'Artist name cannot be empty' };
+    if (artists.includes(trimmed)) return { success: false, error: 'Artist already exists' };
+    try {
+        const { error } = await supabaseClient.from('artists').insert({ name: trimmed });
+        if (error) throw error;
+        artists.push(trimmed);
+        artists.sort((a, b) => a.localeCompare(b));
+        return { success: true };
+    } catch (error) {
+        console.error('Error adding artist:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function updateArtist(oldName, newName) {
+    const trimmed = (newName || '').trim();
+    if (!trimmed) return { success: false, error: 'Artist name cannot be empty' };
+    if (trimmed === oldName) return { success: true };
+    if (artists.includes(trimmed)) return { success: false, error: 'An artist with that name already exists' };
+    try {
+        const { error } = await supabaseClient
+            .from('artists')
+            .update({ name: trimmed, updated_at: new Date().toISOString() })
+            .eq('name', oldName);
+        if (error) throw error;
+
+        const { error: eventsError } = await supabaseClient
+            .from('events')
+            .update({ artist_name: trimmed })
+            .eq('artist_name', oldName);
+        if (eventsError) throw eventsError;
+
+        artists = artists.map(a => a === oldName ? trimmed : a).sort((a, b) => a.localeCompare(b));
+        eventsData.forEach(e => { if (e.artist === oldName) e.artist = trimmed; });
+        return { success: true };
+    } catch (error) {
+        console.error('Error updating artist:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function deleteArtist(name) {
+    const inUse = eventsData.filter(e => e.artist === name).length;
+    if (inUse > 0) {
+        return { success: false, error: `Cannot delete: ${inUse} event(s) use this artist` };
+    }
+    try {
+        const { error } = await supabaseClient.from('artists').delete().eq('name', name);
+        if (error) throw error;
+        artists = artists.filter(a => a !== name);
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting artist:', error);
         return { success: false, error: error.message };
     }
 }
