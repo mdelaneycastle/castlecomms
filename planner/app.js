@@ -188,9 +188,12 @@ function renderEventTypeFilters() {
     Object.values(eventCategories).forEach(cat => {
         const label = document.createElement('label');
         label.className = 'checkbox-label';
+        const desc = cat.description && cat.description !== cat.name ? cat.description : '';
+        if (desc) label.setAttribute('data-description', desc);
         label.innerHTML = `
             <input type="checkbox" value="${cat.id}" checked>
             <span class="badge ${cat.id}">${cat.name}</span>
+            ${desc ? '<i class="fas fa-circle-info key-info-icon" aria-hidden="true"></i>' : ''}
         `;
         container.appendChild(label);
     });
@@ -1189,32 +1192,36 @@ function renderCategoryList() {
         const item = document.createElement('div');
         item.className = 'category-item';
         item.dataset.categoryId = cat.id;
+        const descVal = cat.description && cat.description !== cat.name ? cat.description : '';
         item.innerHTML = `
-            <div class="category-preview">
-                <span class="badge ${cat.id}">${cat.name}</span>
-            </div>
-            <div class="category-info">
-                <span class="category-id">${cat.id}</span>
-                <input type="text" class="category-name-input" value="${cat.name}" data-field="name">
-            </div>
-            <div class="category-colors">
-                <div class="color-picker-group">
-                    <label>BG</label>
-                    <input type="color" value="${cat.bgColor}" data-field="bgColor" title="Background Color">
+            <div class="category-row">
+                <div class="category-preview">
+                    <span class="badge ${cat.id}">${cat.name}</span>
                 </div>
-                <div class="color-picker-group">
-                    <label>Text</label>
-                    <input type="color" value="${cat.textColor}" data-field="textColor" title="Text Color">
+                <div class="category-info">
+                    <span class="category-id">${cat.id}</span>
+                    <input type="text" class="category-name-input" value="${cat.name}" data-field="name">
+                </div>
+                <div class="category-colors">
+                    <div class="color-picker-group">
+                        <label>BG</label>
+                        <input type="color" value="${cat.bgColor}" data-field="bgColor" title="Background Color">
+                    </div>
+                    <div class="color-picker-group">
+                        <label>Text</label>
+                        <input type="color" value="${cat.textColor}" data-field="textColor" title="Text Color">
+                    </div>
+                </div>
+                <div class="category-actions">
+                    <button class="btn-icon save" onclick="handleSaveCategory('${cat.id}')" title="Save Changes">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button class="btn-icon delete" onclick="handleDeleteCategory('${cat.id}')" title="Delete Category">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </div>
-            <div class="category-actions">
-                <button class="btn-icon save" onclick="handleSaveCategory('${cat.id}')" title="Save Changes">
-                    <i class="fas fa-check"></i>
-                </button>
-                <button class="btn-icon delete" onclick="handleDeleteCategory('${cat.id}')" title="Delete Category">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
+            <textarea class="category-description-input" data-field="description" rows="3" placeholder="Description shown as a tooltip on the calendar key (optional)">${descVal}</textarea>
         `;
         container.appendChild(item);
     });
@@ -1230,11 +1237,13 @@ async function handleSaveCategory(categoryId) {
     const nameInput = item.querySelector('input[data-field="name"]');
     const bgColorInput = item.querySelector('input[data-field="bgColor"]');
     const textColorInput = item.querySelector('input[data-field="textColor"]');
+    const descriptionInput = item.querySelector('textarea[data-field="description"]');
 
     const updates = {
         name: nameInput.value.trim(),
         bgColor: bgColorInput.value,
-        textColor: textColorInput.value
+        textColor: textColorInput.value,
+        description: descriptionInput ? descriptionInput.value.trim() : ''
     };
 
     if (!updates.name) {
@@ -1283,11 +1292,13 @@ async function handleAddCategory() {
     const nameInput = document.getElementById('newCategoryName');
     const bgColorInput = document.getElementById('newCategoryBgColor');
     const textColorInput = document.getElementById('newCategoryTextColor');
+    const descInput = document.getElementById('newCategoryDescription');
 
     const id = idInput.value.trim().toLowerCase().replace(/\s+/g, '-');
     const name = nameInput.value.trim();
     const bgColor = bgColorInput.value;
     const textColor = textColorInput.value;
+    const description = (descInput && descInput.value.trim()) || name;
 
     if (!id) {
         alert('Please enter a category ID');
@@ -1308,13 +1319,14 @@ async function handleAddCategory() {
         return;
     }
 
-    const result = await addCategory(id, name, name, 'fa-tag', bgColor, textColor);
+    const result = await addCategory(id, name, description, 'fa-tag', bgColor, textColor);
     if (result.success) {
         // Clear inputs
         idInput.value = '';
         nameInput.value = '';
         bgColorInput.value = '#a8d8ea';
         textColorInput.value = '#1e3a8a';
+        if (descInput) descInput.value = '';
 
         // Refresh UI
         renderDynamicCategories();
