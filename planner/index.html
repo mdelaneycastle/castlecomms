@@ -38,8 +38,14 @@
                 <button id="createNewItemBtn" class="btn-primary" style="width: 100%; margin-bottom: 1rem;">
                     <i class="fas fa-plus"></i> Create New Item
                 </button>
-                <button id="manageCategoriesBtn" class="btn-secondary" style="width: 100%; margin-top: 0; margin-bottom: 2rem;">
+                <button id="manageCategoriesBtn" class="btn-secondary" style="width: 100%; margin-top: 0; margin-bottom: 0.5rem;">
                     <i class="fas fa-tags"></i> Manage Categories
+                </button>
+                <button id="manageGalleriesBtn" class="btn-secondary" style="width: 100%; margin-top: 0; margin-bottom: 0.5rem;">
+                    <i class="fas fa-building"></i> Manage Galleries
+                </button>
+                <button id="manageArtistsBtn" class="btn-secondary" style="width: 100%; margin-top: 0; margin-bottom: 2rem;">
+                    <i class="fas fa-user"></i> Manage Artists
                 </button>
             </div>
 
@@ -303,6 +309,60 @@
                         <input type="color" id="newCategoryBgColor" value="#a8d8ea" title="Background Color">
                         <input type="color" id="newCategoryTextColor" value="#1e3a8a" title="Text Color">
                         <button id="addCategoryBtn" class="btn-primary btn-small">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary cancel-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Management Modal (Admin Only) -->
+    <div id="galleryModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Galleries</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="category-manager-body">
+                <div class="simple-list" id="galleryList">
+                    <!-- Galleries will be rendered here -->
+                </div>
+                <div class="add-category-section">
+                    <h4>Add New Gallery</h4>
+                    <div class="add-simple-form">
+                        <input type="text" id="newGalleryName" placeholder="Gallery name (e.g., Cambridge)" class="category-input">
+                        <button id="addGalleryBtn" class="btn-primary btn-small">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary cancel-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Artist Management Modal (Admin Only) -->
+    <div id="artistModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Artists</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="category-manager-body">
+                <div class="simple-list" id="artistList2">
+                    <!-- Artists will be rendered here -->
+                </div>
+                <div class="add-category-section">
+                    <h4>Add New Artist</h4>
+                    <div class="add-simple-form">
+                        <input type="text" id="newArtistName" placeholder="Artist name (e.g., Jane Smith)" class="category-input">
+                        <button id="addArtistBtn" class="btn-primary btn-small">
                             <i class="fas fa-plus"></i> Add
                         </button>
                     </div>
