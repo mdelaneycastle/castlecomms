@@ -53,13 +53,6 @@
                 <h3>Filters</h3>
 
                 <div class="filter-group">
-                    <label>Event Type</label>
-                    <div class="event-types" id="eventTypesFilter">
-                        <!-- Event type filters will be rendered dynamically -->
-                    </div>
-                </div>
-
-                <div class="filter-group">
                     <label for="artistFilter">Artist</label>
                     <select id="artistFilter" class="filter-select">
                         <option value="">All Artists</option>
@@ -71,6 +64,13 @@
                     <select id="galleryFilter" class="filter-select">
                         <option value="">All Galleries</option>
                     </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Event Type</label>
+                    <div class="event-types" id="eventTypesFilter">
+                        <!-- Event type filters will be rendered dynamically -->
+                    </div>
                 </div>
 
                 <button id="clearFilters" class="btn-secondary">Clear Filters</button>
