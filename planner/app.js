@@ -30,6 +30,7 @@ const eventDetailsModal = document.getElementById('eventDetailsModal');
 document.addEventListener('DOMContentLoaded', async function() {
     await loadCategories(); // Load categories first from Supabase
     renderDynamicCategories(); // Render all category-dependent UI
+    await Promise.all([loadGalleries(), loadArtists()]);
     await loadEventsFromDatabase();
     initializeFilters();
     initializeCalendar();
@@ -307,6 +308,17 @@ function initializeEventHandlers() {
     // Add category button
     const addCategoryBtn = document.getElementById('addCategoryBtn');
     if (addCategoryBtn) addCategoryBtn.addEventListener('click', handleAddCategory);
+
+    // Manage galleries / artists (admin only)
+    const manageGalleriesBtn = document.getElementById('manageGalleriesBtn');
+    if (manageGalleriesBtn) manageGalleriesBtn.addEventListener('click', showGalleryModal);
+    const manageArtistsBtn = document.getElementById('manageArtistsBtn');
+    if (manageArtistsBtn) manageArtistsBtn.addEventListener('click', showArtistModal);
+
+    const addGalleryBtn = document.getElementById('addGalleryBtn');
+    if (addGalleryBtn) addGalleryBtn.addEventListener('click', handleAddGallery);
+    const addArtistBtn = document.getElementById('addArtistBtn');
+    if (addArtistBtn) addArtistBtn.addEventListener('click', handleAddArtist);
 
     // Type selection cards
     document.querySelectorAll('.type-card').forEach(card => {
@@ -1312,6 +1324,206 @@ async function handleAddCategory() {
     } else {
         alert('Failed to add category: ' + result.error);
     }
+}
+
+// ============================================================
+// Galleries / Artists admin — generic list manager
+// ============================================================
+
+// After galleries change: refresh sidebar filter + event form select
+function refreshGalleryUI() {
+    const galleryFilterEl = document.getElementById('galleryFilter');
+    if (galleryFilterEl) {
+        const current = galleryFilterEl.value;
+        galleryFilterEl.innerHTML = '<option value="">All Galleries</option>';
+        galleries.forEach(g => {
+            const o = document.createElement('option');
+            o.value = g; o.textContent = g;
+            galleryFilterEl.appendChild(o);
+        });
+        if (galleries.includes(current)) galleryFilterEl.value = current;
+    }
+
+    const eventGallerySelect = document.getElementById('eventGallery');
+    if (eventGallerySelect) {
+        const current = eventGallerySelect.value;
+        eventGallerySelect.innerHTML = '<option value="">Select Gallery</option>';
+        galleries.forEach(g => {
+            const o = document.createElement('option');
+            o.value = g; o.textContent = g;
+            eventGallerySelect.appendChild(o);
+        });
+        if (galleries.includes(current)) eventGallerySelect.value = current;
+    }
+}
+
+// After artists change: refresh sidebar filter + datalists
+function refreshArtistUI() {
+    const artistFilterEl = document.getElementById('artistFilter');
+    if (artistFilterEl) {
+        const current = artistFilterEl.value;
+        artistFilterEl.innerHTML = '<option value="">All Artists</option>';
+        artists.forEach(a => {
+            const o = document.createElement('option');
+            o.value = a; o.textContent = a;
+            artistFilterEl.appendChild(o);
+        });
+        if (artists.includes(current)) artistFilterEl.value = current;
+    }
+    populateArtistDatalist('artistList');
+    populateArtistDatalist('simpleArtistList');
+}
+
+// --- Galleries ---
+function showGalleryModal() {
+    if (!isAdminMode) return;
+    renderGalleryList();
+    document.getElementById('galleryModal').classList.remove('hidden');
+}
+
+function renderGalleryList() {
+    const container = document.getElementById('galleryList');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!galleries.length) {
+        container.innerHTML = '<div class="empty-state">No galleries yet. Add one below.</div>';
+        return;
+    }
+    galleries.forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'simple-list-item';
+        item.dataset.name = name;
+        item.innerHTML = `
+            <input type="text" class="simple-name-input" value="${escapeAttr(name)}">
+            <div class="simple-actions">
+                <button class="btn-icon save" title="Save Changes"><i class="fas fa-check"></i></button>
+                <button class="btn-icon delete" title="Delete Gallery"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        item.querySelector('.btn-icon.save').addEventListener('click', () => handleSaveGallery(name, item));
+        item.querySelector('.btn-icon.delete').addEventListener('click', () => handleDeleteGallery(name));
+        container.appendChild(item);
+    });
+}
+
+async function handleSaveGallery(oldName, itemEl) {
+    if (!isAdminMode) return;
+    const newName = itemEl.querySelector('.simple-name-input').value.trim();
+    if (!newName) { alert('Gallery name cannot be empty'); return; }
+    const result = await updateGallery(oldName, newName);
+    if (result.success) {
+        renderGalleryList();
+        refreshGalleryUI();
+        updateCalendar();
+        renderListView();
+    } else {
+        alert('Failed to update gallery: ' + result.error);
+    }
+}
+
+async function handleDeleteGallery(name) {
+    if (!isAdminMode) return;
+    if (!confirm(`Delete gallery "${name}"?`)) return;
+    const result = await deleteGallery(name);
+    if (result.success) {
+        renderGalleryList();
+        refreshGalleryUI();
+    } else {
+        alert('Failed to delete gallery: ' + result.error);
+    }
+}
+
+async function handleAddGallery() {
+    if (!isAdminMode) return;
+    const input = document.getElementById('newGalleryName');
+    const name = input.value.trim();
+    if (!name) { alert('Please enter a gallery name'); input.focus(); return; }
+    const result = await addGallery(name);
+    if (result.success) {
+        input.value = '';
+        renderGalleryList();
+        refreshGalleryUI();
+    } else {
+        alert('Failed to add gallery: ' + result.error);
+    }
+}
+
+// --- Artists ---
+function showArtistModal() {
+    if (!isAdminMode) return;
+    renderArtistList();
+    document.getElementById('artistModal').classList.remove('hidden');
+}
+
+function renderArtistList() {
+    const container = document.getElementById('artistList2');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!artists.length) {
+        container.innerHTML = '<div class="empty-state">No artists yet. Add one below.</div>';
+        return;
+    }
+    artists.forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'simple-list-item';
+        item.dataset.name = name;
+        item.innerHTML = `
+            <input type="text" class="simple-name-input" value="${escapeAttr(name)}">
+            <div class="simple-actions">
+                <button class="btn-icon save" title="Save Changes"><i class="fas fa-check"></i></button>
+                <button class="btn-icon delete" title="Delete Artist"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        item.querySelector('.btn-icon.save').addEventListener('click', () => handleSaveArtist(name, item));
+        item.querySelector('.btn-icon.delete').addEventListener('click', () => handleDeleteArtist(name));
+        container.appendChild(item);
+    });
+}
+
+async function handleSaveArtist(oldName, itemEl) {
+    if (!isAdminMode) return;
+    const newName = itemEl.querySelector('.simple-name-input').value.trim();
+    if (!newName) { alert('Artist name cannot be empty'); return; }
+    const result = await updateArtist(oldName, newName);
+    if (result.success) {
+        renderArtistList();
+        refreshArtistUI();
+        updateCalendar();
+        renderListView();
+    } else {
+        alert('Failed to update artist: ' + result.error);
+    }
+}
+
+async function handleDeleteArtist(name) {
+    if (!isAdminMode) return;
+    if (!confirm(`Delete artist "${name}"?`)) return;
+    const result = await deleteArtist(name);
+    if (result.success) {
+        renderArtistList();
+        refreshArtistUI();
+    } else {
+        alert('Failed to delete artist: ' + result.error);
+    }
+}
+
+async function handleAddArtist() {
+    if (!isAdminMode) return;
+    const input = document.getElementById('newArtistName');
+    const name = input.value.trim();
+    if (!name) { alert('Please enter an artist name'); input.focus(); return; }
+    const result = await addArtist(name);
+    if (result.success) {
+        input.value = '';
+        renderArtistList();
+        refreshArtistUI();
+    } else {
+        alert('Failed to add artist: ' + result.error);
+    }
+}
+
+function escapeAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // Print Calendar functionality
