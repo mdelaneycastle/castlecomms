@@ -964,15 +964,19 @@ async function handleEventSubmit(e) {
 
     const formData = new FormData(e.target);
     const allDay = document.getElementById('allDay').checked;
+    const type = document.getElementById('eventType').value;
+    const artist = document.getElementById('eventArtist').value;
+    const gallery = document.getElementById('eventGallery').value;
     const eventData = {
-        type: document.getElementById('eventType').value,
+        type: type,
         date: document.getElementById('eventDate').value,
         allDay: allDay,
         startTime: allDay ? null : document.getElementById('startTime').value,
         endTime: allDay ? null : document.getElementById('endTime').value,
-        artist: document.getElementById('eventArtist').value,
-        gallery: document.getElementById('eventGallery').value,
+        artist: artist,
+        gallery: gallery,
         status: document.getElementById('eventStatus').value,
+        title: type === 'event' ? `${artist} - ${gallery}` : artist,
         description: document.getElementById('eventDescription').value || null,
         equipment: {
             tv: document.getElementById('equipTV').checked,
