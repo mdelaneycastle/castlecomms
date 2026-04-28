@@ -812,6 +812,44 @@
         }
 
         .content-link-icon { font-size: 1.2em; }
+
+        /* Back button (single-artist view) */
+        .back-btn {
+            display: none;
+            margin-bottom: 25px;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #4a5568;
+            font-weight: 700;
+            font-size: 1em;
+            cursor: pointer;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .back-btn:hover {
+            transform: translateX(-4px);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Hide all artist cards by default — only the selected one shows */
+        .artist-card { display: none; }
+        .artist-card.active-artist { display: block; animation: none; }
+
+        /* The "Artists" / "Business & Strategy" banners inside content-area are redundant
+           with the nav-grid section headers — hide them */
+        .section-banner { display: none; }
+
+        /* Single-artist view: swap nav grid for the selected card */
+        body.single-view .back-btn { display: inline-flex; }
+        body.single-view .nav-grid { display: none; }
+        body.single-view .quick-nav { opacity: 1; visibility: visible; }
     </style>
 </head>
 <body class="locked">
@@ -846,6 +884,9 @@
             <h1>🎨 2025 Artist Program Planning</h1>
             <p class="subtitle">Live Dashboard - Real-time Updates</p>
         </header>
+
+        <!-- Back button (visible only in single-artist view) -->
+        <button id="back-btn" class="back-btn" type="button" onclick="showAllArtists()">← Back to All Artists</button>
 
         <!-- Navigation Grid -->
         <div class="nav-grid" id="nav-grid"></div>
@@ -1051,6 +1092,7 @@
 
                 if (artists.length > 0) {
                     const artistsSection = document.createElement('div');
+                    artistsSection.className = 'section-banner';
                     artistsSection.innerHTML = '<h2 style="color: white; text-align: center; margin: 40px 0 30px 0;">🎨 Artists</h2>';
                     contentArea.appendChild(artistsSection);
 
@@ -1062,6 +1104,7 @@
 
                 if (businessSections.length > 0) {
                     const businessSectionHeader = document.createElement('div');
+                    businessSectionHeader.className = 'section-banner';
                     businessSectionHeader.innerHTML = '<h2 style="color: white; text-align: center; margin: 40px 0 30px 0;">📊 Business & Strategy</h2>';
                     contentArea.appendChild(businessSectionHeader);
 
@@ -1369,24 +1412,17 @@
             const element = document.getElementById(`card-${recordId}`);
             if (!element) return;
 
-            // Scroll, then re-scroll to correct for lazy-loaded image layout shifts
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.querySelectorAll('.artist-card').forEach(c => c.classList.remove('active-artist'));
+            element.classList.add('active-artist');
 
-            let checks = 0;
-            const correctionInterval = setInterval(() => {
-                const rect = element.getBoundingClientRect();
-                // If element isn't near the top of the viewport, re-scroll
-                if (Math.abs(rect.top) > 30) {
-                    window.scrollTo({ top: window.scrollY + rect.top - 20, behavior: 'smooth' });
-                }
-                checks++;
-                if (checks >= 5) {
-                    clearInterval(correctionInterval);
-                    // Final highlight pulse
-                    element.style.transform = 'scale(1.02)';
-                    setTimeout(() => { element.style.transform = 'scale(1)'; }, 300);
-                }
-            }, 400);
+            document.body.classList.add('single-view');
+            window.scrollTo(0, 0);
+        }
+
+        function showAllArtists() {
+            document.body.classList.remove('single-view');
+            document.querySelectorAll('.artist-card').forEach(c => c.classList.remove('active-artist'));
+            window.scrollTo(0, 0);
         }
 
         function scrollToArtist(recordId) { scrollToSection(recordId); }
