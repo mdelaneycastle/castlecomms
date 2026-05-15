@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Image Overlay Tool</title>
+    <title>PDF Overlay Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <style>
@@ -1391,6 +1391,11 @@
         let pdfOffset = { x: 0, y: 0 };
         let pdfZoomLevel = 100;
 
+        // Exact canvas dimensions used when each page was rendered, so export
+        // maps overlay coordinates with the same scale they were placed at.
+        // { pageNum: { cssWidth, cssHeight } }
+        let pageRenderInfo = {};
+
         // Selection state
         let selectedImageId = null;
         let selectedWhiteBoxId = null;
@@ -1529,6 +1534,7 @@
             textBoxes = [];
             templateData = null;
             templatePages = {};
+            pageRenderInfo = {};
             templateOverlay.style.display = 'none';
             selectedImageId = null;
             selectedWhiteBoxId = null;
@@ -2189,8 +2195,15 @@
             pdfCanvas.width = viewport.width;
             pdfCanvas.height = viewport.height;
 
-            pdfCanvasWrapper.style.width = viewport.width + 'px';
-            pdfCanvasWrapper.style.height = viewport.height + 'px';
+            // Record the exact (browser-truncated) pixel size the overlays are
+            // being positioned against, so export uses the same mapping.
+            pageRenderInfo[pageNum] = {
+                cssWidth: pdfCanvas.width,
+                cssHeight: pdfCanvas.height
+            };
+
+            pdfCanvasWrapper.style.width = pdfCanvas.width + 'px';
+            pdfCanvasWrapper.style.height = pdfCanvas.height + 'px';
 
             const ctx = pdfCanvas.getContext('2d');
             await page.render({
@@ -2636,14 +2649,16 @@
                     const page = pages[pageIdx];
                     const { width: pageWidth, height: pageHeight } = page.getSize();
 
-                    // Compute the same scale used during rendering for this page
+                    // Use the EXACT canvas size the overlays were placed
+                    // against (captured at render time). Recomputing from the
+                    // live container width here causes misalignment, because
+                    // the container width changes (scrollbars, resizing)
+                    // between placing items and exporting.
                     const pdfJsPage = await pdfDoc.getPage(pageNum);
                     const naturalVp = pdfJsPage.getViewport({ scale: 1 });
-                    const containerWidth = pdfContainer.clientWidth - 20;
-                    const renderScale = Math.min(1.5, containerWidth / naturalVp.width);
-                    const viewport = pdfJsPage.getViewport({ scale: renderScale });
-                    const canvasWidth = viewport.width;
-                    const canvasHeight = viewport.height;
+                    const info = pageRenderInfo[pageNum];
+                    const canvasWidth = info ? info.cssWidth : naturalVp.width;
+                    const canvasHeight = info ? info.cssHeight : naturalVp.height;
 
                     const scaleX = pageWidth / canvasWidth;
                     const scaleY = pageHeight / canvasHeight;
