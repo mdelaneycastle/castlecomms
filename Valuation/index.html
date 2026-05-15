@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Overlay Tool</title>
+    <title>PDF Image Overlay Tool</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <style>
@@ -2643,94 +2643,126 @@
                     return embeddedFonts[key];
                 }
 
+                // Remember the page so we can restore it after export (we
+                // navigate the viewer to measure each page). We deliberately
+                // KEEP the user's pan/zoom: they align by dragging the PDF
+                // under a fixed template, so that transform must be preserved.
+                const savedPage = currentPage;
+
+                // Map a DOM rectangle (in viewport/client coords) to PDF points
+                // on the given page's visible box. Because we read the actual
+                // rendered geometry, the export is by construction identical to
+                // what is shown on screen — no scale/padding/baseline guessing.
+                function rectToPdf(elRect, canvasRect, v) {
+                    const fLeft = (elRect.left - canvasRect.left) / canvasRect.width;
+                    const fRight = (elRect.right - canvasRect.left) / canvasRect.width;
+                    const fTop = (elRect.top - canvasRect.top) / canvasRect.height;
+                    const fBottom = (elRect.bottom - canvasRect.top) / canvasRect.height;
+                    return {
+                        x: v.x + fLeft * v.w,
+                        y: v.y + (1 - fBottom) * v.h, // PDF y-axis points up
+                        width: (fRight - fLeft) * v.w,
+                        height: (fBottom - fTop) * v.h
+                    };
+                }
+
                 // Process each page
                 for (let pageIdx = 0; pageIdx < pages.length; pageIdx++) {
                     const pageNum = pageIdx + 1;
                     const page = pages[pageIdx];
-                    const { width: pageWidth, height: pageHeight } = page.getSize();
 
-                    // Use the EXACT canvas size the overlays were placed
-                    // against (captured at render time). Recomputing from the
-                    // live container width here causes misalignment, because
-                    // the container width changes (scrollbars, resizing)
-                    // between placing items and exporting.
-                    const pdfJsPage = await pdfDoc.getPage(pageNum);
-                    const naturalVp = pdfJsPage.getViewport({ scale: 1 });
-                    const info = pageRenderInfo[pageNum];
-                    const canvasWidth = info ? info.cssWidth : naturalVp.width;
-                    const canvasHeight = info ? info.cssHeight : naturalVp.height;
-
-                    const scaleX = pageWidth / canvasWidth;
-                    const scaleY = pageHeight / canvasHeight;
-
-                    // 1. Draw white boxes for this page
                     const pageWhiteBoxes = whiteBoxes.filter(wb => wb.page === pageNum);
+                    const pageImages = images.filter(img => img.page === pageNum);
+                    const pageTextBoxes = textBoxes.filter(tb => tb.page === pageNum);
+                    const hasTemplate = embeddedTemplate && templatePages[pageNum];
+
+                    if (!hasTemplate && pageWhiteBoxes.length === 0 &&
+                        pageImages.length === 0 && pageTextBoxes.length === 0) {
+                        continue;
+                    }
+
+                    // The PDF's visible box (CropBox) in points — the same box
+                    // pdf.js uses to render the canvas. view = [x1,y1,x2,y2].
+                    const pdfJsPage = await pdfDoc.getPage(pageNum);
+                    const view = pdfJsPage.view;
+                    const v = {
+                        x: view[0],
+                        y: view[1],
+                        w: view[2] - view[0],
+                        h: view[3] - view[1]
+                    };
+
+                    // Show this page in the viewer WITH the user's current
+                    // pan/zoom applied. canvasRect therefore reflects where the
+                    // user dragged the PDF; measuring the (untransformed)
+                    // overlays and the template against that rect reproduces
+                    // the exact alignment the user set up on screen.
+                    currentPage = pageNum;
+                    await renderPage(pageNum);
+                    updateOverlayVisibility();
+                    applyPdfZoom();
+                    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+                    const canvasRect = pdfCanvas.getBoundingClientRect();
+
+                    // 1. Template first (background), matching screen stacking.
+                    // Measured the same way as the overlays, so it lands where
+                    // the user sees it relative to the (panned/zoomed) PDF.
+                    if (hasTemplate) {
+                        const tEl = templateImage || templateOverlay;
+                        const tp = rectToPdf(tEl.getBoundingClientRect(), canvasRect, v);
+                        page.drawImage(embeddedTemplate, {
+                            x: tp.x,
+                            y: tp.y,
+                            width: tp.width,
+                            height: tp.height,
+                            opacity: templatePages[pageNum].opacity / 100
+                        });
+                    }
+
+                    // 2. White boxes
                     for (const wb of pageWhiteBoxes) {
-                        const adjustedX = (wb.position.x - pdfOffset.x) / zoomScale;
-                        const adjustedY = (wb.position.y - pdfOffset.y) / zoomScale;
-                        const adjustedWidth = wb.size.width / zoomScale;
-                        const adjustedHeight = wb.size.height / zoomScale;
-
-                        const pdfX = adjustedX * scaleX;
-                        const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
-                        const pdfWidth = adjustedWidth * scaleX;
-                        const pdfHeight = adjustedHeight * scaleY;
-
+                        if (!wb.element) continue;
+                        const p = rectToPdf(wb.element.getBoundingClientRect(), canvasRect, v);
                         page.drawRectangle({
-                            x: pdfX,
-                            y: pdfY,
-                            width: pdfWidth,
-                            height: pdfHeight,
+                            x: p.x,
+                            y: p.y,
+                            width: p.width,
+                            height: p.height,
                             color: rgb(1, 1, 1),
                         });
                     }
 
-                    // 2. Draw template for this page
-                    if (embeddedTemplate && templatePages[pageNum]) {
-                        const opacity = templatePages[pageNum].opacity / 100;
-                        page.drawImage(embeddedTemplate, {
-                            x: 0,
-                            y: 0,
-                            width: pageWidth,
-                            height: pageHeight,
-                            opacity: opacity
-                        });
-                    }
-
-                    // 3. Draw images for this page
-                    const pageImages = images.filter(img => img.page === pageNum);
+                    // 3. Images (measure the inner <img>, excluding the border)
                     for (const img of pageImages) {
                         const embeddedImage = embeddedImages.get(img.id);
-                        if (!embeddedImage) continue;
-
-                        const adjustedX = (img.position.x - pdfOffset.x) / zoomScale;
-                        const adjustedY = (img.position.y - pdfOffset.y) / zoomScale;
-                        const adjustedWidth = img.size.width / zoomScale;
-                        const adjustedHeight = img.size.height / zoomScale;
-
-                        const pdfX = adjustedX * scaleX;
-                        const pdfY = pageHeight - (adjustedY * scaleY) - (adjustedHeight * scaleY);
-                        const pdfWidth = adjustedWidth * scaleX;
-                        const pdfHeight = adjustedHeight * scaleY;
-                        const opacity = img.opacity / 100;
-
+                        if (!embeddedImage || !img.element) continue;
+                        const imgEl = img.element.querySelector('img') || img.element;
+                        const p = rectToPdf(imgEl.getBoundingClientRect(), canvasRect, v);
                         page.drawImage(embeddedImage, {
-                            x: pdfX,
-                            y: pdfY,
-                            width: pdfWidth,
-                            height: pdfHeight,
-                            opacity: opacity
+                            x: p.x,
+                            y: p.y,
+                            width: p.width,
+                            height: p.height,
+                            opacity: img.opacity / 100
                         });
                     }
 
-                    // 4. Draw text boxes for this page
-                    const pageTextBoxes = textBoxes.filter(tb => tb.page === pageNum);
+                    // 4. Text (measure the actual glyph box element)
                     for (const tb of pageTextBoxes) {
-                        const adjustedX = (tb.position.x - pdfOffset.x) / zoomScale;
-                        const adjustedY = (tb.position.y - pdfOffset.y) / zoomScale;
+                        if (!tb.element) continue;
+                        const contentEl = tb.element.querySelector('.text-overlay-content') || tb.element;
+                        const cRect = contentEl.getBoundingClientRect();
+                        const cs = window.getComputedStyle(contentEl);
+                        const fontPx = parseFloat(cs.fontSize);
+                        const scale = v.h / canvasRect.height;
+                        const pdfFontSize = fontPx * scale;
 
-                        const pdfX = adjustedX * scaleX;
-                        const pdfY = pageHeight - (adjustedY * scaleY) - (tb.fontSize * scaleY);
+                        // Browser renders the alphabetic baseline ~0.80em below
+                        // the top of the line box for normal line-height.
+                        const baselineClientY = cRect.top + fontPx * 0.80;
+                        const fBaseline = (baselineClientY - canvasRect.top) / canvasRect.height;
+                        const fLeft = (cRect.left - canvasRect.left) / canvasRect.width;
 
                         const hex = tb.color.replace('#', '');
                         const r = parseInt(hex.substring(0, 2), 16) / 255;
@@ -2740,14 +2772,21 @@
                         const font = await getFont(tb.fontFamily, tb.bold);
 
                         page.drawText(tb.text, {
-                            x: pdfX,
-                            y: pdfY,
-                            size: tb.fontSize * scaleX,
+                            x: v.x + fLeft * v.w,
+                            y: v.y + (1 - fBaseline) * v.h,
+                            size: pdfFontSize,
                             font: font,
                             color: rgb(r, g, b)
                         });
                     }
                 }
+
+                // Restore the viewer to the page the user was on (pan/zoom
+                // were never changed, so nothing else to restore).
+                currentPage = savedPage;
+                await renderPage(savedPage);
+                updateOverlayVisibility();
+                applyPdfZoom();
 
                 const modifiedPdfBytes = await pdfDocLib.save();
 
