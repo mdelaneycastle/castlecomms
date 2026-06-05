@@ -1479,29 +1479,51 @@ Select text and click a formatting button above, or click a button to insert at 
             const beforeText = textarea.value.substring(0, start);
             const afterText = textarea.value.substring(end);
 
+            // Inline wrap (bold / italic / highlight): keep any leading or trailing
+            // whitespace OUTSIDE the markers. Wrapping whitespace — e.g. "**text **"
+            // or "** text**" — is invalid Markdown and renders as literal asterisks
+            // instead of bold. Selecting whole lines almost always grabs a trailing
+            // space/newline, which is why only one clean selection ever worked.
+            function applyInline(marker, placeholder) {
+                const lead  = selectedText.match(/^\s*/)[0];
+                const trail = selectedText.match(/\s*$/)[0];
+                const core  = selectedText.slice(lead.length, selectedText.length - trail.length);
+
+                // Nothing meaningful selected → insert a placeholder and select it.
+                if (!core) {
+                    const at = start + lead.length;
+                    textarea.value = beforeText + lead + marker + placeholder + marker + trail + afterText;
+                    contentBlocks[blockIndex].content = textarea.value;
+                    textarea.focus();
+                    textarea.setSelectionRange(at + marker.length, at + marker.length + placeholder.length);
+                    return;
+                }
+
+                // Toggle off if the core is already wrapped in this exact marker.
+                let wrapped = core.startsWith(marker) && core.endsWith(marker) && core.length >= marker.length * 2;
+                // A single "*" (italic) must not mistake "**bold**" for italic-wrapped text.
+                if (wrapped && marker === '*' && (core.startsWith('**') || core.endsWith('**'))) wrapped = false;
+
+                const newCore = wrapped
+                    ? core.slice(marker.length, core.length - marker.length)   // unwrap
+                    : marker + core + marker;                                  // wrap
+
+                textarea.value = beforeText + lead + newCore + trail + afterText;
+                contentBlocks[blockIndex].content = textarea.value;
+                textarea.focus();
+                const selStart = start + lead.length;
+                textarea.setSelectionRange(selStart, selStart + newCore.length);
+            }
+
             let newText = '';
             let cursorOffset = 0;
 
             switch (formatType) {
                 case 'bold':
-                    if (selectedText) {
-                        newText = beforeText + '**' + selectedText + '**' + afterText;
-                        cursorOffset = end + 4;
-                    } else {
-                        newText = beforeText + '**bold text**' + afterText;
-                        cursorOffset = start + 2;
-                    }
-                    break;
+                    return applyInline('**', 'bold text');
 
                 case 'italic':
-                    if (selectedText) {
-                        newText = beforeText + '*' + selectedText + '*' + afterText;
-                        cursorOffset = end + 2;
-                    } else {
-                        newText = beforeText + '*italic text*' + afterText;
-                        cursorOffset = start + 1;
-                    }
-                    break;
+                    return applyInline('*', 'italic text');
 
                 case 'header':
                     if (selectedText) {
@@ -1548,14 +1570,7 @@ Select text and click a formatting button above, or click a button to insert at 
                     break;
 
                 case 'highlight':
-                    if (selectedText) {
-                        newText = beforeText + '`' + selectedText + '`' + afterText;
-                        cursorOffset = end + 2;
-                    } else {
-                        newText = beforeText + '`highlighted`' + afterText;
-                        cursorOffset = start + 1;
-                    }
-                    break;
+                    return applyInline('`', 'highlighted');
 
                 default:
                     return;
